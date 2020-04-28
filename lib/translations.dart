@@ -21,7 +21,8 @@ extension Localization on String {
         'en_us': 'Study',
         'es': 'Estudiar',
         'ar': 'تواصل',
-      } + {
+      } +
+      {
         'en_us': 'You have pushed the button this many times:',
         'es': 'Has presionado el botón tantas veces:',
         'ar': ':لقد ضغطت على الزر عدة مرات',
