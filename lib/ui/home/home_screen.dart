@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/app_theme_bloc.dart';
 import '../../blocs/counter_bloc.dart';
+import '../../translations.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key key}) : super(key: key);
@@ -16,15 +17,13 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: Text('Home'.i18n),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
+            Text('You have pushed the button this many times:'.i18n),
 
             ///3. Efficiently render state changes
             BlocBuilder<CounterBloc, CounterState>(

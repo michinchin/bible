@@ -5,28 +5,27 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 enum AppThemeEvent { toggle }
 
-class AppThemeBloc extends Bloc<AppThemeEvent, ThemeData> {
+class AppThemeBloc extends Bloc<AppThemeEvent, ThemeMode> {
   @override
-  ThemeData get initialState =>
-      tec.Prefs.shared.getBool('isDarkTheme', defaultValue: false)
-          ? ThemeData.dark()
-          : ThemeData.light();
+  ThemeMode get initialState {
+    final isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
+    if (isDarkTheme == null) {
+      return ThemeMode.system;
+    } else {
+      return isDarkTheme ? ThemeMode.dark : ThemeMode.light;
+    }
+  }
 
   @override
-  Stream<ThemeData> mapEventToState(AppThemeEvent event) async* {
+  Stream<ThemeMode> mapEventToState(AppThemeEvent event) async* {
     switch (event) {
       case AppThemeEvent.toggle:
         {
-          final isDarkTheme = state != ThemeData.dark();
+          final isDarkTheme = state != ThemeMode.dark;
           await tec.Prefs.shared.setBool('isDarkTheme', isDarkTheme);
-          yield isDarkTheme ? ThemeData.dark() : ThemeData.light();
+          yield isDarkTheme ? ThemeMode.dark : ThemeMode.light;
           break;
         }
     }
   }
 }
-
-// theme: ThemeData(
-//   primarySwatch: Colors.blue,
-//   visualDensity: VisualDensity.adaptivePlatformDensity,
-// ),
