@@ -70,3 +70,33 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
+/*
+typedef ViewBuilder = Widget Function(BuildContext context);
+
+class ViewManager {
+  void addViewable({Size minSize, ViewBuilder viewBuilder}) {
+
+  }
+}
+
+class TestView extends StatelessWidget with Viewable {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(border: Border.all()),
+    );
+  }
+
+  static Size get minSize => const Size(200, 200);
+
+  @override
+  // TODO: implement preferredHeight
+  Size get preferredHeight => throw UnimplementedError();
+
+  @override
+  // TODO: implement preferredWidth
+  Size get preferredWidth => throw UnimplementedError();
+  
+}
+*/

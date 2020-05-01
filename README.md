@@ -18,7 +18,7 @@ It's super simple:
 
 In general model classes should be defined as immutable, and kept as simple as possible.
 
-For model classes that need to support equality comparison (`==`) and/or `copyWith` functionality, the [`freezed`](https://pub.dev/packages/freezed) library can be used to reduce boilerplate. (The `freezed` library also provides access to some useful features that Dart doesn't currently support, such as union types (e.g. Kotlin & Swift) and lazily initialized variables.)
+For model classes that need to support equality comparison (`==`) and/or `copyWith`, the [`freezed`](https://pub.dev/packages/freezed) library can be used to reduce boilerplate. (The `freezed` library also provides access to some useful features that Dart doesn't currently support, such as union types (e.g. Kotlin & Swift) and lazily initialized variables.)
 
 ### Bloc
 
