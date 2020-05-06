@@ -17,6 +17,14 @@ const String _key = 'viewManagerState';
 ///
 enum ViewType { bible }
 
+double minWidthForViewType(ViewType type) {
+  return 229;
+}
+
+double minHeightForViewType(ViewType type) {
+  return 299;
+}
+
 ///
 /// ViewManagerBloc
 ///
@@ -121,24 +129,6 @@ abstract class ViewManagerState with _$ViewManagerState {
       _$ViewManagerStateFromJson(json);
 }
 
-extension VMBExtOnViewManagerState on ViewManagerState {
-  /// toWidget
-  Widget toWidget(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      return BlocBuilder<ViewManagerBloc, ViewManagerState>(
-          builder: (_, state) {
-        final views = <_View>[];
-        _layoutViews(views, state, constraints);
-        if (views.isEmpty) {
-          return Container();
-        } else {
-          return Stack(children: [for (final view in views) view.asWidget()]);
-        }
-      });
-    });
-  }
-}
-
 ///
 /// ViewManagerWidget
 ///
@@ -229,15 +219,7 @@ void _layoutViews(
   // Balance the rows and convert to views list.
   rows
     ..balance()
-    ..toViewList(views);
-}
-
-double minWidthForViewType(ViewType type) {
-  return 229;
-}
-
-double minHeightForViewType(ViewType type) {
-  return 229;
+    ..toViewList(views, constraints);
 }
 
 extension _ExtOnViewState on ViewState {
@@ -245,6 +227,13 @@ extension _ExtOnViewState on ViewState {
   double get minHeight => minHeightForViewType(type);
   double get idealWidth => math.max(preferredWidth ?? 0, minWidth);
   double get idealHeight => math.max(preferredHeight ?? 0, minHeight);
+}
+
+extension _ExtOnListOfViewState on List<ViewState> {
+  double get minWidth => fold(0.0, (t, el) => t + el.minWidth);
+  double get minHeight => fold(0.0, (t, el) => math.max(t, el.minHeight));
+  double get idealWidth => fold(0.0, (t, el) => t + el.idealWidth);
+  double get idealHeight => fold(0.0, (t, el) => math.max(t, el.idealHeight));
 }
 
 extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
@@ -297,29 +286,47 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     return changed;
   }
 
-  void toViewList(List<_View> views) {
+  void toViewList(List<_View> views, BoxConstraints constraints) {
     views.clear();
     var i = 0;
     var y = 0.0;
+
+    final yExtraPerRow =
+        math.max(0.0, (constraints.maxHeight - idealHeight) / length);
+    var yExtra = yExtraPerRow > 0.0 ? 0.0 : constraints.maxHeight - minHeight;
+
     for (final row in this) {
       var x = 0.0;
-      final minHeight = row.minHeight;
+
+      double height;
+      if (yExtraPerRow > 0.0) {
+        height = row.idealHeight + yExtraPerRow;
+      } else {
+        final yDelta = math.min(row.idealHeight - row.minHeight, yExtra);
+        yExtra -= yDelta;
+        height = row.minHeight + yDelta;
+      }
+
+      final xExtraPerItem = math.max(0.0, (constraints.maxWidth - row.idealWidth) / row.length);
+      var xExtra = xExtraPerItem > 0.0 ? 0.0 : constraints.maxWidth - row.minWidth;
+
       for (final state in row) {
-        final width = state.minWidth;
-        views.add(_View(Rect.fromLTWH(x, y, width, minHeight),
+
+        double width;
+        if (xExtraPerItem > 0.0) {
+          width = state.idealWidth + xExtraPerItem;
+        } else {
+          final xDelta = math.min(state.idealWidth - state.minWidth, xExtra);
+          xExtra -= xDelta;
+          width = state.minWidth + xDelta;
+        }
+        views.add(_View(Rect.fromLTWH(x, y, width, height),
             ViewWidget(viewState: state, viewIndex: i++)));
         x += width;
       }
-      y += minHeight;
+      y += height;
     }
   }
-}
-
-extension _ExtOnListOfViewState on List<ViewState> {
-  double get minWidth => fold(0.0, (t, el) => t + el.minWidth);
-  double get minHeight => fold(0.0, (t, el) => math.max(t, el.minHeight));
-  double get idealWidth => fold(0.0, (t, el) => t + el.idealWidth);
-  double get idealHeight => fold(0.0, (t, el) => math.max(t, el.idealHeight));
 }
 
 class _View {

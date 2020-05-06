@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:tec_util/tec_util.dart' as tec;
 
-import '../../blocs/app_theme_bloc.dart';
 import '../../blocs/view_manager_bloc.dart';
 import '../../translations.dart';
 
@@ -28,11 +27,20 @@ class _HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const fabPadding = EdgeInsets.symmetric(vertical: 5.0);
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'.i18n),
+      // appBar: AppBar(
+      //   title: Text('Home'.i18n),
+      // ),
+      body: Container(
+        color: Colors.blue,
+        child: SafeArea(
+          bottom: false,
+          right: false,
+          left: false,
+          child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+            builder: (_, state) => ViewManagerWidget(state: state),
+          ),
+        ),
       ),
-      body: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-          builder: (_, state) => ViewManagerWidget(state: state)),
       floatingActionButton: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.end,
@@ -46,14 +54,14 @@ class _HomeScreen extends StatelessWidget {
                       type: ViewType.bible, data: '${++_viewId}')),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5.0),
-            child: FloatingActionButton(
-              child: Icon(Icons.update),
-              onPressed: () =>
-                  context.bloc<AppThemeBloc>().add(AppThemeEvent.toggle),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(vertical: 5.0),
+          //   child: FloatingActionButton(
+          //     child: Icon(Icons.update),
+          //     onPressed: () =>
+          //         context.bloc<AppThemeBloc>().add(AppThemeEvent.toggle),
+          //   ),
+          // ),
         ],
       ),
     );
