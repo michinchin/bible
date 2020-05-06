@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:tec_util/tec_util.dart' as tec;
+
 import '../../blocs/app_theme_bloc.dart';
-import '../../blocs/counter_bloc.dart';
+import '../../blocs/view_manager_bloc.dart';
 import '../../translations.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -10,31 +12,27 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ///2. Resolve counter bloc to update state
-    //final counterBloc = context.bloc<CounterBloc>();
-    final textStyle = Theme.of(context).textTheme.headline4;
-    const fabPadding = EdgeInsets.symmetric(vertical: 5.0);
+    return BlocProvider(
+      create: (_) => ViewManagerBloc(kvStore: tec.Prefs.shared),
+      child: const _HomeScreen(),
+    );
+  }
+}
 
+var _viewId = 0;
+
+class _HomeScreen extends StatelessWidget {
+  const _HomeScreen({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    const fabPadding = EdgeInsets.symmetric(vertical: 5.0);
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'.i18n),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('You have pushed the button this many times:'.i18n),
-
-            ///3. Efficiently render state changes
-            BlocBuilder<CounterBloc, CounterState>(
-              builder: (_, state) => state.when(
-                current: (value) => Text('$value', style: textStyle),
-                initial: (value) => Text('$value', style: textStyle),
-              ),
-            )
-          ],
-        ),
-      ),
+      body: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+          builder: (_, state) => ViewManagerWidget(state: state)),
       floatingActionButton: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.end,
@@ -43,18 +41,9 @@ class HomeScreen extends StatelessWidget {
             padding: fabPadding,
             child: FloatingActionButton(
               child: Icon(Icons.add),
-
-              ///4. Perform increment action
-              onPressed: () => context.bloc<CounterBloc>().increment(),
-            ),
-          ),
-          Padding(
-            padding: fabPadding,
-            child: FloatingActionButton(
-              child: Icon(Icons.remove),
-
-              ///5. Perform decrement action
-              onPressed: () => context.bloc<CounterBloc>().decrement(),
+              onPressed: () => context.bloc<ViewManagerBloc>().add(
+                  ViewManagerEvent.add(
+                      type: ViewType.bible, data: '${++_viewId}')),
             ),
           ),
           Padding(
@@ -70,33 +59,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-/*
-typedef ViewBuilder = Widget Function(BuildContext context);
-
-class ViewManager {
-  void addViewable({Size minSize, ViewBuilder viewBuilder}) {
-
-  }
-}
-
-class TestView extends StatelessWidget with Viewable {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(border: Border.all()),
-    );
-  }
-
-  static Size get minSize => const Size(200, 200);
-
-  @override
-  // TODO: implement preferredHeight
-  Size get preferredHeight => throw UnimplementedError();
-
-  @override
-  // TODO: implement preferredWidth
-  Size get preferredWidth => throw UnimplementedError();
-  
-}
-*/

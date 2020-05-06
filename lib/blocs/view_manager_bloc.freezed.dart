@@ -486,6 +486,206 @@ abstract class _Move implements ViewManagerEvent {
   _$MoveCopyWith<_Move> get copyWith;
 }
 
+ViewState _$ViewStateFromJson(Map<String, dynamic> json) {
+  return _ViewState.fromJson(json);
+}
+
+class _$ViewStateTearOff {
+  const _$ViewStateTearOff();
+
+  _ViewState call(
+      {ViewType type,
+      double preferredWidth,
+      double preferredHeight,
+      String data}) {
+    return _ViewState(
+      type: type,
+      preferredWidth: preferredWidth,
+      preferredHeight: preferredHeight,
+      data: data,
+    );
+  }
+}
+
+// ignore: unused_element
+const $ViewState = _$ViewStateTearOff();
+
+mixin _$ViewState {
+  ViewType get type;
+  double get preferredWidth;
+  double get preferredHeight;
+  String get data;
+
+  Map<String, dynamic> toJson();
+  $ViewStateCopyWith<ViewState> get copyWith;
+}
+
+abstract class $ViewStateCopyWith<$Res> {
+  factory $ViewStateCopyWith(ViewState value, $Res Function(ViewState) then) =
+      _$ViewStateCopyWithImpl<$Res>;
+  $Res call(
+      {ViewType type,
+      double preferredWidth,
+      double preferredHeight,
+      String data});
+}
+
+class _$ViewStateCopyWithImpl<$Res> implements $ViewStateCopyWith<$Res> {
+  _$ViewStateCopyWithImpl(this._value, this._then);
+
+  final ViewState _value;
+  // ignore: unused_field
+  final $Res Function(ViewState) _then;
+
+  @override
+  $Res call({
+    Object type = freezed,
+    Object preferredWidth = freezed,
+    Object preferredHeight = freezed,
+    Object data = freezed,
+  }) {
+    return _then(_value.copyWith(
+      type: type == freezed ? _value.type : type as ViewType,
+      preferredWidth: preferredWidth == freezed
+          ? _value.preferredWidth
+          : preferredWidth as double,
+      preferredHeight: preferredHeight == freezed
+          ? _value.preferredHeight
+          : preferredHeight as double,
+      data: data == freezed ? _value.data : data as String,
+    ));
+  }
+}
+
+abstract class _$ViewStateCopyWith<$Res> implements $ViewStateCopyWith<$Res> {
+  factory _$ViewStateCopyWith(
+          _ViewState value, $Res Function(_ViewState) then) =
+      __$ViewStateCopyWithImpl<$Res>;
+  @override
+  $Res call(
+      {ViewType type,
+      double preferredWidth,
+      double preferredHeight,
+      String data});
+}
+
+class __$ViewStateCopyWithImpl<$Res> extends _$ViewStateCopyWithImpl<$Res>
+    implements _$ViewStateCopyWith<$Res> {
+  __$ViewStateCopyWithImpl(_ViewState _value, $Res Function(_ViewState) _then)
+      : super(_value, (v) => _then(v as _ViewState));
+
+  @override
+  _ViewState get _value => super._value as _ViewState;
+
+  @override
+  $Res call({
+    Object type = freezed,
+    Object preferredWidth = freezed,
+    Object preferredHeight = freezed,
+    Object data = freezed,
+  }) {
+    return _then(_ViewState(
+      type: type == freezed ? _value.type : type as ViewType,
+      preferredWidth: preferredWidth == freezed
+          ? _value.preferredWidth
+          : preferredWidth as double,
+      preferredHeight: preferredHeight == freezed
+          ? _value.preferredHeight
+          : preferredHeight as double,
+      data: data == freezed ? _value.data : data as String,
+    ));
+  }
+}
+
+@JsonSerializable()
+class _$_ViewState with DiagnosticableTreeMixin implements _ViewState {
+  _$_ViewState(
+      {this.type, this.preferredWidth, this.preferredHeight, this.data});
+
+  factory _$_ViewState.fromJson(Map<String, dynamic> json) =>
+      _$_$_ViewStateFromJson(json);
+
+  @override
+  final ViewType type;
+  @override
+  final double preferredWidth;
+  @override
+  final double preferredHeight;
+  @override
+  final String data;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'ViewState(type: $type, preferredWidth: $preferredWidth, preferredHeight: $preferredHeight, data: $data)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ViewState'))
+      ..add(DiagnosticsProperty('type', type))
+      ..add(DiagnosticsProperty('preferredWidth', preferredWidth))
+      ..add(DiagnosticsProperty('preferredHeight', preferredHeight))
+      ..add(DiagnosticsProperty('data', data));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _ViewState &&
+            (identical(other.type, type) ||
+                const DeepCollectionEquality().equals(other.type, type)) &&
+            (identical(other.preferredWidth, preferredWidth) ||
+                const DeepCollectionEquality()
+                    .equals(other.preferredWidth, preferredWidth)) &&
+            (identical(other.preferredHeight, preferredHeight) ||
+                const DeepCollectionEquality()
+                    .equals(other.preferredHeight, preferredHeight)) &&
+            (identical(other.data, data) ||
+                const DeepCollectionEquality().equals(other.data, data)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(type) ^
+      const DeepCollectionEquality().hash(preferredWidth) ^
+      const DeepCollectionEquality().hash(preferredHeight) ^
+      const DeepCollectionEquality().hash(data);
+
+  @override
+  _$ViewStateCopyWith<_ViewState> get copyWith =>
+      __$ViewStateCopyWithImpl<_ViewState>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$_$_ViewStateToJson(this);
+  }
+}
+
+abstract class _ViewState implements ViewState {
+  factory _ViewState(
+      {ViewType type,
+      double preferredWidth,
+      double preferredHeight,
+      String data}) = _$_ViewState;
+
+  factory _ViewState.fromJson(Map<String, dynamic> json) =
+      _$_ViewState.fromJson;
+
+  @override
+  ViewType get type;
+  @override
+  double get preferredWidth;
+  @override
+  double get preferredHeight;
+  @override
+  String get data;
+  @override
+  _$ViewStateCopyWith<_ViewState> get copyWith;
+}
+
 ViewManagerState _$ViewManagerStateFromJson(Map<String, dynamic> json) {
   return _Views.fromJson(json);
 }
@@ -615,169 +815,4 @@ abstract class _Views implements ViewManagerState {
   List<ViewState> get views;
   @override
   _$ViewsCopyWith<_Views> get copyWith;
-}
-
-ViewState _$ViewStateFromJson(Map<String, dynamic> json) {
-  return _ViewState.fromJson(json);
-}
-
-class _$ViewStateTearOff {
-  const _$ViewStateTearOff();
-
-  _ViewState call({ViewType type, double preferredWidth, String data}) {
-    return _ViewState(
-      type: type,
-      preferredWidth: preferredWidth,
-      data: data,
-    );
-  }
-}
-
-// ignore: unused_element
-const $ViewState = _$ViewStateTearOff();
-
-mixin _$ViewState {
-  ViewType get type;
-  double get preferredWidth;
-  String get data;
-
-  Map<String, dynamic> toJson();
-  $ViewStateCopyWith<ViewState> get copyWith;
-}
-
-abstract class $ViewStateCopyWith<$Res> {
-  factory $ViewStateCopyWith(ViewState value, $Res Function(ViewState) then) =
-      _$ViewStateCopyWithImpl<$Res>;
-  $Res call({ViewType type, double preferredWidth, String data});
-}
-
-class _$ViewStateCopyWithImpl<$Res> implements $ViewStateCopyWith<$Res> {
-  _$ViewStateCopyWithImpl(this._value, this._then);
-
-  final ViewState _value;
-  // ignore: unused_field
-  final $Res Function(ViewState) _then;
-
-  @override
-  $Res call({
-    Object type = freezed,
-    Object preferredWidth = freezed,
-    Object data = freezed,
-  }) {
-    return _then(_value.copyWith(
-      type: type == freezed ? _value.type : type as ViewType,
-      preferredWidth: preferredWidth == freezed
-          ? _value.preferredWidth
-          : preferredWidth as double,
-      data: data == freezed ? _value.data : data as String,
-    ));
-  }
-}
-
-abstract class _$ViewStateCopyWith<$Res> implements $ViewStateCopyWith<$Res> {
-  factory _$ViewStateCopyWith(
-          _ViewState value, $Res Function(_ViewState) then) =
-      __$ViewStateCopyWithImpl<$Res>;
-  @override
-  $Res call({ViewType type, double preferredWidth, String data});
-}
-
-class __$ViewStateCopyWithImpl<$Res> extends _$ViewStateCopyWithImpl<$Res>
-    implements _$ViewStateCopyWith<$Res> {
-  __$ViewStateCopyWithImpl(_ViewState _value, $Res Function(_ViewState) _then)
-      : super(_value, (v) => _then(v as _ViewState));
-
-  @override
-  _ViewState get _value => super._value as _ViewState;
-
-  @override
-  $Res call({
-    Object type = freezed,
-    Object preferredWidth = freezed,
-    Object data = freezed,
-  }) {
-    return _then(_ViewState(
-      type: type == freezed ? _value.type : type as ViewType,
-      preferredWidth: preferredWidth == freezed
-          ? _value.preferredWidth
-          : preferredWidth as double,
-      data: data == freezed ? _value.data : data as String,
-    ));
-  }
-}
-
-@JsonSerializable()
-class _$_ViewState with DiagnosticableTreeMixin implements _ViewState {
-  _$_ViewState({this.type, this.preferredWidth, this.data});
-
-  factory _$_ViewState.fromJson(Map<String, dynamic> json) =>
-      _$_$_ViewStateFromJson(json);
-
-  @override
-  final ViewType type;
-  @override
-  final double preferredWidth;
-  @override
-  final String data;
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'ViewState(type: $type, preferredWidth: $preferredWidth, data: $data)';
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(DiagnosticsProperty('type', 'ViewState'))
-      ..add(DiagnosticsProperty('type', type))
-      ..add(DiagnosticsProperty('preferredWidth', preferredWidth))
-      ..add(DiagnosticsProperty('data', data));
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    return identical(this, other) ||
-        (other is _ViewState &&
-            (identical(other.type, type) ||
-                const DeepCollectionEquality().equals(other.type, type)) &&
-            (identical(other.preferredWidth, preferredWidth) ||
-                const DeepCollectionEquality()
-                    .equals(other.preferredWidth, preferredWidth)) &&
-            (identical(other.data, data) ||
-                const DeepCollectionEquality().equals(other.data, data)));
-  }
-
-  @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(type) ^
-      const DeepCollectionEquality().hash(preferredWidth) ^
-      const DeepCollectionEquality().hash(data);
-
-  @override
-  _$ViewStateCopyWith<_ViewState> get copyWith =>
-      __$ViewStateCopyWithImpl<_ViewState>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$_$_ViewStateToJson(this);
-  }
-}
-
-abstract class _ViewState implements ViewState {
-  factory _ViewState({ViewType type, double preferredWidth, String data}) =
-      _$_ViewState;
-
-  factory _ViewState.fromJson(Map<String, dynamic> json) =
-      _$_ViewState.fromJson;
-
-  @override
-  ViewType get type;
-  @override
-  double get preferredWidth;
-  @override
-  String get data;
-  @override
-  _$ViewStateCopyWith<_ViewState> get copyWith;
 }

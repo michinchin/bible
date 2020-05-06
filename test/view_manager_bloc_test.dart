@@ -49,11 +49,12 @@ void main() {
 //
 
 ViewManagerEvent add(String data) =>
-    ViewManagerEvent.add(type: ViewType.test, data: data);
+    ViewManagerEvent.add(type: ViewType.values.first, data: data);
 
 ViewManagerEvent move(int from, int to) =>
     ViewManagerEvent.move(fromPosition: from, toPosition: to);
 
 ViewManagerEvent remove(int position) => ViewManagerEvent.remove(position);
 
-ViewState view(String data) => ViewState(type: ViewType.test, data: data);
+ViewState view(String data) =>
+    ViewState(type: ViewType.values.first, data: data);
