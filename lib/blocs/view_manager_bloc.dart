@@ -162,7 +162,7 @@ class ViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final side = BorderSide(width: 1, color: Colors.grey[400]);
+    final side = BorderSide(width: 1, color: Theme.of(context).primaryColor);
     return Container(
       decoration: BoxDecoration(
         border: Border(right: side, bottom: side),
@@ -241,12 +241,14 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
   double get idealHeight => fold(0.0, (t, el) => t + el.idealHeight);
 
   ///
-  /// Balances rows of items based on the ideal width each item.
+  /// Balances rows of items based on the ideal width of each item.
   ///
   void balance() {
+    // Balance from the bottom up.
     for (var i = length - 2; i >= 0; i--) {
       while (_balanceRow(i)) {
-        // Row i changed, so we need to rebalance the rows after it.
+        // Row `i` changed, so we need to rebalance the rows after it.
+        // Rebalance from row `i + 1` down, until there a no changes.
         var changed = false;
         for (var j = i + 1; j < length - 1; j++) {
           if (_balanceRow(j)) {
@@ -262,7 +264,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
   }
 
   ///
-  /// Balances row `i` with the row after it based on the ideal width of the
+  /// Balances row `i` with the row after it, based on the ideal width of the
   /// items in the rows.
   ///
   bool _balanceRow(int i) {
@@ -273,7 +275,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     final row2 = this[i + 1];
     var changed = false;
 
-    // Keep moving the last item in row i to the next row until they are in balance.
+    // Keep moving the last item in row `i` to the next row until they are in balance.
     while (row1.length > 1) {
       if (row2.idealWidth + row1.last.idealWidth <= row1.idealWidth) {
         row2.insert(0, row1.removeLast());
@@ -307,11 +309,12 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
         height = row.minHeight + yDelta;
       }
 
-      final xExtraPerItem = math.max(0.0, (constraints.maxWidth - row.idealWidth) / row.length);
-      var xExtra = xExtraPerItem > 0.0 ? 0.0 : constraints.maxWidth - row.minWidth;
+      final xExtraPerItem =
+          math.max(0.0, (constraints.maxWidth - row.idealWidth) / row.length);
+      var xExtra =
+          xExtraPerItem > 0.0 ? 0.0 : constraints.maxWidth - row.minWidth;
 
       for (final state in row) {
-
         double width;
         if (xExtraPerItem > 0.0) {
           width = state.idealWidth + xExtraPerItem;
@@ -335,8 +338,9 @@ class _View {
 
   _View(this.rect, this.view);
 
-  Widget asWidget() => Positioned(
-      left: rect.left,
+  Widget asWidget() => AnimatedPositionedDirectional(
+      duration: const Duration(milliseconds: 200),
+      start: rect.left,
       top: rect.top,
       width: rect.width,
       height: rect.height,

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/view_manager_bloc.dart';
-import '../../translations.dart';
+//import '../../translations.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key key}) : super(key: key);
@@ -31,13 +31,16 @@ class _HomeScreen extends StatelessWidget {
       //   title: Text('Home'.i18n),
       // ),
       body: Container(
-        color: Colors.blue,
+        color: Theme.of(context).primaryColor,
         child: SafeArea(
           bottom: false,
           right: false,
           left: false,
-          child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-            builder: (_, state) => ViewManagerWidget(state: state),
+          child: Container(
+            color: Theme.of(context).canvasColor,
+            child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+              builder: (_, state) => ViewManagerWidget(state: state),
+            ),
           ),
         ),
       ),
