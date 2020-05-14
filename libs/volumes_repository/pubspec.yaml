@@ -1,0 +1,27 @@
+name: volumes_repository
+description: A new Flutter package project.
+version: 0.0.1
+author:
+
+environment:
+  sdk: '>=2.7.0 <3.0.0'
+
+dependencies:
+  # Flutter default dependencies
+  flutter:
+    sdk: flutter
+
+  # External dependencies
+
+  # Internal dependencies
+  tec_util:
+    hosted:
+      name: tec_util
+      url: http://noah.tecarta.com:8100
+    version: ^1.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  pedantic: ^1.9.0

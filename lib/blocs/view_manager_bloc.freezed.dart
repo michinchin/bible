@@ -32,6 +32,20 @@ class _$ViewManagerEventTearOff {
       toPosition: toPosition,
     );
   }
+
+  _SetWidth setWidth({int position, double width}) {
+    return _SetWidth(
+      position: position,
+      width: width,
+    );
+  }
+
+  _SetHeight setHeight({int position, double height}) {
+    return _SetHeight(
+      position: position,
+      height: height,
+    );
+  }
 }
 
 // ignore: unused_element
@@ -43,12 +57,16 @@ mixin _$ViewManagerEvent {
     @required Result add(ViewType type, int position, String data),
     @required Result remove(int position),
     @required Result move(int fromPosition, int toPosition),
+    @required Result setWidth(int position, double width),
+    @required Result setHeight(int position, double height),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result add(ViewType type, int position, String data),
     Result remove(int position),
     Result move(int fromPosition, int toPosition),
+    Result setWidth(int position, double width),
+    Result setHeight(int position, double height),
     @required Result orElse(),
   });
   @optionalTypeArgs
@@ -56,12 +74,16 @@ mixin _$ViewManagerEvent {
     @required Result add(_Add value),
     @required Result remove(_Remove value),
     @required Result move(_Move value),
+    @required Result setWidth(_SetWidth value),
+    @required Result setHeight(_SetHeight value),
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result add(_Add value),
     Result remove(_Remove value),
     Result move(_Move value),
+    Result setWidth(_SetWidth value),
+    Result setHeight(_SetHeight value),
     @required Result orElse(),
   });
 }
@@ -165,10 +187,14 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
     @required Result add(ViewType type, int position, String data),
     @required Result remove(int position),
     @required Result move(int fromPosition, int toPosition),
+    @required Result setWidth(int position, double width),
+    @required Result setHeight(int position, double height),
   }) {
     assert(add != null);
     assert(remove != null);
     assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
     return add(type, position, data);
   }
 
@@ -178,6 +204,8 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
     Result add(ViewType type, int position, String data),
     Result remove(int position),
     Result move(int fromPosition, int toPosition),
+    Result setWidth(int position, double width),
+    Result setHeight(int position, double height),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -193,10 +221,14 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
     @required Result add(_Add value),
     @required Result remove(_Remove value),
     @required Result move(_Move value),
+    @required Result setWidth(_SetWidth value),
+    @required Result setHeight(_SetHeight value),
   }) {
     assert(add != null);
     assert(remove != null);
     assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
     return add(this);
   }
 
@@ -206,6 +238,8 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
     Result add(_Add value),
     Result remove(_Remove value),
     Result move(_Move value),
+    Result setWidth(_SetWidth value),
+    Result setHeight(_SetHeight value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -292,10 +326,14 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
     @required Result add(ViewType type, int position, String data),
     @required Result remove(int position),
     @required Result move(int fromPosition, int toPosition),
+    @required Result setWidth(int position, double width),
+    @required Result setHeight(int position, double height),
   }) {
     assert(add != null);
     assert(remove != null);
     assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
     return remove(position);
   }
 
@@ -305,6 +343,8 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
     Result add(ViewType type, int position, String data),
     Result remove(int position),
     Result move(int fromPosition, int toPosition),
+    Result setWidth(int position, double width),
+    Result setHeight(int position, double height),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -320,10 +360,14 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
     @required Result add(_Add value),
     @required Result remove(_Remove value),
     @required Result move(_Move value),
+    @required Result setWidth(_SetWidth value),
+    @required Result setHeight(_SetHeight value),
   }) {
     assert(add != null);
     assert(remove != null);
     assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
     return remove(this);
   }
 
@@ -333,6 +377,8 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
     Result add(_Add value),
     Result remove(_Remove value),
     Result move(_Move value),
+    Result setWidth(_SetWidth value),
+    Result setHeight(_SetHeight value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -427,10 +473,14 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
     @required Result add(ViewType type, int position, String data),
     @required Result remove(int position),
     @required Result move(int fromPosition, int toPosition),
+    @required Result setWidth(int position, double width),
+    @required Result setHeight(int position, double height),
   }) {
     assert(add != null);
     assert(remove != null);
     assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
     return move(fromPosition, toPosition);
   }
 
@@ -440,6 +490,8 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
     Result add(ViewType type, int position, String data),
     Result remove(int position),
     Result move(int fromPosition, int toPosition),
+    Result setWidth(int position, double width),
+    Result setHeight(int position, double height),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -455,10 +507,14 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
     @required Result add(_Add value),
     @required Result remove(_Remove value),
     @required Result move(_Move value),
+    @required Result setWidth(_SetWidth value),
+    @required Result setHeight(_SetHeight value),
   }) {
     assert(add != null);
     assert(remove != null);
     assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
     return move(this);
   }
 
@@ -468,6 +524,8 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
     Result add(_Add value),
     Result remove(_Remove value),
     Result move(_Move value),
+    Result setWidth(_SetWidth value),
+    Result setHeight(_SetHeight value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -484,6 +542,300 @@ abstract class _Move implements ViewManagerEvent {
   int get fromPosition;
   int get toPosition;
   _$MoveCopyWith<_Move> get copyWith;
+}
+
+abstract class _$SetWidthCopyWith<$Res> {
+  factory _$SetWidthCopyWith(_SetWidth value, $Res Function(_SetWidth) then) =
+      __$SetWidthCopyWithImpl<$Res>;
+  $Res call({int position, double width});
+}
+
+class __$SetWidthCopyWithImpl<$Res> extends _$ViewManagerEventCopyWithImpl<$Res>
+    implements _$SetWidthCopyWith<$Res> {
+  __$SetWidthCopyWithImpl(_SetWidth _value, $Res Function(_SetWidth) _then)
+      : super(_value, (v) => _then(v as _SetWidth));
+
+  @override
+  _SetWidth get _value => super._value as _SetWidth;
+
+  @override
+  $Res call({
+    Object position = freezed,
+    Object width = freezed,
+  }) {
+    return _then(_SetWidth(
+      position: position == freezed ? _value.position : position as int,
+      width: width == freezed ? _value.width : width as double,
+    ));
+  }
+}
+
+class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
+  const _$_SetWidth({this.position, this.width});
+
+  @override
+  final int position;
+  @override
+  final double width;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'ViewManagerEvent.setWidth(position: $position, width: $width)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ViewManagerEvent.setWidth'))
+      ..add(DiagnosticsProperty('position', position))
+      ..add(DiagnosticsProperty('width', width));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _SetWidth &&
+            (identical(other.position, position) ||
+                const DeepCollectionEquality()
+                    .equals(other.position, position)) &&
+            (identical(other.width, width) ||
+                const DeepCollectionEquality().equals(other.width, width)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(position) ^
+      const DeepCollectionEquality().hash(width);
+
+  @override
+  _$SetWidthCopyWith<_SetWidth> get copyWith =>
+      __$SetWidthCopyWithImpl<_SetWidth>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result add(ViewType type, int position, String data),
+    @required Result remove(int position),
+    @required Result move(int fromPosition, int toPosition),
+    @required Result setWidth(int position, double width),
+    @required Result setHeight(int position, double height),
+  }) {
+    assert(add != null);
+    assert(remove != null);
+    assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
+    return setWidth(position, width);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result add(ViewType type, int position, String data),
+    Result remove(int position),
+    Result move(int fromPosition, int toPosition),
+    Result setWidth(int position, double width),
+    Result setHeight(int position, double height),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (setWidth != null) {
+      return setWidth(position, width);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result add(_Add value),
+    @required Result remove(_Remove value),
+    @required Result move(_Move value),
+    @required Result setWidth(_SetWidth value),
+    @required Result setHeight(_SetHeight value),
+  }) {
+    assert(add != null);
+    assert(remove != null);
+    assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
+    return setWidth(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result add(_Add value),
+    Result remove(_Remove value),
+    Result move(_Move value),
+    Result setWidth(_SetWidth value),
+    Result setHeight(_SetHeight value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (setWidth != null) {
+      return setWidth(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _SetWidth implements ViewManagerEvent {
+  const factory _SetWidth({int position, double width}) = _$_SetWidth;
+
+  int get position;
+  double get width;
+  _$SetWidthCopyWith<_SetWidth> get copyWith;
+}
+
+abstract class _$SetHeightCopyWith<$Res> {
+  factory _$SetHeightCopyWith(
+          _SetHeight value, $Res Function(_SetHeight) then) =
+      __$SetHeightCopyWithImpl<$Res>;
+  $Res call({int position, double height});
+}
+
+class __$SetHeightCopyWithImpl<$Res>
+    extends _$ViewManagerEventCopyWithImpl<$Res>
+    implements _$SetHeightCopyWith<$Res> {
+  __$SetHeightCopyWithImpl(_SetHeight _value, $Res Function(_SetHeight) _then)
+      : super(_value, (v) => _then(v as _SetHeight));
+
+  @override
+  _SetHeight get _value => super._value as _SetHeight;
+
+  @override
+  $Res call({
+    Object position = freezed,
+    Object height = freezed,
+  }) {
+    return _then(_SetHeight(
+      position: position == freezed ? _value.position : position as int,
+      height: height == freezed ? _value.height : height as double,
+    ));
+  }
+}
+
+class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
+  const _$_SetHeight({this.position, this.height});
+
+  @override
+  final int position;
+  @override
+  final double height;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'ViewManagerEvent.setHeight(position: $position, height: $height)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ViewManagerEvent.setHeight'))
+      ..add(DiagnosticsProperty('position', position))
+      ..add(DiagnosticsProperty('height', height));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _SetHeight &&
+            (identical(other.position, position) ||
+                const DeepCollectionEquality()
+                    .equals(other.position, position)) &&
+            (identical(other.height, height) ||
+                const DeepCollectionEquality().equals(other.height, height)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(position) ^
+      const DeepCollectionEquality().hash(height);
+
+  @override
+  _$SetHeightCopyWith<_SetHeight> get copyWith =>
+      __$SetHeightCopyWithImpl<_SetHeight>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result add(ViewType type, int position, String data),
+    @required Result remove(int position),
+    @required Result move(int fromPosition, int toPosition),
+    @required Result setWidth(int position, double width),
+    @required Result setHeight(int position, double height),
+  }) {
+    assert(add != null);
+    assert(remove != null);
+    assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
+    return setHeight(position, height);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result add(ViewType type, int position, String data),
+    Result remove(int position),
+    Result move(int fromPosition, int toPosition),
+    Result setWidth(int position, double width),
+    Result setHeight(int position, double height),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (setHeight != null) {
+      return setHeight(position, height);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result add(_Add value),
+    @required Result remove(_Remove value),
+    @required Result move(_Move value),
+    @required Result setWidth(_SetWidth value),
+    @required Result setHeight(_SetHeight value),
+  }) {
+    assert(add != null);
+    assert(remove != null);
+    assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
+    return setHeight(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result add(_Add value),
+    Result remove(_Remove value),
+    Result move(_Move value),
+    Result setWidth(_SetWidth value),
+    Result setHeight(_SetHeight value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (setHeight != null) {
+      return setHeight(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _SetHeight implements ViewManagerEvent {
+  const factory _SetHeight({int position, double height}) = _$_SetHeight;
+
+  int get position;
+  double get height;
+  _$SetHeightCopyWith<_SetHeight> get copyWith;
 }
 
 ViewState _$ViewStateFromJson(Map<String, dynamic> json) {
