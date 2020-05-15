@@ -1,4 +1,4 @@
-# volumes_repository
+# tec_volumes
 
 A new Flutter package project.
 

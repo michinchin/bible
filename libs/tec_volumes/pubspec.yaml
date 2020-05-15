@@ -1,4 +1,4 @@
-name: volumes_repository
+name: tec_volumes
 description: A new Flutter package project.
 version: 0.0.1
 author:
@@ -14,6 +14,11 @@ dependencies:
   # External dependencies
 
   # Internal dependencies
+  tec_env:
+    hosted:
+      name: tec_env
+      url: http://noah.tecarta.com:8100
+    version: ^1.0.1
   tec_util:
     hosted:
       name: tec_util
