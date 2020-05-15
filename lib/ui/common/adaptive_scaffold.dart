@@ -74,7 +74,7 @@ class AdaptiveScaffold extends StatelessWidget {
                 selectedLabelTextStyle: TextStyle(
                   color: Theme.of(context).accentColor,
                 ),
-                unselectedIconTheme: IconThemeData(
+                unselectedIconTheme: const IconThemeData(
                   color: Colors.grey,
                 ),
                 labelType: NavigationRailLabelType.all,

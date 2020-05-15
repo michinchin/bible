@@ -51,7 +51,7 @@ class _HomeScreen extends StatelessWidget {
           Padding(
             padding: fabPadding,
             child: FloatingActionButton(
-              child: Icon(Icons.add),
+              child: const Icon(Icons.add),
               onPressed: () => context.bloc<ViewManagerBloc>().add(
                   ViewManagerEvent.add(
                       type: ViewType.bible, data: '${++_viewId}')),
