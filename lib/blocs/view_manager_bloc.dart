@@ -226,58 +226,77 @@ class ViewWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     ViewManagerBloc bloc() => context.bloc<ViewManagerBloc>();
     final side = BorderSide(width: 1, color: Theme.of(context).primaryColor);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(right: side, bottom: side),
-      ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('${viewState.data}'),
-          leading: bloc().state.views.length <= 1
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.close),
-                  tooltip: 'Close',
-                  onPressed: () {
-                    final event = ViewManagerEvent.remove(viewIndex);
-                    bloc().add(event);
-                  },
-                ),
-          // actions: <Widget>[
-          //   IconButton(
-          //     icon: const Icon(Icons.border_outer),
-          //     onPressed: () {
-          //       bloc().add(ViewManagerEvent.setWidth(
-          //           position: viewIndex, width: null));
-          //       bloc().add(ViewManagerEvent.setHeight(
-          //           position: viewIndex, height: null));
-          //     },
-          //   ),
-          //   IconButton(
-          //     icon: const Icon(Icons.format_textdirection_l_to_r),
-          //     onPressed: () {
-          //       final viewState = bloc().state.views[viewIndex];
-          //       final idealWidth =
-          //           viewState.idealWidth ?? minWidthForViewType(viewState.type);
-          //       final event = ViewManagerEvent.setWidth(
-          //           position: viewIndex, width: idealWidth + 20.0);
-          //       bloc().add(event);
-          //     },
-          //   ),
-          //   IconButton(
-          //     icon: const Icon(Icons.format_line_spacing),
-          //     onPressed: () {
-          //       final viewState = bloc().state.views[viewIndex];
-          //       final idealHeight = viewState.idealHeight ??
-          //           minHeightForViewType(viewState.type);
-          //       final event = ViewManagerEvent.setHeight(
-          //           position: viewIndex, height: idealHeight + 20.0);
-          //       bloc().add(event);
-          //     },
-          //   ),
-          // ],
+
+    final theme = Theme.of(context);
+    //final barColor = theme.canvasColor;
+    final barColor = theme.appBarTheme.color ?? theme.primaryColor;
+    final barTextColor =
+        ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
+            ? Colors.grey[700]
+            : Colors.white;
+    final newAppBarTheme = theme.appBarTheme.copyWith(
+      elevation: 0,
+      color: barColor,
+      actionsIconTheme: IconThemeData(color: barTextColor),
+      iconTheme: IconThemeData(color: barTextColor),
+      textTheme: theme.copyOfAppBarTextThemeWithColor(barTextColor),
+    );
+
+    return Theme(
+      data: theme.copyWith(appBarTheme: newAppBarTheme),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(right: side, bottom: side),
         ),
-        body: Container(),
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('${viewState.data}'),
+            leading: bloc().state.views.length <= 1
+                ? null
+                : IconButton(
+                    icon: const Icon(Icons.close),
+                    tooltip: 'Close',
+                    onPressed: () {
+                      final event = ViewManagerEvent.remove(viewIndex);
+                      bloc().add(event);
+                    },
+                  ),
+            // actions: <Widget>[
+            //   IconButton(
+            //     icon: const Icon(Icons.border_outer),
+            //     onPressed: () {
+            //       bloc().add(ViewManagerEvent.setWidth(
+            //           position: viewIndex, width: null));
+            //       bloc().add(ViewManagerEvent.setHeight(
+            //           position: viewIndex, height: null));
+            //     },
+            //   ),
+            //   IconButton(
+            //     icon: const Icon(Icons.format_textdirection_l_to_r),
+            //     onPressed: () {
+            //       final viewState = bloc().state.views[viewIndex];
+            //       final idealWidth =
+            //           viewState.idealWidth ?? minWidthForViewType(viewState.type);
+            //       final event = ViewManagerEvent.setWidth(
+            //           position: viewIndex, width: idealWidth + 20.0);
+            //       bloc().add(event);
+            //     },
+            //   ),
+            //   IconButton(
+            //     icon: const Icon(Icons.format_line_spacing),
+            //     onPressed: () {
+            //       final viewState = bloc().state.views[viewIndex];
+            //       final idealHeight = viewState.idealHeight ??
+            //           minHeightForViewType(viewState.type);
+            //       final event = ViewManagerEvent.setHeight(
+            //           position: viewIndex, height: idealHeight + 20.0);
+            //       bloc().add(event);
+            //     },
+            //   ),
+            // ],
+          ),
+          body: const Center(child: Text('abc')),
+        ),
       ),
     );
   }
@@ -489,4 +508,27 @@ extension _ExtOnList on List {
       this[to] = temp;
     }
   }
+}
+
+extension _ExtOnThemeData on ThemeData {
+  TextTheme copyOfAppBarTextThemeWithColor(Color color) =>
+      appBarTheme.textTheme?.apply(bodyColor: color) ??
+      primaryTextTheme?.apply(bodyColor: color) ??
+      TextTheme(headline6: TextStyle(color: color));
+
+  // TextTheme copyOfAppBarTextThemeWithColor(Color color) =>
+  //     appBarTheme.textTheme?.copyWith(
+  //         headline6: appBarTheme.textTheme?.headline6?.copyWith(color: color) ??
+  //             TextStyle(color: color)) ??
+  //     primaryTextTheme?.copyWith(
+  //         headline6: primaryTextTheme.headline6?.copyWith(color: color) ??
+  //             TextStyle(color: color)) ??
+  //     TextTheme(headline6: TextStyle(color: color));
+}
+
+extension _ExtOnAppBarTheme on AppBarTheme {
+  IconThemeData copyOfActionsIconThemeWithColor(Color color) =>
+      actionsIconTheme?.copyWith(color: color) ?? IconThemeData(color: color);
+  IconThemeData copyOfIconThemeWithColor(Color color) =>
+      iconTheme?.copyWith(color: color) ?? IconThemeData(color: color);
 }

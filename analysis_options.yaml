@@ -7,12 +7,15 @@
 analyzer:
   strong-mode:
     implicit-casts: false
-    implicit-dynamic: false
-  errors:
-    todo: info
+    # TODO(ron): change back to `implicit-dynamic: false` when analyzer bug is fixed
+    implicit-dynamic: true
   exclude:
-    # Example:
-    # - path/to/excluded/files/**
+    - lib/**/*.freezed.dart
+    - lib/**/*.g.dart
+  errors:
+    missing_return: error
+    missing_required_param: error
+    todo: info
 
 # Linter rules (http://dart-lang.github.io/linter/lints/)
 linter:

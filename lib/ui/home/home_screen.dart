@@ -25,7 +25,6 @@ class _HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const fabPadding = EdgeInsets.symmetric(vertical: 5.0);
     return Scaffold(
       // appBar: AppBar(
       //   title: Text('Home'.i18n),
@@ -33,9 +32,10 @@ class _HomeScreen extends StatelessWidget {
       body: Container(
         color: Theme.of(context).primaryColor,
         child: SafeArea(
+          left: true,
+          top: true,
+          right: true,
           bottom: false,
-          right: false,
-          left: false,
           child: Container(
             color: Theme.of(context).canvasColor,
             child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
@@ -48,21 +48,18 @@ class _HomeScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          Padding(
-            padding: fabPadding,
-            child: FloatingActionButton(
-              child: const Icon(Icons.add),
-              onPressed: () => context.bloc<ViewManagerBloc>().add(
-                  ViewManagerEvent.add(
-                      type: ViewType.bible, data: '${++_viewId}')),
-            ),
+          FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () => context.bloc<ViewManagerBloc>().add(
+                ViewManagerEvent.add(
+                    type: ViewType.bible, data: '${++_viewId}')),
           ),
           // Padding(
           //   padding: const EdgeInsets.symmetric(vertical: 5.0),
           //   child: FloatingActionButton(
           //     child: Icon(Icons.update),
           //     onPressed: () =>
-          //         context.bloc<AppThemeBloc>().add(AppThemeEvent.toggle),
+          //         context.bloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
           //   ),
           // ),
         ],

@@ -26,11 +26,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AppThemeBloc(),
-      child: BlocBuilder<AppThemeBloc, ThemeMode>(
+      create: (_) => ThemeModeBloc(),
+      child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (_, themeMode) {
           return MaterialApp(
             theme: ThemeData.light(),
+            // theme: ThemeData(
+            //   brightness: Brightness.light,
+            //   primarySwatch: Colors.blueGrey,
+            // ),
             darkTheme: ThemeData.dark(),
             themeMode: themeMode,
             debugShowCheckedModeBanner: false,
@@ -48,7 +52,11 @@ class MyApp extends StatelessWidget {
             home: I18n(
               //initialLocale: const Locale('es'),
               //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
-              child: Adaptive(),
+              //child: Adaptive(),
+              child: BlocProvider(
+                create: (_) => CounterBloc(),
+                child: const HomeScreen(),
+              ),
             ),
           );
         },

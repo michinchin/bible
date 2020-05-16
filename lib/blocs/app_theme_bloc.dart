@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
-enum AppThemeEvent { toggle }
+enum ThemeModeEvent { toggle }
 
-class AppThemeBloc extends Bloc<AppThemeEvent, ThemeMode> {
+class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
   @override
   ThemeMode get initialState {
     final isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
@@ -17,9 +17,9 @@ class AppThemeBloc extends Bloc<AppThemeEvent, ThemeMode> {
   }
 
   @override
-  Stream<ThemeMode> mapEventToState(AppThemeEvent event) async* {
+  Stream<ThemeMode> mapEventToState(ThemeModeEvent event) async* {
     switch (event) {
-      case AppThemeEvent.toggle:
+      case ThemeModeEvent.toggle:
         {
           final isDarkTheme = state != ThemeMode.dark;
           await tec.Prefs.shared.setBool('isDarkTheme', isDarkTheme);
