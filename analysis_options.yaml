@@ -7,11 +7,12 @@
 analyzer:
   strong-mode:
     implicit-casts: false
-    # TODO(ron): change back to `implicit-dynamic: false` when analyzer bug is fixed
-    implicit-dynamic: true
+    implicit-dynamic: false
+
   exclude:
-    - lib/**/*.freezed.dart
-    - lib/**/*.g.dart
+    # - lib/**/*.freezed.dart
+    # - lib/**/*.g.dart
+
   errors:
     missing_return: error
     missing_required_param: error

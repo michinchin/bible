@@ -41,9 +41,9 @@ dependencies:
     hosted:
       name: tec_util
       url: http://noah.tecarta.com:8100
-    version: ^1.2.0
+    version: ^1.2.1
   tec_volumes:
-    path: libs/tec_volumes
+    path: ../shared/tec_volumes
 
 dev_dependencies:
   flutter_test:

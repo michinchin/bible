@@ -64,7 +64,7 @@ const _$ViewTypeEnumMap = {
 _$_Views _$_$_ViewsFromJson(Map<String, dynamic> json) {
   return _$_Views(
     (json['views'] as List)
-        ?.map((e) =>
+        ?.map((dynamic e) =>
             e == null ? null : ViewState.fromJson(e as Map<String, dynamic>))
         ?.toList(),
   );

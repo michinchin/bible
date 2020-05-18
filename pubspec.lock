@@ -197,6 +197,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.2+4"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.1"
   fake_async:
     dependency: transitive
     description:
@@ -613,11 +620,11 @@ packages:
       name: tec_util
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1"
   tec_volumes:
     dependency: "direct main"
     description:
-      path: "libs/tec_volumes"
+      path: "../shared/tec_volumes"
       relative: true
     source: path
     version: "0.0.1"

@@ -295,10 +295,76 @@ class ViewWidget extends StatelessWidget {
             //   ),
             // ],
           ),
-          body: const Center(child: Text('abc')),
+          body: Pager(manager: BibleRefPageManager()),
         ),
       ),
     );
+  }
+}
+
+class Pager extends StatefulWidget {
+  final PageManager manager;
+
+  const Pager({Key key, @required this.manager})
+      : assert(manager != null),
+        super(key: key);
+
+  @override
+  _PagerState createState() => _PagerState();
+}
+
+class _PagerState extends State<Pager> {
+  final _controller = PageController(initialPage: 0);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView.builder(
+      controller: _controller,
+      itemBuilder: (context, index) {
+        return widget.manager.currentPage(context, index);
+      },
+      // children: [
+      //   BibleChapterView(),
+      //   BibleChapterView(),
+      //   BibleChapterView(),
+      // ],
+    );
+  }
+}
+
+abstract class PageManager {
+  Widget currentPage(BuildContext context, int pageIndex);
+  bool get hasNextPage;
+  bool get hasPrevPage;
+}
+
+class BibleRefPageManager implements PageManager {
+  @override
+  Widget currentPage(BuildContext context, int pageIndex) {
+    return BibleChapterView(pageIndex: pageIndex);
+  }
+
+  @override
+  bool get hasNextPage => true;
+
+  @override
+  bool get hasPrevPage => true;
+}
+
+class BibleChapterView extends StatelessWidget {
+  final int pageIndex;
+
+  const BibleChapterView({Key key, this.pageIndex}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Page: $pageIndex'));
   }
 }
 
