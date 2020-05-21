@@ -230,8 +230,8 @@ class ViewWidget extends StatefulWidget {
 
 class _ViewWidgetState extends State<ViewWidget> {
   final _pageController = TecPageController(
-    initialPage: 3,
-    // viewportFraction: 0.95,
+    //initialPage: 1,
+    //viewportFraction: 0.8,
   );
 
   @override
@@ -285,37 +285,37 @@ class _ViewWidgetState extends State<ViewWidget> {
             //     icon: const Icon(Icons.border_outer),
             //     onPressed: () {
             //       bloc().add(ViewManagerEvent.setWidth(
-            //           position: viewIndex, width: null));
+            //           position: widget.viewIndex, width: null));
             //       bloc().add(ViewManagerEvent.setHeight(
-            //           position: viewIndex, height: null));
+            //           position: widget.viewIndex, height: null));
             //     },
             //   ),
             //   IconButton(
             //     icon: const Icon(Icons.format_textdirection_l_to_r),
             //     onPressed: () {
-            //       final viewState = bloc().state.views[viewIndex];
-            //       final idealWidth =
-            //           viewState.idealWidth ?? minWidthForViewType(viewState.type);
+            //       final viewState = bloc().state.views[widget.viewIndex];
+            //       final idealWidth = viewState.idealWidth ??
+            //           minWidthForViewType(viewState.type);
             //       final event = ViewManagerEvent.setWidth(
-            //           position: viewIndex, width: idealWidth + 20.0);
+            //           position: widget.viewIndex, width: idealWidth + 20.0);
             //       bloc().add(event);
             //     },
             //   ),
             //   IconButton(
             //     icon: const Icon(Icons.format_line_spacing),
             //     onPressed: () {
-            //       final viewState = bloc().state.views[viewIndex];
+            //       final viewState = bloc().state.views[widget.viewIndex];
             //       final idealHeight = viewState.idealHeight ??
             //           minHeightForViewType(viewState.type);
             //       final event = ViewManagerEvent.setHeight(
-            //           position: viewIndex, height: idealHeight + 20.0);
+            //           position: widget.viewIndex, height: idealHeight + 20.0);
             //       bloc().add(event);
             //     },
             //   ),
             // ],
           ),
           body: TecPageView(
-            pageBuilder: (context, index) => (index >= 1 && index <= 5)
+            pageBuilder: (context, index) => (index >= -2 && index <= 2)
                 ? BibleChapterView(pageIndex: index)
                 : null,
             controller: _pageController,
@@ -344,8 +344,11 @@ class BibleChapterView extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          'Page: $pageIndex',
-          style: const TextStyle(color: Colors.white),
+          'page $pageIndex',
+          style: Theme.of(context)
+              .textTheme
+              .headline5
+              .copyWith(color: Colors.white),
         ),
       ),
     );

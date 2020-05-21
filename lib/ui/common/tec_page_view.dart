@@ -7,17 +7,20 @@ import 'package:provider/provider.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 ///
-/// An conceptually infinite list of widgets that can be scrolled in either
-/// direction, page by page, until the provided [pageBuilder] returns null
-/// for a given page index (in which case scrolling to that page is disabled).
+/// Similar to the [PageView] class, except that it supports unbounded
+/// page scrolling in both directions, with no need to specify, or even
+/// know, the limit of pages in either direction.
 ///
-/// Note, scrolling will not stop in either the positive or negative direction
-/// until the [pageBuilder] returns null for a given page index. Page index
-/// values below zero are allowed, if desired.
+/// Scrolling is enabled in both directions until the provided [pageBuilder]
+/// returns `null` for a given page index, which will disable scrolling to
+/// that page index. Page index values just represent the offset from page
+/// zero, and can be positive or negative values.
 ///
-/// A [TecPageController] can be used to control which page is visible in the
-/// view. And, the [TecPageController.viewportFraction], to control the size
-/// of each page as a fraction of the viewport size.
+/// A [TecPageController] can be used to query and control which page is
+/// visible via the `page`, `animateToPage`, `jumpToPage`, `nextPage`, and
+/// `previousPage` functions. And the [TecPageController.viewportFraction]
+/// property can be used to control the size of each page as a fraction of
+/// the viewport size.
 ///
 class TecPageView extends StatefulWidget {
   ///
@@ -27,8 +30,7 @@ class TecPageView extends StatefulWidget {
   /// when necessary to build each page when it is scrolled into view. If
   /// a page cannot be built for the given index (i.e. the page is out of
   /// range for the content), the [pageBuilder] should return null, which
-  /// lets the associated [TecPageView] know that it should disable scrolling
-  /// to that page.
+  /// disables scrolling to that page.
   ///
   const TecPageView({
     Key key,
@@ -144,8 +146,9 @@ class _TecPageViewState extends State<TecPageView> {
       _physics ??= _TecPageViewScrollPhysics(pageInfo: _TecPageInfo());
       _physics.pageInfo.min = _initialPage;
       _physics.pageInfo.max = _initialPage;
-      _physics.pageInfo.viewportFraction = _controller.viewportFraction;
     }
+
+    _physics.pageInfo.viewportFraction = _controller.viewportFraction;
   }
 
   @override
@@ -170,7 +173,7 @@ class _TecPageViewState extends State<TecPageView> {
         int _fauxPageFromActualPage(int actualPage) =>
             fauxInitialPage + (actualPage - _controller.initialPage);
 
-        tec.dmPrint('building PageView with range ($minOffset, $maxOffset)');
+        // tec.dmPrint('building PageView with range ($minOffset, $maxOffset)');
         return PageView.builder(
           scrollDirection: widget.scrollDirection ?? Axis.horizontal,
           reverse: widget.reverse ?? false,
@@ -235,6 +238,9 @@ class TecPageController implements PageController {
     _pageController.dispose();
   }
 
+  // This class's primary purpose is to translate between 'faux' (or external) 
+  // page indices and actual (or internal) page indices.
+
   final int _fauxInitialPage;
   final int _maxPossiblePages;
   final PageController _pageController;
@@ -282,14 +288,29 @@ class TecPageController implements PageController {
     return _pageController.previousPage(duration: duration, curve: curve);
   }
 
+  //
+  // Inherited from ScrollController:
+  //
+  // Note, no attempt is made to convert between faux and actual scroll positions.
+  //
+
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics,
-      ScrollContext context, ScrollPosition oldPosition) {
-    return _pageController.createScrollPosition(physics, context, oldPosition);
-  }
+  double get initialScrollOffset => _pageController.initialScrollOffset;
+
+  @override
+  bool get keepScrollOffset => _pageController.keepScrollOffset;
 
   @override
   String get debugLabel => _pageController.debugLabel;
+
+  @override
+  Iterable<ScrollPosition> get positions => _pageController.positions;
+
+  @override
+  bool get hasClients => _pageController.hasClients;
+
+  @override
+  ScrollPosition get position => _pageController.position;
 
   @override
   double get offset => _pageController.offset;
@@ -304,27 +325,6 @@ class TecPageController implements PageController {
     _pageController.jumpTo(value);
   }
 
-  //
-  // Inherited from ScrollController:
-  //
-  // Note, no attempt is made to convert between faux and actual scroll positions.
-  //
-
-  @override
-  double get initialScrollOffset => _pageController.initialScrollOffset;
-
-  @override
-  bool get keepScrollOffset => _pageController.keepScrollOffset;
-
-  @override
-  Iterable<ScrollPosition> get positions => _pageController.positions;
-
-  @override
-  bool get hasClients => _pageController.hasClients;
-
-  @override
-  ScrollPosition get position => _pageController.position;
-
   @override
   void attach(ScrollPosition position) {
     return _pageController.attach(position);
@@ -333,6 +333,12 @@ class TecPageController implements PageController {
   @override
   void detach(ScrollPosition position) {
     _pageController.detach(position);
+  }
+
+  @override
+  ScrollPosition createScrollPosition(ScrollPhysics physics,
+      ScrollContext context, ScrollPosition oldPosition) {
+    return _pageController.createScrollPosition(physics, context, oldPosition);
   }
 
   @override
@@ -391,11 +397,11 @@ class _TecPageBuilder extends ChangeNotifier {
       // Do the min or max page offsets need to be updated?
       if (minOffset > adjustedPageOffset) {
         minOffset = adjustedPageOffset;
-        tec.dmPrint('_TecPageBuilder updated minOffset to $pageOffset');
+        // tec.dmPrint('_TecPageBuilder updated minOffset to $pageOffset');
         _notify();
       } else if (maxOffset < adjustedPageOffset) {
         maxOffset = adjustedPageOffset;
-        tec.dmPrint('_TecPageBuilder updated maxOffset to $pageOffset');
+        // tec.dmPrint('_TecPageBuilder updated maxOffset to $pageOffset');
         _notify();
       }
 
@@ -415,7 +421,8 @@ class _TecPageBuilder extends ChangeNotifier {
 }
 
 ///
-/// _TecPageInfo
+/// Minimum and maximum page indices, and size of each page as a fraction of
+/// the viewport.
 ///
 class _TecPageInfo {
   int min = 0, max = 0;
@@ -423,8 +430,10 @@ class _TecPageInfo {
 }
 
 ///
-/// _TecPageViewScrollPhysics -- limits scrolling past pages in the
-/// given [pageInfo].
+/// Scroll physics used by a [TecPageView].
+///
+/// These physics cause the page view to snap to page boundaries and limit
+/// scrolling past the min and max pages specified in `pageInfo`.
 ///
 @immutable
 class _TecPageViewScrollPhysics extends ScrollPhysics {
