@@ -7,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
+import '../ui/common/tec_page_view.dart';
+
 part 'view_manager_bloc.freezed.dart';
 part 'view_manager_bloc.g.dart';
 
@@ -189,10 +191,10 @@ class _VMViewStack extends StatefulWidget {
       : super(key: key);
 
   @override
-  __VMViewStackState createState() => __VMViewStackState();
+  _VMViewStackState createState() => _VMViewStackState();
 }
 
-class __VMViewStackState extends State<_VMViewStack> {
+class _VMViewStackState extends State<_VMViewStack> {
   @override
   void didUpdateWidget(_VMViewStack oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -216,16 +218,31 @@ class __VMViewStackState extends State<_VMViewStack> {
 ///
 /// ViewWidget
 ///
-class ViewWidget extends StatelessWidget {
+class ViewWidget extends StatefulWidget {
   final ViewState viewState;
   final int viewIndex;
 
   const ViewWidget({Key key, this.viewState, this.viewIndex}) : super(key: key);
 
   @override
+  _ViewWidgetState createState() => _ViewWidgetState();
+}
+
+class _ViewWidgetState extends State<ViewWidget> {
+  final _pageController = TecPageController(
+    initialPage: 3,
+    // viewportFraction: 0.95,
+  );
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     ViewManagerBloc bloc() => context.bloc<ViewManagerBloc>();
-    final side = BorderSide(width: 1, color: Theme.of(context).primaryColor);
 
     final theme = Theme.of(context);
     //final barColor = theme.canvasColor;
@@ -242,22 +259,24 @@ class ViewWidget extends StatelessWidget {
       textTheme: theme.copyOfAppBarTextThemeWithColor(barTextColor),
     );
 
+    //final side = BorderSide(width: 1, color: Theme.of(context).primaryColor);
+
     return Theme(
       data: theme.copyWith(appBarTheme: newAppBarTheme),
       child: Container(
-        decoration: BoxDecoration(
-          border: Border(right: side, bottom: side),
-        ),
+        // decoration: BoxDecoration(
+        //   border: Border(right: side, bottom: side),
+        // ),
         child: Scaffold(
           appBar: AppBar(
-            title: Text('${viewState.data}'),
+            title: Text('${widget.viewState.data}'),
             leading: bloc().state.views.length <= 1
                 ? null
                 : IconButton(
                     icon: const Icon(Icons.close),
                     tooltip: 'Close',
                     onPressed: () {
-                      final event = ViewManagerEvent.remove(viewIndex);
+                      final event = ViewManagerEvent.remove(widget.viewIndex);
                       bloc().add(event);
                     },
                   ),
@@ -295,76 +314,41 @@ class ViewWidget extends StatelessWidget {
             //   ),
             // ],
           ),
-          body: Pager(manager: BibleRefPageManager()),
+          body: TecPageView(
+            pageBuilder: (context, index) => (index >= 1 && index <= 5)
+                ? BibleChapterView(pageIndex: index)
+                : null,
+            controller: _pageController,
+            onPageChanged: (page) =>
+                tec.dmPrint('ViewWidget onPageChanged($page)'),
+          ),
         ),
       ),
     );
   }
 }
 
-class Pager extends StatefulWidget {
-  final PageManager manager;
-
-  const Pager({Key key, @required this.manager})
-      : assert(manager != null),
-        super(key: key);
-
-  @override
-  _PagerState createState() => _PagerState();
-}
-
-class _PagerState extends State<Pager> {
-  final _controller = PageController(initialPage: 0);
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PageView.builder(
-      controller: _controller,
-      itemBuilder: (context, index) {
-        return widget.manager.currentPage(context, index);
-      },
-      // children: [
-      //   BibleChapterView(),
-      //   BibleChapterView(),
-      //   BibleChapterView(),
-      // ],
-    );
-  }
-}
-
-abstract class PageManager {
-  Widget currentPage(BuildContext context, int pageIndex);
-  bool get hasNextPage;
-  bool get hasPrevPage;
-}
-
-class BibleRefPageManager implements PageManager {
-  @override
-  Widget currentPage(BuildContext context, int pageIndex) {
-    return BibleChapterView(pageIndex: pageIndex);
-  }
-
-  @override
-  bool get hasNextPage => true;
-
-  @override
-  bool get hasPrevPage => true;
-}
-
 class BibleChapterView extends StatelessWidget {
   final int pageIndex;
 
-  const BibleChapterView({Key key, this.pageIndex}) : super(key: key);
+  const BibleChapterView({Key key, @required this.pageIndex}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('Page: $pageIndex'));
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      decoration: const BoxDecoration(
+        color: Colors.deepOrangeAccent,
+        borderRadius: BorderRadius.all(Radius.circular(36)),
+        //border: Border.all(),
+      ),
+      child: Center(
+        child: Text(
+          'Page: $pageIndex',
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
+    );
   }
 }
 

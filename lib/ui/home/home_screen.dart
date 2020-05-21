@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,16 +31,19 @@ class _HomeScreen extends StatelessWidget {
       //   title: Text('Home'.i18n),
       // ),
       body: Container(
+        //margin: kIsWeb ? const EdgeInsets.symmetric(horizontal: 4) : null,
         color: Theme.of(context).primaryColor,
         child: SafeArea(
-          left: true,
-          top: true,
-          right: true,
+          left: false,
+          right: false,
           bottom: false,
           child: Container(
             color: Theme.of(context).canvasColor,
-            child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-              builder: (_, state) => ViewManagerWidget(state: state),
+            child: SafeArea(
+              bottom: false,
+              child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+                builder: (_, state) => ViewManagerWidget(state: state),
+              ),
             ),
           ),
         ),

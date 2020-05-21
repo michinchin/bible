@@ -35,6 +35,8 @@ dependencies:
   flutter_bloc: ^4.0.0
   freezed_annotation: ^0.7.1
   json_annotation: ^3.0.1
+  provider: ^4.1.2
+  tuple: ^1.0.3
 
   # Internal dependencies
   tec_util:
