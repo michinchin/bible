@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager_bloc.dart';
-import '../bible/chapter_view.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key key}) : super(key: key);
@@ -50,12 +50,43 @@ class _HomeScreen extends StatelessWidget {
         children: <Widget>[
           FloatingActionButton(
             child: const Icon(Icons.add),
-            onPressed: () => context.bloc<ViewManagerBloc>().add(
-                ViewManagerEvent.add(
-                    type: bibleChapterTypeName, data: '${++_viewId}')),
+            onPressed: () {
+              tecShowAlertDialog<bool>(
+                context: context,
+                barrierDismissible: false,
+                useRootNavigator: false,
+                title: const TecText('Open View of Type?'),
+                //content: const TecText('What type?'),
+                actions: <Widget>[
+                  ..._foo(context),
+                  TecDialogButton(
+                    isDefaultAction: true,
+                    child: const Text('CANCEL'),
+                    onPressed: () {
+                      Navigator.of(context).maybePop();
+                    },
+                  ),
+                ],
+              );
+            },
+            // onPressed: () => context.bloc<ViewManagerBloc>().add(
+            //     ViewManagerEvent.add(type: bibleChapterTypeName, data: '${++_viewId}')),
           ),
         ],
       ),
     );
   }
+}
+
+Iterable<Widget> _foo(BuildContext context) {
+  final vm = ViewManager.shared;
+  return vm.types.map<Widget>((type) => TecDialogButton(
+        child: Text(vm.titleForType(type)),
+        onPressed: () {
+          context
+              .bloc<ViewManagerBloc>()
+              .add(ViewManagerEvent.add(type: type, data: '${++_viewId}'));
+          Navigator.of(context).maybePop(true);
+        },
+      ));
 }

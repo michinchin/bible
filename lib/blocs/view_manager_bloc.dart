@@ -19,7 +19,7 @@ const String _key = 'viewManagerState';
 ///
 /// Use the [register] function to register a view type. For example:
 ///
-/// ```Dart
+/// ```dart
 /// ViewManager.shared.register('MyType', builder: (context, state) => Container());
 /// ```
 ///
@@ -28,16 +28,28 @@ class ViewManager {
 
   final _types = <String, _ViewTypeAPI>{};
 
+  ///
+  /// Registers a new view type. For example:
+  ///
+  /// ```dart
+  /// ViewManager.shared.register('MyType', builder: (context, state) => Container());
+  /// ```
+  ///
   void register(
     String key, {
+    @required String title,
     @required BuilderWithViewState builder,
     ViewSizeFunc minWidth,
     ViewSizeFunc minHeight,
   }) {
     assert(tec.isNotNullOrEmpty(key) && builder != null);
     assert(!_types.containsKey(key));
-    _types[key] = _ViewTypeAPI(builder, minWidth, minHeight);
+    _types[key] = _ViewTypeAPI(title, builder, minWidth, minHeight);
   }
+
+  List<String> get types => _types.keys.toList();
+
+  String titleForType(String type) => _types[type]?.title;
 
   Widget _buildView(BuildContext context, ViewState state) =>
       (_types[state.type]?.builder ?? _defaultBuilder)(context, state);
@@ -84,10 +96,14 @@ typedef ViewSizeFunc = double Function(BoxConstraints constraints);
 /// The builder and size functions for a view type.
 ///
 class _ViewTypeAPI {
+  final String title;
   final BuilderWithViewState builder;
   final ViewSizeFunc minWidth;
   final ViewSizeFunc minHeight;
-  _ViewTypeAPI(this.builder, this.minWidth, this.minHeight);
+
+  const _ViewTypeAPI(this.title, this.builder, this.minWidth, this.minHeight);
+
+  //static const _ViewTypeAPI none = _ViewTypeAPI(null, null, null, null);
 }
 
 ///

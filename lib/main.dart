@@ -4,10 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
 import 'blocs/app_theme_bloc.dart';
 import 'blocs/view_manager_bloc.dart';
 import 'ui/bible/chapter_view.dart';
+import 'ui/common/test_view.dart';
 import 'ui/home/home_screen.dart';
 
 const _appTitle = 'Tecarta Bible';
@@ -30,13 +32,9 @@ Future<void> main() async {
 ///
 void _registerViewTypes() {
   ViewManager.shared
-      .register('myType', builder: (context, state) => Container());
-
-  ViewManager.shared.register(
-    bibleChapterTypeName,
-    builder: (context, state) =>
-        PageableView(state: state, pageBuilder: bibleChapterPageBuilder),
-  );
+    ..register(testViewTypeName, title: 'Test', builder: testViewBuilder)
+    ..register(bibleChapterTypeName,
+        title: 'Bible', builder: bibleChapterViewBuilder);
 }
 
 ///
@@ -49,27 +47,31 @@ class App extends StatelessWidget {
       create: (_) => ThemeModeBloc(),
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (_, themeMode) {
-          return MaterialApp(
-            theme: ThemeData.light(),
-            darkTheme: ThemeData.dark(),
-            themeMode: themeMode,
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en', 'US'),
-              Locale('es'), // Spanish
-              Locale('ar'), // Arabic
-            ],
-            title: _appTitle,
-            home: I18n(
-              //initialLocale: const Locale('es'),
-              //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
-              //child: Adaptive(),
-              child: const HomeScreen(),
+          return tec.BlocProvider<TecStyleBloc>(
+            bloc: TecStyleBloc(
+                <String, dynamic>{'dialogStyle': TecMetaStyle.material}),
+            child: MaterialApp(
+              theme: ThemeData.light(),
+              darkTheme: ThemeData.dark(),
+              themeMode: themeMode,
+              debugShowCheckedModeBanner: false,
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('en', 'US'),
+                Locale('es'), // Spanish
+                Locale('ar'), // Arabic
+              ],
+              title: _appTitle,
+              home: I18n(
+                //initialLocale: const Locale('es'),
+                //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
+                //child: Adaptive(),
+                child: const HomeScreen(),
+              ),
             ),
           );
         },

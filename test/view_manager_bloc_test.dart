@@ -12,8 +12,8 @@ void main() {
     ViewManagerBloc bloc; // ignore: close_sinks
 
     setUpAll(() {
-      ViewManager.shared
-          .register('test', builder: (context, state) => Container());
+      ViewManager.shared.register('test',
+          title: 'test', builder: (context, state) => Container());
     });
 
     setUp(() {

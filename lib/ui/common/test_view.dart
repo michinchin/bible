@@ -2,24 +2,26 @@ import 'package:flutter/material.dart';
 
 import '../../blocs/view_manager_bloc.dart';
 
-const bibleChapterTypeName = 'BibleChapter';
+const testViewTypeName = 'TestView';
 
-Widget bibleChapterViewBuilder(BuildContext context, ViewState state) =>
+Widget testViewBuilder(BuildContext context, ViewState viewState) =>
+    TestView(viewState: viewState);
+
+Widget testViewPageableBuilder(BuildContext context, ViewState viewState) =>
     PageableView(
-      state: state,
-      pageBuilder: (context, state, index) {
+      state: viewState,
+      pageBuilder: (context, viewState, index) {
         return (index >= -2 && index <= 2)
-            ? BibleChapterView(state: state, pageIndex: index)
+            ? TestView(viewState: viewState, pageIndex: index)
             : null;
       },
     );
 
-class BibleChapterView extends StatelessWidget {
-  final ViewState state;
+class TestView extends StatelessWidget {
+  final ViewState viewState;
   final int pageIndex;
 
-  const BibleChapterView(
-      {Key key, @required this.state, @required this.pageIndex})
+  const TestView({Key key, @required this.viewState, this.pageIndex})
       : super(key: key);
 
   @override
@@ -27,13 +29,13 @@ class BibleChapterView extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.green[300],
+        color: Colors.deepOrange[400],
         borderRadius: const BorderRadius.all(Radius.circular(36)),
         //border: Border.all(),
       ),
       child: Center(
         child: Text(
-          'Bible View ${state.data}, Page $pageIndex',
+          pageIndex == null ? 'Test View ${viewState.data}' : 'page $pageIndex',
           style: Theme.of(context)
               .textTheme
               .headline5
