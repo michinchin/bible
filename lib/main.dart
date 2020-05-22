@@ -6,23 +6,43 @@ import 'package:i18n_extension/i18n_widget.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 import 'blocs/app_theme_bloc.dart';
-import 'blocs/counter_bloc.dart';
-import 'translations.dart';
-import 'ui/common/adaptive_scaffold.dart';
-import 'ui/explore/explore_screen.dart';
+import 'blocs/view_manager_bloc.dart';
+import 'ui/bible/chapter_view.dart';
 import 'ui/home/home_screen.dart';
-import 'ui/notes/notes_screen.dart';
-import 'ui/study/study_screen.dart';
 
 const _appTitle = 'Tecarta Bible';
 
+///
+/// main
+///
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await tec.Prefs.shared.load();
-  runApp(MyApp());
+
+  _registerViewTypes();
+
+  runApp(App());
 }
 
-class MyApp extends StatelessWidget {
+///
+/// Registers the view types used in the app.
+///
+void _registerViewTypes() {
+  ViewManager.shared
+      .register('myType', builder: (context, state) => Container());
+
+  ViewManager.shared.register(
+    bibleChapterTypeName,
+    builder: (context, state) =>
+        PageableView(state: state, pageBuilder: bibleChapterPageBuilder),
+  );
+}
+
+///
+/// App
+///
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -31,10 +51,6 @@ class MyApp extends StatelessWidget {
         builder: (_, themeMode) {
           return MaterialApp(
             theme: ThemeData.light(),
-            // theme: ThemeData(
-            //   brightness: Brightness.light,
-            //   primarySwatch: Colors.blueGrey,
-            // ),
             darkTheme: ThemeData.dark(),
             themeMode: themeMode,
             debugShowCheckedModeBanner: false,
@@ -53,10 +69,7 @@ class MyApp extends StatelessWidget {
               //initialLocale: const Locale('es'),
               //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
               //child: Adaptive(),
-              child: BlocProvider(
-                create: (_) => CounterBloc(),
-                child: const HomeScreen(),
-              ),
+              child: const HomeScreen(),
             ),
           );
         },
@@ -65,6 +78,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/*
 class Adaptive extends StatefulWidget {
   @override
   _AdaptiveState createState() => _AdaptiveState();
@@ -107,4 +121,4 @@ class _AdaptiveState extends State<Adaptive> {
       ),
     );
   }
-}
+} */

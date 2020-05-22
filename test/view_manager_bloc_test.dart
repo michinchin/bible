@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bloc_test/bloc_test.dart';
@@ -9,6 +10,11 @@ void main() {
   group('ViewManagerBloc', () {
     tec.KeyValueStore kvStore;
     ViewManagerBloc bloc; // ignore: close_sinks
+
+    setUpAll(() {
+      ViewManager.shared
+          .register('test', builder: (context, state) => Container());
+    });
 
     setUp(() {
       kvStore = tec.MemoryKVStore();
@@ -49,12 +55,11 @@ void main() {
 //
 
 ViewManagerEvent add(String data) =>
-    ViewManagerEvent.add(type: ViewType.values.first, data: data);
+    ViewManagerEvent.add(type: 'test', data: data);
 
 ViewManagerEvent move(int from, int to) =>
     ViewManagerEvent.move(fromPosition: from, toPosition: to);
 
 ViewManagerEvent remove(int position) => ViewManagerEvent.remove(position);
 
-ViewState view(String data) =>
-    ViewState(type: ViewType.values.first, data: data);
+ViewState view(String data) => ViewState(type: 'test', data: data);

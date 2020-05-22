@@ -12,7 +12,7 @@ T _$identity<T>(T value) => value;
 class _$ViewManagerEventTearOff {
   const _$ViewManagerEventTearOff();
 
-  _Add add({@required ViewType type, int position, String data}) {
+  _Add add({@required String type, int position, String data}) {
     return _Add(
       type: type,
       position: position,
@@ -54,7 +54,7 @@ const $ViewManagerEvent = _$ViewManagerEventTearOff();
 mixin _$ViewManagerEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(ViewType type, int position, String data),
+    @required Result add(String type, int position, String data),
     @required Result remove(int position),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
@@ -62,7 +62,7 @@ mixin _$ViewManagerEvent {
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(ViewType type, int position, String data),
+    Result add(String type, int position, String data),
     Result remove(int position),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
@@ -106,7 +106,7 @@ class _$ViewManagerEventCopyWithImpl<$Res>
 abstract class _$AddCopyWith<$Res> {
   factory _$AddCopyWith(_Add value, $Res Function(_Add) then) =
       __$AddCopyWithImpl<$Res>;
-  $Res call({ViewType type, int position, String data});
+  $Res call({String type, int position, String data});
 }
 
 class __$AddCopyWithImpl<$Res> extends _$ViewManagerEventCopyWithImpl<$Res>
@@ -124,7 +124,7 @@ class __$AddCopyWithImpl<$Res> extends _$ViewManagerEventCopyWithImpl<$Res>
     Object data = freezed,
   }) {
     return _then(_Add(
-      type: type == freezed ? _value.type : type as ViewType,
+      type: type == freezed ? _value.type : type as String,
       position: position == freezed ? _value.position : position as int,
       data: data == freezed ? _value.data : data as String,
     ));
@@ -136,7 +136,7 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
       : assert(type != null);
 
   @override
-  final ViewType type;
+  final String type;
   @override
   final int position;
   @override
@@ -184,7 +184,7 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(ViewType type, int position, String data),
+    @required Result add(String type, int position, String data),
     @required Result remove(int position),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
@@ -201,7 +201,7 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(ViewType type, int position, String data),
+    Result add(String type, int position, String data),
     Result remove(int position),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
@@ -251,10 +251,10 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
 }
 
 abstract class _Add implements ViewManagerEvent {
-  const factory _Add({@required ViewType type, int position, String data}) =
+  const factory _Add({@required String type, int position, String data}) =
       _$_Add;
 
-  ViewType get type;
+  String get type;
   int get position;
   String get data;
   _$AddCopyWith<_Add> get copyWith;
@@ -323,7 +323,7 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(ViewType type, int position, String data),
+    @required Result add(String type, int position, String data),
     @required Result remove(int position),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
@@ -340,7 +340,7 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(ViewType type, int position, String data),
+    Result add(String type, int position, String data),
     Result remove(int position),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
@@ -470,7 +470,7 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(ViewType type, int position, String data),
+    @required Result add(String type, int position, String data),
     @required Result remove(int position),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
@@ -487,7 +487,7 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(ViewType type, int position, String data),
+    Result add(String type, int position, String data),
     Result remove(int position),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
@@ -616,7 +616,7 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(ViewType type, int position, String data),
+    @required Result add(String type, int position, String data),
     @required Result remove(int position),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
@@ -633,7 +633,7 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(ViewType type, int position, String data),
+    Result add(String type, int position, String data),
     Result remove(int position),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
@@ -764,7 +764,7 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(ViewType type, int position, String data),
+    @required Result add(String type, int position, String data),
     @required Result remove(int position),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
@@ -781,7 +781,7 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(ViewType type, int position, String data),
+    Result add(String type, int position, String data),
     Result remove(int position),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
@@ -846,7 +846,7 @@ class _$ViewStateTearOff {
   const _$ViewStateTearOff();
 
   _ViewState call(
-      {ViewType type,
+      {String type,
       double preferredWidth,
       double preferredHeight,
       String data}) {
@@ -863,7 +863,7 @@ class _$ViewStateTearOff {
 const $ViewState = _$ViewStateTearOff();
 
 mixin _$ViewState {
-  ViewType get type;
+  String get type;
   double get preferredWidth;
   double get preferredHeight;
   String get data;
@@ -876,7 +876,7 @@ abstract class $ViewStateCopyWith<$Res> {
   factory $ViewStateCopyWith(ViewState value, $Res Function(ViewState) then) =
       _$ViewStateCopyWithImpl<$Res>;
   $Res call(
-      {ViewType type,
+      {String type,
       double preferredWidth,
       double preferredHeight,
       String data});
@@ -897,7 +897,7 @@ class _$ViewStateCopyWithImpl<$Res> implements $ViewStateCopyWith<$Res> {
     Object data = freezed,
   }) {
     return _then(_value.copyWith(
-      type: type == freezed ? _value.type : type as ViewType,
+      type: type == freezed ? _value.type : type as String,
       preferredWidth: preferredWidth == freezed
           ? _value.preferredWidth
           : preferredWidth as double,
@@ -915,7 +915,7 @@ abstract class _$ViewStateCopyWith<$Res> implements $ViewStateCopyWith<$Res> {
       __$ViewStateCopyWithImpl<$Res>;
   @override
   $Res call(
-      {ViewType type,
+      {String type,
       double preferredWidth,
       double preferredHeight,
       String data});
@@ -937,7 +937,7 @@ class __$ViewStateCopyWithImpl<$Res> extends _$ViewStateCopyWithImpl<$Res>
     Object data = freezed,
   }) {
     return _then(_ViewState(
-      type: type == freezed ? _value.type : type as ViewType,
+      type: type == freezed ? _value.type : type as String,
       preferredWidth: preferredWidth == freezed
           ? _value.preferredWidth
           : preferredWidth as double,
@@ -958,7 +958,7 @@ class _$_ViewState with DiagnosticableTreeMixin implements _ViewState {
       _$_$_ViewStateFromJson(json);
 
   @override
-  final ViewType type;
+  final String type;
   @override
   final double preferredWidth;
   @override
@@ -1018,7 +1018,7 @@ class _$_ViewState with DiagnosticableTreeMixin implements _ViewState {
 
 abstract class _ViewState implements ViewState {
   factory _ViewState(
-      {ViewType type,
+      {String type,
       double preferredWidth,
       double preferredHeight,
       String data}) = _$_ViewState;
@@ -1027,7 +1027,7 @@ abstract class _ViewState implements ViewState {
       _$_ViewState.fromJson;
 
   @override
-  ViewType get type;
+  String get type;
   @override
   double get preferredWidth;
   @override

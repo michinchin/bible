@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/view_manager_bloc.dart';
-//import '../../translations.dart';
+import '../bible/chapter_view.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key key}) : super(key: key);
@@ -27,11 +27,7 @@ class _HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('Home'.i18n),
-      // ),
       body: Container(
-        //margin: kIsWeb ? const EdgeInsets.symmetric(horizontal: 4) : null,
         color: Theme.of(context).primaryColor,
         child: SafeArea(
           left: false,
@@ -56,16 +52,8 @@ class _HomeScreen extends StatelessWidget {
             child: const Icon(Icons.add),
             onPressed: () => context.bloc<ViewManagerBloc>().add(
                 ViewManagerEvent.add(
-                    type: ViewType.bible, data: '${++_viewId}')),
+                    type: bibleChapterTypeName, data: '${++_viewId}')),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(vertical: 5.0),
-          //   child: FloatingActionButton(
-          //     child: Icon(Icons.update),
-          //     onPressed: () =>
-          //         context.bloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
-          //   ),
-          // ),
         ],
       ),
     );
