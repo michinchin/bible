@@ -32,9 +32,8 @@ Future<void> main() async {
 ///
 void _registerViewTypes() {
   ViewManager.shared
-    ..register(testViewTypeName, title: 'Test', builder: testViewBuilder)
-    ..register(bibleChapterTypeName,
-        title: 'Bible', builder: bibleChapterViewBuilder);
+    ..register(testViewType, title: 'Test', builder: testViewBuilder)
+    ..register(bibleChapterType, title: 'Bible', builder: bibleChapterViewBuilder);
 }
 
 ///
@@ -48,8 +47,7 @@ class App extends StatelessWidget {
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (_, themeMode) {
           return tec.BlocProvider<TecStyleBloc>(
-            bloc: TecStyleBloc(
-                <String, dynamic>{'dialogStyle': TecMetaStyle.material}),
+            bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
             child: MaterialApp(
               theme: ThemeData.light(),
               darkTheme: ThemeData.dark(),

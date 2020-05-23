@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../blocs/view_manager_bloc.dart';
 
-const bibleChapterTypeName = 'BibleChapter';
+const bibleChapterType = 'BibleChapter';
 
 Widget bibleChapterViewBuilder(BuildContext context, ViewState state) =>
     PageableView(

@@ -62,14 +62,13 @@ class ViewManager {
 
   Widget _defaultBuilder(BuildContext context, ViewState state) => Container();
 
-  double _defaultMinWidth(BoxConstraints constraints) => math.max(_minSize,
-      ((constraints ?? _defaultConstraints).maxWidth / 3).roundToDouble());
+  double _defaultMinWidth(BoxConstraints constraints) =>
+      math.max(_minSize, ((constraints ?? _defaultConstraints).maxWidth / 3).roundToDouble());
 
-  double _defaultMinHeight(BoxConstraints constraints) => math.max(_minSize,
-      ((constraints ?? _defaultConstraints).maxHeight / 3).roundToDouble());
+  double _defaultMinHeight(BoxConstraints constraints) =>
+      math.max(_minSize, ((constraints ?? _defaultConstraints).maxHeight / 3).roundToDouble());
 
-  static const BoxConstraints _defaultConstraints =
-      BoxConstraints(maxWidth: 320, maxHeight: 480);
+  static const BoxConstraints _defaultConstraints = BoxConstraints(maxWidth: 320, maxHeight: 480);
 }
 
 const _iPhoneSEHeight = 568.0;
@@ -78,8 +77,7 @@ const _minSize = (_iPhoneSEHeight - 20.0) / 2;
 ///
 /// Signature for a function that creates a widget for a given view state.
 ///
-typedef BuilderWithViewState = Widget Function(
-    BuildContext context, ViewState state);
+typedef BuilderWithViewState = Widget Function(BuildContext context, ViewState state);
 
 ///
 /// Signature for a function that creates a widget for a given view state and index.
@@ -201,15 +199,11 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
 ///
 @freezed
 abstract class ViewManagerEvent with _$ViewManagerEvent {
-  const factory ViewManagerEvent.add(
-      {@required String type, int position, String data}) = _Add;
+  const factory ViewManagerEvent.add({@required String type, int position, String data}) = _Add;
   const factory ViewManagerEvent.remove(int position) = _Remove;
-  const factory ViewManagerEvent.move({int fromPosition, int toPosition}) =
-      _Move;
-  const factory ViewManagerEvent.setWidth({int position, double width}) =
-      _SetWidth;
-  const factory ViewManagerEvent.setHeight({int position, double height}) =
-      _SetHeight;
+  const factory ViewManagerEvent.move({int fromPosition, int toPosition}) = _Move;
+  const factory ViewManagerEvent.setWidth({int position, double width}) = _SetWidth;
+  const factory ViewManagerEvent.setHeight({int position, double height}) = _SetHeight;
 }
 
 ///
@@ -225,8 +219,7 @@ abstract class ViewState with _$ViewState {
   }) = _ViewState;
 
   /// fromJson
-  factory ViewState.fromJson(Map<String, dynamic> json) =>
-      _$ViewStateFromJson(json);
+  factory ViewState.fromJson(Map<String, dynamic> json) => _$ViewStateFromJson(json);
 }
 
 ///
@@ -237,8 +230,7 @@ abstract class ViewManagerState with _$ViewManagerState {
   factory ViewManagerState(List<ViewState> views) = _Views;
 
   /// fromJson
-  factory ViewManagerState.fromJson(Map<String, dynamic> json) =>
-      _$ViewManagerStateFromJson(json);
+  factory ViewManagerState.fromJson(Map<String, dynamic> json) => _$ViewManagerStateFromJson(json);
 }
 
 ///
@@ -271,8 +263,7 @@ class _VMViewStack extends StatefulWidget {
   final BoxConstraints constraints;
   final ViewManagerState vmState;
 
-  const _VMViewStack({Key key, this.constraints, this.vmState})
-      : super(key: key);
+  const _VMViewStack({Key key, this.constraints, this.vmState}) : super(key: key);
 
   @override
   _VMViewStackState createState() => _VMViewStackState();
@@ -306,8 +297,7 @@ class _IndividualViewScaffold extends StatefulWidget {
   final ViewState viewState;
   final int viewIndex;
 
-  const _IndividualViewScaffold({Key key, this.viewState, this.viewIndex})
-      : super(key: key);
+  const _IndividualViewScaffold({Key key, this.viewState, this.viewIndex}) : super(key: key);
 
   @override
   _IndividualViewScaffoldState createState() => _IndividualViewScaffoldState();
@@ -321,10 +311,9 @@ class _IndividualViewScaffoldState extends State<_IndividualViewScaffold> {
     final theme = Theme.of(context);
     //final barColor = theme.canvasColor;
     final barColor = theme.appBarTheme.color ?? theme.primaryColor;
-    final barTextColor =
-        ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
-            ? Colors.grey[700]
-            : Colors.white;
+    final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
+        ? Colors.grey[700]
+        : Colors.white;
     final newAppBarTheme = theme.appBarTheme.copyWith(
       elevation: 0,
       color: barColor,
@@ -359,22 +348,18 @@ class _IndividualViewScaffoldState extends State<_IndividualViewScaffold> {
             IconButton(
               icon: const Icon(Icons.border_outer),
               onPressed: () {
-                bloc().add(ViewManagerEvent.setWidth(
-                    position: widget.viewIndex, width: null));
-                bloc().add(ViewManagerEvent.setHeight(
-                    position: widget.viewIndex, height: null));
+                bloc().add(ViewManagerEvent.setWidth(position: widget.viewIndex, width: null));
+                bloc().add(ViewManagerEvent.setHeight(position: widget.viewIndex, height: null));
               },
             ),
             IconButton(
               icon: const Icon(Icons.format_textdirection_l_to_r),
               onPressed: () {
                 final viewState = bloc().state.views[widget.viewIndex];
-                final idealWidth =
-                    viewState.idealWidth(ViewManager._defaultConstraints) ??
-                        _minWidthForType(
-                            viewState.type, ViewManager._defaultConstraints);
-                final event = ViewManagerEvent.setWidth(
-                    position: widget.viewIndex, width: idealWidth + 20.0);
+                final idealWidth = viewState.idealWidth(ViewManager._defaultConstraints) ??
+                    _minWidthForType(viewState.type, ViewManager._defaultConstraints);
+                final event =
+                    ViewManagerEvent.setWidth(position: widget.viewIndex, width: idealWidth + 20.0);
                 bloc().add(event);
               },
             ),
@@ -382,10 +367,8 @@ class _IndividualViewScaffoldState extends State<_IndividualViewScaffold> {
               icon: const Icon(Icons.format_line_spacing),
               onPressed: () {
                 final viewState = bloc().state.views[widget.viewIndex];
-                final idealHeight =
-                    viewState.idealHeight(ViewManager._defaultConstraints) ??
-                        _minHeightForType(
-                            viewState.type, ViewManager._defaultConstraints);
+                final idealHeight = viewState.idealHeight(ViewManager._defaultConstraints) ??
+                    _minHeightForType(viewState.type, ViewManager._defaultConstraints);
                 final event = ViewManagerEvent.setHeight(
                     position: widget.viewIndex, height: idealHeight + 20.0);
                 bloc().add(event);
@@ -409,8 +392,7 @@ class _View extends StatelessWidget {
   const _View({Key key, this.state}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) =>
-      ViewManager.shared._buildView(context, state);
+  Widget build(BuildContext context) => ViewManager.shared._buildView(context, state);
 }
 
 ///
@@ -440,8 +422,7 @@ class _PageableViewState extends State<PageableView> {
   @override
   void initState() {
     super.initState();
-    _pageController =
-        (widget.controllerBuilder == null ? null : widget.controllerBuilder());
+    _pageController = (widget.controllerBuilder == null ? null : widget.controllerBuilder());
   }
 
   @override
@@ -454,11 +435,9 @@ class _PageableViewState extends State<PageableView> {
   @override
   Widget build(BuildContext context) {
     return TecPageView(
-      pageBuilder: (context, index) =>
-          widget.pageBuilder(context, widget.state, index),
+      pageBuilder: (context, index) => widget.pageBuilder(context, widget.state, index),
       controller: _pageController,
-      onPageChanged: (page) =>
-          tec.dmPrint('View ${widget.state.data} onPageChanged($page)'),
+      onPageChanged: (page) => tec.dmPrint('View ${widget.state.data} onPageChanged($page)'),
     );
   }
 }
@@ -503,8 +482,7 @@ List<List<ViewState>> _buildRows(
   for (final viewState in state.views) {
     // Add another row?
     if (rows.isEmpty ||
-        rows.last.width(constraints, size) +
-                viewState.width(constraints, size) >
+        rows.last.width(constraints, size) + viewState.width(constraints, size) >
             constraints.maxWidth) {
       // If another row won't fit, break out of the for loop.
       if (rows.isNotEmpty &&
@@ -525,14 +503,10 @@ List<List<ViewState>> _buildRows(
 extension _ExtOnViewState on ViewState {
   double minWidth(BoxConstraints c) => _minWidthForType(type, c);
   double minHeight(BoxConstraints c) => _minHeightForType(type, c);
-  double idealWidth(BoxConstraints c) =>
-      math.max(preferredWidth ?? 0, minWidth(c));
-  double idealHeight(BoxConstraints c) =>
-      math.max(preferredHeight ?? 0, minHeight(c));
-  double width(BoxConstraints c, _Size s) =>
-      s == _Size.min ? minWidth(c) : idealWidth(c);
-  double height(BoxConstraints c, _Size s) =>
-      s == _Size.min ? minHeight(c) : idealHeight(c);
+  double idealWidth(BoxConstraints c) => math.max(preferredWidth ?? 0, minWidth(c));
+  double idealHeight(BoxConstraints c) => math.max(preferredHeight ?? 0, minHeight(c));
+  double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
+  double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
 }
 
 ///
@@ -540,28 +514,20 @@ extension _ExtOnViewState on ViewState {
 ///
 extension _ExtOnListOfViewState on List<ViewState> {
   double minWidth(BoxConstraints c) => fold(0.0, (t, el) => t + el.minWidth(c));
-  double minHeight(BoxConstraints c) =>
-      fold(0.0, (t, el) => math.max(t, el.minHeight(c)));
-  double idealWidth(BoxConstraints c) =>
-      fold(0.0, (t, el) => t + el.idealWidth(c));
-  double idealHeight(BoxConstraints c) =>
-      fold(0.0, (t, el) => math.max(t, el.idealHeight(c)));
-  double width(BoxConstraints c, _Size s) =>
-      s == _Size.min ? minWidth(c) : idealWidth(c);
-  double height(BoxConstraints c, _Size s) =>
-      s == _Size.min ? minHeight(c) : idealHeight(c);
+  double minHeight(BoxConstraints c) => fold(0.0, (t, el) => math.max(t, el.minHeight(c)));
+  double idealWidth(BoxConstraints c) => fold(0.0, (t, el) => t + el.idealWidth(c));
+  double idealHeight(BoxConstraints c) => fold(0.0, (t, el) => math.max(t, el.idealHeight(c)));
+  double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
+  double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
 }
 
 ///
 /// List<List<ViewState>> extensions
 ///
 extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
-  double minHeight(BoxConstraints c) =>
-      fold(0.0, (t, el) => t + el.minHeight(c));
-  double idealHeight(BoxConstraints c) =>
-      fold(0.0, (t, el) => t + el.idealHeight(c));
-  double height(BoxConstraints c, _Size s) =>
-      s == _Size.min ? minHeight(c) : idealHeight(c);
+  double minHeight(BoxConstraints c) => fold(0.0, (t, el) => t + el.minHeight(c));
+  double idealHeight(BoxConstraints c) => fold(0.0, (t, el) => t + el.idealHeight(c));
+  double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
 
   int get totalItems => fold(0, (t, el) => t + el.length);
 
@@ -624,11 +590,8 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     // First, clear the view list.
     views.clear();
 
-    final yExtraPerRow = math.max(
-        0.0, (constraints.maxHeight - idealHeight(constraints)) / length);
-    var yExtra = yExtraPerRow > 0.0
-        ? 0.0
-        : constraints.maxHeight - minHeight(constraints);
+    final yExtraPerRow = math.max(0.0, (constraints.maxHeight - idealHeight(constraints)) / length);
+    var yExtra = yExtraPerRow > 0.0 ? 0.0 : constraints.maxHeight - minHeight(constraints);
 
     for (final row in this) {
       var x = 0.0;
@@ -637,26 +600,22 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
       if (yExtraPerRow > 0.0) {
         height = row.idealHeight(constraints) + yExtraPerRow;
       } else {
-        final yDelta = math.min(
-            row.idealHeight(constraints) - row.minHeight(constraints), yExtra);
+        final yDelta = math.min(row.idealHeight(constraints) - row.minHeight(constraints), yExtra);
         yExtra -= yDelta;
         height = row.minHeight(constraints) + yDelta;
       }
 
-      final xExtraPerItem = math.max(0.0,
-          (constraints.maxWidth - row.idealWidth(constraints)) / row.length);
-      var xExtra = xExtraPerItem > 0.0
-          ? 0.0
-          : constraints.maxWidth - row.minWidth(constraints);
+      final xExtraPerItem =
+          math.max(0.0, (constraints.maxWidth - row.idealWidth(constraints)) / row.length);
+      var xExtra = xExtraPerItem > 0.0 ? 0.0 : constraints.maxWidth - row.minWidth(constraints);
 
       for (final state in row) {
         double width;
         if (xExtraPerItem > 0.0) {
           width = state.idealWidth(constraints) + xExtraPerItem;
         } else {
-          final xDelta = math.min(
-              state.idealWidth(constraints) - state.minWidth(constraints),
-              xExtra);
+          final xDelta =
+              math.min(state.idealWidth(constraints) - state.minWidth(constraints), xExtra);
           xExtra -= xDelta;
           width = state.minWidth(constraints) + xDelta;
         }

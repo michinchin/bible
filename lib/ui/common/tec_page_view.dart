@@ -127,19 +127,16 @@ class _TecPageViewState extends State<TecPageView> {
 
   void update() {
     final providedController = widget.controller?._pageController;
-    if (_controller == null ||
-        (providedController != null && providedController != _controller)) {
+    if (_controller == null || (providedController != null && providedController != _controller)) {
       tec.dmPrint('_TecPageViewState updating the page controller...');
 
       // First, dispose of the old controller (if we created it).
       disposeController();
 
       // Create the controller if necessary, or save a reference to the provided one.
-      final maxPossiblePages =
-          widget.controller?._maxPossiblePages ?? _defaultMaxPossiblePages;
+      final maxPossiblePages = widget.controller?._maxPossiblePages ?? _defaultMaxPossiblePages;
       _initialPage = maxPossiblePages ~/ 2;
-      _controller =
-          providedController ?? PageController(initialPage: _initialPage);
+      _controller = providedController ?? PageController(initialPage: _initialPage);
       _didCreateController = (providedController == null);
 
       // Make sure the scroll physics object is created and updated.
@@ -158,10 +155,8 @@ class _TecPageViewState extends State<TecPageView> {
       create: (context) => _TecPageBuilder(widget.pageBuilder),
       child: Builder(builder: (context) {
         final pageBuilder = context.watch<_TecPageBuilder>();
-        final minOffset =
-            context.select<_TecPageBuilder, int>((v) => v.minOffset);
-        final maxOffset =
-            context.select<_TecPageBuilder, int>((v) => v.maxOffset);
+        final minOffset = context.select<_TecPageBuilder, int>((v) => v.minOffset);
+        final maxOffset = context.select<_TecPageBuilder, int>((v) => v.maxOffset);
 
         // Update pageInfo for the physics object.
         _physics.pageInfo.min = _initialPage + minOffset;
@@ -178,8 +173,7 @@ class _TecPageViewState extends State<TecPageView> {
           scrollDirection: widget.scrollDirection ?? Axis.horizontal,
           reverse: widget.reverse ?? false,
           pageSnapping: false,
-          dragStartBehavior:
-              widget.dragStartBehavior ?? DragStartBehavior.start,
+          dragStartBehavior: widget.dragStartBehavior ?? DragStartBehavior.start,
           allowImplicitScrolling: widget.allowImplicitScrolling ?? false,
           onPageChanged: widget.onPageChanged == null
               ? null
@@ -187,8 +181,8 @@ class _TecPageViewState extends State<TecPageView> {
           controller: _controller,
           physics: _physics,
           itemCount: _initialPage * 2,
-          itemBuilder: (context, index) => pageBuilder.buildPage(
-              context, _fauxPageFromActualPage(index), fauxInitialPage),
+          itemBuilder: (context, index) =>
+              pageBuilder.buildPage(context, _fauxPageFromActualPage(index), fauxInitialPage),
         );
       }),
     );
@@ -238,15 +232,14 @@ class TecPageController implements PageController {
     _pageController.dispose();
   }
 
-  // This class's primary purpose is to translate between 'faux' (or external) 
+  // This class's primary purpose is to translate between 'faux' (or external)
   // page indices and actual (or internal) page indices.
 
   final int _fauxInitialPage;
   final int _maxPossiblePages;
   final PageController _pageController;
 
-  int _actualPageFromFauxPage(int fauxPage) =>
-      _pageController.initialPage + fauxPage;
+  int _actualPageFromFauxPage(int fauxPage) => _pageController.initialPage + fauxPage;
 
   double _fauxPageFromActualPage(double actualPage) =>
       _fauxInitialPage + (actualPage - _pageController.initialPage);
@@ -336,8 +329,8 @@ class TecPageController implements PageController {
   }
 
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics,
-      ScrollContext context, ScrollPosition oldPosition) {
+  ScrollPosition createScrollPosition(
+      ScrollPhysics physics, ScrollContext context, ScrollPosition oldPosition) {
     return _pageController.createScrollPosition(physics, context, oldPosition);
   }
 
@@ -439,25 +432,22 @@ class _TecPageInfo {
 class _TecPageViewScrollPhysics extends ScrollPhysics {
   final _TecPageInfo pageInfo;
 
-  const _TecPageViewScrollPhysics({ScrollPhysics parent, this.pageInfo})
-      : super(parent: parent);
+  const _TecPageViewScrollPhysics({ScrollPhysics parent, this.pageInfo}) : super(parent: parent);
 
   @override
   _TecPageViewScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return _TecPageViewScrollPhysics(
-        parent: buildParent(ancestor), pageInfo: pageInfo);
+    return _TecPageViewScrollPhysics(parent: buildParent(ancestor), pageInfo: pageInfo);
   }
 
-  double _initialPageOffset(double viewportDimension) => math.max(
-      0, viewportDimension * ((pageInfo?.viewportFraction ?? 1.0) - 1) / 2);
+  double _initialPageOffset(double viewportDimension) =>
+      math.max(0, viewportDimension * ((pageInfo?.viewportFraction ?? 1.0) - 1) / 2);
 
   double _pageFromPixels(double pixels, ScrollMetrics position) {
     final actual = math.max(
             0.0,
             pixels.clamp(position.minScrollExtent, position.maxScrollExtent) -
                 _initialPageOffset(position.viewportDimension)) /
-        math.max(1.0,
-            position.viewportDimension * (pageInfo?.viewportFraction ?? 1.0));
+        math.max(1.0, position.viewportDimension * (pageInfo?.viewportFraction ?? 1.0));
     final round = actual.roundToDouble();
     if ((actual - round).abs() < precisionErrorTolerance) {
       return round;
@@ -466,14 +456,11 @@ class _TecPageViewScrollPhysics extends ScrollPhysics {
   }
 
   double _pixelsFromPage(double page, ScrollMetrics position) {
-    return page *
-            position.viewportDimension *
-            (pageInfo?.viewportFraction ?? 1.0) +
+    return page * position.viewportDimension * (pageInfo?.viewportFraction ?? 1.0) +
         _initialPageOffset(position.viewportDimension);
   }
 
-  double _getTargetPixels(
-      ScrollMetrics position, Tolerance tolerance, double velocity) {
+  double _getTargetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
     // Get the page from the scroll position.
     var page = _pageFromPixels(position.pixels, position);
     if (velocity < -tolerance.velocity) {
@@ -498,8 +485,7 @@ class _TecPageViewScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation createBallisticSimulation(
-      ScrollMetrics position, double velocity) {
+  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
     final tolerance = this.tolerance;
     final target = _getTargetPixels(position, tolerance, velocity);
     if (target != position.pixels) {

@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../blocs/view_manager_bloc.dart';
 
-const testViewTypeName = 'TestView';
+const testViewType = 'TestView';
 
-Widget testViewBuilder(BuildContext context, ViewState viewState) =>
-    TestView(viewState: viewState);
+Widget testViewBuilder(BuildContext context, ViewState viewState) => TestView(viewState: viewState);
 
-Widget testViewPageableBuilder(BuildContext context, ViewState viewState) =>
-    PageableView(
+Widget testViewPageableBuilder(BuildContext context, ViewState viewState) => PageableView(
       state: viewState,
       pageBuilder: (context, viewState, index) {
         return (index >= -2 && index <= 2)
@@ -21,8 +19,7 @@ class TestView extends StatelessWidget {
   final ViewState viewState;
   final int pageIndex;
 
-  const TestView({Key key, @required this.viewState, this.pageIndex})
-      : super(key: key);
+  const TestView({Key key, @required this.viewState, this.pageIndex}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +33,7 @@ class TestView extends StatelessWidget {
       child: Center(
         child: Text(
           pageIndex == null ? 'Test View ${viewState.data}' : 'page $pageIndex',
-          style: Theme.of(context)
-              .textTheme
-              .headline5
-              .copyWith(color: Colors.white),
+          style: Theme.of(context).textTheme.headline5.copyWith(color: Colors.white),
         ),
       ),
     );

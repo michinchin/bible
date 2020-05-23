@@ -70,7 +70,7 @@ class _HomeScreen extends StatelessWidget {
               );
             },
             // onPressed: () => context.bloc<ViewManagerBloc>().add(
-            //     ViewManagerEvent.add(type: bibleChapterTypeName, data: '${++_viewId}')),
+            //     ViewManagerEvent.add(type: bibleChapterType, data: '${++_viewId}')),
           ),
         ],
       ),
