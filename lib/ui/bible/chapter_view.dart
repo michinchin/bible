@@ -1,25 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/view_manager_bloc.dart';
+import '../common/tec_page_view.dart';
 
 const bibleChapterType = 'BibleChapter';
 
-Widget bibleChapterViewBuilder(BuildContext context, ViewState state) =>
-    PageableView(
-      state: state,
-      pageBuilder: (context, state, index) {
-        return (index >= -2 && index <= 2)
-            ? BibleChapterView(state: state, pageIndex: index)
-            : null;
-      },
-    );
+Widget bibleChapterViewBuilder(BuildContext context, ViewState state) {
+  tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
+  return PageableView(
+    state: state,
+    controllerBuilder: () {
+      tec.dmPrint('bibleChapterViewBuilder controllerBuilder called for uid ${state.uid}');
+      return TecPageController(initialPage: 1);
+    },
+    pageBuilder: (context, state, index) {
+      return (index >= -2 && index <= 2) ? BibleChapterView(state: state, pageIndex: index) : null;
+    },
+  );
+}
 
 class BibleChapterView extends StatelessWidget {
   final ViewState state;
   final int pageIndex;
 
-  const BibleChapterView(
-      {Key key, @required this.state, @required this.pageIndex})
+  const BibleChapterView({Key key, @required this.state, @required this.pageIndex})
       : super(key: key);
 
   @override
@@ -33,11 +38,8 @@ class BibleChapterView extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          'Bible View ${state.data}, Page $pageIndex',
-          style: Theme.of(context)
-              .textTheme
-              .headline5
-              .copyWith(color: Colors.white),
+          'Bible View ${state.uid}, Page $pageIndex',
+          style: Theme.of(context).textTheme.headline5.copyWith(color: Colors.white),
         ),
       ),
     );

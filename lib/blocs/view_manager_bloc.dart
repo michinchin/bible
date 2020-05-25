@@ -100,8 +100,6 @@ class _ViewTypeAPI {
   final ViewSizeFunc minHeight;
 
   const _ViewTypeAPI(this.title, this.builder, this.minWidth, this.minHeight);
-
-  //static const _ViewTypeAPI none = _ViewTypeAPI(null, null, null, null);
 }
 
 ///
@@ -131,7 +129,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       final json = tec.parseJsonSync(jsonStr);
       if (json != null) return ViewManagerState.fromJson(json);
     }
-    return ViewManagerState([]);
+    return ViewManagerState([], 1);
   }
 
   @override
@@ -158,39 +156,40 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   }
 
   ViewManagerState _add(String type, int position, String data) {
-    //tec.dmPrint('VM add type: $type, position: $position, data: \'$data\'');
-    final view = ViewState(type: type, data: data);
+    final nextUid = (state.nextUid ?? 1);
+    final viewState = ViewState(uid: nextUid, type: type, data: data);
     final newViews = List.of(state.views); // shallow copy
-    newViews.insert(position ?? newViews.length, view);
-    return ViewManagerState(newViews);
+    tec.dmPrint('VM add type: $type, uid: $nextUid, position: $position, data: \'$data\'');
+    newViews.insert(position ?? newViews.length, viewState);
+    return ViewManagerState(newViews, tec.nextIntWithJsSafeWraparound(nextUid, wrapTo: 1));
   }
 
   ViewManagerState _remove(int position) {
     assert(position != null);
     final newViews = List.of(state.views) // shallow copy
       ..removeAt(position);
-    return ViewManagerState(newViews);
+    return ViewManagerState(newViews, state.nextUid);
   }
 
   ViewManagerState _move(int from, int to) {
     if (from == to) return state;
     final newViews = List.of(state.views) // shallow copy
       ..move(from: from, to: to);
-    return ViewManagerState(newViews);
+    return ViewManagerState(newViews, state.nextUid);
   }
 
   ViewManagerState _setWidth(int position, double width) {
     assert(state.views.isValidIndex(position));
     final newViews = List.of(state.views); // shallow copy
     newViews[position] = newViews[position].copyWith(preferredWidth: width);
-    return ViewManagerState(newViews);
+    return ViewManagerState(newViews, state.nextUid);
   }
 
   ViewManagerState _setHeight(int position, double height) {
     assert(state.views.isValidIndex(position));
     final newViews = List.of(state.views); // shallow copy
     newViews[position] = newViews[position].copyWith(preferredHeight: height);
-    return ViewManagerState(newViews);
+    return ViewManagerState(newViews, state.nextUid);
   }
 }
 
@@ -212,6 +211,7 @@ abstract class ViewManagerEvent with _$ViewManagerEvent {
 @freezed
 abstract class ViewState with _$ViewState {
   factory ViewState({
+    int uid,
     String type,
     double preferredWidth,
     double preferredHeight,
@@ -227,7 +227,7 @@ abstract class ViewState with _$ViewState {
 ///
 @freezed
 abstract class ViewManagerState with _$ViewManagerState {
-  factory ViewManagerState(List<ViewState> views) = _Views;
+  factory ViewManagerState(List<ViewState> views, int nextUid) = _Views;
 
   /// fromJson
   factory ViewManagerState.fromJson(Map<String, dynamic> json) => _$ViewManagerStateFromJson(json);
@@ -243,6 +243,7 @@ class ViewManagerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // tec.dmPrint('ViewManagerWidget build()');
     return LayoutBuilder(
       builder: (context, constraints) => _VMViewStack(
         vmState: state,
@@ -271,39 +272,33 @@ class _VMViewStack extends StatefulWidget {
 
 class _VMViewStackState extends State<_VMViewStack> {
   @override
-  void didUpdateWidget(_VMViewStack oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    // if (oldWidget.constraints != widget.constraints ||
-    //     oldWidget.vmState != widget.vmState) {
-    //   setState(() {
-    //     tec.dmPrint('rebuilding view stack...');
-    //   });
-    // }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final views = <_PositionedView>[];
-    _layoutViews(views, widget.vmState, widget.constraints);
-    return Stack(children: [for (final view in views) view.asWidget()]);
+    // tec.dmPrint('_VMViewStackState build()');
+    final views = _layoutViews(widget.vmState, widget.constraints);
+    return Stack(children: [...views.map((e) => e.asWidget())]);
   }
 }
 
 ///
-/// Scaffold for individual view.
+/// Scaffold for a managed view.
 ///
-class _IndividualViewScaffold extends StatefulWidget {
+class _ManagedViewScaffold extends StatefulWidget {
+  final BoxConstraints constraints;
   final ViewState viewState;
   final int viewIndex;
 
-  const _IndividualViewScaffold({Key key, this.viewState, this.viewIndex}) : super(key: key);
+  const _ManagedViewScaffold({
+    Key key,
+    @required this.constraints,
+    @required this.viewState,
+    @required this.viewIndex,
+  }) : super(key: key);
 
   @override
-  _IndividualViewScaffoldState createState() => _IndividualViewScaffoldState();
+  _ManagedViewScaffoldState createState() => _ManagedViewScaffoldState();
 }
 
-class _IndividualViewScaffoldState extends State<_IndividualViewScaffold> {
+class _ManagedViewScaffoldState extends State<_ManagedViewScaffold> {
   @override
   Widget build(BuildContext context) {
     ViewManagerBloc bloc() => context.bloc<ViewManagerBloc>();
@@ -333,7 +328,7 @@ class _IndividualViewScaffoldState extends State<_IndividualViewScaffold> {
           // child:
           Scaffold(
         appBar: AppBar(
-          title: Text('${widget.viewState.data}'),
+          title: Text('${widget.viewState.uid}'),
           leading: bloc().state.views.length <= 1
               ? null
               : IconButton(
@@ -344,39 +339,39 @@ class _IndividualViewScaffoldState extends State<_IndividualViewScaffold> {
                     bloc().add(event);
                   },
                 ),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.border_outer),
-              onPressed: () {
-                bloc().add(ViewManagerEvent.setWidth(position: widget.viewIndex, width: null));
-                bloc().add(ViewManagerEvent.setHeight(position: widget.viewIndex, height: null));
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.format_textdirection_l_to_r),
-              onPressed: () {
-                final viewState = bloc().state.views[widget.viewIndex];
-                final idealWidth = viewState.idealWidth(ViewManager._defaultConstraints) ??
-                    _minWidthForType(viewState.type, ViewManager._defaultConstraints);
-                final event =
-                    ViewManagerEvent.setWidth(position: widget.viewIndex, width: idealWidth + 20.0);
-                bloc().add(event);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.format_line_spacing),
-              onPressed: () {
-                final viewState = bloc().state.views[widget.viewIndex];
-                final idealHeight = viewState.idealHeight(ViewManager._defaultConstraints) ??
-                    _minHeightForType(viewState.type, ViewManager._defaultConstraints);
-                final event = ViewManagerEvent.setHeight(
-                    position: widget.viewIndex, height: idealHeight + 20.0);
-                bloc().add(event);
-              },
-            ),
-          ],
+          // actions: <Widget>[
+          //   IconButton(
+          //     icon: const Icon(Icons.border_outer),
+          //     onPressed: () {
+          //       bloc().add(ViewManagerEvent.setWidth(position: widget.viewIndex, width: null));
+          //       bloc().add(ViewManagerEvent.setHeight(position: widget.viewIndex, height: null));
+          //     },
+          //   ),
+          //   IconButton(
+          //     icon: const Icon(Icons.format_textdirection_l_to_r),
+          //     onPressed: () {
+          //       final viewState = bloc().state.views[widget.viewIndex];
+          //       final idealWidth = viewState.idealWidth(widget.constraints) ??
+          //           _minWidthForType(viewState.type, widget.constraints);
+          //       final event =
+          //           ViewManagerEvent.setWidth(position: widget.viewIndex, width: idealWidth + 20.0);
+          //       bloc().add(event);
+          //     },
+          //   ),
+          //   IconButton(
+          //     icon: const Icon(Icons.format_line_spacing),
+          //     onPressed: () {
+          //       final viewState = bloc().state.views[widget.viewIndex];
+          //       final idealHeight = viewState.idealHeight(widget.constraints) ??
+          //           _minHeightForType(viewState.type, widget.constraints);
+          //       final event = ViewManagerEvent.setHeight(
+          //           position: widget.viewIndex, height: idealHeight + 20.0);
+          //       bloc().add(event);
+          //     },
+          //   ),
+          // ],
         ),
-        body: _View(state: bloc().state.views[widget.viewIndex]),
+        body: _ManagedView(state: widget.viewState),
       ),
       // ), // Container
     );
@@ -386,10 +381,10 @@ class _IndividualViewScaffoldState extends State<_IndividualViewScaffold> {
 ///
 /// Individual view.
 ///
-class _View extends StatelessWidget {
+class _ManagedView extends StatelessWidget {
   final ViewState state;
 
-  const _View({Key key, this.state}) : super(key: key);
+  const _ManagedView({Key key, this.state}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => ViewManager.shared._buildView(context, state);
@@ -450,8 +445,7 @@ enum _Size { min, ideal }
 ///
 /// Lays out the individual `views`.
 ///
-void _layoutViews(
-  List<_PositionedView> views,
+List<_PositionedView> _layoutViews(
   ViewManagerState state,
   BoxConstraints constraints,
 ) {
@@ -464,10 +458,10 @@ void _layoutViews(
   //   if (minRows.totalItems > rows.totalItems) rows = minRows;
   // }
 
-  // Balance the rows, then save them to the view list.
-  rows // ignore: cascade_invocations
-    ..balance(constraints)
-    ..toViewList(views, constraints);
+  // Balance the rows.
+  rows.balance(constraints); // ignore: cascade_invocations
+
+  return rows.toViewList(constraints);
 }
 
 ///
@@ -519,6 +513,7 @@ extension _ExtOnListOfViewState on List<ViewState> {
   double idealHeight(BoxConstraints c) => fold(0.0, (t, el) => math.max(t, el.idealHeight(c)));
   double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
   double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
+  String toDebugString() => '[${map<int>((e) => e.uid).join(', ')}]';
 }
 
 ///
@@ -581,14 +576,13 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
   }
 
   ///
-  /// Saves the rows of view states to the given [views] list.
+  /// Returns the list of positioned views.
   ///
-  void toViewList(List<_PositionedView> views, BoxConstraints constraints) {
+  List<_PositionedView> toViewList(BoxConstraints constraints) {
+    final views = <_PositionedView>[];
+
     var i = 0;
     var y = 0.0;
-
-    // First, clear the view list.
-    views.clear();
 
     final yExtraPerRow = math.max(0.0, (constraints.maxHeight - idealHeight(constraints)) / length);
     var yExtra = yExtraPerRow > 0.0 ? 0.0 : constraints.maxHeight - minHeight(constraints);
@@ -619,25 +613,37 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           xExtra -= xDelta;
           width = state.minWidth(constraints) + xDelta;
         }
-        views.add(_PositionedView(Rect.fromLTWH(x, y, width, height),
-            _IndividualViewScaffold(viewState: state, viewIndex: i++)));
+
+        //tec.dmPrint('toViewList calling views.add(_PositionedView(${state.uid}))');
+        views.add(_PositionedView(
+            state.uid,
+            Rect.fromLTWH(x, y, width, height),
+            _ManagedViewScaffold(
+                constraints: constraints,
+                viewState: state,
+                viewIndex: i++)));
+
         x += width;
       }
       y += height;
     }
+
+    return views;
   }
 }
 
 ///
-/// `view` and its position `rect`.
+/// The `uid`, position, and widget for a view.
 ///
 class _PositionedView {
+  final int uid;
   final Rect rect;
   final Widget view;
 
-  _PositionedView(this.rect, this.view);
+  _PositionedView(this.uid, this.rect, this.view);
 
   Widget asWidget() => AnimatedPositionedDirectional(
+      key: ValueKey(uid),
       duration: const Duration(milliseconds: 200),
       start: rect.left,
       top: rect.top,

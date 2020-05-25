@@ -10,6 +10,7 @@ part of 'view_manager_bloc.dart';
 
 _$_ViewState _$_$_ViewStateFromJson(Map<String, dynamic> json) {
   return _$_ViewState(
+    uid: json['uid'] as int,
     type: json['type'] as String,
     preferredWidth: (json['preferredWidth'] as num)?.toDouble(),
     preferredHeight: (json['preferredHeight'] as num)?.toDouble(),
@@ -19,6 +20,7 @@ _$_ViewState _$_$_ViewStateFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$_$_ViewStateToJson(_$_ViewState instance) =>
     <String, dynamic>{
+      'uid': instance.uid,
       'type': instance.type,
       'preferredWidth': instance.preferredWidth,
       'preferredHeight': instance.preferredHeight,
@@ -31,9 +33,11 @@ _$_Views _$_$_ViewsFromJson(Map<String, dynamic> json) {
         ?.map((dynamic e) =>
             e == null ? null : ViewState.fromJson(e as Map<String, dynamic>))
         ?.toList(),
+    json['nextUid'] as int,
   );
 }
 
 Map<String, dynamic> _$_$_ViewsToJson(_$_Views instance) => <String, dynamic>{
       'views': instance.views,
+      'nextUid': instance.nextUid,
     };

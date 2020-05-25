@@ -32,7 +32,7 @@ class TestView extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          pageIndex == null ? 'Test View ${viewState.data}' : 'page $pageIndex',
+          pageIndex == null ? 'Test View ${viewState.uid}' : 'page $pageIndex',
           style: Theme.of(context).textTheme.headline5.copyWith(color: Colors.white),
         ),
       ),

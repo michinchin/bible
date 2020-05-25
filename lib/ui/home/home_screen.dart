@@ -19,13 +19,12 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-var _viewId = 0;
-
 class _HomeScreen extends StatelessWidget {
   const _HomeScreen({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    tec.dmPrint('_HomeScreen build()');
     return Scaffold(
       body: Container(
         color: Theme.of(context).primaryColor,
@@ -55,10 +54,10 @@ class _HomeScreen extends StatelessWidget {
                 context: context,
                 barrierDismissible: false,
                 useRootNavigator: false,
-                title: const TecText('Open View of Type?'),
-                //content: const TecText('What type?'),
+                //title: const TecText('Open View of Type?'),
+                content: const TecText('Open View of Type?'),
                 actions: <Widget>[
-                  ..._foo(context),
+                  ..._generateViewTypeButtons(context),
                   TecDialogButton(
                     isDefaultAction: true,
                     child: const Text('CANCEL'),
@@ -69,8 +68,6 @@ class _HomeScreen extends StatelessWidget {
                 ],
               );
             },
-            // onPressed: () => context.bloc<ViewManagerBloc>().add(
-            //     ViewManagerEvent.add(type: bibleChapterType, data: '${++_viewId}')),
           ),
         ],
       ),
@@ -78,15 +75,15 @@ class _HomeScreen extends StatelessWidget {
   }
 }
 
-Iterable<Widget> _foo(BuildContext context) {
+Iterable<Widget> _generateViewTypeButtons(BuildContext context) {
   final vm = ViewManager.shared;
-  return vm.types.map<Widget>((type) => TecDialogButton(
-        child: Text(vm.titleForType(type)),
-        onPressed: () {
-          context
-              .bloc<ViewManagerBloc>()
-              .add(ViewManagerEvent.add(type: type, data: '${++_viewId}'));
-          Navigator.of(context).maybePop(true);
-        },
-      ));
+  return vm.types.map<Widget>(
+    (type) => TecDialogButton(
+      child: Text(vm.titleForType(type)),
+      onPressed: () {
+        context.bloc<ViewManagerBloc>().add(ViewManagerEvent.add(type: type, data: ''));
+        Navigator.of(context).maybePop(true);
+      },
+    ),
+  );
 }

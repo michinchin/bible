@@ -846,11 +846,13 @@ class _$ViewStateTearOff {
   const _$ViewStateTearOff();
 
   _ViewState call(
-      {String type,
+      {int uid,
+      String type,
       double preferredWidth,
       double preferredHeight,
       String data}) {
     return _ViewState(
+      uid: uid,
       type: type,
       preferredWidth: preferredWidth,
       preferredHeight: preferredHeight,
@@ -863,6 +865,7 @@ class _$ViewStateTearOff {
 const $ViewState = _$ViewStateTearOff();
 
 mixin _$ViewState {
+  int get uid;
   String get type;
   double get preferredWidth;
   double get preferredHeight;
@@ -876,7 +879,8 @@ abstract class $ViewStateCopyWith<$Res> {
   factory $ViewStateCopyWith(ViewState value, $Res Function(ViewState) then) =
       _$ViewStateCopyWithImpl<$Res>;
   $Res call(
-      {String type,
+      {int uid,
+      String type,
       double preferredWidth,
       double preferredHeight,
       String data});
@@ -891,12 +895,14 @@ class _$ViewStateCopyWithImpl<$Res> implements $ViewStateCopyWith<$Res> {
 
   @override
   $Res call({
+    Object uid = freezed,
     Object type = freezed,
     Object preferredWidth = freezed,
     Object preferredHeight = freezed,
     Object data = freezed,
   }) {
     return _then(_value.copyWith(
+      uid: uid == freezed ? _value.uid : uid as int,
       type: type == freezed ? _value.type : type as String,
       preferredWidth: preferredWidth == freezed
           ? _value.preferredWidth
@@ -915,7 +921,8 @@ abstract class _$ViewStateCopyWith<$Res> implements $ViewStateCopyWith<$Res> {
       __$ViewStateCopyWithImpl<$Res>;
   @override
   $Res call(
-      {String type,
+      {int uid,
+      String type,
       double preferredWidth,
       double preferredHeight,
       String data});
@@ -931,12 +938,14 @@ class __$ViewStateCopyWithImpl<$Res> extends _$ViewStateCopyWithImpl<$Res>
 
   @override
   $Res call({
+    Object uid = freezed,
     Object type = freezed,
     Object preferredWidth = freezed,
     Object preferredHeight = freezed,
     Object data = freezed,
   }) {
     return _then(_ViewState(
+      uid: uid == freezed ? _value.uid : uid as int,
       type: type == freezed ? _value.type : type as String,
       preferredWidth: preferredWidth == freezed
           ? _value.preferredWidth
@@ -952,11 +961,17 @@ class __$ViewStateCopyWithImpl<$Res> extends _$ViewStateCopyWithImpl<$Res>
 @JsonSerializable()
 class _$_ViewState with DiagnosticableTreeMixin implements _ViewState {
   _$_ViewState(
-      {this.type, this.preferredWidth, this.preferredHeight, this.data});
+      {this.uid,
+      this.type,
+      this.preferredWidth,
+      this.preferredHeight,
+      this.data});
 
   factory _$_ViewState.fromJson(Map<String, dynamic> json) =>
       _$_$_ViewStateFromJson(json);
 
+  @override
+  final int uid;
   @override
   final String type;
   @override
@@ -968,7 +983,7 @@ class _$_ViewState with DiagnosticableTreeMixin implements _ViewState {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'ViewState(type: $type, preferredWidth: $preferredWidth, preferredHeight: $preferredHeight, data: $data)';
+    return 'ViewState(uid: $uid, type: $type, preferredWidth: $preferredWidth, preferredHeight: $preferredHeight, data: $data)';
   }
 
   @override
@@ -976,6 +991,7 @@ class _$_ViewState with DiagnosticableTreeMixin implements _ViewState {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'ViewState'))
+      ..add(DiagnosticsProperty('uid', uid))
       ..add(DiagnosticsProperty('type', type))
       ..add(DiagnosticsProperty('preferredWidth', preferredWidth))
       ..add(DiagnosticsProperty('preferredHeight', preferredHeight))
@@ -986,6 +1002,8 @@ class _$_ViewState with DiagnosticableTreeMixin implements _ViewState {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other is _ViewState &&
+            (identical(other.uid, uid) ||
+                const DeepCollectionEquality().equals(other.uid, uid)) &&
             (identical(other.type, type) ||
                 const DeepCollectionEquality().equals(other.type, type)) &&
             (identical(other.preferredWidth, preferredWidth) ||
@@ -1001,6 +1019,7 @@ class _$_ViewState with DiagnosticableTreeMixin implements _ViewState {
   @override
   int get hashCode =>
       runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(uid) ^
       const DeepCollectionEquality().hash(type) ^
       const DeepCollectionEquality().hash(preferredWidth) ^
       const DeepCollectionEquality().hash(preferredHeight) ^
@@ -1018,7 +1037,8 @@ class _$_ViewState with DiagnosticableTreeMixin implements _ViewState {
 
 abstract class _ViewState implements ViewState {
   factory _ViewState(
-      {String type,
+      {int uid,
+      String type,
       double preferredWidth,
       double preferredHeight,
       String data}) = _$_ViewState;
@@ -1026,6 +1046,8 @@ abstract class _ViewState implements ViewState {
   factory _ViewState.fromJson(Map<String, dynamic> json) =
       _$_ViewState.fromJson;
 
+  @override
+  int get uid;
   @override
   String get type;
   @override
@@ -1045,9 +1067,10 @@ ViewManagerState _$ViewManagerStateFromJson(Map<String, dynamic> json) {
 class _$ViewManagerStateTearOff {
   const _$ViewManagerStateTearOff();
 
-  _Views call(List<ViewState> views) {
+  _Views call(List<ViewState> views, int nextUid) {
     return _Views(
       views,
+      nextUid,
     );
   }
 }
@@ -1057,6 +1080,7 @@ const $ViewManagerState = _$ViewManagerStateTearOff();
 
 mixin _$ViewManagerState {
   List<ViewState> get views;
+  int get nextUid;
 
   Map<String, dynamic> toJson();
   $ViewManagerStateCopyWith<ViewManagerState> get copyWith;
@@ -1066,7 +1090,7 @@ abstract class $ViewManagerStateCopyWith<$Res> {
   factory $ViewManagerStateCopyWith(
           ViewManagerState value, $Res Function(ViewManagerState) then) =
       _$ViewManagerStateCopyWithImpl<$Res>;
-  $Res call({List<ViewState> views});
+  $Res call({List<ViewState> views, int nextUid});
 }
 
 class _$ViewManagerStateCopyWithImpl<$Res>
@@ -1080,9 +1104,11 @@ class _$ViewManagerStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object views = freezed,
+    Object nextUid = freezed,
   }) {
     return _then(_value.copyWith(
       views: views == freezed ? _value.views : views as List<ViewState>,
+      nextUid: nextUid == freezed ? _value.nextUid : nextUid as int,
     ));
   }
 }
@@ -1092,7 +1118,7 @@ abstract class _$ViewsCopyWith<$Res>
   factory _$ViewsCopyWith(_Views value, $Res Function(_Views) then) =
       __$ViewsCopyWithImpl<$Res>;
   @override
-  $Res call({List<ViewState> views});
+  $Res call({List<ViewState> views, int nextUid});
 }
 
 class __$ViewsCopyWithImpl<$Res> extends _$ViewManagerStateCopyWithImpl<$Res>
@@ -1106,26 +1132,32 @@ class __$ViewsCopyWithImpl<$Res> extends _$ViewManagerStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object views = freezed,
+    Object nextUid = freezed,
   }) {
     return _then(_Views(
       views == freezed ? _value.views : views as List<ViewState>,
+      nextUid == freezed ? _value.nextUid : nextUid as int,
     ));
   }
 }
 
 @JsonSerializable()
 class _$_Views with DiagnosticableTreeMixin implements _Views {
-  _$_Views(this.views) : assert(views != null);
+  _$_Views(this.views, this.nextUid)
+      : assert(views != null),
+        assert(nextUid != null);
 
   factory _$_Views.fromJson(Map<String, dynamic> json) =>
       _$_$_ViewsFromJson(json);
 
   @override
   final List<ViewState> views;
+  @override
+  final int nextUid;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'ViewManagerState(views: $views)';
+    return 'ViewManagerState(views: $views, nextUid: $nextUid)';
   }
 
   @override
@@ -1133,7 +1165,8 @@ class _$_Views with DiagnosticableTreeMixin implements _Views {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'ViewManagerState'))
-      ..add(DiagnosticsProperty('views', views));
+      ..add(DiagnosticsProperty('views', views))
+      ..add(DiagnosticsProperty('nextUid', nextUid));
   }
 
   @override
@@ -1141,12 +1174,16 @@ class _$_Views with DiagnosticableTreeMixin implements _Views {
     return identical(this, other) ||
         (other is _Views &&
             (identical(other.views, views) ||
-                const DeepCollectionEquality().equals(other.views, views)));
+                const DeepCollectionEquality().equals(other.views, views)) &&
+            (identical(other.nextUid, nextUid) ||
+                const DeepCollectionEquality().equals(other.nextUid, nextUid)));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(views);
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(views) ^
+      const DeepCollectionEquality().hash(nextUid);
 
   @override
   _$ViewsCopyWith<_Views> get copyWith =>
@@ -1159,12 +1196,14 @@ class _$_Views with DiagnosticableTreeMixin implements _Views {
 }
 
 abstract class _Views implements ViewManagerState {
-  factory _Views(List<ViewState> views) = _$_Views;
+  factory _Views(List<ViewState> views, int nextUid) = _$_Views;
 
   factory _Views.fromJson(Map<String, dynamic> json) = _$_Views.fromJson;
 
   @override
   List<ViewState> get views;
+  @override
+  int get nextUid;
   @override
   _$ViewsCopyWith<_Views> get copyWith;
 }

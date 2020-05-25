@@ -22,7 +22,7 @@ void main() {
     });
 
     test('initial state is empty list', () {
-      expect(bloc.initialState, ViewManagerState([]));
+      expect(bloc.initialState, ViewManagerState([], 1));
     });
 
     blocTest<ViewManagerBloc, ViewManagerEvent, ViewManagerState>(
@@ -39,12 +39,12 @@ void main() {
         return Future.value();
       },
       expect: <dynamic>[
-        ViewManagerState([view('1')]),
-        ViewManagerState([view('1'), view('2')]),
-        ViewManagerState([view('2'), view('1')]),
-        ViewManagerState([view('1'), view('2')]),
-        ViewManagerState([view('2')]),
-        ViewManagerState([]),
+        ViewManagerState([view(1, '1')], 2),
+        ViewManagerState([view(1, '1'), view(2, '2')], 3),
+        ViewManagerState([view(2, '2'), view(1, '1')], 3),
+        ViewManagerState([view(1, '1'), view(2, '2')], 3),
+        ViewManagerState([view(2, '2')], 3),
+        ViewManagerState([], 3),
       ],
     );
   });
@@ -62,4 +62,4 @@ ViewManagerEvent move(int from, int to) =>
 
 ViewManagerEvent remove(int position) => ViewManagerEvent.remove(position);
 
-ViewState view(String data) => ViewState(type: 'test', data: data);
+ViewState view(int uid, String data) => ViewState(uid: uid, type: 'test', data: data);
