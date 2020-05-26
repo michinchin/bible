@@ -24,7 +24,7 @@ class _HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    tec.dmPrint('_HomeScreen build()');
+    // tec.dmPrint('_HomeScreen build()');
     return Scaffold(
       body: Container(
         color: Theme.of(context).primaryColor,

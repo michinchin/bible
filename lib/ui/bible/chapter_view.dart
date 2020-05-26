@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/view_manager_bloc.dart';
 import '../common/tec_page_view.dart';
@@ -7,13 +6,10 @@ import '../common/tec_page_view.dart';
 const bibleChapterType = 'BibleChapter';
 
 Widget bibleChapterViewBuilder(BuildContext context, ViewState state) {
-  tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
+  // tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
   return PageableView(
     state: state,
-    controllerBuilder: () {
-      tec.dmPrint('bibleChapterViewBuilder controllerBuilder called for uid ${state.uid}');
-      return TecPageController(initialPage: 1);
-    },
+    controllerBuilder: () => TecPageController(initialPage: 1),
     pageBuilder: (context, state, index) {
       return (index >= -2 && index <= 2) ? BibleChapterView(state: state, pageIndex: index) : null;
     },

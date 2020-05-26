@@ -126,7 +126,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   ViewManagerState get initialState {
     final jsonStr = _kvStore.getString(_key);
     if (tec.isNotNullOrEmpty(jsonStr)) {
-      //tec.dmPrint('loaded ViewManagerState: $jsonStr');
+      // tec.dmPrint('loaded ViewManagerState: $jsonStr');
       final json = tec.parseJsonSync(jsonStr);
       if (json != null) return ViewManagerState.fromJson(json);
     }
@@ -149,7 +149,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     } else {
       if (value != state) {
         final strValue = tec.toJsonString(value);
-        //tec.dmPrint('VM mapEventToState saving state: $strValue');
+        // tec.dmPrint('VM mapEventToState saving state: $strValue');
         await _kvStore.setString(_key, strValue);
       }
       yield value;
@@ -160,7 +160,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     final nextUid = (state.nextUid ?? 1);
     final viewState = ViewState(uid: nextUid, type: type, data: data);
     final newViews = List.of(state.views); // shallow copy
-    tec.dmPrint('VM add type: $type, uid: $nextUid, position: $position, data: \'$data\'');
+    // tec.dmPrint('VM add type: $type, uid: $nextUid, position: $position, data: \'$data\'');
     newViews.insert(position ?? newViews.length, viewState);
     return ViewManagerState(newViews, tec.nextIntWithJsSafeWraparound(nextUid, wrapTo: 1));
   }
@@ -259,7 +259,7 @@ class ViewManagerWidget extends StatelessWidget {
 //
 
 ///
-/// Stack of individual views.
+/// Stack of managed views.
 ///
 class _VMViewStack extends StatelessWidget {
   final BoxConstraints constraints;
@@ -362,7 +362,7 @@ class _ManagedViewScaffold extends StatelessWidget {
           //   ),
           // ],
         ),
-        body: _ManagedView(state: viewState),
+        body: _ManagedViewBody(state: viewState),
       ),
       // ), // Container
     );
@@ -370,12 +370,12 @@ class _ManagedViewScaffold extends StatelessWidget {
 }
 
 ///
-/// Individual view.
+/// Managed view body widget.
 ///
-class _ManagedView extends StatelessWidget {
+class _ManagedViewBody extends StatelessWidget {
   final ViewState state;
 
-  const _ManagedView({Key key, this.state}) : super(key: key);
+  const _ManagedViewBody({Key key, this.state}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => ViewManager.shared._buildView(context, state);

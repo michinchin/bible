@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+// import 'package:tec_util/tec_util.dart' as tec;
 
 ///
 /// Similar to the [PageView] class, except that it supports unbounded
@@ -128,7 +128,7 @@ class _TecPageViewState extends State<TecPageView> {
   void update() {
     final providedController = widget.controller?._pageController;
     if (_controller == null || (providedController != null && providedController != _controller)) {
-      tec.dmPrint('_TecPageViewState updating the page controller...');
+      // tec.dmPrint('_TecPageViewState updating the page controller...');
 
       // First, dispose of the old controller (if we created it).
       disposeController();
