@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_env/tec_env.dart';
 import 'package:tec_html/tec_html.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/view_manager_bloc.dart';
@@ -92,7 +93,7 @@ class _ChapterViewState extends State<_ChapterView> {
 
     final htmlFragment = widget.chapter.html;
 
-    final baseUrl = 'https://${_env.streamServerAndVersion}/${widget.chapter.volumeId}/urlbase/';
+    final baseUrl = '${tec.streamUrl}/${widget.chapter.volumeId}/urlbase/';
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
