@@ -141,6 +141,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       move: _move,
       setWidth: _setWidth,
       setHeight: _setHeight,
+      setData: _setData,
     );
     assert(value != null);
     if (value == null) {
@@ -192,6 +193,14 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     newViews[position] = newViews[position].copyWith(preferredHeight: height);
     return ViewManagerState(newViews, state.nextUid);
   }
+
+  ViewManagerState _setData(int uid, String data) {
+    final position = state.views.indexWhere((e) => e.uid == uid);
+    if (position < 0) return state;
+    final newViews = List.of(state.views); // shallow copy
+    newViews[position] = newViews[position].copyWith(data: data);
+    return ViewManagerState(newViews, state.nextUid);
+  }
 }
 
 ///
@@ -204,6 +213,7 @@ abstract class ViewManagerEvent with _$ViewManagerEvent {
   const factory ViewManagerEvent.move({int fromPosition, int toPosition}) = _Move;
   const factory ViewManagerEvent.setWidth({int position, double width}) = _SetWidth;
   const factory ViewManagerEvent.setHeight({int position, double height}) = _SetHeight;
+  const factory ViewManagerEvent.setData({int uid, String data}) = _SetData;
 }
 
 ///

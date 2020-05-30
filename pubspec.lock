@@ -120,6 +120,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.0+1"
+  characters:
+    dependency: transitive
+    description:
+      name: characters
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.0"
   charcode:
     dependency: transitive
     description:
@@ -175,7 +182,7 @@ packages:
       name: crypto
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.5"
   csslib:
     dependency: transitive
     description:
@@ -210,7 +217,7 @@ packages:
       name: equatable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.1"
+    version: "1.2.0"
   fake_async:
     dependency: transitive
     description:
@@ -218,6 +225,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
+  feather_icons_flutter:
+    dependency: transitive
+    description:
+      name: feather_icons_flutter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.7.4"
   file:
     dependency: transitive
     description:
@@ -484,7 +498,7 @@ packages:
     source: hosted
     version: "1.0.2"
   pedantic:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: pedantic
       url: "https://pub.dartlang.org"
@@ -559,7 +573,7 @@ packages:
       name: shared_preferences
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.7+2"
+    version: "0.5.7+3"
   shared_preferences_macos:
     dependency: transitive
     description:
@@ -706,19 +720,33 @@ packages:
     source: hosted
     version: "1.0.0"
   tec_env:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: tec_env
       url: "http://noah.tecarta.com:8100"
     source: hosted
     version: "1.0.1"
+  tec_html:
+    dependency: "direct main"
+    description:
+      name: tec_html
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
+    version: "1.1.4"
+  tec_selectable:
+    dependency: transitive
+    description:
+      name: tec_selectable
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
+    version: "1.0.4"
   tec_util:
     dependency: "direct main"
     description:
       name: tec_util
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.2"
+    version: "1.2.5"
   tec_volumes:
     dependency: "direct main"
     description:
@@ -732,7 +760,7 @@ packages:
       name: tec_widgets
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.2"
   term_glyph:
     dependency: transitive
     description:
@@ -824,6 +852,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.4"
+  wakelock:
+    dependency: transitive
+    description:
+      name: wakelock
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.4+1"
   watcher:
     dependency: transitive
     description:
