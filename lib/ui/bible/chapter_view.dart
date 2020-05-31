@@ -16,12 +16,14 @@ Widget bibleChapterViewBuilder(BuildContext context, ViewState state) {
   // tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
   return PageableView(
     state: state,
-    controllerBuilder: () => TecPageController(initialPage: 1),
+    controllerBuilder: () => TecPageController(initialPage: 0),
     pageBuilder: (context, state, index) {
-      return (index >= -2 && index <= 2) ? BibleChapterView(state: state, pageIndex: index) : null;
+      return BibleChapterView(state: state, pageIndex: index);
     },
   );
 }
+
+const _bible = Bible(id: 32);
 
 class BibleChapterView extends StatelessWidget {
   final ViewState state;
@@ -32,9 +34,17 @@ class BibleChapterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ref = const BookChapterVerse(50, 1, 1).advancedBy(chapters: pageIndex, bible: _bible);
     return BlocProvider(
-      create: (_) => ChapterBloc(
-          volumes: TecVolumesRepository(const TecEnv()), volume: 32, book: 50, chapter: 1),
+      create: (_) {
+        tec.dmPrint(
+            'BibleChapterView: creating ChapterBloc for ${_bible.id}/${ref.book}/${ref.chapter}');
+        return ChapterBloc(
+            volumes: TecVolumesRepository(const TecEnv()),
+            volume: _bible.id,
+            book: ref.book,
+            chapter: ref.chapter);
+      },
       child: BlocBuilder<ChapterBloc, ChapterState>(
         builder: (_, chapterState) {
           return chapterState.when<Widget>(
@@ -74,7 +84,7 @@ class _ChapterView extends StatefulWidget {
 
 class _ChapterViewState extends State<_ChapterView> {
   final _scrollController = ScrollController();
-  final _env = TecEnv();
+  final _env = const TecEnv();
 
   @override
   void dispose() {
@@ -116,6 +126,7 @@ class _ChapterViewState extends State<_ChapterView> {
         children: <Widget>[
           TecHtml(
             html,
+            debugId: '${widget.chapter.volumeId}/${widget.chapter.book}/${widget.chapter.chapter}',
             selectable: !kIsWeb,
             scrollController: _scrollController,
             baseUrl: baseUrl,

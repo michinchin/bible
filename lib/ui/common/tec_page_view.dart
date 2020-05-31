@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tuple/tuple.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 ///
 /// Similar to the [PageView] class, except that it supports unbounded
@@ -154,35 +155,47 @@ class _TecPageViewState extends State<TecPageView> {
     return ChangeNotifierProvider<_TecPageBuilder>(
       create: (context) => _TecPageBuilder(widget.pageBuilder),
       child: Builder(builder: (context) {
-        final pageBuilder = context.watch<_TecPageBuilder>();
-        final minOffset = context.select<_TecPageBuilder, int>((v) => v.minOffset);
-        final maxOffset = context.select<_TecPageBuilder, int>((v) => v.maxOffset);
+        return Selector<_TecPageBuilder, Tuple2<int, int>>(
+          selector: (context, pb) => Tuple2(pb.minOffset, pb.maxOffset),
+          builder: (context, tuple, abc) {
+            // final minOffset = context.select<_TecPageBuilder, int>((v) => v.minOffset);
+            // final maxOffset = context.select<_TecPageBuilder, int>((v) => v.maxOffset);
+            final minOffset = tuple.item1;
+            final maxOffset = tuple.item2;
 
-        // Update pageInfo for the physics object.
-        _physics.pageInfo.min = _initialPage + minOffset;
-        _physics.pageInfo.max = _initialPage + maxOffset;
+            // Update pageInfo for the physics object.
+            _physics.pageInfo.min = _initialPage + minOffset;
+            _physics.pageInfo.max = _initialPage + maxOffset;
 
-        final fauxInitialPage = (widget.controller?.initialPage ?? 0);
+            final fauxInitialPage = (widget.controller?.initialPage ?? 0);
 
-        // Local utility function
-        int _fauxPageFromActualPage(int actualPage) =>
-            fauxInitialPage + (actualPage - _controller.initialPage);
+            // Local utility function
+            int _fauxPageFromActualPage(int actualPage) =>
+                fauxInitialPage + (actualPage - _controller.initialPage);
 
-        // tec.dmPrint('building PageView with range ($minOffset, $maxOffset)');
-        return PageView.builder(
-          scrollDirection: widget.scrollDirection ?? Axis.horizontal,
-          reverse: widget.reverse ?? false,
-          pageSnapping: false,
-          dragStartBehavior: widget.dragStartBehavior ?? DragStartBehavior.start,
-          allowImplicitScrolling: widget.allowImplicitScrolling ?? false,
-          onPageChanged: widget.onPageChanged == null
-              ? null
-              : (page) => widget.onPageChanged(_fauxPageFromActualPage(page)),
-          controller: _controller,
-          physics: _physics,
-          itemCount: _initialPage * 2,
-          itemBuilder: (context, index) =>
-              pageBuilder.buildPage(context, _fauxPageFromActualPage(index), fauxInitialPage),
+            tec.dmPrint('TecPageView.build: '
+                'calling PageView.builder with range ($minOffset, $maxOffset)');
+            return PageView.builder(
+              scrollDirection: widget.scrollDirection ?? Axis.horizontal,
+              reverse: widget.reverse ?? false,
+              pageSnapping: false,
+              dragStartBehavior: widget.dragStartBehavior ?? DragStartBehavior.start,
+              allowImplicitScrolling: widget.allowImplicitScrolling ?? false,
+              onPageChanged: widget.onPageChanged == null
+                  ? null
+                  : (page) => widget.onPageChanged(_fauxPageFromActualPage(page)),
+              controller: _controller,
+              physics: _physics,
+              itemCount: _initialPage * 2,
+              itemBuilder: (context, index) {
+                final pageBuilder = context.read<_TecPageBuilder>();
+                final offset = _fauxPageFromActualPage(index);
+                // tec.dmPrint('TecPageView.build: '
+                //     'calling pageBuilder.buildPage(context, $offset, $fauxInitialPage)');
+                return pageBuilder.buildPage(context, offset, fauxInitialPage);
+              },
+            );
+          },
         );
       }),
     );

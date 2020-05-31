@@ -732,7 +732,7 @@ packages:
       name: tec_html
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.1.4"
+    version: "1.1.5"
   tec_selectable:
     dependency: transitive
     description:
@@ -746,7 +746,7 @@ packages:
       name: tec_util
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.5"
+    version: "1.2.6"
   tec_volumes:
     dependency: "direct main"
     description:
@@ -796,6 +796,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.1+2"
+  tuple:
+    dependency: "direct main"
+    description:
+      name: tuple
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.3"
   typed_data:
     dependency: transitive
     description:

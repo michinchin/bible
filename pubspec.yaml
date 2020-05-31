@@ -36,6 +36,7 @@ dependencies:
   freezed_annotation: ^0.7.1
   json_annotation: ^3.0.1
   provider: ^4.1.2
+  tuple: ^1.0.3
 
   # Internal dependencies
   tec_env:
@@ -44,15 +45,16 @@ dependencies:
       url: http://noah.tecarta.com:8100
     version: ^1.0.1
   tec_html:
+    # path: ../shared/tec_html
     hosted:
       name: tec_html
       url: http://noah.tecarta.com:8100
-    version: ^1.1.4
+    version: ^1.1.5
   tec_util:
     hosted:
       name: tec_util
       url: http://noah.tecarta.com:8100
-    version: ^1.2.2
+    version: ^1.2.6
   tec_widgets:
     hosted:
       name: tec_widgets
