@@ -5,6 +5,7 @@ import 'package:tec_env/tec_env.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager_bloc.dart';
 import '../common/common.dart';
@@ -49,7 +50,12 @@ class BibleChapterView extends StatelessWidget {
         builder: (_, chapterState) {
           return chapterState.when<Widget>(
             loading: () => const Center(child: LoadingIndicator()),
-            loadSuccess: (chapter) => _ChapterView(chapter: chapter),
+            loadSuccess: (chapter) => LayoutBuilder(
+              builder: (context, constraints) => _ChapterView(
+                chapter: chapter,
+                constraints: constraints,
+              ),
+            ),
             loadFailure: (e) => Center(child: Text(e.toString())),
           );
         },
@@ -75,8 +81,9 @@ class BibleChapterView extends StatelessWidget {
 
 class _ChapterView extends StatefulWidget {
   final Chapter chapter;
+  final BoxConstraints constraints;
 
-  const _ChapterView({Key key, this.chapter}) : super(key: key);
+  const _ChapterView({Key key, this.chapter, this.constraints}) : super(key: key);
 
   @override
   _ChapterViewState createState() => _ChapterViewState();
@@ -84,7 +91,7 @@ class _ChapterView extends StatefulWidget {
 
 class _ChapterViewState extends State<_ChapterView> {
   final _scrollController = ScrollController();
-  final _env = const TecEnv();
+  var _env = const TecEnv();
 
   @override
   void dispose() {
@@ -112,9 +119,14 @@ class _ChapterViewState extends State<_ChapterView> {
     final cssClass = useZondervanCss ? 'C' : 'cno';
     final customStyles = ' .$cssClass { display: none; } ';
 
+    if (_env.darkMode != isDarkTheme) {
+      _env = _env.copyWith(darkMode: isDarkTheme);
+    }
+
     final html = _env.html(
       htmlFragment: htmlFragment,
       fontSizePercent: (_contentScaleFactor * 100.0).round(),
+      marginTop: '0px',
       //vendorFolder: useZondervanCss ? 'zondervan' : 'tecarta',
       customStyles: customStyles,
     );
@@ -124,6 +136,12 @@ class _ChapterViewState extends State<_ChapterView> {
       child: ListView(
         controller: _scrollController,
         children: <Widget>[
+          const SizedBox(height: 16),
+          Center(
+            child: TecText(
+              Bible.refTitleFromHref('${widget.chapter.book}/${widget.chapter.chapter}'),
+            ),
+          ),
           TecHtml(
             html,
             debugId: '${widget.chapter.volumeId}/${widget.chapter.book}/${widget.chapter.chapter}',
@@ -132,7 +150,9 @@ class _ChapterViewState extends State<_ChapterView> {
             baseUrl: baseUrl,
             textScaleFactor: 1.0, // HTML is already scaled.
             textStyle: htmlTextStyle.merge(TextStyle(color: textColor)),
-            padding: null,
+            padding: EdgeInsets.symmetric(
+              horizontal: (widget.constraints.maxWidth * 0.05).roundToDouble(),
+            ),
             onLinkTap: null,
           ),
         ],
