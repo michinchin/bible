@@ -5,7 +5,6 @@ import 'package:tec_env/tec_env.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager_bloc.dart';
 import '../common/common.dart';
@@ -13,25 +12,73 @@ import '../common/tec_page_view.dart';
 
 const bibleChapterType = 'BibleChapter';
 
-Widget bibleChapterViewBuilder(BuildContext context, ViewState state) {
+Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size) {
   // tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
   return PageableView(
     state: state,
-    controllerBuilder: () => TecPageController(initialPage: 0),
-    pageBuilder: (context, state, index) {
-      return BibleChapterView(state: state, pageIndex: index);
+    size: size,
+    controllerBuilder: () {
+      final chapterData = _ChapterData.fromJson(state.data);
+      return TecPageController(initialPage: chapterData.page);
+    },
+
+    // pageBuilder
+    pageBuilder: (context, state, size, index) {
+      return BibleChapterView(state: state, size: size, pageIndex: index);
+    },
+
+    // onPageChanged
+    onPageChanged: (context, state, page) {
+      tec.dmPrint('View ${state.uid} onPageChanged($page)');
+      final bcv = const BookChapterVerse(50, 1, 1).advancedBy(chapters: page, bible: _bible);
+      context.bloc<ViewManagerBloc>().add(ViewManagerEvent.setData(
+          uid: state.uid, data: tec.toJsonString(_ChapterData(bcv, page))));
     },
   );
+}
+
+class _ChapterData {
+  final BookChapterVerse bcv;
+  final int page;
+
+  const _ChapterData(BookChapterVerse bcv, int page)
+      : bcv = bcv ?? const BookChapterVerse(50, 1, 1),
+        page = page ?? 0;
+
+  factory _ChapterData.fromJson(Object object) {
+    BookChapterVerse bcv;
+    int page;
+    final json = (object is String ? tec.parseJsonSync(object) : object);
+    if (json is Map<String, dynamic>) {
+      bcv = BookChapterVerse.fromJson(json['bcv']);
+      page = tec.as<int>(json['page']);
+    }
+    return _ChapterData(bcv, page);
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{'bcv': bcv, 'page': page};
+  }
+}
+
+Widget bibleChapterTitleBuilder(BuildContext context, ViewState state, Size size) {
+  final bcv = _ChapterData.fromJson(state.data).bcv;
+  return Text(Bible.refTitleFromHref('${bcv.book}/${bcv.chapter}'));
 }
 
 const _bible = Bible(id: 32);
 
 class BibleChapterView extends StatelessWidget {
   final ViewState state;
+  final Size size;
   final int pageIndex;
 
-  const BibleChapterView({Key key, @required this.state, @required this.pageIndex})
-      : super(key: key);
+  const BibleChapterView({
+    Key key,
+    @required this.state,
+    @required this.size,
+    @required this.pageIndex,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -50,40 +97,20 @@ class BibleChapterView extends StatelessWidget {
         builder: (_, chapterState) {
           return chapterState.when<Widget>(
             loading: () => const Center(child: LoadingIndicator()),
-            loadSuccess: (chapter) => LayoutBuilder(
-              builder: (context, constraints) => _ChapterView(
-                chapter: chapter,
-                constraints: constraints,
-              ),
-            ),
+            loadSuccess: (chapter) => _ChapterView(chapter: chapter, size: size),
             loadFailure: (e) => Center(child: Text(e.toString())),
           );
         },
       ),
     );
   }
-  //   return Container(
-  //     margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-  //     decoration: BoxDecoration(
-  //       color: Colors.green[300],
-  //       borderRadius: const BorderRadius.all(Radius.circular(36)),
-  //       //border: Border.all(),
-  //     ),
-  //     child: Center(
-  //       child: Text(
-  //         'Bible View ${state.uid}, Page $pageIndex',
-  //         style: Theme.of(context).textTheme.headline5.copyWith(color: Colors.white),
-  //       ),
-  //     ),
-  //   );
-  // }
 }
 
 class _ChapterView extends StatefulWidget {
   final Chapter chapter;
-  final BoxConstraints constraints;
+  final Size size;
 
-  const _ChapterView({Key key, this.chapter, this.constraints}) : super(key: key);
+  const _ChapterView({Key key, this.chapter, this.size}) : super(key: key);
 
   @override
   _ChapterViewState createState() => _ChapterViewState();
@@ -136,12 +163,12 @@ class _ChapterViewState extends State<_ChapterView> {
       child: ListView(
         controller: _scrollController,
         children: <Widget>[
-          const SizedBox(height: 16),
-          Center(
-            child: TecText(
-              Bible.refTitleFromHref('${widget.chapter.book}/${widget.chapter.chapter}'),
-            ),
-          ),
+          // const SizedBox(height: 16),
+          // Center(
+          //   child: TecText(
+          //     Bible.refTitleFromHref('${widget.chapter.book}/${widget.chapter.chapter}'),
+          //   ),
+          // ),
           TecHtml(
             html,
             debugId: '${widget.chapter.volumeId}/${widget.chapter.book}/${widget.chapter.chapter}',
@@ -151,7 +178,7 @@ class _ChapterViewState extends State<_ChapterView> {
             textScaleFactor: 1.0, // HTML is already scaled.
             textStyle: htmlTextStyle.merge(TextStyle(color: textColor)),
             padding: EdgeInsets.symmetric(
-              horizontal: (widget.constraints.maxWidth * 0.05).roundToDouble(),
+              horizontal: (widget.size.width * 0.05).roundToDouble(),
             ),
             onLinkTap: null,
           ),

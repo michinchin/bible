@@ -39,20 +39,24 @@ class ViewManager {
     String key, {
     @required String title,
     @required BuilderWithViewState builder,
+    BuilderWithViewState titleBuilder,
     ViewSizeFunc minWidth,
     ViewSizeFunc minHeight,
   }) {
     assert(tec.isNotNullOrEmpty(key) && builder != null);
     assert(!_types.containsKey(key));
-    _types[key] = _ViewTypeAPI(title, builder, minWidth, minHeight);
+    _types[key] = _ViewTypeAPI(title, builder, titleBuilder, minWidth, minHeight);
   }
 
   List<String> get types => _types.keys.toList();
 
   String titleForType(String type) => _types[type]?.title;
 
-  Widget _buildView(BuildContext context, ViewState state) =>
-      (_types[state.type]?.builder ?? _defaultBuilder)(context, state);
+  Widget _buildViewBody(BuildContext context, ViewState state, Size size) =>
+      (_types[state.type]?.builder ?? _defaultBuilder)(context, state, size);
+
+  Widget _buildViewTitle(BuildContext context, ViewState state, Size size) =>
+      (_types[state.type]?.titleBuilder ?? _defaultTitleBuilder)(context, state, size);
 
   double _minWidthForType(String type, BoxConstraints constraints) =>
       (_types[type]?.minWidth ?? _defaultMinWidth)(constraints);
@@ -60,7 +64,10 @@ class ViewManager {
   double _minHeightForType(String type, BoxConstraints constraints) =>
       (_types[type]?.minHeight ?? _defaultMinHeight)(constraints);
 
-  Widget _defaultBuilder(BuildContext context, ViewState state) => Container();
+  Widget _defaultBuilder(BuildContext context, ViewState state, Size size) => Container();
+
+  Widget _defaultTitleBuilder(BuildContext context, ViewState state, Size size) =>
+      Text(state.uid.toString());
 
   double _defaultMinWidth(BoxConstraints constraints) => math.max(_minSize,
       math.min(_maxMinWidth, ((constraints ?? _defaultConstraints).maxWidth / 3).roundToDouble()));
@@ -78,13 +85,13 @@ const _maxMinWidth = 400.0;
 ///
 /// Signature for a function that creates a widget for a given view state.
 ///
-typedef BuilderWithViewState = Widget Function(BuildContext context, ViewState state);
+typedef BuilderWithViewState = Widget Function(BuildContext context, ViewState state, Size size);
 
 ///
 /// Signature for a function that creates a widget for a given view state and index.
 ///
 typedef IndexedBuilderWithViewState = Widget Function(
-    BuildContext context, ViewState state, int index);
+    BuildContext context, ViewState state, Size size, int index);
 
 ///
 /// Signature for a function that returns a view size value based on constraints.
@@ -97,10 +104,17 @@ typedef ViewSizeFunc = double Function(BoxConstraints constraints);
 class _ViewTypeAPI {
   final String title;
   final BuilderWithViewState builder;
+  final BuilderWithViewState titleBuilder;
   final ViewSizeFunc minWidth;
   final ViewSizeFunc minHeight;
 
-  const _ViewTypeAPI(this.title, this.builder, this.minWidth, this.minHeight);
+  const _ViewTypeAPI(
+    this.title,
+    this.builder,
+    this.titleBuilder,
+    this.minWidth,
+    this.minHeight,
+  );
 }
 
 ///
@@ -264,147 +278,27 @@ class ViewManagerWidget extends StatelessWidget {
   }
 }
 
-//
-// PRIVATE CLASSES, DATA, AND FUNCTIONS
-//
-
-///
-/// Stack of managed views.
-///
-class _VMViewStack extends StatelessWidget {
-  final BoxConstraints constraints;
-  final ViewManagerState vmState;
-
-  const _VMViewStack({Key key, this.constraints, this.vmState}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // tec.dmPrint('_VMViewStackState build()');
-    final rows = _buildRows(_Size.ideal, vmState, constraints)..balance(constraints);
-    return Stack(children: rows.toViewList(constraints));
-  }
-}
-
-///
-/// Scaffold for a managed view.
-///
-class _ManagedViewScaffold extends StatelessWidget {
-  final BoxConstraints constraints;
-  final ViewState viewState;
-  final int viewIndex;
-
-  const _ManagedViewScaffold({
-    Key key,
-    @required this.constraints,
-    @required this.viewState,
-    @required this.viewIndex,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    ViewManagerBloc bloc() => context.bloc<ViewManagerBloc>();
-
-    final theme = Theme.of(context);
-    //final barColor = theme.canvasColor;
-    final barColor = theme.appBarTheme.color ?? theme.primaryColor;
-    final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
-        ? Colors.grey[700]
-        : Colors.white;
-    final newAppBarTheme = theme.appBarTheme.copyWith(
-      elevation: 0,
-      color: barColor,
-      actionsIconTheme: IconThemeData(color: barTextColor),
-      iconTheme: IconThemeData(color: barTextColor),
-      textTheme: theme.copyOfAppBarTextThemeWithColor(barTextColor),
-    );
-
-    //final side = BorderSide(width: 1, color: Theme.of(context).primaryColor);
-
-    return Theme(
-      data: theme.copyWith(appBarTheme: newAppBarTheme),
-      child: // Container(
-          // decoration: BoxDecoration(
-          //   border: Border(right: side, bottom: side),
-          // ),
-          // child:
-          Scaffold(
-        appBar: AppBar(
-          title: Text('${viewState.uid}'),
-          leading: bloc().state.views.length <= 1
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.close),
-                  tooltip: 'Close',
-                  onPressed: () {
-                    final event = ViewManagerEvent.remove(viewIndex);
-                    bloc().add(event);
-                  },
-                ),
-          // actions: <Widget>[
-          //   IconButton(
-          //     icon: const Icon(Icons.border_outer),
-          //     onPressed: () {
-          //       bloc().add(ViewManagerEvent.setWidth(position: viewIndex, width: null));
-          //       bloc().add(ViewManagerEvent.setHeight(position: viewIndex, height: null));
-          //     },
-          //   ),
-          //   IconButton(
-          //     icon: const Icon(Icons.format_textdirection_l_to_r),
-          //     onPressed: () {
-          //       final viewState = bloc().state.views[viewIndex];
-          //       final idealWidth = viewState.idealWidth(constraints) ??
-          //           _minWidthForType(viewState.type, constraints);
-          //       final event =
-          //           ViewManagerEvent.setWidth(position: viewIndex, width: idealWidth + 20.0);
-          //       bloc().add(event);
-          //     },
-          //   ),
-          //   IconButton(
-          //     icon: const Icon(Icons.format_line_spacing),
-          //     onPressed: () {
-          //       final viewState = bloc().state.views[viewIndex];
-          //       final idealHeight = viewState.idealHeight(constraints) ??
-          //           _minHeightForType(viewState.type, constraints);
-          //       final event =
-          //           ViewManagerEvent.setHeight(position: viewIndex, height: idealHeight + 20.0);
-          //       bloc().add(event);
-          //     },
-          //   ),
-          // ],
-        ),
-        body: _ManagedViewBody(state: viewState),
-      ),
-      // ), // Container
-    );
-  }
-}
-
-///
-/// Managed view body widget.
-///
-class _ManagedViewBody extends StatelessWidget {
-  final ViewState state;
-
-  const _ManagedViewBody({Key key, this.state}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => ViewManager.shared._buildView(context, state);
-}
+typedef PageableViewOnPageChanged = void Function(BuildContext context, ViewState state, int page);
 
 ///
 /// View that uses TecPageView for paging.
 ///
 class PageableView extends StatefulWidget {
   final ViewState state;
+  final Size size;
   final IndexedBuilderWithViewState pageBuilder;
+  final PageableViewOnPageChanged onPageChanged;
   final TecPageController Function() controllerBuilder;
 
   const PageableView({
     Key key,
     @required this.state,
+    @required this.size,
     @required this.pageBuilder,
+    this.onPageChanged,
     this.controllerBuilder,
   })  : assert(state != null),
+        assert(size != null),
         assert(pageBuilder != null),
         super(key: key);
 
@@ -431,11 +325,157 @@ class _PageableViewState extends State<PageableView> {
   @override
   Widget build(BuildContext context) {
     return TecPageView(
-      pageBuilder: (context, index) => widget.pageBuilder(context, widget.state, index),
+      pageBuilder: (context, index) =>
+          widget.pageBuilder(context, widget.state, widget.size, index),
       controller: _pageController,
-      onPageChanged: (page) => tec.dmPrint('View ${widget.state.data} onPageChanged($page)'),
+      onPageChanged: widget.onPageChanged == null
+          ? null
+          : (page) => widget.onPageChanged(context, widget.state, page),
     );
   }
+}
+
+//
+// PRIVATE CLASSES, DATA, AND FUNCTIONS
+//
+
+///
+/// Stack of managed views.
+///
+class _VMViewStack extends StatelessWidget {
+  final BoxConstraints constraints;
+  final ViewManagerState vmState;
+
+  const _VMViewStack({Key key, this.constraints, this.vmState}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // tec.dmPrint('_VMViewStackState build()');
+    final rows = _buildRows(_Size.ideal, vmState, constraints)..balance(constraints);
+    return Stack(children: rows.toViewList(constraints));
+  }
+}
+
+///
+/// Scaffold for a managed view.
+///
+class _ManagedViewScaffold extends StatelessWidget {
+  final BoxConstraints parentConstraints;
+  final ViewState viewState;
+  final Size viewSize;
+  final int viewIndex;
+
+  const _ManagedViewScaffold({
+    Key key,
+    @required this.parentConstraints,
+    @required this.viewState,
+    @required this.viewSize,
+    @required this.viewIndex,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // ignore: close_sinks
+    final bloc = context.bloc<ViewManagerBloc>();
+
+    final theme = Theme.of(context);
+    //final barColor = theme.canvasColor;
+    final barColor = theme.appBarTheme.color ?? theme.primaryColor;
+    final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
+        ? Colors.grey[700]
+        : Colors.white;
+    final newAppBarTheme = theme.appBarTheme.copyWith(
+      elevation: 0,
+      color: barColor,
+      actionsIconTheme: IconThemeData(color: barTextColor),
+      iconTheme: IconThemeData(color: barTextColor),
+      textTheme: theme.copyOfAppBarTextThemeWithColor(barTextColor),
+    );
+
+    //final side = BorderSide(width: 1, color: Theme.of(context).primaryColor);
+
+    return Theme(
+      data: theme.copyWith(appBarTheme: newAppBarTheme),
+      child: // Container(
+          // decoration: BoxDecoration(
+          //   border: Border(right: side, bottom: side),
+          // ),
+          // child:
+          Scaffold(
+        appBar: AppBar(
+          title: _ManagedViewTitle(state: viewState, viewSize: viewSize),
+          leading: bloc.state.views.length <= 1
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.close),
+                  tooltip: 'Close',
+                  onPressed: () {
+                    final event = ViewManagerEvent.remove(viewIndex);
+                    bloc.add(event);
+                  },
+                ),
+          // actions: <Widget>[
+          //   IconButton(
+          //     icon: const Icon(Icons.border_outer),
+          //     onPressed: () {
+          //       bloc.add(ViewManagerEvent.setWidth(position: viewIndex, width: null));
+          //       bloc.add(ViewManagerEvent.setHeight(position: viewIndex, height: null));
+          //     },
+          //   ),
+          //   IconButton(
+          //     icon: const Icon(Icons.format_textdirection_l_to_r),
+          //     onPressed: () {
+          //       final viewState = bloc.state.views[viewIndex];
+          //       final idealWidth = viewState.idealWidth(parentConstraints) ??
+          //           _minWidthForType(viewState.type, parentConstraints);
+          //       final event =
+          //           ViewManagerEvent.setWidth(position: viewIndex, width: idealWidth + 20.0);
+          //       bloc.add(event);
+          //     },
+          //   ),
+          //   IconButton(
+          //     icon: const Icon(Icons.format_line_spacing),
+          //     onPressed: () {
+          //       final viewState = bloc.state.views[viewIndex];
+          //       final idealHeight = viewState.idealHeight(parentConstraints) ??
+          //           _minHeightForType(viewState.type, parentConstraints);
+          //       final event =
+          //           ViewManagerEvent.setHeight(position: viewIndex, height: idealHeight + 20.0);
+          //       bloc.add(event);
+          //     },
+          //   ),
+          // ],
+        ),
+        body: _ManagedViewBody(state: viewState, size: viewSize),
+      ),
+      // ), // Container
+    );
+  }
+}
+
+class _ManagedViewTitle extends StatelessWidget {
+  final ViewState state;
+  final Size viewSize;
+
+  const _ManagedViewTitle({Key key, @required this.state, @required this.viewSize})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) =>
+      ViewManager.shared._buildViewTitle(context, state, viewSize);
+}
+
+///
+/// Managed view body widget.
+///
+class _ManagedViewBody extends StatelessWidget {
+  final ViewState state;
+  final Size size;
+
+  const _ManagedViewBody({Key key, @required this.state, @required this.size}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => ViewManager.shared._buildViewBody(context, state, size);
 }
 
 ///
@@ -600,7 +640,12 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           top: y,
           width: width,
           height: height,
-          child: _ManagedViewScaffold(constraints: constraints, viewState: state, viewIndex: i++),
+          child: _ManagedViewScaffold(
+            parentConstraints: constraints,
+            viewState: state,
+            viewSize: Size(width, height),
+            viewIndex: i++,
+          ),
         ));
 
         x += width;

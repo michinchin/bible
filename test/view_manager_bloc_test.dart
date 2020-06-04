@@ -12,8 +12,8 @@ void main() {
     ViewManagerBloc bloc; // ignore: close_sinks
 
     setUpAll(() {
-      ViewManager.shared.register('test',
-          title: 'test', builder: (context, state) => Container());
+      ViewManager.shared
+          .register('test', title: 'test', builder: (context, state, size) => Container());
     });
 
     setUp(() {
@@ -54,8 +54,7 @@ void main() {
 // UTILITY FUNCTIONS
 //
 
-ViewManagerEvent add(String data) =>
-    ViewManagerEvent.add(type: 'test', data: data);
+ViewManagerEvent add(String data) => ViewManagerEvent.add(type: 'test', data: data);
 
 ViewManagerEvent move(int from, int to) =>
     ViewManagerEvent.move(fromPosition: from, toPosition: to);

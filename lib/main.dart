@@ -33,7 +33,8 @@ Future<void> main() async {
 void _registerViewTypes() {
   ViewManager.shared
     ..register(testViewType, title: 'Test', builder: testViewBuilder)
-    ..register(bibleChapterType, title: 'Bible', builder: bibleChapterViewBuilder);
+    ..register(bibleChapterType,
+        title: 'Bible', builder: bibleChapterViewBuilder, titleBuilder: bibleChapterTitleBuilder);
 }
 
 ///
