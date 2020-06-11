@@ -733,6 +733,20 @@ packages:
       url: "http://noah.tecarta.com:8100"
     source: hosted
     version: "1.1.6"
+  tec_platform_util:
+    dependency: transitive
+    description:
+      name: tec_platform_util
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
+    version: "1.0.0"
+  tec_product_db:
+    dependency: transitive
+    description:
+      name: tec_product_db
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
+    version: "1.0.0"
   tec_selectable:
     dependency: transitive
     description:
@@ -746,14 +760,14 @@ packages:
       name: tec_util
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.7"
+    version: "1.2.8"
   tec_volumes:
     dependency: "direct main"
     description:
-      path: "../shared/tec_volumes"
-      relative: true
-    source: path
-    version: "0.0.1"
+      name: tec_volumes
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
+    version: "1.0.0"
   tec_widgets:
     dependency: "direct main"
     description:
@@ -774,21 +788,21 @@ packages:
       name: test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.14.4"
+    version: "1.14.7"
   test_api:
     dependency: transitive
     description:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.15"
+    version: "0.2.16"
   test_core:
     dependency: transitive
     description:
       name: test_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.4"
+    version: "0.3.7"
   timing:
     dependency: transitive
     description:

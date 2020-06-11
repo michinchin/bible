@@ -28,13 +28,22 @@ Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size)
     },
 
     // onPageChanged
-    onPageChanged: (context, state, page) {
+    onPageChanged: (context, state, page) async {
       tec.dmPrint('View ${state.uid} onPageChanged($page)');
-      final bcv = const BookChapterVerse(50, 1, 1).advancedBy(chapters: page, bible: _bible);
-      context.bloc<ViewManagerBloc>().add(ViewManagerEvent.setData(
-          uid: state.uid, data: tec.toJsonString(_ChapterData(bcv, page))));
+      final bible = VolumesRepository.shared.bibleWithId(32);
+      if (bible != null) {
+        final bcv = const BookChapterVerse(50, 1, 1).advancedBy(chapters: page, bible: bible);
+        context.bloc<ViewManagerBloc>().add(ViewManagerEvent.setData(
+            uid: state.uid, data: tec.toJsonString(_ChapterData(bcv, page))));
+      }
     },
   );
+}
+
+Widget bibleChapterTitleBuilder(BuildContext context, ViewState state, Size size) {
+  final bible = VolumesRepository.shared.bibleWithId(32);
+  final bcv = _ChapterData.fromJson(state.data).bcv;
+  return Text(bible.titleWithHref('${bcv.book}/${bcv.chapter}'));
 }
 
 class _ChapterData {
@@ -61,12 +70,7 @@ class _ChapterData {
   }
 }
 
-Widget bibleChapterTitleBuilder(BuildContext context, ViewState state, Size size) {
-  final bcv = _ChapterData.fromJson(state.data).bcv;
-  return Text(Bible.refTitleFromHref('${bcv.book}/${bcv.chapter}'));
-}
-
-const _bible = Bible(id: 32);
+//const _bible = Bible(id: 32);
 
 class BibleChapterView extends StatelessWidget {
   final ViewState state;
@@ -82,35 +86,47 @@ class BibleChapterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _bible = VolumesRepository.shared.bibleWithId(32);
     final ref = const BookChapterVerse(50, 1, 1).advancedBy(chapters: pageIndex, bible: _bible);
-    return BlocProvider(
-      create: (_) {
-        tec.dmPrint(
-            'BibleChapterView: creating ChapterBloc for ${_bible.id}/${ref.book}/${ref.chapter}');
-        return ChapterBloc(
-            volumes: TecVolumesRepository(const TecEnv()),
-            volume: _bible.id,
-            book: ref.book,
-            chapter: ref.chapter);
-      },
-      child: BlocBuilder<ChapterBloc, ChapterState>(
-        builder: (_, chapterState) {
-          return chapterState.when<Widget>(
-            loading: () => const Center(child: LoadingIndicator()),
-            loadSuccess: (chapter) => _ChapterView(chapter: chapter, size: size),
-            loadFailure: (e) => Center(child: Text(e.toString())),
+    return FutureBuilder<tec.ErrorOrValue<String>>(
+      future: _bible.chapterHtmlWith(ref.book, ref.chapter),
+      builder: (context, snapshot) {
+        final html = snapshot.hasData ? snapshot.data.value : null;
+        final error =
+            snapshot.hasError ? snapshot.error : snapshot.hasData ? snapshot.data.error : null;
+        if (tec.isNotNullOrEmpty(html)) {
+          return _ChapterView(
+            volumeId: _bible.id,
+            ref: ref,
+            baseUrl: _bible.baseUrl,
+            html: html,
+            size: size,
           );
-        },
-      ),
+        } else if (error != null) {
+          return Center(child: Text(error.toString()));
+        } else {
+          return const Center(child: LoadingIndicator());
+        }
+      },
     );
   }
 }
 
 class _ChapterView extends StatefulWidget {
-  final Chapter chapter;
+  final int volumeId;
+  final BookChapterVerse ref;
+  final String baseUrl;
+  final String html;
   final Size size;
 
-  const _ChapterView({Key key, this.chapter, this.size}) : super(key: key);
+  const _ChapterView({
+    Key key,
+    @required this.volumeId,
+    @required this.ref,
+    @required this.baseUrl,
+    @required this.html,
+    this.size,
+  }) : super(key: key);
 
   @override
   _ChapterViewState createState() => _ChapterViewState();
@@ -135,13 +151,18 @@ class _ChapterViewState extends State<_ChapterView> {
     //   _contentScaleFactor = newContentScaleFactor;
     // }
 
-    final htmlFragment = widget.chapter.html;
+    final htmlFragment = widget.html;
 
-    final baseUrl = '${tec.streamUrl}/${widget.chapter.volumeId}/urlbase/';
+    //final baseUrl = '${tec.streamUrl}/${widget.volumeId}/urlbase/';
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
-    final useZondervanCss = widget.chapter.volumeId == 32;
+    final useZondervanCss = widget.volumeId == 32;
+
+    String vendorFolder;
+    if (!(widget.baseUrl?.startsWith('http') ?? false)) {
+      vendorFolder = useZondervanCss ? 'zondervan' : 'tecarta';
+    }
 
     final cssClass = useZondervanCss ? 'C' : 'cno';
     final customStyles = ' .$cssClass { display: none; } ';
@@ -154,7 +175,7 @@ class _ChapterViewState extends State<_ChapterView> {
       htmlFragment: htmlFragment,
       fontSizePercent: (_contentScaleFactor * 100.0).round(),
       marginTop: '0px',
-      //vendorFolder: useZondervanCss ? 'zondervan' : 'tecarta',
+      vendorFolder: vendorFolder,
       customStyles: customStyles,
     );
 
@@ -171,10 +192,10 @@ class _ChapterViewState extends State<_ChapterView> {
           // ),
           TecHtml(
             html,
-            debugId: '${widget.chapter.volumeId}/${widget.chapter.book}/${widget.chapter.chapter}',
+            debugId: '${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}',
             selectable: !kIsWeb,
             scrollController: _scrollController,
-            baseUrl: baseUrl,
+            baseUrl: widget.baseUrl,
             textScaleFactor: 1.0, // HTML is already scaled.
             textStyle: htmlTextStyle.merge(TextStyle(color: textColor)),
             padding: EdgeInsets.symmetric(

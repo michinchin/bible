@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import 'blocs/app_theme_bloc.dart';
@@ -21,6 +22,14 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await tec.Prefs.shared.load();
+
+  VolumesRepository.shared = TecVolumesRepository(
+    productsUrl: null,
+    productsBundleKey: null,
+    bundledProducts: [
+      BundledProduct([8, 9, 32, 47, 49, 50, 51, 78, 218, 231, 250], 'assets')
+    ],
+  );
 
   _registerViewTypes();
 
