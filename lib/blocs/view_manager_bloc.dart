@@ -12,6 +12,8 @@ import '../ui/common/tec_page_view.dart';
 part 'view_manager_bloc.freezed.dart';
 part 'view_manager_bloc.g.dart';
 
+// ignore_for_file: unused_element
+
 const String _key = 'viewManagerState';
 
 ///
@@ -379,8 +381,8 @@ class _ManagedViewScaffold extends StatelessWidget {
     final bloc = context.bloc<ViewManagerBloc>();
 
     final theme = Theme.of(context);
-    //final barColor = theme.canvasColor;
-    final barColor = theme.appBarTheme.color ?? theme.primaryColor;
+    final barColor = theme.canvasColor;
+    // final barColor = theme.appBarTheme.color ?? theme.primaryColor;
     final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
         ? Colors.grey[700]
         : Colors.white;

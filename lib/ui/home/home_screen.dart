@@ -27,7 +27,7 @@ class _HomeScreen extends StatelessWidget {
     // tec.dmPrint('_HomeScreen build()');
     return Scaffold(
       body: Container(
-        color: Theme.of(context).primaryColor,
+        color: Theme.of(context).canvasColor, // primaryColor,
         child: SafeArea(
           left: false,
           right: false,
