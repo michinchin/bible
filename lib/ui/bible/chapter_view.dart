@@ -11,6 +11,7 @@ import '../common/common.dart';
 import '../common/tec_page_view.dart';
 
 const bibleChapterType = 'BibleChapter';
+const _bibleId = 51;
 
 Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size) {
   // tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
@@ -30,7 +31,7 @@ Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size)
     // onPageChanged
     onPageChanged: (context, state, page) async {
       tec.dmPrint('View ${state.uid} onPageChanged($page)');
-      final bible = VolumesRepository.shared.bibleWithId(32);
+      final bible = VolumesRepository.shared.bibleWithId(_bibleId);
       if (bible != null) {
         final bcv = const BookChapterVerse(50, 1, 1).advancedBy(chapters: page, bible: bible);
         context.bloc<ViewManagerBloc>().add(ViewManagerEvent.setData(
@@ -41,7 +42,7 @@ Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size)
 }
 
 Widget bibleChapterTitleBuilder(BuildContext context, ViewState state, Size size) {
-  final bible = VolumesRepository.shared.bibleWithId(32);
+  final bible = VolumesRepository.shared.bibleWithId(_bibleId);
   final bcv = _ChapterData.fromJson(state.data).bcv;
   return Text(bible.titleWithHref('${bcv.book}/${bcv.chapter}'));
 }
@@ -70,8 +71,6 @@ class _ChapterData {
   }
 }
 
-//const _bible = Bible(id: 32);
-
 class BibleChapterView extends StatelessWidget {
   final ViewState state;
   final Size size;
@@ -86,14 +85,12 @@ class BibleChapterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _bible = VolumesRepository.shared.bibleWithId(32);
+    final _bible = VolumesRepository.shared.bibleWithId(_bibleId);
     final ref = const BookChapterVerse(50, 1, 1).advancedBy(chapters: pageIndex, bible: _bible);
     return FutureBuilder<tec.ErrorOrValue<String>>(
       future: _bible.chapterHtmlWith(ref.book, ref.chapter),
       builder: (context, snapshot) {
         final html = snapshot.hasData ? snapshot.data.value : null;
-        final error =
-            snapshot.hasError ? snapshot.error : snapshot.hasData ? snapshot.data.error : null;
         if (tec.isNotNullOrEmpty(html)) {
           return _ChapterView(
             volumeId: _bible.id,
@@ -102,10 +99,17 @@ class BibleChapterView extends StatelessWidget {
             html: html,
             size: size,
           );
-        } else if (error != null) {
-          return Center(child: Text(error.toString()));
         } else {
-          return const Center(child: LoadingIndicator());
+          final error =
+              snapshot.hasError ? snapshot.error : snapshot.hasData ? snapshot.data.error : null;
+          final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+          final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
+          return Container(
+            color: backgroundColor,
+            child: Center(
+              child: error == null ? const LoadingIndicator() : Text(error.toString()),
+            ),
+          );
         }
       },
     );

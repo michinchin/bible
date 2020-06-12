@@ -27,7 +27,7 @@ Future<void> main() async {
     productsUrl: null,
     productsBundleKey: null,
     bundledProducts: [
-      BundledProduct([8, 9, 32, 47, 49, 50, 51, 78, 218, 231, 250], 'assets')
+      BundledProduct([8, 9, 32, 47, 49, 50, 51, 78, 218, 231, 250], 'assets'),
     ],
   );
 
