@@ -404,49 +404,52 @@ class _ManagedViewScaffold extends StatelessWidget {
           // ),
           // child:
           Scaffold(
-        appBar: AppBar(
-          title: _ManagedViewTitle(state: viewState, viewSize: viewSize),
-          leading: bloc.state.views.length <= 1
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.close),
-                  tooltip: 'Close',
-                  onPressed: () {
-                    final event = ViewManagerEvent.remove(viewIndex);
-                    bloc.add(event);
-                  },
-                ),
-          // actions: <Widget>[
-          //   IconButton(
-          //     icon: const Icon(Icons.border_outer),
-          //     onPressed: () {
-          //       bloc.add(ViewManagerEvent.setWidth(position: viewIndex, width: null));
-          //       bloc.add(ViewManagerEvent.setHeight(position: viewIndex, height: null));
-          //     },
-          //   ),
-          //   IconButton(
-          //     icon: const Icon(Icons.format_textdirection_l_to_r),
-          //     onPressed: () {
-          //       final viewState = bloc.state.views[viewIndex];
-          //       final idealWidth = viewState.idealWidth(parentConstraints) ??
-          //           _minWidthForType(viewState.type, parentConstraints);
-          //       final event =
-          //           ViewManagerEvent.setWidth(position: viewIndex, width: idealWidth + 20.0);
-          //       bloc.add(event);
-          //     },
-          //   ),
-          //   IconButton(
-          //     icon: const Icon(Icons.format_line_spacing),
-          //     onPressed: () {
-          //       final viewState = bloc.state.views[viewIndex];
-          //       final idealHeight = viewState.idealHeight(parentConstraints) ??
-          //           _minHeightForType(viewState.type, parentConstraints);
-          //       final event =
-          //           ViewManagerEvent.setHeight(position: viewIndex, height: idealHeight + 20.0);
-          //       bloc.add(event);
-          //     },
-          //   ),
-          // ],
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight((AppBar().preferredSize.height * 0.75).roundToDouble()),
+          child: AppBar(
+            title: _ManagedViewTitle(state: viewState, viewSize: viewSize),
+            leading: bloc.state.views.length <= 1
+                ? null
+                : IconButton(
+                    icon: const Icon(Icons.close),
+                    tooltip: 'Close',
+                    onPressed: () {
+                      final event = ViewManagerEvent.remove(viewIndex);
+                      bloc.add(event);
+                    },
+                  ),
+            // actions: <Widget>[
+            //   IconButton(
+            //     icon: const Icon(Icons.border_outer),
+            //     onPressed: () {
+            //       bloc.add(ViewManagerEvent.setWidth(position: viewIndex, width: null));
+            //       bloc.add(ViewManagerEvent.setHeight(position: viewIndex, height: null));
+            //     },
+            //   ),
+            //   IconButton(
+            //     icon: const Icon(Icons.format_textdirection_l_to_r),
+            //     onPressed: () {
+            //       final viewState = bloc.state.views[viewIndex];
+            //       final idealWidth = viewState.idealWidth(parentConstraints) ??
+            //           _minWidthForType(viewState.type, parentConstraints);
+            //       final event =
+            //           ViewManagerEvent.setWidth(position: viewIndex, width: idealWidth + 20.0);
+            //       bloc.add(event);
+            //     },
+            //   ),
+            //   IconButton(
+            //     icon: const Icon(Icons.format_line_spacing),
+            //     onPressed: () {
+            //       final viewState = bloc.state.views[viewIndex];
+            //       final idealHeight = viewState.idealHeight(parentConstraints) ??
+            //           _minHeightForType(viewState.type, parentConstraints);
+            //       final event =
+            //           ViewManagerEvent.setHeight(position: viewIndex, height: idealHeight + 20.0);
+            //       bloc.add(event);
+            //     },
+            //   ),
+            // ],
+          ),
         ),
         body: _ManagedViewBody(state: viewState, size: viewSize),
       ),

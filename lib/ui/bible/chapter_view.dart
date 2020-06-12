@@ -203,7 +203,7 @@ class _ChapterViewState extends State<_ChapterView> {
             textScaleFactor: 1.0, // HTML is already scaled.
             textStyle: htmlTextStyle.merge(TextStyle(color: textColor)),
             padding: EdgeInsets.symmetric(
-              horizontal: (widget.size.width * 0.05).roundToDouble(),
+              horizontal: (widget.size.width * _marginPercent).roundToDouble(),
             ),
             onLinkTap: null,
           ),
@@ -213,10 +213,13 @@ class _ChapterViewState extends State<_ChapterView> {
   }
 }
 
+const _lineSpacing = 1.4;
+const _marginPercent = 0.05; // 0.05;
+
 const TextStyle htmlTextStyle = TextStyle(
   inherit: false,
   //fontFamily: tec.platformIs(tec.Platform.iOS) ? 'Avenir' : 'normal',
   fontSize: 16,
   fontWeight: FontWeight.normal,
-  height: 1.5,
+  height: _lineSpacing,
 );
