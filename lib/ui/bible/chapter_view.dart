@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,7 +45,16 @@ Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size)
 Widget bibleChapterTitleBuilder(BuildContext context, ViewState state, Size size) {
   final bible = VolumesRepository.shared.bibleWithId(_bibleId);
   final bcv = _ChapterData.fromJson(state.data).bcv;
-  return Text(bible.titleWithHref('${bcv.book}/${bcv.chapter}'));
+  return CupertinoButton(
+    onPressed: () {
+      Navigator.of(context).push<void>(MaterialPageRoute<void>(
+        builder: (context) => Scaffold(appBar: AppBar(), body: const Text('test')),
+      ));
+    },
+    child: Text(
+      bible.titleWithHref('${bcv.book}/${bcv.chapter}'),
+    ),
+  );
 }
 
 class _ChapterData {

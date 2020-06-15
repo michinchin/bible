@@ -13,3 +13,23 @@ class LoadingIndicator extends StatelessWidget {
         radius: radius,
       ));
 }
+
+///
+/// ThemeData extensions.
+///
+extension ExtOnThemeData on ThemeData {
+  TextTheme copyOfAppBarTextThemeWithColor(Color color) =>
+      appBarTheme.textTheme?.apply(bodyColor: color) ??
+      primaryTextTheme?.apply(bodyColor: color) ??
+      TextTheme(headline6: TextStyle(color: color));
+}
+
+///
+/// AppBarTheme extensions.
+///
+// extension _ExtOnAppBarTheme on AppBarTheme {
+//   IconThemeData copyOfActionsIconThemeWithColor(Color color) =>
+//       actionsIconTheme?.copyWith(color: color) ?? IconThemeData(color: color);
+//   IconThemeData copyOfIconThemeWithColor(Color color) =>
+//       iconTheme?.copyWith(color: color) ?? IconThemeData(color: color);
+// }

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
+import '../ui/common/common.dart';
 import '../ui/common/tec_page_view.dart';
 
 part 'view_manager_bloc.freezed.dart';
@@ -118,15 +119,6 @@ class _ViewTypeAPI {
     this.minHeight,
   );
 }
-
-///
-/// Min width for a view, based on type.
-///
-double _minWidthForType(String type, BoxConstraints constraints) =>
-    ViewManager.shared._minWidthForType(type, constraints);
-
-double _minHeightForType(String type, BoxConstraints constraints) =>
-    ViewManager.shared._minHeightForType(type, constraints);
 
 ///
 /// ViewManagerBloc
@@ -358,27 +350,136 @@ class _VMViewStack extends StatelessWidget {
   }
 }
 
+@freezed
+abstract class ManagedViewState with _$ManagedViewState {
+  factory ManagedViewState(
+    BoxConstraints parentConstraints,
+    ViewState viewState,
+    Size viewSize,
+    int viewIndex,
+  ) = _ManagedViewState;
+}
+
+class ManagedViewBloc extends Bloc<ManagedViewState, ManagedViewState> {
+  final ManagedViewState _initialState;
+  ManagedViewBloc(ManagedViewState initialState) : _initialState = initialState;
+
+  @override
+  ManagedViewState get initialState => _initialState;
+
+  @override
+  Stream<ManagedViewState> mapEventToState(ManagedViewState event) async* {
+    yield ManagedViewState(
+        event.parentConstraints, event.viewState, event.viewSize, event.viewIndex);
+  }
+}
+
+///
+/// Root navigator for a managed view, so each view has its own navigation
+/// state and history.
+///
+class _ManagedViewNavigator extends StatefulWidget {
+  final ManagedViewState managedViewState;
+
+  const _ManagedViewNavigator(this.managedViewState, {Key key}) : super(key: key);
+
+  @override
+  __ManagedViewNavigatorState createState() => __ManagedViewNavigatorState();
+}
+
+class __ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
+  @override
+  void didUpdateWidget(_ManagedViewNavigator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // if (context.bloc<ManagedViewBloc>().state != widget.managedViewState) {
+    final state = widget.managedViewState;
+    tec.dmPrint('ManagedViewNavigatorState calling ManagedViewBloc.add for ${state.viewState.uid}');
+    context.bloc<ManagedViewBloc>().add(state);
+    // }
+  }
+
+  Widget _routeBuilder(BuildContext context) => BlocBuilder<ManagedViewBloc, ManagedViewState>(
+      builder: (_, state) => _ManagedViewScaffold(state));
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      // onGenerateRoute: (settings) => MaterialPageRoute<dynamic>(
+      //   settings: settings,
+      //   builder: _routeBuilder,
+      // ),
+
+      onGenerateRoute: (settings) {
+        return PageRouteBuilder<dynamic>(
+          pageBuilder: (context, _, __) => _routeBuilder(context),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            // final theme = Theme.of(context).pageTransitionsTheme;
+            // return theme.buildTransitions<dynamic>(
+            //     this, context, animation, secondaryAnimation, child);
+            return FadeTransition(
+              opacity: animation,
+              child: RotationTransition(
+                turns: Tween<double>(begin: 0.5, end: 1.0).animate(animation),
+                child: child,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
 ///
 /// Scaffold for a managed view.
 ///
 class _ManagedViewScaffold extends StatelessWidget {
-  final BoxConstraints parentConstraints;
-  final ViewState viewState;
-  final Size viewSize;
-  final int viewIndex;
+  final ManagedViewState state;
 
-  const _ManagedViewScaffold({
+  const _ManagedViewScaffold(
+    this.state, {
     Key key,
-    @required this.parentConstraints,
-    @required this.viewState,
-    @required this.viewSize,
-    @required this.viewIndex,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // ignore: close_sinks
-    final bloc = context.bloc<ViewManagerBloc>();
+    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+    tec.dmPrint(
+        '_ManagedViewScaffold building ${state.viewState.uid} with index ${state.viewIndex}');
+
+    List<Widget> testActionsForAdjustingSize() => <Widget>[
+          IconButton(
+            icon: const Icon(Icons.border_outer),
+            onPressed: () {
+              bloc
+                ..add(ViewManagerEvent.setWidth(position: state.viewIndex, width: null))
+                ..add(ViewManagerEvent.setHeight(position: state.viewIndex, height: null));
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.format_textdirection_l_to_r),
+            onPressed: () {
+              final idealWidth = state.viewState.idealWidth(state.parentConstraints) ??
+                  ViewManager.shared
+                      ._minWidthForType(state.viewState.type, state.parentConstraints);
+              final event =
+                  ViewManagerEvent.setWidth(position: state.viewIndex, width: idealWidth + 20.0);
+              bloc.add(event);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.format_line_spacing),
+            onPressed: () {
+              final idealHeight = state.viewState.idealHeight(state.parentConstraints) ??
+                  ViewManager.shared
+                      ._minHeightForType(state.viewState.type, state.parentConstraints);
+              final event =
+                  ViewManagerEvent.setHeight(position: state.viewIndex, height: idealHeight + 20.0);
+              bloc.add(event);
+            },
+          ),
+        ];
 
     final theme = Theme.of(context);
     final barColor = theme.canvasColor;
@@ -394,93 +495,30 @@ class _ManagedViewScaffold extends StatelessWidget {
       textTheme: theme.copyOfAppBarTextThemeWithColor(barTextColor),
     );
 
-    //final side = BorderSide(width: 1, color: Theme.of(context).primaryColor);
-
     return Theme(
       data: theme.copyWith(appBarTheme: newAppBarTheme),
-      child: // Container(
-          // decoration: BoxDecoration(
-          //   border: Border(right: side, bottom: side),
-          // ),
-          // child:
-          Scaffold(
+      child: Scaffold(
         appBar: PreferredSize(
           preferredSize: Size.fromHeight((AppBar().preferredSize.height * 0.75).roundToDouble()),
           child: AppBar(
-            title: _ManagedViewTitle(state: viewState, viewSize: viewSize),
+            title: ViewManager.shared._buildViewTitle(context, state.viewState, state.viewSize),
             leading: bloc.state.views.length <= 1
                 ? null
                 : IconButton(
                     icon: const Icon(Icons.close),
                     tooltip: 'Close',
                     onPressed: () {
-                      final event = ViewManagerEvent.remove(viewIndex);
+                      final event = ViewManagerEvent.remove(state.viewIndex);
                       bloc.add(event);
                     },
                   ),
-            // actions: <Widget>[
-            //   IconButton(
-            //     icon: const Icon(Icons.border_outer),
-            //     onPressed: () {
-            //       bloc.add(ViewManagerEvent.setWidth(position: viewIndex, width: null));
-            //       bloc.add(ViewManagerEvent.setHeight(position: viewIndex, height: null));
-            //     },
-            //   ),
-            //   IconButton(
-            //     icon: const Icon(Icons.format_textdirection_l_to_r),
-            //     onPressed: () {
-            //       final viewState = bloc.state.views[viewIndex];
-            //       final idealWidth = viewState.idealWidth(parentConstraints) ??
-            //           _minWidthForType(viewState.type, parentConstraints);
-            //       final event =
-            //           ViewManagerEvent.setWidth(position: viewIndex, width: idealWidth + 20.0);
-            //       bloc.add(event);
-            //     },
-            //   ),
-            //   IconButton(
-            //     icon: const Icon(Icons.format_line_spacing),
-            //     onPressed: () {
-            //       final viewState = bloc.state.views[viewIndex];
-            //       final idealHeight = viewState.idealHeight(parentConstraints) ??
-            //           _minHeightForType(viewState.type, parentConstraints);
-            //       final event =
-            //           ViewManagerEvent.setHeight(position: viewIndex, height: idealHeight + 20.0);
-            //       bloc.add(event);
-            //     },
-            //   ),
-            // ],
+            actions: null, // testActionsForAdjustingSize(),
           ),
         ),
-        body: _ManagedViewBody(state: viewState, size: viewSize),
+        body: ViewManager.shared._buildViewBody(context, state.viewState, state.viewSize),
       ),
-      // ), // Container
     );
   }
-}
-
-class _ManagedViewTitle extends StatelessWidget {
-  final ViewState state;
-  final Size viewSize;
-
-  const _ManagedViewTitle({Key key, @required this.state, @required this.viewSize})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) =>
-      ViewManager.shared._buildViewTitle(context, state, viewSize);
-}
-
-///
-/// Managed view body widget.
-///
-class _ManagedViewBody extends StatelessWidget {
-  final ViewState state;
-  final Size size;
-
-  const _ManagedViewBody({Key key, @required this.state, @required this.size}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => ViewManager.shared._buildViewBody(context, state, size);
 }
 
 ///
@@ -519,8 +557,8 @@ List<List<ViewState>> _buildRows(
 /// ViewState extensions.
 ///
 extension _ExtOnViewState on ViewState {
-  double minWidth(BoxConstraints c) => _minWidthForType(type, c);
-  double minHeight(BoxConstraints c) => _minHeightForType(type, c);
+  double minWidth(BoxConstraints c) => ViewManager.shared._minWidthForType(type, c);
+  double minHeight(BoxConstraints c) => ViewManager.shared._minHeightForType(type, c);
   double idealWidth(BoxConstraints c) => math.max(preferredWidth ?? 0, minWidth(c));
   double idealHeight(BoxConstraints c) => math.max(preferredHeight ?? 0, minHeight(c));
   double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
@@ -638,6 +676,8 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           width = state.minWidth(constraints) + xDelta;
         }
 
+        final mvs = ManagedViewState(constraints, state, Size(width, height), i);
+
         views.add(AnimatedPositionedDirectional(
           key: ValueKey(state.uid),
           duration: const Duration(milliseconds: 200),
@@ -645,14 +685,14 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           top: y,
           width: width,
           height: height,
-          child: _ManagedViewScaffold(
-            parentConstraints: constraints,
-            viewState: state,
-            viewSize: Size(width, height),
-            viewIndex: i++,
+          child: BlocProvider(
+            create: (_) => ManagedViewBloc(mvs),
+            child: _ManagedViewNavigator(mvs),
           ),
+          // child: _ManagedViewScaffold(mvs),
         ));
 
+        i++;
         x += width;
       }
       y += height;
@@ -683,24 +723,4 @@ extension _ExtOnList on List {
       this[to] = temp;
     }
   }
-}
-
-///
-/// ThemeData extensions.
-///
-extension _ExtOnThemeData on ThemeData {
-  TextTheme copyOfAppBarTextThemeWithColor(Color color) =>
-      appBarTheme.textTheme?.apply(bodyColor: color) ??
-      primaryTextTheme?.apply(bodyColor: color) ??
-      TextTheme(headline6: TextStyle(color: color));
-}
-
-///
-/// AppBarTheme extensions.
-///
-extension _ExtOnAppBarTheme on AppBarTheme {
-  IconThemeData copyOfActionsIconThemeWithColor(Color color) =>
-      actionsIconTheme?.copyWith(color: color) ?? IconThemeData(color: color);
-  IconThemeData copyOfIconThemeWithColor(Color color) =>
-      iconTheme?.copyWith(color: color) ?? IconThemeData(color: color);
 }

@@ -1399,3 +1399,205 @@ abstract class _Views implements ViewManagerState {
   @override
   _$ViewsCopyWith<_Views> get copyWith;
 }
+
+class _$ManagedViewStateTearOff {
+  const _$ManagedViewStateTearOff();
+
+  _ManagedViewState call(BoxConstraints parentConstraints, ViewState viewState,
+      Size viewSize, int viewIndex) {
+    return _ManagedViewState(
+      parentConstraints,
+      viewState,
+      viewSize,
+      viewIndex,
+    );
+  }
+}
+
+// ignore: unused_element
+const $ManagedViewState = _$ManagedViewStateTearOff();
+
+mixin _$ManagedViewState {
+  BoxConstraints get parentConstraints;
+  ViewState get viewState;
+  Size get viewSize;
+  int get viewIndex;
+
+  $ManagedViewStateCopyWith<ManagedViewState> get copyWith;
+}
+
+abstract class $ManagedViewStateCopyWith<$Res> {
+  factory $ManagedViewStateCopyWith(
+          ManagedViewState value, $Res Function(ManagedViewState) then) =
+      _$ManagedViewStateCopyWithImpl<$Res>;
+  $Res call(
+      {BoxConstraints parentConstraints,
+      ViewState viewState,
+      Size viewSize,
+      int viewIndex});
+
+  $ViewStateCopyWith<$Res> get viewState;
+}
+
+class _$ManagedViewStateCopyWithImpl<$Res>
+    implements $ManagedViewStateCopyWith<$Res> {
+  _$ManagedViewStateCopyWithImpl(this._value, this._then);
+
+  final ManagedViewState _value;
+  // ignore: unused_field
+  final $Res Function(ManagedViewState) _then;
+
+  @override
+  $Res call({
+    Object parentConstraints = freezed,
+    Object viewState = freezed,
+    Object viewSize = freezed,
+    Object viewIndex = freezed,
+  }) {
+    return _then(_value.copyWith(
+      parentConstraints: parentConstraints == freezed
+          ? _value.parentConstraints
+          : parentConstraints as BoxConstraints,
+      viewState:
+          viewState == freezed ? _value.viewState : viewState as ViewState,
+      viewSize: viewSize == freezed ? _value.viewSize : viewSize as Size,
+      viewIndex: viewIndex == freezed ? _value.viewIndex : viewIndex as int,
+    ));
+  }
+
+  @override
+  $ViewStateCopyWith<$Res> get viewState {
+    if (_value.viewState == null) {
+      return null;
+    }
+    return $ViewStateCopyWith<$Res>(_value.viewState, (value) {
+      return _then(_value.copyWith(viewState: value));
+    });
+  }
+}
+
+abstract class _$ManagedViewStateCopyWith<$Res>
+    implements $ManagedViewStateCopyWith<$Res> {
+  factory _$ManagedViewStateCopyWith(
+          _ManagedViewState value, $Res Function(_ManagedViewState) then) =
+      __$ManagedViewStateCopyWithImpl<$Res>;
+  @override
+  $Res call(
+      {BoxConstraints parentConstraints,
+      ViewState viewState,
+      Size viewSize,
+      int viewIndex});
+
+  @override
+  $ViewStateCopyWith<$Res> get viewState;
+}
+
+class __$ManagedViewStateCopyWithImpl<$Res>
+    extends _$ManagedViewStateCopyWithImpl<$Res>
+    implements _$ManagedViewStateCopyWith<$Res> {
+  __$ManagedViewStateCopyWithImpl(
+      _ManagedViewState _value, $Res Function(_ManagedViewState) _then)
+      : super(_value, (v) => _then(v as _ManagedViewState));
+
+  @override
+  _ManagedViewState get _value => super._value as _ManagedViewState;
+
+  @override
+  $Res call({
+    Object parentConstraints = freezed,
+    Object viewState = freezed,
+    Object viewSize = freezed,
+    Object viewIndex = freezed,
+  }) {
+    return _then(_ManagedViewState(
+      parentConstraints == freezed
+          ? _value.parentConstraints
+          : parentConstraints as BoxConstraints,
+      viewState == freezed ? _value.viewState : viewState as ViewState,
+      viewSize == freezed ? _value.viewSize : viewSize as Size,
+      viewIndex == freezed ? _value.viewIndex : viewIndex as int,
+    ));
+  }
+}
+
+class _$_ManagedViewState
+    with DiagnosticableTreeMixin
+    implements _ManagedViewState {
+  _$_ManagedViewState(
+      this.parentConstraints, this.viewState, this.viewSize, this.viewIndex)
+      : assert(parentConstraints != null),
+        assert(viewState != null),
+        assert(viewSize != null),
+        assert(viewIndex != null);
+
+  @override
+  final BoxConstraints parentConstraints;
+  @override
+  final ViewState viewState;
+  @override
+  final Size viewSize;
+  @override
+  final int viewIndex;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'ManagedViewState(parentConstraints: $parentConstraints, viewState: $viewState, viewSize: $viewSize, viewIndex: $viewIndex)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ManagedViewState'))
+      ..add(DiagnosticsProperty('parentConstraints', parentConstraints))
+      ..add(DiagnosticsProperty('viewState', viewState))
+      ..add(DiagnosticsProperty('viewSize', viewSize))
+      ..add(DiagnosticsProperty('viewIndex', viewIndex));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _ManagedViewState &&
+            (identical(other.parentConstraints, parentConstraints) ||
+                const DeepCollectionEquality()
+                    .equals(other.parentConstraints, parentConstraints)) &&
+            (identical(other.viewState, viewState) ||
+                const DeepCollectionEquality()
+                    .equals(other.viewState, viewState)) &&
+            (identical(other.viewSize, viewSize) ||
+                const DeepCollectionEquality()
+                    .equals(other.viewSize, viewSize)) &&
+            (identical(other.viewIndex, viewIndex) ||
+                const DeepCollectionEquality()
+                    .equals(other.viewIndex, viewIndex)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(parentConstraints) ^
+      const DeepCollectionEquality().hash(viewState) ^
+      const DeepCollectionEquality().hash(viewSize) ^
+      const DeepCollectionEquality().hash(viewIndex);
+
+  @override
+  _$ManagedViewStateCopyWith<_ManagedViewState> get copyWith =>
+      __$ManagedViewStateCopyWithImpl<_ManagedViewState>(this, _$identity);
+}
+
+abstract class _ManagedViewState implements ManagedViewState {
+  factory _ManagedViewState(BoxConstraints parentConstraints,
+      ViewState viewState, Size viewSize, int viewIndex) = _$_ManagedViewState;
+
+  @override
+  BoxConstraints get parentConstraints;
+  @override
+  ViewState get viewState;
+  @override
+  Size get viewSize;
+  @override
+  int get viewIndex;
+  @override
+  _$ManagedViewStateCopyWith<_ManagedViewState> get copyWith;
+}
