@@ -1,3 +1,6 @@
+import 'package:bible/blocs/note_bloc.dart';
+import 'package:bible/ui/note/note_view.dart';
+import 'package:bible/ui/note/notes_view.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,7 +46,10 @@ void _registerViewTypes() {
   ViewManager.shared
     ..register(testViewType, title: 'Test', builder: testViewBuilder)
     ..register(bibleChapterType,
-        title: 'Bible', builder: bibleChapterViewBuilder, titleBuilder: bibleChapterTitleBuilder);
+        title: 'Bible',
+        builder: bibleChapterViewBuilder,
+        titleBuilder: bibleChapterTitleBuilder)
+    ..register(noteViewTypeName, title: 'Note', builder: notesViewBuilder);
 }
 
 ///
@@ -57,7 +63,8 @@ class App extends StatelessWidget {
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (_, themeMode) {
           return tec.BlocProvider<TecStyleBloc>(
-            bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
+            bloc: TecStyleBloc(
+                <String, dynamic>{'dialogStyle': TecMetaStyle.material}),
             child: MaterialApp(
               theme: ThemeData.light(),
               darkTheme: ThemeData.dark(),
