@@ -8,7 +8,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 import '../ui/common/common.dart';
-import '../ui/common/tec_page_route.dart';
 import '../ui/common/tec_page_view.dart';
 
 part 'view_manager_bloc.freezed.dart';
@@ -415,7 +414,7 @@ class __ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
 
     // if (context.bloc<ManagedViewBloc>().state != widget.managedViewState) {
     final state = widget.managedViewState;
-    tec.dmPrint('ManagedViewNavigatorState calling ManagedViewBloc.add for ${state.viewState.uid}');
+    // tec.dmPrint('ManagedViewNavigatorState calling ManagedViewBloc.add for ${state.viewState.uid}');
     context.bloc<ManagedViewBloc>().add(state);
     // }
   }
@@ -426,28 +425,10 @@ class __ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      // onGenerateRoute: (settings) => MaterialPageRoute<dynamic>(
-      //   settings: settings,
-      //   builder: _routeBuilder,
-      // ),
-
-      onGenerateRoute: (settings) {
-        return PageRouteBuilder<dynamic>(
-          pageBuilder: (context, _, __) => _routeBuilder(context),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            // final theme = Theme.of(context).pageTransitionsTheme;
-            // return theme.buildTransitions<dynamic>(
-            //     this, context, animation, secondaryAnimation, child);
-            return FadeTransition(
-              opacity: animation,
-              child: RotationTransition(
-                turns: Tween<double>(begin: 0.5, end: 1.0).animate(animation),
-                child: child,
-              ),
-            );
-          },
-        );
-      },
+      onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+        settings: settings,
+        builder: _routeBuilder,
+      ),
     );
   }
 }
@@ -466,8 +447,7 @@ class _ManagedViewScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-    tec.dmPrint(
-        '_ManagedViewScaffold building ${state.viewState.uid} with index ${state.viewIndex}');
+    // tec.dmPrint('_ManagedViewScaffold building ${state.viewState.uid} with index ${state.viewIndex}');
 
     List<Widget> testActionsForAdjustingSize() => <Widget>[
           IconButton(

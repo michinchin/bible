@@ -1,6 +1,3 @@
-import 'package:bible/blocs/note_bloc.dart';
-import 'package:bible/ui/note/note_view.dart';
-import 'package:bible/ui/note/notes_view.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +12,8 @@ import 'blocs/view_manager_bloc.dart';
 import 'ui/bible/chapter_view.dart';
 import 'ui/common/test_view.dart';
 import 'ui/home/home_screen.dart';
+import 'ui/note/note_view.dart';
+import 'ui/note/notes_view.dart';
 
 const _appTitle = 'Tecarta Bible';
 
@@ -46,9 +45,7 @@ void _registerViewTypes() {
   ViewManager.shared
     ..register(testViewType, title: 'Test', builder: testViewBuilder)
     ..register(bibleChapterType,
-        title: 'Bible',
-        builder: bibleChapterViewBuilder,
-        titleBuilder: bibleChapterTitleBuilder)
+        title: 'Bible', builder: bibleChapterViewBuilder, titleBuilder: bibleChapterTitleBuilder)
     ..register(noteViewTypeName, title: 'Note', builder: notesViewBuilder);
 }
 
@@ -63,8 +60,7 @@ class App extends StatelessWidget {
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (_, themeMode) {
           return tec.BlocProvider<TecStyleBloc>(
-            bloc: TecStyleBloc(
-                <String, dynamic>{'dialogStyle': TecMetaStyle.material}),
+            bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
             child: MaterialApp(
               theme: ThemeData.light(),
               darkTheme: ThemeData.dark(),

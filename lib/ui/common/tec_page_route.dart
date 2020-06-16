@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble, ImageFilter;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -119,8 +119,8 @@ PageTransitionsTheme tecPageTransitionsTheme(BuildContext context) {
 }
 
 ///
-/// Used by [PageTransitionsTheme] to define a horizontal [MaterialPageRoute]
-/// page transition animation that matches native iOS page transitions.
+/// Used by [PageTransitionsTheme] to define a horizontal page transition
+/// animation that approximates native iOS page transitions.
 ///
 class TecCupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   const TecCupertinoPageTransitionsBuilder();
@@ -444,6 +444,7 @@ class TecCupertinoPageTransition extends StatelessWidget {
   TecCupertinoPageTransition({
     Key key,
     @required Animation<double> primaryRouteAnimation,
+    // ignore: avoid_unused_constructor_parameters
     @required Animation<double> secondaryRouteAnimation,
     @required this.child,
     @required bool linearTransition,
@@ -451,27 +452,23 @@ class TecCupertinoPageTransition extends StatelessWidget {
         _primaryPositionAnimation = (linearTransition
                 ? primaryRouteAnimation
                 : CurvedAnimation(
-                    // The curves below have been rigorously derived from plots of native
-                    // iOS animation frames. Specifically, a video was taken of a page
-                    // transition animation and the distance in each frame that the page
-                    // moved was measured. A best fit bezier curve was the fitted to the
-                    // point set, which is linearToEaseIn. Conversely, easeInToLinear is the
-                    // reflection over the origin of linearToEaseIn.
                     parent: primaryRouteAnimation,
                     curve: Curves.linearToEaseOut,
                     reverseCurve: Curves.easeInToLinear,
                   ))
             .drive(_kRightMiddleTween),
-        _secondaryPositionAnimation = (linearTransition
-                ? secondaryRouteAnimation
-                : CurvedAnimation(
-                    parent: secondaryRouteAnimation,
-                    curve: Curves.linearToEaseOut,
-                    reverseCurve: Curves.easeInToLinear,
-                  ))
-            .drive(_kMiddleLeftTween),
 
-        // REMOVED THIS TO REMOVE SHADOW TO LEFT OF VIEW:
+        // REMOVED THIS SO PAGE DOESN'T SLIDE TO LEFT
+        // _secondaryPositionAnimation = (linearTransition
+        //         ? secondaryRouteAnimation
+        //         : CurvedAnimation(
+        //             parent: secondaryRouteAnimation,
+        //             curve: Curves.linearToEaseOut,
+        //             reverseCurve: Curves.easeInToLinear,
+        //           ))
+        //     .drive(_kMiddleLeftTween),
+
+        // REMOVED THIS TO REMOVE SHADOW TO LEFT OF PAGE:
         // _primaryShadowAnimation = (linearTransition
         //         ? primaryRouteAnimation
         //         : CurvedAnimation(
@@ -485,9 +482,11 @@ class TecCupertinoPageTransition extends StatelessWidget {
   // When this page is coming in to cover another page.
   final Animation<Offset> _primaryPositionAnimation;
   // When this page is becoming covered by another page.
-  final Animation<Offset> _secondaryPositionAnimation;
 
-  // REMOVED THIS TO REMOVE SHADOW TO LEFT OF VIEW:
+  // REMOVED THIS SO PAGE DOESN'T SLIDE TO LEFT
+  // final Animation<Offset> _secondaryPositionAnimation;
+
+  // REMOVED THIS TO REMOVE SHADOW TO LEFT OF PAGE:
   // final Animation<Decoration> _primaryShadowAnimation;
 
   /// The widget below this widget in the tree.
@@ -497,20 +496,25 @@ class TecCupertinoPageTransition extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final textDirection = Directionality.of(context);
+
+    // REMOVED THIS SO PAGE DOESN'T SLIDE TO LEFT
+    // return SlideTransition(
+    // position: _secondaryPositionAnimation,
+    // textDirection: textDirection,
+    // transformHitTests: false,
+    // child:
+
     return SlideTransition(
-      position: _secondaryPositionAnimation,
+      position: _primaryPositionAnimation,
       textDirection: textDirection,
-      transformHitTests: false,
-      child: SlideTransition(
-        position: _primaryPositionAnimation,
-        textDirection: textDirection,
-        child: child,
-        // REMOVED THIS TO REMOVE SHADOW TO LEFT OF VIEW:
-        // child: DecoratedBoxTransition(
-        //   decoration: _primaryShadowAnimation,
-        //   child: child,
-        // ),
-      ),
+      child: child,
+
+      // REMOVED THIS TO REMOVE SHADOW TO LEFT OF PAGE:
+      // child: DecoratedBoxTransition(
+      //   decoration: _primaryShadowAnimation,
+      //   child: child,
+      // ),
+      //),
     );
   }
 }

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/note_bloc.dart';
 import '../../blocs/view_manager_bloc.dart';
-
+import '../common/common.dart';
 import 'note_view.dart';
 
 const notesViewTypeName = 'NotesView';
@@ -54,7 +54,7 @@ class __NotesScreenState extends State<_NotesScreen> {
                     title: const Text('Add Note'),
                     leading: const Icon(Icons.add),
                     onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<NoteView>(
+                      TecPageRoute<NoteView>(
                         builder: (c) => noteViewBuilder(c, notes.length),
                       ),
                     ),
@@ -73,8 +73,7 @@ class __NotesScreenState extends State<_NotesScreen> {
                   child: ListTile(
                     // first line of note is made to be the title
                     title: Text(notes[i].doc.lookupLine(0).node.toPlainText()),
-                    onTap: () =>
-                        Navigator.of(context).push(MaterialPageRoute<NoteView>(
+                    onTap: () => Navigator.of(context).push(TecPageRoute<NoteView>(
                       builder: (c) => noteViewBuilder(c, i),
                     )),
                   ),

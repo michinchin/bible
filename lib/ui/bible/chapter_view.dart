@@ -47,7 +47,7 @@ Widget bibleChapterTitleBuilder(BuildContext context, ViewState state, Size size
   final bcv = _ChapterData.fromJson(state.data).bcv;
   return CupertinoButton(
     onPressed: () {
-      Navigator.of(context).push<void>(MaterialPageRoute<void>(
+      Navigator.of(context).push<void>(TecPageRoute<void>(
         builder: (context) => Scaffold(appBar: AppBar(), body: const Text('test')),
       ));
     },
