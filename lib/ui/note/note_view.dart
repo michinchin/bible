@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:zefyr/zefyr.dart';
 
 import '../../blocs/note_bloc.dart';
+import '../../blocs/view_manager_bloc.dart';
 
 const noteViewTypeName = 'NoteView';
 
@@ -52,16 +53,18 @@ class __NoteScreenState extends State<_NoteScreen> {
           final doc = state.doc;
           _controller = ZefyrController(doc);
           return Scaffold(
-              appBar: AppBar(
-                title: const Text('Edit Note'),
-                actions: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.save),
-                    onPressed: () {
-                      bloc().save();
-                    },
-                  )
-                ],
+              appBar: ManagedViewAppBar(
+                appBar: AppBar(
+                  title: const Text('Edit Note'),
+                  actions: <Widget>[
+                    IconButton(
+                      icon: const Icon(Icons.save),
+                      onPressed: () {
+                        bloc().save();
+                      },
+                    )
+                  ],
+                ),
               ),
               body: SafeArea(
                 child: ZefyrScaffold(

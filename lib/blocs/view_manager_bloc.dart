@@ -272,6 +272,26 @@ class ViewManagerWidget extends StatelessWidget {
   }
 }
 
+final _viewAppBarPreferredSize =
+    Size.fromHeight((AppBar().preferredSize.height * 0.75).roundToDouble());
+
+///
+/// App bar widget with reduced height, so managed views have more space for content.
+///
+class ManagedViewAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final PreferredSizeWidget appBar;
+
+  const ManagedViewAppBar({Key key, this.appBar}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return appBar;
+  }
+
+  @override
+  Size get preferredSize => _viewAppBarPreferredSize;
+}
+
 typedef PageableViewOnPageChanged = void Function(BuildContext context, ViewState state, int page);
 
 ///
@@ -483,9 +503,8 @@ class _ManagedViewScaffold extends StatelessWidget {
         ];
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight((AppBar().preferredSize.height * 0.75).roundToDouble()),
-        child: AppBar(
+      appBar: ManagedViewAppBar(
+        appBar: AppBar(
           title: ViewManager.shared._buildViewTitle(context, state.viewState, state.viewSize),
           leading: bloc.state.views.length <= 1
               ? null
