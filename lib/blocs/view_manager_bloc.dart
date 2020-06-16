@@ -8,6 +8,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 import '../ui/common/common.dart';
+import '../ui/common/tec_page_route.dart';
 import '../ui/common/tec_page_view.dart';
 
 part 'view_manager_bloc.freezed.dart';
@@ -344,9 +345,29 @@ class _VMViewStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final barColor = theme.canvasColor;
+    // final barColor = theme.appBarTheme.color ?? theme.primaryColor;
+    final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
+        ? Colors.grey[700]
+        : Colors.white;
+    final newAppBarTheme = theme.appBarTheme.copyWith(
+      elevation: 0,
+      color: barColor,
+      actionsIconTheme: IconThemeData(color: barTextColor),
+      iconTheme: IconThemeData(color: barTextColor),
+      textTheme: theme.copyOfAppBarTextThemeWithColor(barTextColor),
+    );
+
     // tec.dmPrint('_VMViewStackState build()');
     final rows = _buildRows(_Size.ideal, vmState, constraints)..balance(constraints);
-    return Stack(children: rows.toViewList(constraints));
+    return Theme(
+      data: theme.copyWith(
+        appBarTheme: newAppBarTheme,
+        pageTransitionsTheme: tecPageTransitionsTheme(context),
+      ),
+      child: Stack(children: rows.toViewList(constraints)),
+    );
   }
 }
 
@@ -481,42 +502,25 @@ class _ManagedViewScaffold extends StatelessWidget {
           ),
         ];
 
-    final theme = Theme.of(context);
-    final barColor = theme.canvasColor;
-    // final barColor = theme.appBarTheme.color ?? theme.primaryColor;
-    final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
-        ? Colors.grey[700]
-        : Colors.white;
-    final newAppBarTheme = theme.appBarTheme.copyWith(
-      elevation: 0,
-      color: barColor,
-      actionsIconTheme: IconThemeData(color: barTextColor),
-      iconTheme: IconThemeData(color: barTextColor),
-      textTheme: theme.copyOfAppBarTextThemeWithColor(barTextColor),
-    );
-
-    return Theme(
-      data: theme.copyWith(appBarTheme: newAppBarTheme),
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight((AppBar().preferredSize.height * 0.75).roundToDouble()),
-          child: AppBar(
-            title: ViewManager.shared._buildViewTitle(context, state.viewState, state.viewSize),
-            leading: bloc.state.views.length <= 1
-                ? null
-                : IconButton(
-                    icon: const Icon(Icons.close),
-                    tooltip: 'Close',
-                    onPressed: () {
-                      final event = ViewManagerEvent.remove(state.viewIndex);
-                      bloc.add(event);
-                    },
-                  ),
-            actions: null, // testActionsForAdjustingSize(),
-          ),
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight((AppBar().preferredSize.height * 0.75).roundToDouble()),
+        child: AppBar(
+          title: ViewManager.shared._buildViewTitle(context, state.viewState, state.viewSize),
+          leading: bloc.state.views.length <= 1
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.close),
+                  tooltip: 'Close',
+                  onPressed: () {
+                    final event = ViewManagerEvent.remove(state.viewIndex);
+                    bloc.add(event);
+                  },
+                ),
+          actions: null, // testActionsForAdjustingSize(),
         ),
-        body: ViewManager.shared._buildViewBody(context, state.viewState, state.viewSize),
       ),
+      body: ViewManager.shared._buildViewBody(context, state.viewState, state.viewSize),
     );
   }
 }
