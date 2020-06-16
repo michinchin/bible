@@ -48,7 +48,8 @@ Widget bibleChapterTitleBuilder(BuildContext context, ViewState state, Size size
   return CupertinoButton(
     onPressed: () {
       Navigator.of(context).push<void>(TecPageRoute<void>(
-        builder: (context) => Scaffold(appBar: AppBar(), body: const Text('test')),
+        fullscreenDialog: true,
+        builder: (context) => const Scaffold(appBar: ManagedViewAppBar(), body: Text('test')),
       ));
     },
     child: Text(
