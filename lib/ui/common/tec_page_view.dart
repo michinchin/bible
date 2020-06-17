@@ -5,7 +5,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 
 ///
 /// Similar to the [PageView] class, except that it supports unbounded
@@ -173,8 +172,8 @@ class _TecPageViewState extends State<TecPageView> {
             int _fauxPageFromActualPage(int actualPage) =>
                 fauxInitialPage + (actualPage - _controller.initialPage);
 
-            tec.dmPrint('TecPageView.build: '
-                'calling PageView.builder with range ($minOffset, $maxOffset)');
+            // tec.dmPrint('TecPageView.build: '
+            //     'calling PageView.builder with range ($minOffset, $maxOffset)');
             return PageView.builder(
               scrollDirection: widget.scrollDirection ?? Axis.horizontal,
               reverse: widget.reverse ?? false,

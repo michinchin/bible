@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+export 'tec_modal_popup.dart';
 export 'tec_page_route.dart';
 
 class LoadingIndicator extends StatelessWidget {

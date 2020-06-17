@@ -10,6 +10,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 import '../../blocs/view_manager_bloc.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
+import '../nav/nav.dart';
 
 const bibleChapterType = 'BibleChapter';
 const _bibleId = 51;
@@ -47,10 +48,28 @@ Widget bibleChapterTitleBuilder(BuildContext context, ViewState state, Size size
   final bcv = _ChapterData.fromJson(state.data).bcv;
   return CupertinoButton(
     onPressed: () {
-      Navigator.of(context).push<void>(TecPageRoute<void>(
-        fullscreenDialog: true,
-        builder: (context) => const Scaffold(appBar: ManagedViewAppBar(), body: Text('test')),
-      ));
+      showTecModalPopup<void>(
+        context: context,
+        popupMode: TecPopupMode.slideDown,
+        useRootNavigator: false,
+        //builder: (context) => const Scaffold(appBar: ManagedViewAppBar(), body: Text('test')),
+        builder: (context) => TecPopupSheet(child: Nav()),
+        //builder: (context) => const TecPopupSheet(child: Text('test')),
+      );
+
+      // showTecDialog<void>(
+      //   context: context,
+      //   useRootNavigator: false,
+      //   maxWidth: 400,
+      //   builder: (context) {
+      //     return Scaffold(appBar: const ManagedViewAppBar(), body: Nav());
+      //   },
+      // );
+
+      // // Navigator.of(context).push<void>(TecPageRoute<void>(
+      // //   fullscreenDialog: true,
+      // //   builder: (context) => const Scaffold(appBar: ManagedViewAppBar(), body: Text('test')),
+      // // ));
     },
     child: Text(
       bible.titleWithHref('${bcv.book}/${bcv.chapter}'),

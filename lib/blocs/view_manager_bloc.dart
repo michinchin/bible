@@ -445,10 +445,12 @@ class __ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      onGenerateRoute: (settings) => TecPageRoute<dynamic>(
-        settings: settings,
-        builder: _routeBuilder,
+    return ClipRect(
+      child: Navigator(
+        onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+          settings: settings,
+          builder: _routeBuilder,
+        ),
       ),
     );
   }

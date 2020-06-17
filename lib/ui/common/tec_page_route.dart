@@ -144,6 +144,19 @@ bool _isFullscreenDialogRoute(TransitionRoute route) {
       (route is CupertinoPageRoute && !route.fullscreenDialog);
 }
 
+//---------------------------------------------------------------------------
+// The following code was originally copied from:
+//
+//   flutter/lib/src/cupertino/route.dart
+//   version 1d0999d, April 29th, 2020 12:19pm
+//
+// and then modified as needed to conform to how we want the page route and
+// animations to look and work for pages managed by our ViewManager.
+//
+// When changes are made to the source (route.dart), those changes should be
+// incorporated into this code. (Ron, June 16, 2020)
+//---------------------------------------------------------------------------
+
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 
@@ -173,10 +186,13 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   end: Offset.zero,
 );
 
-/// A modal route that replaces the entire screen with an iOS transition.
+/// A modal route that replaces the entire screen (or current Navigator, which
+/// might not be full screen) with an iOS transition.
 ///
-/// The page slides in from the right and exits in reverse. The page also shifts
-/// to the left in parallax when another page enters to cover it.
+/// The page slides in from the right and exits in reverse. And, unlike the
+/// regular CupertinoPageRoute, the page does NOT shift to the left in parallax
+/// when another page enters to cover it. These changes were made to better
+/// support the case where the page is in a Navigator that is not full screen.
 ///
 /// The page slides in from the bottom and exits in reverse with no parallax
 /// effect for fullscreen dialogs.
@@ -190,10 +206,12 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
 /// `result` can be provided.
 ///
 class TecCupertinoPageRoute<T> extends PageRoute<T> {
-  /// Creates a page route for use in an iOS designed app.
+  ///
+  /// Creates a [TecCupertinoPageRoute] for use in an iOS designed app.
   ///
   /// The [builder], [maintainState], and [fullscreenDialog] arguments must not
   /// be null.
+  ///
   TecCupertinoPageRoute({
     @required this.builder,
     this.title,
@@ -405,7 +423,6 @@ class TecCupertinoPageRoute<T> extends PageRoute<T> {
     } else {
       return TecCupertinoPageTransition(
         primaryRouteAnimation: animation,
-        secondaryRouteAnimation: secondaryAnimation,
         linearTransition: linearTransition,
         child: _CupertinoBackGestureDetector<T>(
           enabledCallback: () => _isPopGestureEnabled<T>(route),
@@ -426,26 +443,25 @@ class TecCupertinoPageRoute<T> extends PageRoute<T> {
   String get debugLabel => '${super.debugLabel}(${settings.name})';
 }
 
-/// Provides an iOS-style page transition animation.
+/// Provides an iOS-style page transition animation. But, unlike the regular
+/// CupertinoPageTransition, the page does NOT shift to the left in parallax
+/// when another page enters to cover it, and there is no shadow to the left
+/// of the page. These changes were made to better support the case where
+/// the page is in a Navigator that is not full screen.
 ///
-/// The page slides in from the right and exits in reverse. It also shifts to the left in
-/// a parallax motion when another page enters to cover it.
+/// The page slides in from the right and exits in reverse.
 ///
 class TecCupertinoPageTransition extends StatelessWidget {
   /// Creates an iOS-style page transition.
   ///
   ///  * `primaryRouteAnimation` is a linear route animation from 0.0 to 1.0
   ///    when this screen is being pushed.
-  ///  * `secondaryRouteAnimation` is a linear route animation from 0.0 to 1.0
-  ///    when another screen is being pushed on top of this one.
   ///  * `linearTransition` is whether to perform the transitions linearly.
   ///    Used to precisely track back gesture drags.
   ///
   TecCupertinoPageTransition({
     Key key,
     @required Animation<double> primaryRouteAnimation,
-    // ignore: avoid_unused_constructor_parameters
-    @required Animation<double> secondaryRouteAnimation,
     @required this.child,
     @required bool linearTransition,
   })  : assert(linearTransition != null),

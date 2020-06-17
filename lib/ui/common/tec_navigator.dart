@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 ///
-/// A view with its own [Navigator] state and history. Useful in cases where
+/// A widget with its own [Navigator] state and history. Useful in cases where
 /// parallel navigation states and history are desired.
 ///
-/// [TecNavView] configures the top-level [Navigator] to search for routes
+/// [TecNavigator] configures the top-level [Navigator] to search for routes
 /// in the following order:
 ///
 ///  1. For the `/` route, the [builder] property, if non-null, is used.
@@ -17,24 +17,24 @@ import 'package:flutter/material.dart';
 ///
 ///  4. Finally if all else fails [onUnknownRoute] is called.
 ///
-/// These navigation properties are not shared with any sibling [TecNavView]
+/// These navigation properties are not shared with any sibling [TecNavigator]
 /// nor any ancestor or descendant [Navigator] instances.
 ///
-/// To push a route above this [TecNavView] instead of inside it (such
+/// To push a route above this [TecNavigator] instead of inside it (such
 /// as when showing a dialog on top of all tabs), use
 /// `Navigator.of(rootNavigator: true)`.
 ///
 /// See also:
 ///
 ///  * [MaterialPageRoute], a typical modal page route pushed onto the
-///    [TecNavView]'s [Navigator].
+///    [TecNavigator]'s [Navigator].
 ///
-class TecNavView extends StatefulWidget {
+class TecNavigator extends StatefulWidget {
   ///
-  /// Returns a new [TecNavView], a view with its own [Navigator] state and
+  /// Returns a new [TecNavigator], a widget with its own [Navigator] state and
   /// history.
   ///
-  const TecNavView({
+  const TecNavigator({
     Key key,
     this.builder,
     this.navigatorKey,
@@ -51,7 +51,7 @@ class TecNavView extends StatefulWidget {
   /// If a [builder] is specified, then [routes] must not include an entry for `/`,
   /// as [builder] takes its place.
   ///
-  /// Rebuilding a [TecNavView] with a different [builder] will not clear
+  /// Rebuilding a [TecNavigator] with a different [builder] will not clear
   /// its current navigation stack or update its descendant. Instead, trigger a
   /// rebuild from a descendant in its subtree. This can be done via methods such
   /// as:
@@ -76,14 +76,14 @@ class TecNavView extends StatefulWidget {
   ///
   final GlobalKey<NavigatorState> navigatorKey;
 
-  /// This view's routing table.
+  /// The navigator's routing table.
   ///
-  /// When a named route is pushed with [Navigator.pushNamed] inside this view,
+  /// When a named route is pushed with [Navigator.pushNamed] inside this widget,
   /// the route name is looked up in this map. If the name is present,
   /// the associated [WidgetBuilder] is used to construct a [MaterialPageRoute]
   /// that performs an appropriate transition to the new route.
   ///
-  /// If the view only has one page, then you can specify it using [builder] instead.
+  /// If the widget only has one page, then you can specify it using [builder] instead.
   ///
   /// If [builder] is specified, then it implies an entry in this table for the
   /// [Navigator.defaultRouteName] route (`/`), and it is an error to
@@ -98,7 +98,7 @@ class TecNavView extends StatefulWidget {
   ///
   final Map<String, WidgetBuilder> routes;
 
-  /// The route generator callback used when the view is navigated to a named route.
+  /// The route generator callback used when the navigating to a named route.
   ///
   /// This is used if [routes] does not contain the requested route.
   ///
@@ -115,19 +115,19 @@ class TecNavView extends StatefulWidget {
   ///
   final RouteFactory onUnknownRoute;
 
-  /// The list of observers for the [Navigator] created in this view.
+  /// The list of observers for the [Navigator].
   ///
   /// This list of observers is not shared with ancestor or descendant [Navigator]s.
   ///
   final List<NavigatorObserver> navigatorObservers;
 
   @override
-  _TecNavViewState createState() {
-    return _TecNavViewState();
+  _TecNavigatorState createState() {
+    return _TecNavigatorState();
   }
 }
 
-class _TecNavViewState extends State<TecNavView> {
+class _TecNavigatorState extends State<TecNavigator> {
   HeroController _heroController;
   List<NavigatorObserver> _navigatorObservers;
 
@@ -139,7 +139,7 @@ class _TecNavViewState extends State<TecNavView> {
   }
 
   @override
-  void didUpdateWidget(TecNavView oldWidget) {
+  void didUpdateWidget(TecNavigator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.navigatorKey != oldWidget.navigatorKey ||
         widget.navigatorObservers != oldWidget.navigatorObservers) {
@@ -171,6 +171,7 @@ class _TecNavViewState extends State<TecNavView> {
       routeBuilder = widget.routes[name];
     }
     if (routeBuilder != null) {
+      // Example of using a PageRouteBuilder:
       // return PageRouteBuilder<dynamic>(
       //   pageBuilder: (context, _, __) => routeBuilder(context),
       //   transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -220,56 +221,4 @@ class _TecNavViewState extends State<TecNavView> {
     }());
     return result;
   }
-}
-
-///
-/// Builds and shows a view. If [maxWidth] && [maxHeight] are null, or are
-/// greater than or equal to the device window size,
-///
-///   `Navigator.of(context).push<T>(MaterialPageRoute<T>(builder: builder))`
-///
-/// is called, otherwise [showDialog] is called, constraining the built view
-/// as specified.
-///
-Future<T> showView<T extends Object>({
-  BuildContext context,
-  bool useRootNavigator = true,
-  bool barrierDismissible = true,
-  WidgetBuilder builder,
-  double maxWidth,
-  double maxHeight,
-}) {
-  if (maxWidth != null || maxHeight != null) {
-    assert(debugCheckHasMediaQuery(context));
-    final windowSize = MediaQuery.of(context, nullOk: true)?.size ?? Size.zero;
-    if ((maxWidth != null && maxWidth < windowSize.width) ||
-        (maxHeight != null && maxHeight < windowSize.height)) {
-      return showDialog<T>(
-        context: context,
-        barrierDismissible: barrierDismissible,
-        useRootNavigator: useRootNavigator,
-        builder: (context) {
-          return Dialog(
-            backgroundColor: Colors.transparent,
-            //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: maxWidth ?? double.infinity,
-                maxHeight: maxHeight ?? double.infinity,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).canvasColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.all(20),
-              child: Builder(builder: builder),
-            ),
-          );
-        },
-      );
-    }
-  }
-
-  return Navigator.of(context, rootNavigator: useRootNavigator)
-      .push<T>(MaterialPageRoute<T>(builder: builder));
 }
