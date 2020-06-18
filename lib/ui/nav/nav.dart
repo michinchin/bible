@@ -12,10 +12,22 @@ Future<BookChapterVerse> navigate(BuildContext context) {
     context: context,
     popupMode: TecPopupMode.slideDown,
     useRootNavigator: false,
-    //builder: (context) => const Scaffold(appBar: ManagedViewAppBar(), body: Text('test')),
     builder: (context) => TecPopupSheet(child: Nav()),
-    //builder: (context) => const TecPopupSheet(child: Text('test')),
   );
+
+  // Other ways we could show the nav UI:
+
+  // return showTecDialog<BookChapterVerse>(
+  //   context: context,
+  //   useRootNavigator: false,
+  //   maxWidth: 400,
+  //   builder: (context) => Scaffold(appBar: const ManagedViewAppBar(), body: Nav()),
+  // );
+
+  // return Navigator.of(context).push<BookChapterVerse>(TecPageRoute<BookChapterVerse>(
+  //   fullscreenDialog: true,
+  //   builder: (context) => Scaffold(appBar: const ManagedViewAppBar(), body: Nav()),
+  // ));
 }
 
 class Nav extends StatelessWidget {

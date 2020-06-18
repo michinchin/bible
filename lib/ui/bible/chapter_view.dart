@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_env/tec_env.dart';
 import 'package:tec_html/tec_html.dart';
@@ -56,22 +57,14 @@ Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState sta
       final bcv = await navigate(context);
       if (bcv != null) {
         final key = tec.as<GlobalKey<PageableViewState>>(bodyKey);
-        key?.currentState?.pageController?.jumpToPage(0);
+        final pageController = key?.currentState?.pageController;
+        if (pageController != null) {
+          final _bible = VolumesRepository.shared.bibleWithId(_bibleId);
+          final page = const BookChapterVerse(50, 1, 1).chaptersTo(bcv, bible: _bible) -
+              pageController.initialPage;
+          pageController.jumpToPage(page);
+        }
       }
-
-      // showTecDialog<void>(
-      //   context: context,
-      //   useRootNavigator: false,
-      //   maxWidth: 400,
-      //   builder: (context) {
-      //     return Scaffold(appBar: const ManagedViewAppBar(), body: Nav());
-      //   },
-      // );
-
-      // // Navigator.of(context).push<void>(TecPageRoute<void>(
-      // //   fullscreenDialog: true,
-      // //   builder: (context) => const Scaffold(appBar: ManagedViewAppBar(), body: Text('test')),
-      // // ));
     },
     child: Text(
       bible.titleWithHref('${bcv.book}/${bcv.chapter}'),
