@@ -14,6 +14,8 @@ import '../common/tec_page_view.dart';
 import '../nav/nav.dart';
 
 const bibleChapterType = 'BibleChapter';
+
+const _initialReference = BookChapterVerse(50, 1, 1);
 const _bibleId = 51;
 
 Key bibleChapterKeyMaker(BuildContext context, ViewState state) {
@@ -33,7 +35,14 @@ Widget bibleChapterViewBuilder(BuildContext context, Key bodyKey, ViewState stat
 
     // pageBuilder
     pageBuilder: (context, state, size, index) {
-      return _BibleChapterView(state: state, size: size, pageIndex: index);
+      final bible = VolumesRepository.shared.bibleWithId(_bibleId);
+      final ref = _initialReference.advancedBy(chapters: index, bible: bible);
+
+      // If the bible doesn't have the given reference, or we advanced past either end, return null.
+      if (ref == null || ref.advancedBy(chapters: -index, bible: bible) != _initialReference) {
+        return null;
+      }
+      return _BibleChapterView(state: state, size: size, bible: bible, ref: ref);
     },
 
     // onPageChanged
@@ -41,7 +50,7 @@ Widget bibleChapterViewBuilder(BuildContext context, Key bodyKey, ViewState stat
       tec.dmPrint('View ${state.uid} onPageChanged($page)');
       final bible = VolumesRepository.shared.bibleWithId(_bibleId);
       if (bible != null) {
-        final bcv = const BookChapterVerse(50, 1, 1).advancedBy(chapters: page, bible: bible);
+        final bcv = _initialReference.advancedBy(chapters: page, bible: bible);
         context.bloc<ViewManagerBloc>().add(ViewManagerEvent.setData(
             uid: state.uid, data: tec.toJsonString(_ChapterData(bcv, page))));
       }
@@ -60,9 +69,13 @@ Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState sta
         final pageController = key?.currentState?.pageController;
         if (pageController != null) {
           final _bible = VolumesRepository.shared.bibleWithId(_bibleId);
-          final page = const BookChapterVerse(50, 1, 1).chaptersTo(bcv, bible: _bible) -
-              pageController.initialPage;
-          pageController.jumpToPage(page);
+          final page =
+              _initialReference.chaptersTo(bcv, bible: _bible) - pageController.initialPage;
+          if (page == null) {
+            tec.dmPrint('bibleChapterTitleBuilder unable to navigate to $bcv');
+          } else {
+            pageController.jumpToPage(page);
+          }
         }
       }
     },
@@ -77,7 +90,7 @@ class _ChapterData {
   final int page;
 
   const _ChapterData(BookChapterVerse bcv, int page)
-      : bcv = bcv ?? const BookChapterVerse(50, 1, 1),
+      : bcv = bcv ?? _initialReference,
         page = page ?? 0;
 
   factory _ChapterData.fromJson(Object object) {
@@ -99,28 +112,28 @@ class _ChapterData {
 class _BibleChapterView extends StatelessWidget {
   final ViewState state;
   final Size size;
-  final int pageIndex;
+  final Bible bible;
+  final BookChapterVerse ref;
 
   const _BibleChapterView({
     Key key,
     @required this.state,
     @required this.size,
-    @required this.pageIndex,
+    @required this.bible,
+    @required this.ref,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final _bible = VolumesRepository.shared.bibleWithId(_bibleId);
-    final ref = const BookChapterVerse(50, 1, 1).advancedBy(chapters: pageIndex, bible: _bible);
     return FutureBuilder<tec.ErrorOrValue<String>>(
-      future: _bible.chapterHtmlWith(ref.book, ref.chapter),
+      future: bible.chapterHtmlWith(ref.book, ref.chapter),
       builder: (context, snapshot) {
         final html = snapshot.hasData ? snapshot.data.value : null;
         if (tec.isNotNullOrEmpty(html)) {
           return _ChapterView(
-            volumeId: _bible.id,
+            volumeId: bible.id,
             ref: ref,
-            baseUrl: _bible.baseUrl,
+            baseUrl: bible.baseUrl,
             html: html,
             size: size,
           );

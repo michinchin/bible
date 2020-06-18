@@ -823,7 +823,7 @@ packages:
       name: tec_volumes
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
   tec_widgets:
     dependency: "direct main"
     description:
