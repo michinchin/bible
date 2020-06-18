@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/app_settings.dart';
@@ -74,13 +74,14 @@ class _HomeScreen extends StatelessWidget {
           ),
           const Divider(color: Colors.transparent),
           FloatingActionButton(
-              heroTag: 'account',
-              child: const Icon(Icons.account_circle),
-              onPressed: () => tua.showSignInDlg(
-                    context: context,
-                    account: AppSettings.shared.userAccount,
-                    appName: Labels.appNameForUA,
-                  )),
+            heroTag: 'account',
+            child: const Icon(Icons.account_circle),
+            onPressed: () => tua.showSignInDlg(
+              context: context,
+              account: AppSettings.shared.userAccount,
+              appName: Labels.appNameForUA,
+            ),
+          ),
         ],
       ),
     );
@@ -93,9 +94,7 @@ Iterable<Widget> _generateViewTypeButtons(BuildContext context) {
     (type) => TecDialogButton(
       child: Text(vm.titleForType(type)),
       onPressed: () {
-        context
-            .bloc<ViewManagerBloc>()
-            .add(ViewManagerEvent.add(type: type, data: ''));
+        context.bloc<ViewManagerBloc>().add(ViewManagerEvent.add(type: type, data: ''));
         Navigator.of(context).maybePop(true);
       },
     ),
