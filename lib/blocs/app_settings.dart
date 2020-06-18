@@ -14,7 +14,7 @@ class AppSettings {
   tua.UserAccount userAccount;
   tec.DeviceInfo deviceInfo;
 
-  static Future<AppSettings> load(
+  static Future<void> load(
       {@required String appName,
       @required List<tua.UserItemType> itemsToSync}) async {
 
@@ -46,7 +46,6 @@ class AppSettings {
 
     shared.userAccount = ua;
     shared.deviceInfo = di;
-    return shared;
   }
 }
 

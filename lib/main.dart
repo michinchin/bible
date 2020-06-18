@@ -7,6 +7,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import 'blocs/app_lifecycle_bloc.dart';
 import 'blocs/app_settings.dart';
 import 'blocs/app_theme_bloc.dart';
 import 'blocs/view_manager_bloc.dart';
@@ -68,27 +69,29 @@ class App extends StatelessWidget {
           return tec.BlocProvider<TecStyleBloc>(
             bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
             child: OKToast(
-              child: MaterialApp(
-                theme: ThemeData.light(),
-                darkTheme: ThemeData.dark(),
-                themeMode: themeMode,
-                debugShowCheckedModeBanner: false,
-                localizationsDelegates: const [
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                supportedLocales: const [
-                  Locale('en', 'US'),
-                  Locale('es'), // Spanish
-                  Locale('ar'), // Arabic
-                ],
-                title: _appTitle,
-                home: I18n(
-                  //initialLocale: const Locale('es'),
-                  //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
-                  //child: Adaptive(),
-                  child: const HomeScreen(),
+              child: AppLifecycleWrapper(
+                child: MaterialApp(
+                  theme: ThemeData.light(),
+                  darkTheme: ThemeData.dark(),
+                  themeMode: themeMode,
+                  debugShowCheckedModeBanner: false,
+                  localizationsDelegates: const [
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  supportedLocales: const [
+                    Locale('en', 'US'),
+                    Locale('es'), // Spanish
+                    Locale('ar'), // Arabic
+                  ],
+                  title: _appTitle,
+                  home: I18n(
+                    //initialLocale: const Locale('es'),
+                    //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
+                    //child: Adaptive(),
+                    child: const HomeScreen(),
+                  ),
                 ),
               ),
             ),
