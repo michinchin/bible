@@ -43,23 +43,27 @@ class ViewManager {
     @required String title,
     @required BuilderWithViewState builder,
     BuilderWithViewState titleBuilder,
+    KeyMaker keyMaker,
     ViewSizeFunc minWidth,
     ViewSizeFunc minHeight,
   }) {
     assert(tec.isNotNullOrEmpty(key) && builder != null);
     assert(!_types.containsKey(key));
-    _types[key] = _ViewTypeAPI(title, builder, titleBuilder, minWidth, minHeight);
+    _types[key] = _ViewTypeAPI(title, builder, titleBuilder, keyMaker, minWidth, minHeight);
   }
 
   List<String> get types => _types.keys.toList();
 
   String titleForType(String type) => _types[type]?.title;
 
-  Widget _buildViewBody(BuildContext context, ViewState state, Size size) =>
-      (_types[state.type]?.builder ?? _defaultBuilder)(context, state, size);
+  Key _makeKey(BuildContext context, ViewState state) =>
+      (_types[state.type]?.keyMaker ?? _defaultKeyMaker)(context, state);
 
-  Widget _buildViewTitle(BuildContext context, ViewState state, Size size) =>
-      (_types[state.type]?.titleBuilder ?? _defaultTitleBuilder)(context, state, size);
+  Widget _buildViewBody(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+      (_types[state.type]?.builder ?? _defaultBuilder)(context, bodyKey, state, size);
+
+  Widget _buildViewTitle(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+      (_types[state.type]?.titleBuilder ?? _defaultTitleBuilder)(context, bodyKey, state, size);
 
   double _minWidthForType(String type, BoxConstraints constraints) =>
       (_types[type]?.minWidth ?? _defaultMinWidth)(constraints);
@@ -67,9 +71,12 @@ class ViewManager {
   double _minHeightForType(String type, BoxConstraints constraints) =>
       (_types[type]?.minHeight ?? _defaultMinHeight)(constraints);
 
-  Widget _defaultBuilder(BuildContext context, ViewState state, Size size) => Container();
+  Key _defaultKeyMaker(BuildContext context, ViewState state) => null;
 
-  Widget _defaultTitleBuilder(BuildContext context, ViewState state, Size size) =>
+  Widget _defaultBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+      Container(key: bodyKey);
+
+  Widget _defaultTitleBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
       Text(state.uid.toString());
 
   double _defaultMinWidth(BoxConstraints constraints) => math.max(_minSize,
@@ -86,9 +93,15 @@ const _minSize = (_iPhoneSEHeight - 20.0) / 2;
 const _maxMinWidth = 400.0;
 
 ///
+/// Signature for a function the creates a key for a given view state.
+///
+typedef KeyMaker = Key Function(BuildContext context, ViewState state);
+
+///
 /// Signature for a function that creates a widget for a given view state.
 ///
-typedef BuilderWithViewState = Widget Function(BuildContext context, ViewState state, Size size);
+typedef BuilderWithViewState = Widget Function(
+    BuildContext context, Key bodyKey, ViewState state, Size size);
 
 ///
 /// Signature for a function that creates a widget for a given view state and index.
@@ -108,6 +121,7 @@ class _ViewTypeAPI {
   final String title;
   final BuilderWithViewState builder;
   final BuilderWithViewState titleBuilder;
+  final KeyMaker keyMaker;
   final ViewSizeFunc minWidth;
   final ViewSizeFunc minHeight;
 
@@ -115,6 +129,7 @@ class _ViewTypeAPI {
     this.title,
     this.builder,
     this.titleBuilder,
+    this.keyMaker,
     this.minWidth,
     this.minHeight,
   );
@@ -296,7 +311,7 @@ final _managedViewAppBarPreferredSize =
 typedef PageableViewOnPageChanged = void Function(BuildContext context, ViewState state, int page);
 
 ///
-/// View that uses TecPageView for paging.
+/// View that uses a [TecPageView] for paging.
 ///
 class PageableView extends StatefulWidget {
   final ViewState state;
@@ -318,11 +333,13 @@ class PageableView extends StatefulWidget {
         super(key: key);
 
   @override
-  _PageableViewState createState() => _PageableViewState();
+  PageableViewState createState() => PageableViewState();
 }
 
-class _PageableViewState extends State<PageableView> {
+class PageableViewState extends State<PageableView> {
   TecPageController _pageController;
+
+  TecPageController get pageController => _pageController;
 
   @override
   void initState() {
@@ -425,10 +442,10 @@ class _ManagedViewNavigator extends StatefulWidget {
   const _ManagedViewNavigator(this.managedViewState, {Key key}) : super(key: key);
 
   @override
-  __ManagedViewNavigatorState createState() => __ManagedViewNavigatorState();
+  _ManagedViewNavigatorState createState() => _ManagedViewNavigatorState();
 }
 
-class __ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
+class _ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
   @override
   void didUpdateWidget(_ManagedViewNavigator oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -459,13 +476,26 @@ class __ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
 ///
 /// Scaffold for a managed view.
 ///
-class _ManagedViewScaffold extends StatelessWidget {
+class _ManagedViewScaffold extends StatefulWidget {
   final ManagedViewState state;
 
   const _ManagedViewScaffold(
     this.state, {
     Key key,
   }) : super(key: key);
+
+  @override
+  _ManagedViewScaffoldState createState() => _ManagedViewScaffoldState();
+}
+
+class _ManagedViewScaffoldState extends State<_ManagedViewScaffold> {
+  Key _bodyKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _bodyKey = ViewManager.shared._makeKey(context, widget.state.viewState);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -477,29 +507,31 @@ class _ManagedViewScaffold extends StatelessWidget {
             icon: const Icon(Icons.border_outer),
             onPressed: () {
               bloc
-                ..add(ViewManagerEvent.setWidth(position: state.viewIndex, width: null))
-                ..add(ViewManagerEvent.setHeight(position: state.viewIndex, height: null));
+                ..add(ViewManagerEvent.setWidth(position: widget.state.viewIndex, width: null))
+                ..add(ViewManagerEvent.setHeight(position: widget.state.viewIndex, height: null));
             },
           ),
           IconButton(
             icon: const Icon(Icons.format_textdirection_l_to_r),
             onPressed: () {
-              final idealWidth = state.viewState.idealWidth(state.parentConstraints) ??
-                  ViewManager.shared
-                      ._minWidthForType(state.viewState.type, state.parentConstraints);
-              final event =
-                  ViewManagerEvent.setWidth(position: state.viewIndex, width: idealWidth + 20.0);
+              final idealWidth =
+                  widget.state.viewState.idealWidth(widget.state.parentConstraints) ??
+                      ViewManager.shared._minWidthForType(
+                          widget.state.viewState.type, widget.state.parentConstraints);
+              final event = ViewManagerEvent.setWidth(
+                  position: widget.state.viewIndex, width: idealWidth + 20.0);
               bloc.add(event);
             },
           ),
           IconButton(
             icon: const Icon(Icons.format_line_spacing),
             onPressed: () {
-              final idealHeight = state.viewState.idealHeight(state.parentConstraints) ??
-                  ViewManager.shared
-                      ._minHeightForType(state.viewState.type, state.parentConstraints);
-              final event =
-                  ViewManagerEvent.setHeight(position: state.viewIndex, height: idealHeight + 20.0);
+              final idealHeight =
+                  widget.state.viewState.idealHeight(widget.state.parentConstraints) ??
+                      ViewManager.shared._minHeightForType(
+                          widget.state.viewState.type, widget.state.parentConstraints);
+              final event = ViewManagerEvent.setHeight(
+                  position: widget.state.viewIndex, height: idealHeight + 20.0);
               bloc.add(event);
             },
           ),
@@ -508,21 +540,23 @@ class _ManagedViewScaffold extends StatelessWidget {
     return Scaffold(
       appBar: ManagedViewAppBar(
         appBar: AppBar(
-          title: ViewManager.shared._buildViewTitle(context, state.viewState, state.viewSize),
+          title: ViewManager.shared
+              ._buildViewTitle(context, _bodyKey, widget.state.viewState, widget.state.viewSize),
           leading: bloc.state.views.length <= 1
               ? null
               : IconButton(
                   icon: const Icon(Icons.close),
                   tooltip: 'Close',
                   onPressed: () {
-                    final event = ViewManagerEvent.remove(state.viewIndex);
+                    final event = ViewManagerEvent.remove(widget.state.viewIndex);
                     bloc.add(event);
                   },
                 ),
           actions: null, // testActionsForAdjustingSize(),
         ),
       ),
-      body: ViewManager.shared._buildViewBody(context, state.viewState, state.viewSize),
+      body: ViewManager.shared
+          ._buildViewBody(context, _bodyKey, widget.state.viewState, widget.state.viewSize),
     );
   }
 }
@@ -685,6 +719,8 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
         final mvs = ManagedViewState(constraints, state, Size(width, height), i);
 
         views.add(AnimatedPositionedDirectional(
+          // We need a key so when views are removed or reordered the element
+          // tree stays in sync.
           key: ValueKey(state.uid),
           duration: const Duration(milliseconds: 200),
           start: x,

@@ -5,6 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 //import '../../blocs/view_manager_bloc.dart';
+import '../common/common.dart';
+
+Future<BookChapterVerse> navigate(BuildContext context) {
+  return showTecModalPopup<BookChapterVerse>(
+    context: context,
+    popupMode: TecPopupMode.slideDown,
+    useRootNavigator: false,
+    //builder: (context) => const Scaffold(appBar: ManagedViewAppBar(), body: Text('test')),
+    builder: (context) => TecPopupSheet(child: Nav()),
+    //builder: (context) => const TecPopupSheet(child: Text('test')),
+  );
+}
 
 class Nav extends StatelessWidget {
   @override
@@ -38,18 +50,21 @@ class Nav extends StatelessWidget {
         x = 0;
         y += cellHeight;
       }
+      final book = bookKeys[i];
       b.add(
         Positioned.fromRect(
           rect: Rect.fromLTWH(x, y, cellWidth - 2, cellHeight - 2),
           child: CupertinoButton(
             padding: EdgeInsets.zero,
             child: Text(
-              '${bookNames[bookKeys[i]]}',
+              '${bookNames[book]}',
               style: const TextStyle(color: Colors.black),
             ),
             color: bible.isNTBook(bookKeys[i]) ? Colors.red[50] : Colors.blue[50],
             borderRadius: null,
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).maybePop(BookChapterVerse(book, 1, 1));
+            },
           ),
         ),
       );

@@ -45,7 +45,10 @@ void _registerViewTypes() {
   ViewManager.shared
     ..register(testViewType, title: 'Test', builder: testViewBuilder)
     ..register(bibleChapterType,
-        title: 'Bible', builder: bibleChapterViewBuilder, titleBuilder: bibleChapterTitleBuilder)
+        title: 'Bible',
+        builder: bibleChapterViewBuilder,
+        titleBuilder: bibleChapterTitleBuilder,
+        keyMaker: bibleChapterKeyMaker)
     ..register(noteViewTypeName, title: 'Note', builder: notesViewBuilder);
 }
 

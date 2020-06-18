@@ -15,9 +15,14 @@ import '../nav/nav.dart';
 const bibleChapterType = 'BibleChapter';
 const _bibleId = 51;
 
-Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size) {
+Key bibleChapterKeyMaker(BuildContext context, ViewState state) {
+  return GlobalKey<PageableViewState>();
+}
+
+Widget bibleChapterViewBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   // tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
   return PageableView(
+    key: bodyKey,
     state: state,
     size: size,
     controllerBuilder: () {
@@ -27,7 +32,7 @@ Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size)
 
     // pageBuilder
     pageBuilder: (context, state, size, index) {
-      return BibleChapterView(state: state, size: size, pageIndex: index);
+      return _BibleChapterView(state: state, size: size, pageIndex: index);
     },
 
     // onPageChanged
@@ -43,19 +48,16 @@ Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size)
   );
 }
 
-Widget bibleChapterTitleBuilder(BuildContext context, ViewState state, Size size) {
+Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   final bible = VolumesRepository.shared.bibleWithId(_bibleId);
   final bcv = _ChapterData.fromJson(state.data).bcv;
   return CupertinoButton(
-    onPressed: () {
-      showTecModalPopup<void>(
-        context: context,
-        popupMode: TecPopupMode.slideDown,
-        useRootNavigator: false,
-        //builder: (context) => const Scaffold(appBar: ManagedViewAppBar(), body: Text('test')),
-        builder: (context) => TecPopupSheet(child: Nav()),
-        //builder: (context) => const TecPopupSheet(child: Text('test')),
-      );
+    onPressed: () async {
+      final bcv = await navigate(context);
+      if (bcv != null) {
+        final key = tec.as<GlobalKey<PageableViewState>>(bodyKey);
+        key?.currentState?.pageController?.jumpToPage(0);
+      }
 
       // showTecDialog<void>(
       //   context: context,
@@ -101,12 +103,12 @@ class _ChapterData {
   }
 }
 
-class BibleChapterView extends StatelessWidget {
+class _BibleChapterView extends StatelessWidget {
   final ViewState state;
   final Size size;
   final int pageIndex;
 
-  const BibleChapterView({
+  const _BibleChapterView({
     Key key,
     @required this.state,
     @required this.size,

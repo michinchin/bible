@@ -6,10 +6,12 @@ import '../../blocs/view_manager_bloc.dart';
 
 const testViewType = 'TestView';
 
-Widget testViewBuilder(BuildContext context, ViewState state, Size size) =>
-    TestView(state: state, size: size);
+Widget testViewBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+    TestView(key: bodyKey, state: state, size: size);
 
-Widget testViewPageableBuilder(BuildContext context, ViewState state, Size size) => PageableView(
+Widget testViewPageableBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+    PageableView(
+      key: bodyKey,
       state: state,
       size: size,
       pageBuilder: (context, state, size, index) {
