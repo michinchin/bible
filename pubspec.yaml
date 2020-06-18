@@ -38,7 +38,7 @@ dependencies:
   json_annotation: ^3.0.1
   provider: ^4.1.3
   tuple: ^1.0.3
-
+  universal_platform: ^0.1.3
   zefyr:
     git:
       url: git://github.com/memspace/zefyr
@@ -62,6 +62,11 @@ dependencies:
       name: tec_util
       url: http://noah.tecarta.com:8100
     version: ^1.2.7
+  tec_user_account:
+    hosted:
+      name: tec_user_account
+      url: http://noah.tecarta.com:8100
+    version: ^1.3.2
   tec_volumes:
     # path: ../shared/tec_volumes
     hosted:
