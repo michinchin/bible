@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_user_account/tec_user_account.dart' as tua;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -35,7 +36,8 @@ Future<void> main() async {
     ],
   );
 
-  await AppSettings.load(appName: 'Bible', itemsToSync: []);
+  await AppSettings.load(
+      appName: 'Bible', itemsToSync: [tua.UserItemType.license]);
 
   _registerViewTypes();
 
@@ -67,7 +69,8 @@ class App extends StatelessWidget {
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (_, themeMode) {
           return tec.BlocProvider<TecStyleBloc>(
-            bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
+            bloc: TecStyleBloc(
+                <String, dynamic>{'dialogStyle': TecMetaStyle.material}),
             child: OKToast(
               child: AppLifecycleWrapper(
                 child: MaterialApp(
