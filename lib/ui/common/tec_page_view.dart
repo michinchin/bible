@@ -153,16 +153,18 @@ class _TecPageViewState extends State<TecPageView> {
               widget.onPageChanged(_controller._fauxPageFromActualPage(page.toDouble()).round()),
       controller: _controller._pageController,
       physics: _physics,
-      itemCount: _controller._maxPossiblePages,
+      // Set itemCount to `maxPossiblePages * 2` to allow the initial page to be the first or last page.
+      itemCount: _controller._maxPossiblePages * 2,
       itemBuilder: (context, index) {
-        final fauxIndex = _controller._fauxPageFromActualPage(index.toDouble()).round();
-        final page = widget.pageBuilder(context, fauxIndex);
-        if (page == null) {
-          return Container();
-        } else {
-          _controller.enablePage(fauxIndex);
-          return page;
+        if (index >= 0) {
+          final fauxIndex = _controller._fauxPageFromActualPage(index.toDouble()).round();
+          final page = widget.pageBuilder(context, fauxIndex);
+          if (page != null) {
+            _controller.enablePage(fauxIndex);
+            return page;
+          }
         }
+        return Container();
       },
     );
   }
@@ -190,23 +192,28 @@ class TecPageController implements PageController {
     double viewportFraction = 1.0,
     int maxPossiblePages = _defaultMaxPossiblePages,
   })  : assert(initialPage != null),
-        assert(initialPage < maxPossiblePages),
+        assert(maxPossiblePages != null && maxPossiblePages > 0),
         assert(minPage == null || minPage <= initialPage),
         assert(maxPage == null || minPage >= initialPage),
         assert(keepPage != null),
         assert(viewportFraction != null && viewportFraction > 0.0) {
     _fauxInitialPage = initialPage;
-    _maxPossiblePages = math.max(
-      maxPossiblePages ?? _defaultMaxPossiblePages,
-      _defaultMaxPossiblePages,
-    );
+    _maxPossiblePages = maxPossiblePages;
+
+    // This allows the initial page to possibly be the last page, regardless of
+    // the value of [initialPage].
+    final actualInitialPage = _maxPossiblePages - 1;
+
     _pageController = PageController(
-      initialPage: _maxPossiblePages ~/ 2,
+      initialPage: actualInitialPage,
       keepPage: keepPage,
       viewportFraction: viewportFraction,
     );
+
     _minPage = _actualPageFromFauxPage(minPage ?? initialPage);
     _maxPage = _actualPageFromFauxPage(maxPage ?? initialPage);
+    assert(_minPage >= 0);
+    assert(_maxPage - _minPage < _maxPossiblePages);
   }
 
   @override
@@ -223,7 +230,8 @@ class TecPageController implements PageController {
   int _maxPage;
   PageController _pageController;
 
-  int _actualPageFromFauxPage(int fauxPage) => _pageController.initialPage + fauxPage;
+  int _actualPageFromFauxPage(int fauxPage) =>
+      _pageController.initialPage + fauxPage - _fauxInitialPage;
 
   double _fauxPageFromActualPage(double actualPage) =>
       _fauxInitialPage + (actualPage - _pageController.initialPage);
@@ -233,12 +241,20 @@ class TecPageController implements PageController {
   }
 
   void _enableActualPage(int actualPage) {
-    if (_minPage > actualPage) {
-      _minPage = actualPage;
-      tec.dmPrint('TecPageController updated minPage to $page');
-    } else if (_maxPage < actualPage) {
+    if (actualPage < _minPage) {
+      if (actualPage < 0) {
+        tec.dmPrint(
+            'ERROR: TecPageController: an attempt was made to updated minPage to ${_fauxPageFromActualPage(actualPage.toDouble())}, which would set the actualPage to $actualPage.');
+        assert(false);
+      } else {
+        _minPage = actualPage;
+        tec.dmPrint(
+            'TecPageController updated minPage to ${_fauxPageFromActualPage(actualPage.toDouble())}');
+      }
+    } else if (actualPage > _maxPage) {
       _maxPage = actualPage;
-      tec.dmPrint('TecPageController updated maxPage to $page');
+      tec.dmPrint(
+          'TecPageController updated maxPage to ${_fauxPageFromActualPage(actualPage.toDouble())}');
     }
   }
 
@@ -367,7 +383,7 @@ class TecPageController implements PageController {
 /// Scroll physics used by a [TecPageView].
 ///
 /// These physics cause the page view to snap to page boundaries and limit
-/// scrolling past the min and max pages specified in `pageInfo`.
+/// scrolling past the min and max pages delineated in the [TecPageController].
 ///
 @immutable
 class _TecPageViewScrollPhysics extends ScrollPhysics {

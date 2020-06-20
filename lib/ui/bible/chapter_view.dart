@@ -69,8 +69,7 @@ Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState sta
         final pageController = key?.currentState?.pageController;
         if (pageController != null) {
           final _bible = VolumesRepository.shared.bibleWithId(_bibleId);
-          final page =
-              _initialReference.chaptersTo(bcv, bible: _bible) - pageController.initialPage;
+          final page = _initialReference.chaptersTo(bcv, bible: _bible);
           if (page == null) {
             tec.dmPrint('bibleChapterTitleBuilder unable to navigate to $bcv');
           } else {
