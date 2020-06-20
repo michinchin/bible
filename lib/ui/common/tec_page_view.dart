@@ -3,8 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tuple/tuple.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 ///
 /// Similar to the [PageView] class, except that it supports unbounded
@@ -97,8 +96,7 @@ class TecPageView extends StatefulWidget {
 class _TecPageViewState extends State<TecPageView> {
   _TecPageViewScrollPhysics _physics;
   bool _didCreateController = false;
-  PageController _controller;
-  int _initialPage;
+  TecPageController _controller;
 
   @override
   void initState() {
@@ -126,77 +124,46 @@ class _TecPageViewState extends State<TecPageView> {
   }
 
   void update() {
-    final providedController = widget.controller?._pageController;
-    if (_controller == null || (providedController != null && providedController != _controller)) {
+    if (_controller == null || (widget.controller != null && widget.controller != _controller)) {
       // tec.dmPrint('_TecPageViewState updating the page controller...');
 
       // First, dispose of the old controller (if we created it).
       disposeController();
 
       // Create the controller if necessary, or save a reference to the provided one.
-      final maxPossiblePages = widget.controller?._maxPossiblePages ?? _defaultMaxPossiblePages;
-      _initialPage = maxPossiblePages ~/ 2;
-      _controller = providedController ?? PageController(initialPage: _initialPage);
-      _didCreateController = (providedController == null);
+      _controller = widget.controller ?? TecPageController();
+      _didCreateController = (widget.controller == null);
 
-      // Make sure the scroll physics object is created and updated.
-      _physics ??= _TecPageViewScrollPhysics(pageInfo: _TecPageInfo());
-      _physics.pageInfo.min = _initialPage;
-      _physics.pageInfo.max = _initialPage;
+      // Create a new scroll physics object, linked to the current page controller.
+      _physics = _TecPageViewScrollPhysics(pageController: _controller);
     }
-
-    _physics.pageInfo.viewportFraction = _controller.viewportFraction;
   }
 
   @override
   Widget build(BuildContext context) {
-    // tec.dmPrint('building ChangeNotifierProvider<_TecPageBuilder>');
-    return ChangeNotifierProvider<_TecPageBuilder>(
-      create: (context) => _TecPageBuilder(widget.pageBuilder),
-      child: Builder(builder: (context) {
-        return Selector<_TecPageBuilder, Tuple2<int, int>>(
-          selector: (context, pb) => Tuple2(pb.minOffset, pb.maxOffset),
-          builder: (context, tuple, abc) {
-            // final minOffset = context.select<_TecPageBuilder, int>((v) => v.minOffset);
-            // final maxOffset = context.select<_TecPageBuilder, int>((v) => v.maxOffset);
-            final minOffset = tuple.item1;
-            final maxOffset = tuple.item2;
-
-            // Update pageInfo for the physics object.
-            _physics.pageInfo.min = _initialPage + minOffset;
-            _physics.pageInfo.max = _initialPage + maxOffset;
-
-            final fauxInitialPage = (widget.controller?.initialPage ?? 0);
-
-            // Local utility function
-            int _fauxPageFromActualPage(int actualPage) =>
-                fauxInitialPage + (actualPage - _controller.initialPage);
-
-            // tec.dmPrint('TecPageView.build: '
-            //     'calling PageView.builder with range ($minOffset, $maxOffset)');
-            return PageView.builder(
-              scrollDirection: widget.scrollDirection ?? Axis.horizontal,
-              reverse: widget.reverse ?? false,
-              pageSnapping: false,
-              dragStartBehavior: widget.dragStartBehavior ?? DragStartBehavior.start,
-              allowImplicitScrolling: widget.allowImplicitScrolling ?? false,
-              onPageChanged: widget.onPageChanged == null
-                  ? null
-                  : (page) => widget.onPageChanged(_fauxPageFromActualPage(page)),
-              controller: _controller,
-              physics: _physics,
-              itemCount: _initialPage * 2,
-              itemBuilder: (context, index) {
-                final pageBuilder = context.read<_TecPageBuilder>();
-                final offset = _fauxPageFromActualPage(index);
-                // tec.dmPrint('TecPageView.build: '
-                //     'calling pageBuilder.buildPage(context, $offset, $fauxInitialPage)');
-                return pageBuilder.buildPage(context, offset, fauxInitialPage);
-              },
-            );
-          },
-        );
-      }),
+    return PageView.builder(
+      scrollDirection: widget.scrollDirection ?? Axis.horizontal,
+      reverse: widget.reverse ?? false,
+      pageSnapping: false,
+      dragStartBehavior: widget.dragStartBehavior ?? DragStartBehavior.start,
+      allowImplicitScrolling: widget.allowImplicitScrolling ?? false,
+      onPageChanged: widget.onPageChanged == null
+          ? null
+          : (page) =>
+              widget.onPageChanged(_controller._fauxPageFromActualPage(page.toDouble()).round()),
+      controller: _controller._pageController,
+      physics: _physics,
+      itemCount: _controller._maxPossiblePages,
+      itemBuilder: (context, index) {
+        final fauxIndex = _controller._fauxPageFromActualPage(index.toDouble()).round();
+        final page = widget.pageBuilder(context, fauxIndex);
+        if (page == null) {
+          return Container();
+        } else {
+          _controller.enablePage(fauxIndex);
+          return page;
+        }
+      },
     );
   }
 }
@@ -217,27 +184,30 @@ class TecPageController implements PageController {
   ///
   TecPageController({
     int initialPage = 0,
+    int minPage,
+    int maxPage,
     bool keepPage = true,
     double viewportFraction = 1.0,
     int maxPossiblePages = _defaultMaxPossiblePages,
   })  : assert(initialPage != null),
         assert(initialPage < maxPossiblePages),
+        assert(minPage == null || minPage <= initialPage),
+        assert(maxPage == null || minPage >= initialPage),
         assert(keepPage != null),
-        assert(viewportFraction != null && viewportFraction > 0.0),
-        _fauxInitialPage = initialPage,
-        _maxPossiblePages = math.max(
-          maxPossiblePages ?? _defaultMaxPossiblePages,
-          _defaultMaxPossiblePages,
-        ),
-        _pageController = PageController(
-          initialPage: math.max(
-                maxPossiblePages ?? _defaultMaxPossiblePages,
-                _defaultMaxPossiblePages,
-              ) ~/
-              2,
-          keepPage: keepPage,
-          viewportFraction: viewportFraction,
-        );
+        assert(viewportFraction != null && viewportFraction > 0.0) {
+    _fauxInitialPage = initialPage;
+    _maxPossiblePages = math.max(
+      maxPossiblePages ?? _defaultMaxPossiblePages,
+      _defaultMaxPossiblePages,
+    );
+    _pageController = PageController(
+      initialPage: _maxPossiblePages ~/ 2,
+      keepPage: keepPage,
+      viewportFraction: viewportFraction,
+    );
+    _minPage = _actualPageFromFauxPage(minPage ?? initialPage);
+    _maxPage = _actualPageFromFauxPage(maxPage ?? initialPage);
+  }
 
   @override
   void dispose() {
@@ -247,14 +217,30 @@ class TecPageController implements PageController {
   // This class's primary purpose is to translate between 'faux' (or external)
   // page indices and actual (or internal) page indices.
 
-  final int _fauxInitialPage;
-  final int _maxPossiblePages;
-  final PageController _pageController;
+  int _fauxInitialPage;
+  int _maxPossiblePages;
+  int _minPage;
+  int _maxPage;
+  PageController _pageController;
 
   int _actualPageFromFauxPage(int fauxPage) => _pageController.initialPage + fauxPage;
 
   double _fauxPageFromActualPage(double actualPage) =>
       _fauxInitialPage + (actualPage - _pageController.initialPage);
+
+  void enablePage(int page) {
+    _enableActualPage(_actualPageFromFauxPage(page));
+  }
+
+  void _enableActualPage(int actualPage) {
+    if (_minPage > actualPage) {
+      _minPage = actualPage;
+      tec.dmPrint('TecPageController updated minPage to $page');
+    } else if (_maxPage < actualPage) {
+      _maxPage = actualPage;
+      tec.dmPrint('TecPageController updated maxPage to $page');
+    }
+  }
 
   //
   // Inherited from PageController:
@@ -274,13 +260,16 @@ class TecPageController implements PageController {
 
   @override
   Future<void> animateToPage(int page, {Duration duration, Curve curve}) {
-    return _pageController.animateToPage(_actualPageFromFauxPage(page),
-        duration: duration, curve: curve);
+    final actualPage = _actualPageFromFauxPage(page);
+    _enableActualPage(actualPage);
+    return _pageController.animateToPage(actualPage, duration: duration, curve: curve);
   }
 
   @override
   void jumpToPage(int page) {
-    _pageController.jumpToPage(_actualPageFromFauxPage(page));
+    final actualPage = _actualPageFromFauxPage(page);
+    _enableActualPage(actualPage);
+    _pageController.jumpToPage(actualPage);
   }
 
   @override
@@ -374,66 +363,6 @@ class TecPageController implements PageController {
   }
 }
 
-class _TecPageBuilder extends ChangeNotifier {
-  final IndexedWidgetBuilder pageBuilder;
-
-  _TecPageBuilder(this.pageBuilder) : assert(pageBuilder != null);
-
-  int minOffset = 0;
-  int maxOffset = 0;
-
-  Widget buildPage(BuildContext context, int pageOffset, int initialPage) {
-    final widget = pageBuilder(context, pageOffset);
-    if (widget == null) {
-      return Container();
-    } else {
-      // Local notify listeners function.
-      void _notify() {
-        Future.delayed(const Duration(milliseconds: 0), () {
-          if (!_isDisposed) {
-            // tec.dmPrint('_TecPageBuilder is calling notifyListeners()');
-            notifyListeners();
-          }
-        });
-      }
-
-      final adjustedPageOffset = pageOffset - initialPage;
-
-      // Do the min or max page offsets need to be updated?
-      if (minOffset > adjustedPageOffset) {
-        minOffset = adjustedPageOffset;
-        // tec.dmPrint('_TecPageBuilder updated minOffset to $pageOffset');
-        _notify();
-      } else if (maxOffset < adjustedPageOffset) {
-        maxOffset = adjustedPageOffset;
-        // tec.dmPrint('_TecPageBuilder updated maxOffset to $pageOffset');
-        _notify();
-      }
-
-      return widget;
-    }
-  }
-
-  /// After this is disposed, it's not allowed to call [notifyListeners].
-  bool _isDisposed = false;
-
-  @override
-  void dispose() {
-    // tec.dmPrint('_TecPageBuilder dispose');
-    _isDisposed = true;
-    super.dispose();
-  }
-}
-
-///
-/// Minimum and maximum page indices, and size of each page as a fraction of
-/// the viewport.
-///
-class _TecPageInfo {
-  int min = 0, max = 0;
-  double viewportFraction = 1.0;
-}
-
 ///
 /// Scroll physics used by a [TecPageView].
 ///
@@ -442,24 +371,25 @@ class _TecPageInfo {
 ///
 @immutable
 class _TecPageViewScrollPhysics extends ScrollPhysics {
-  final _TecPageInfo pageInfo;
+  final TecPageController pageController;
 
-  const _TecPageViewScrollPhysics({ScrollPhysics parent, this.pageInfo}) : super(parent: parent);
+  const _TecPageViewScrollPhysics({ScrollPhysics parent, this.pageController})
+      : super(parent: parent);
 
   @override
   _TecPageViewScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return _TecPageViewScrollPhysics(parent: buildParent(ancestor), pageInfo: pageInfo);
+    return _TecPageViewScrollPhysics(parent: buildParent(ancestor), pageController: pageController);
   }
 
   double _initialPageOffset(double viewportDimension) =>
-      math.max(0, viewportDimension * ((pageInfo?.viewportFraction ?? 1.0) - 1) / 2);
+      math.max(0, viewportDimension * ((pageController?.viewportFraction ?? 1.0) - 1) / 2);
 
   double _pageFromPixels(double pixels, ScrollMetrics position) {
     final actual = math.max(
             0.0,
             pixels.clamp(position.minScrollExtent, position.maxScrollExtent) -
                 _initialPageOffset(position.viewportDimension)) /
-        math.max(1.0, position.viewportDimension * (pageInfo?.viewportFraction ?? 1.0));
+        math.max(1.0, position.viewportDimension * (pageController?.viewportFraction ?? 1.0));
     final round = actual.roundToDouble();
     if ((actual - round).abs() < precisionErrorTolerance) {
       return round;
@@ -468,7 +398,7 @@ class _TecPageViewScrollPhysics extends ScrollPhysics {
   }
 
   double _pixelsFromPage(double page, ScrollMetrics position) {
-    return page * position.viewportDimension * (pageInfo?.viewportFraction ?? 1.0) +
+    return page * position.viewportDimension * (pageController?.viewportFraction ?? 1.0) +
         _initialPageOffset(position.viewportDimension);
   }
 
@@ -483,8 +413,8 @@ class _TecPageViewScrollPhysics extends ScrollPhysics {
     page = page.roundToDouble();
 
     // Make sure the page is in range.
-    final minPage = pageInfo?.min?.toDouble();
-    final maxPage = pageInfo?.max?.toDouble();
+    final minPage = pageController?._minPage?.toDouble();
+    final maxPage = pageController?._maxPage?.toDouble();
     if (minPage != null && page < minPage) {
       // tec.dmPrint('_TecPageViewScrollPhysics limiting page to $minPage');
       page = minPage;
