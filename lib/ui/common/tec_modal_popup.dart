@@ -82,6 +82,7 @@ class TecPopupSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      bottom: false,
       child: Semantics(
         namesRoute: true,
         scopesRoute: true,
