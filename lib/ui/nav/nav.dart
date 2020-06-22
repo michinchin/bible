@@ -36,7 +36,7 @@ class Nav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      tec.dmPrint('Nav constraints: $constraints');
+      //tec.dmPrint('Nav constraints: $constraints');
 
       final bible = VolumesRepository.shared.bibleWithId(51);
 

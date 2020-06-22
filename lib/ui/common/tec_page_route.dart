@@ -9,16 +9,19 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/animation.dart' show Curves;
 
-/// A modal route that replaces the entire screen with a platform-adaptive
-/// transition.
+/// A modal route that replaces the current [Navigator] area (typically the
+/// entire screen) with a platform-adaptive transition, similar to using a
+/// [MaterialPageRoute], except that on iOS and mac devices a
+/// [TecCupertinoPageTransition] is used in place of a [CupertinoPageTransition]
+/// so that page transitions conform to how we want them to look and work for
+/// views managed by the ViewManager.
 ///
 /// For Android, the entrance transition for the page slides the page upwards
 /// and fades it in. The exit transition is the same, but in reverse.
 ///
 /// The transition is adaptive to the platform and on iOS, the page slides in
-/// from the right and exits in reverse. The page also shifts to the left in
-/// parallax when another page enters to cover it. (These directions are flipped
-/// in environments with a right-to-left reading direction.)
+/// from the right and exits in reverse. (These directions are flipped in
+/// environments with a right-to-left reading direction.)
 ///
 /// By default, when a modal route is replaced by another, the previous route
 /// remains in memory. To free all the resources when this is not necessary, set

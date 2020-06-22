@@ -2,34 +2,31 @@ import 'package:flutter/foundation.dart';
 
 import 'package:tec_user_account/tec_user_account.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:universal_platform/universal_platform.dart';
 
 class AppSettings {
   // singleton
-  static final AppSettings _singleton = AppSettings._();
-  factory AppSettings() => _singleton;
+  static final AppSettings shared = AppSettings._();
+  factory AppSettings() => shared;
   AppSettings._();
-  static AppSettings get shared => _singleton;
 
   tua.UserAccount userAccount;
   tec.DeviceInfo deviceInfo;
 
-  static Future<void> load(
-      {@required String appName,
-      @required List<tua.UserItemType> itemsToSync}) async {
-
+  static Future<void> load({
+    @required String appName,
+    @required List<tua.UserItemType> itemsToSync,
+  }) async {
     // Get device info.
     final di = await tec.DeviceInfo.fetch();
-    debugPrint(
-        'Running on ${di.productName} with ${tec.DeviceInfo.os} ${di.version}');
+    debugPrint('Running on ${di.productName} with ${tec.DeviceInfo.os} ${di.version}');
 
     // app prefix to indicate platform and app
     String platform;
-    if (UniversalPlatform.isAndroid) {
+    if (tec.platformIs(tec.Platform.android)) {
       platform = 'PLAY';
-    } else if (UniversalPlatform.isIOS) {
+    } else if (tec.platformIs(tec.Platform.iOS)) {
       platform = 'IOS';
-    } else if (UniversalPlatform.isWeb) {
+    } else if (tec.platformIs(tec.Platform.web)) {
       platform = 'WEB';
     } else {
       platform = 'OTHER';
