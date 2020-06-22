@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import 'app_settings.dart';
+import '../models/app_settings.dart';
 
 class AppLifecycleBloc extends Bloc<AppLifecycleState, AppLifecycleState> {
   @override

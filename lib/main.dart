@@ -9,9 +9,9 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import 'blocs/app_lifecycle_bloc.dart';
-import 'blocs/app_settings.dart';
 import 'blocs/app_theme_bloc.dart';
 import 'blocs/view_manager/view_manager_bloc.dart';
+import 'models/app_settings.dart';
 import 'ui/bible/chapter_view.dart';
 import 'ui/common/test_view.dart';
 import 'ui/home/home_screen.dart';
@@ -36,8 +36,7 @@ Future<void> main() async {
     ],
   );
 
-  await AppSettings.load(
-      appName: 'Bible', itemsToSync: [tua.UserItemType.license]);
+  await AppSettings.load(appName: 'Bible', itemsToSync: [tua.UserItemType.license]);
 
   _registerViewTypes();
 
@@ -69,8 +68,7 @@ class App extends StatelessWidget {
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (_, themeMode) {
           return tec.BlocProvider<TecStyleBloc>(
-            bloc: TecStyleBloc(
-                <String, dynamic>{'dialogStyle': TecMetaStyle.material}),
+            bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
             child: OKToast(
               child: AppLifecycleWrapper(
                 child: MaterialApp(
