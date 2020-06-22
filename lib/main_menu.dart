@@ -6,13 +6,11 @@ import 'package:tec_widgets/tec_widgets.dart';
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
 
-import '../../blocs/app_settings.dart';
-import '../../models/labels.dart';
-import '../common/common.dart';
+import 'blocs/app_settings.dart';
+import 'models/labels.dart';
+import 'ui/common/common.dart';
 
 const tecartaBlue = Color(0xff4a7dee);
-
-// ignore_for_file: prefer_const_constructors
 
 Future<void> showMainMenu(BuildContext context) {
   return showTecModalPopup<void>(
@@ -23,6 +21,7 @@ Future<void> showMainMenu(BuildContext context) {
   );
 }
 
+// ignore_for_file: prefer_const_constructors
 const _textMaxScaleFactor = 1.0;
 
 class MainMenu extends StatelessWidget {
@@ -105,7 +104,8 @@ class MenuListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = Color.lerp(Theme.of(context).textColor, Theme.of(context).canvasColor, onTap == null ? 0.75 : 0);
+    final textColor = Color.lerp(
+        Theme.of(context).textColor, Theme.of(context).canvasColor, onTap == null ? 0.75 : 0);
     return switchValue == null
         ? ListTile(
             dense: true,
