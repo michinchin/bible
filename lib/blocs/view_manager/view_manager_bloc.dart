@@ -43,13 +43,22 @@ class ViewManager {
     @required String title,
     @required BuilderWithViewState builder,
     BuilderWithViewState titleBuilder,
+    ActionsBuilderWithViewState actionsBuilder,
     KeyMaker keyMaker,
     ViewSizeFunc minWidth,
     ViewSizeFunc minHeight,
   }) {
     assert(tec.isNotNullOrEmpty(key) && builder != null);
     assert(!_types.containsKey(key));
-    _types[key] = _ViewTypeAPI(title, builder, titleBuilder, keyMaker, minWidth, minHeight);
+    _types[key] = _ViewTypeAPI(
+      title,
+      builder,
+      titleBuilder,
+      actionsBuilder,
+      keyMaker,
+      minWidth,
+      minHeight,
+    );
   }
 
   List<String> get types => _types.keys.toList();
@@ -65,6 +74,9 @@ class ViewManager {
   Widget _buildViewTitle(BuildContext context, Key bodyKey, ViewState state, Size size) =>
       (_types[state.type]?.titleBuilder ?? _defaultTitleBuilder)(context, bodyKey, state, size);
 
+  List<Widget> _buildViewActions(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+      (_types[state.type]?.actionsBuilder ?? _defaultActionsBuilder)(context, bodyKey, state, size);
+
   double _minWidthForType(String type, BoxConstraints constraints) =>
       (_types[type]?.minWidth ?? _defaultMinWidth)(constraints);
 
@@ -78,6 +90,53 @@ class ViewManager {
 
   Widget _defaultTitleBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
       Text(state.uid.toString());
+
+  List<Widget> _defaultActionsBuilder(
+          BuildContext context, Key bodyKey, ViewState state, Size size) =>
+      [
+        IconButton(
+          icon: const Icon(Icons.close),
+          tooltip: 'Close',
+          onPressed: () => context.bloc<ViewManagerBloc>().add(ViewManagerEvent.remove(state.uid)),
+        ),
+      ];
+
+  // List<Widget> _testActionsForAdjustingSize(
+  //     BuildContext context, Key bodyKey, ViewState state, Size size) {
+  //   final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+  //   return <Widget>[
+  //     IconButton(
+  //       icon: const Icon(Icons.border_outer),
+  //       onPressed: () {
+  //         bloc
+  //           ..add(ViewManagerEvent.setWidth(position: widget.state.viewIndex, width: null))
+  //           ..add(ViewManagerEvent.setHeight(position: widget.state.viewIndex, height: null));
+  //       },
+  //     ),
+  //     IconButton(
+  //       icon: const Icon(Icons.format_textdirection_l_to_r),
+  //       onPressed: () {
+  //         final idealWidth = widget.state.viewState.idealWidth(widget.state.parentConstraints) ??
+  //             ViewManager.shared
+  //                 ._minWidthForType(widget.state.viewState.type, widget.state.parentConstraints);
+  //         final event =
+  //             ViewManagerEvent.setWidth(position: widget.state.viewIndex, width: idealWidth + 20.0);
+  //         bloc.add(event);
+  //       },
+  //     ),
+  //     IconButton(
+  //       icon: const Icon(Icons.format_line_spacing),
+  //       onPressed: () {
+  //         final idealHeight = widget.state.viewState.idealHeight(widget.state.parentConstraints) ??
+  //             ViewManager.shared
+  //                 ._minHeightForType(widget.state.viewState.type, widget.state.parentConstraints);
+  //         final event = ViewManagerEvent.setHeight(
+  //             position: widget.state.viewIndex, height: idealHeight + 20.0);
+  //         bloc.add(event);
+  //       },
+  //     ),
+  //   ];
+  // }
 
   double _defaultMinWidth(BoxConstraints constraints) => math.max(_minSize,
       math.min(_maxMinWidth, ((constraints ?? _defaultConstraints).maxWidth / 3).roundToDouble()));
@@ -104,6 +163,12 @@ typedef BuilderWithViewState = Widget Function(
     BuildContext context, Key bodyKey, ViewState state, Size size);
 
 ///
+/// Signature for a function that creates a list of "action" widgets for a given view state.
+///
+typedef ActionsBuilderWithViewState = List<Widget> Function(
+    BuildContext context, Key bodyKey, ViewState state, Size size);
+
+///
 /// Signature for a function that creates a widget for a given view state and index.
 ///
 typedef IndexedBuilderWithViewState = Widget Function(
@@ -121,6 +186,7 @@ class _ViewTypeAPI {
   final String title;
   final BuilderWithViewState builder;
   final BuilderWithViewState titleBuilder;
+  final ActionsBuilderWithViewState actionsBuilder;
   final KeyMaker keyMaker;
   final ViewSizeFunc minWidth;
   final ViewSizeFunc minHeight;
@@ -129,6 +195,7 @@ class _ViewTypeAPI {
     this.title,
     this.builder,
     this.titleBuilder,
+    this.actionsBuilder,
     this.keyMaker,
     this.minWidth,
     this.minHeight,
@@ -189,8 +256,9 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     return ViewManagerState(newViews, tec.nextIntWithJsSafeWraparound(nextUid, wrapTo: 1));
   }
 
-  ViewManagerState _remove(int position) {
-    assert(position != null);
+  ViewManagerState _remove(int uid) {
+    final position = state.views.indexWhere((e) => e.uid == uid);
+    if (position < 0) return state;
     final newViews = List.of(state.views) // shallow copy
       ..removeAt(position);
     return ViewManagerState(newViews, state.nextUid);
@@ -232,7 +300,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
 @freezed
 abstract class ViewManagerEvent with _$ViewManagerEvent {
   const factory ViewManagerEvent.add({@required String type, int position, String data}) = _Add;
-  const factory ViewManagerEvent.remove(int position) = _Remove;
+  const factory ViewManagerEvent.remove(int uid) = _Remove;
   const factory ViewManagerEvent.move({int fromPosition, int toPosition}) = _Move;
   const factory ViewManagerEvent.setWidth({int position, double width}) = _SetWidth;
   const factory ViewManagerEvent.setHeight({int position, double height}) = _SetHeight;
@@ -499,60 +567,21 @@ class _ManagedViewScaffoldState extends State<_ManagedViewScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     // tec.dmPrint('_ManagedViewScaffold building ${state.viewState.uid} with index ${state.viewIndex}');
-
-    List<Widget> testActionsForAdjustingSize() => <Widget>[
-          IconButton(
-            icon: const Icon(Icons.border_outer),
-            onPressed: () {
-              bloc
-                ..add(ViewManagerEvent.setWidth(position: widget.state.viewIndex, width: null))
-                ..add(ViewManagerEvent.setHeight(position: widget.state.viewIndex, height: null));
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.format_textdirection_l_to_r),
-            onPressed: () {
-              final idealWidth =
-                  widget.state.viewState.idealWidth(widget.state.parentConstraints) ??
-                      ViewManager.shared._minWidthForType(
-                          widget.state.viewState.type, widget.state.parentConstraints);
-              final event = ViewManagerEvent.setWidth(
-                  position: widget.state.viewIndex, width: idealWidth + 20.0);
-              bloc.add(event);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.format_line_spacing),
-            onPressed: () {
-              final idealHeight =
-                  widget.state.viewState.idealHeight(widget.state.parentConstraints) ??
-                      ViewManager.shared._minHeightForType(
-                          widget.state.viewState.type, widget.state.parentConstraints);
-              final event = ViewManagerEvent.setHeight(
-                  position: widget.state.viewIndex, height: idealHeight + 20.0);
-              bloc.add(event);
-            },
-          ),
-        ];
-
     return Scaffold(
       appBar: ManagedViewAppBar(
         appBar: AppBar(
           title: ViewManager.shared
               ._buildViewTitle(context, _bodyKey, widget.state.viewState, widget.state.viewSize),
-          leading: bloc.state.views.length <= 1
+          leading: widget.state.viewIndex > 0
               ? null
               : IconButton(
-                  icon: const Icon(Icons.close),
-                  tooltip: 'Close',
-                  onPressed: () {
-                    final event = ViewManagerEvent.remove(widget.state.viewIndex);
-                    bloc.add(event);
-                  },
+                  icon: const Icon(Icons.menu),
+                  tooltip: 'Main Menu',
+                  onPressed: () {},
                 ),
-          actions: null, // testActionsForAdjustingSize(),
+          actions: ViewManager.shared
+              ._buildViewActions(context, _bodyKey, widget.state.viewState, widget.state.viewSize),
         ),
       ),
       body: ViewManager.shared
