@@ -18,7 +18,7 @@ class AppSettings {
   }) async {
     // Get device info.
     final di = await tec.DeviceInfo.fetch();
-    debugPrint('Running on ${di.productName} with ${tec.DeviceInfo.os} ${di.version}');
+    tec.dmPrint('Running on ${di.productName} with ${tec.platformName} ${di.version}');
 
     // app prefix to indicate platform and app
     String platform;

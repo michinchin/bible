@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import 'app_settings.dart';
@@ -15,7 +16,7 @@ class AppLifecycleBloc extends Bloc<AppLifecycleState, AppLifecycleState> {
   @override
   Stream<AppLifecycleState> mapEventToState(AppLifecycleState event) async* {
     final newState = event;
-    debugPrint('App state changed to $event');
+    tec.dmPrint('App state changed to $event');
 
     if (newState != null && newState != state) {
       if (newState == AppLifecycleState.resumed) {
@@ -34,7 +35,7 @@ class AppLifecycleBloc extends Bloc<AppLifecycleState, AppLifecycleState> {
     _appResumedCount++;
     _pausedStopwatch.stop();
     if (kDebugMode) {
-      debugPrint('App resumed after being paused for $pausedDuration');
+      tec.dmPrint('App resumed after being paused for $pausedDuration');
     }
 
     // On Android, if you switch away from the app, then return to it,
@@ -104,8 +105,8 @@ class AppBindingObserver extends StatefulWidget {
   AppBindingObserverState createState() => AppBindingObserverState();
 }
 
-class AppBindingObserverState extends State<AppBindingObserver>
-    with WidgetsBindingObserver {
+// ignore: prefer_mixin
+class AppBindingObserverState extends State<AppBindingObserver> with WidgetsBindingObserver {
   AppLifecycleBloc bloc() => context.bloc<AppLifecycleBloc>();
 
   @override

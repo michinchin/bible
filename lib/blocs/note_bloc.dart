@@ -5,11 +5,10 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-
 import 'package:tec_util/tec_util.dart' as tec;
 
-import 'package:zefyr/zefyr.dart';
 import 'package:quill_delta/quill_delta.dart';
+import 'package:zefyr/zefyr.dart';
 
 part 'note_bloc.freezed.dart';
 part 'note_bloc.g.dart';
@@ -57,10 +56,10 @@ class NoteBloc extends Bloc<NoteEvent, Note> {
     assert(newState != null);
     if (newState == null) {
       assert(false);
-      debugPrint('Note not updated');
+      tec.dmPrint('Note not updated');
       yield state;
     } else {
-      debugPrint('Note ${state.id} updated');
+      tec.dmPrint('Note ${state.id} updated');
       yield newState;
     }
   }
@@ -90,8 +89,7 @@ class NoteBloc extends Bloc<NoteEvent, Note> {
     } else {
       modNotes.add(Note(id: id, doc: doc));
     }
-    tec.Prefs.shared.setStringList(
-        notesPref, modNotes.map((n) => jsonEncode(n.doc)).toList());
+    tec.Prefs.shared.setStringList(notesPref, modNotes.map((n) => jsonEncode(n.doc)).toList());
 
     final newState = state.copyWith(doc: doc);
     NoteManagerBloc.shared.updateNote(newState);
@@ -155,11 +153,7 @@ class NoteManagerBloc extends Bloc<NoteManagerEvent, NoteManagerState> {
   @override
   Stream<NoteManagerState> mapEventToState(NoteManagerEvent event) async* {
     final newState = event.when(
-        load: _load,
-        addNote: _addNote,
-        updateNote: _updateNote,
-        remove: _remove,
-        save: _save);
+        load: _load, addNote: _addNote, updateNote: _updateNote, remove: _remove, save: _save);
     assert(newState != null);
     if (newState != null) {
       yield newState;
@@ -196,8 +190,7 @@ class NoteManagerBloc extends Bloc<NoteManagerEvent, NoteManagerState> {
   }
 
   NoteManagerState _remove(int id) {
-    final noteList = List<Note>.from(state.notes)
-      ..removeWhere((n) => n.id == id);
+    final noteList = List<Note>.from(state.notes)..removeWhere((n) => n.id == id);
     for (var i = 0; i < noteList.length; i++) {
       noteList[i] = noteList[i].copyWith(id: i);
     }
@@ -206,14 +199,12 @@ class NoteManagerBloc extends Bloc<NoteManagerEvent, NoteManagerState> {
 
   NoteManagerState _save() {
     final noteList = List<Note>.from(state.notes);
-    final jsonNotes =
-        List<String>.from(noteList.map((n) => jsonEncode(n.doc)).toList());
+    final jsonNotes = List<String>.from(noteList.map((n) => jsonEncode(n.doc)).toList());
     tec.Prefs.shared.setStringList(notesPref, jsonNotes);
     return state;
   }
 
-  List<String> _grabNotesFromPrefs() =>
-      tec.Prefs.shared.getStringList(notesPref) ?? [];
+  List<String> _grabNotesFromPrefs() => tec.Prefs.shared.getStringList(notesPref) ?? [];
 
   void load() => add(const NoteManagerEvent.load());
   void addNote(Note note) => add(NoteManagerEvent.addNote(note));
@@ -227,8 +218,7 @@ abstract class NoteManagerState with _$NoteManagerState {
   factory NoteManagerState(List<Note> notes) = _Notes;
 
   // fromJson
-  factory NoteManagerState.fromJson(Map<String, dynamic> json) =>
-      _$NoteManagerStateFromJson(json);
+  factory NoteManagerState.fromJson(Map<String, dynamic> json) => _$NoteManagerStateFromJson(json);
 }
 
 @freezed
