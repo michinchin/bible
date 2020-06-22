@@ -4,14 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-///
-/// Popup mode: slide up or down.
-///
-enum TecPopupMode { slideUp, slideDown }
-
-/// Shows a modal popup that, depending on the popupMode setting, can slide up
-/// from the bottom of the screen (the default), or slide down from the top of
-/// the screen.
+/// Shows a modal popup that, depending on the [alignment] setting, can slide
+/// up from the bottom of the screen (the default), slide down from the top of
+/// the screen, slide in from either side, or slide in from any corner. :)
 ///
 /// Such a popup is an alternative to a menu or a dialog and prevents the user
 /// from interacting with the rest of the app (or current [Navigator] area).
@@ -48,7 +43,7 @@ Future<T> showTecModalPopup<T>({
   ImageFilter filter,
   bool useRootNavigator = true,
   bool semanticsDismissible,
-  TecPopupMode popupMode = TecPopupMode.slideUp,
+  Alignment alignment = Alignment.bottomCenter,
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
@@ -56,7 +51,7 @@ Future<T> showTecModalPopup<T>({
       barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
       barrierLabel: 'Dismiss',
       builder: builder,
-      popupMode: popupMode,
+      alignment: alignment ?? Alignment.bottomCenter,
       filter: filter,
       semanticsDismissible: semanticsDismissible,
     ),
@@ -66,8 +61,7 @@ Future<T> showTecModalPopup<T>({
 /// A popup sheet.
 ///
 /// A [TecPopupSheet] is typically passed as the child widget to
-/// [showTecModalPopup], which displays the sheet by sliding it up
-/// from the bottom of the screen, or down from the top of the screen.
+/// [showTecModalPopup].
 ///
 class TecPopupSheet extends StatelessWidget {
   ///
@@ -189,7 +183,7 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
     this.barrierColor,
     this.barrierLabel,
     this.builder,
-    this.popupMode,
+    this.alignment,
     bool semanticsDismissible,
     ImageFilter filter,
     RouteSettings settings,
@@ -203,7 +197,7 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
   final WidgetBuilder builder;
   bool _semanticsDismissible;
 
-  final TecPopupMode popupMode;
+  final Alignment alignment;
 
   @override
   final String barrierLabel;
@@ -231,8 +225,9 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
         parent: super.createAnimation(),
         curve: Curves.linearToEaseOut,
         reverseCurve: Curves.linearToEaseOut.flipped);
-    final beginY = (popupMode == TecPopupMode.slideDown ? -1.0 : 1.0);
-    _offsetTween = Tween<Offset>(begin: Offset(0.0, beginY), end: const Offset(0.0, 0.0));
+    final beginX = (alignment.x < 0.0 ? -1.0 : alignment.x > 0.0 ? 1.0 : 0.0);
+    final beginY = (alignment.y < 0.0 ? -1.0 : alignment.y > 0.0 ? 1.0 : 0.0);
+    _offsetTween = Tween<Offset>(begin: Offset(beginX, beginY), end: const Offset(0.0, 0.0));
     return _animation;
   }
 
@@ -249,8 +244,7 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
   Widget buildTransitions(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation, Widget child) {
     return Align(
-      alignment:
-          (popupMode == TecPopupMode.slideDown ? Alignment.topCenter : Alignment.bottomCenter),
+      alignment: alignment,
       child: FractionalTranslation(translation: _offsetTween.evaluate(_animation), child: child),
     );
   }

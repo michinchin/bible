@@ -9,6 +9,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../ui/common/common.dart';
 import '../../ui/common/tec_page_view.dart';
+import '../../ui/home/home_drawer.dart';
 
 part 'view_manager_bloc.freezed.dart';
 part 'view_manager_bloc.g.dart';
@@ -578,7 +579,7 @@ class _ManagedViewScaffoldState extends State<_ManagedViewScaffold> {
               : IconButton(
                   icon: const Icon(Icons.menu),
                   tooltip: 'Main Menu',
-                  onPressed: () {},
+                  onPressed: () => showMainMenu(context),
                 ),
           actions: ViewManager.shared
               ._buildViewActions(context, _bodyKey, widget.state.viewState, widget.state.viewSize),

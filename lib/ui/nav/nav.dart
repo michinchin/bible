@@ -12,7 +12,7 @@ import '../common/common.dart';
 Future<BookChapterVerse> navigate(BuildContext context) {
   return showTecModalPopup<BookChapterVerse>(
     context: context,
-    popupMode: TecPopupMode.slideDown,
+    alignment: Alignment.topCenter,
     useRootNavigator: false,
     builder: (context) => TecPopupSheet(child: Nav()),
   );

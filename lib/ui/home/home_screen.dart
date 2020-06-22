@@ -2,12 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/app_settings.dart';
-import '../../blocs/labels.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -57,7 +54,6 @@ class _HomeScreen extends StatelessWidget {
                 context: context,
                 barrierDismissible: false,
                 useRootNavigator: false,
-                //title: const TecText('Open View of Type?'),
                 content: const TecText('Open View of Type?'),
                 actions: <Widget>[
                   ..._generateViewTypeButtons(context),
@@ -71,16 +67,6 @@ class _HomeScreen extends StatelessWidget {
                 ],
               );
             },
-          ),
-          const Divider(color: Colors.transparent),
-          FloatingActionButton(
-            heroTag: 'account',
-            child: const Icon(Icons.account_circle),
-            onPressed: () => tua.showSignInDlg(
-              context: context,
-              account: AppSettings.shared.userAccount,
-              appName: Labels.appNameForUA,
-            ),
           ),
         ],
       ),
