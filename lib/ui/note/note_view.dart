@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:zefyr/zefyr.dart';
 
 import '../../blocs/note_bloc.dart';
-import '../../blocs/view_manager_bloc.dart';
+import '../../blocs/view_manager/view_manager_bloc.dart';
 
 const noteViewTypeName = 'NoteView';
 

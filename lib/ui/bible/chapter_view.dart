@@ -8,7 +8,7 @@ import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/view_manager_bloc.dart';
+import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
 import '../nav/nav.dart';

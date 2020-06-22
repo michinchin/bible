@@ -8,7 +8,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/app_settings.dart';
 import '../../blocs/labels.dart';
-import '../../blocs/view_manager_bloc.dart';
+import '../../blocs/view_manager/view_manager_bloc.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key key}) : super(key: key);

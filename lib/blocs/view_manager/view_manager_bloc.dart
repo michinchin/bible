@@ -7,8 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
-import '../ui/common/common.dart';
-import '../ui/common/tec_page_view.dart';
+import '../../ui/common/common.dart';
+import '../../ui/common/tec_page_view.dart';
 
 part 'view_manager_bloc.freezed.dart';
 part 'view_manager_bloc.g.dart';

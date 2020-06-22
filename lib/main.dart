@@ -11,7 +11,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import 'blocs/app_lifecycle_bloc.dart';
 import 'blocs/app_settings.dart';
 import 'blocs/app_theme_bloc.dart';
-import 'blocs/view_manager_bloc.dart';
+import 'blocs/view_manager/view_manager_bloc.dart';
 import 'ui/bible/chapter_view.dart';
 import 'ui/common/test_view.dart';
 import 'ui/home/home_screen.dart';
