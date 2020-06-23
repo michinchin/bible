@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+//import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../models/app_settings.dart';
 import '../common/common.dart';

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../main_menu.dart';
 import '../../ui/common/common.dart';
@@ -93,14 +94,37 @@ class ViewManager {
       Text(state.uid.toString());
 
   List<Widget> _defaultActionsBuilder(
-          BuildContext context, Key bodyKey, ViewState state, Size size) =>
-      [
-        IconButton(
-          icon: const Icon(Icons.close),
-          tooltip: 'Close',
-          onPressed: () => context.bloc<ViewManagerBloc>().add(ViewManagerEvent.remove(state.uid)),
-        ),
-      ];
+      BuildContext context, Key bodyKey, ViewState state, Size size) {
+    return [
+      // IconButton(
+      //   icon: const Icon(Icons.close),
+      //   tooltip: 'Close',
+      //   onPressed: () => context.bloc<ViewManagerBloc>().add(ViewManagerEvent.remove(state.uid)),
+      // ),
+      PopupMenuButton<_MenuItem>(
+        padding: EdgeInsets.zero,
+        onSelected: (value) {
+          switch (value) {
+            case _MenuItem.add:
+              _showOpenWindowDialog(context);
+              break;
+            case _MenuItem.close:
+              context.bloc<ViewManagerBloc>().add(ViewManagerEvent.remove(state.uid));
+              break;
+          }
+        },
+        itemBuilder: (context) => <PopupMenuEntry<_MenuItem>>[
+          if ((context.bloc<ViewManagerBloc>()?.state?.views?.length ?? 0) > 1)
+          const PopupMenuItem<_MenuItem>(
+              value: _MenuItem.close,
+              child: ListTile(leading: Icon(Icons.close), title: Text('Close Window'))),
+          const PopupMenuItem<_MenuItem>(
+              value: _MenuItem.add,
+              child: ListTile(leading: Icon(Icons.add), title: Text('Add Window'))),
+        ],
+      ),
+    ];
+  }
 
   // List<Widget> _testActionsForAdjustingSize(
   //     BuildContext context, Key bodyKey, ViewState state, Size size) {
@@ -148,9 +172,43 @@ class ViewManager {
   static const BoxConstraints _defaultConstraints = BoxConstraints(maxWidth: 320, maxHeight: 480);
 }
 
+void _showOpenWindowDialog(BuildContext context) {
+  tecShowAlertDialog<bool>(
+    context: context,
+    barrierDismissible: false,
+    useRootNavigator: false,
+    content: const TecText('Open Window of Type:'),
+    actions: <Widget>[
+      ..._generateViewTypeButtons(context),
+      TecDialogButton(
+        isDefaultAction: true,
+        child: const Text('Cancel'),
+        onPressed: () {
+          Navigator.of(context).maybePop();
+        },
+      ),
+    ],
+  );
+}
+
+Iterable<Widget> _generateViewTypeButtons(BuildContext context) {
+  final vm = ViewManager.shared;
+  return vm.types.map<Widget>(
+    (type) => TecDialogButton(
+      child: Text(vm.titleForType(type)),
+      onPressed: () {
+        context.bloc<ViewManagerBloc>().add(ViewManagerEvent.add(type: type, data: ''));
+        Navigator.of(context).maybePop(true);
+      },
+    ),
+  );
+}
+
 const _iPhoneSEHeight = 568.0;
 const _minSize = (_iPhoneSEHeight - 20.0) / 2;
 const _maxMinWidth = 400.0;
+
+enum _MenuItem { close, add }
 
 ///
 /// Signature for a function the creates a key for a given view state.
@@ -213,15 +271,21 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       : assert(kvStore != null),
         _kvStore = kvStore;
 
+  final _defaultState = ViewManagerState([ViewState(uid: 1, type: 'BibleChapter')], 2);
+
   @override
   ViewManagerState get initialState {
     final jsonStr = _kvStore.getString(_key);
+    ViewManagerState state;
     if (tec.isNotNullOrEmpty(jsonStr)) {
       // tec.dmPrint('loaded ViewManagerState: $jsonStr');
       final json = tec.parseJsonSync(jsonStr);
-      if (json != null) return ViewManagerState.fromJson(json);
+      if (json != null) state = ViewManagerState.fromJson(json);
     }
-    return ViewManagerState([], 1);
+    if (state == null || state.views.isEmpty) {
+      state = _defaultState;
+    }
+    return state;
   }
 
   @override
@@ -262,6 +326,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     if (position < 0) return state;
     final newViews = List.of(state.views) // shallow copy
       ..removeAt(position);
+    if (newViews.isEmpty) return _defaultState;
     return ViewManagerState(newViews, state.nextUid);
   }
 

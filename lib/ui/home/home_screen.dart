@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
@@ -53,48 +51,8 @@ class _HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              tecShowAlertDialog<bool>(
-                context: context,
-                barrierDismissible: false,
-                useRootNavigator: false,
-                content: const TecText('Open View of Type?'),
-                actions: <Widget>[
-                  ..._generateViewTypeButtons(context),
-                  TecDialogButton(
-                    isDefaultAction: true,
-                    child: const Text('CANCEL'),
-                    onPressed: () {
-                      Navigator.of(context).maybePop();
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
     );
   }
-}
-
-Iterable<Widget> _generateViewTypeButtons(BuildContext context) {
-  final vm = ViewManager.shared;
-  return vm.types.map<Widget>(
-    (type) => TecDialogButton(
-      child: Text(vm.titleForType(type)),
-      onPressed: () {
-        context.bloc<ViewManagerBloc>().add(ViewManagerEvent.add(type: type, data: ''));
-        Navigator.of(context).maybePop(true);
-      },
-    ),
-  );
 }
 
 class _BottomSheet extends StatefulWidget {
