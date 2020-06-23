@@ -107,8 +107,6 @@ class _BottomSheet extends StatefulWidget {
 }
 
 class _BottomSheetState extends State<_BottomSheet> {
-  bool isTextSelected = false;
-
   PersistentBottomSheetController bottomSheet;
 
   @override
