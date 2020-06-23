@@ -9,6 +9,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'models/app_settings.dart';
 import 'models/labels.dart';
 import 'ui/common/common.dart';
+import 'ui/misc/text_settings.dart';
 
 const tecartaBlue = Color(0xff4a7dee);
 
@@ -49,6 +50,14 @@ class MainMenu extends StatelessWidget {
                 icon: FeatherIcons.bell,
                 title: 'Notifications',
                 onTap: null,
+              ),
+              MenuListTile(
+                icon: Icons.format_size,
+                title: 'Text Size',
+                onTap: () {
+                  Navigator.of(context).pop();
+                  showTextSettingsDialog(context);
+                },
               ),
               Divider(),
               MenuListTile(

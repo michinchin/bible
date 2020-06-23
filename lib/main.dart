@@ -13,8 +13,8 @@ import 'blocs/app_theme_bloc.dart';
 import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'ui/bible/chapter_view.dart';
-import 'ui/common/test_view.dart';
 import 'ui/home/home_screen.dart';
+import 'ui/misc/test_view.dart';
 import 'ui/note/note_view.dart';
 import 'ui/note/notes_view.dart';
 
@@ -36,7 +36,7 @@ Future<void> main() async {
     ],
   );
 
-  await AppSettings.load(appName: 'Bible', itemsToSync: [tua.UserItemType.license]);
+  await AppSettings.shared.load(appName: 'Bible', itemsToSync: [tua.UserItemType.license]);
 
   _registerViewTypes();
 

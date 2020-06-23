@@ -9,6 +9,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
 import '../nav/nav.dart';
@@ -129,12 +130,17 @@ class _BibleChapterView extends StatelessWidget {
       builder: (context, snapshot) {
         final html = snapshot.hasData ? snapshot.data.value : null;
         if (tec.isNotNullOrEmpty(html)) {
-          return _ChapterView(
-            volumeId: bible.id,
-            ref: ref,
-            baseUrl: bible.baseUrl,
-            html: html,
-            size: size,
+          return StreamBuilder<double>(
+            stream: AppSettings.shared.contentTextScaleFactor.stream,
+            builder: (c, snapshot) {
+              return _ChapterView(
+                volumeId: bible.id,
+                ref: ref,
+                baseUrl: bible.baseUrl,
+                html: html,
+                size: size,
+              );
+            },
           );
         } else {
           final error =
@@ -183,14 +189,14 @@ class _ChapterViewState extends State<_ChapterView> {
     super.dispose();
   }
 
-  final _contentScaleFactor = 1.0;
+  var _contentScaleFactor = 1.0;
 
   @override
   Widget build(BuildContext context) {
-    // final newContentScaleFactor = contentTextScaleFactorWith(context);
-    // if (newContentScaleFactor != _contentScaleFactor) {
-    //   _contentScaleFactor = newContentScaleFactor;
-    // }
+    final newContentScaleFactor = contentTextScaleFactorWith(context);
+    if (newContentScaleFactor != _contentScaleFactor) {
+      _contentScaleFactor = newContentScaleFactor;
+    }
 
     final htmlFragment = widget.html;
 
