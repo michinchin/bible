@@ -9,6 +9,7 @@ import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
+import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
@@ -272,6 +273,11 @@ class _ChapterViewState extends State<_ChapterView> {
                 padding: EdgeInsets.symmetric(
                   horizontal: (widget.size.width * _marginPercent).roundToDouble(),
                 ),
+                onSelectionChanged: (isTextSelected) {
+                  context
+                      .bloc<SelectionBloc>()
+                      ?.add(SelectionEvent.updateIsTextSelected(isTextSelected));
+                },
                 onLinkTap: null,
               );
             },
