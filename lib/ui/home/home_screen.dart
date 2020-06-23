@@ -6,6 +6,8 @@ import 'package:tec_util/tec_util.dart' as tec;
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 
+import '../bible/selection_sheet.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key key}) : super(key: key);
 
@@ -74,18 +76,21 @@ class _BottomSheetState extends State<_BottomSheet> {
 
   void _showBottomSheet() {
     if (bottomSheet != null) return;
-    bottomSheet = Scaffold.of(context)
-        .showBottomSheet<void>((context) => _BottomSheetContent(), elevation: 25)
-          ..closed.whenComplete(() {
-            bottomSheet = null;
-          });
+    bottomSheet = Scaffold.of(context).showBottomSheet<void>(
+        (context) => SelectionSheet(),
+        elevation: 25,
+        backgroundColor: Colors.transparent)
+      ..closed.whenComplete(() {
+        bottomSheet = null;
+      });
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<SelectionBloc, SelectionState>(
       child: widget.child,
-      condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
+      condition: (previous, current) =>
+          previous.isTextSelected != current.isTextSelected,
       listener: (context, state) {
         if (state.isTextSelected) {
           _showBottomSheet();

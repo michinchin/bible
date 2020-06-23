@@ -36,7 +36,8 @@ Future<void> main() async {
     ],
   );
 
-  await AppSettings.shared.load(appName: 'Bible', itemsToSync: [tua.UserItemType.license]);
+  await AppSettings.shared
+      .load(appName: 'Bible', itemsToSync: [tua.UserItemType.license]);
 
   _registerViewTypes();
 
@@ -68,7 +69,8 @@ class App extends StatelessWidget {
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (_, themeMode) {
           return tec.BlocProvider<TecStyleBloc>(
-            bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
+            bloc: TecStyleBloc(
+                <String, dynamic>{'dialogStyle': TecMetaStyle.material}),
             child: OKToast(
               child: AppLifecycleWrapper(
                 child: MaterialApp(
