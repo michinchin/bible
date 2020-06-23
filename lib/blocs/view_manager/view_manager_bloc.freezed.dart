@@ -20,9 +20,9 @@ class _$ViewManagerEventTearOff {
     );
   }
 
-  _Remove remove(int position) {
+  _Remove remove(int uid) {
     return _Remove(
-      position,
+      uid,
     );
   }
 
@@ -62,7 +62,7 @@ mixin _$ViewManagerEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
-    @required Result remove(int position),
+    @required Result remove(int uid),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -71,7 +71,7 @@ mixin _$ViewManagerEvent {
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
-    Result remove(int position),
+    Result remove(int uid),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -196,7 +196,7 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
-    @required Result remove(int position),
+    @required Result remove(int uid),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -215,7 +215,7 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
-    Result remove(int position),
+    Result remove(int uid),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -280,7 +280,7 @@ abstract class _Add implements ViewManagerEvent {
 abstract class _$RemoveCopyWith<$Res> {
   factory _$RemoveCopyWith(_Remove value, $Res Function(_Remove) then) =
       __$RemoveCopyWithImpl<$Res>;
-  $Res call({int position});
+  $Res call({int uid});
 }
 
 class __$RemoveCopyWithImpl<$Res> extends _$ViewManagerEventCopyWithImpl<$Res>
@@ -293,23 +293,23 @@ class __$RemoveCopyWithImpl<$Res> extends _$ViewManagerEventCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object position = freezed,
+    Object uid = freezed,
   }) {
     return _then(_Remove(
-      position == freezed ? _value.position : position as int,
+      uid == freezed ? _value.uid : uid as int,
     ));
   }
 }
 
 class _$_Remove with DiagnosticableTreeMixin implements _Remove {
-  const _$_Remove(this.position) : assert(position != null);
+  const _$_Remove(this.uid) : assert(uid != null);
 
   @override
-  final int position;
+  final int uid;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'ViewManagerEvent.remove(position: $position)';
+    return 'ViewManagerEvent.remove(uid: $uid)';
   }
 
   @override
@@ -317,21 +317,20 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'ViewManagerEvent.remove'))
-      ..add(DiagnosticsProperty('position', position));
+      ..add(DiagnosticsProperty('uid', uid));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other is _Remove &&
-            (identical(other.position, position) ||
-                const DeepCollectionEquality()
-                    .equals(other.position, position)));
+            (identical(other.uid, uid) ||
+                const DeepCollectionEquality().equals(other.uid, uid)));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(position);
+      runtimeType.hashCode ^ const DeepCollectionEquality().hash(uid);
 
   @override
   _$RemoveCopyWith<_Remove> get copyWith =>
@@ -341,7 +340,7 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
-    @required Result remove(int position),
+    @required Result remove(int uid),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -353,14 +352,14 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
     assert(setWidth != null);
     assert(setHeight != null);
     assert(setData != null);
-    return remove(position);
+    return remove(uid);
   }
 
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
-    Result remove(int position),
+    Result remove(int uid),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -369,7 +368,7 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   }) {
     assert(orElse != null);
     if (remove != null) {
-      return remove(position);
+      return remove(uid);
     }
     return orElse();
   }
@@ -413,9 +412,9 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
 }
 
 abstract class _Remove implements ViewManagerEvent {
-  const factory _Remove(int position) = _$_Remove;
+  const factory _Remove(int uid) = _$_Remove;
 
-  int get position;
+  int get uid;
   _$RemoveCopyWith<_Remove> get copyWith;
 }
 
@@ -494,7 +493,7 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
-    @required Result remove(int position),
+    @required Result remove(int uid),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -513,7 +512,7 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
-    Result remove(int position),
+    Result remove(int uid),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -646,7 +645,7 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
-    @required Result remove(int position),
+    @required Result remove(int uid),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -665,7 +664,7 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
-    Result remove(int position),
+    Result remove(int uid),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -800,7 +799,7 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
-    @required Result remove(int position),
+    @required Result remove(int uid),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -819,7 +818,7 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
-    Result remove(int position),
+    Result remove(int uid),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -951,7 +950,7 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
-    @required Result remove(int position),
+    @required Result remove(int uid),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -970,7 +969,7 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
-    Result remove(int position),
+    Result remove(int uid),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),

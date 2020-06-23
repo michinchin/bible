@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -12,8 +13,15 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ViewManagerBloc(kvStore: tec.Prefs.shared),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ViewManagerBloc>(
+          create: (_) => ViewManagerBloc(kvStore: tec.Prefs.shared),
+        ),
+        BlocProvider<SelectionBloc>(
+          create: (_) => SelectionBloc(),
+        ),
+      ],
       child: const _HomeScreen(),
     );
   }
