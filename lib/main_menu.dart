@@ -53,7 +53,7 @@ class MainMenu extends StatelessWidget {
               ),
               MenuListTile(
                 icon: Icons.format_size,
-                title: 'Text Size',
+                title: 'Text Settings',
                 onTap: () {
                   Navigator.of(context).pop();
                   showTextSettingsDialog(context);

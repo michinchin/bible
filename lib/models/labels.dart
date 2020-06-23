@@ -3,4 +3,5 @@ class Labels {
 
   // Preference key names:
   static const prefContentTextScaleFactor = 'contentTextScaleFactor';
+  static const prefContentFontName = 'contentFontName';
 }

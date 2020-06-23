@@ -28,6 +28,11 @@ class AppSettings {
   final contentTextScaleFactor = BehaviorSubject<double>.seeded(1); // ignore: close_sinks
 
   ///
+  /// The font scale factor for content (e.g. devo or Bible HTML).
+  ///
+  final contentFontName = BehaviorSubject<String>.seeded(''); // ignore: close_sinks
+
+  ///
   /// Loads the app settings. This must only be called once.
   ///
   Future<void> load({
@@ -53,6 +58,12 @@ class AppSettings {
       ..add((tec.Prefs.shared.getDouble(Labels.prefContentTextScaleFactor, defaultValue: 1.2)))
       ..listen((scaleFactor) {
         tec.Prefs.shared.setDouble(Labels.prefContentTextScaleFactor, scaleFactor);
+      });
+
+    contentFontName
+      ..add((tec.Prefs.shared.getString(Labels.prefContentFontName, defaultValue: '')))
+      ..listen((fontName) {
+        tec.Prefs.shared.setString(Labels.prefContentFontName, fontName);
       });
   }
 }

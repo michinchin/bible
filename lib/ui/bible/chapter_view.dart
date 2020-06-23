@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:tec_env/tec_env.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -237,18 +238,28 @@ class _ChapterViewState extends State<_ChapterView> {
           //     Bible.refTitleFromHref('${widget.chapter.book}/${widget.chapter.chapter}'),
           //   ),
           // ),
-          TecHtml(
-            html,
-            debugId: '${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}',
-            selectable: !kIsWeb,
-            scrollController: _scrollController,
-            baseUrl: widget.baseUrl,
-            textScaleFactor: 1.0, // HTML is already scaled.
-            textStyle: htmlTextStyle.merge(TextStyle(color: textColor)),
-            padding: EdgeInsets.symmetric(
-              horizontal: (widget.size.width * _marginPercent).roundToDouble(),
-            ),
-            onLinkTap: null,
+          StreamBuilder<String>(
+            stream: AppSettings.shared.contentFontName.stream,
+            builder: (c, snapshot) {
+              final fontName =
+                  (snapshot.hasData ? snapshot.data : AppSettings.shared.contentFontName.value);
+
+              return TecHtml(
+                html,
+                debugId: '${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}',
+                selectable: !kIsWeb,
+                scrollController: _scrollController,
+                baseUrl: widget.baseUrl,
+                textScaleFactor: 1.0, // HTML is already scaled.
+                textStyle: fontName.isEmpty
+                    ? htmlTextStyle.merge(TextStyle(color: textColor))
+                    : GoogleFonts.getFont(fontName, color: textColor),
+                padding: EdgeInsets.symmetric(
+                  horizontal: (widget.size.width * _marginPercent).roundToDouble(),
+                ),
+                onLinkTap: null,
+              );
+            },
           ),
         ],
       ),
