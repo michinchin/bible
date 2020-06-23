@@ -86,6 +86,10 @@ Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState sta
   );
 }
 
+//
+// PRIVATE STUFF
+//
+
 class _ChapterData {
   final BookChapterVerse bcv;
   final int page;
@@ -159,6 +163,17 @@ class _BibleChapterView extends StatelessWidget {
     );
   }
 }
+
+const _lineSpacing = 1.4;
+const _marginPercent = 0.05; // 0.05;
+
+const TextStyle htmlTextStyle = TextStyle(
+  inherit: false,
+  //fontFamily: tec.platformIs(tec.Platform.iOS) ? 'Avenir' : 'normal',
+  fontSize: 16,
+  fontWeight: FontWeight.normal,
+  height: _lineSpacing,
+);
 
 class _ChapterView extends StatefulWidget {
   final int volumeId;
@@ -266,14 +281,3 @@ class _ChapterViewState extends State<_ChapterView> {
     );
   }
 }
-
-const _lineSpacing = 1.4;
-const _marginPercent = 0.05; // 0.05;
-
-const TextStyle htmlTextStyle = TextStyle(
-  inherit: false,
-  //fontFamily: tec.platformIs(tec.Platform.iOS) ? 'Avenir' : 'normal',
-  fontSize: 16,
-  fontWeight: FontWeight.normal,
-  height: _lineSpacing,
-);

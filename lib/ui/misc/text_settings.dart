@@ -63,3 +63,53 @@ class _TextSettings extends StatelessWidget {
     );
   }
 }
+
+// class _PopupMenuButton extends StatelessWidget {
+//   final Widget title;
+
+//   const _PopupMenuButton({Key key, this.title})
+//       : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) => StreamBuilder<String>(
+//       stream: bibleBloc.ref.stream,
+//       builder: (context, snapshot) {
+//         final ref = (snapshot.hasData ? snapshot.data : '');
+//         final menuItems = bibleBloc.hrefs
+//             .map<PopupMenuEntry<String>>((href) => PopupMenuItem<String>(
+//                   height: _defaultMenuItemHeight,
+//                   value: href,
+//                   child: TecText(
+//                     BibleBloc.titleFromHref(href),
+//                     maxScaleFactor: 1.2,
+//                     style: TextStyle(
+//                         fontWeight:
+//                             href == ref ? FontWeight.bold : FontWeight.normal,
+//                         color: href == ref
+//                             ? (Theme.of(context).brightness == Brightness.dark
+//                                 ? Colors.white
+//                                 : Colors.black)
+//                             : (Theme.of(context).brightness == Brightness.dark
+//                                 ? Colors.white70
+//                                 : Colors.black87)),
+//                   ),
+//                 ))
+//             .toList();
+
+//         return Theme(
+//           data: Theme.of(context).copyWith(
+//             textTheme: const TextTheme(
+//                 subtitle1: TextStyle(textBaseline: TextBaseline.alphabetic)),
+//           ),
+//           child: PopupMenuButton<String>(
+//             child: title,
+//             offset: const Offset(150, 0),
+//             onSelected: (value) {
+//               bibleBloc.currentIndex = bibleBloc.hrefs.indexOf(value);
+//             },
+//             itemBuilder: (context) => menuItems,
+//             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+//           ),
+//         );
+//       });
+// }

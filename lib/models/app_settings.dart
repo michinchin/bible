@@ -23,12 +23,12 @@ class AppSettings {
   tua.UserAccount userAccount;
 
   ///
-  /// The font scale factor for content (e.g. devo or Bible HTML).
+  /// The font scale factor for content (e.g. Bible or study content HTML).
   ///
   final contentTextScaleFactor = BehaviorSubject<double>.seeded(1); // ignore: close_sinks
 
   ///
-  /// The font scale factor for content (e.g. devo or Bible HTML).
+  /// The font scale factor for content (e.g. Bible or study content HTML).
   ///
   final contentFontName = BehaviorSubject<String>.seeded(''); // ignore: close_sinks
 
