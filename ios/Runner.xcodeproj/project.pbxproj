@@ -8,11 +8,19 @@
 
 /* Begin PBXBuildFile section */
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
+		275A100E24A3BEFC0035A8A6 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 275A0FFE24A3BEFC0035A8A6 /* Default@2x.png */; };
+		275A100F24A3BEFC0035A8A6 /* Default-Landscape.png in Resources */ = {isa = PBXBuildFile; fileRef = 275A100024A3BEFC0035A8A6 /* Default-Landscape.png */; };
+		275A101024A3BEFC0035A8A6 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 275A100224A3BEFC0035A8A6 /* LaunchScreen.xib */; };
+		275A101124A3BEFC0035A8A6 /* Default-Portrait.png in Resources */ = {isa = PBXBuildFile; fileRef = 275A100424A3BEFC0035A8A6 /* Default-Portrait.png */; };
+		275A101224A3BEFC0035A8A6 /* Default-Landscape@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 275A100624A3BEFC0035A8A6 /* Default-Landscape@2x.png */; };
+		275A101324A3BEFC0035A8A6 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 275A100824A3BEFC0035A8A6 /* Default.png */; };
+		275A101424A3BEFC0035A8A6 /* Default-Portrait@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 275A100A24A3BEFC0035A8A6 /* Default-Portrait@2x.png */; };
+		275A101524A3BEFC0035A8A6 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 275A100C24A3BEFC0035A8A6 /* Default-568h@2x.png */; };
+		275A101824A3C5890035A8A6 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 275A101724A3C5890035A8A6 /* StoreKit.framework */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
-		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		C55EC9BBC5D637C6F0E08C16 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E8A5D9AE157B3B7CCACA3DE /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
 
@@ -33,12 +41,18 @@
 		060C3B3252FAE275B2F45EAD /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
+		275A0FFF24A3BEFC0035A8A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = "Base.lproj/Default@2x.png"; sourceTree = "<group>"; };
+		275A100124A3BEFC0035A8A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = "Base.lproj/Default-Landscape.png"; sourceTree = "<group>"; };
+		275A100324A3BEFC0035A8A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
+		275A100524A3BEFC0035A8A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = "Base.lproj/Default-Portrait.png"; sourceTree = "<group>"; };
+		275A100724A3BEFC0035A8A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = "Base.lproj/Default-Landscape@2x.png"; sourceTree = "<group>"; };
+		275A100924A3BEFC0035A8A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = Base.lproj/Default.png; sourceTree = "<group>"; };
+		275A100B24A3BEFC0035A8A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = "Base.lproj/Default-Portrait@2x.png"; sourceTree = "<group>"; };
+		275A100D24A3BEFC0035A8A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = "Base.lproj/Default-568h@2x.png"; sourceTree = "<group>"; };
+		275A101724A3C5890035A8A6 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		275A101924A3C5E20035A8A6 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		2E8A5D9AE157B3B7CCACA3DE /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
-		6414A0E82458715A006C3B61 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Main.strings; sourceTree = "<group>"; };
-		6414A0E92458715A006C3B61 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
-		6414A0EA24587176006C3B61 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Main.strings; sourceTree = "<group>"; };
-		6414A0EB24587176006C3B61 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
@@ -48,7 +62,6 @@
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97C146FB1CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A73D30F51A56BD95E4430406 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -59,12 +72,28 @@
 			buildActionMask = 2147483647;
 			files = (
 				C55EC9BBC5D637C6F0E08C16 /* Pods_Runner.framework in Frameworks */,
+				275A101824A3C5890035A8A6 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		275A101624A3BF010035A8A6 /* Launch Screen */ = {
+			isa = PBXGroup;
+			children = (
+				275A100C24A3BEFC0035A8A6 /* Default-568h@2x.png */,
+				275A100024A3BEFC0035A8A6 /* Default-Landscape.png */,
+				275A100624A3BEFC0035A8A6 /* Default-Landscape@2x.png */,
+				275A100424A3BEFC0035A8A6 /* Default-Portrait.png */,
+				275A100A24A3BEFC0035A8A6 /* Default-Portrait@2x.png */,
+				275A100824A3BEFC0035A8A6 /* Default.png */,
+				275A0FFE24A3BEFC0035A8A6 /* Default@2x.png */,
+				275A100224A3BEFC0035A8A6 /* LaunchScreen.xib */,
+			);
+			name = "Launch Screen";
+			sourceTree = "<group>";
+		};
 		57652B3BC7B8EFF989378F5B /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -108,9 +137,10 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				275A101924A3C5E20035A8A6 /* Runner.entitlements */,
+				275A101624A3BF010035A8A6 /* Launch Screen */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
-				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
 				97C147021CF9000F007C117D /* Info.plist */,
 				97C146F11CF9000F007C117D /* Supporting Files */,
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
@@ -131,6 +161,7 @@
 		A8B1847DE1909C701B9F4E7C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				275A101724A3C5890035A8A6 /* StoreKit.framework */,
 				2E8A5D9AE157B3B7CCACA3DE /* Pods_Runner.framework */,
 			);
 			name = Frameworks;
@@ -184,8 +215,6 @@
 			knownRegions = (
 				en,
 				Base,
-				es,
-				ar,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
@@ -202,10 +231,17 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
+				275A100E24A3BEFC0035A8A6 /* Default@2x.png in Resources */,
+				275A101424A3BEFC0035A8A6 /* Default-Portrait@2x.png in Resources */,
+				275A101024A3BEFC0035A8A6 /* LaunchScreen.xib in Resources */,
+				275A101524A3BEFC0035A8A6 /* Default-568h@2x.png in Resources */,
+				275A101224A3BEFC0035A8A6 /* Default-Landscape@2x.png in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+				275A101124A3BEFC0035A8A6 /* Default-Portrait.png in Resources */,
+				275A100F24A3BEFC0035A8A6 /* Default-Landscape.png in Resources */,
+				275A101324A3BEFC0035A8A6 /* Default.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,7 +277,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin\n";
 		};
 		9740EEB61CF901F6004384FC /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -311,24 +347,76 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		275A0FFE24A3BEFC0035A8A6 /* Default@2x.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				275A0FFF24A3BEFC0035A8A6 /* Base */,
+			);
+			name = "Default@2x.png";
+			sourceTree = "<group>";
+		};
+		275A100024A3BEFC0035A8A6 /* Default-Landscape.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				275A100124A3BEFC0035A8A6 /* Base */,
+			);
+			name = "Default-Landscape.png";
+			sourceTree = "<group>";
+		};
+		275A100224A3BEFC0035A8A6 /* LaunchScreen.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				275A100324A3BEFC0035A8A6 /* Base */,
+			);
+			name = LaunchScreen.xib;
+			sourceTree = "<group>";
+		};
+		275A100424A3BEFC0035A8A6 /* Default-Portrait.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				275A100524A3BEFC0035A8A6 /* Base */,
+			);
+			name = "Default-Portrait.png";
+			sourceTree = "<group>";
+		};
+		275A100624A3BEFC0035A8A6 /* Default-Landscape@2x.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				275A100724A3BEFC0035A8A6 /* Base */,
+			);
+			name = "Default-Landscape@2x.png";
+			sourceTree = "<group>";
+		};
+		275A100824A3BEFC0035A8A6 /* Default.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				275A100924A3BEFC0035A8A6 /* Base */,
+			);
+			name = Default.png;
+			sourceTree = "<group>";
+		};
+		275A100A24A3BEFC0035A8A6 /* Default-Portrait@2x.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				275A100B24A3BEFC0035A8A6 /* Base */,
+			);
+			name = "Default-Portrait@2x.png";
+			sourceTree = "<group>";
+		};
+		275A100C24A3BEFC0035A8A6 /* Default-568h@2x.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				275A100D24A3BEFC0035A8A6 /* Base */,
+			);
+			name = "Default-568h@2x.png";
+			sourceTree = "<group>";
+		};
 		97C146FA1CF9000F007C117D /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
 				97C146FB1CF9000F007C117D /* Base */,
-				6414A0E82458715A006C3B61 /* es */,
-				6414A0EA24587176006C3B61 /* ar */,
 			);
 			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				97C147001CF9000F007C117D /* Base */,
-				6414A0E92458715A006C3B61 /* es */,
-				6414A0EB24587176006C3B61 /* ar */,
-			);
-			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -376,7 +464,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
@@ -391,6 +479,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 6MDE8399G4;
 				ENABLE_BITCODE = NO;
@@ -407,7 +496,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.bible;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecarta.TecartaBible;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -463,7 +552,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -513,7 +602,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
@@ -530,6 +619,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 6MDE8399G4;
 				ENABLE_BITCODE = NO;
@@ -546,7 +636,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.bible;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecarta.TecartaBible;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -561,6 +651,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 6MDE8399G4;
 				ENABLE_BITCODE = NO;
@@ -577,7 +668,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.bible;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecarta.TecartaBible;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;

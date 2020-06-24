@@ -1,0 +1,2 @@
+-keepclassmembers enum * {*;}
+-keep class com.dexterous.** { *; }
