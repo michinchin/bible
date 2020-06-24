@@ -81,6 +81,9 @@ class ViewManager {
   Widget _buildViewTitle(BuildContext context, Key bodyKey, ViewState state, Size size) =>
       (_types[state.type]?.titleBuilder ?? _defaultTitleBuilder)(context, bodyKey, state, size);
 
+  Widget _defaultTitleBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+      Text(_types[state.type]?.title ?? state.uid.toString());
+
   List<Widget> _buildViewActions(BuildContext context, Key bodyKey, ViewState state, Size size) =>
       (_types[state.type]?.actionsBuilder ?? _defaultActionsBuilder)(context, bodyKey, state, size);
 
@@ -123,9 +126,6 @@ Key _defaultKeyMaker(BuildContext context, ViewState state) => null;
 
 Widget _defaultBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
     Container(key: bodyKey);
-
-Widget _defaultTitleBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
-    Text(state.uid.toString());
 
 double _defaultMinWidth(BoxConstraints constraints) => math.max(_minSize,
     math.min(_maxMinWidth, ((constraints ?? _defaultConstraints).maxWidth / 3).roundToDouble()));

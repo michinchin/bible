@@ -208,11 +208,6 @@ final _managedViewAppBarPreferredSize =
     Size.fromHeight((AppBar().preferredSize.height * 0.75).roundToDouble());
 
 ///
-/// Signature of the function that is called when the current page is changed.
-///
-typedef PageableViewOnPageChanged = void Function(BuildContext context, ViewState state, int page);
-
-///
 /// View that uses a [TecPageView] for paging.
 ///
 class PageableView extends StatefulWidget {
@@ -268,3 +263,8 @@ class PageableViewState extends State<PageableView> {
     );
   }
 }
+
+///
+/// Signature of the function that is called when the current page is changed.
+///
+typedef PageableViewOnPageChanged = void Function(BuildContext context, ViewState state, int page);

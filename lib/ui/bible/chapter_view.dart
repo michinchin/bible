@@ -65,6 +65,10 @@ Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState sta
   final bible = VolumesRepository.shared.bibleWithId(_bibleId);
   final bcv = _ChapterData.fromJson(state.data).bcv;
   return CupertinoButton(
+    child: Text(
+      bible.titleWithHref('${bcv.book}/${bcv.chapter}'),
+      style: Theme.of(context).textTheme.headline6.copyWith(color: Theme.of(context).accentColor),
+    ),
     onPressed: () async {
       final bcv = await navigate(context);
       if (bcv != null) {
@@ -81,9 +85,6 @@ Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState sta
         }
       }
     },
-    child: Text(
-      bible.titleWithHref('${bcv.book}/${bcv.chapter}'),
-    ),
   );
 }
 
