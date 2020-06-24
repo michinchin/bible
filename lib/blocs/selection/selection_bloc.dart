@@ -29,11 +29,11 @@ class SelectionBloc extends Bloc<SelectionEvent, SelectionState> {
   @override
   Stream<SelectionState> mapEventToState(SelectionEvent event) async* {
     final newState = event.when(highlight: (type, color) {
-      return SelectionState(highlightType: type, color: color);
+      return state.copyWith(highlightType: type, color: color);
     }, updateIsTextSelected: (isTextSelected) {
-      return SelectionState(isTextSelected: isTextSelected);
+      return state.copyWith(isTextSelected: isTextSelected);
     });
-    tec.dmPrint('SelectionBloc state updated to $newState');
+    tec.dmPrint('Updated to $newState');
     yield newState;
   }
 }
