@@ -6,7 +6,6 @@ flutter pub get
 flutter clean
 
 # sed -i '' "s/DEBUG-VERSION/$VERSION-$BUILD_NUMBER/g" lib/version.dart
-echo --build-name $VERSION --build-number $BUILD_NUMBER
 
 # APK
 flutter build apk --release --build-name $VERSION --build-number $BUILD_NUMBER
