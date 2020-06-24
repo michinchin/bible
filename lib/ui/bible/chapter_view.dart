@@ -54,7 +54,7 @@ Widget bibleChapterViewBuilder(BuildContext context, Key bodyKey, ViewState stat
       final bible = VolumesRepository.shared.bibleWithId(_bibleId);
       if (bible != null) {
         final bcv = _initialReference.advancedBy(chapters: page, bible: bible);
-        context.bloc<ViewManagerBloc>().add(ViewManagerEvent.setData(
+        context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.setData(
             uid: state.uid, data: tec.toJsonString(_ChapterData(bcv, page))));
       }
     },
