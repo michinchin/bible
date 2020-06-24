@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tecarta Bible</string>
+    <string name="facebook_app_id">156251967778545</string>
+    <string name="fb_login_protocol_scheme">fb156251967778545</string>
+    <string name="admob_app_id">ca-app-pub-5279916355700267~8126364633</string>
+</resources>
