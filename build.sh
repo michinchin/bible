@@ -10,7 +10,7 @@ echo --build-name '$VERSION' --build-number $BUILD_NUMBER
 
 # APK
 flutter build apk --release --build-name '$VERSION' --build-number $BUILD_NUMBER
-cp build/app/outputs/apk/release/app-release.apk ${HTDOCS}/bibles/android/Refresh-${BUILD_ID}-${BUILD_NUMBER}.apk
+cp build/app/outputs/apk/release/app-release.apk ${HTDOCS}/bibles/android/Bible-${BUILD_ID}-${BUILD_NUMBER}.apk
 # resign with regular signature
 /opt/android-sdk-mac_x86/build-tools/29.0.2/apksigner sign --ks ../tools/build/keystore --ks-key-alias "tecarta apps" --ks-pass pass:Secur1ty --key-pass pass:Secur1ty ${HTDOCS}/bibles/android/Refresh-${BUILD_ID}-${BUILD_NUMBER}.apk
 "../tools/build/makeIndex.sh" "Android Products" "${HTDOCS}/bibles/android"
