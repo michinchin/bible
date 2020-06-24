@@ -8,3 +8,4 @@ targets:
             - implicit_dynamic_parameter
             - non_constant_identifier_names
             - avoid_single_cascade_in_expression_statements
+            - avoid_positional_boolean_parameters
