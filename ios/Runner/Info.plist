@@ -51,8 +51,8 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>Save images to your photo library.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Save verse of day images to your photo library.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
