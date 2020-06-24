@@ -1,4 +1,4 @@
-package com.example.bible
+package com.tecarta.TecartaBible
 
 import io.flutter.embedding.android.FlutterActivity
 
