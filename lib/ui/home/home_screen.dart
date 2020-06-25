@@ -77,7 +77,6 @@ class _BottomSheetState extends State<_BottomSheet> {
     if (bottomSheet != null) return;
     bottomSheet = Scaffold.of(context).showBottomSheet<void>(
         (context) => SelectionSheet(),
-        elevation: 25,
         backgroundColor: Colors.transparent)
       ..closed.whenComplete(() {
         bottomSheet = null;

@@ -35,12 +35,17 @@ class _SelectionSheetState extends State<SelectionSheet> {
     FeatherIcons.share,
     FeatherIcons.copy,
     FeatherIcons.bookmark,
+    Icons.lightbulb_outline,
+    Icons.compare_arrows,
+    FeatherIcons.compass
   ];
 
   final buttons = <String, IconData>{
     'Copy': FeatherIcons.copy,
     'Note': FeatherIcons.edit,
-    'Share': FeatherIcons.share
+    'Share': FeatherIcons.share,
+    // 'Learn': Icons.lightbulb_outline,
+    // 'Compare': FeatherIcons.compass
   };
 
   bool _isFullSized;
@@ -76,10 +81,10 @@ class _SelectionSheetState extends State<SelectionSheet> {
   @override
   Widget build(BuildContext context) {
     var _colors = List<Color>.from(colors);
-    var _icons = List<IconData>.from(icons);
+    // var _icons = List<IconData>.from(icons);
     if (!_isFullSized) {
       _colors = _colors.take(3).toList();
-      _icons = _icons.take(3).toList();
+      // _icons = _icons.take(3).toList();
     }
 
     const vDiv = VerticalDivider(
@@ -107,26 +112,19 @@ class _SelectionSheetState extends State<SelectionSheet> {
       //   onPressed: onShowAllColors,
       // ),
       // vDiv,
-      for (final each in _icons) ...[
+      for (final each in icons) ...[
         _GreyCircleButton(icon: each, onPressed: () {}),
       ],
     ];
 
     Widget sheet() => Padding(
-          padding: const EdgeInsets.only(left: 15, right: 15),
-          child: _isFullSized
-              ? ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: sheetChildren.length,
-                  itemBuilder: (c, i) => sheetChildren[i],
-                  separatorBuilder: (c, i) => vDiv,
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: sheetChildren,
-                ),
-        );
+        padding: const EdgeInsets.only(left: 15, right: 15),
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: sheetChildren.length,
+          itemBuilder: (c, i) => sheetChildren[i],
+          separatorBuilder: (c, i) => vDiv,
+        ));
 
     return _RoundedCornerSheet(
       isFullSized: _isFullSized,
@@ -306,7 +304,7 @@ class _RoundedCornerSheet extends StatelessWidget {
           duration: const Duration(milliseconds: 300),
           curve: Curves.fastOutSlowIn,
           height: isFullSized ? 200 : 100,
-          // margin: isFullSized ? null : const EdgeInsets.fromLTRB(15, 20, 15, 20),
+          // margin: const EdgeInsets.fromLTRB(100, 0, 100, 0),
           decoration: ShapeDecoration(
               shadows: Theme.of(context).brightness == Brightness.light
                   ? [
