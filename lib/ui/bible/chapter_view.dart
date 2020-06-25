@@ -45,7 +45,7 @@ Widget bibleChapterViewBuilder(BuildContext context, Key bodyKey, ViewState stat
       if (ref == null || ref.advancedBy(chapters: -index, bible: bible) != _initialReference) {
         return null;
       }
-      return _BibleChapterView(state: state, size: size, bible: bible, ref: ref);
+      return _BibleChapterView(size: size, bible: bible, ref: ref);
     },
 
     // onPageChanged
@@ -117,14 +117,12 @@ class _ChapterData {
 }
 
 class _BibleChapterView extends StatelessWidget {
-  final ViewState state;
   final Size size;
   final Bible bible;
   final BookChapterVerse ref;
 
   const _BibleChapterView({
     Key key,
-    @required this.state,
     @required this.size,
     @required this.bible,
     @required this.ref,
@@ -166,23 +164,16 @@ class _BibleChapterView extends StatelessWidget {
   }
 }
 
-const _lineSpacing = 1.4;
-const _marginPercent = 0.05; // 0.05;
-
-const TextStyle htmlTextStyle = TextStyle(
-  inherit: false,
-  //fontFamily: tec.platformIs(tec.Platform.iOS) ? 'Avenir' : 'normal',
-  fontSize: 16,
-  fontWeight: FontWeight.normal,
-  height: _lineSpacing,
-);
-
+///
+/// _ChapterView
+///
 class _ChapterView extends StatefulWidget {
   final int volumeId;
   final BookChapterVerse ref;
   final String baseUrl;
   final String html;
   final Size size;
+  final List<String> versesToShow;
 
   const _ChapterView({
     Key key,
@@ -190,8 +181,10 @@ class _ChapterView extends StatefulWidget {
     @required this.ref,
     @required this.baseUrl,
     @required this.html,
+    this.versesToShow,
     this.size,
-  }) : super(key: key);
+  })  : assert(volumeId != null && baseUrl != null && html != null),
+        super(key: key);
 
   @override
   _ChapterViewState createState() => _ChapterViewState();
@@ -221,7 +214,6 @@ class _ChapterViewState extends State<_ChapterView> {
     //final baseUrl = '${tec.streamUrl}/${widget.volumeId}/urlbase/';
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
-    final textColor = isDarkTheme ? Colors.white : Colors.black;
     final useZondervanCss = widget.volumeId == 32;
 
     String vendorFolder;
@@ -261,25 +253,16 @@ class _ChapterViewState extends State<_ChapterView> {
               final fontName =
                   (snapshot.hasData ? snapshot.data : AppSettings.shared.contentFontName.value);
 
-              return TecHtml(
-                html,
-                debugId: '${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}',
-                selectable: !kIsWeb,
-                scrollController: _scrollController,
+              return BibleHtml(
+                volumeId: widget.volumeId,
+                ref: widget.ref,
                 baseUrl: widget.baseUrl,
-                textScaleFactor: 1.0, // HTML is already scaled.
-                textStyle: fontName.isEmpty
-                    ? htmlTextStyle.merge(TextStyle(color: textColor))
-                    : GoogleFonts.getFont(fontName, color: textColor),
-                padding: EdgeInsets.symmetric(
-                  horizontal: (widget.size.width * _marginPercent).roundToDouble(),
-                ),
-                onSelectionChanged: (isTextSelected) {
-                  context
-                      .bloc<SelectionBloc>()
-                      ?.add(SelectionEvent.updateIsTextSelected(isTextSelected));
-                },
-                onLinkTap: null,
+                html: html,
+                versesToShow: widget.versesToShow ?? [],
+                size: widget.size,
+                scrollController: _scrollController,
+                fontName: fontName,
+                useZondervanCss: useZondervanCss,
               );
             },
           ),
@@ -288,3 +271,170 @@ class _ChapterViewState extends State<_ChapterView> {
     );
   }
 }
+
+class BibleHtml extends StatefulWidget {
+  final int volumeId;
+  final BookChapterVerse ref;
+  final String baseUrl;
+  final String html;
+  final Size size;
+  final List<String> versesToShow;
+  final ScrollController scrollController;
+  final String fontName;
+  final bool useZondervanCss;
+
+  const BibleHtml({
+    Key key,
+    @required this.volumeId,
+    @required this.ref,
+    @required this.baseUrl,
+    @required this.html,
+    @required this.versesToShow,
+    @required this.size,
+    @required this.scrollController,
+    @required this.fontName,
+    @required this.useZondervanCss,
+  }) : super(key: key);
+
+  @override
+  _BibleHtmlState createState() => _BibleHtmlState();
+}
+
+class _BibleHtmlState extends State<BibleHtml> {
+  @override
+  Widget build(BuildContext context) {
+    // ignore_for_file: omit_local_variable_types
+
+    /// Local func that returns `true` iff the given element is a section element.
+    final TecHtmlCheckElementFunc _isSectionElement = widget.useZondervanCss
+        ? (name, id, className, level, isVisible) {
+            return name == 'div' && (className == 'SUBA' || className == 'PARREF');
+          }
+        : (name, id, className, level, isVisible) {
+            return name == 'h5';
+          };
+
+    var skipSectionTitle = false;
+
+    /// Local func that returns `true` iff the visibility should be toggled
+    /// for the given element.
+    final TecHtmlCheckElementFunc _toggleVisibilityWithHtmlElement = widget.versesToShow.isEmpty
+        ? null
+        : (name, id, className, level, isVisible) {
+            if (tec.isNotNullOrEmpty(id) &&
+                name == 'div' &&
+                (className == 'v' || className.startsWith('v '))) {
+              final toggle = (!isVisible && widget.versesToShow.contains(id)) ||
+                  (isVisible && !widget.versesToShow.contains(id));
+              if (isVisible || toggle) {
+                final v = int.tryParse(id);
+                skipSectionTitle = (v != null && !widget.versesToShow.contains((v + 1).toString()));
+              }
+              return toggle;
+            }
+            return false;
+          };
+
+    /// Local func that returns true iff the given element should be skipped.
+    final TecHtmlCheckElementFunc _shouldSkipHtmlElement = widget.versesToShow.isEmpty
+        ? null
+        : (name, id, className, level, isVisible) {
+            return (isVisible &&
+                skipSectionTitle &&
+                _isSectionElement(name, id, className, level, isVisible));
+          };
+
+    var currentVerseTag = '';
+    var isInSection = false;
+    var sectionLevel = 0;
+
+    /// Local function that returns a tag for the given element.
+    String _tagHtmlElement(String name, String id, String className, int level, bool isVisible) {
+      if (isInSection) {
+        if (level <= sectionLevel) {
+          isInSection = false;
+        }
+      }
+      if (!isInSection) {
+        if (tec.isNotNullOrEmpty(id) &&
+            name == 'div' &&
+            (className == 'v' || className.startsWith('v '))) {
+          currentVerseTag = id;
+        } else if (_isSectionElement(name, id, className, level, isVisible)) {
+          isInSection = true;
+          sectionLevel = level;
+        }
+      }
+      return isInSection ? '' : currentVerseTag;
+    }
+
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkTheme ? Colors.white : Colors.black;
+    final selectedTextStyle =
+        TextStyle(backgroundColor: isDarkTheme ? Colors.blueGrey[800] : Colors.blue[100]);
+
+    return TecHtml(
+      widget.html,
+      debugId: '${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}',
+      selectable: !kIsWeb,
+      scrollController: widget.scrollController,
+      baseUrl: widget.baseUrl,
+      textScaleFactor: 1.0, // HTML is already scaled.
+      textStyle: widget.fontName.isEmpty
+          ? _htmlDefaultTextStyle.merge(TextStyle(color: textColor))
+          : GoogleFonts.getFont(widget.fontName, color: textColor),
+      padding: EdgeInsets.symmetric(
+        horizontal: (widget.size.width * _marginPercent).roundToDouble(),
+      ),
+      onLinkTap: null,
+
+      onSelectionChanged: (isTextSelected) {
+        tec.dmPrint('TecHtml.onSelectionChanged($isTextSelected)');
+        if (isTextSelected) _clearAllSelectedVerses();
+        //context.bloc<SelectionBloc>()?.add(SelectionEvent.updateIsTextSelected(isTextSelected));
+      },
+      onTagTap: _toggleSelectionForVerse,
+      tagHtmlElement: _tagHtmlElement,
+      styleForTag: (tag) => _selectedVerses.contains(tag) ? selectedTextStyle : null,
+
+      isInitialHtmlElementVisible: widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
+      toggleVisibilityWithHtmlElement: _toggleVisibilityWithHtmlElement,
+      shouldSkipHtmlElement: _shouldSkipHtmlElement,
+    );
+  }
+
+  final _selectedVerses = <String>{};
+
+  void _toggleSelectionForVerse(String verse) {
+    assert(verse?.isNotEmpty ?? false);
+    _updateSelectedVersesInBlock(() {
+      if (!_selectedVerses.remove(verse)) _selectedVerses.add(verse);
+    });
+  }
+
+  void _clearAllSelectedVerses() {
+    if (_selectedVerses.isEmpty) return;
+    _updateSelectedVersesInBlock(_selectedVerses.clear);
+  }
+
+  void _updateSelectedVersesInBlock(void Function() block) {
+    final wasTextSelected = _selectedVerses.isNotEmpty;
+    setState(block);
+    tec.dmPrint('selected verses: $_selectedVerses');
+    final isTextSelected = _selectedVerses.isNotEmpty;
+    if (wasTextSelected != isTextSelected) {
+      context.bloc<SelectionBloc>()?.add(SelectionEvent.updateIsTextSelected(isTextSelected));
+    }
+  }
+}
+
+const _lineSpacing = 1.4;
+const _marginPercent = 0.05; // 0.05;
+
+const TextStyle _htmlDefaultTextStyle = TextStyle(
+  inherit: false,
+  //fontFamily: tec.platformIs(tec.Platform.iOS) ? 'Avenir' : 'normal',
+  fontSize: 16,
+  fontWeight: FontWeight.normal,
+  height: _lineSpacing,
+);
