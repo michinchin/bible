@@ -53,8 +53,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   @override
   void initState() {
-    _isFullSized = tec.Prefs.shared
-        .getBool(Labels.prefSelectionSheetFullSize, defaultValue: false);
+    _isFullSized = tec.Prefs.shared.getBool(Labels.prefSelectionSheetFullSize, defaultValue: false);
     _showAllColors = false;
     super.initState();
   }
@@ -96,10 +95,9 @@ class _SelectionSheetState extends State<SelectionSheet> {
       // _ClearHighlightButton(context: context),
       _GreyCircleButton(
         icon: Icons.format_color_reset,
-        onPressed: () =>
-            context.bloc<SelectionBloc>()?.add(const SelectionEvent.highlight(
-                  type: HighlightType.clear,
-                )),
+        onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
+              type: HighlightType.clear,
+            )),
       ),
       for (final color in _colors) ...[
         _ColorPickerButton(
@@ -197,8 +195,9 @@ class _ColorPickerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       customBorder: const CircleBorder(),
-      onTap: () => context.bloc<SelectionBloc>()?.add(SelectionEvent.highlight(
-          type: HighlightType.highlight, color: color.value)),
+      onTap: () => context
+          .bloc<SelectionStyleBloc>()
+          ?.add(SelectionStyle(type: HighlightType.highlight, color: color.value)),
       child: CircleAvatar(
         backgroundColor: color,
       ),
@@ -230,20 +229,16 @@ class _SheetButton extends StatelessWidget {
 
 class _ClearHighlightButton extends StatelessWidget {
   final BuildContext context;
-  const _ClearHighlightButton({@required this.context})
-      : assert(context != null);
+  const _ClearHighlightButton({@required this.context}) : assert(context != null);
   @override
   Widget build(BuildContext context) {
     return InkWell(
       customBorder: const CircleBorder(),
-      onTap: () =>
-          context.bloc<SelectionBloc>()?.add(const SelectionEvent.highlight(
-                type: HighlightType.clear,
-              )),
+      onTap: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
+            type: HighlightType.clear,
+          )),
       child: ClipOval(
-          child: CustomPaint(
-              painter: DiagonalLinePainter(),
-              child: const _GreyCircleButton())),
+          child: CustomPaint(painter: DiagonalLinePainter(), child: const _GreyCircleButton())),
     );
   }
 }
@@ -344,13 +339,8 @@ class _RoundedCornerSheet extends StatelessWidget {
                   //   onPressed: onExpanded,
                   // ),
                   decoration: ShapeDecoration(
-                      color: Theme.of(context)
-                          .textTheme
-                          .bodyText1
-                          .color
-                          .withOpacity(0.2),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15))),
+                      color: Theme.of(context).textTheme.bodyText1.color.withOpacity(0.2),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
                 ),
               ),
             ),

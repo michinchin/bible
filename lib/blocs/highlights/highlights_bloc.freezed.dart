@@ -12,9 +12,11 @@ T _$identity<T>(T value) => value;
 class _$ChapterHighlightsTearOff {
   const _$ChapterHighlightsTearOff();
 
-  _ChapterHighlights call(int volume, int chapter, List<Highlight> highlights) {
+  _ChapterHighlights call(
+      int volume, int book, int chapter, List<Highlight> highlights) {
     return _ChapterHighlights(
       volume,
+      book,
       chapter,
       highlights,
     );
@@ -26,6 +28,7 @@ const $ChapterHighlights = _$ChapterHighlightsTearOff();
 
 mixin _$ChapterHighlights {
   int get volume;
+  int get book;
   int get chapter;
   List<Highlight> get highlights;
 
@@ -36,7 +39,7 @@ abstract class $ChapterHighlightsCopyWith<$Res> {
   factory $ChapterHighlightsCopyWith(
           ChapterHighlights value, $Res Function(ChapterHighlights) then) =
       _$ChapterHighlightsCopyWithImpl<$Res>;
-  $Res call({int volume, int chapter, List<Highlight> highlights});
+  $Res call({int volume, int book, int chapter, List<Highlight> highlights});
 }
 
 class _$ChapterHighlightsCopyWithImpl<$Res>
@@ -50,11 +53,13 @@ class _$ChapterHighlightsCopyWithImpl<$Res>
   @override
   $Res call({
     Object volume = freezed,
+    Object book = freezed,
     Object chapter = freezed,
     Object highlights = freezed,
   }) {
     return _then(_value.copyWith(
       volume: volume == freezed ? _value.volume : volume as int,
+      book: book == freezed ? _value.book : book as int,
       chapter: chapter == freezed ? _value.chapter : chapter as int,
       highlights: highlights == freezed
           ? _value.highlights
@@ -69,7 +74,7 @@ abstract class _$ChapterHighlightsCopyWith<$Res>
           _ChapterHighlights value, $Res Function(_ChapterHighlights) then) =
       __$ChapterHighlightsCopyWithImpl<$Res>;
   @override
-  $Res call({int volume, int chapter, List<Highlight> highlights});
+  $Res call({int volume, int book, int chapter, List<Highlight> highlights});
 }
 
 class __$ChapterHighlightsCopyWithImpl<$Res>
@@ -85,11 +90,13 @@ class __$ChapterHighlightsCopyWithImpl<$Res>
   @override
   $Res call({
     Object volume = freezed,
+    Object book = freezed,
     Object chapter = freezed,
     Object highlights = freezed,
   }) {
     return _then(_ChapterHighlights(
       volume == freezed ? _value.volume : volume as int,
+      book == freezed ? _value.book : book as int,
       chapter == freezed ? _value.chapter : chapter as int,
       highlights == freezed ? _value.highlights : highlights as List<Highlight>,
     ));
@@ -97,13 +104,17 @@ class __$ChapterHighlightsCopyWithImpl<$Res>
 }
 
 class _$_ChapterHighlights implements _ChapterHighlights {
-  _$_ChapterHighlights(this.volume, this.chapter, this.highlights)
+  const _$_ChapterHighlights(
+      this.volume, this.book, this.chapter, this.highlights)
       : assert(volume != null),
+        assert(book != null),
         assert(chapter != null),
         assert(highlights != null);
 
   @override
   final int volume;
+  @override
+  final int book;
   @override
   final int chapter;
   @override
@@ -111,7 +122,7 @@ class _$_ChapterHighlights implements _ChapterHighlights {
 
   @override
   String toString() {
-    return 'ChapterHighlights(volume: $volume, chapter: $chapter, highlights: $highlights)';
+    return 'ChapterHighlights(volume: $volume, book: $book, chapter: $chapter, highlights: $highlights)';
   }
 
   @override
@@ -120,6 +131,8 @@ class _$_ChapterHighlights implements _ChapterHighlights {
         (other is _ChapterHighlights &&
             (identical(other.volume, volume) ||
                 const DeepCollectionEquality().equals(other.volume, volume)) &&
+            (identical(other.book, book) ||
+                const DeepCollectionEquality().equals(other.book, book)) &&
             (identical(other.chapter, chapter) ||
                 const DeepCollectionEquality()
                     .equals(other.chapter, chapter)) &&
@@ -132,6 +145,7 @@ class _$_ChapterHighlights implements _ChapterHighlights {
   int get hashCode =>
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(volume) ^
+      const DeepCollectionEquality().hash(book) ^
       const DeepCollectionEquality().hash(chapter) ^
       const DeepCollectionEquality().hash(highlights);
 
@@ -141,12 +155,14 @@ class _$_ChapterHighlights implements _ChapterHighlights {
 }
 
 abstract class _ChapterHighlights implements ChapterHighlights {
-  factory _ChapterHighlights(
-          int volume, int chapter, List<Highlight> highlights) =
+  const factory _ChapterHighlights(
+          int volume, int book, int chapter, List<Highlight> highlights) =
       _$_ChapterHighlights;
 
   @override
   int get volume;
+  @override
+  int get book;
   @override
   int get chapter;
   @override
@@ -255,7 +271,7 @@ class __$HighlightCopyWithImpl<$Res> extends _$HighlightCopyWithImpl<$Res>
 }
 
 class _$_Highlight implements _Highlight {
-  _$_Highlight(this.highlightType, this.color, this.ref, this.modified)
+  const _$_Highlight(this.highlightType, this.color, this.ref, this.modified)
       : assert(highlightType != null),
         assert(color != null),
         assert(ref != null),
@@ -305,8 +321,8 @@ class _$_Highlight implements _Highlight {
 }
 
 abstract class _Highlight implements Highlight {
-  factory _Highlight(HighlightType highlightType, int color, Reference ref,
-      DateTime modified) = _$_Highlight;
+  const factory _Highlight(HighlightType highlightType, int color,
+      Reference ref, DateTime modified) = _$_Highlight;
 
   @override
   HighlightType get highlightType;

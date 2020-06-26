@@ -10,32 +10,34 @@ part 'selection_bloc.freezed.dart';
 
 @freezed
 abstract class SelectionState with _$SelectionState {
-  factory SelectionState({
-    bool isTextSelected,
-    HighlightType highlightType,
-    int color,
-  }) = _SelectionState;
+  const factory SelectionState({bool isTextSelected}) = _SelectionState;
+}
+
+class SelectionBloc extends Bloc<SelectionState, SelectionState> {
+  @override
+  SelectionState get initialState => const SelectionState(isTextSelected: false);
+
+  @override
+  Stream<SelectionState> mapEventToState(SelectionState event) async* {
+    tec.dmPrint('$event');
+    yield event;
+  }
 }
 
 @freezed
-abstract class SelectionEvent with _$SelectionEvent {
-  const factory SelectionEvent.highlight({@required HighlightType type, int color}) = _Highlight;
-  // ignore: avoid_positional_boolean_parameters
-  const factory SelectionEvent.updateIsTextSelected(bool isTextSelected) = _UpdateIsTextSelected;
+abstract class SelectionStyle with _$SelectionStyle {
+  const factory SelectionStyle({HighlightType type, int color, DateTime modified}) =
+      _SelectionStyle;
 }
 
-class SelectionBloc extends Bloc<SelectionEvent, SelectionState> {
+class SelectionStyleBloc extends Bloc<SelectionStyle, SelectionStyle> {
   @override
-  SelectionState get initialState => SelectionState(isTextSelected: false);
+  SelectionStyle get initialState => const SelectionStyle();
 
   @override
-  Stream<SelectionState> mapEventToState(SelectionEvent event) async* {
-    final newState = event.when(highlight: (type, color) {
-      return state.copyWith(highlightType: type, color: color);
-    }, updateIsTextSelected: (isTextSelected) {
-      return state.copyWith(isTextSelected: isTextSelected);
-    });
-    tec.dmPrint('Updated to $newState');
+  Stream<SelectionStyle> mapEventToState(SelectionStyle event) async* {
+    final newState = event.modified != null ? event : event.copyWith(modified: DateTime.now());
+    tec.dmPrint('$newState');
     yield newState;
   }
 }

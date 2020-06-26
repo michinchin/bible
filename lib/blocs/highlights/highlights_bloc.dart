@@ -11,13 +11,22 @@ part 'highlights_bloc.freezed.dart';
 
 @freezed
 abstract class ChapterHighlights with _$ChapterHighlights {
-  factory ChapterHighlights(int volume, int chapter, List<Highlight> highlights) =
+  const factory ChapterHighlights(int volume, int book, int chapter, List<Highlight> highlights) =
       _ChapterHighlights;
+}
+
+extension ChapterHighlightsExt on ChapterHighlights {
+  Highlight highlightForVerse(int verse) {
+    for (final highlight in highlights.reversed) {
+      if (highlight.ref.verse == verse) return highlight;
+    }
+    return null;
+  }
 }
 
 @freezed
 abstract class Highlight with _$Highlight {
-  factory Highlight(
+  const factory Highlight(
     HighlightType highlightType,
     int color,
     Reference ref,
@@ -34,12 +43,13 @@ abstract class HighlightsEvent with _$HighlightsEvent {
 
 class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
   final int volume;
+  final int book;
   final int chapter;
 
-  ChapterHighlightsBloc({@required this.volume, @required this.chapter});
+  ChapterHighlightsBloc({@required this.volume, @required this.book, @required this.chapter});
 
   @override
-  ChapterHighlights get initialState => ChapterHighlights(volume, chapter, []);
+  ChapterHighlights get initialState => ChapterHighlights(volume, book, chapter, []);
 
   @override
   Stream<ChapterHighlights> mapEventToState(HighlightsEvent event) async* {
@@ -50,11 +60,19 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
 
   ChapterHighlights _add(HighlightType type, int color, Reference ref) {
     assert(type != HighlightType.clear);
-    final newList = List.of(state.highlights)..add(Highlight(type, color, ref, DateTime.now()));
-    return ChapterHighlights(volume, chapter, newList);
+    final newList = state.highlights.copyRemovingHighlightsWithRef(ref)
+      ..add(Highlight(type, color, ref, DateTime.now()));
+    return ChapterHighlights(volume, book, chapter, newList);
   }
 
   ChapterHighlights _clear(Reference ref) {
-    return ChapterHighlights(volume, chapter, []);
+    final newList = state.highlights.copyRemovingHighlightsWithRef(ref);
+    return ChapterHighlights(volume, book, chapter, newList);
+  }
+}
+
+extension HighlightsBlocExtOnListOfHighlight on List<Highlight> {
+  List<Highlight> copyRemovingHighlightsWithRef(Reference ref) {
+    return expand<Highlight>((e) => e.ref.verse == ref.verse ? [] : [e]).toList();
   }
 }
