@@ -75,8 +75,9 @@ class _BottomSheetState extends State<_BottomSheet> {
 
   void _showBottomSheet() {
     if (bottomSheet != null) return;
-    bottomSheet = Scaffold.of(context).showBottomSheet<void>((context) => SelectionSheet(),
-        elevation: 25, backgroundColor: Colors.transparent)
+    bottomSheet = Scaffold.of(context).showBottomSheet<void>(
+        (context) => SelectionSheet(),
+        backgroundColor: Colors.transparent)
       ..closed.whenComplete(() {
         bottomSheet = null;
       });
@@ -86,7 +87,8 @@ class _BottomSheetState extends State<_BottomSheet> {
   Widget build(BuildContext context) {
     return BlocListener<SelectionBloc, SelectionState>(
       child: widget.child,
-      condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
+      condition: (previous, current) =>
+          previous.isTextSelected != current.isTextSelected,
       listener: (context, state) {
         if (state.isTextSelected) {
           _showBottomSheet();

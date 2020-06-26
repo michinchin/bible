@@ -1,8 +1,11 @@
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_util/tec_util.dart' as tec;
+
 import '../../blocs/selection/selection_bloc.dart';
+import '../../models/labels.dart';
 
 class SelectionSheet extends StatefulWidget {
   @override
@@ -26,12 +29,23 @@ class _SelectionSheetState extends State<SelectionSheet> {
       Colors.primaries +
       Colors.primaries;
 
-  final icons = [FeatherIcons.copy, FeatherIcons.bookmark, FeatherIcons.share];
+  final icons = [
+    FeatherIcons.underline,
+    FeatherIcons.edit,
+    FeatherIcons.share,
+    FeatherIcons.copy,
+    FeatherIcons.bookmark,
+    Icons.lightbulb_outline,
+    Icons.compare_arrows,
+    FeatherIcons.compass
+  ];
 
   final buttons = <String, IconData>{
-    'Copy': Icons.content_copy,
-    'Save': Icons.bookmark_border,
-    'Margin': Icons.list
+    'Copy': FeatherIcons.copy,
+    'Note': FeatherIcons.edit,
+    'Share': FeatherIcons.share,
+    // 'Learn': Icons.lightbulb_outline,
+    // 'Compare': FeatherIcons.compass
   };
 
   bool _isFullSized;
@@ -39,7 +53,8 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   @override
   void initState() {
-    _isFullSized = false;
+    _isFullSized = tec.Prefs.shared
+        .getBool(Labels.prefSelectionSheetFullSize, defaultValue: false);
     _showAllColors = false;
     super.initState();
   }
@@ -47,6 +62,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
   void onExpanded() {
     setState(() {
       _isFullSized = !_isFullSized;
+      tec.Prefs.shared.setBool(Labels.prefSelectionSheetFullSize, _isFullSized);
       // if (!_isFullSized && _showAllColors) {
       //   _showAllColors = !_showAllColors;
       // }
@@ -65,14 +81,50 @@ class _SelectionSheetState extends State<SelectionSheet> {
   @override
   Widget build(BuildContext context) {
     var _colors = List<Color>.from(colors);
+    // var _icons = List<IconData>.from(icons);
     if (!_isFullSized) {
       _colors = _colors.take(3).toList();
+      // _icons = _icons.take(3).toList();
     }
 
     const vDiv = VerticalDivider(
       color: Colors.transparent,
       width: 10,
     );
+
+    final sheetChildren = [
+      // _ClearHighlightButton(context: context),
+      _GreyCircleButton(
+        icon: Icons.format_color_reset,
+        onPressed: () =>
+            context.bloc<SelectionBloc>()?.add(const SelectionEvent.highlight(
+                  type: HighlightType.clear,
+                )),
+      ),
+      for (final color in _colors) ...[
+        _ColorPickerButton(
+          context: context,
+          color: color,
+        ),
+      ],
+      // _GreyCircleButton(
+      //   icon: Icons.color_lens,
+      //   onPressed: onShowAllColors,
+      // ),
+      // vDiv,
+      for (final each in icons) ...[
+        _GreyCircleButton(icon: each, onPressed: () {}),
+      ],
+    ];
+
+    Widget sheet() => Padding(
+        padding: const EdgeInsets.only(left: 15, right: 15),
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: sheetChildren.length,
+          itemBuilder: (c, i) => sheetChildren[i],
+          separatorBuilder: (c, i) => vDiv,
+        ));
 
     return _RoundedCornerSheet(
       isFullSized: _isFullSized,
@@ -102,7 +154,6 @@ class _SelectionSheetState extends State<SelectionSheet> {
             )
           ],
           Expanded(
-              flex: _showAllColors ? 5 : 1,
               child: _showAllColors
                   ? Padding(
                       padding: const EdgeInsets.only(left: 15, right: 15),
@@ -127,42 +178,8 @@ class _SelectionSheetState extends State<SelectionSheet> {
                         ),
                       ]),
                     )
-                  : Padding(
-                      padding: const EdgeInsets.only(left: 15),
-                      child:
-                          ListView(scrollDirection: Axis.horizontal, children: [
-                        // _ClearHighlightButton(context: context),
-                        _GreyCircleButton(
-                          icon: Icons.format_color_reset,
-                          onPressed: () => context
-                              .bloc<SelectionBloc>()
-                              ?.add(const SelectionEvent.highlight(
-                                type: HighlightType.clear,
-                              )),
-                        ),
-                        vDiv,
-                        for (final color in _colors) ...[
-                          _ColorPickerButton(
-                            context: context,
-                            color: color,
-                          ),
-                          vDiv
-                        ],
-                        _GreyCircleButton(
-                          icon: Icons.color_lens,
-                          onPressed: onShowAllColors,
-                        ),
-                        vDiv,
-                        if (!_isFullSized) ...[
-                          for (final each in icons) ...[
-                            _GreyCircleButton(icon: each, onPressed: () {}),
-                            vDiv,
-                          ]
-                        ],
-                      ]))),
-          const Divider(
-            color: Colors.transparent,
-          )
+                  : sheet()),
+          if (!_isFullSized) const Divider(color: Colors.transparent),
         ],
       ),
     );
@@ -273,31 +290,39 @@ class _RoundedCornerSheet extends StatelessWidget {
       : assert(child != null);
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.fastOutSlowIn,
-      height: isFullSized ? 200 : 100,
-      margin: isFullSized ? null : const EdgeInsets.fromLTRB(15, 20, 15, 20),
-      decoration: ShapeDecoration(
-          shadows: Theme.of(context).brightness == Brightness.light
-              ? [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 5,
-                    blurRadius: 7,
-                    offset: const Offset(0, 3),
-                  )
-                ]
-              : null,
-          color: Theme.of(context).canvasColor,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-            Radius.circular(15),
-          ))),
-      child: ConstrainedBox(
-        constraints:
-            BoxConstraints.loose(Size.fromHeight(isFullSized ? 200 : 100)),
-        child: Scaffold(
+    return GestureDetector(
+      onVerticalDragEnd: (details) {
+        final dy = details.velocity.pixelsPerSecond.dy;
+        // debugPrint(dy.toString());
+        if (dy > 0) {
+          Navigator.of(context).pop();
+        } else if (isFullSized && dy >= 0 || !isFullSized && dy <= 0) {
+          onExpanded();
+        }
+      },
+      child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.fastOutSlowIn,
+          height: isFullSized ? 200 : 100,
+          // margin: const EdgeInsets.fromLTRB(100, 0, 100, 0),
+          decoration: ShapeDecoration(
+              shadows: Theme.of(context).brightness == Brightness.light
+                  ? [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: const Offset(0, 3),
+                      )
+                    ]
+                  : null,
+              color: Theme.of(context).canvasColor,
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                topRight: Radius.circular(15),
+                topLeft: Radius.circular(15),
+              ))),
+          child: Scaffold(
             backgroundColor: Colors.transparent,
             appBar: PreferredSize(
               preferredSize: const Size.fromHeight(30),
@@ -307,32 +332,30 @@ class _RoundedCornerSheet extends StatelessWidget {
                 leading: Container(),
                 elevation: 0,
                 title: Container(
-                    width: 50,
-                    height: 25,
-                    // isFullSized ? 5 : 25
-                    child: IconButton(
-                      padding: const EdgeInsets.all(0),
-                      icon: Icon(!isFullSized
-                          ? FeatherIcons.chevronUp
-                          : FeatherIcons.chevronDown),
-                      color: Colors.grey,
-                      onPressed: onExpanded,
-                    )
-                    // decoration: isFullSized
-                    //     ? ShapeDecoration(
-                    //         color: Theme.of(context)
-                    //             .textTheme
-                    //             .bodyText1
-                    //             .color
-                    //             .withOpacity(0.2),
-                    //         shape: RoundedRectangleBorder(
-                    //             borderRadius: BorderRadius.circular(15)))
-                    //     : null,
-                    ),
+                  width: 50,
+                  height: 5,
+                  // isFullSized ? 5 : 25
+                  // child: IconButton(
+                  //   padding: const EdgeInsets.all(0),
+                  //   icon: Icon(!isFullSized
+                  //       ? FeatherIcons.chevronUp
+                  //       : FeatherIcons.chevronDown),
+                  //   color: Colors.grey,
+                  //   onPressed: onExpanded,
+                  // ),
+                  decoration: ShapeDecoration(
+                      color: Theme.of(context)
+                          .textTheme
+                          .bodyText1
+                          .color
+                          .withOpacity(0.2),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15))),
+                ),
               ),
             ),
-            body: SafeArea(child: child)),
-      ),
+            body: SafeArea(child: child),
+          )),
     );
   }
 }
