@@ -53,20 +53,21 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   @override
   void initState() {
-    _isFullSized = tec.Prefs.shared.getBool(Labels.prefSelectionSheetFullSize, defaultValue: false);
+    _isFullSized = tec.Prefs.shared
+        .getBool(Labels.prefSelectionSheetFullSize, defaultValue: false);
     _showAllColors = false;
     super.initState();
   }
 
-  void onExpanded() {
-    setState(() {
-      _isFullSized = !_isFullSized;
-      tec.Prefs.shared.setBool(Labels.prefSelectionSheetFullSize, _isFullSized);
-      // if (!_isFullSized && _showAllColors) {
-      //   _showAllColors = !_showAllColors;
-      // }
-    });
-  }
+  // void onExpanded() {
+  //   setState(() {
+  //     _isFullSized = !_isFullSized;
+  //     tec.Prefs.shared.setBool(Labels.prefSelectionSheetFullSize, _isFullSized);
+  //     // if (!_isFullSized && _showAllColors) {
+  //     //   _showAllColors = !_showAllColors;
+  //     // }
+  //   });
+  // }
 
   void onShowAllColors() {
     setState(() {
@@ -79,12 +80,12 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    var _colors = List<Color>.from(colors);
-    // var _icons = List<IconData>.from(icons);
-    if (!_isFullSized) {
-      _colors = _colors.take(3).toList();
-      // _icons = _icons.take(3).toList();
-    }
+    // var _colors = List<Color>.from(colors);
+    // // var _icons = List<IconData>.from(icons);
+    // if (!_isFullSized) {
+    //   _colors = _colors.take(3).toList();
+    //   // _icons = _icons.take(3).toList();
+    // }
 
     const vDiv = VerticalDivider(
       color: Colors.transparent,
@@ -95,11 +96,12 @@ class _SelectionSheetState extends State<SelectionSheet> {
       // _ClearHighlightButton(context: context),
       _GreyCircleButton(
         icon: Icons.format_color_reset,
-        onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
-              type: HighlightType.clear,
-            )),
+        onPressed: () =>
+            context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
+                  type: HighlightType.clear,
+                )),
       ),
-      for (final color in _colors) ...[
+      for (final color in colors) ...[
         _ColorPickerButton(
           context: context,
           color: color,
@@ -117,41 +119,31 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
     Widget sheet() => Padding(
         padding: const EdgeInsets.only(left: 15, right: 15),
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: sheetChildren.length,
-          itemBuilder: (c, i) => sheetChildren[i],
-          separatorBuilder: (c, i) => vDiv,
-        ));
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          runSpacing: 5,
+          spacing: 5,
+          children: sheetChildren,
+        )
+        // : ListView.separated(
+        //     scrollDirection: Axis.horizontal,
+        //     itemCount: sheetChildren.length,
+        //     itemBuilder: (c, i) => sheetChildren[i],
+        //     separatorBuilder: (c, i) => vDiv,
+        //   )
+        );
 
     return _RoundedCornerSheet(
       isFullSized: _isFullSized,
       showAllColors: _showAllColors,
-      onExpanded: onExpanded,
+      // onExpanded: onExpanded,
       child: Column(
         children: [
-          if (_isFullSized && !_showAllColors) ...[
-            Flexible(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      for (final each in buttons.keys) ...[
-                        Expanded(
-                          child: _SheetButton(text: each, icon: buttons[each]),
-                        ),
-                        if (buttons.keys.last != each) const SizedBox(width: 10)
-                      ]
-                    ],
-                  ),
-                )),
-            const Divider(
-              color: Colors.transparent,
-            )
-          ],
+          // if (_isFullSized && !_showAllColors) ...[
+          // ],
           Expanded(
+              flex: 2,
               child: _showAllColors
                   ? Padding(
                       padding: const EdgeInsets.only(left: 15, right: 15),
@@ -177,7 +169,24 @@ class _SelectionSheetState extends State<SelectionSheet> {
                       ]),
                     )
                   : sheet()),
-          if (!_isFullSized) const Divider(color: Colors.transparent),
+          Expanded(
+              child: Padding(
+            padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (final each in buttons.keys) ...[
+                  Expanded(
+                    child: _SheetButton(text: each, icon: buttons[each]),
+                  ),
+                  if (buttons.keys.last != each) const SizedBox(width: 10)
+                ]
+              ],
+            ),
+          )),
+          const Divider(
+            color: Colors.transparent,
+          ),
         ],
       ),
     );
@@ -195,9 +204,8 @@ class _ColorPickerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       customBorder: const CircleBorder(),
-      onTap: () => context
-          .bloc<SelectionStyleBloc>()
-          ?.add(SelectionStyle(type: HighlightType.highlight, color: color.value)),
+      onTap: () => context.bloc<SelectionStyleBloc>()?.add(
+          SelectionStyle(type: HighlightType.highlight, color: color.value)),
       child: CircleAvatar(
         backgroundColor: color,
       ),
@@ -229,7 +237,8 @@ class _SheetButton extends StatelessWidget {
 
 class _ClearHighlightButton extends StatelessWidget {
   final BuildContext context;
-  const _ClearHighlightButton({@required this.context}) : assert(context != null);
+  const _ClearHighlightButton({@required this.context})
+      : assert(context != null);
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -238,7 +247,9 @@ class _ClearHighlightButton extends StatelessWidget {
             type: HighlightType.clear,
           )),
       child: ClipOval(
-          child: CustomPaint(painter: DiagonalLinePainter(), child: const _GreyCircleButton())),
+          child: CustomPaint(
+              painter: DiagonalLinePainter(),
+              child: const _GreyCircleButton())),
     );
   }
 }
@@ -276,77 +287,85 @@ class _RoundedCornerSheet extends StatelessWidget {
   final Widget child;
   final bool isFullSized;
   final bool showAllColors;
-  final VoidCallback onExpanded;
-  const _RoundedCornerSheet(
-      {@required this.child,
-      this.isFullSized = true,
-      this.showAllColors = false,
-      @required this.onExpanded})
-      : assert(child != null);
+  // final VoidCallback onExpanded;
+  const _RoundedCornerSheet({
+    @required this.child,
+    this.isFullSized = true,
+    this.showAllColors = false,
+    // @required this.onExpanded
+  }) : assert(child != null);
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onVerticalDragEnd: (details) {
-        final dy = details.velocity.pixelsPerSecond.dy;
-        // debugPrint(dy.toString());
-        if (dy > 0) {
-          Navigator.of(context).pop();
-        } else if (isFullSized && dy >= 0 || !isFullSized && dy <= 0) {
-          onExpanded();
-        }
-      },
-      child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.fastOutSlowIn,
-          height: isFullSized ? 200 : 100,
-          // margin: const EdgeInsets.fromLTRB(100, 0, 100, 0),
-          decoration: ShapeDecoration(
-              shadows: Theme.of(context).brightness == Brightness.light
-                  ? [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: const Offset(0, 3),
-                      )
-                    ]
-                  : null,
-              color: Theme.of(context).canvasColor,
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                topRight: Radius.circular(15),
-                topLeft: Radius.circular(15),
-              ))),
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(30),
-              child: AppBar(
-                centerTitle: true,
+    return DraggableScrollableSheet(
+        //   child: GestureDetector(
+        // onVerticalDragEnd: (details) {
+        //   final dy = details.velocity.pixelsPerSecond.dy;
+        //   // debugPrint(dy.toString());
+        //   if (dy > 0) {
+        //     Navigator.of(context).pop();
+        //   } else if (isFullSized && dy >= 0 || !isFullSized && dy <= 0) {
+        //     onExpanded();
+        //   }
+        // },
+        initialChildSize: 0.11,
+        minChildSize: 0.11,
+        maxChildSize: 0.3,
+        expand: false,
+        builder: (c, scrollController) {
+          return Container(
+            // AnimatedContainer(
+            //   duration: const Duration(milliseconds: 300),
+            //   curve: Curves.fastOutSlowIn,
+            //   height: isFullSized ? 200 : 100,
+            // margin: const EdgeInsets.fromLTRB(100, 0, 100, 0),
+            decoration: ShapeDecoration(
+                shadows: Theme.of(context).brightness == Brightness.light
+                    ? [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 5,
+                          blurRadius: 7,
+                          offset: const Offset(0, 3),
+                        )
+                      ]
+                    : null,
+                color: Theme.of(context).canvasColor,
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(15),
+                  topLeft: Radius.circular(15),
+                ))),
+            child: Scaffold(
                 backgroundColor: Colors.transparent,
-                leading: Container(),
-                elevation: 0,
-                title: Container(
-                  width: 50,
-                  height: 5,
-                  // isFullSized ? 5 : 25
-                  // child: IconButton(
-                  //   padding: const EdgeInsets.all(0),
-                  //   icon: Icon(!isFullSized
-                  //       ? FeatherIcons.chevronUp
-                  //       : FeatherIcons.chevronDown),
-                  //   color: Colors.grey,
-                  //   onPressed: onExpanded,
-                  // ),
-                  decoration: ShapeDecoration(
-                      color: Theme.of(context).textTheme.bodyText1.color.withOpacity(0.2),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                appBar: PreferredSize(
+                  preferredSize: const Size.fromHeight(30),
+                  child: AppBar(
+                    centerTitle: true,
+                    backgroundColor: Colors.transparent,
+                    leading: Container(),
+                    elevation: 0,
+                    title: Container(
+                      width: 50,
+                      height: 5,
+                      decoration: ShapeDecoration(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyText1
+                              .color
+                              .withOpacity(0.2),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15))),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            body: SafeArea(child: child),
-          )),
-    );
+                body: SingleChildScrollView(
+                  controller: scrollController,
+                  child: SafeArea(child: Container(height: 200, child: child)),
+                )),
+          );
+        }
+        // ),
+        );
   }
 }
 
