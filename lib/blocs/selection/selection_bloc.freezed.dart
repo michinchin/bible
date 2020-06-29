@@ -128,10 +128,15 @@ abstract class _SelectionState implements SelectionState {
 class _$SelectionStyleTearOff {
   const _$SelectionStyleTearOff();
 
-  _SelectionStyle call({HighlightType type, int color, DateTime modified}) {
+  _SelectionStyle call(
+      {HighlightType type,
+      int color,
+      bool isTrialMode = false,
+      DateTime modified}) {
     return _SelectionStyle(
       type: type,
       color: color,
+      isTrialMode: isTrialMode,
       modified: modified,
     );
   }
@@ -143,6 +148,7 @@ const $SelectionStyle = _$SelectionStyleTearOff();
 mixin _$SelectionStyle {
   HighlightType get type;
   int get color;
+  bool get isTrialMode;
   DateTime get modified;
 
   $SelectionStyleCopyWith<SelectionStyle> get copyWith;
@@ -152,7 +158,8 @@ abstract class $SelectionStyleCopyWith<$Res> {
   factory $SelectionStyleCopyWith(
           SelectionStyle value, $Res Function(SelectionStyle) then) =
       _$SelectionStyleCopyWithImpl<$Res>;
-  $Res call({HighlightType type, int color, DateTime modified});
+  $Res call(
+      {HighlightType type, int color, bool isTrialMode, DateTime modified});
 }
 
 class _$SelectionStyleCopyWithImpl<$Res>
@@ -167,11 +174,14 @@ class _$SelectionStyleCopyWithImpl<$Res>
   $Res call({
     Object type = freezed,
     Object color = freezed,
+    Object isTrialMode = freezed,
     Object modified = freezed,
   }) {
     return _then(_value.copyWith(
       type: type == freezed ? _value.type : type as HighlightType,
       color: color == freezed ? _value.color : color as int,
+      isTrialMode:
+          isTrialMode == freezed ? _value.isTrialMode : isTrialMode as bool,
       modified: modified == freezed ? _value.modified : modified as DateTime,
     ));
   }
@@ -183,7 +193,8 @@ abstract class _$SelectionStyleCopyWith<$Res>
           _SelectionStyle value, $Res Function(_SelectionStyle) then) =
       __$SelectionStyleCopyWithImpl<$Res>;
   @override
-  $Res call({HighlightType type, int color, DateTime modified});
+  $Res call(
+      {HighlightType type, int color, bool isTrialMode, DateTime modified});
 }
 
 class __$SelectionStyleCopyWithImpl<$Res>
@@ -200,29 +211,37 @@ class __$SelectionStyleCopyWithImpl<$Res>
   $Res call({
     Object type = freezed,
     Object color = freezed,
+    Object isTrialMode = freezed,
     Object modified = freezed,
   }) {
     return _then(_SelectionStyle(
       type: type == freezed ? _value.type : type as HighlightType,
       color: color == freezed ? _value.color : color as int,
+      isTrialMode:
+          isTrialMode == freezed ? _value.isTrialMode : isTrialMode as bool,
       modified: modified == freezed ? _value.modified : modified as DateTime,
     ));
   }
 }
 
 class _$_SelectionStyle implements _SelectionStyle {
-  const _$_SelectionStyle({this.type, this.color, this.modified});
+  const _$_SelectionStyle(
+      {this.type, this.color, this.isTrialMode = false, this.modified})
+      : assert(isTrialMode != null);
 
   @override
   final HighlightType type;
   @override
   final int color;
+  @JsonKey(defaultValue: false)
+  @override
+  final bool isTrialMode;
   @override
   final DateTime modified;
 
   @override
   String toString() {
-    return 'SelectionStyle(type: $type, color: $color, modified: $modified)';
+    return 'SelectionStyle(type: $type, color: $color, isTrialMode: $isTrialMode, modified: $modified)';
   }
 
   @override
@@ -233,6 +252,9 @@ class _$_SelectionStyle implements _SelectionStyle {
                 const DeepCollectionEquality().equals(other.type, type)) &&
             (identical(other.color, color) ||
                 const DeepCollectionEquality().equals(other.color, color)) &&
+            (identical(other.isTrialMode, isTrialMode) ||
+                const DeepCollectionEquality()
+                    .equals(other.isTrialMode, isTrialMode)) &&
             (identical(other.modified, modified) ||
                 const DeepCollectionEquality()
                     .equals(other.modified, modified)));
@@ -243,6 +265,7 @@ class _$_SelectionStyle implements _SelectionStyle {
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(type) ^
       const DeepCollectionEquality().hash(color) ^
+      const DeepCollectionEquality().hash(isTrialMode) ^
       const DeepCollectionEquality().hash(modified);
 
   @override
@@ -252,12 +275,17 @@ class _$_SelectionStyle implements _SelectionStyle {
 
 abstract class _SelectionStyle implements SelectionStyle {
   const factory _SelectionStyle(
-      {HighlightType type, int color, DateTime modified}) = _$_SelectionStyle;
+      {HighlightType type,
+      int color,
+      bool isTrialMode,
+      DateTime modified}) = _$_SelectionStyle;
 
   @override
   HighlightType get type;
   @override
   int get color;
+  @override
+  bool get isTrialMode;
   @override
   DateTime get modified;
   @override

@@ -26,8 +26,12 @@ class SelectionBloc extends Bloc<SelectionState, SelectionState> {
 
 @freezed
 abstract class SelectionStyle with _$SelectionStyle {
-  const factory SelectionStyle({HighlightType type, int color, DateTime modified}) =
-      _SelectionStyle;
+  const factory SelectionStyle({
+    HighlightType type,
+    int color,
+    @Default(false) bool isTrialMode,
+    DateTime modified,
+  }) = _SelectionStyle;
 }
 
 class SelectionStyleBloc extends Bloc<SelectionStyle, SelectionStyle> {

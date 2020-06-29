@@ -40,6 +40,7 @@ import 'package:flutter/widgets.dart';
 Future<T> showTecModalPopup<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  Color barrierColor,
   ImageFilter filter,
   bool useRootNavigator = true,
   bool semanticsDismissible,
@@ -48,7 +49,7 @@ Future<T> showTecModalPopup<T>({
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
     _TecModalPopupRoute<T>(
-      barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
+      barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
       barrierLabel: 'Dismiss',
       builder: builder,
       alignment: alignment ?? Alignment.bottomCenter,

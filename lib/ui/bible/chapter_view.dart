@@ -378,7 +378,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
     /// Local function that returns the style for the given tag.
     TextStyle _styleForTag(String tag) {
-      if (_selectedVerses.contains(tag)) return selectedTextStyle;
+      if (!_isSelectionTrialMode && _selectedVerses.contains(tag)) return selectedTextStyle;
       final verse = int.tryParse(tag);
       if (verse != null) {
         final highlight = widget.highlights.highlightForVerse(verse);
@@ -399,6 +399,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
     return BlocListener<SelectionStyleBloc, SelectionStyle>(
       listener: (context, state) {
+        _isSelectionTrialMode = state.isTrialMode;
         final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
         if (_selectedVerses.isEmpty || bloc == null) return;
         for (final verseStr in _selectedVerses) {
@@ -411,7 +412,9 @@ class _BibleHtmlState extends State<_BibleHtml> {
             bloc.add(HighlightsEvent.add(type: state.type, color: state.color, ref: ref));
           }
         }
-        _clearAllSelectedVerses();
+        if (!_isSelectionTrialMode) {
+          _clearAllSelectedVerses();
+        }
       },
       child: TecHtml(
         widget.html,
@@ -447,6 +450,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
     );
   }
 
+  var _isSelectionTrialMode = false;
   final _selectedVerses = <String>{};
 
   void _toggleSelectionForVerse(String verse) {
