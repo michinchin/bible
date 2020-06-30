@@ -374,7 +374,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
     final selectedTextStyle =
-        TextStyle(backgroundColor: isDarkTheme ? Colors.blueGrey[800] : Colors.blue[100]);
+        TextStyle(backgroundColor: isDarkTheme ? Colors.blueGrey[800] : const Color(0xffe6e6e6)); // Colors.blue[100]);
 
     /// Local function that returns the style for the given tag.
     TextStyle _styleForTag(String tag) {
@@ -416,36 +416,42 @@ class _BibleHtmlState extends State<_BibleHtml> {
           _clearAllSelectedVerses();
         }
       },
-      child: TecHtml(
-        widget.html,
-        debugId: '$volume/$book/$chapter',
-        selectable: !kIsWeb && _selectedVerses.isEmpty,
-        scrollController: _scrollController,
-        baseUrl: widget.baseUrl,
-        textScaleFactor: 1.0, // HTML is already scaled.
-        textStyle: widget.fontName.isEmpty
-            ? _htmlDefaultTextStyle.merge(TextStyle(color: textColor))
-            : GoogleFonts.getFont(widget.fontName, color: textColor),
-        padding: EdgeInsets.symmetric(
-          horizontal: (widget.size.width * _marginPercent).roundToDouble(),
+      child: Semantics(
+        //textDirection: textDirection,
+        label: 'Bible text',
+        child: ExcludeSemantics(
+          child: TecHtml(
+            widget.html,
+            debugId: '$volume/$book/$chapter',
+            selectable: !kIsWeb && _selectedVerses.isEmpty,
+            scrollController: _scrollController,
+            baseUrl: widget.baseUrl,
+            textScaleFactor: 1.0, // HTML is already scaled.
+            textStyle: widget.fontName.isEmpty
+                ? _htmlDefaultTextStyle.merge(TextStyle(color: textColor))
+                : GoogleFonts.getFont(widget.fontName, color: textColor),
+            padding: EdgeInsets.symmetric(
+              horizontal: (widget.size.width * _marginPercent).roundToDouble(),
+            ),
+            onLinkTap: null,
+
+            // Selection related:
+            onSelectionChanged: (isTextSelected) {
+              tec.dmPrint('TecHtml.onSelectionChanged($isTextSelected)');
+              if (isTextSelected) _clearAllSelectedVerses();
+              //context.bloc<SelectionBloc>()?.add(SelectionEvent.updateIsTextSelected(isTextSelected));
+            },
+            onTagTap: _toggleSelectionForVerse,
+            tagHtmlElement: _tagHtmlElement,
+            styleForTag: _styleForTag,
+
+            // Verses-to-show related (when viewing a subset of verses in the chapter):
+            isInitialHtmlElementVisible:
+                widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
+            toggleVisibilityWithHtmlElement: _toggleVisibilityWithHtmlElement,
+            shouldSkipHtmlElement: _shouldSkipHtmlElement,
+          ),
         ),
-        onLinkTap: null,
-
-        // Selection related:
-        onSelectionChanged: (isTextSelected) {
-          tec.dmPrint('TecHtml.onSelectionChanged($isTextSelected)');
-          if (isTextSelected) _clearAllSelectedVerses();
-          //context.bloc<SelectionBloc>()?.add(SelectionEvent.updateIsTextSelected(isTextSelected));
-        },
-        onTagTap: _toggleSelectionForVerse,
-        tagHtmlElement: _tagHtmlElement,
-        styleForTag: _styleForTag,
-
-        // Verses-to-show related (when viewing a subset of verses in the chapter):
-        isInitialHtmlElementVisible:
-            widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
-        toggleVisibilityWithHtmlElement: _toggleVisibilityWithHtmlElement,
-        shouldSkipHtmlElement: _shouldSkipHtmlElement,
       ),
     );
   }
