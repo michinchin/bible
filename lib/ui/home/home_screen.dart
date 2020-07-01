@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/selection/selection_bloc.dart';
@@ -65,32 +66,44 @@ class _BottomSheet extends StatefulWidget {
 }
 
 class _BottomSheetState extends State<_BottomSheet> {
-  PersistentBottomSheetController bottomSheet;
+  SheetController _sheetController;
+  List<double> snappings;
 
   @override
   void initState() {
+    _sheetController = SheetController();
     super.initState();
   }
 
-  void _showBottomSheet() {
-    if (bottomSheet != null) return;
-    bottomSheet = Scaffold.of(context)
-        .showBottomSheet<void>((context) => SelectionSheet(), backgroundColor: Colors.transparent)
-          ..closed.whenComplete(() {
-            bottomSheet = null;
-          });
+  List<double> _calculateHeightSnappings() {
+    // figure out dimensions depending on view size
+    const topBarHeight = 30.0;
+    const secondBarHeight = 80.0;
+    final ratio = (topBarHeight / MediaQuery.of(context).size.height) + 0.1;
+    final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height) + 0.1;
+
+    debugPrint(ratio.toString());
+    return [0, ratio, ratio + ratio2, ratio * 4];
   }
 
   @override
   Widget build(BuildContext context) {
+    snappings = _calculateHeightSnappings();
+
     return BlocListener<SelectionBloc, SelectionState>(
-      child: widget.child,
-      condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
+      child: SnapSheet(
+          controller: _sheetController,
+          body: widget.child,
+          onSnap: (s, d) {},
+          snappings: snappings,
+          child: SelectionSheet()),
+      condition: (previous, current) =>
+          previous.isTextSelected != current.isTextSelected,
       listener: (context, state) {
         if (state.isTextSelected) {
-          _showBottomSheet();
+          _sheetController?.snapToExtent(snappings[1]);
         } else {
-          bottomSheet?.close();
+          _sheetController?.collapse();
         }
       },
     );
