@@ -373,8 +373,9 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
-    final selectedTextStyle =
-        TextStyle(backgroundColor: isDarkTheme ? Colors.blueGrey[800] : const Color(0xffe6e6e6)); // Colors.blue[100]);
+    final selectedTextStyle = TextStyle(
+        backgroundColor:
+            isDarkTheme ? Colors.blueGrey[800] : const Color(0xffe6e6e6)); // Colors.blue[100]);
 
     /// Local function that returns the style for the given tag.
     TextStyle _styleForTag(String tag) {
@@ -388,7 +389,10 @@ class _BibleHtmlState extends State<_BibleHtml> {
             case HighlightType.highlight:
               return isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color);
             case HighlightType.underline:
-              return TextStyle(decoration: TextDecoration.underline, decorationColor: color);
+              return TextStyle(
+                  decoration: TextDecoration.underline,
+                  decorationColor: color.withAlpha(192),
+                  decorationThickness: 2);
             default:
               break;
           }
