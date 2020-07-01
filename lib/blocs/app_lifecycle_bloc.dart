@@ -2,10 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bloc/bloc.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../models/app_settings.dart';
 
@@ -77,11 +75,6 @@ extension on AppLifecycleBloc {
     if (kDebugMode) {
       tec.dmPrint('App resumed after being paused for $pausedDuration');
     }
-
-    // On Android, if you switch away from the app, then return to it,
-    // the systemNavigationBarIconBrightness is not set back to what it
-    // should be. This call fixes that bug.
-    SystemChrome.setSystemUIOverlayStyle(darkOverlayStyle);
 
     // See if today changed.
     // _dayOffsetListener(dayOffset.value);

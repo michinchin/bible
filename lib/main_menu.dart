@@ -1,4 +1,3 @@
-import 'package:bible/blocs/app_theme_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +7,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
 
+import 'blocs/app_theme_bloc.dart';
 import 'models/app_settings.dart';
 import 'models/labels.dart';
 import 'ui/common/common.dart';
