@@ -245,6 +245,8 @@ class _ChapterViewState extends State<_ChapterView> {
       color: isDarkTheme ? Colors.black : Colors.white,
       child: TecAutoScroll(
         scrollController: _scrollController,
+        allowAutoscroll: () =>
+            !context.bloc<SelectionBloc>().state.isTextSelected,
         child: ListView(
           controller: _scrollController,
           children: <Widget>[
@@ -396,8 +398,9 @@ class _BibleHtmlState extends State<_BibleHtml> {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
     final selectedTextStyle = TextStyle(
-        backgroundColor:
-            isDarkTheme ? Colors.blueGrey[800] : const Color(0xffe6e6e6)); // Colors.blue[100]);
+        backgroundColor: isDarkTheme
+            ? Colors.blueGrey[800]
+            : const Color(0xffe6e6e6)); // Colors.blue[100]);
 
     /// Local function that returns the style for the given tag.
     TextStyle _styleForTag(String tag) {
