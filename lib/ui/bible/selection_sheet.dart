@@ -50,6 +50,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   @override
   void initState() {
+    _addColors();
     _themeChangeStream =
         context.bloc<ThemeModeBloc>().listen(_listenForThemeChange);
 
@@ -64,14 +65,18 @@ class _SelectionSheetState extends State<SelectionSheet> {
     super.dispose();
   }
 
-  void _listenForThemeChange(ThemeMode mode) {
+  List<Color> _addColors() {
     final colors = <Color>[];
     for (var i = 1; i < 5; i++) {
       colors.add(tec.colorFromColorId(i,
           darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
     }
+    return colors;
+  }
+
+  void _listenForThemeChange(ThemeMode mode) {
     setState(() {
-      mainColors = colors;
+      mainColors = _addColors();
     });
   }
 
@@ -200,6 +205,7 @@ class __ColorSliderState extends State<_ColorSlider> {
 
   @override
   void initState() {
+    allColors = _addColors();
     _themeChangeStream =
         context.bloc<ThemeModeBloc>().listen(_listenForThemeChange);
     _colorValue = 0;
@@ -213,12 +219,17 @@ class __ColorSliderState extends State<_ColorSlider> {
     super.dispose();
   }
 
-  void _listenForThemeChange(ThemeMode mode) {
+  List<Color> _addColors() {
     final colors = <Color>[];
     for (var i = 6; i < 365; i++) {
       colors.add(tec.colorFromColorId(i,
           darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
     }
+    return colors;
+  }
+
+  void _listenForThemeChange(ThemeMode mode) {
+    final colors = _addColors();
     setState(() {
       allColors = colors;
     });
