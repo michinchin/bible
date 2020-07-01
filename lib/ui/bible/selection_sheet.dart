@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -44,20 +46,33 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   bool _showAllColors;
   bool _underlineMode;
+  StreamSubscription<ThemeMode> _themeChangeStream;
 
   @override
   void initState() {
-    for (var i = 1; i < 5; i++) {
-      mainColors.add(tec.colorFromColorId(i,
-          darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
-    }
-
-    // _isFullSized = tec.Prefs.shared
-    //     .getBool(Labels.prefSelectionSheetFullSize, defaultValue: false);
+    _themeChangeStream =
+        context.bloc<ThemeModeBloc>().listen(_listenForThemeChange);
 
     _showAllColors = false;
     _underlineMode = false;
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _themeChangeStream.cancel();
+    super.dispose();
+  }
+
+  void _listenForThemeChange(ThemeMode mode) {
+    final colors = <Color>[];
+    for (var i = 1; i < 5; i++) {
+      colors.add(tec.colorFromColorId(i,
+          darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
+    }
+    setState(() {
+      mainColors = colors;
+    });
   }
 
   void onShowAllColors() {
@@ -181,15 +196,32 @@ class __ColorSliderState extends State<_ColorSlider> {
   List<Color> allColors = [];
   double _colorValue;
   bool _canEnd;
+  StreamSubscription<ThemeMode> _themeChangeStream;
 
   @override
   void initState() {
-    for (var i = 6; i < 365; i++) {
-      allColors.add(tec.colorFromColorId(i,
-          darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
-    }
+    _themeChangeStream =
+        context.bloc<ThemeModeBloc>().listen(_listenForThemeChange);
     _colorValue = 0;
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _themeChangeStream.cancel();
+    _themeChangeStream = null;
+    super.dispose();
+  }
+
+  void _listenForThemeChange(ThemeMode mode) {
+    final colors = <Color>[];
+    for (var i = 6; i < 365; i++) {
+      colors.add(tec.colorFromColorId(i,
+          darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
+    }
+    setState(() {
+      allColors = colors;
+    });
   }
 
   void changeColor(double value) {
@@ -381,6 +413,7 @@ class SnapSheet extends StatefulWidget {
   _SnapSheetState createState() => _SnapSheetState();
 }
 
+// TODO(abby): save sheet size to prefs so open on default sizing
 class _SnapSheetState extends State<SnapSheet> {
   @override
   Widget build(BuildContext context) {
@@ -388,7 +421,7 @@ class _SnapSheetState extends State<SnapSheet> {
         controller: widget.controller,
         elevation: 8,
         cornerRadius: 15,
-        isBackdropInteractable: true,
+        isBackdropInteractable: false,
         duration: const Duration(milliseconds: 250),
         addTopViewPaddingOnFullscreen: true,
         snapSpec: SnapSpec(
