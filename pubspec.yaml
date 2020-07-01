@@ -92,9 +92,9 @@ dev_dependencies:
   json_serializable: ^3.3.0
   pedantic: ^1.9.0
 
-dependency_overrides:
-  tec_widgets:
-    path: ../shared/tec_widgets
+# dependency_overrides:
+#   tec_widgets:
+#     path: ../shared/tec_widgets
 
 flutter:
   uses-material-design: true

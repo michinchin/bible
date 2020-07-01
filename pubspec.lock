@@ -960,9 +960,9 @@ packages:
   tec_widgets:
     dependency: "direct main"
     description:
-      path: "../shared/tec_widgets"
-      relative: true
-    source: path
+      name: tec_widgets
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
     version: "1.0.8"
   term_glyph:
     dependency: transitive
