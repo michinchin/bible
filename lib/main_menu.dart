@@ -1,7 +1,9 @@
+import 'package:bible/blocs/app_theme_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
@@ -28,8 +30,9 @@ const _textMaxScaleFactor = 1.0;
 class MainMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final drawerTextColor =
-        Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.grey[700];
+    final drawerTextColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.grey[700];
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -42,7 +45,9 @@ class MainMenu extends StatelessWidget {
           child: Column(
             children: [
               MenuListTile(
-                icon: tec.platformIs(tec.Platform.iOS) ? FeatherIcons.share : FeatherIcons.share2,
+                icon: tec.platformIs(tec.Platform.iOS)
+                    ? FeatherIcons.share
+                    : FeatherIcons.share2,
                 title: 'Share app',
                 onTap: null,
               ),
@@ -50,6 +55,14 @@ class MainMenu extends StatelessWidget {
                 icon: FeatherIcons.bell,
                 title: 'Notifications',
                 onTap: null,
+              ),
+              MenuListTile(
+                icon: Icons.lightbulb_outline,
+                switchValue:
+                    context.bloc<ThemeModeBloc>().state == ThemeMode.dark,
+                title: 'Dark Mode',
+                onTap: () =>
+                    context.bloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
               ),
               MenuListTile(
                 icon: Icons.format_size,
@@ -108,13 +121,14 @@ class MenuListTile extends StatelessWidget {
   final bool switchValue;
   final GestureTapCallback onTap;
 
-  const MenuListTile({Key key, this.icon, this.title, this.switchValue, this.onTap})
+  const MenuListTile(
+      {Key key, this.icon, this.title, this.switchValue, this.onTap})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final textColor = Color.lerp(
-        Theme.of(context).textColor, Theme.of(context).canvasColor, onTap == null ? 0.75 : 0);
+    final textColor = Color.lerp(Theme.of(context).textColor,
+        Theme.of(context).canvasColor, onTap == null ? 0.75 : 0);
     return switchValue == null
         ? ListTile(
             dense: true,
