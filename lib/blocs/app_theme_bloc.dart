@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
@@ -12,10 +13,13 @@ class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
   ThemeMode get initialState {
     final isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
     if (isDarkTheme == null) {
-      SystemChrome.setSystemUIOverlayStyle(ThemeMode.system == ThemeMode.dark
-          ? lightOverlayStyle
-          : darkOverlayStyle);
-      return ThemeMode.system;
+      final systemDarkMode =
+          SchedulerBinding.instance.window.platformBrightness ==
+              Brightness.dark;
+      SystemChrome.setSystemUIOverlayStyle(
+          systemDarkMode ? lightOverlayStyle : darkOverlayStyle);
+      tec.Prefs.shared.setBool('isDarkTheme', systemDarkMode);
+      return systemDarkMode ? ThemeMode.dark : ThemeMode.light;
     } else {
       SystemChrome.setSystemUIOverlayStyle(
           isDarkTheme ? lightOverlayStyle : darkOverlayStyle);
