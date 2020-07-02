@@ -29,8 +29,7 @@ Key bibleChapterKeyMaker(BuildContext context, ViewState state) {
   return GlobalKey<PageableViewState>();
 }
 
-Widget bibleChapterViewBuilder(
-    BuildContext context, Key bodyKey, ViewState state, Size size) {
+Widget bibleChapterViewBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   // tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
   return PageableView(
     key: bodyKey,
@@ -45,8 +44,7 @@ Widget bibleChapterViewBuilder(
       final ref = _initialReference.advancedBy(chapters: index, bible: bible);
 
       // If the bible doesn't have the given reference, or we advanced past either end, return null.
-      if (ref == null ||
-          ref.advancedBy(chapters: -index, bible: bible) != _initialReference) {
+      if (ref == null || ref.advancedBy(chapters: -index, bible: bible) != _initialReference) {
         return null;
       }
       return _BibleChapterView(size: size, bible: bible, ref: ref);
@@ -63,17 +61,13 @@ Widget bibleChapterViewBuilder(
   );
 }
 
-Widget bibleChapterTitleBuilder(
-    BuildContext context, Key bodyKey, ViewState state, Size size) {
+Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   final bible = VolumesRepository.shared.bibleWithId(_bibleId);
   final bcv = _ChapterData.fromJson(state.data).bcv;
   return CupertinoButton(
     child: Text(
       bible.titleWithHref('${bcv.book}/${bcv.chapter}'),
-      style: Theme.of(context)
-          .textTheme
-          .headline6
-          .copyWith(color: Theme.of(context).accentColor),
+      style: Theme.of(context).textTheme.headline6.copyWith(color: Theme.of(context).accentColor),
     ),
     onPressed: () async {
       final bcv = await navigate(context);
@@ -154,17 +148,14 @@ class _BibleChapterView extends StatelessWidget {
             },
           );
         } else {
-          final error = snapshot.hasError
-              ? snapshot.error
-              : snapshot.hasData ? snapshot.data.error : null;
+          final error =
+              snapshot.hasError ? snapshot.error : snapshot.hasData ? snapshot.data.error : null;
           final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
           final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
           return Container(
             color: backgroundColor,
             child: Center(
-              child: error == null
-                  ? const LoadingIndicator()
-                  : Text(error.toString()),
+              child: error == null ? const LoadingIndicator() : Text(error.toString()),
             ),
           );
         }
@@ -209,12 +200,10 @@ class _ChapterViewState extends State<_ChapterView> {
   // Cached values, for quick rebuild.
   var _contentScaleFactor = 1.0;
   var _env = const TecEnv();
-  ScrollController _scrollController;
   String _html;
 
   @override
   Widget build(BuildContext context) {
-    _scrollController = ScrollController();
     // Did the content scale factor change?
     final newContentScaleFactor = contentTextScaleFactorWith(context);
     if (newContentScaleFactor != _contentScaleFactor) {
@@ -237,49 +226,37 @@ class _ChapterViewState extends State<_ChapterView> {
       vendorFolder: (widget.baseUrl?.startsWith('http') ?? false)
           ? null
           : _useZondervanCss(widget.volumeId) ? 'zondervan' : 'tecarta',
-      customStyles:
-          ' .${_useZondervanCss(widget.volumeId) ? 'C' : 'cno'} { display: none; } ',
+      customStyles: ' .${_useZondervanCss(widget.volumeId) ? 'C' : 'cno'} { display: none; } ',
     );
 
     return Container(
       color: isDarkTheme ? Colors.black : Colors.white,
-      child: TecAutoScroll(
-        scrollController: _scrollController,
-        allowAutoscroll: () =>
-            !context.bloc<SelectionBloc>().state.isTextSelected,
-        child: ListView(
-          controller: _scrollController,
-          children: <Widget>[
-            BlocProvider(
-              create: (_) => ChapterHighlightsBloc(
-                volume: widget.volumeId,
-                book: widget.ref.book,
-                chapter: widget.ref.chapter,
-              ),
-              child: BlocBuilder<ChapterHighlightsBloc, ChapterHighlights>(
-                builder: (context, highlights) {
-                  return StreamBuilder<String>(
-                    stream: AppSettings.shared.contentFontName.stream,
-                    builder: (c, snapshot) {
-                      final fontName = (snapshot.hasData
-                          ? snapshot.data
-                          : AppSettings.shared.contentFontName.value);
-                      return _BibleHtml(
-                        volumeId: widget.volumeId,
-                        ref: widget.ref,
-                        baseUrl: widget.baseUrl,
-                        html: _html,
-                        versesToShow: widget.versesToShow ?? [],
-                        size: widget.size,
-                        fontName: fontName,
-                        highlights: highlights,
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+      child: BlocProvider(
+        create: (_) => ChapterHighlightsBloc(
+          volume: widget.volumeId,
+          book: widget.ref.book,
+          chapter: widget.ref.chapter,
+        ),
+        child: BlocBuilder<ChapterHighlightsBloc, ChapterHighlights>(
+          builder: (context, highlights) {
+            return StreamBuilder<String>(
+              stream: AppSettings.shared.contentFontName.stream,
+              builder: (c, snapshot) {
+                final fontName =
+                    (snapshot.hasData ? snapshot.data : AppSettings.shared.contentFontName.value);
+                return _BibleHtml(
+                  volumeId: widget.volumeId,
+                  ref: widget.ref,
+                  baseUrl: widget.baseUrl,
+                  html: _html,
+                  versesToShow: widget.versesToShow ?? [],
+                  size: widget.size,
+                  fontName: fontName,
+                  highlights: highlights,
+                );
+              },
+            );
+          },
         ),
       ),
     );
@@ -332,8 +309,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
     /// Local func that returns `true` iff the given element is a section element.
     final TecHtmlCheckElementFunc _isSectionElement = _useZondervanCss(volume)
         ? (name, attrs, level, isVisible) {
-            return name == 'div' &&
-                (attrs.className == 'SUBA' || attrs.className == 'PARREF');
+            return name == 'div' && (attrs.className == 'SUBA' || attrs.className == 'PARREF');
           }
         : (name, attrs, level, isVisible) {
             return name == 'h5';
@@ -343,8 +319,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
     /// Local func that returns `true` iff the visibility should be toggled
     /// for the given element.
-    final TecHtmlCheckElementFunc _toggleVisibilityWithHtmlElement = widget
-            .versesToShow.isEmpty
+    final TecHtmlCheckElementFunc _toggleVisibilityWithHtmlElement = widget.versesToShow.isEmpty
         ? null
         : (name, attrs, level, isVisible) {
             final id = attrs.id;
@@ -355,8 +330,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
                   (isVisible && !widget.versesToShow.contains(id));
               if (isVisible || toggle) {
                 final v = int.tryParse(id);
-                skipSectionTitle = (v != null &&
-                    !widget.versesToShow.contains((v + 1).toString()));
+                skipSectionTitle = (v != null && !widget.versesToShow.contains((v + 1).toString()));
               }
               return toggle;
             }
@@ -364,30 +338,28 @@ class _BibleHtmlState extends State<_BibleHtml> {
           };
 
     /// Local func that returns true iff the given element should be skipped.
-    final TecHtmlCheckElementFunc _shouldSkipHtmlElement =
-        widget.versesToShow.isEmpty
-            ? null
-            : (name, attrs, level, isVisible) {
-                return (isVisible &&
-                    skipSectionTitle &&
-                    _isSectionElement(name, attrs, level, isVisible));
-              };
+    final TecHtmlCheckElementFunc _shouldSkipHtmlElement = widget.versesToShow.isEmpty
+        ? null
+        : (name, attrs, level, isVisible) {
+            return (isVisible &&
+                skipSectionTitle &&
+                _isSectionElement(name, attrs, level, isVisible));
+          };
 
     var currentVerseTag = '';
     var skipping = false;
     var skippedLevel = 0;
 
     /// Local function that returns a tag for the given element.
-    String _tagHtmlElement(String name, LinkedHashMap<dynamic, String> attrs,
-        int level, bool isVisible) {
+    String _tagHtmlElement(
+        String name, LinkedHashMap<dynamic, String> attrs, int level, bool isVisible) {
       if (skipping && level <= skippedLevel) skipping = false;
       if (!skipping) {
         if (tec.isNotNullOrEmpty(attrs.id) &&
             name == 'div' &&
             (attrs.className == 'v' || attrs.className.startsWith('v '))) {
           currentVerseTag = attrs.id;
-        } else if (attrs['v'] == '0' ||
-            _isSectionElement(name, attrs, level, isVisible)) {
+        } else if (attrs['v'] == '0' || _isSectionElement(name, attrs, level, isVisible)) {
           skipping = true;
           skippedLevel = level;
         }
@@ -398,14 +370,12 @@ class _BibleHtmlState extends State<_BibleHtml> {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
     final selectedTextStyle = TextStyle(
-        backgroundColor: isDarkTheme
-            ? Colors.blueGrey[800]
-            : const Color(0xffe6e6e6)); // Colors.blue[100]);
+        backgroundColor:
+            isDarkTheme ? Colors.blueGrey[800] : const Color(0xffe6e6e6)); // Colors.blue[100]);
 
     /// Local function that returns the style for the given tag.
     TextStyle _styleForTag(String tag) {
-      if (!_isSelectionTrialMode && _selectedVerses.contains(tag))
-        return selectedTextStyle;
+      if (!_isSelectionTrialMode && _selectedVerses.contains(tag)) return selectedTextStyle;
       final verse = int.tryParse(tag);
       if (verse != null) {
         final highlight = widget.highlights.highlightForVerse(verse);
@@ -413,9 +383,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
           final color = Color(highlight.color ?? 0xfff8f888);
           switch (highlight.highlightType) {
             case HighlightType.highlight:
-              return isDarkTheme
-                  ? TextStyle(color: color)
-                  : TextStyle(backgroundColor: color);
+              return isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color);
             case HighlightType.underline:
               return TextStyle(
                   decoration: TextDecoration.underline,
@@ -432,19 +400,16 @@ class _BibleHtmlState extends State<_BibleHtml> {
     return BlocListener<SelectionStyleBloc, SelectionStyle>(
       listener: (context, state) {
         _isSelectionTrialMode = state.isTrialMode;
-        final bloc =
-            context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
+        final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
         if (_selectedVerses.isEmpty || bloc == null) return;
         for (final verseStr in _selectedVerses) {
           final verse = int.tryParse(verseStr);
           if (verse == null) continue;
-          final ref = Reference(
-              volume: volume, book: book, chapter: chapter, verse: verse);
+          final ref = Reference(volume: volume, book: book, chapter: chapter, verse: verse);
           if (state.type == HighlightType.clear) {
             bloc.add(HighlightsEvent.clear(ref));
           } else {
-            bloc.add(HighlightsEvent.add(
-                type: state.type, color: state.color, ref: ref));
+            bloc.add(HighlightsEvent.add(type: state.type, color: state.color, ref: ref));
           }
         }
         if (!_isSelectionTrialMode) {
@@ -455,36 +420,45 @@ class _BibleHtmlState extends State<_BibleHtml> {
         //textDirection: textDirection,
         label: 'Bible text',
         child: ExcludeSemantics(
-          child: TecHtml(
-            widget.html,
-            debugId: '$volume/$book/$chapter',
-            selectable: !kIsWeb && _selectedVerses.isEmpty,
+          child: TecAutoScroll(
             scrollController: _scrollController,
-            baseUrl: widget.baseUrl,
-            textScaleFactor: 1.0, // HTML is already scaled.
-            textStyle: widget.fontName.isEmpty
-                ? _htmlDefaultTextStyle.merge(TextStyle(color: textColor))
-                : GoogleFonts.getFont(widget.fontName, color: textColor),
-            padding: EdgeInsets.symmetric(
-              horizontal: (widget.size.width * _marginPercent).roundToDouble(),
+            allowAutoscroll: () => !context.bloc<SelectionBloc>().state.isTextSelected,
+            child: ListView(
+              controller: _scrollController,
+              children: <Widget>[
+                TecHtml(
+                  widget.html,
+                  debugId: '$volume/$book/$chapter',
+                  selectable: !kIsWeb && _selectedVerses.isEmpty,
+                  scrollController: _scrollController,
+                  baseUrl: widget.baseUrl,
+                  textScaleFactor: 1.0, // HTML is already scaled.
+                  textStyle: widget.fontName.isEmpty
+                      ? _htmlDefaultTextStyle.merge(TextStyle(color: textColor))
+                      : GoogleFonts.getFont(widget.fontName, color: textColor),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: (widget.size.width * _marginPercent).roundToDouble(),
+                  ),
+                  onLinkTap: null,
+
+                  // Selection related:
+                  onSelectionChanged: (isTextSelected) {
+                    tec.dmPrint('TecHtml.onSelectionChanged($isTextSelected)');
+                    if (isTextSelected) _clearAllSelectedVerses();
+                    //context.bloc<SelectionBloc>()?.add(SelectionEvent.updateIsTextSelected(isTextSelected));
+                  },
+                  onTagTap: _toggleSelectionForVerse,
+                  tagHtmlElement: _tagHtmlElement,
+                  styleForTag: _styleForTag,
+
+                  // Verses-to-show related (when viewing a subset of verses in the chapter):
+                  isInitialHtmlElementVisible:
+                      widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
+                  toggleVisibilityWithHtmlElement: _toggleVisibilityWithHtmlElement,
+                  shouldSkipHtmlElement: _shouldSkipHtmlElement,
+                ),
+              ],
             ),
-            onLinkTap: null,
-
-            // Selection related:
-            onSelectionChanged: (isTextSelected) {
-              tec.dmPrint('TecHtml.onSelectionChanged($isTextSelected)');
-              if (isTextSelected) _clearAllSelectedVerses();
-              //context.bloc<SelectionBloc>()?.add(SelectionEvent.updateIsTextSelected(isTextSelected));
-            },
-            onTagTap: _toggleSelectionForVerse,
-            tagHtmlElement: _tagHtmlElement,
-            styleForTag: _styleForTag,
-
-            // Verses-to-show related (when viewing a subset of verses in the chapter):
-            isInitialHtmlElementVisible: widget.versesToShow.isEmpty ||
-                widget.versesToShow.contains('1'),
-            toggleVisibilityWithHtmlElement: _toggleVisibilityWithHtmlElement,
-            shouldSkipHtmlElement: _shouldSkipHtmlElement,
           ),
         ),
       ),
@@ -512,9 +486,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
     tec.dmPrint('selected verses: $_selectedVerses');
     final isTextSelected = _selectedVerses.isNotEmpty;
     if (wasTextSelected != isTextSelected) {
-      context
-          .bloc<SelectionBloc>()
-          ?.add(SelectionState(isTextSelected: isTextSelected));
+      context.bloc<SelectionBloc>()?.add(SelectionState(isTextSelected: isTextSelected));
     }
   }
 }

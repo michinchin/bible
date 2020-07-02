@@ -40,7 +40,7 @@ class MainMenu extends StatelessWidget {
         textTheme: TextTheme(bodyText2: TextStyle(color: drawerTextColor)),
       ),
       child: SizedBox(
-        width: 235,
+        width: 255,
         child: Material(
           child: Column(
             children: [
