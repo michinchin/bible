@@ -13,16 +13,12 @@ class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
   ThemeMode get initialState {
     final isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
     if (isDarkTheme == null) {
-      final systemDarkMode =
-          SchedulerBinding.instance.window.platformBrightness ==
-              Brightness.dark;
-      SystemChrome.setSystemUIOverlayStyle(
-          systemDarkMode ? lightOverlayStyle : darkOverlayStyle);
+      final systemDarkMode = SchedulerBinding.instance.window.platformBrightness == Brightness.dark;
+      SystemChrome.setSystemUIOverlayStyle(systemDarkMode ? lightOverlayStyle : darkOverlayStyle);
       tec.Prefs.shared.setBool('isDarkTheme', systemDarkMode);
       return systemDarkMode ? ThemeMode.dark : ThemeMode.light;
     } else {
-      SystemChrome.setSystemUIOverlayStyle(
-          isDarkTheme ? lightOverlayStyle : darkOverlayStyle);
+      SystemChrome.setSystemUIOverlayStyle(isDarkTheme ? lightOverlayStyle : darkOverlayStyle);
       return isDarkTheme ? ThemeMode.dark : ThemeMode.light;
     }
   }
@@ -34,8 +30,7 @@ class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
         {
           final isDarkTheme = state != ThemeMode.dark;
           await tec.Prefs.shared.setBool('isDarkTheme', isDarkTheme);
-          SystemChrome.setSystemUIOverlayStyle(
-              isDarkTheme ? lightOverlayStyle : darkOverlayStyle);
+          SystemChrome.setSystemUIOverlayStyle(isDarkTheme ? lightOverlayStyle : darkOverlayStyle);
           yield isDarkTheme ? ThemeMode.dark : ThemeMode.light;
           break;
         }
