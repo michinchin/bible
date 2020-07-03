@@ -146,22 +146,21 @@ List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState
 }
 
 Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
-  return showTecModalPopup<void>(
+  return showModalBottomSheet<void>(
     useRootNavigator: false,
     context: context,
-    alignment: Alignment.topRight,
     builder: (context) {
-      return TecPopupSheet(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _menuItem(context, Icons.close, 'Close View', () {
-              Navigator.of(context).maybePop();
-              context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.uid));
-            }),
-            ..._generateAddMenuItems(context, state.uid),
-          ],
-        ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // _menuItem(context, Icons.close, 'Close View', () {
+          //   Navigator.of(context).maybePop();
+          //   context
+          //       .bloc<ViewManagerBloc>()
+          //       ?.add(ViewManagerEvent.remove(state.uid));
+          // }),
+          ..._generateAddMenuItems(context, state.uid),
+        ],
       );
     },
   );
