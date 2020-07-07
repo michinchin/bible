@@ -59,6 +59,8 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     final value = event.when(
       add: _add,
       remove: _remove,
+      maximize: _maximize,
+      restore: _restore,
       move: _move,
       setWidth: _setWidth,
       setHeight: _setHeight,
@@ -104,6 +106,16 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     );
   }
 
+  ViewManagerState _maximize(int uid) {
+    final position = indexOfView(uid);
+    if (position < 0) return state;
+    return ViewManagerState(state.views, uid, state.nextUid);
+  }
+
+  ViewManagerState _restore() {
+    return ViewManagerState(state.views, 0, state.nextUid);
+  }
+
   ViewManagerState _move(int from, int to) {
     if (from == to) return state;
     final newViews = List.of(state.views) // shallow copy
@@ -141,6 +153,8 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
 abstract class ViewManagerEvent with _$ViewManagerEvent {
   const factory ViewManagerEvent.add({@required String type, int position, String data}) = _Add;
   const factory ViewManagerEvent.remove(int uid) = _Remove;
+  const factory ViewManagerEvent.maximize(int uid) = _Maximize;
+  const factory ViewManagerEvent.restore() = _Restore;
   const factory ViewManagerEvent.move({int fromPosition, int toPosition}) = _Move;
   const factory ViewManagerEvent.setWidth({int position, double width}) = _SetWidth;
   const factory ViewManagerEvent.setHeight({int position, double height}) = _SetHeight;

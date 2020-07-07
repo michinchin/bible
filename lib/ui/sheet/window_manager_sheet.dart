@@ -60,6 +60,13 @@ class WindowManagerSheet extends StatelessWidget {
         }),
       );
     }
+      // _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
+      //             isMaximized ? 'Restore' : 'Maximize', () {
+      //           Navigator.of(context).maybePop();
+      //           bloc?.add(isMaximized
+      //               ? const ViewManagerEvent.restore()
+      //               : ViewManagerEvent.maximize(state.uid));
+      //         }),
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
