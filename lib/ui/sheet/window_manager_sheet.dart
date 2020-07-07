@@ -47,6 +47,7 @@ class WindowManagerSheet extends StatelessWidget {
 
     Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
       final vm = ViewManager.shared;
+
       return vm.types.map<Widget>(
         (type) =>
             _menuItem(context, iconMap[vm.titleForType(type)], 'Add ${vm.titleForType(type)}', () {
@@ -60,14 +61,9 @@ class WindowManagerSheet extends StatelessWidget {
         }),
       );
     }
-      // _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
-      //             isMaximized ? 'Restore' : 'Maximize', () {
-      //           Navigator.of(context).maybePop();
-      //           bloc?.add(isMaximized
-      //               ? const ViewManagerEvent.restore()
-      //               : ViewManagerEvent.maximize(state.uid));
-      //         }),
 
+    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+    final isMaximized = bloc?.state?.maximizedViewUid != 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -76,18 +72,29 @@ class WindowManagerSheet extends StatelessWidget {
           style: Theme.of(context).textTheme.headline6,
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Wrap(
+            runSpacing: 10,
+            spacing: 10,
             alignment: WrapAlignment.spaceAround,
             children: _generateAddMenuItems(context, state.viewUid).toList()
-              ..add(
+              ..addAll([
+                _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
+                    isMaximized ? 'Restore' : 'Maximize', () {
+                  context.bloc<SheetManagerBloc>()
+                    ..changeType(SheetType.main)
+                    ..changeSize(SheetSize.collapsed);
+                  bloc?.add(isMaximized
+                      ? const ViewManagerEvent.restore()
+                      : ViewManagerEvent.maximize(state.viewUid));
+                }),
                 _menuItem(context, Icons.close, 'Close View', () {
                   context.bloc<SheetManagerBloc>()
                     ..changeType(SheetType.main)
                     ..changeSize(SheetSize.collapsed);
                   context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.viewUid));
                 }),
-              )),
+              ])),
       ],
     );
   }
