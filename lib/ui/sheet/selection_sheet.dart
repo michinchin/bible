@@ -1,5 +1,6 @@
 import 'dart:async';
 
+
 import 'package:flutter/material.dart';
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -9,6 +10,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/app_theme_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../ui/sheet/snap_sheet.dart';
 
 class SelectionSheet extends StatefulWidget {
@@ -94,48 +96,47 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    Widget _miniView() => !_showAllColors
-        ? Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-            GreyCircleButton(
-              icon: Icons.format_color_reset,
-              onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
-                    type: HighlightType.clear,
-                  )),
+    Widget _miniView() => Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+          GreyCircleButton(
+            icon: Icons.format_color_reset,
+            onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
+                  type: HighlightType.clear,
+                )),
+          ),
+          GreyCircleButton(
+            icon: _underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
+            onPressed: onSwitchToUnderline,
+          ),
+          for (final color in mainColors) ...[
+            _ColorPickerButton(
+              isForUnderline: _underlineMode,
+              color: color,
             ),
-            GreyCircleButton(
-              icon: _underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
-              onPressed: onSwitchToUnderline,
-            ),
-            for (final color in mainColors) ...[
-              _ColorPickerButton(
-                isForUnderline: _underlineMode,
-                color: color,
-              ),
-            ],
-            GreyCircleButton(
-              icon: Icons.color_lens,
-              onPressed: onShowAllColors,
-            ),
-          ])
-        : Row(children: [
-            Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
-            GreyCircleButton(
-              icon: Icons.format_color_reset,
-              onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
-                    type: HighlightType.clear,
-                  )),
-            ),
-            const SizedBox(width: 5),
-            GreyCircleButton(
-              icon: _underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
-              onPressed: onSwitchToUnderline,
-            ),
-            const SizedBox(width: 5),
-            GreyCircleButton(
-              icon: Icons.color_lens,
-              onPressed: onShowAllColors,
-            ),
-          ]);
+          ],
+          GreyCircleButton(
+            icon: Icons.color_lens,
+            onPressed: onShowAllColors,
+          ),
+        ]);
+    //  Row(children: [
+    //     Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
+    //     GreyCircleButton(
+    //       icon: Icons.format_color_reset,
+    //       onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
+    //             type: HighlightType.clear,
+    //           )),
+    //     ),
+    //     const SizedBox(width: 5),
+    //     GreyCircleButton(
+    //       icon: _underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
+    //       onPressed: onSwitchToUnderline,
+    //     ),
+    //     const SizedBox(width: 5),
+    //     GreyCircleButton(
+    //       icon: Icons.color_lens,
+    //       onPressed: onShowAllColors,
+    //     ),
+    //   ]);
 
     return Padding(
       padding: const EdgeInsets.only(left: 15, right: 15),

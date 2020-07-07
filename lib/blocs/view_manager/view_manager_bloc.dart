@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../main_menu.dart';
 import '../../ui/common/common.dart';
 import '../../ui/common/tec_page_view.dart';
+import '../sheet/sheet_manager_bloc.dart';
 
 part 'view_manager.dart';
 part 'view_manager_bloc.freezed.dart';

@@ -1,13 +1,12 @@
-import 'package:bible/ui/sheet/main_sheet.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/selection/selection_bloc.dart';
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../sheet/selection_sheet.dart';
 import '../sheet/snap_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -22,6 +21,9 @@ class HomeScreen extends StatelessWidget {
         ),
         BlocProvider<SelectionBloc>(create: (_) => SelectionBloc()),
         BlocProvider<SelectionStyleBloc>(create: (_) => SelectionStyleBloc()),
+        BlocProvider<SheetManagerBloc>(
+          create: (_) => SheetManagerBloc(),
+        ),
       ],
       child: const _HomeScreen(),
     );
@@ -70,24 +72,17 @@ class _BottomSheet extends StatefulWidget {
 class _BottomSheetState extends State<_BottomSheet> {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SelectionBloc, SelectionState>(
+    return BlocListener<SelectionBloc, SelectionState>(
       bloc: context.bloc<SelectionBloc>(),
       condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
-      builder: (context, state) {
+      listener: (context, state) {
         if (state.isTextSelected) {
-          return SnapSheet(
-              body: widget.child, builder: (c, sheetSize) => SelectionSheet(sheetSize: sheetSize));
+          context.bloc<SheetManagerBloc>().changeType(SheetType.selection);
+        } else {
+          context.bloc<SheetManagerBloc>().changeType(SheetType.main);
         }
-        return SnapSheet(
-            body: widget.child, builder: (c, sheetSize) => MainSheet(sheetSize: sheetSize));
       },
-      // listener: (context, state) {
-      //   if (state.isTextSelected) {
-      //     _sheetController?.snapToExtent(snappings[1]);
-      //   } else {
-      //     _sheetController?.snapToExtent(snappings[1]);
-      //   }
-      // },
+      child: SnapSheet(body: widget.child,)
     );
   }
 }

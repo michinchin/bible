@@ -145,62 +145,10 @@ List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState
   ];
 }
 
-Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
-  return showModalBottomSheet<void>(
-    useRootNavigator: false,
-    context: context,
-    builder: (context) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // _menuItem(context, Icons.close, 'Close View', () {
-          //   Navigator.of(context).maybePop();
-          //   context
-          //       .bloc<ViewManagerBloc>()
-          //       ?.add(ViewManagerEvent.remove(state.uid));
-          // }),
-          ..._generateAddMenuItems(context, state.uid),
-        ],
-      );
-    },
-  );
-}
-
-Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
-  final vm = ViewManager.shared;
-  return vm.types.map<Widget>(
-    (type) => _menuItem(context, Icons.add, 'Add ${vm.titleForType(type)}', () {
-      Navigator.of(context).maybePop();
-      final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-      final position = bloc?.indexOfView(viewUid) ?? -1;
-      bloc?.add(ViewManagerEvent.add(
-          type: type, data: '', position: position == -1 ? null : position + 1));
-    }),
-  );
-}
-
-Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onPressed) {
-  final textColor = Theme.of(context).textColor;
-  const iconSize = 24.0;
-  return CupertinoButton(
-    padding: EdgeInsets.zero,
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (icon == null)
-          const SizedBox(width: iconSize)
-        else
-          Icon(icon, color: Theme.of(context).textColor, size: iconSize),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(color: textColor),
-        ),
-      ],
-    ),
-    borderRadius: null,
-    onPressed: onPressed,
-  );
+void showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
+  context.bloc<SheetManagerBloc>().setUid(state.uid);
+  context.bloc<SheetManagerBloc>().changeSize(SheetSize.medium);
+  context.bloc<SheetManagerBloc>().changeType(SheetType.windows);
 }
 
 IconData _moreIcon(BuildContext context) {
