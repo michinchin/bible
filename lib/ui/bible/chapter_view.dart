@@ -406,8 +406,30 @@ class _BibleHtmlState extends State<_BibleHtml> {
     ///
     InlineSpan _spanForText(String text, TextStyle style, Object tag) {
       if (tag is VerseTag) {
-        final textStyle =
-            (tag is VerseTag && _selectedVerses.contains(tag.verse)) ? selectedTextStyle : style;
+        TextStyle textStyle;
+        if (!_isSelectionTrialMode && _selectedVerses.contains(tag.verse)) {
+          textStyle = style.merge(selectedTextStyle);
+        } else if (tag.verse != null) {
+          final highlight = widget.highlights.highlightForVerse(tag.verse);
+          if (highlight != null) {
+            final color = Color(highlight.color ?? 0xfff8f888);
+            switch (highlight.highlightType) {
+              case HighlightType.highlight:
+                textStyle = style.merge(
+                    isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color));
+                break;
+              case HighlightType.underline:
+                textStyle = style.merge(TextStyle(
+                    decoration: TextDecoration.underline,
+                    decorationColor: color.withAlpha(192),
+                    decorationThickness: 2));
+                break;
+              default:
+                break;
+            }
+          }
+        }
+        textStyle ??= style;
         return TaggableTextSpan(
             text: text,
             style: textStyle,
@@ -416,27 +438,6 @@ class _BibleHtmlState extends State<_BibleHtml> {
       } else {
         return TextSpan(text: text, style: style);
       }
-
-      // if (!_isSelectionTrialMode && _selectedVerses.contains(tag)) return selectedTextStyle;
-      // final verse = int.tryParse(tag);
-      // if (verse != null) {
-      //   final highlight = widget.highlights.highlightForVerse(verse);
-      //   if (highlight != null) {
-      //     final color = Color(highlight.color ?? 0xfff8f888);
-      //     switch (highlight.highlightType) {
-      //       case HighlightType.highlight:
-      //         return isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color);
-      //       case HighlightType.underline:
-      //         return TextStyle(
-      //             decoration: TextDecoration.underline,
-      //             decorationColor: color.withAlpha(192),
-      //             decorationThickness: 2);
-      //       default:
-      //         break;
-      //     }
-      //   }
-      // }
-      // return null;
     }
 
     ///
