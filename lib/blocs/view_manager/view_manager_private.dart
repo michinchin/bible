@@ -26,13 +26,33 @@ class _VMViewStack extends StatelessWidget {
     );
 
     // tec.dmPrint('_VMViewStackState build()');
-    final rows = _buildRows(_Size.ideal, vmState, constraints)..balance(constraints);
+    List<Widget> children;
+    final maximizedView =
+        vmState.views.firstWhere((e) => e.uid == vmState.maximizedViewUid, orElse: () => null);
+    if (maximizedView == null) {
+      final rows = _buildRows(_Size.ideal, vmState, constraints)..balance(constraints);
+      children = rows.toViewList(constraints);
+    } else {
+      var i = 0;
+      final views = List.of(vmState.views)
+        ..remove(maximizedView)
+        ..add(maximizedView);
+      children = views
+          .map<Widget>((e) => e.toWidget(
+              constraints: constraints,
+              x: 0,
+              y: 0,
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              index: i++))
+          .toList();
+    }
     return Theme(
       data: theme.copyWith(
         appBarTheme: newAppBarTheme,
         pageTransitionsTheme: tecPageTransitionsTheme(context),
       ),
-      child: Stack(children: rows.toViewList(constraints)),
+      child: Stack(children: children),
     );
   }
 }
@@ -189,6 +209,31 @@ extension _ExtOnViewState on ViewState {
   double idealHeight(BoxConstraints c) => math.max(preferredHeight ?? 0, minHeight(c));
   double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
   double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
+
+  Widget toWidget({
+    @required BoxConstraints constraints,
+    @required double x,
+    @required double y,
+    @required double width,
+    @required double height,
+    @required int index,
+  }) {
+    final mvs = ManagedViewState(constraints, this, Size(width, height), index);
+    return AnimatedPositionedDirectional(
+      // We need a key so when views are removed or reordered the element tree stays in sync.
+      key: ValueKey(uid),
+      duration: const Duration(milliseconds: 200),
+      start: x,
+      top: y,
+      width: width,
+      height: height,
+      // child: _ManagedViewScaffold(mvs),
+      child: BlocProvider(
+        create: (_) => ManagedViewBloc(mvs),
+        child: _ManagedViewNavigator(mvs),
+      ),
+    );
+  }
 }
 
 ///
@@ -304,23 +349,8 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           width = state.minWidth(constraints) + xDelta;
         }
 
-        final mvs = ManagedViewState(constraints, state, Size(width, height), i);
-
-        views.add(AnimatedPositionedDirectional(
-          // We need a key so when views are removed or reordered the element
-          // tree stays in sync.
-          key: ValueKey(state.uid),
-          duration: const Duration(milliseconds: 200),
-          start: x,
-          top: y,
-          width: width,
-          height: height,
-          child: BlocProvider(
-            create: (_) => ManagedViewBloc(mvs),
-            child: _ManagedViewNavigator(mvs),
-          ),
-          // child: _ManagedViewScaffold(mvs),
-        ));
+        views.add(state.toWidget(
+            constraints: constraints, x: x, y: y, width: width, height: height, index: i));
 
         i++;
         x += width;

@@ -151,14 +151,25 @@ Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Si
     context: context,
     alignment: Alignment.topRight,
     builder: (context) {
+      final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+      final isMaximized = bloc?.state?.maximizedViewUid != 0;
       return TecPopupSheet(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _menuItem(context, Icons.close, 'Close View', () {
-              Navigator.of(context).maybePop();
-              context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.uid));
-            }),
+            if ((bloc?.state?.views?.length ?? 0) > 1)
+              _menuItem(context, Icons.close, 'Close View', () {
+                Navigator.of(context).maybePop();
+                bloc?.add(ViewManagerEvent.remove(state.uid));
+              }),
+            if ((bloc?.state?.views?.length ?? 0) > 1)
+              _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
+                  isMaximized ? 'Restore' : 'Maximize', () {
+                Navigator.of(context).maybePop();
+                bloc?.add(isMaximized
+                    ? const ViewManagerEvent.restore()
+                    : ViewManagerEvent.maximize(state.uid));
+              }),
             ..._generateAddMenuItems(context, state.uid),
           ],
         ),

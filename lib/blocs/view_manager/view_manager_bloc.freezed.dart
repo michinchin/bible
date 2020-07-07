@@ -26,6 +26,16 @@ class _$ViewManagerEventTearOff {
     );
   }
 
+  _Maximize maximize(int uid) {
+    return _Maximize(
+      uid,
+    );
+  }
+
+  _Restore restore() {
+    return const _Restore();
+  }
+
   _Move move({int fromPosition, int toPosition}) {
     return _Move(
       fromPosition: fromPosition,
@@ -63,6 +73,8 @@ mixin _$ViewManagerEvent {
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
     @required Result remove(int uid),
+    @required Result maximize(int uid),
+    @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -72,6 +84,8 @@ mixin _$ViewManagerEvent {
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
     Result remove(int uid),
+    Result maximize(int uid),
+    Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -82,6 +96,8 @@ mixin _$ViewManagerEvent {
   Result map<Result extends Object>({
     @required Result add(_Add value),
     @required Result remove(_Remove value),
+    @required Result maximize(_Maximize value),
+    @required Result restore(_Restore value),
     @required Result move(_Move value),
     @required Result setWidth(_SetWidth value),
     @required Result setHeight(_SetHeight value),
@@ -91,6 +107,8 @@ mixin _$ViewManagerEvent {
   Result maybeMap<Result extends Object>({
     Result add(_Add value),
     Result remove(_Remove value),
+    Result maximize(_Maximize value),
+    Result restore(_Restore value),
     Result move(_Move value),
     Result setWidth(_SetWidth value),
     Result setHeight(_SetHeight value),
@@ -197,6 +215,8 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
     @required Result remove(int uid),
+    @required Result maximize(int uid),
+    @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -204,6 +224,8 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -216,6 +238,8 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
     Result remove(int uid),
+    Result maximize(int uid),
+    Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -234,6 +258,8 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   Result map<Result extends Object>({
     @required Result add(_Add value),
     @required Result remove(_Remove value),
+    @required Result maximize(_Maximize value),
+    @required Result restore(_Restore value),
     @required Result move(_Move value),
     @required Result setWidth(_SetWidth value),
     @required Result setHeight(_SetHeight value),
@@ -241,6 +267,8 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -253,6 +281,8 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   Result maybeMap<Result extends Object>({
     Result add(_Add value),
     Result remove(_Remove value),
+    Result maximize(_Maximize value),
+    Result restore(_Restore value),
     Result move(_Move value),
     Result setWidth(_SetWidth value),
     Result setHeight(_SetHeight value),
@@ -341,6 +371,8 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
     @required Result remove(int uid),
+    @required Result maximize(int uid),
+    @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -348,6 +380,8 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -360,6 +394,8 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
     Result remove(int uid),
+    Result maximize(int uid),
+    Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -378,6 +414,8 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   Result map<Result extends Object>({
     @required Result add(_Add value),
     @required Result remove(_Remove value),
+    @required Result maximize(_Maximize value),
+    @required Result restore(_Restore value),
     @required Result move(_Move value),
     @required Result setWidth(_SetWidth value),
     @required Result setHeight(_SetHeight value),
@@ -385,6 +423,8 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -397,6 +437,8 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   Result maybeMap<Result extends Object>({
     Result add(_Add value),
     Result remove(_Remove value),
+    Result maximize(_Maximize value),
+    Result restore(_Restore value),
     Result move(_Move value),
     Result setWidth(_SetWidth value),
     Result setHeight(_SetHeight value),
@@ -416,6 +458,286 @@ abstract class _Remove implements ViewManagerEvent {
 
   int get uid;
   _$RemoveCopyWith<_Remove> get copyWith;
+}
+
+abstract class _$MaximizeCopyWith<$Res> {
+  factory _$MaximizeCopyWith(_Maximize value, $Res Function(_Maximize) then) =
+      __$MaximizeCopyWithImpl<$Res>;
+  $Res call({int uid});
+}
+
+class __$MaximizeCopyWithImpl<$Res> extends _$ViewManagerEventCopyWithImpl<$Res>
+    implements _$MaximizeCopyWith<$Res> {
+  __$MaximizeCopyWithImpl(_Maximize _value, $Res Function(_Maximize) _then)
+      : super(_value, (v) => _then(v as _Maximize));
+
+  @override
+  _Maximize get _value => super._value as _Maximize;
+
+  @override
+  $Res call({
+    Object uid = freezed,
+  }) {
+    return _then(_Maximize(
+      uid == freezed ? _value.uid : uid as int,
+    ));
+  }
+}
+
+class _$_Maximize with DiagnosticableTreeMixin implements _Maximize {
+  const _$_Maximize(this.uid) : assert(uid != null);
+
+  @override
+  final int uid;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'ViewManagerEvent.maximize(uid: $uid)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ViewManagerEvent.maximize'))
+      ..add(DiagnosticsProperty('uid', uid));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _Maximize &&
+            (identical(other.uid, uid) ||
+                const DeepCollectionEquality().equals(other.uid, uid)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^ const DeepCollectionEquality().hash(uid);
+
+  @override
+  _$MaximizeCopyWith<_Maximize> get copyWith =>
+      __$MaximizeCopyWithImpl<_Maximize>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result add(String type, int position, String data),
+    @required Result remove(int uid),
+    @required Result maximize(int uid),
+    @required Result restore(),
+    @required Result move(int fromPosition, int toPosition),
+    @required Result setWidth(int position, double width),
+    @required Result setHeight(int position, double height),
+    @required Result setData(int uid, String data),
+  }) {
+    assert(add != null);
+    assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
+    assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
+    assert(setData != null);
+    return maximize(uid);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result add(String type, int position, String data),
+    Result remove(int uid),
+    Result maximize(int uid),
+    Result restore(),
+    Result move(int fromPosition, int toPosition),
+    Result setWidth(int position, double width),
+    Result setHeight(int position, double height),
+    Result setData(int uid, String data),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (maximize != null) {
+      return maximize(uid);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result add(_Add value),
+    @required Result remove(_Remove value),
+    @required Result maximize(_Maximize value),
+    @required Result restore(_Restore value),
+    @required Result move(_Move value),
+    @required Result setWidth(_SetWidth value),
+    @required Result setHeight(_SetHeight value),
+    @required Result setData(_SetData value),
+  }) {
+    assert(add != null);
+    assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
+    assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
+    assert(setData != null);
+    return maximize(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result add(_Add value),
+    Result remove(_Remove value),
+    Result maximize(_Maximize value),
+    Result restore(_Restore value),
+    Result move(_Move value),
+    Result setWidth(_SetWidth value),
+    Result setHeight(_SetHeight value),
+    Result setData(_SetData value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (maximize != null) {
+      return maximize(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _Maximize implements ViewManagerEvent {
+  const factory _Maximize(int uid) = _$_Maximize;
+
+  int get uid;
+  _$MaximizeCopyWith<_Maximize> get copyWith;
+}
+
+abstract class _$RestoreCopyWith<$Res> {
+  factory _$RestoreCopyWith(_Restore value, $Res Function(_Restore) then) =
+      __$RestoreCopyWithImpl<$Res>;
+}
+
+class __$RestoreCopyWithImpl<$Res> extends _$ViewManagerEventCopyWithImpl<$Res>
+    implements _$RestoreCopyWith<$Res> {
+  __$RestoreCopyWithImpl(_Restore _value, $Res Function(_Restore) _then)
+      : super(_value, (v) => _then(v as _Restore));
+
+  @override
+  _Restore get _value => super._value as _Restore;
+}
+
+class _$_Restore with DiagnosticableTreeMixin implements _Restore {
+  const _$_Restore();
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'ViewManagerEvent.restore()';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties..add(DiagnosticsProperty('type', 'ViewManagerEvent.restore'));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) || (other is _Restore);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result add(String type, int position, String data),
+    @required Result remove(int uid),
+    @required Result maximize(int uid),
+    @required Result restore(),
+    @required Result move(int fromPosition, int toPosition),
+    @required Result setWidth(int position, double width),
+    @required Result setHeight(int position, double height),
+    @required Result setData(int uid, String data),
+  }) {
+    assert(add != null);
+    assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
+    assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
+    assert(setData != null);
+    return restore();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result add(String type, int position, String data),
+    Result remove(int uid),
+    Result maximize(int uid),
+    Result restore(),
+    Result move(int fromPosition, int toPosition),
+    Result setWidth(int position, double width),
+    Result setHeight(int position, double height),
+    Result setData(int uid, String data),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (restore != null) {
+      return restore();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result add(_Add value),
+    @required Result remove(_Remove value),
+    @required Result maximize(_Maximize value),
+    @required Result restore(_Restore value),
+    @required Result move(_Move value),
+    @required Result setWidth(_SetWidth value),
+    @required Result setHeight(_SetHeight value),
+    @required Result setData(_SetData value),
+  }) {
+    assert(add != null);
+    assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
+    assert(move != null);
+    assert(setWidth != null);
+    assert(setHeight != null);
+    assert(setData != null);
+    return restore(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result add(_Add value),
+    Result remove(_Remove value),
+    Result maximize(_Maximize value),
+    Result restore(_Restore value),
+    Result move(_Move value),
+    Result setWidth(_SetWidth value),
+    Result setHeight(_SetHeight value),
+    Result setData(_SetData value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (restore != null) {
+      return restore(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _Restore implements ViewManagerEvent {
+  const factory _Restore() = _$_Restore;
 }
 
 abstract class _$MoveCopyWith<$Res> {
@@ -494,6 +816,8 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
     @required Result remove(int uid),
+    @required Result maximize(int uid),
+    @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -501,6 +825,8 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -513,6 +839,8 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
     Result remove(int uid),
+    Result maximize(int uid),
+    Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -531,6 +859,8 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   Result map<Result extends Object>({
     @required Result add(_Add value),
     @required Result remove(_Remove value),
+    @required Result maximize(_Maximize value),
+    @required Result restore(_Restore value),
     @required Result move(_Move value),
     @required Result setWidth(_SetWidth value),
     @required Result setHeight(_SetHeight value),
@@ -538,6 +868,8 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -550,6 +882,8 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   Result maybeMap<Result extends Object>({
     Result add(_Add value),
     Result remove(_Remove value),
+    Result maximize(_Maximize value),
+    Result restore(_Restore value),
     Result move(_Move value),
     Result setWidth(_SetWidth value),
     Result setHeight(_SetHeight value),
@@ -646,6 +980,8 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
     @required Result remove(int uid),
+    @required Result maximize(int uid),
+    @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -653,6 +989,8 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -665,6 +1003,8 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
     Result remove(int uid),
+    Result maximize(int uid),
+    Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -683,6 +1023,8 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   Result map<Result extends Object>({
     @required Result add(_Add value),
     @required Result remove(_Remove value),
+    @required Result maximize(_Maximize value),
+    @required Result restore(_Restore value),
     @required Result move(_Move value),
     @required Result setWidth(_SetWidth value),
     @required Result setHeight(_SetHeight value),
@@ -690,6 +1032,8 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -702,6 +1046,8 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   Result maybeMap<Result extends Object>({
     Result add(_Add value),
     Result remove(_Remove value),
+    Result maximize(_Maximize value),
+    Result restore(_Restore value),
     Result move(_Move value),
     Result setWidth(_SetWidth value),
     Result setHeight(_SetHeight value),
@@ -800,6 +1146,8 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
     @required Result remove(int uid),
+    @required Result maximize(int uid),
+    @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -807,6 +1155,8 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -819,6 +1169,8 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
     Result remove(int uid),
+    Result maximize(int uid),
+    Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -837,6 +1189,8 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   Result map<Result extends Object>({
     @required Result add(_Add value),
     @required Result remove(_Remove value),
+    @required Result maximize(_Maximize value),
+    @required Result restore(_Restore value),
     @required Result move(_Move value),
     @required Result setWidth(_SetWidth value),
     @required Result setHeight(_SetHeight value),
@@ -844,6 +1198,8 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -856,6 +1212,8 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   Result maybeMap<Result extends Object>({
     Result add(_Add value),
     Result remove(_Remove value),
+    Result maximize(_Maximize value),
+    Result restore(_Restore value),
     Result move(_Move value),
     Result setWidth(_SetWidth value),
     Result setHeight(_SetHeight value),
@@ -951,6 +1309,8 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
   Result when<Result extends Object>({
     @required Result add(String type, int position, String data),
     @required Result remove(int uid),
+    @required Result maximize(int uid),
+    @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
@@ -958,6 +1318,8 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -970,6 +1332,8 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
   Result maybeWhen<Result extends Object>({
     Result add(String type, int position, String data),
     Result remove(int uid),
+    Result maximize(int uid),
+    Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
@@ -988,6 +1352,8 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
   Result map<Result extends Object>({
     @required Result add(_Add value),
     @required Result remove(_Remove value),
+    @required Result maximize(_Maximize value),
+    @required Result restore(_Restore value),
     @required Result move(_Move value),
     @required Result setWidth(_SetWidth value),
     @required Result setHeight(_SetHeight value),
@@ -995,6 +1361,8 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
   }) {
     assert(add != null);
     assert(remove != null);
+    assert(maximize != null);
+    assert(restore != null);
     assert(move != null);
     assert(setWidth != null);
     assert(setHeight != null);
@@ -1007,6 +1375,8 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
   Result maybeMap<Result extends Object>({
     Result add(_Add value),
     Result remove(_Remove value),
+    Result maximize(_Maximize value),
+    Result restore(_Restore value),
     Result move(_Move value),
     Result setWidth(_SetWidth value),
     Result setHeight(_SetHeight value),
