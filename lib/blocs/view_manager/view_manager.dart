@@ -142,6 +142,11 @@ List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState
       tooltip: 'More',
       onPressed: () => showMoreMenu(context, bodyKey, state, size),
     ),
+    IconButton(
+      icon: const Icon(Icons.account_circle),
+      tooltip: 'Main Menu',
+      onPressed: () => showMainMenu(context),
+    ),
   ];
 }
 
