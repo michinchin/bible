@@ -7,7 +7,7 @@ part 'sheet_manager_bloc.freezed.dart';
 
 enum SheetType { main, selection, windows }
 
-enum SheetSize { mini, medium, full }
+enum SheetSize { collapsed, mini, medium, full }
 
 @freezed
 abstract class SheetManagerState with _$SheetManagerState {
@@ -35,7 +35,13 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
     yield newState;
   }
 
-  SheetManagerState _changeSize(SheetSize size) => state.copyWith(size: size);
+  SheetManagerState _changeSize(SheetSize size) {
+    if (size == SheetSize.collapsed) {
+      return state.copyWith(size: size, type: SheetType.main);
+    }
+    return state.copyWith(size: size);
+  }
+
   SheetManagerState _changeType(SheetType type) => state.copyWith(type: type);
   SheetManagerState _changeView(int uid) => state.copyWith(viewUid: uid);
 

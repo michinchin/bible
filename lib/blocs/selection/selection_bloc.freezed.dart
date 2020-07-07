@@ -12,9 +12,11 @@ T _$identity<T>(T value) => value;
 class _$SelectionStateTearOff {
   const _$SelectionStateTearOff();
 
-  _SelectionState call({bool isTextSelected}) {
+  _SelectionState call(
+      {bool isTextSelected = false, Set<int> selectedVerses = const <int>{}}) {
     return _SelectionState(
       isTextSelected: isTextSelected,
+      selectedVerses: selectedVerses,
     );
   }
 }
@@ -24,6 +26,7 @@ const $SelectionState = _$SelectionStateTearOff();
 
 mixin _$SelectionState {
   bool get isTextSelected;
+  Set<int> get selectedVerses;
 
   $SelectionStateCopyWith<SelectionState> get copyWith;
 }
@@ -32,7 +35,7 @@ abstract class $SelectionStateCopyWith<$Res> {
   factory $SelectionStateCopyWith(
           SelectionState value, $Res Function(SelectionState) then) =
       _$SelectionStateCopyWithImpl<$Res>;
-  $Res call({bool isTextSelected});
+  $Res call({bool isTextSelected, Set<int> selectedVerses});
 }
 
 class _$SelectionStateCopyWithImpl<$Res>
@@ -46,11 +49,15 @@ class _$SelectionStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object isTextSelected = freezed,
+    Object selectedVerses = freezed,
   }) {
     return _then(_value.copyWith(
       isTextSelected: isTextSelected == freezed
           ? _value.isTextSelected
           : isTextSelected as bool,
+      selectedVerses: selectedVerses == freezed
+          ? _value.selectedVerses
+          : selectedVerses as Set<int>,
     ));
   }
 }
@@ -61,7 +68,7 @@ abstract class _$SelectionStateCopyWith<$Res>
           _SelectionState value, $Res Function(_SelectionState) then) =
       __$SelectionStateCopyWithImpl<$Res>;
   @override
-  $Res call({bool isTextSelected});
+  $Res call({bool isTextSelected, Set<int> selectedVerses});
 }
 
 class __$SelectionStateCopyWithImpl<$Res>
@@ -77,24 +84,35 @@ class __$SelectionStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object isTextSelected = freezed,
+    Object selectedVerses = freezed,
   }) {
     return _then(_SelectionState(
       isTextSelected: isTextSelected == freezed
           ? _value.isTextSelected
           : isTextSelected as bool,
+      selectedVerses: selectedVerses == freezed
+          ? _value.selectedVerses
+          : selectedVerses as Set<int>,
     ));
   }
 }
 
 class _$_SelectionState implements _SelectionState {
-  const _$_SelectionState({this.isTextSelected});
+  const _$_SelectionState(
+      {this.isTextSelected = false, this.selectedVerses = const <int>{}})
+      : assert(isTextSelected != null),
+        assert(selectedVerses != null);
 
+  @JsonKey(defaultValue: false)
   @override
   final bool isTextSelected;
+  @JsonKey(defaultValue: const <int>{})
+  @override
+  final Set<int> selectedVerses;
 
   @override
   String toString() {
-    return 'SelectionState(isTextSelected: $isTextSelected)';
+    return 'SelectionState(isTextSelected: $isTextSelected, selectedVerses: $selectedVerses)';
   }
 
   @override
@@ -103,13 +121,17 @@ class _$_SelectionState implements _SelectionState {
         (other is _SelectionState &&
             (identical(other.isTextSelected, isTextSelected) ||
                 const DeepCollectionEquality()
-                    .equals(other.isTextSelected, isTextSelected)));
+                    .equals(other.isTextSelected, isTextSelected)) &&
+            (identical(other.selectedVerses, selectedVerses) ||
+                const DeepCollectionEquality()
+                    .equals(other.selectedVerses, selectedVerses)));
   }
 
   @override
   int get hashCode =>
       runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(isTextSelected);
+      const DeepCollectionEquality().hash(isTextSelected) ^
+      const DeepCollectionEquality().hash(selectedVerses);
 
   @override
   _$SelectionStateCopyWith<_SelectionState> get copyWith =>
@@ -117,10 +139,13 @@ class _$_SelectionState implements _SelectionState {
 }
 
 abstract class _SelectionState implements SelectionState {
-  const factory _SelectionState({bool isTextSelected}) = _$_SelectionState;
+  const factory _SelectionState(
+      {bool isTextSelected, Set<int> selectedVerses}) = _$_SelectionState;
 
   @override
   bool get isTextSelected;
+  @override
+  Set<int> get selectedVerses;
   @override
   _$SelectionStateCopyWith<_SelectionState> get copyWith;
 }

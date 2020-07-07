@@ -407,7 +407,8 @@ class _BibleHtmlState extends State<_BibleHtml> {
     InlineSpan _spanForText(String text, TextStyle style, Object tag) {
       if (tag is VerseTag) {
         TextStyle textStyle;
-        if (!_isSelectionTrialMode && _selectedVerses.contains(tag.verse)) {
+        final selectedVerses = context.bloc<SelectionBloc>().state.selectedVerses;
+        if (!_isSelectionTrialMode && selectedVerses.contains(tag.verse)) {
           textStyle = style.merge(selectedTextStyle);
         } else if (tag.verse != null) {
           final highlight = widget.highlights.highlightForVerse(tag.verse);
@@ -443,11 +444,12 @@ class _BibleHtmlState extends State<_BibleHtml> {
     ///
     /// SelectionStyleBloc listener
     ///
-    void _selectionStyleBlocListener(BuildContext context, SelectionStyle state) {
+    void _selectionStyleBlocListener(
+        BuildContext context, SelectionStyle state, Set<int> selectedVerses) {
       _isSelectionTrialMode = state.isTrialMode;
       final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
-      if (_selectedVerses.isEmpty || bloc == null) return;
-      for (final verse in _selectedVerses) {
+      if (selectedVerses.isEmpty || bloc == null) return;
+      for (final verse in selectedVerses) {
         if (verse == null) continue;
         final ref = Reference(volume: volume, book: book, chapter: chapter, verse: verse);
         if (state.type == HighlightType.clear) {
@@ -461,52 +463,53 @@ class _BibleHtmlState extends State<_BibleHtml> {
       }
     }
 
-    return BlocListener<SelectionStyleBloc, SelectionStyle>(
-      listener: _selectionStyleBlocListener,
-      child: Semantics(
-        //textDirection: textDirection,
-        label: 'Bible text',
-        child: ExcludeSemantics(
-          child: TecAutoScroll(
-            scrollController: _scrollController,
-            allowAutoscroll: () => !context.bloc<SelectionBloc>().state.isTextSelected,
-            child: ListView(
-              controller: _scrollController,
-              children: <Widget>[
-                TecHtml(
-                  widget.html,
-                  debugId: '$volume/$book/$chapter',
-                  scrollController: _scrollController,
-                  baseUrl: widget.baseUrl,
-                  textScaleFactor: 1.0, // HTML is already scaled.
-                  textStyle: widget.fontName.isEmpty
-                      ? _htmlDefaultTextStyle.merge(TextStyle(color: textColor))
-                      : GoogleFonts.getFont(widget.fontName, color: textColor),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: (widget.size.width * _marginPercent).roundToDouble(),
-                  ),
+    return BlocBuilder<SelectionBloc, SelectionState>(
+      builder: (context, selectionState) => BlocListener<SelectionStyleBloc, SelectionStyle>(
+          listener: (c, s) => _selectionStyleBlocListener(c, s, selectionState.selectedVerses),
+          child: Semantics(
+            //textDirection: textDirection,
+            label: 'Bible text',
+            child: ExcludeSemantics(
+              child: TecAutoScroll(
+                scrollController: _scrollController,
+                allowAutoscroll: () => !context.bloc<SelectionBloc>().state.isTextSelected,
+                child: ListView(
+                  controller: _scrollController,
+                  children: <Widget>[
+                    TecHtml(
+                      widget.html,
+                      debugId: '$volume/$book/$chapter',
+                      scrollController: _scrollController,
+                      baseUrl: widget.baseUrl,
+                      textScaleFactor: 1.0, // HTML is already scaled.
+                      textStyle: widget.fontName.isEmpty
+                          ? _htmlDefaultTextStyle.merge(TextStyle(color: textColor))
+                          : GoogleFonts.getFont(widget.fontName, color: textColor),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: (widget.size.width * _marginPercent).roundToDouble(),
+                      ),
 
-                  // Tagging HTML elements:
-                  tagHtmlElement: _tagHtmlElement,
+                      // Tagging HTML elements:
+                      tagHtmlElement: _tagHtmlElement,
 
-                  // Rendering HTML text to a TextSpan:
-                  spanForText: _spanForText,
+                      // Rendering HTML text to a TextSpan:
+                      spanForText: _spanForText,
 
-                  // Word range selection related:
-                  selectable: !kIsWeb && _selectedVerses.isEmpty,
-                  onSelectedTextChanged: _onSelectedTextChanged,
+                      // Word range selection related:
+                      selectable: !kIsWeb && selectionState.selectedVerses.isEmpty,
+                      onSelectedTextChanged: _onSelectedTextChanged,
 
-                  // `versesToShow` related (when viewing a subset of verses in the chapter):
-                  isInitialHtmlElementVisible:
-                      widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
-                  toggleVisibilityWithHtmlElement: _toggleVisibilityWithHtmlElement,
-                  shouldSkipHtmlElement: _shouldSkipHtmlElement,
+                      // `versesToShow` related (when viewing a subset of verses in the chapter):
+                      isInitialHtmlElementVisible:
+                          widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
+                      toggleVisibilityWithHtmlElement: _toggleVisibilityWithHtmlElement,
+                      shouldSkipHtmlElement: _shouldSkipHtmlElement,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
+          )),
     );
   }
 
@@ -536,28 +539,19 @@ class _BibleHtmlState extends State<_BibleHtml> {
   //-------------------------------------------------------------------------
   // Verse selection:
 
-  final _selectedVerses = <int>{};
-
   void _toggleSelectionForVerse(int verse) {
     assert(verse != null);
-    _updateSelectedVersesInBlock(() {
-      if (!_selectedVerses.remove(verse)) _selectedVerses.add(verse);
-    });
+    _updateSelectedVersesInBlock(() => context.bloc<SelectionBloc>().addVerse(verse));
   }
 
   void _clearAllSelectedVerses() {
-    if (_selectedVerses.isEmpty) return;
-    _updateSelectedVersesInBlock(_selectedVerses.clear);
+    if (context.bloc<SelectionBloc>().state.selectedVerses.isEmpty) return;
+    _updateSelectedVersesInBlock(context.bloc<SelectionBloc>().clearVerses);
   }
 
   void _updateSelectedVersesInBlock(void Function() block) {
-    final wasTextSelected = _selectedVerses.isNotEmpty;
-    setState(block);
-    tec.dmPrint('selected verses: $_selectedVerses');
-    final isTextSelected = _selectedVerses.isNotEmpty;
-    if (wasTextSelected != isTextSelected) {
-      context.bloc<SelectionBloc>()?.add(SelectionState(isTextSelected: isTextSelected));
-    }
+    block();
+    tec.dmPrint('selected verses: ${context.bloc<SelectionBloc>().state.selectedVerses}');
   }
 }
 

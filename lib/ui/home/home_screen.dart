@@ -1,8 +1,8 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
@@ -37,6 +37,20 @@ class _HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // tec.dmPrint('_HomeScreen build()');
     return Scaffold(
+      floatingActionButton: BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (c, s) {
+        if (s.size == SheetSize.collapsed) {
+          return FloatingActionButton(
+            backgroundColor: Theme.of(context).cardColor,
+            child: Icon(
+              Icons.keyboard_arrow_up,
+              color: Theme.of(context).textColor.withOpacity(0.5),
+            ),
+            tooltip: 'Drawer',
+            onPressed: () => context.bloc<SheetManagerBloc>().changeSize(SheetSize.mini),
+          );
+        }
+        return Container();
+      }),
       body: _BottomSheet(
         child: Container(
           color: Theme.of(context).canvasColor, // primaryColor,
@@ -73,16 +87,19 @@ class _BottomSheetState extends State<_BottomSheet> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<SelectionBloc, SelectionState>(
-      bloc: context.bloc<SelectionBloc>(),
-      condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
-      listener: (context, state) {
-        if (state.isTextSelected) {
-          context.bloc<SheetManagerBloc>().changeType(SheetType.selection);
-        } else {
-          context.bloc<SheetManagerBloc>().changeType(SheetType.main);
-        }
-      },
-      child: SnapSheet(body: widget.child,)
-    );
+        bloc: context.bloc<SelectionBloc>(),
+        // condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
+        listener: (context, state) {
+          if (state.isTextSelected) {
+            context.bloc<SheetManagerBloc>()..changeType(SheetType.selection);
+          } else {
+            context.bloc<SheetManagerBloc>()
+              ..changeType(SheetType.main)
+              ..changeSize(SheetSize.mini);
+          }
+        },
+        child: SnapSheet(
+          body: widget.child,
+        ));
   }
 }

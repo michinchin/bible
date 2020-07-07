@@ -24,7 +24,7 @@ class WindowManagerSheet extends StatelessWidget {
     };
     Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onPressed) {
       final textColor = Theme.of(context).textColor;
-      const iconSize = 50.0;
+      const iconSize = 30.0;
       return FlatButton(
         padding: EdgeInsets.zero,
         child: Column(
@@ -34,7 +34,8 @@ class WindowManagerSheet extends StatelessWidget {
               color: Theme.of(context).textColor.withOpacity(0.5),
               size: iconSize,
             ),
-            Text(
+            const SizedBox(height: 5),
+            TecText(
               title,
               style: TextStyle(color: textColor),
             ),
@@ -51,7 +52,7 @@ class WindowManagerSheet extends StatelessWidget {
             _menuItem(context, iconMap[vm.titleForType(type)], 'Add ${vm.titleForType(type)}', () {
           context.bloc<SheetManagerBloc>()
             ..changeType(SheetType.main)
-            ..changeSize(SheetSize.mini);
+            ..changeSize(SheetSize.collapsed);
           final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
           final position = bloc?.indexOfView(viewUid) ?? -1;
           bloc?.add(ViewManagerEvent.add(
@@ -61,19 +62,25 @@ class WindowManagerSheet extends StatelessWidget {
     }
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TecText('Window Actions', style: Theme.of(context).textTheme.headline6),
-        Wrap(children: _generateAddMenuItems(context, state.viewUid).toList()),
-        ListTile(
-            leading: const Icon(Icons.close),
-            title: const Text('Close View'),
-            onTap: () {
-              context.bloc<SheetManagerBloc>()
-                ..changeType(SheetType.main)
-                ..changeSize(SheetSize.mini);
-              context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.viewUid));
-            }),
+        TecText(
+          'Window Actions',
+          style: Theme.of(context).textTheme.headline6,
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 10),
+        Wrap(
+            alignment: WrapAlignment.spaceAround,
+            children: _generateAddMenuItems(context, state.viewUid).toList()
+              ..add(
+                _menuItem(context, Icons.close, 'Close View', () {
+                  context.bloc<SheetManagerBloc>()
+                    ..changeType(SheetType.main)
+                    ..changeSize(SheetSize.collapsed);
+                  context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.viewUid));
+                }),
+              )),
       ],
     );
   }

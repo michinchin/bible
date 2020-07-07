@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import 'main_sheet.dart';
 import 'selection_sheet.dart';
@@ -37,7 +38,7 @@ class _SnapSheetState extends State<SnapSheet> {
     final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height) + 0.1;
 
     // debugPrint(ratio.toString());
-    return [ratio, ratio + ratio2, 1.0];
+    return [0, ratio, ratio + ratio2, 1.0];
   }
 
   @override
@@ -49,6 +50,9 @@ class _SnapSheetState extends State<SnapSheet> {
     return BlocConsumer<SheetManagerBloc, SheetManagerState>(
         listenWhen: (previous, current) => previous != current,
         listener: (context, state) {
+          if (state.size == SheetSize.collapsed) {
+            context.bloc<SelectionBloc>().clearVerses();
+          }
           _sheetController.snapToExtent(snappings[state.size.index]);
         },
         builder: (context, state) {
@@ -88,7 +92,7 @@ class _SnapSheetState extends State<SnapSheet> {
                   height: 5,
                   margin: const EdgeInsets.only(top: 10, bottom: 10),
                   decoration: ShapeDecoration(
-                      color: Theme.of(context).textTheme.bodyText1.color.withOpacity(0.2),
+                      color: Theme.of(context).textColor.withOpacity(0.2),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
                 );
               });
