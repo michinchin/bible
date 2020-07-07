@@ -55,32 +55,34 @@ dependencies:
       url: http://noah.tecarta.com:8100
     version: ^1.0.1
   tec_html:
-    # path: ../shared/tec_html
     hosted:
       name: tec_html
       url: http://noah.tecarta.com:8100
-    version: ^2.0.4
+    version: ^3.0.0
   tec_util:
     hosted:
       name: tec_util
       url: http://noah.tecarta.com:8100
-    version: ^1.2.14
+    version: ^1.2.15
   tec_user_account:
     hosted:
       name: tec_user_account
       url: http://noah.tecarta.com:8100
     version: ^1.4.10
   tec_volumes:
-    # path: ../shared/tec_volumes
     hosted:
       name: tec_volumes
       url: http://noah.tecarta.com:8100
-    version: ^1.0.2
+    version: ^1.0.3
   tec_widgets:
     hosted:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
-    version: ^1.0.7
+    version: ^1.0.8
+
+# dependency_overrides:
+#   tec_widgets:
+#     path: ../shared/tec_widgets
 
 dev_dependencies:
   flutter_test:
@@ -91,10 +93,6 @@ dev_dependencies:
   freezed: ^0.11.0
   json_serializable: ^3.3.0
   pedantic: ^1.9.0
-
-# dependency_overrides:
-#   tec_widgets:
-#     path: ../shared/tec_widgets
 
 flutter:
   uses-material-design: true

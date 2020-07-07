@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -346,76 +347,122 @@ class _BibleHtmlState extends State<_BibleHtml> {
                 _isSectionElement(name, attrs, level, isVisible));
           };
 
-    var currentVerseTag = '';
-    var skipping = false;
-    var skippedLevel = 0;
-
-    /// Local function that returns a tag for the given element.
-    String _tagHtmlElement(
-        String name, LinkedHashMap<dynamic, String> attrs, int level, bool isVisible) {
-      if (skipping && level <= skippedLevel) skipping = false;
-      if (!skipping) {
-        if (tec.isNotNullOrEmpty(attrs.id) &&
-            name == 'div' &&
-            (attrs.className == 'v' || attrs.className.startsWith('v '))) {
-          currentVerseTag = attrs.id;
-        } else if (attrs['v'] == '0' || _isSectionElement(name, attrs, level, isVisible)) {
-          skipping = true;
-          skippedLevel = level;
-        }
-      }
-      return skipping ? '' : currentVerseTag;
-    }
-
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
     final selectedTextStyle = TextStyle(
         backgroundColor:
             isDarkTheme ? Colors.blueGrey[800] : const Color(0xffe6e6e6)); // Colors.blue[100]);
 
-    /// Local function that returns the style for the given tag.
-    TextStyle _styleForTag(String tag) {
-      if (!_isSelectionTrialMode && _selectedVerses.contains(tag)) return selectedTextStyle;
-      final verse = int.tryParse(tag);
-      if (verse != null) {
-        final highlight = widget.highlights.highlightForVerse(verse);
-        if (highlight != null) {
-          final color = Color(highlight.color ?? 0xfff8f888);
-          switch (highlight.highlightType) {
-            case HighlightType.highlight:
-              return isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color);
-            case HighlightType.underline:
-              return TextStyle(
-                  decoration: TextDecoration.underline,
-                  decorationColor: color.withAlpha(192),
-                  decorationThickness: 2);
-            default:
-              break;
+    var currentVerse = 0;
+    var currentWord = 1;
+    var skipping = false;
+    var skippedLevel = 0;
+
+    ///
+    /// Local function for tagging HTML elements.
+    ///
+    Object _tagHtmlElement(
+        String name, LinkedHashMap<dynamic, String> attrs, String text, int level, bool isVisible) {
+      if (skipping && level <= skippedLevel) skipping = false;
+      if (!skipping) {
+        final id = attrs.id;
+        if (tec.isNotNullOrEmpty(id) &&
+            name == 'div' &&
+            (attrs.className == 'v' || attrs.className.startsWith('v '))) {
+          final verse = int.tryParse(id);
+          if (verse != null && verse > currentVerse) {
+            currentVerse = verse;
+            currentWord = 1;
+          } else {
+            tec.dmPrint('current verse: $currentVerse, new verse: $id');
+            assert(false);
+          }
+        } else if (id == 'copyright' ||
+            attrs['v'] == '0' ||
+            _isSectionElement(name, attrs, level, isVisible)) {
+          skipping = true;
+          skippedLevel = level;
+        } else if (text?.isNotEmpty ?? false) {
+          final wordCount = tec.countOfWordsInString(text);
+          //tec.dmPrint('$wordCount words for text: $text');
+          if (wordCount > 0) {
+            final word = currentWord;
+            currentWord += wordCount;
+            if (wordCount == 1) {
+              tec.dmPrint('verse: $currentVerse, word $word: [$text]');
+            } else {
+              tec.dmPrint('verse: $currentVerse, words $word-${word + wordCount - 1}: [$text]');
+            }
+            return VerseTag(currentVerse, word);
           }
         }
       }
-      return null;
+
+      return skipping ? null : VerseTag(currentVerse, currentWord);
+    }
+
+    ///
+    /// Local function that converts an HTML text node into a TextSpan.
+    ///
+    InlineSpan _spanForText(String text, TextStyle style, Object tag) {
+      if (tag is VerseTag) {
+        TextStyle textStyle;
+        if (!_isSelectionTrialMode && _selectedVerses.contains(tag.verse)) {
+          textStyle = style.merge(selectedTextStyle);
+        } else if (tag.verse != null) {
+          final highlight = widget.highlights.highlightForVerse(tag.verse);
+          if (highlight != null) {
+            final color = Color(highlight.color ?? 0xfff8f888);
+            switch (highlight.highlightType) {
+              case HighlightType.highlight:
+                textStyle = style.merge(
+                    isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color));
+                break;
+              case HighlightType.underline:
+                textStyle = style.merge(TextStyle(
+                    decoration: TextDecoration.underline,
+                    decorationColor: color.withAlpha(192),
+                    decorationThickness: 2));
+                break;
+              default:
+                break;
+            }
+          }
+        }
+        textStyle ??= style;
+        return TaggableTextSpan(
+            text: text,
+            style: textStyle,
+            tag: tag,
+            recognizer: TapGestureRecognizer()..onTap = () => _toggleSelectionForVerse(tag.verse));
+      } else {
+        return TextSpan(text: text, style: style);
+      }
+    }
+
+    ///
+    /// SelectionStyleBloc listener
+    ///
+    void _selectionStyleBlocListener(BuildContext context, SelectionStyle state) {
+      _isSelectionTrialMode = state.isTrialMode;
+      final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
+      if (_selectedVerses.isEmpty || bloc == null) return;
+      for (final verse in _selectedVerses) {
+        if (verse == null) continue;
+        final ref = Reference(volume: volume, book: book, chapter: chapter, verse: verse);
+        if (state.type == HighlightType.clear) {
+          bloc.add(HighlightsEvent.clear(ref));
+        } else {
+          bloc.add(HighlightsEvent.add(type: state.type, color: state.color, ref: ref));
+        }
+      }
+      if (!_isSelectionTrialMode) {
+        _clearAllSelectedVerses();
+      }
     }
 
     return BlocListener<SelectionStyleBloc, SelectionStyle>(
-      listener: (context, state) {
-        _isSelectionTrialMode = state.isTrialMode;
-        final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
-        if (_selectedVerses.isEmpty || bloc == null) return;
-        for (final verseStr in _selectedVerses) {
-          final verse = int.tryParse(verseStr);
-          if (verse == null) continue;
-          final ref = Reference(volume: volume, book: book, chapter: chapter, verse: verse);
-          if (state.type == HighlightType.clear) {
-            bloc.add(HighlightsEvent.clear(ref));
-          } else {
-            bloc.add(HighlightsEvent.add(type: state.type, color: state.color, ref: ref));
-          }
-        }
-        if (!_isSelectionTrialMode) {
-          _clearAllSelectedVerses();
-        }
-      },
+      listener: _selectionStyleBlocListener,
       child: Semantics(
         //textDirection: textDirection,
         label: 'Bible text',
@@ -429,7 +476,6 @@ class _BibleHtmlState extends State<_BibleHtml> {
                 TecHtml(
                   widget.html,
                   debugId: '$volume/$book/$chapter',
-                  selectable: !kIsWeb && _selectedVerses.isEmpty,
                   scrollController: _scrollController,
                   baseUrl: widget.baseUrl,
                   textScaleFactor: 1.0, // HTML is already scaled.
@@ -439,19 +485,18 @@ class _BibleHtmlState extends State<_BibleHtml> {
                   padding: EdgeInsets.symmetric(
                     horizontal: (widget.size.width * _marginPercent).roundToDouble(),
                   ),
-                  onLinkTap: null,
 
-                  // Selection related:
-                  onSelectionChanged: (isTextSelected) {
-                    tec.dmPrint('TecHtml.onSelectionChanged($isTextSelected)');
-                    if (isTextSelected) _clearAllSelectedVerses();
-                    //context.bloc<SelectionBloc>()?.add(SelectionEvent.updateIsTextSelected(isTextSelected));
-                  },
-                  onTagTap: _toggleSelectionForVerse,
+                  // Tagging HTML elements:
                   tagHtmlElement: _tagHtmlElement,
-                  styleForTag: _styleForTag,
 
-                  // Verses-to-show related (when viewing a subset of verses in the chapter):
+                  // Rendering HTML text to a TextSpan:
+                  spanForText: _spanForText,
+
+                  // Word range selection related:
+                  selectable: !kIsWeb && _selectedVerses.isEmpty,
+                  onSelectedTextChanged: _onSelectedTextChanged,
+
+                  // `versesToShow` related (when viewing a subset of verses in the chapter):
                   isInitialHtmlElementVisible:
                       widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
                   toggleVisibilityWithHtmlElement: _toggleVisibilityWithHtmlElement,
@@ -466,10 +511,35 @@ class _BibleHtmlState extends State<_BibleHtml> {
   }
 
   var _isSelectionTrialMode = false;
-  final _selectedVerses = <String>{};
 
-  void _toggleSelectionForVerse(String verse) {
-    assert(verse?.isNotEmpty ?? false);
+  //-------------------------------------------------------------------------
+  // Word range selection:
+
+  TaggedText _start;
+  TaggedText _end;
+
+  void _onSelectedTextChanged(List<TaggedText> tags) {
+    if ((tags?.length ?? 0) == 2) {
+      _start = tags.first;
+      _end = tags.last;
+      tec.dmPrint('START: $_start');
+      tec.dmPrint('END:   $_end');
+    } else {
+      _start = null;
+      _end = null;
+      tec.dmPrint('NO WORDS SELECTED');
+    }
+
+    context.bloc<SelectionBloc>()?.add(SelectionState(isTextSelected: _start != null));
+  }
+
+  //-------------------------------------------------------------------------
+  // Verse selection:
+
+  final _selectedVerses = <int>{};
+
+  void _toggleSelectionForVerse(int verse) {
+    assert(verse != null);
     _updateSelectedVersesInBlock(() {
       if (!_selectedVerses.remove(verse)) _selectedVerses.add(verse);
     });
@@ -503,3 +573,31 @@ const TextStyle _htmlDefaultTextStyle = TextStyle(
   fontWeight: FontWeight.normal,
   height: _lineSpacing,
 );
+
+///
+/// Used to tag an HTML text node with the verse it is in, and the word index
+/// of the first word in the text node.
+///
+@immutable
+class VerseTag {
+  final int verse;
+  final int word;
+
+  const VerseTag(this.verse, this.word) : assert(verse != null && word != null);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VerseTag &&
+          runtimeType == other.runtimeType &&
+          verse == other.verse &&
+          word == other.word;
+
+  @override
+  int get hashCode => verse.hashCode ^ word.hashCode;
+
+  @override
+  String toString() {
+    return ('{ "verse": $verse, "word": $word }');
+  }
+}

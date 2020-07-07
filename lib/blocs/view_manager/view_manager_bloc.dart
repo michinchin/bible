@@ -49,7 +49,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       if (json != null) state = ViewManagerState.fromJson(json);
     }
     if (state == null || state.views.isEmpty) {
-      state = _defaultState;
+      state = _defaultViewManagerState;
     }
     return state;
   }
@@ -78,15 +78,17 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     }
   }
 
-  final _defaultState = ViewManagerState([ViewState(uid: 1, type: 'BibleChapter')], 2);
-
   ViewManagerState _add(String type, int position, String data) {
     final nextUid = (state.nextUid ?? 1);
     final viewState = ViewState(uid: nextUid, type: type, data: data);
     final newViews = List.of(state.views); // shallow copy
     // tec.dmPrint('VM add type: $type, uid: $nextUid, position: $position, data: \'$data\'');
     newViews.insert(position ?? newViews.length, viewState);
-    return ViewManagerState(newViews, tec.nextIntWithJsSafeWraparound(nextUid, wrapTo: 1));
+    return ViewManagerState(
+      newViews,
+      state.maximizedViewUid == 0 ? 0 : nextUid,
+      tec.nextIntWithJsSafeWraparound(nextUid, wrapTo: 1),
+    );
   }
 
   ViewManagerState _remove(int uid) {
@@ -94,29 +96,33 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     if (position < 0) return state;
     final newViews = List.of(state.views) // shallow copy
       ..removeAt(position);
-    if (newViews.isEmpty) return _defaultState;
-    return ViewManagerState(newViews, state.nextUid);
+    if (newViews.isEmpty) return _defaultViewManagerState;
+    return ViewManagerState(
+      newViews,
+      state.maximizedViewUid == uid ? 0 : state.maximizedViewUid,
+      state.nextUid,
+    );
   }
 
   ViewManagerState _move(int from, int to) {
     if (from == to) return state;
     final newViews = List.of(state.views) // shallow copy
       ..move(from: from, to: to);
-    return ViewManagerState(newViews, state.nextUid);
+    return ViewManagerState(newViews, state.maximizedViewUid, state.nextUid);
   }
 
   ViewManagerState _setWidth(int position, double width) {
     assert(state.views.isValidIndex(position));
     final newViews = List.of(state.views); // shallow copy
     newViews[position] = newViews[position].copyWith(preferredWidth: width);
-    return ViewManagerState(newViews, state.nextUid);
+    return ViewManagerState(newViews, state.maximizedViewUid, state.nextUid);
   }
 
   ViewManagerState _setHeight(int position, double height) {
     assert(state.views.isValidIndex(position));
     final newViews = List.of(state.views); // shallow copy
     newViews[position] = newViews[position].copyWith(preferredHeight: height);
-    return ViewManagerState(newViews, state.nextUid);
+    return ViewManagerState(newViews, state.maximizedViewUid, state.nextUid);
   }
 
   ViewManagerState _setData(int uid, String data) {
@@ -124,7 +130,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     if (position < 0) return state;
     final newViews = List.of(state.views); // shallow copy
     newViews[position] = newViews[position].copyWith(data: data);
-    return ViewManagerState(newViews, state.nextUid);
+    return ViewManagerState(newViews, state.maximizedViewUid, state.nextUid);
   }
 }
 
@@ -163,11 +169,21 @@ abstract class ViewState with _$ViewState {
 ///
 @freezed
 abstract class ViewManagerState with _$ViewManagerState {
-  factory ViewManagerState(List<ViewState> views, int nextUid) = _Views;
+  factory ViewManagerState(List<ViewState> views, int maximizedViewUid, int nextUid) = _Views;
 
   /// fromJson
-  factory ViewManagerState.fromJson(Map<String, dynamic> json) => _$ViewManagerStateFromJson(json);
+  factory ViewManagerState.fromJson(Map<String, dynamic> json) {
+    ViewManagerState state;
+    try {
+      state = _$ViewManagerStateFromJson(json);
+    } catch (_) {}
+    return state ?? _defaultViewManagerState;
+  }
 }
+
+final _defaultViewManagerState = ViewManagerState([ViewState(uid: 1, type: 'BibleChapter')], 0, 2);
+
+extension ViewManagerExtOnState on ViewManagerState {}
 
 ///
 /// ViewManagerWidget
