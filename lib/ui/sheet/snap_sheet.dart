@@ -56,6 +56,7 @@ class _SnapSheetState extends State<SnapSheet> {
           return SlidingSheet(
               controller: _sheetController,
               elevation: 8,
+              closeOnBackdropTap: state.type == SheetType.windows,
               cornerRadius: 15,
               duration: const Duration(milliseconds: 250),
               addTopViewPaddingOnFullscreen: true,

@@ -37,7 +37,6 @@ class WindowManagerSheet extends StatelessWidget {
                   child: Icon(
                     icon,
                     color: Theme.of(context).textColor.withOpacity(0.5),
-                    size: iconSize,
                   ),
                 ),
                 const SizedBox(height: 5),
