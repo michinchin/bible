@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -62,26 +63,37 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
     final hls = <Highlight>[];
 
     for (final ui in uc) {
-      final ref = Reference(volume: volume, book: book, chapter: chapter, verse: ui.verse);
-      Highlight hl;
+      var word = Reference.minWord, endWord = Reference.maxWord;
 
-      if (ui.color == 5) {
-        hl = Highlight(
-          HighlightType.underline,
-          tec.colorFromColorId(ui.color).value,
-          ref,
-          ui.modifiedDT,
-        );
-      } else {
-        hl = Highlight(
-          HighlightType.highlight,
-          tec.colorFromColorId(ui.color).value,
-          ref,
-          ui.modifiedDT,
-        );
+      // is this a parital hl?
+      if (ui.wordBegin != word || ui.wordEnd != Reference.maxWord) {
+        word = ui.wordBegin;
+        endWord = ui.wordEnd;
+
+        // catch old hl bugs where end was set to 0
+        if (endWord <= Reference.minWord) {
+          endWord = Reference.maxWord;
+        }
       }
 
-      hls.add(hl);
+      final ref = Reference(
+          volume: volume,
+          book: book,
+          chapter: chapter,
+          verse: ui.verse,
+          word: word,
+          endWord: endWord,
+      );
+
+      final highlightType =
+          (ui.color == 5 || ui.color > 1000) ? HighlightType.underline : HighlightType.highlight;
+
+      hls.add(Highlight(
+        highlightType,
+        tec.intFromColorId(ui.color, darkMode: tec.Prefs.shared.getBool('isDarkTheme')),
+        ref,
+        ui.modifiedDT,
+      ));
     }
 
     if (hls.isNotEmpty) {
