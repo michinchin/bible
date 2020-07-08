@@ -103,7 +103,9 @@ class __$ChapterHighlightsCopyWithImpl<$Res>
   }
 }
 
-class _$_ChapterHighlights implements _ChapterHighlights {
+class _$_ChapterHighlights
+    with DiagnosticableTreeMixin
+    implements _ChapterHighlights {
   const _$_ChapterHighlights(
       this.volume, this.book, this.chapter, this.highlights)
       : assert(volume != null),
@@ -121,8 +123,19 @@ class _$_ChapterHighlights implements _ChapterHighlights {
   final List<Highlight> highlights;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'ChapterHighlights(volume: $volume, book: $book, chapter: $chapter, highlights: $highlights)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ChapterHighlights'))
+      ..add(DiagnosticsProperty('volume', volume))
+      ..add(DiagnosticsProperty('book', book))
+      ..add(DiagnosticsProperty('chapter', chapter))
+      ..add(DiagnosticsProperty('highlights', highlights));
   }
 
   @override
@@ -270,7 +283,7 @@ class __$HighlightCopyWithImpl<$Res> extends _$HighlightCopyWithImpl<$Res>
   }
 }
 
-class _$_Highlight implements _Highlight {
+class _$_Highlight with DiagnosticableTreeMixin implements _Highlight {
   const _$_Highlight(this.highlightType, this.color, this.ref, this.modified)
       : assert(highlightType != null),
         assert(color != null),
@@ -287,8 +300,19 @@ class _$_Highlight implements _Highlight {
   final DateTime modified;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'Highlight(highlightType: $highlightType, color: $color, ref: $ref, modified: $modified)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'Highlight'))
+      ..add(DiagnosticsProperty('highlightType', highlightType))
+      ..add(DiagnosticsProperty('color', color))
+      ..add(DiagnosticsProperty('ref', ref))
+      ..add(DiagnosticsProperty('modified', modified));
   }
 
   @override
@@ -339,6 +363,12 @@ abstract class _Highlight implements Highlight {
 class _$HighlightsEventTearOff {
   const _$HighlightsEventTearOff();
 
+  _UpdateFromDb updateFromDb({@required List<Highlight> hls}) {
+    return _UpdateFromDb(
+      hls: hls,
+    );
+  }
+
   _Add add(
       {@required HighlightType type,
       @required int color,
@@ -361,39 +391,38 @@ class _$HighlightsEventTearOff {
 const $HighlightsEvent = _$HighlightsEventTearOff();
 
 mixin _$HighlightsEvent {
-  Reference get ref;
-
   @optionalTypeArgs
   Result when<Result extends Object>({
+    @required Result updateFromDb(List<Highlight> hls),
     @required Result add(HighlightType type, int color, Reference ref),
     @required Result clear(Reference ref),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
+    Result updateFromDb(List<Highlight> hls),
     Result add(HighlightType type, int color, Reference ref),
     Result clear(Reference ref),
     @required Result orElse(),
   });
   @optionalTypeArgs
   Result map<Result extends Object>({
+    @required Result updateFromDb(_UpdateFromDb value),
     @required Result add(_Add value),
     @required Result clear(_Clear value),
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
+    Result updateFromDb(_UpdateFromDb value),
     Result add(_Add value),
     Result clear(_Clear value),
     @required Result orElse(),
   });
-
-  $HighlightsEventCopyWith<HighlightsEvent> get copyWith;
 }
 
 abstract class $HighlightsEventCopyWith<$Res> {
   factory $HighlightsEventCopyWith(
           HighlightsEvent value, $Res Function(HighlightsEvent) then) =
       _$HighlightsEventCopyWithImpl<$Res>;
-  $Res call({Reference ref});
 }
 
 class _$HighlightsEventCopyWithImpl<$Res>
@@ -403,21 +432,138 @@ class _$HighlightsEventCopyWithImpl<$Res>
   final HighlightsEvent _value;
   // ignore: unused_field
   final $Res Function(HighlightsEvent) _then;
+}
+
+abstract class _$UpdateFromDbCopyWith<$Res> {
+  factory _$UpdateFromDbCopyWith(
+          _UpdateFromDb value, $Res Function(_UpdateFromDb) then) =
+      __$UpdateFromDbCopyWithImpl<$Res>;
+  $Res call({List<Highlight> hls});
+}
+
+class __$UpdateFromDbCopyWithImpl<$Res>
+    extends _$HighlightsEventCopyWithImpl<$Res>
+    implements _$UpdateFromDbCopyWith<$Res> {
+  __$UpdateFromDbCopyWithImpl(
+      _UpdateFromDb _value, $Res Function(_UpdateFromDb) _then)
+      : super(_value, (v) => _then(v as _UpdateFromDb));
+
+  @override
+  _UpdateFromDb get _value => super._value as _UpdateFromDb;
 
   @override
   $Res call({
-    Object ref = freezed,
+    Object hls = freezed,
   }) {
-    return _then(_value.copyWith(
-      ref: ref == freezed ? _value.ref : ref as Reference,
+    return _then(_UpdateFromDb(
+      hls: hls == freezed ? _value.hls : hls as List<Highlight>,
     ));
   }
 }
 
-abstract class _$AddCopyWith<$Res> implements $HighlightsEventCopyWith<$Res> {
+class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
+  const _$_UpdateFromDb({@required this.hls}) : assert(hls != null);
+
+  @override
+  final List<Highlight> hls;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'HighlightsEvent.updateFromDb(hls: $hls)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'HighlightsEvent.updateFromDb'))
+      ..add(DiagnosticsProperty('hls', hls));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _UpdateFromDb &&
+            (identical(other.hls, hls) ||
+                const DeepCollectionEquality().equals(other.hls, hls)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^ const DeepCollectionEquality().hash(hls);
+
+  @override
+  _$UpdateFromDbCopyWith<_UpdateFromDb> get copyWith =>
+      __$UpdateFromDbCopyWithImpl<_UpdateFromDb>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result updateFromDb(List<Highlight> hls),
+    @required Result add(HighlightType type, int color, Reference ref),
+    @required Result clear(Reference ref),
+  }) {
+    assert(updateFromDb != null);
+    assert(add != null);
+    assert(clear != null);
+    return updateFromDb(hls);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result updateFromDb(List<Highlight> hls),
+    Result add(HighlightType type, int color, Reference ref),
+    Result clear(Reference ref),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (updateFromDb != null) {
+      return updateFromDb(hls);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result updateFromDb(_UpdateFromDb value),
+    @required Result add(_Add value),
+    @required Result clear(_Clear value),
+  }) {
+    assert(updateFromDb != null);
+    assert(add != null);
+    assert(clear != null);
+    return updateFromDb(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result updateFromDb(_UpdateFromDb value),
+    Result add(_Add value),
+    Result clear(_Clear value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (updateFromDb != null) {
+      return updateFromDb(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _UpdateFromDb implements HighlightsEvent {
+  const factory _UpdateFromDb({@required List<Highlight> hls}) =
+      _$_UpdateFromDb;
+
+  List<Highlight> get hls;
+  _$UpdateFromDbCopyWith<_UpdateFromDb> get copyWith;
+}
+
+abstract class _$AddCopyWith<$Res> {
   factory _$AddCopyWith(_Add value, $Res Function(_Add) then) =
       __$AddCopyWithImpl<$Res>;
-  @override
   $Res call({HighlightType type, int color, Reference ref});
 }
 
@@ -443,7 +589,7 @@ class __$AddCopyWithImpl<$Res> extends _$HighlightsEventCopyWithImpl<$Res>
   }
 }
 
-class _$_Add implements _Add {
+class _$_Add with DiagnosticableTreeMixin implements _Add {
   const _$_Add({@required this.type, @required this.color, @required this.ref})
       : assert(type != null),
         assert(color != null),
@@ -457,8 +603,18 @@ class _$_Add implements _Add {
   final Reference ref;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'HighlightsEvent.add(type: $type, color: $color, ref: $ref)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'HighlightsEvent.add'))
+      ..add(DiagnosticsProperty('type', type))
+      ..add(DiagnosticsProperty('color', color))
+      ..add(DiagnosticsProperty('ref', ref));
   }
 
   @override
@@ -487,9 +643,11 @@ class _$_Add implements _Add {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
+    @required Result updateFromDb(List<Highlight> hls),
     @required Result add(HighlightType type, int color, Reference ref),
     @required Result clear(Reference ref),
   }) {
+    assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
     return add(type, color, ref);
@@ -498,6 +656,7 @@ class _$_Add implements _Add {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
+    Result updateFromDb(List<Highlight> hls),
     Result add(HighlightType type, int color, Reference ref),
     Result clear(Reference ref),
     @required Result orElse(),
@@ -512,9 +671,11 @@ class _$_Add implements _Add {
   @override
   @optionalTypeArgs
   Result map<Result extends Object>({
+    @required Result updateFromDb(_UpdateFromDb value),
     @required Result add(_Add value),
     @required Result clear(_Clear value),
   }) {
+    assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
     return add(this);
@@ -523,6 +684,7 @@ class _$_Add implements _Add {
   @override
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
+    Result updateFromDb(_UpdateFromDb value),
     Result add(_Add value),
     Result clear(_Clear value),
     @required Result orElse(),
@@ -543,16 +705,13 @@ abstract class _Add implements HighlightsEvent {
 
   HighlightType get type;
   int get color;
-  @override
   Reference get ref;
-  @override
   _$AddCopyWith<_Add> get copyWith;
 }
 
-abstract class _$ClearCopyWith<$Res> implements $HighlightsEventCopyWith<$Res> {
+abstract class _$ClearCopyWith<$Res> {
   factory _$ClearCopyWith(_Clear value, $Res Function(_Clear) then) =
       __$ClearCopyWithImpl<$Res>;
-  @override
   $Res call({Reference ref});
 }
 
@@ -574,15 +733,23 @@ class __$ClearCopyWithImpl<$Res> extends _$HighlightsEventCopyWithImpl<$Res>
   }
 }
 
-class _$_Clear implements _Clear {
+class _$_Clear with DiagnosticableTreeMixin implements _Clear {
   const _$_Clear(this.ref) : assert(ref != null);
 
   @override
   final Reference ref;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'HighlightsEvent.clear(ref: $ref)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'HighlightsEvent.clear'))
+      ..add(DiagnosticsProperty('ref', ref));
   }
 
   @override
@@ -604,9 +771,11 @@ class _$_Clear implements _Clear {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
+    @required Result updateFromDb(List<Highlight> hls),
     @required Result add(HighlightType type, int color, Reference ref),
     @required Result clear(Reference ref),
   }) {
+    assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
     return clear(ref);
@@ -615,6 +784,7 @@ class _$_Clear implements _Clear {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
+    Result updateFromDb(List<Highlight> hls),
     Result add(HighlightType type, int color, Reference ref),
     Result clear(Reference ref),
     @required Result orElse(),
@@ -629,9 +799,11 @@ class _$_Clear implements _Clear {
   @override
   @optionalTypeArgs
   Result map<Result extends Object>({
+    @required Result updateFromDb(_UpdateFromDb value),
     @required Result add(_Add value),
     @required Result clear(_Clear value),
   }) {
+    assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
     return clear(this);
@@ -640,6 +812,7 @@ class _$_Clear implements _Clear {
   @override
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
+    Result updateFromDb(_UpdateFromDb value),
     Result add(_Add value),
     Result clear(_Clear value),
     @required Result orElse(),
@@ -655,8 +828,6 @@ class _$_Clear implements _Clear {
 abstract class _Clear implements HighlightsEvent {
   const factory _Clear(Reference ref) = _$_Clear;
 
-  @override
   Reference get ref;
-  @override
   _$ClearCopyWith<_Clear> get copyWith;
 }
