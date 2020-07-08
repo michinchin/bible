@@ -1,3 +1,4 @@
+import 'package:bible/ui/sheet/snap_sheet.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,39 +23,54 @@ class WindowManagerSheet extends StatelessWidget {
       // Icons.add,
       // Icons.add,
     };
+    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+    final isMaximized = bloc?.state?.maximizedViewUid != 0;
+
     Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onPressed) {
       final textColor = Theme.of(context).textColor;
-      const iconSize = 20.0;
-      return Expanded(
-        child: FlatButton(
-          padding: EdgeInsets.zero,
-          child: Container(
-            height: 50,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Icon(
-                    icon,
-                    color: Theme.of(context).textColor.withOpacity(0.5),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Expanded(
-                  child: TecText(
-                    title,
-                    style: TextStyle(color: textColor),
-                    autoCalcMaxLines: true,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          onPressed: onPressed,
-        ),
-      );
+      final mini = sheetSize == SheetSize.mini;
+      // final child = FlatButton(
+      //   padding: EdgeInsets.zero,
+      //   child: Container(
+      //     height: mini ? 50 : 100,
+      //     child: Column(
+      //       crossAxisAlignment: CrossAxisAlignment.center,
+      //       children: [
+      //         Expanded(
+      //           flex: 3,
+      //           child: Icon(
+      //             icon,
+      //             color: Theme.of(context).textColor.withOpacity(0.5),
+      //           ),
+      //         ),
+      //         const SizedBox(height: 5),
+      //         Expanded(
+      //           child: TecText(
+      //             title,
+      //             style: TextStyle(color: textColor),
+      //             autoCalcMaxLines: true,
+      //             overflow: TextOverflow.ellipsis,
+      //             textAlign: TextAlign.center,
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //   ),
+      //   onPressed: onPressed,
+      // );
+
+      final child = Container(
+          height: 90,
+          child: GreyCircleButton(
+            icon: icon,
+            onPressed: onPressed,
+            title: (mini && bloc.state.views.length == 1) || !mini ? title : null,
+          ));
+
+      if (mini) {
+        return Expanded(child: child);
+      }
+      return child;
     }
 
     Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
@@ -73,34 +89,37 @@ class WindowManagerSheet extends StatelessWidget {
       );
     }
 
-    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-    final isMaximized = bloc?.state?.maximizedViewUid != 0;
+    final children = _generateAddMenuItems(context, state.viewUid).toList()
+      ..addAll([
+        if (context.bloc<ViewManagerBloc>().state.views.length > 1) ...[
+          _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
+              isMaximized ? 'Restore' : 'Maximize', () {
+            context.bloc<SheetManagerBloc>().toDefaultView();
+            bloc?.add(isMaximized
+                ? const ViewManagerEvent.restore()
+                : ViewManagerEvent.maximize(state.viewUid));
+          }),
+          _menuItem(context, Icons.close, 'Close View', () {
+            context.bloc<SheetManagerBloc>()
+              ..changeType(SheetType.main)
+              ..changeSize(SheetSize.collapsed);
+            context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.viewUid));
+          }),
+        ]
+      ]);
     return Padding(
-      padding: const EdgeInsets.only(left: 15, right: 15),
-      child: Row(
-        // runSpacing: 10,
-        // spacing: 10,
-        // alignment: WrapAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: _generateAddMenuItems(context, state.viewUid).toList()
-          ..addAll([
-            if (context.bloc<ViewManagerBloc>().state.views.length > 1) ...[
-              _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
-                  isMaximized ? 'Restore' : 'Maximize', () {
-                context.bloc<SheetManagerBloc>().toDefaultView();
-                bloc?.add(isMaximized
-                    ? const ViewManagerEvent.restore()
-                    : ViewManagerEvent.maximize(state.viewUid));
-              }),
-              _menuItem(context, Icons.close, 'Close View', () {
-                context.bloc<SheetManagerBloc>()
-                  ..changeType(SheetType.main)
-                  ..changeSize(SheetSize.collapsed);
-                context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.viewUid));
-              }),
-            ]
-          ]),
-      ),
-    );
+        padding: const EdgeInsets.only(left: 15, right: 15),
+        child: sheetSize == SheetSize.mini
+            ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: children)
+            : Align(
+                alignment: Alignment.topCenter,
+                child: GridView.count(
+                  padding: const EdgeInsets.only(top: 10),
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: 0,
+                  crossAxisCount: 3,
+                  children: children,
+                ),
+              ));
   }
 }

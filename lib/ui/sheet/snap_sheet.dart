@@ -158,6 +158,7 @@ class GreyCircleButton extends StatelessWidget {
               child: TecText(
             title,
             autoSize: true,
+            textAlign: TextAlign.center,
           )),
         ] else
           circleIcon(),

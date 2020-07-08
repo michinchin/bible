@@ -158,8 +158,10 @@ int calculateViewsNotOnScreen(BuildContext context) {
 }
 
 void showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
+  final bloc = context.bloc<ViewManagerBloc>(); //ignore: close_sinks
+  final moreThanOneView = bloc.state.views.length > 1;
   context.bloc<SheetManagerBloc>().setUid(state.uid);
-  context.bloc<SheetManagerBloc>().changeSize(SheetSize.mini);
+  context.bloc<SheetManagerBloc>().changeSize(moreThanOneView ? SheetSize.medium : SheetSize.mini);
   context.bloc<SheetManagerBloc>().changeType(SheetType.windows);
 }
 
