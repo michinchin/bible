@@ -24,24 +24,37 @@ class WindowManagerSheet extends StatelessWidget {
     };
     Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onPressed) {
       final textColor = Theme.of(context).textColor;
-      const iconSize = 30.0;
-      return FlatButton(
-        padding: EdgeInsets.zero,
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: Theme.of(context).textColor.withOpacity(0.5),
-              size: iconSize,
+      const iconSize = 20.0;
+      return Expanded(
+        child: FlatButton(
+          padding: EdgeInsets.zero,
+          child: Container(
+            height: 50,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Icon(
+                    icon,
+                    color: Theme.of(context).textColor.withOpacity(0.5),
+                    size: iconSize,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Expanded(
+                  child: TecText(
+                    title,
+                    style: TextStyle(color: textColor),
+                    autoCalcMaxLines: true,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 5),
-            TecText(
-              title,
-              style: TextStyle(color: textColor),
-            ),
-          ],
+          ),
+          onPressed: onPressed,
         ),
-        onPressed: onPressed,
       );
     }
 
@@ -51,11 +64,10 @@ class WindowManagerSheet extends StatelessWidget {
       return vm.types.map<Widget>(
         (type) =>
             _menuItem(context, iconMap[vm.titleForType(type)], 'Add ${vm.titleForType(type)}', () {
-          context.bloc<SheetManagerBloc>()
-            ..changeType(SheetType.main)
-            ..changeSize(SheetSize.collapsed);
+          context.bloc<SheetManagerBloc>().toDefaultView();
           final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
           final position = bloc?.indexOfView(viewUid) ?? -1;
+          bloc?.add(const ViewManagerEvent.restore());
           bloc?.add(ViewManagerEvent.add(
               type: type, data: '', position: position == -1 ? null : position + 1));
         }),
@@ -64,38 +76,32 @@ class WindowManagerSheet extends StatelessWidget {
 
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     final isMaximized = bloc?.state?.maximizedViewUid != 0;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TecText(
-          'Window Actions',
-          style: Theme.of(context).textTheme.headline6,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 10),
-        Wrap(
-            runSpacing: 10,
-            spacing: 10,
-            alignment: WrapAlignment.spaceAround,
-            children: _generateAddMenuItems(context, state.viewUid).toList()
-              ..addAll([
-                _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
-                    isMaximized ? 'Restore' : 'Maximize', () {
-                  context.bloc<SheetManagerBloc>()
-                    ..changeType(SheetType.main)
-                    ..changeSize(SheetSize.collapsed);
-                  bloc?.add(isMaximized
-                      ? const ViewManagerEvent.restore()
-                      : ViewManagerEvent.maximize(state.viewUid));
-                }),
-                _menuItem(context, Icons.close, 'Close View', () {
-                  context.bloc<SheetManagerBloc>()
-                    ..changeType(SheetType.main)
-                    ..changeSize(SheetSize.collapsed);
-                  context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.viewUid));
-                }),
-              ])),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(left: 15, right: 15),
+      child: Row(
+        // runSpacing: 10,
+        // spacing: 10,
+        // alignment: WrapAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _generateAddMenuItems(context, state.viewUid).toList()
+          ..addAll([
+            if (context.bloc<ViewManagerBloc>().state.views.length > 1) ...[
+              _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
+                  isMaximized ? 'Restore' : 'Maximize', () {
+                context.bloc<SheetManagerBloc>().toDefaultView();
+                bloc?.add(isMaximized
+                    ? const ViewManagerEvent.restore()
+                    : ViewManagerEvent.maximize(state.viewUid));
+              }),
+              _menuItem(context, Icons.close, 'Close View', () {
+                context.bloc<SheetManagerBloc>()
+                  ..changeType(SheetType.main)
+                  ..changeSize(SheetSize.collapsed);
+                context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.viewUid));
+              }),
+            ]
+          ]),
+      ),
     );
   }
 }

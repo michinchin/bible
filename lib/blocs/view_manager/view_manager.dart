@@ -138,8 +138,8 @@ const BoxConstraints _defaultConstraints = BoxConstraints(maxWidth: 320, maxHeig
 List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return [
     IconButton(
-      icon: Icon(_moreIcon(context)),
-      tooltip: 'More',
+      icon: const Icon(Icons.photo_size_select_large),
+      tooltip: 'Windows',
       onPressed: () => showMoreMenu(context, bodyKey, state, size),
     ),
     IconButton(
@@ -150,20 +150,17 @@ List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState
   ];
 }
 
-void showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
-  context.bloc<SheetManagerBloc>().setUid(state.uid);
-  context.bloc<SheetManagerBloc>().changeSize(SheetSize.medium);
-  context.bloc<SheetManagerBloc>().changeType(SheetType.windows);
+int calculateViewsNotOnScreen(BuildContext context) {
+  final bloc = context.bloc<ViewManagerBloc>(); //ignore: close_sinks
+  final totalViews = bloc.state.views.length;
+  //TODO : actually calculate views not on screen
+  return totalViews;
 }
 
-IconData _moreIcon(BuildContext context) {
-  switch (Theme.of(context).platform) {
-    case TargetPlatform.iOS:
-    case TargetPlatform.macOS:
-      return Icons.more_horiz;
-    default:
-      return Icons.more_vert;
-  }
+void showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
+  context.bloc<SheetManagerBloc>().setUid(state.uid);
+  context.bloc<SheetManagerBloc>().changeSize(SheetSize.mini);
+  context.bloc<SheetManagerBloc>().changeType(SheetType.windows);
 }
 
 // List<Widget> _testActionsForAdjustingSize(

@@ -27,6 +27,41 @@ extension ExtOnThemeData on ThemeData {
       TextTheme(headline6: TextStyle(color: color));
 }
 
+class IconWithNumberBadge extends StatelessWidget {
+  final IconData icon;
+  final int value;
+  const IconWithNumberBadge({this.icon, this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(children: <Widget>[
+      Icon(icon),
+      Positioned(
+        right: 0,
+        child: Container(
+          padding: const EdgeInsets.all(1),
+          decoration: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          constraints: const BoxConstraints(
+            minWidth: 12,
+            minHeight: 12,
+          ),
+          child: Text(
+            '$value',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 8,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      )
+    ]);
+  }
+}
+
 ///
 /// AppBarTheme extensions.
 ///

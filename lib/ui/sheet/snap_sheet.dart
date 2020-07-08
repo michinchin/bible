@@ -32,8 +32,8 @@ class _SnapSheetState extends State<SnapSheet> {
 
   List<double> _calculateHeightSnappings() {
     // figure out dimensions depending on view size
-    const topBarHeight = 35.0;
-    const secondBarHeight = 80.0;
+    const topBarHeight = 20.0;
+    const secondBarHeight = 100.0;
     final ratio = (topBarHeight / MediaQuery.of(context).size.height) + 0.1;
     final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height) + 0.1;
 
@@ -152,13 +152,12 @@ class GreyCircleButton extends StatelessWidget {
     return Column(
       children: [
         if (title != null) ...[
-          Expanded(flex: 3, child: circleIcon(30)),
+          Expanded(child: circleIcon(20)),
           Expanded(
-              flex: 2,
               child: TecText(
-                title,
-                autoSize: true,
-              )),
+            title,
+            autoSize: true,
+          )),
         ] else
           circleIcon(),
       ],

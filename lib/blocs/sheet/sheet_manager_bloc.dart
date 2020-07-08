@@ -48,4 +48,8 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
   void changeType(SheetType type) => add(SheetEvent.changeType(type));
   void changeSize(SheetSize size) => add(SheetEvent.changeSize(size));
   void setUid(int uid) => add(SheetEvent.changeView(uid));
+  void toDefaultView() {
+    changeType(SheetType.main);
+    changeSize(SheetSize.mini);
+  }
 }

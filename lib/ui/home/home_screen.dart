@@ -40,6 +40,7 @@ class _HomeScreen extends StatelessWidget {
       floatingActionButton: BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (c, s) {
         if (s.size == SheetSize.collapsed) {
           return FloatingActionButton(
+            mini: true,
             backgroundColor: Theme.of(context).cardColor,
             child: Icon(
               Icons.keyboard_arrow_up,
