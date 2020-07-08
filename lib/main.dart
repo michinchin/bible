@@ -36,7 +36,12 @@ Future<void> main() async {
     ],
   );
 
-  await AppSettings.shared.load(appName: 'Bible', itemsToSync: [tua.UserItemType.license]);
+  await AppSettings.shared.load(appName: 'Bible', itemsToSync: [
+    tua.UserItemType.license,
+    tua.UserItemType.highlight,
+    tua.UserItemType.marginNote,
+    tua.UserItemType.note
+  ]);
 
   _registerViewTypes();
 
