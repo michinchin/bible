@@ -50,9 +50,6 @@ class _SnapSheetState extends State<SnapSheet> {
     return BlocConsumer<SheetManagerBloc, SheetManagerState>(
         listenWhen: (previous, current) => previous != current,
         listener: (context, state) {
-          if (state.size == SheetSize.collapsed) {
-            context.bloc<SelectionBloc>().clearVerses();
-          }
           _sheetController.snapToExtent(snappings[state.size.index]);
         },
         builder: (context, state) {

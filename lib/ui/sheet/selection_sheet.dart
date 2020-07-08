@@ -1,6 +1,5 @@
 import 'dart:async';
 
-
 import 'package:flutter/material.dart';
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -39,8 +38,13 @@ class _SelectionSheetState extends State<SelectionSheet> {
     'Twitter': FeatherIcons.twitter
   };
 
-  final squareButtons = <String, IconData>{
-    'Copy': FeatherIcons.copy,
+  final medButtons = <String, IconData>{
+    'Compare': Icons.compare_arrows,
+    'Define': FeatherIcons.bookOpen,
+  };
+
+  final keyButtons = <String, IconData>{
+    'Audio': FeatherIcons.play,
     'Note': FeatherIcons.edit,
     'Share': FeatherIcons.share,
     // 'Learn': Icons.lightbulb_outline,
@@ -69,7 +73,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   List<Color> _addColors() {
     final colors = <Color>[];
-    for (var i = 1; i < 5; i++) {
+    for (var i = 1; i < 11; i++) {
       colors.add(
           tec.colorFromColorId(i, darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
     }
@@ -96,69 +100,137 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    Widget _miniView() => Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-          GreyCircleButton(
-            icon: Icons.format_color_reset,
-            onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
-                  type: HighlightType.clear,
-                )),
+    final showColorsButton = GreyCircleButton(
+      icon: _showAllColors ? Icons.close : Icons.color_lens,
+      onPressed: onShowAllColors,
+    );
+    final underlineButton = GreyCircleButton(
+      icon: _underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
+      onPressed: onSwitchToUnderline,
+    );
+    final noColorButton = GreyCircleButton(
+      icon: Icons.format_color_reset,
+      onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
+            type: HighlightType.clear,
+          )),
+    );
+    final colors = [
+      if (_showAllColors) ...[
+        Row(children: [
+          Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
+          noColorButton,
+          const SizedBox(width: 5),
+          underlineButton,
+          const SizedBox(width: 5),
+          showColorsButton
+        ])
+      ] else ...[
+        noColorButton,
+        underlineButton,
+        for (final color in mainColors) ...[
+          _ColorPickerButton(
+            isForUnderline: _underlineMode,
+            color: color,
           ),
-          GreyCircleButton(
-            icon: _underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
-            onPressed: onSwitchToUnderline,
-          ),
-          for (final color in mainColors) ...[
-            _ColorPickerButton(
-              isForUnderline: _underlineMode,
-              color: color,
+        ],
+        showColorsButton,
+      ],
+    ];
+    final mediumViewChildren = <Widget>[
+      ...colors,
+      const SizedBox(height: 10),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          for (final each in medButtons.keys) ...[
+            Expanded(
+              child: SheetButton(text: each, icon: medButtons[each]),
             ),
-          ],
-          GreyCircleButton(
-            icon: Icons.color_lens,
-            onPressed: onShowAllColors,
-          ),
-        ]);
-    //  Row(children: [
-    //     Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
-    //     GreyCircleButton(
-    //       icon: Icons.format_color_reset,
-    //       onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
-    //             type: HighlightType.clear,
-    //           )),
-    //     ),
-    //     const SizedBox(width: 5),
-    //     GreyCircleButton(
-    //       icon: _underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
-    //       onPressed: onSwitchToUnderline,
-    //     ),
-    //     const SizedBox(width: 5),
-    //     GreyCircleButton(
-    //       icon: Icons.color_lens,
-    //       onPressed: onShowAllColors,
-    //     ),
-    //   ]);
+            if (buttons.keys.last != each) const SizedBox(width: 10)
+          ]
+        ],
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          for (final each in keyButtons.keys) ...[
+            Expanded(
+              child: SheetButton(text: each, icon: keyButtons[each]),
+            ),
+            if (buttons.keys.last != each) const SizedBox(width: 10)
+          ]
+        ],
+      ),
+    ];
+
+    final scrollingChildren = [
+      noColorButton,
+      underlineButton,
+      for (final color in mainColors.take(4)) ...[
+        _ColorPickerButton(
+          isForUnderline: _underlineMode,
+          color: color,
+        ),
+      ],
+      showColorsButton,
+      for (final button in keyButtons.keys) ...[
+        GreyCircleButton(
+          icon: keyButtons[button],
+          onPressed: () {},
+        ),
+      ],
+      const SizedBox(width: 15)
+    ];
+
+    Widget _miniView() => !_showAllColors
+        ? ShaderMask(
+            shaderCallback: (bounds) {
+              return LinearGradient(
+                begin: Alignment.centerRight,
+                end: Alignment(0.8, Alignment.centerRight.y),
+                colors: const [Colors.transparent, Colors.white],
+              ).createShader(bounds);
+            },
+            child: ListView.separated(
+                itemCount: scrollingChildren.length,
+                scrollDirection: Axis.horizontal,
+                separatorBuilder: (c, i) => const SizedBox(width: 5),
+                itemBuilder: (c, i) => scrollingChildren[i]))
+        : Row(children: [
+            Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
+            noColorButton,
+            const SizedBox(width: 5),
+            underlineButton,
+            const SizedBox(width: 5),
+            showColorsButton
+          ]);
+
+    Widget _mediumView() => Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 5,
+          runSpacing: 10,
+          children: mediumViewChildren,
+        );
 
     return Padding(
       padding: const EdgeInsets.only(left: 15, right: 15),
       child: Column(children: [
-        _miniView(),
-        if (widget.sheetSize != SheetSize.mini) ...[
+        if (widget.sheetSize == SheetSize.mini)
+          Container(height: 50, child: _miniView())
+        else if (widget.sheetSize == SheetSize.medium)
+          _mediumView()
+        else if (widget.sheetSize == SheetSize.full) ...[
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 5,
+            runSpacing: 10,
+            children: colors,
+          ),
           const Divider(
             color: Colors.transparent,
             height: 10,
           ),
           // if (!widget.fullyExpanded)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              for (final each in squareButtons.keys) ...[
-                Expanded(
-                  child: SheetButton(text: each, icon: squareButtons[each]),
-                ),
-                if (buttons.keys.last != each) const SizedBox(width: 10)
-              ]
-            ],
-          ),
           const Divider(color: Colors.transparent),
           Expanded(
             child: GridView.count(

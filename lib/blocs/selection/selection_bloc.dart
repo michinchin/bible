@@ -10,29 +10,18 @@ part 'selection_bloc.freezed.dart';
 
 @freezed
 abstract class SelectionState with _$SelectionState {
-  const factory SelectionState(
-      {@Default(false) bool isTextSelected,
-      @Default(<int>{}) Set<int> selectedVerses}) = _SelectionState;
+  const factory SelectionState({bool isTextSelected}) = _SelectionState;
 }
 
 class SelectionBloc extends Bloc<SelectionState, SelectionState> {
   @override
-  SelectionState get initialState =>
-      const SelectionState(isTextSelected: false, selectedVerses: <int>{});
+  SelectionState get initialState => const SelectionState(isTextSelected: false);
 
   @override
   Stream<SelectionState> mapEventToState(SelectionState event) async* {
     tec.dmPrint('$event');
     yield event;
   }
-
-  void addVerse(int verse) {
-    final verses = Set<int>.from(state.selectedVerses);
-    if (!verses.remove(verse)) verses.add(verse);
-    add(state.copyWith(isTextSelected: verses.isNotEmpty, selectedVerses: verses));
-  }
-
-  void clearVerses() => add(state.copyWith(isTextSelected: false, selectedVerses: {}));
 }
 
 @freezed
