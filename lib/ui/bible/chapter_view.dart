@@ -227,7 +227,8 @@ class _ChapterViewState extends State<_ChapterView> {
       vendorFolder: (widget.baseUrl?.startsWith('http') ?? false)
           ? null
           : _useZondervanCss(widget.volumeId) ? 'zondervan' : 'tecarta',
-      customStyles: ' .${_useZondervanCss(widget.volumeId) ? 'C' : 'cno'} { display: none; } ',
+      customStyles: ' .${_useZondervanCss(widget.volumeId) ? 'C' : 'cno'} { display: none; } '
+          '.FOOTNO { line-height: inherit; }',
     );
 
     return Container(
@@ -353,52 +354,71 @@ class _BibleHtmlState extends State<_BibleHtml> {
         backgroundColor:
             isDarkTheme ? Colors.blueGrey[800] : const Color(0xffe6e6e6)); // Colors.blue[100]);
 
-    var currentVerse = 0;
-    var currentWord = 1;
-    var skipping = false;
-    var skippedLevel = 0;
+    var currentVerse = 1;
+    var currentWord = 0;
+    var isInVerse = false;
+    var isInNonVerseElement = false;
+    var nonVerseElementLevel = 0;
+    var wasInVerse = false;
 
     ///
     /// Local function for tagging HTML elements.
     ///
     Object _tagHtmlElement(
-        String name, LinkedHashMap<dynamic, String> attrs, String text, int level, bool isVisible) {
-      if (skipping && level <= skippedLevel) skipping = false;
-      if (!skipping) {
+      String name,
+      LinkedHashMap<dynamic, String> attrs,
+      String text,
+      int level,
+      bool isVisible,
+    ) {
+      if (isInNonVerseElement && level <= nonVerseElementLevel) {
+        isInNonVerseElement = false;
+        isInVerse = wasInVerse;
+      }
+      if (!isInNonVerseElement) {
         final id = attrs.id;
         if (tec.isNotNullOrEmpty(id) &&
             name == 'div' &&
             (attrs.className == 'v' || attrs.className.startsWith('v '))) {
           final verse = int.tryParse(id);
-          if (verse != null && verse > currentVerse) {
-            currentVerse = verse;
-            currentWord = 1;
-          } else {
-            tec.dmPrint('current verse: $currentVerse, new verse: $id');
-            assert(false);
+          if (verse != null) {
+            isInVerse = true;
+            if (verse > currentVerse) {
+              currentVerse = verse;
+              currentWord = 0;
+            } else if (verse == 1) {
+              currentWord++; // The old app has a chapter number, which is counted as a word.
+            } else {
+              tec.dmPrint('current verse: $currentVerse, new verse: $id');
+              assert(false);
+            }
           }
         } else if (id == 'copyright' ||
             attrs['v'] == '0' ||
             _isSectionElement(name, attrs, level, isVisible)) {
-          skipping = true;
-          skippedLevel = level;
-        } else if (text?.isNotEmpty ?? false) {
-          final wordCount = tec.countOfWordsInString(text);
-          //tec.dmPrint('$wordCount words for text: $text');
-          if (wordCount > 0) {
-            final word = currentWord;
-            currentWord += wordCount;
-            if (wordCount == 1) {
-              tec.dmPrint('verse: $currentVerse, word $word: [$text]');
-            } else {
-              tec.dmPrint('verse: $currentVerse, words $word-${word + wordCount - 1}: [$text]');
-            }
-            return VerseTag(currentVerse, word);
-          }
+          wasInVerse = isInVerse;
+          isInVerse = false;
+          isInNonVerseElement = true;
+          nonVerseElementLevel = level;
         }
       }
 
-      return skipping ? null : VerseTag(currentVerse, currentWord);
+      if (text?.isNotEmpty ?? false) {
+        final wordCount = tec.countOfWordsInString(text);
+        //tec.dmPrint('$wordCount words for text: $text');
+        if (wordCount > 0) {
+          final word = currentWord;
+          currentWord += wordCount;
+          if (wordCount == 1) {
+            tec.dmPrint('verse: $currentVerse, word $word: [$text]');
+          } else {
+            tec.dmPrint('verse: $currentVerse, words $word-${word + wordCount - 1}: [$text]');
+          }
+          return VerseTag(currentVerse, word, isInVerse);
+        }
+      }
+
+      return VerseTag(currentVerse, currentWord, isInVerse);
     }
 
     ///
@@ -494,6 +514,10 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
                   // Word range selection related:
                   selectable: !kIsWeb && _selectedVerses.isEmpty,
+                  onSelectionChanged: (isTextSelected) {
+                    tec.dmPrint('TecHtml.onSelectionChanged($isTextSelected)');
+                    if (isTextSelected) _clearAllSelectedVerses();
+                  },
                   onSelectedTextChanged: _onSelectedTextChanged,
 
                   // `versesToShow` related (when viewing a subset of verses in the chapter):
@@ -515,22 +539,21 @@ class _BibleHtmlState extends State<_BibleHtml> {
   //-------------------------------------------------------------------------
   // Word range selection:
 
-  TaggedText _start;
-  TaggedText _end;
+  TaggedText _selectionStart;
+  TaggedText _selectionEnd;
 
   void _onSelectedTextChanged(List<TaggedText> tags) {
     if ((tags?.length ?? 0) == 2) {
-      _start = tags.first;
-      _end = tags.last;
-      tec.dmPrint('START: $_start');
-      tec.dmPrint('END:   $_end');
+      _selectionStart = tags.first;
+      _selectionEnd = tags.last;
+      tec.dmPrint('START: $_selectionStart');
+      tec.dmPrint('END:   $_selectionEnd');
     } else {
-      _start = null;
-      _end = null;
+      _selectionStart = _selectionEnd = null;
       tec.dmPrint('NO WORDS SELECTED');
     }
 
-    context.bloc<SelectionBloc>()?.add(SelectionState(isTextSelected: _start != null));
+    context.bloc<SelectionBloc>()?.add(SelectionState(isTextSelected: _selectionStart != null));
   }
 
   //-------------------------------------------------------------------------
@@ -582,8 +605,11 @@ const TextStyle _htmlDefaultTextStyle = TextStyle(
 class VerseTag {
   final int verse;
   final int word;
+  final bool isInVerse;
 
-  const VerseTag(this.verse, this.word) : assert(verse != null && word != null);
+  // ignore: avoid_positional_boolean_parameters
+  const VerseTag(this.verse, this.word, this.isInVerse)
+      : assert(verse != null && word != null && isInVerse != null);
 
   @override
   bool operator ==(Object other) =>
@@ -591,13 +617,14 @@ class VerseTag {
       other is VerseTag &&
           runtimeType == other.runtimeType &&
           verse == other.verse &&
-          word == other.word;
+          word == other.word &&
+          isInVerse == other.isInVerse;
 
   @override
-  int get hashCode => verse.hashCode ^ word.hashCode;
+  int get hashCode => verse.hashCode ^ word.hashCode ^ isInVerse.hashCode;
 
   @override
   String toString() {
-    return ('{ "verse": $verse, "word": $word }');
+    return ('{ "v": $verse, "w": $word, "inV": $isInVerse }');
   }
 }
