@@ -58,12 +58,45 @@ extension ChapterHighlightsExt on ChapterHighlights {
 
 @freezed
 abstract class Highlight with _$Highlight {
-  const factory Highlight(
-    HighlightType highlightType,
-    int color,
-    Reference ref,
-    DateTime modified,
-  ) = _Highlight;
+  const factory Highlight(HighlightType highlightType,
+      int color,
+      Reference ref,
+      DateTime modified,) = _Highlight;
+
+  factory Highlight.from(UserItem ui) {
+    var word = Reference.minWord,
+        endWord = Reference.maxWord;
+
+    // is this a parital hl?
+    if (ui.wordBegin != word || ui.wordEnd != Reference.maxWord) {
+      word = ui.wordBegin;
+      endWord = ui.wordEnd;
+
+      // catch old hl bugs where end was set to 0
+      if (endWord <= Reference.minWord) {
+        endWord = Reference.maxWord;
+      }
+    }
+
+    final ref = Reference(
+      volume: ui.volumeId,
+      book: ui.book,
+      chapter: ui.chapter,
+      verse: ui.verse,
+      word: word,
+      endWord: endWord,
+    );
+
+    final highlightType =
+    (ui.color == 5 || ui.color > 1000) ? HighlightType.underline : HighlightType.highlight;
+
+    return Highlight(
+      highlightType,
+      tec.intFromColorId(ui.color, darkMode: tec.Prefs.shared.getBool('isDarkTheme')),
+      ref,
+      ui.modifiedDT,
+    );
+  }
 }
 
 @freezed
@@ -88,43 +121,13 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
     final uc = await AppSettings.shared.userAccount.userDb
         .getItemsWithVBC(volume, book, chapter, ofTypes: [UserItemType.highlight]);
 
-    final hls = <Highlight>[];
+    if (uc.isNotEmpty) {
+      final hls = <Highlight>[];
 
-    for (final ui in uc) {
-      var word = Reference.minWord, endWord = Reference.maxWord;
-
-      // is this a parital hl?
-      if (ui.wordBegin != word || ui.wordEnd != Reference.maxWord) {
-        word = ui.wordBegin;
-        endWord = ui.wordEnd;
-
-        // catch old hl bugs where end was set to 0
-        if (endWord <= Reference.minWord) {
-          endWord = Reference.maxWord;
-        }
+      for (final ui in uc) {
+        hls.add(Highlight.from(ui));
       }
 
-      final ref = Reference(
-          volume: volume,
-          book: book,
-          chapter: chapter,
-          verse: ui.verse,
-          word: word,
-          endWord: endWord,
-      );
-
-      final highlightType =
-          (ui.color == 5 || ui.color > 1000) ? HighlightType.underline : HighlightType.highlight;
-
-      hls.add(Highlight(
-        highlightType,
-        tec.intFromColorId(ui.color, darkMode: tec.Prefs.shared.getBool('isDarkTheme')),
-        ref,
-        ui.modifiedDT,
-      ));
-    }
-
-    if (hls.isNotEmpty) {
       add(HighlightsEvent.updateFromDb(hls: hls));
     }
   }
