@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:bible/blocs/sheet/sheet_manager_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -443,8 +444,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
     ///
     /// SelectionStyleBloc listener
     ///
-    void _selectionStyleBlocListener(
-        BuildContext context, SelectionStyle state) {
+    void _selectionStyleBlocListener(BuildContext context, SelectionStyle state) {
       _isSelectionTrialMode = state.isTrialMode;
       final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
       if (_selectedVerses.isEmpty || bloc == null) return;
@@ -471,6 +471,17 @@ class _BibleHtmlState extends State<_BibleHtml> {
           child: TecAutoScroll(
             scrollController: _scrollController,
             allowAutoscroll: () => !context.bloc<SelectionBloc>().state.isTextSelected,
+            autoscrollActive: (active) {
+              if (active) {
+                context.bloc<SheetManagerBloc>()
+                  ..changeSize(SheetSize.collapsed)
+                  ..changeType(SheetType.hidden);
+              } else {
+                context.bloc<SheetManagerBloc>()
+                  ..changeSize(SheetSize.mini)
+                  ..changeType(SheetType.main);
+              }
+            },
             child: ListView(
               controller: _scrollController,
               children: <Widget>[

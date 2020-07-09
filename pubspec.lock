@@ -963,7 +963,7 @@ packages:
       name: tec_widgets
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.8"
+    version: "1.0.9"
   term_glyph:
     dependency: transitive
     description:

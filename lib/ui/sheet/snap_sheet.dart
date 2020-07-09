@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import 'main_sheet.dart';
 import 'selection_sheet.dart';
@@ -30,9 +29,9 @@ class _SnapSheetState extends State<SnapSheet> {
     super.initState();
   }
 
-  List<double> _calculateHeightSnappings() {
+  List<double> _calculateHeightSnappings(BuildContext context) {
     // figure out dimensions depending on view size
-    const topBarHeight = 20.0;
+    const topBarHeight = 10.0;
     const secondBarHeight = 100.0;
     final ratio = (topBarHeight / MediaQuery.of(context).size.height) + 0.1;
     final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height) + 0.1;
@@ -43,7 +42,7 @@ class _SnapSheetState extends State<SnapSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final snappings = _calculateHeightSnappings();
+    final snappings = _calculateHeightSnappings(context);
 
     SheetSize _getSheetSize(double d) => SheetSize.values[snappings.indexWhere((s) => s == d)];
 
@@ -53,7 +52,17 @@ class _SnapSheetState extends State<SnapSheet> {
           _sheetController.snapToExtent(snappings[state.size.index]);
         },
         builder: (context, state) {
-          return SlidingSheet(
+          final widthOfScreen = MediaQuery.of(context).size.width;
+          final mini = state.size == SheetSize.mini;
+          EdgeInsets margin;
+          if (widthOfScreen > 500) {
+            margin = EdgeInsets.only(left: widthOfScreen / 5, right: widthOfScreen / 5);
+          }
+          
+          return SafeArea(
+            bottom: false,
+            child: SlidingSheet(
+              margin: margin,
               controller: _sheetController,
               elevation: 8,
               closeOnBackdropTap: state.type == SheetType.windows,
@@ -93,7 +102,9 @@ class _SnapSheetState extends State<SnapSheet> {
                       color: Theme.of(context).textColor.withOpacity(0.2),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
                 );
-              });
+              },
+            ),
+          );
         });
   }
 }

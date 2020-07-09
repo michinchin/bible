@@ -1,12 +1,11 @@
-import 'package:bible/ui/sheet/snap_sheet.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import 'snap_sheet.dart';
 
 class WindowManagerSheet extends StatelessWidget {
   final SheetSize sheetSize;
@@ -25,10 +24,10 @@ class WindowManagerSheet extends StatelessWidget {
     };
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     final isMaximized = bloc?.state?.maximizedViewUid != 0;
+    final landscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final mini = sheetSize == SheetSize.mini;
 
     Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onPressed) {
-      final textColor = Theme.of(context).textColor;
-      final mini = sheetSize == SheetSize.mini;
       // final child = FlatButton(
       //   padding: EdgeInsets.zero,
       //   child: Container(
@@ -59,18 +58,11 @@ class WindowManagerSheet extends StatelessWidget {
       //   onPressed: onPressed,
       // );
 
-      final child = Container(
-          height: 90,
-          child: GreyCircleButton(
-            icon: icon,
-            onPressed: onPressed,
-            title: (mini && bloc.state.views.length == 1) || !mini ? title : null,
-          ));
-
-      if (mini) {
-        return Expanded(child: child);
-      }
-      return child;
+      return GreyCircleButton(
+        icon: icon,
+        onPressed: onPressed,
+        title: title,
+      );
     }
 
     Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
@@ -107,19 +99,16 @@ class WindowManagerSheet extends StatelessWidget {
           }),
         ]
       ]);
-    return Padding(
+    return Container(
         padding: const EdgeInsets.only(left: 15, right: 15),
-        child: sheetSize == SheetSize.mini
-            ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: children)
-            : Align(
-                alignment: Alignment.topCenter,
-                child: GridView.count(
-                  padding: const EdgeInsets.only(top: 10),
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 0,
-                  crossAxisCount: 3,
-                  children: children,
-                ),
-              ));
+        alignment: Alignment.topCenter,
+        child: GridView.count(
+          // padding: const EdgeInsets.only(top: 10),
+          childAspectRatio: landscape ? (mini ? 3.0 : 2.0) : 1.0,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 0,
+          crossAxisCount: 3,
+          children: children,
+        ));
   }
 }

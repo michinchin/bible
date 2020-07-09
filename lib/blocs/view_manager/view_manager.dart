@@ -153,16 +153,91 @@ List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState
 int calculateViewsNotOnScreen(BuildContext context) {
   final bloc = context.bloc<ViewManagerBloc>(); //ignore: close_sinks
   final totalViews = bloc.state.views.length;
-  //TODO : actually calculate views not on screen
+  // TODO(abby): actually calculate views not on screen
   return totalViews;
 }
 
-void showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
-  final bloc = context.bloc<ViewManagerBloc>(); //ignore: close_sinks
-  final moreThanOneView = bloc.state.views.length > 1;
-  context.bloc<SheetManagerBloc>().setUid(state.uid);
-  context.bloc<SheetManagerBloc>().changeSize(moreThanOneView ? SheetSize.medium : SheetSize.mini);
-  context.bloc<SheetManagerBloc>().changeType(SheetType.windows);
+// void showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
+//   final bloc = context.bloc<ViewManagerBloc>(); //ignore: close_sinks
+//   final moreThanOneView = bloc.state.views.length > 1;
+//   context.bloc<SheetManagerBloc>().setUid(state.uid);
+//   context.bloc<SheetManagerBloc>().changeSize(moreThanOneView ? SheetSize.medium : SheetSize.mini);
+//   context.bloc<SheetManagerBloc>().changeType(SheetType.windows);
+// }
+Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
+  return showTecModalPopup<void>(
+    useRootNavigator: false,
+    context: context,
+    alignment: Alignment.topRight,
+    builder: (context) {
+      final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+      final isMaximized = bloc?.state?.maximizedViewUid != 0;
+      return TecPopupSheet(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if ((bloc?.state?.views?.length ?? 0) > 1)
+              _menuItem(context, Icons.close, 'Close View', () {
+                Navigator.of(context).maybePop();
+                bloc?.add(ViewManagerEvent.remove(state.uid));
+              }),
+            if ((bloc?.state?.views?.length ?? 0) > 1)
+              _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
+                  isMaximized ? 'Restore' : 'Maximize', () {
+                Navigator.of(context).maybePop();
+                bloc?.add(isMaximized
+                    ? const ViewManagerEvent.restore()
+                    : ViewManagerEvent.maximize(state.uid));
+              }),
+            ..._generateAddMenuItems(context, state.uid),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
+  final vm = ViewManager.shared;
+  final iconMap = <String, IconData>{
+    'Bible': FeatherIcons.book,
+    'Notes': FeatherIcons.edit,
+    'Test View': FeatherIcons.plusSquare
+  };
+  return vm.types.map<Widget>(
+    (type) =>
+        _menuItem(context, iconMap[vm.titleForType(type)], 'Add ${vm.titleForType(type)}', () {
+      Navigator.of(context).maybePop();
+      final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+      final position = bloc?.indexOfView(viewUid) ?? -1;
+      bloc?.add(ViewManagerEvent.add(
+          type: type, data: '', position: position == -1 ? null : position + 1));
+    }),
+  );
+}
+
+Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onPressed) {
+  final textColor = Theme.of(context).textColor;
+  const iconSize = 24.0;
+  return CupertinoButton(
+    padding: EdgeInsets.zero,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon == null)
+          const SizedBox(width: iconSize)
+        else
+          Icon(icon, color: Theme.of(context).textColor, size: iconSize),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(color: textColor),
+        ),
+      ],
+    ),
+    borderRadius: null,
+    onPressed: onPressed,
+  );
 }
 
 // List<Widget> _testActionsForAdjustingSize(

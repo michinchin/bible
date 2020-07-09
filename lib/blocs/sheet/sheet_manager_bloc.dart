@@ -5,7 +5,8 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 part 'sheet_manager_bloc.freezed.dart';
 
-enum SheetType { main, selection, windows }
+// hidden hides the fab away, collapsed still shows fab
+enum SheetType { hidden, main, selection, windows }
 
 enum SheetSize { collapsed, mini, medium, full }
 
@@ -35,12 +36,7 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
     yield newState;
   }
 
-  SheetManagerState _changeSize(SheetSize size) {
-    if (size == SheetSize.collapsed) {
-      return state.copyWith(size: size, type: SheetType.main);
-    }
-    return state.copyWith(size: size);
-  }
+  SheetManagerState _changeSize(SheetSize size) => state.copyWith(size: size);
 
   SheetManagerState _changeType(SheetType type) => state.copyWith(type: type);
   SheetManagerState _changeView(int uid) => state.copyWith(viewUid: uid);

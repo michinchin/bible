@@ -20,6 +20,8 @@ class _MainSheetState extends State<MainSheet> {
   };
   @override
   Widget build(BuildContext context) {
+    final landscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
     return Padding(
         padding: const EdgeInsets.only(left: 15, right: 15),
         child: Column(
@@ -29,14 +31,20 @@ class _MainSheetState extends State<MainSheet> {
                 height: 100,
                 child: GridView.count(
                   crossAxisCount: 4,
-                  padding: const EdgeInsets.only(top: 0),
+                  childAspectRatio: landscape ? 2.0 : 1.0,
+                  // padding: const EdgeInsets.only(top: 0),
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
                     for (final key in miniViewIcons.keys)
-                      GreyCircleButton(
-                        icon: miniViewIcons[key],
+                      FlatButton(
                         onPressed: () {},
-                        title: key,
+                        child: Column(
+                          children: [
+                            Icon(miniViewIcons[key]),
+                            const SizedBox(height: 5),
+                            Text(key),
+                          ],
+                        ),
                       ),
                   ],
                 ),
@@ -45,7 +53,7 @@ class _MainSheetState extends State<MainSheet> {
               Expanded(
                 child: GridView.count(
                   crossAxisCount: 2,
-                  childAspectRatio: 2.0,
+                  childAspectRatio: landscape ? 4.0 : 2.0,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                   padding: const EdgeInsets.only(top: 0),
