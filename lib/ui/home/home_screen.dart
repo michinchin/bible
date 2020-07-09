@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
@@ -16,9 +15,6 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<ViewManagerBloc>(
-          create: (_) => ViewManagerBloc(kvStore: tec.Prefs.shared),
-        ),
         BlocProvider<SelectionBloc>(create: (_) => SelectionBloc()),
         BlocProvider<SelectionStyleBloc>(create: (_) => SelectionStyleBloc()),
         BlocProvider<SheetManagerBloc>(
@@ -30,18 +26,29 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _HomeScreen extends StatelessWidget {
+class _HomeScreen extends StatefulWidget {
   const _HomeScreen({Key key}) : super(key: key);
 
+  @override
+  __HomeScreenState createState() => __HomeScreenState();
+}
+
+class __HomeScreenState extends State<_HomeScreen> {
+  SheetSize _previousSheetSize;
   @override
   Widget build(BuildContext context) {
     // tec.dmPrint('_HomeScreen build()');
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (c, s) {
+      floatingActionButton: BlocBuilder<SheetManagerBloc, SheetManagerState>(condition: (p, c) {
+        if (p != c) {
+          _previousSheetSize = p.size;
+        }
+        return p != c;
+      }, builder: (c, s) {
         if (s.size == SheetSize.collapsed && s.type != SheetType.hidden) {
           return FloatingActionButton(
-            backgroundColor: Colors.transparent,
+            backgroundColor: Theme.of(context).cardColor.withOpacity(0.7),
             elevation: 0,
             child: Icon(
               Icons.keyboard_arrow_up,
@@ -49,7 +56,7 @@ class _HomeScreen extends StatelessWidget {
               size: 30,
             ),
             tooltip: 'Sheet',
-            onPressed: () => context.bloc<SheetManagerBloc>().changeSize(SheetSize.mini),
+            onPressed: () => context.bloc<SheetManagerBloc>().changeSize(_previousSheetSize),
           );
         }
         return Container();

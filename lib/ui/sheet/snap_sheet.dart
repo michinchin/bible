@@ -32,7 +32,7 @@ class _SnapSheetState extends State<SnapSheet> {
   List<double> _calculateHeightSnappings(Orientation orientation) {
     // figure out dimensions depending on view size
     final landscape = orientation == Orientation.landscape;
-    final topBarHeight = landscape ? 50.0 : 10.0;
+    final topBarHeight = landscape ? 50.0 : 15.0;
     final secondBarHeight = landscape ? 140 : 100.0;
     final ratio = (topBarHeight / MediaQuery.of(context).size.height) + 0.1;
     final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height) + 0.1;
@@ -97,14 +97,18 @@ class _SnapSheetState extends State<SnapSheet> {
                   return Container(height: MediaQuery.of(context).size.height, child: child);
                 },
                 body: widget.body,
-                headerBuilder: (context, state) {
-                  return Container(
-                    width: 30,
-                    height: 5,
-                    margin: const EdgeInsets.only(top: 10, bottom: 10),
-                    decoration: ShapeDecoration(
-                        color: Theme.of(context).textColor.withOpacity(0.2),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                headerBuilder: (context, s) {
+                  return InkWell(
+                    onTap: () => context.bloc<SheetManagerBloc>().changeSize(
+                        state.size == SheetSize.mini ? SheetSize.medium : SheetSize.mini),
+                    child: Container(
+                      width: 30,
+                      height: 5,
+                      margin: const EdgeInsets.only(top: 10, bottom: 10),
+                      decoration: ShapeDecoration(
+                          color: Theme.of(context).textColor.withOpacity(0.2),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                    ),
                   );
                 },
               ),
@@ -129,10 +133,16 @@ class SheetButton extends StatelessWidget {
       height: 50,
       child: OutlineButton.icon(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          label: Text(text),
+          label: Text(
+            text,
+            style: TextStyle(
+              color: Theme.of(context).textColor.withOpacity(0.8),
+            ),
+          ),
           icon: Icon(
             icon,
             size: 18,
+            color: Theme.of(context).textColor.withOpacity(0.8),
           ),
           onPressed: () {}),
     );
@@ -175,6 +185,9 @@ class GreyCircleButton extends StatelessWidget {
             title,
             autoSize: true,
             textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Theme.of(context).textColor.withOpacity(0.5),
+            ),
           )),
         ] else
           circleIcon(),

@@ -142,11 +142,13 @@ List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState
       tooltip: 'Windows',
       onPressed: () => showMoreMenu(context, bodyKey, state, size),
     ),
-    IconButton(
-      icon: const Icon(Icons.account_circle),
-      tooltip: 'Main Menu',
-      onPressed: () => showMainMenu(context),
-    ),
+    if (context.bloc<ViewManagerBloc>().indexOfView(state.uid) == 0 ||
+        context.bloc<ViewManagerBloc>().state.maximizedViewUid == state.uid)
+      IconButton(
+        icon: const Icon(Icons.account_circle),
+        tooltip: 'Main Menu',
+        onPressed: () => showMainMenu(context),
+      ),
   ];
 }
 
@@ -166,9 +168,9 @@ int calculateViewsNotOnScreen(BuildContext context) {
 // }
 Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return showTecModalPopup<void>(
-    useRootNavigator: false,
     context: context,
     alignment: Alignment.topRight,
+    // useRootNavigator: false,
     builder: (context) {
       final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
       final isMaximized = bloc?.state?.maximizedViewUid != 0;

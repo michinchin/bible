@@ -1,6 +1,8 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 
+import 'package:tec_widgets/tec_widgets.dart';
+
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../ui/sheet/snap_sheet.dart';
 
@@ -40,9 +42,17 @@ class _MainSheetState extends State<MainSheet> {
                         onPressed: () {},
                         child: Column(
                           children: [
-                            Icon(miniViewIcons[key]),
+                            Icon(
+                              miniViewIcons[key],
+                              color: Theme.of(context).textColor.withOpacity(0.5),
+                            ),
                             const SizedBox(height: 5),
-                            Text(key),
+                            Text(
+                              key,
+                              style: TextStyle(
+                                color: Theme.of(context).textColor.withOpacity(0.5),
+                              ),
+                            ),
                           ],
                         ),
                       ),

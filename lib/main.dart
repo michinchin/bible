@@ -64,8 +64,15 @@ void _registerViewTypes() {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ThemeModeBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ViewManagerBloc>(
+          create: (_) => ViewManagerBloc(kvStore: tec.Prefs.shared),
+        ),
+        BlocProvider<ThemeModeBloc>(
+          create: (_) => ThemeModeBloc(),
+        ),
+      ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (_, themeMode) {
           return tec.BlocProvider<TecStyleBloc>(
