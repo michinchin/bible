@@ -445,7 +445,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
         if (!_isSelectionTrialMode && _selectedVerses.contains(tag.verse)) {
           return TaggableTextSpan(
               text: text,
-              style: _merge(style, selectedTextStyle),
+              style: tag.isInVerse ? _merge(style, selectedTextStyle) : style,
               tag: tag,
               recognizer: recognizer);
         } else if (tag.verse != null) {
@@ -457,7 +457,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
           ///
           /// Local func that returns a new span from the `remainingText` up
           /// to and including the given [word], with the given [style]. And
-          /// it also updates `currentWord` and `remainingText` appropriately.
+          /// also updates `currentWord` and `remainingText` appropriately.
           ///
           InlineSpan _spanToWord(int word, TextStyle style) {
             final wordCount = (word - currentWord) + 1;
@@ -472,7 +472,9 @@ class _BibleHtmlState extends State<_BibleHtml> {
               currentWord += wordCount;
               return span;
             } else {
-              tec.dmPrint('ERROR in _spanToWord! tag: $tag, word: $word, wordCount: $wordCount, endIndex: $endIndex, currentWord: $currentWord, remainingText: "$remainingText", text: "$text"');
+              tec.dmPrint('ERROR in _spanToWord! tag: $tag, word: $word, '
+                  'wordCount: $wordCount, endIndex: $endIndex, currentWord: $currentWord, '
+                  'remainingText: "$remainingText", text: "$text"');
               assert(false);
               return const TextSpan(text: 'FAILED!');
             }
@@ -493,22 +495,26 @@ class _BibleHtmlState extends State<_BibleHtml> {
             }
 
             TextStyle hlStyle = style;
-            final color = Color(highlight.color ?? 0xfff8f888);
-            switch (highlight.highlightType) {
-              case HighlightType.highlight:
-                hlStyle = _merge(style,
-                    isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color));
-                break;
-              case HighlightType.underline:
-                hlStyle = _merge(
-                    style,
-                    TextStyle(
-                        decoration: TextDecoration.underline,
-                        decorationColor: color.withAlpha(192),
-                        decorationThickness: 2));
-                break;
-              default:
-                break;
+            if (tag.isInVerse ||
+                highlight.ref.word != Reference.minWord ||
+                highlight.ref.endWord != Reference.maxWord) {
+              final color = Color(highlight.color ?? 0xfff8f888);
+              switch (highlight.highlightType) {
+                case HighlightType.highlight:
+                  hlStyle = _merge(style,
+                      isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color));
+                  break;
+                case HighlightType.underline:
+                  hlStyle = _merge(
+                      style,
+                      TextStyle(
+                          decoration: TextDecoration.underline,
+                          decorationColor: color.withAlpha(192),
+                          decorationThickness: 2));
+                  break;
+                default:
+                  break;
+              }
             }
 
             // Add the highlight words with the highlight style.
