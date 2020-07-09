@@ -93,7 +93,9 @@ class _BottomSheetState extends State<_BottomSheet> {
         // condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
         listener: (context, state) {
           if (state.isTextSelected) {
-            context.bloc<SheetManagerBloc>()..changeType(SheetType.selection);
+            context.bloc<SheetManagerBloc>()
+              ..changeType(SheetType.selection)
+              ..changeSize(SheetSize.mini);
           } else {
             context.bloc<SheetManagerBloc>()
               ..changeType(SheetType.main)

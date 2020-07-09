@@ -29,10 +29,11 @@ class _SnapSheetState extends State<SnapSheet> {
     super.initState();
   }
 
-  List<double> _calculateHeightSnappings(BuildContext context) {
+  List<double> _calculateHeightSnappings(Orientation orientation) {
     // figure out dimensions depending on view size
-    const topBarHeight = 10.0;
-    const secondBarHeight = 100.0;
+    final landscape = orientation == Orientation.landscape;
+    final topBarHeight = landscape ? 50.0 : 10.0;
+    final secondBarHeight = landscape ? 140 : 100.0;
     final ratio = (topBarHeight / MediaQuery.of(context).size.height) + 0.1;
     final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height) + 0.1;
 
@@ -42,70 +43,75 @@ class _SnapSheetState extends State<SnapSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final snappings = _calculateHeightSnappings(context);
+    return OrientationBuilder(builder: (context, orientation) {
+      final snappings = _calculateHeightSnappings(orientation);
 
-    SheetSize _getSheetSize(double d) => SheetSize.values[snappings.indexWhere((s) => s == d)];
+      SheetSize _getSheetSize(double d) => SheetSize.values[snappings.indexWhere((s) => s == d)];
 
-    return BlocConsumer<SheetManagerBloc, SheetManagerState>(
-        listenWhen: (previous, current) => previous != current,
-        listener: (context, state) {
-          _sheetController.snapToExtent(snappings[state.size.index]);
-        },
-        builder: (context, state) {
-          final widthOfScreen = MediaQuery.of(context).size.width;
-          final mini = state.size == SheetSize.mini;
-          EdgeInsets margin;
-          if (widthOfScreen > 500) {
-            margin = EdgeInsets.only(left: widthOfScreen / 5, right: widthOfScreen / 5);
-          }
-          
-          return SafeArea(
-            bottom: false,
-            child: SlidingSheet(
-              margin: margin,
-              controller: _sheetController,
-              elevation: 8,
-              closeOnBackdropTap: state.type == SheetType.windows,
-              cornerRadius: 15,
-              duration: const Duration(milliseconds: 250),
-              addTopViewPaddingOnFullscreen: true,
-              snapSpec: SnapSpec(
-                initialSnap: snappings[state.size.index],
-                snappings: snappings,
-                onSnap: (s, snapPosition) =>
-                    context.bloc<SheetManagerBloc>().changeSize(_getSheetSize(snapPosition)),
-                positioning: SnapPositioning.relativeToAvailableSpace,
+      return BlocConsumer<SheetManagerBloc, SheetManagerState>(
+          listenWhen: (previous, current) => previous != current,
+          listener: (context, state) {
+            _sheetController.snapToExtent(snappings[state.size.index]);
+          },
+          builder: (context, state) {
+            final widthOfScreen = MediaQuery.of(context).size.width;
+            final mini = state.size == SheetSize.mini;
+            EdgeInsets margin;
+            if (widthOfScreen > 500) {
+              margin = EdgeInsets.only(left: widthOfScreen / 5, right: widthOfScreen / 5);
+            }
+            _sheetController.snapToExtent(snappings[state.size.index]);
+
+            return SafeArea(
+              bottom: false,
+              child: SlidingSheet(
+                margin: margin,
+                controller: _sheetController,
+                elevation: 8,
+                closeOnBackdropTap: state.type == SheetType.windows,
+                cornerRadius: 15,
+                duration: const Duration(milliseconds: 250),
+                addTopViewPaddingOnFullscreen: true,
+                snapSpec: SnapSpec(
+                  initialSnap: snappings[state.size.index],
+                  snappings: snappings,
+                  onSnap: (s, snapPosition) =>
+                      context.bloc<SheetManagerBloc>().changeSize(_getSheetSize(snapPosition)),
+                  positioning: SnapPositioning.relativeToAvailableSpace,
+                ),
+                color: Theme.of(context).cardColor,
+                builder: (c, s) {
+                  Widget child;
+                  switch (state.type) {
+                    case SheetType.main:
+                      child = MainSheet(sheetSize: state.size);
+                      break;
+                    case SheetType.selection:
+                      child = SelectionSheet(sheetSize: state.size);
+                      break;
+                    case SheetType.windows:
+                      child = WindowManagerSheet(sheetSize: state.size);
+                      break;
+                    default:
+                      child = Container();
+                  }
+                  return Container(height: MediaQuery.of(context).size.height, child: child);
+                },
+                body: widget.body,
+                headerBuilder: (context, state) {
+                  return Container(
+                    width: 30,
+                    height: 5,
+                    margin: const EdgeInsets.only(top: 10, bottom: 10),
+                    decoration: ShapeDecoration(
+                        color: Theme.of(context).textColor.withOpacity(0.2),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                  );
+                },
               ),
-              color: Theme.of(context).cardColor,
-              builder: (c, s) {
-                Widget child;
-                switch (state.type) {
-                  case SheetType.main:
-                    child = MainSheet(sheetSize: state.size);
-                    break;
-                  case SheetType.selection:
-                    child = SelectionSheet(sheetSize: state.size);
-                    break;
-                  case SheetType.windows:
-                    child = WindowManagerSheet(sheetSize: state.size);
-                    break;
-                }
-                return Container(height: MediaQuery.of(context).size.height, child: child);
-              },
-              body: widget.body,
-              headerBuilder: (context, state) {
-                return Container(
-                  width: 30,
-                  height: 5,
-                  margin: const EdgeInsets.only(top: 10, bottom: 10),
-                  decoration: ShapeDecoration(
-                      color: Theme.of(context).textColor.withOpacity(0.2),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
-                );
-              },
-            ),
-          );
-        });
+            );
+          });
+    });
   }
 }
 
