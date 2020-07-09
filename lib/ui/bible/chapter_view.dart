@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:bible/blocs/sheet/sheet_manager_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -16,6 +15,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';

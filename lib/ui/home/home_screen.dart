@@ -37,7 +37,7 @@ class _HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // tec.dmPrint('_HomeScreen build()');
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (c, s) {
         if (s.size == SheetSize.collapsed && s.type != SheetType.hidden) {
           return FloatingActionButton(
@@ -46,6 +46,7 @@ class _HomeScreen extends StatelessWidget {
             child: Icon(
               Icons.keyboard_arrow_up,
               color: Theme.of(context).textColor,
+              size: 30,
             ),
             tooltip: 'Sheet',
             onPressed: () => context.bloc<SheetManagerBloc>().changeSize(SheetSize.mini),

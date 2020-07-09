@@ -55,7 +55,6 @@ class _SnapSheetState extends State<SnapSheet> {
           },
           builder: (context, state) {
             final widthOfScreen = MediaQuery.of(context).size.width;
-            final mini = state.size == SheetSize.mini;
             EdgeInsets margin;
             if (widthOfScreen > 500) {
               margin = EdgeInsets.only(left: widthOfScreen / 5, right: widthOfScreen / 5);
