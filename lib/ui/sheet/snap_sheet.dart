@@ -102,9 +102,12 @@ class _SnapSheetState extends State<SnapSheet> {
                     onTap: () => context.bloc<SheetManagerBloc>().changeSize(
                         state.size == SheetSize.mini ? SheetSize.medium : SheetSize.mini),
                     child: Container(
-                      width: 30,
                       height: 5,
-                      margin: const EdgeInsets.only(top: 10, bottom: 10),
+                      margin: EdgeInsets.only(
+                          top: 10,
+                          bottom: 10,
+                          right: MediaQuery.of(context).size.width / 2 - 15,
+                          left: MediaQuery.of(context).size.width / 2 - 15),
                       decoration: ShapeDecoration(
                           color: Theme.of(context).textColor.withOpacity(0.2),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
