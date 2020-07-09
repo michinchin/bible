@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sliding_sheet/sliding_sheet.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../bible/selection_sheet.dart';
+import '../sheet/snap_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key key}) : super(key: key);
@@ -15,24 +15,52 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<ViewManagerBloc>(
-          create: (_) => ViewManagerBloc(kvStore: tec.Prefs.shared),
-        ),
         BlocProvider<SelectionBloc>(create: (_) => SelectionBloc()),
         BlocProvider<SelectionStyleBloc>(create: (_) => SelectionStyleBloc()),
+        BlocProvider<SheetManagerBloc>(
+          create: (_) => SheetManagerBloc(),
+        ),
       ],
       child: const _HomeScreen(),
     );
   }
 }
 
-class _HomeScreen extends StatelessWidget {
+class _HomeScreen extends StatefulWidget {
   const _HomeScreen({Key key}) : super(key: key);
 
+  @override
+  __HomeScreenState createState() => __HomeScreenState();
+}
+
+class __HomeScreenState extends State<_HomeScreen> {
+  SheetSize _previousSheetSize;
   @override
   Widget build(BuildContext context) {
     // tec.dmPrint('_HomeScreen build()');
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: BlocBuilder<SheetManagerBloc, SheetManagerState>(condition: (p, c) {
+        if (p != c) {
+          _previousSheetSize = p.size;
+        }
+        return p != c;
+      }, builder: (c, s) {
+        if (s.size == SheetSize.collapsed && s.type != SheetType.hidden) {
+          return FloatingActionButton(
+            backgroundColor: Theme.of(context).cardColor.withOpacity(0.7),
+            elevation: 0,
+            child: Icon(
+              Icons.keyboard_arrow_up,
+              color: Theme.of(context).textColor,
+              size: 30,
+            ),
+            tooltip: 'Sheet',
+            onPressed: () => context.bloc<SheetManagerBloc>().changeSize(_previousSheetSize),
+          );
+        }
+        return Container();
+      }),
       body: _BottomSheet(
         child: Container(
           color: Theme.of(context).canvasColor, // primaryColor,
@@ -66,46 +94,24 @@ class _BottomSheet extends StatefulWidget {
 }
 
 class _BottomSheetState extends State<_BottomSheet> {
-  SheetController _sheetController;
-  List<double> snappings;
-
-  @override
-  void initState() {
-    _sheetController = SheetController();
-    super.initState();
-  }
-
-  List<double> _calculateHeightSnappings() {
-    // figure out dimensions depending on view size
-    const topBarHeight = 30.0;
-    const secondBarHeight = 80.0;
-    final ratio = (topBarHeight / MediaQuery.of(context).size.height) + 0.1;
-    final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height) + 0.1;
-
-    debugPrint(ratio.toString());
-    return [0, ratio, ratio + ratio2, ratio * 4];
-  }
-
   @override
   Widget build(BuildContext context) {
-    snappings = _calculateHeightSnappings();
-
     return BlocListener<SelectionBloc, SelectionState>(
-      child: SnapSheet(
-          controller: _sheetController,
+        bloc: context.bloc<SelectionBloc>(),
+        // condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
+        listener: (context, state) {
+          if (state.isTextSelected) {
+            context.bloc<SheetManagerBloc>()
+              ..changeType(SheetType.selection)
+              ..changeSize(SheetSize.mini);
+          } else {
+            context.bloc<SheetManagerBloc>()
+              ..changeType(SheetType.main)
+              ..changeSize(SheetSize.mini);
+          }
+        },
+        child: SnapSheet(
           body: widget.child,
-          onSnap: (s, d) {},
-          snappings: snappings,
-          child: SelectionSheet()),
-      condition: (previous, current) =>
-          previous.isTextSelected != current.isTextSelected,
-      listener: (context, state) {
-        if (state.isTextSelected) {
-          _sheetController?.snapToExtent(snappings[1]);
-        } else {
-          _sheetController?.collapse();
-        }
-      },
-    );
+        ));
   }
 }

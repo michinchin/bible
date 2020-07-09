@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../blocs/note_bloc.dart';
+import '../../blocs/notes/note_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../common/common.dart';
 import 'note_view.dart';
