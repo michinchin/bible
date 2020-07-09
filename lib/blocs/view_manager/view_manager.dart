@@ -138,13 +138,32 @@ const BoxConstraints _defaultConstraints = BoxConstraints(maxWidth: 320, maxHeig
 List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return [
     IconButton(
-      icon: Icon(_moreIcon(context)),
-      tooltip: 'More',
+      icon: const Icon(Icons.photo_size_select_large),
+      tooltip: 'Windows',
       onPressed: () => showMoreMenu(context, bodyKey, state, size),
+    ),
+    IconButton(
+      icon: const Icon(Icons.account_circle),
+      tooltip: 'Main Menu',
+      onPressed: () => showMainMenu(context),
     ),
   ];
 }
 
+int calculateViewsNotOnScreen(BuildContext context) {
+  final bloc = context.bloc<ViewManagerBloc>(); //ignore: close_sinks
+  final totalViews = bloc.state.views.length;
+  // TODO(abby): actually calculate views not on screen
+  return totalViews;
+}
+
+// void showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
+//   final bloc = context.bloc<ViewManagerBloc>(); //ignore: close_sinks
+//   final moreThanOneView = bloc.state.views.length > 1;
+//   context.bloc<SheetManagerBloc>().setUid(state.uid);
+//   context.bloc<SheetManagerBloc>().changeSize(moreThanOneView ? SheetSize.medium : SheetSize.mini);
+//   context.bloc<SheetManagerBloc>().changeType(SheetType.windows);
+// }
 Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return showTecModalPopup<void>(
     useRootNavigator: false,
@@ -180,8 +199,14 @@ Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Si
 
 Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
   final vm = ViewManager.shared;
+  final iconMap = <String, IconData>{
+    'Bible': FeatherIcons.book,
+    'Notes': FeatherIcons.edit,
+    'Test View': FeatherIcons.plusSquare
+  };
   return vm.types.map<Widget>(
-    (type) => _menuItem(context, Icons.add, 'Add ${vm.titleForType(type)}', () {
+    (type) =>
+        _menuItem(context, iconMap[vm.titleForType(type)], 'Add ${vm.titleForType(type)}', () {
       Navigator.of(context).maybePop();
       final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
       final position = bloc?.indexOfView(viewUid) ?? -1;
@@ -213,16 +238,6 @@ Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback
     borderRadius: null,
     onPressed: onPressed,
   );
-}
-
-IconData _moreIcon(BuildContext context) {
-  switch (Theme.of(context).platform) {
-    case TargetPlatform.iOS:
-    case TargetPlatform.macOS:
-      return Icons.more_horiz;
-    default:
-      return Icons.more_vert;
-  }
 }
 
 // List<Widget> _testActionsForAdjustingSize(

@@ -18,7 +18,7 @@ const tecartaBlue = Color(0xff4a7dee);
 Future<void> showMainMenu(BuildContext context) {
   return showTecModalPopup<void>(
     context: context,
-    alignment: Alignment.topLeft,
+    alignment: Alignment.topRight,
     useRootNavigator: true,
     builder: (context) => TecPopupSheet(child: MainMenu()),
   );

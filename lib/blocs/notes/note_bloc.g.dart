@@ -11,9 +11,7 @@ part of 'note_bloc.dart';
 _$_Note _$_$_NoteFromJson(Map<String, dynamic> json) {
   return _$_Note(
     id: json['id'] as int,
-    doc: json['doc'] == null
-        ? null
-        : NotusDocument.fromJson(json['doc'] as List),
+    doc: json['doc'] == null ? null : NotusDocument.fromJson(json['doc'] as List),
   );
 }
 
@@ -25,8 +23,7 @@ Map<String, dynamic> _$_$_NoteToJson(_$_Note instance) => <String, dynamic>{
 _$_Notes _$_$_NotesFromJson(Map<String, dynamic> json) {
   return _$_Notes(
     (json['notes'] as List)
-        ?.map(
-            (dynamic e) => e == null ? null : Note.fromJson(e as Map<String, dynamic>))
+        ?.map((dynamic e) => e == null ? null : Note.fromJson(e as Map<String, dynamic>))
         ?.toList(),
   );
 }

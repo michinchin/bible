@@ -15,6 +15,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
@@ -470,6 +471,17 @@ class _BibleHtmlState extends State<_BibleHtml> {
           child: TecAutoScroll(
             scrollController: _scrollController,
             allowAutoscroll: () => !context.bloc<SelectionBloc>().state.isTextSelected,
+            autoscrollActive: (active) {
+              if (active) {
+                context.bloc<SheetManagerBloc>()
+                  ..changeSize(SheetSize.collapsed)
+                  ..changeType(SheetType.hidden);
+              } else {
+                context.bloc<SheetManagerBloc>()
+                  ..changeSize(SheetSize.mini)
+                  ..changeType(SheetType.main);
+              }
+            },
             child: ListView(
               controller: _scrollController,
               children: <Widget>[
