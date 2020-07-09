@@ -64,27 +64,13 @@ abstract class Highlight with _$Highlight {
       DateTime modified,) = _Highlight;
 
   factory Highlight.from(UserItem ui) {
-    var word = Reference.minWord,
-        endWord = Reference.maxWord;
-
-    // is this a parital hl?
-    if (ui.wordBegin != word || ui.wordEnd != Reference.maxWord) {
-      word = ui.wordBegin;
-      endWord = ui.wordEnd;
-
-      // catch old hl bugs where end was set to 0
-      if (endWord <= Reference.minWord) {
-        endWord = Reference.maxWord;
-      }
-    }
-
     final ref = Reference(
       volume: ui.volumeId,
       book: ui.book,
       chapter: ui.chapter,
       verse: ui.verse,
-      word: word,
-      endWord: endWord,
+      word: ui.wordBegin,
+      endWord: (ui.wordEnd <= Reference.minWord) ? Reference.maxWord : ui.wordEnd,
     );
 
     final highlightType =
