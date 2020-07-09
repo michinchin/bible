@@ -82,7 +82,7 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
   @override
   Stream<ChapterHighlights> mapEventToState(HighlightsEvent event) async* {
     final newState = event.when(add: _add, clear: _clear);
-    tec.dmPrint('Updated to $newState');
+    // tec.dmPrint('Updated to $newState');
     yield newState;
   }
 

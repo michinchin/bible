@@ -413,14 +413,14 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
       if (text?.isNotEmpty ?? false) {
         final wordCount = tec.countOfWordsInString(text);
-        //tec.dmPrint('$wordCount words for text: $text');
+        // tec.dmPrint('$wordCount words for text: $text');
         if (wordCount > 0) {
           final word = currentWord;
           currentWord += wordCount;
           if (wordCount == 1) {
-            tec.dmPrint('verse: $currentVerse, word $word: [$text]');
+            // tec.dmPrint('verse: $currentVerse, word $word: [$text]');
           } else {
-            tec.dmPrint('verse: $currentVerse, words $word-${word + wordCount - 1}: [$text]');
+            // tec.dmPrint('verse: $currentVerse, words $word-${word + wordCount - 1}: [$text]');
           }
           return VerseTag(currentVerse, word, isInVerse);
         }
@@ -641,12 +641,12 @@ class _BibleHtmlState extends State<_BibleHtml> {
         tec.dmPrint('END:   $_selectionEnd');
         assert(false);
       } else {
-        tec.dmPrint('START: $_selectionStart');
-        tec.dmPrint('END:   $_selectionEnd');
+        // tec.dmPrint('START: $_selectionStart');
+        // tec.dmPrint('END:   $_selectionEnd');
       }
     } else {
       _selectionStart = _selectionEnd = null;
-      tec.dmPrint('NO WORDS SELECTED');
+      tec.dmPrint('No words selected.');
     }
 
     context.bloc<SelectionBloc>()?.add(SelectionState(isTextSelected: _selectionStart != null));
