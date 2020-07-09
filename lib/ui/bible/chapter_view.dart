@@ -293,9 +293,17 @@ class _BibleHtml extends StatefulWidget {
 
 class _BibleHtmlState extends State<_BibleHtml> {
   final _scrollController = ScrollController();
+  final _selectionController = TecSelectableController();
+
+  @override
+  void initState() {
+    super.initState();
+    _selectionController.addListener(_onSelectionChanged);
+  }
 
   @override
   void dispose() {
+    _selectionController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -430,7 +438,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
         if (!_isSelectionTrialMode && _selectedVerses.contains(tag.verse)) {
           textStyle = style.merge(selectedTextStyle);
         } else if (tag.verse != null) {
-          final highlight = widget.highlights.highlightForVerse(tag.verse);
+          final highlight = widget.highlights.highlightForVerse(tag.verse, andWord: tag.word);
           if (highlight != null) {
             final color = Color(highlight.color ?? 0xfff8f888);
             switch (highlight.highlightType) {
@@ -460,29 +468,9 @@ class _BibleHtmlState extends State<_BibleHtml> {
       }
     }
 
-    ///
-    /// SelectionStyleBloc listener
-    ///
-    void _selectionStyleBlocListener(BuildContext context, SelectionStyle state) {
-      _isSelectionTrialMode = state.isTrialMode;
-      final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
-      if (_selectedVerses.isEmpty || bloc == null) return;
-      for (final verse in _selectedVerses) {
-        if (verse == null) continue;
-        final ref = Reference(volume: volume, book: book, chapter: chapter, verse: verse);
-        if (state.type == HighlightType.clear) {
-          bloc.add(HighlightsEvent.clear(ref));
-        } else {
-          bloc.add(HighlightsEvent.add(type: state.type, color: state.color, ref: ref));
-        }
-      }
-      if (!_isSelectionTrialMode) {
-        _clearAllSelectedVerses();
-      }
-    }
-
     return BlocListener<SelectionStyleBloc, SelectionStyle>(
-      listener: _selectionStyleBlocListener,
+      listener: (context, selectionStyle) => Future.delayed(Duration.zero,
+          () => _selectionStyleChanged(context, selectionStyle, volume, book, chapter)),
       child: Semantics(
         //textDirection: textDirection,
         label: 'Bible text',
@@ -514,11 +502,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
                   // Word range selection related:
                   selectable: !kIsWeb && _selectedVerses.isEmpty,
-                  onSelectionChanged: (isTextSelected) {
-                    tec.dmPrint('TecHtml.onSelectionChanged($isTextSelected)');
-                    if (isTextSelected) _clearAllSelectedVerses();
-                  },
-                  onSelectedTextChanged: _onSelectedTextChanged,
+                  selectionController: _selectionController,
 
                   // `versesToShow` related (when viewing a subset of verses in the chapter):
                   isInitialHtmlElementVisible:
@@ -537,17 +521,65 @@ class _BibleHtmlState extends State<_BibleHtml> {
   var _isSelectionTrialMode = false;
 
   //-------------------------------------------------------------------------
+  // Selection related:
+
+  bool get _hasSelection => _selectedVerses.isNotEmpty || _selectionStart != null;
+
+  void _selectionStyleChanged(
+      BuildContext context, SelectionStyle selectionStyle, int volume, int book, int chapter) {
+    final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
+    if (bloc == null || !_hasSelection) return;
+    _isSelectionTrialMode = selectionStyle.isTrialMode;
+
+    final ref = _selectedVerses.isNotEmpty
+        ? _referenceWithVerses(_selectedVerses, volume: volume, book: book, chapter: chapter)
+        : Reference(
+            volume: volume,
+            book: book,
+            chapter: chapter,
+            verse: _selectionStart.verse,
+            word: _selectionStart.word,
+            endVerse: _selectionEnd.verse,
+            endWord: _selectionEnd.word);
+
+    if (!_isSelectionTrialMode) {
+      _selectionController.deselectAll();
+      _clearAllSelectedVerses();
+    }
+
+    if (selectionStyle.type == HighlightType.clear) {
+      bloc.add(HighlightsEvent.clear(ref));
+    } else {
+      bloc.add(
+          HighlightsEvent.add(type: selectionStyle.type, color: selectionStyle.color, ref: ref));
+    }
+  }
+
+  //-------------------------------------------------------------------------
   // Word range selection:
 
   TaggedText _selectionStart;
   TaggedText _selectionEnd;
 
-  void _onSelectedTextChanged(List<TaggedText> tags) {
-    if ((tags?.length ?? 0) == 2) {
-      _selectionStart = tags.first;
-      _selectionEnd = tags.last;
-      tec.dmPrint('START: $_selectionStart');
-      tec.dmPrint('END:   $_selectionEnd');
+  void _onSelectionChanged() {
+    final isTextSelected = _selectionController.isTextSelected;
+    if (isTextSelected) _clearAllSelectedVerses();
+
+    final start = _selectionController.selectionStart;
+    final end = _selectionController.selectionEnd;
+    if (start != null && end != null) {
+      _selectionStart = start.tag is VerseTag ? start : null;
+      _selectionEnd = end.tag is VerseTag ? end : null;
+      if (_selectionStart == null || _selectionEnd == null) {
+        _selectionStart = _selectionEnd = null;
+        tec.dmPrint('ERROR, EITHER START OR END HAS INVALID TAG!');
+        tec.dmPrint('START: $_selectionStart');
+        tec.dmPrint('END:   $_selectionEnd');
+        assert(false);
+      } else {
+        tec.dmPrint('START: $_selectionStart');
+        tec.dmPrint('END:   $_selectionEnd');
+      }
     } else {
       _selectionStart = _selectionEnd = null;
       tec.dmPrint('NO WORDS SELECTED');
@@ -581,6 +613,46 @@ class _BibleHtmlState extends State<_BibleHtml> {
     if (wasTextSelected != isTextSelected) {
       context.bloc<SelectionBloc>()?.add(SelectionState(isTextSelected: isTextSelected));
     }
+  }
+
+  //-------------------------------------------------------------------------
+}
+
+Reference _referenceWithVerses(
+  Iterable<int> verses, {
+  int volume,
+  int book,
+  int chapter,
+  DateTime modified,
+}) {
+  if (verses?.isEmpty ?? true) return null;
+  final sorted = List.of(Set.of(verses))..sort();
+  final first = sorted.first;
+  final last = sorted.last;
+  final excluded = sorted.missingValues();
+  return Reference(
+      volume: volume,
+      book: book,
+      chapter: chapter,
+      verse: first,
+      endVerse: last,
+      excluded: excluded.isEmpty ? null : excluded.toSet(),
+      modified: modified);
+}
+
+extension on Iterable<int> {
+  List<int> missingValues() {
+    if (isEmpty ?? true) return [];
+    final set = Set.of(this);
+    final sorted = List.of(set)..sort();
+    if (sorted.last - sorted.first > sorted.length) {
+      final first = sorted.first;
+      final last = sorted.last;
+      final missing = Set.of(Iterable<int>.generate((last - first) + 1, (i) => first + i))
+        ..removeAll(set);
+      return missing.toList()..sort();
+    }
+    return [];
   }
 }
 
@@ -627,4 +699,35 @@ class VerseTag {
   String toString() {
     return ('{ "v": $verse, "w": $word, "inV": $isInVerse }');
   }
+}
+
+extension on TaggedText {
+  int get verse => (tag is VerseTag) ? (tag as VerseTag).verse : null;
+  int get word {
+    final t = tag;
+    if (t is VerseTag) {
+      final words = _countOfWordsInString(text, toIndex: index);
+      return t.word + words;
+    }
+    return null; // ignore: avoid_returning_null
+  }
+}
+
+int _countOfWordsInString(String string, {int toIndex}) {
+  if (string == null) return 0;
+  var count = 0;
+  var isInRune = false;
+  var i = 0;
+  for (final rune in string.runes) {
+    if (toIndex != null && i >= toIndex) break;
+    final isWs = tec.isWhitespace(rune);
+    if (isInRune) {
+      if (isWs) isInRune = false;
+    } else if (!isWs) {
+      count++;
+      isInRune = true;
+    }
+    i++;
+  }
+  return count;
 }

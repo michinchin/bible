@@ -20,9 +20,9 @@ abstract class ChapterHighlights with _$ChapterHighlights {
 }
 
 extension ChapterHighlightsExt on ChapterHighlights {
-  Highlight highlightForVerse(int verse) {
+  Highlight highlightForVerse(int verse, {int andWord}) {
     for (final highlight in highlights.reversed) {
-      if (highlight.ref.verse == verse) return highlight;
+      if (highlight.ref.includesVerse(verse, andWord: andWord)) return highlight;
     }
     return null;
   }
