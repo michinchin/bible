@@ -429,43 +429,107 @@ class _BibleHtmlState extends State<_BibleHtml> {
       return VerseTag(currentVerse, currentWord, isInVerse);
     }
 
+    TextStyle _merge(TextStyle s1, TextStyle s2) =>
+        s1 == null ? s2 : s2 == null ? s1 : s1.merge(s2);
+
     ///
     /// Local function that converts an HTML text node into a TextSpan.
     ///
     InlineSpan _spanForText(String text, TextStyle style, Object tag) {
       if (tag is VerseTag) {
-        TextStyle textStyle;
+        final recognizer = TapGestureRecognizer()
+          ..onTap = () => _toggleSelectionForVerse(tag.verse);
+
+        // If not in trial mode, and this whole verse is selected, just
+        // return a span with the selected text style.
         if (!_isSelectionTrialMode && _selectedVerses.contains(tag.verse)) {
-          textStyle = style.merge(selectedTextStyle);
+          return TaggableTextSpan(
+              text: text,
+              style: _merge(style, selectedTextStyle),
+              tag: tag,
+              recognizer: recognizer);
         } else if (tag.verse != null) {
-          final highlight = widget.highlights.highlightForVerse(tag.verse, andWord: tag.word);
-          if (highlight != null) {
+          final v = tag.verse;
+          var currentWord = tag.word;
+          final endWord = currentWord + tec.countOfWordsInString(text) - 1;
+          var remainingText = text;
+
+          ///
+          /// Local func that returns a new span from the `remainingText` up
+          /// to and including the given [word], with the given [style]. And
+          /// it also updates `currentWord` and `remainingText` appropriately.
+          ///
+          InlineSpan _spanToWord(int word, TextStyle style) {
+            final wordCount = (word - currentWord) + 1;
+            final endIndex = remainingText.indexAtEndOfWord(wordCount);
+            if (endIndex > 0 && endIndex <= remainingText.length) {
+              final span = TaggableTextSpan(
+                  text: remainingText.substring(0, endIndex),
+                  style: style,
+                  tag: VerseTag(v, currentWord, tag.isInVerse),
+                  recognizer: recognizer);
+              remainingText = remainingText.substring(endIndex);
+              currentWord += wordCount;
+              return span;
+            } else {
+              tec.dmPrint('ERROR in _spanToWord! tag: $tag, word: $word, wordCount: $wordCount, endIndex: $endIndex, currentWord: $currentWord, remainingText: "$remainingText", text: "$text"');
+              assert(false);
+              return const TextSpan(text: 'FAILED!');
+            }
+          }
+
+          // We're building a list of one or more spans...
+          final spans = <InlineSpan>[];
+
+          // Iterate through all the highlights for the words in the tag...
+          for (final highlight
+              in widget.highlights.highlightsForVerse(v, startWord: tag.word, endWord: endWord)) {
+            final hlStartWord = highlight.ref.startWordForVerse(v);
+            final hlEndWord = highlight.ref.endWordForVerse(v);
+
+            // If there are one or more words before the highlight, add them with the default style.
+            if (currentWord < hlStartWord) {
+              spans.add(_spanToWord(hlStartWord - 1, style));
+            }
+
+            TextStyle hlStyle = style;
             final color = Color(highlight.color ?? 0xfff8f888);
             switch (highlight.highlightType) {
               case HighlightType.highlight:
-                textStyle = style.merge(
+                hlStyle = _merge(style,
                     isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color));
                 break;
               case HighlightType.underline:
-                textStyle = style.merge(TextStyle(
-                    decoration: TextDecoration.underline,
-                    decorationColor: color.withAlpha(192),
-                    decorationThickness: 2));
+                hlStyle = _merge(
+                    style,
+                    TextStyle(
+                        decoration: TextDecoration.underline,
+                        decorationColor: color.withAlpha(192),
+                        decorationThickness: 2));
                 break;
               default:
                 break;
             }
+
+            // Add the highlight words with the highlight style.
+            spans.add(_spanToWord(hlEndWord, hlStyle));
           }
+
+          // If there is still text left, add it with the default style.
+          if (remainingText.isNotEmpty) {
+            spans.add(TaggableTextSpan(
+                text: remainingText,
+                style: style,
+                tag: VerseTag(v, currentWord, tag.isInVerse),
+                recognizer: recognizer));
+          }
+
+          return spans.length == 1
+              ? spans.first
+              : TextSpan(children: spans, recognizer: recognizer);
         }
-        textStyle ??= style;
-        return TaggableTextSpan(
-            text: text,
-            style: textStyle,
-            tag: tag,
-            recognizer: TapGestureRecognizer()..onTap = () => _toggleSelectionForVerse(tag.verse));
-      } else {
-        return TextSpan(text: text, style: style);
       }
+      return TextSpan(text: text, style: style);
     }
 
     return BlocListener<SelectionStyleBloc, SelectionStyle>(
@@ -540,7 +604,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
             verse: _selectionStart.verse,
             word: _selectionStart.word,
             endVerse: _selectionEnd.verse,
-            endWord: _selectionEnd.word);
+            endWord: _selectionEnd.word - 1);
 
     if (!_isSelectionTrialMode) {
       _selectionController.deselectAll();
@@ -706,28 +770,52 @@ extension on TaggedText {
   int get word {
     final t = tag;
     if (t is VerseTag) {
-      final words = _countOfWordsInString(text, toIndex: index);
+      final words = text?.countOfWords(toIndex: index) ?? 0;
       return t.word + words;
     }
     return null; // ignore: avoid_returning_null
   }
 }
 
-int _countOfWordsInString(String string, {int toIndex}) {
-  if (string == null) return 0;
-  var count = 0;
-  var isInRune = false;
-  var i = 0;
-  for (final rune in string.runes) {
-    if (toIndex != null && i >= toIndex) break;
-    final isWs = tec.isWhitespace(rune);
-    if (isInRune) {
-      if (isWs) isInRune = false;
-    } else if (!isWs) {
-      count++;
-      isInRune = true;
+extension ChapterViewExtOnString on String {
+  int countOfWords({int toIndex}) {
+    var count = 0;
+    var isInWord = false;
+    var i = 0;
+    final units = codeUnits;
+    for (final codeUnit in units) {
+      if (toIndex != null && i >= toIndex) break;
+      final isWhitespace = tec.isWhitespace(codeUnit);
+      if (isInWord) {
+        if (isWhitespace) isInWord = false;
+      } else if (!isWhitespace) {
+        count++;
+        isInWord = true;
+      }
+      i++;
     }
-    i++;
+    return count;
   }
-  return count;
+
+  int indexAtEndOfWord(int word) {
+    if (word == null || word <= 0) return 0;
+    var wordCount = 0;
+    var isInWord = false;
+    var i = 0;
+    final units = codeUnits;
+    for (final codeUnit in units) {
+      final isWhitespace = tec.isWhitespace(codeUnit);
+      if (isInWord) {
+        if (isWhitespace) {
+          isInWord = false;
+          if (word == wordCount) return i;
+        }
+      } else if (!isWhitespace) {
+        wordCount++;
+        isInWord = true;
+      }
+      i++;
+    }
+    return i;
+  }
 }
