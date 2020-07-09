@@ -228,7 +228,8 @@ class _ChapterViewState extends State<_ChapterView> {
       vendorFolder: (widget.baseUrl?.startsWith('http') ?? false)
           ? null
           : _useZondervanCss(widget.volumeId) ? 'zondervan' : 'tecarta',
-      customStyles: ' .${_useZondervanCss(widget.volumeId) ? 'C' : 'cno'} { display: none; } ',
+      customStyles: ' .${_useZondervanCss(widget.volumeId) ? 'C' : 'cno'} { display: none; } '
+          '.FOOTNO { line-height: inherit; }',
     );
 
     return Container(
@@ -293,9 +294,17 @@ class _BibleHtml extends StatefulWidget {
 
 class _BibleHtmlState extends State<_BibleHtml> {
   final _scrollController = ScrollController();
+  final _selectionController = TecSelectableController();
+
+  @override
+  void initState() {
+    super.initState();
+    _selectionController.addListener(_onSelectionChanged);
+  }
 
   @override
   void dispose() {
+    _selectionController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -354,116 +363,185 @@ class _BibleHtmlState extends State<_BibleHtml> {
         backgroundColor:
             isDarkTheme ? Colors.blueGrey[800] : const Color(0xffe6e6e6)); // Colors.blue[100]);
 
-    var currentVerse = 0;
-    var currentWord = 1;
-    var skipping = false;
-    var skippedLevel = 0;
+    var currentVerse = 1;
+    var currentWord = 0;
+    var isInVerse = false;
+    var isInNonVerseElement = false;
+    var nonVerseElementLevel = 0;
+    var wasInVerse = false;
 
     ///
     /// Local function for tagging HTML elements.
     ///
     Object _tagHtmlElement(
-        String name, LinkedHashMap<dynamic, String> attrs, String text, int level, bool isVisible) {
-      if (skipping && level <= skippedLevel) skipping = false;
-      if (!skipping) {
+      String name,
+      LinkedHashMap<dynamic, String> attrs,
+      String text,
+      int level,
+      bool isVisible,
+    ) {
+      if (isInNonVerseElement && level <= nonVerseElementLevel) {
+        isInNonVerseElement = false;
+        isInVerse = wasInVerse;
+      }
+      if (!isInNonVerseElement) {
         final id = attrs.id;
         if (tec.isNotNullOrEmpty(id) &&
             name == 'div' &&
             (attrs.className == 'v' || attrs.className.startsWith('v '))) {
           final verse = int.tryParse(id);
-          if (verse != null && verse > currentVerse) {
-            currentVerse = verse;
-            currentWord = 1;
-          } else {
-            tec.dmPrint('current verse: $currentVerse, new verse: $id');
-            assert(false);
+          if (verse != null) {
+            isInVerse = true;
+            if (verse > currentVerse) {
+              currentVerse = verse;
+              currentWord = 0;
+            } else if (verse == 1) {
+              currentWord++; // The old app has a chapter number, which is counted as a word.
+            } else {
+              tec.dmPrint('current verse: $currentVerse, new verse: $id');
+              assert(false);
+            }
           }
         } else if (id == 'copyright' ||
             attrs['v'] == '0' ||
             _isSectionElement(name, attrs, level, isVisible)) {
-          skipping = true;
-          skippedLevel = level;
-        } else if (text?.isNotEmpty ?? false) {
-          final wordCount = tec.countOfWordsInString(text);
-          //tec.dmPrint('$wordCount words for text: $text');
-          if (wordCount > 0) {
-            final word = currentWord;
-            currentWord += wordCount;
-            if (wordCount == 1) {
-              tec.dmPrint('verse: $currentVerse, word $word: [$text]');
-            } else {
-              tec.dmPrint('verse: $currentVerse, words $word-${word + wordCount - 1}: [$text]');
-            }
-            return VerseTag(currentVerse, word);
-          }
+          wasInVerse = isInVerse;
+          isInVerse = false;
+          isInNonVerseElement = true;
+          nonVerseElementLevel = level;
         }
       }
 
-      return skipping ? null : VerseTag(currentVerse, currentWord);
+      if (text?.isNotEmpty ?? false) {
+        final wordCount = tec.countOfWordsInString(text);
+        // tec.dmPrint('$wordCount words for text: $text');
+        if (wordCount > 0) {
+          final word = currentWord;
+          currentWord += wordCount;
+          if (wordCount == 1) {
+            // tec.dmPrint('verse: $currentVerse, word $word: [$text]');
+          } else {
+            // tec.dmPrint('verse: $currentVerse, words $word-${word + wordCount - 1}: [$text]');
+          }
+          return VerseTag(currentVerse, word, isInVerse);
+        }
+      }
+
+      return VerseTag(currentVerse, currentWord, isInVerse);
     }
+
+    TextStyle _merge(TextStyle s1, TextStyle s2) =>
+        s1 == null ? s2 : s2 == null ? s1 : s1.merge(s2);
 
     ///
     /// Local function that converts an HTML text node into a TextSpan.
     ///
     InlineSpan _spanForText(String text, TextStyle style, Object tag) {
       if (tag is VerseTag) {
-        TextStyle textStyle;
+        final recognizer = TapGestureRecognizer()
+          ..onTap = () => _toggleSelectionForVerse(tag.verse);
+
+        // If not in trial mode, and this whole verse is selected, just
+        // return a span with the selected text style.
         if (!_isSelectionTrialMode && _selectedVerses.contains(tag.verse)) {
-          textStyle = style.merge(selectedTextStyle);
+          return TaggableTextSpan(
+              text: text,
+              style: tag.isInVerse ? _merge(style, selectedTextStyle) : style,
+              tag: tag,
+              recognizer: recognizer);
         } else if (tag.verse != null) {
-          final highlight = widget.highlights.highlightForVerse(tag.verse);
-          if (highlight != null) {
-            final color = Color(highlight.color ?? 0xfff8f888);
-            switch (highlight.highlightType) {
-              case HighlightType.highlight:
-                textStyle = style.merge(
-                    isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color));
-                break;
-              case HighlightType.underline:
-                textStyle = style.merge(TextStyle(
-                    decoration: TextDecoration.underline,
-                    decorationColor: color.withAlpha(192),
-                    decorationThickness: 2));
-                break;
-              default:
-                break;
+          final v = tag.verse;
+          var currentWord = tag.word;
+          final endWord = currentWord + tec.countOfWordsInString(text) - 1;
+          var remainingText = text;
+
+          ///
+          /// Local func that returns a new span from the `remainingText` up
+          /// to and including the given [word], with the given [style]. And
+          /// also updates `currentWord` and `remainingText` appropriately.
+          ///
+          InlineSpan _spanToWord(int word, TextStyle style) {
+            final wordCount = (word - currentWord) + 1;
+            final endIndex = remainingText.indexAtEndOfWord(wordCount);
+            if (endIndex > 0 && endIndex <= remainingText.length) {
+              final span = TaggableTextSpan(
+                  text: remainingText.substring(0, endIndex),
+                  style: style,
+                  tag: VerseTag(v, currentWord, tag.isInVerse),
+                  recognizer: recognizer);
+              remainingText = remainingText.substring(endIndex);
+              currentWord += wordCount;
+              return span;
+            } else {
+              tec.dmPrint('ERROR in _spanToWord! tag: $tag, word: $word, '
+                  'wordCount: $wordCount, endIndex: $endIndex, currentWord: $currentWord, '
+                  'remainingText: "$remainingText", text: "$text"');
+              assert(false);
+              return const TextSpan(text: 'FAILED!');
             }
           }
-        }
-        textStyle ??= style;
-        return TaggableTextSpan(
-            text: text,
-            style: textStyle,
-            tag: tag,
-            recognizer: TapGestureRecognizer()..onTap = () => _toggleSelectionForVerse(tag.verse));
-      } else {
-        return TextSpan(text: text, style: style);
-      }
-    }
 
-    ///
-    /// SelectionStyleBloc listener
-    ///
-    void _selectionStyleBlocListener(BuildContext context, SelectionStyle state) {
-      _isSelectionTrialMode = state.isTrialMode;
-      final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
-      if (_selectedVerses.isEmpty || bloc == null) return;
-      for (final verse in _selectedVerses) {
-        if (verse == null) continue;
-        final ref = Reference(volume: volume, book: book, chapter: chapter, verse: verse);
-        if (state.type == HighlightType.clear) {
-          bloc.add(HighlightsEvent.clear(ref));
-        } else {
-          bloc.add(HighlightsEvent.add(type: state.type, color: state.color, ref: ref));
+          // We're building a list of one or more spans...
+          final spans = <InlineSpan>[];
+
+          // Iterate through all the highlights for the words in the tag...
+          for (final highlight
+              in widget.highlights.highlightsForVerse(v, startWord: tag.word, endWord: endWord)) {
+            final hlStartWord = highlight.ref.startWordForVerse(v);
+            final hlEndWord = highlight.ref.endWordForVerse(v);
+
+            // If there are one or more words before the highlight, add them with the default style.
+            if (currentWord < hlStartWord) {
+              spans.add(_spanToWord(hlStartWord - 1, style));
+            }
+
+            TextStyle hlStyle = style;
+            if (tag.isInVerse ||
+                highlight.ref.word != Reference.minWord ||
+                highlight.ref.endWord != Reference.maxWord) {
+              final color = Color(highlight.color ?? 0xfff8f888);
+              switch (highlight.highlightType) {
+                case HighlightType.highlight:
+                  hlStyle = _merge(style,
+                      isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color));
+                  break;
+                case HighlightType.underline:
+                  hlStyle = _merge(
+                      style,
+                      TextStyle(
+                          decoration: TextDecoration.underline,
+                          decorationColor: color.withAlpha(192),
+                          decorationThickness: 2));
+                  break;
+                default:
+                  break;
+              }
+            }
+
+            // Add the highlight words with the highlight style.
+            spans.add(_spanToWord(hlEndWord, hlStyle));
+          }
+
+          // If there is still text left, add it with the default style.
+          if (remainingText.isNotEmpty) {
+            spans.add(TaggableTextSpan(
+                text: remainingText,
+                style: style,
+                tag: VerseTag(v, currentWord, tag.isInVerse),
+                recognizer: recognizer));
+          }
+
+          return spans.length == 1
+              ? spans.first
+              : TextSpan(children: spans, recognizer: recognizer);
         }
       }
-      if (!_isSelectionTrialMode) {
-        _clearAllSelectedVerses();
-      }
+      return TextSpan(text: text, style: style);
     }
 
     return BlocListener<SelectionStyleBloc, SelectionStyle>(
-      listener: _selectionStyleBlocListener,
+      listener: (context, selectionStyle) => Future.delayed(Duration.zero,
+          () => _selectionStyleChanged(context, selectionStyle, volume, book, chapter)),
       child: Semantics(
         //textDirection: textDirection,
         label: 'Bible text',
@@ -506,7 +584,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
                   // Word range selection related:
                   selectable: !kIsWeb && _selectedVerses.isEmpty,
-                  onSelectedTextChanged: _onSelectedTextChanged,
+                  selectionController: _selectionController,
 
                   // `versesToShow` related (when viewing a subset of verses in the chapter):
                   isInitialHtmlElementVisible:
@@ -525,24 +603,71 @@ class _BibleHtmlState extends State<_BibleHtml> {
   var _isSelectionTrialMode = false;
 
   //-------------------------------------------------------------------------
-  // Word range selection:
+  // Selection related:
 
-  TaggedText _start;
-  TaggedText _end;
+  bool get _hasSelection => _selectedVerses.isNotEmpty || _selectionStart != null;
 
-  void _onSelectedTextChanged(List<TaggedText> tags) {
-    if ((tags?.length ?? 0) == 2) {
-      _start = tags.first;
-      _end = tags.last;
-      tec.dmPrint('START: $_start');
-      tec.dmPrint('END:   $_end');
-    } else {
-      _start = null;
-      _end = null;
-      tec.dmPrint('NO WORDS SELECTED');
+  void _selectionStyleChanged(
+      BuildContext context, SelectionStyle selectionStyle, int volume, int book, int chapter) {
+    final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
+    if (bloc == null || !_hasSelection) return;
+    _isSelectionTrialMode = selectionStyle.isTrialMode;
+
+    final ref = _selectedVerses.isNotEmpty
+        ? _referenceWithVerses(_selectedVerses, volume: volume, book: book, chapter: chapter)
+        : Reference(
+            volume: volume,
+            book: book,
+            chapter: chapter,
+            verse: _selectionStart.verse,
+            word: _selectionStart.word,
+            endVerse: _selectionEnd.verse,
+            endWord: _selectionEnd.word - 1);
+
+    if (!_isSelectionTrialMode) {
+      _selectionController.deselectAll();
+      _clearAllSelectedVerses();
     }
 
-    context.bloc<SelectionBloc>()?.add(SelectionState(isTextSelected: _start != null));
+    if (selectionStyle.type == HighlightType.clear) {
+      bloc.add(HighlightsEvent.clear(ref));
+    } else {
+      bloc.add(
+          HighlightsEvent.add(type: selectionStyle.type, color: selectionStyle.color, ref: ref));
+    }
+  }
+
+  //-------------------------------------------------------------------------
+  // Word range selection:
+
+  TaggedText _selectionStart;
+  TaggedText _selectionEnd;
+
+  void _onSelectionChanged() {
+    final isTextSelected = _selectionController.isTextSelected;
+    if (isTextSelected) _clearAllSelectedVerses();
+
+    final start = _selectionController.selectionStart;
+    final end = _selectionController.selectionEnd;
+    if (start != null && end != null) {
+      _selectionStart = start.tag is VerseTag ? start : null;
+      _selectionEnd = end.tag is VerseTag ? end : null;
+      if (_selectionStart == null || _selectionEnd == null) {
+        _selectionStart = _selectionEnd = null;
+        tec.dmPrint('ERROR, EITHER START OR END HAS INVALID TAG!');
+        tec.dmPrint('START: $_selectionStart');
+        tec.dmPrint('END:   $_selectionEnd');
+        assert(false);
+      } else {
+        // tec.dmPrint('START: $_selectionStart');
+        // tec.dmPrint('END:   $_selectionEnd');
+      }
+    } else {
+      _selectionStart = _selectionEnd = null;
+      tec.dmPrint('No words selected.');
+    }
+
+    context.bloc<SelectionBloc>()?.add(SelectionState(isTextSelected: _selectionStart != null));
   }
 
   //-------------------------------------------------------------------------
@@ -571,6 +696,46 @@ class _BibleHtmlState extends State<_BibleHtml> {
       context.bloc<SelectionBloc>()?.add(SelectionState(isTextSelected: isTextSelected));
     }
   }
+
+  //-------------------------------------------------------------------------
+}
+
+Reference _referenceWithVerses(
+  Iterable<int> verses, {
+  int volume,
+  int book,
+  int chapter,
+  DateTime modified,
+}) {
+  if (verses?.isEmpty ?? true) return null;
+  final sorted = List.of(Set.of(verses))..sort();
+  final first = sorted.first;
+  final last = sorted.last;
+  final excluded = sorted.missingValues();
+  return Reference(
+      volume: volume,
+      book: book,
+      chapter: chapter,
+      verse: first,
+      endVerse: last,
+      excluded: excluded.isEmpty ? null : excluded.toSet(),
+      modified: modified);
+}
+
+extension on Iterable<int> {
+  List<int> missingValues() {
+    if (isEmpty ?? true) return [];
+    final set = Set.of(this);
+    final sorted = List.of(set)..sort();
+    if (sorted.last - sorted.first > sorted.length) {
+      final first = sorted.first;
+      final last = sorted.last;
+      final missing = Set.of(Iterable<int>.generate((last - first) + 1, (i) => first + i))
+        ..removeAll(set);
+      return missing.toList()..sort();
+    }
+    return [];
+  }
 }
 
 const _lineSpacing = 1.4;
@@ -594,8 +759,11 @@ const TextStyle _htmlDefaultTextStyle = TextStyle(
 class VerseTag {
   final int verse;
   final int word;
+  final bool isInVerse;
 
-  const VerseTag(this.verse, this.word) : assert(verse != null && word != null);
+  // ignore: avoid_positional_boolean_parameters
+  const VerseTag(this.verse, this.word, this.isInVerse)
+      : assert(verse != null && word != null && isInVerse != null);
 
   @override
   bool operator ==(Object other) =>
@@ -603,13 +771,69 @@ class VerseTag {
       other is VerseTag &&
           runtimeType == other.runtimeType &&
           verse == other.verse &&
-          word == other.word;
+          word == other.word &&
+          isInVerse == other.isInVerse;
 
   @override
-  int get hashCode => verse.hashCode ^ word.hashCode;
+  int get hashCode => verse.hashCode ^ word.hashCode ^ isInVerse.hashCode;
 
   @override
   String toString() {
-    return ('{ "verse": $verse, "word": $word }');
+    return ('{ "v": $verse, "w": $word, "inV": $isInVerse }');
+  }
+}
+
+extension on TaggedText {
+  int get verse => (tag is VerseTag) ? (tag as VerseTag).verse : null;
+  int get word {
+    final t = tag;
+    if (t is VerseTag) {
+      final words = text?.countOfWords(toIndex: index) ?? 0;
+      return t.word + words;
+    }
+    return null; // ignore: avoid_returning_null
+  }
+}
+
+extension ChapterViewExtOnString on String {
+  int countOfWords({int toIndex}) {
+    var count = 0;
+    var isInWord = false;
+    var i = 0;
+    final units = codeUnits;
+    for (final codeUnit in units) {
+      if (toIndex != null && i >= toIndex) break;
+      final isWhitespace = tec.isWhitespace(codeUnit);
+      if (isInWord) {
+        if (isWhitespace) isInWord = false;
+      } else if (!isWhitespace) {
+        count++;
+        isInWord = true;
+      }
+      i++;
+    }
+    return count;
+  }
+
+  int indexAtEndOfWord(int word) {
+    if (word == null || word <= 0) return 0;
+    var wordCount = 0;
+    var isInWord = false;
+    var i = 0;
+    final units = codeUnits;
+    for (final codeUnit in units) {
+      final isWhitespace = tec.isWhitespace(codeUnit);
+      if (isInWord) {
+        if (isWhitespace) {
+          isInWord = false;
+          if (word == wordCount) return i;
+        }
+      } else if (!isWhitespace) {
+        wordCount++;
+        isInWord = true;
+      }
+      i++;
+    }
+    return i;
   }
 }

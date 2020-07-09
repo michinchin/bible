@@ -914,7 +914,7 @@ packages:
       name: tec_html
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.3"
   tec_platform_util:
     dependency: transitive
     description:
@@ -935,7 +935,7 @@ packages:
       name: tec_selectable
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.1.2"
+    version: "1.2.0"
   tec_user_account:
     dependency: "direct main"
     description:
@@ -956,7 +956,7 @@ packages:
       name: tec_volumes
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.3"
+    version: "1.0.4"
   tec_widgets:
     dependency: "direct main"
     description:
