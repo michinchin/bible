@@ -19,7 +19,7 @@ class SelectionBloc extends Bloc<SelectionState, SelectionState> {
 
   @override
   Stream<SelectionState> mapEventToState(SelectionState event) async* {
-    tec.dmPrint('$event');
+    // tec.dmPrint('$event');
     yield event;
   }
 }
@@ -41,7 +41,7 @@ class SelectionStyleBloc extends Bloc<SelectionStyle, SelectionStyle> {
   @override
   Stream<SelectionStyle> mapEventToState(SelectionStyle event) async* {
     final newState = event.modified != null ? event : event.copyWith(modified: DateTime.now());
-    tec.dmPrint('$newState');
+    // tec.dmPrint('$newState');
     yield newState;
   }
 }

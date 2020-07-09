@@ -26,6 +26,34 @@ extension ChapterHighlightsExt on ChapterHighlights {
     }
     return null;
   }
+
+  Iterable<Highlight> highlightsForVerse(int verse,
+      {int startWord = Reference.minWord, int endWord = Reference.maxWord}) {
+    assert(startWord != null && endWord != null);
+
+    // We keep the list sorted by each highlight's start word for the current verse.
+    final hls = <Highlight>[];
+
+    for (final hl in highlights) {
+      if (startWord > endWord) break;
+
+      final start = hl.ref.startWordForVerse(verse);
+      if (start == null || start > endWord) continue;
+      if (start < startWord) {
+        final end = hl.ref.endWordForVerse(verse);
+        if (end < startWord) continue;
+      }
+
+      // Insert the highlight in sorted order.
+      hls.insert(
+          lowerBound<Highlight>(hls, hl,
+              compare: (a, b) =>
+                  a.ref.startWordForVerse(verse).compareTo(b.ref.startWordForVerse(verse))),
+          hl);
+    }
+
+    return hls;
+  }
 }
 
 @freezed
@@ -107,7 +135,7 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
   @override
   Stream<ChapterHighlights> mapEventToState(HighlightsEvent event) async* {
     final newState = event.when(add: _add, clear: _clear, updateFromDb: _updateFromDb);
-    tec.dmPrint('Updated to $newState');
+    // tec.dmPrint('Updated to $newState');
     yield newState;
   }
 
