@@ -138,7 +138,9 @@ const BoxConstraints _defaultConstraints = BoxConstraints(maxWidth: 320, maxHeig
 List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return [
     IconButton(
-      icon: const Icon(Icons.photo_size_select_large),
+      icon: IconWithNumberBadge(
+          icon: Icons.photo_size_select_large,
+          value: context.bloc<ViewManagerBloc>().countOfInvisibleViews),
       tooltip: 'Windows',
       onPressed: () => showMoreMenu(context, bodyKey, state, size),
     ),
@@ -152,20 +154,6 @@ List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState
   ];
 }
 
-int calculateViewsNotOnScreen(BuildContext context) {
-  final bloc = context.bloc<ViewManagerBloc>(); //ignore: close_sinks
-  final totalViews = bloc.state.views.length;
-  // TODO(abby): actually calculate views not on screen
-  return totalViews;
-}
-
-// void showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
-//   final bloc = context.bloc<ViewManagerBloc>(); //ignore: close_sinks
-//   final moreThanOneView = bloc.state.views.length > 1;
-//   context.bloc<SheetManagerBloc>().setUid(state.uid);
-//   context.bloc<SheetManagerBloc>().changeSize(moreThanOneView ? SheetSize.medium : SheetSize.mini);
-//   context.bloc<SheetManagerBloc>().changeType(SheetType.windows);
-// }
 Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return showTecModalPopup<void>(
     context: context,

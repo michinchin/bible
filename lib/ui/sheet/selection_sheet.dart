@@ -199,8 +199,6 @@ class _SelectionSheetState extends State<SelectionSheet> {
           children: mediumViewChildren,
         );
 
-    final smallScreen = MediaQuery.of(context).size.height < 600;
-
     return Padding(
       padding: const EdgeInsets.only(left: 15, right: 15),
       child: Column(children: [

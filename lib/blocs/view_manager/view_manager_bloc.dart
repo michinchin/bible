@@ -48,6 +48,11 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   int get countOfVisibleViews => _viewRects.where((e) => e.isVisible).length;
 
   ///
+  /// Returns the number of views that are currently not on the screen.
+  ///
+  int get countOfInvisibleViews => countOfOpenViews - countOfVisibleViews;
+
+  ///
   /// Returns the ViewState of the view with the given [uid], or null if none.
   ///
   ViewState stateOfViewWithUid(int uid) =>

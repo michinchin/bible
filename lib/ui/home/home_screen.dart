@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
@@ -26,15 +25,9 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _HomeScreen extends StatefulWidget {
-  const _HomeScreen({Key key}) : super(key: key);
-
-  @override
-  __HomeScreenState createState() => __HomeScreenState();
-}
-
-class __HomeScreenState extends State<_HomeScreen> {
-  SheetSize _previousSheetSize;
+class _HomeScreen extends StatelessWidget {
+  const _HomeScreen();
+  
   @override
   Widget build(BuildContext context) {
     // tec.dmPrint('_HomeScreen build()');
