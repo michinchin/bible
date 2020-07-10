@@ -118,6 +118,8 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
       // We keep the highlights sorted by modified date with most recent at the bottom.
       hls.sort((a, b) => a?.modified?.compareTo(b.modified) ?? 1);
 
+      _printHighlights(hls, withTitle: 'HIGHLIGHTS IMPORTED FROM DB:');
+
       add(HighlightsEvent.updateFromDb(hls: hls));
     }
   }
@@ -133,7 +135,21 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
   }
 
   ChapterHighlights _updateFromDb(List<Highlight> hls) {
-    return ChapterHighlights(volume, book, chapter, hls);
+    Stopwatch stopwatch;
+    if (kDebugMode) stopwatch = Stopwatch()..start();
+
+    var newList = state.highlights;
+    for (final hl in hls) {
+      newList = newList.copySubtracting(hl.ref)..add(hl);
+    }
+
+    if (kDebugMode) {
+      tec.dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');
+    }
+
+    _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
+
+    return ChapterHighlights(volume, book, chapter, newList);
   }
 
   ChapterHighlights _add(HighlightType type, int color, Reference ref) {
@@ -155,5 +171,20 @@ extension HighlightsBlocExtOnListOfHighlight on List<Highlight> {
       (highlight) =>
           highlight.ref.subtracting(ref).map<Highlight>((e) => highlight.copyWith(ref: e)),
     ).toList();
+  }
+}
+
+void _printHighlights(List<Highlight> hls, {String withTitle}) {
+  if (kDebugMode) {
+    tec.dmPrint('');
+    tec.dmPrint('-----------------------------------------------------');
+    if (withTitle?.isNotEmpty ?? false) tec.dmPrint(withTitle);
+    tec.dmPrint('');
+    for (final hl in hls) {
+      tec.dmPrint(hl.ref);
+    }
+    tec.dmPrint('');
+    tec.dmPrint('-----------------------------------------------------\n');
+    tec.dmPrint('');
   }
 }
