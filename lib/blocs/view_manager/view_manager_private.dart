@@ -26,27 +26,18 @@ class _VMViewStack extends StatelessWidget {
     );
 
     // tec.dmPrint('_VMViewStackState build()');
-    List<Widget> children;
+
     final maximizedView =
         vmState.views.firstWhere((e) => e.uid == vmState.maximizedViewUid, orElse: () => null);
-    if (maximizedView == null) {
-      final rows = _buildRows(_Size.ideal, vmState, constraints)..balance(constraints);
-      children = rows.toViewList(constraints);
-    } else {
-      var i = 0;
-      final views = List.of(vmState.views)
-        ..remove(maximizedView)
-        ..add(maximizedView);
-      children = views
-          .map<Widget>((e) => e.toWidget(
-              constraints: constraints,
-              x: 0,
-              y: 0,
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              index: i++))
-          .toList();
-    }
+
+    final viewRects = <ViewRect>[];
+    final rows = _buildRows(_Size.ideal, vmState, constraints)..balance(constraints);
+    final children = rows.toViewList(constraints, maximizedView, viewRects);
+
+    // Update the view rects...
+    assert(context.bloc<ViewManagerBloc>() != null);
+    context.bloc<ViewManagerBloc>()?._viewRects = viewRects;
+
     return Theme(
       data: theme.copyWith(
         appBarTheme: newAppBarTheme,
@@ -314,7 +305,11 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
   ///
   /// Returns the positioned view widgets.
   ///
-  List<Widget> toViewList(BoxConstraints constraints) {
+  List<Widget> toViewList(
+    BoxConstraints constraints,
+    ViewState maximizedView,
+    List<ViewRect> rects,
+  ) {
     final views = <Widget>[];
 
     var i = 0;
@@ -323,6 +318,10 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     final yExtraPerRow = math.max(0.0, (constraints.maxHeight - idealHeight(constraints)) / length);
     var yExtra = yExtraPerRow > 0.0 ? 0.0 : constraints.maxHeight - minHeight(constraints);
 
+    final noViewIsMaximized = (maximizedView == null);
+    Widget maximizedViewWidget;
+
+    var r = 0;
     for (final row in this) {
       var x = 0.0;
 
@@ -339,6 +338,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           math.max(0.0, (constraints.maxWidth - row.idealWidth(constraints)) / row.length);
       var xExtra = xExtraPerItem > 0.0 ? 0.0 : constraints.maxWidth - row.minWidth(constraints);
 
+      var c = 0;
       for (final state in row) {
         double width;
         if (xExtraPerItem > 0.0) {
@@ -350,14 +350,57 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           width = state.minWidth(constraints) + xDelta;
         }
 
-        views.add(state.toWidget(
-            constraints: constraints, x: x, y: y, width: width, height: height, index: i));
+        final thisViewIsMaximized = (maximizedView?.uid == state.uid);
+
+        // This is always created with the view's no-maximized rect. Should it be?
+        rects.add(ViewRect(
+            uid: state.uid,
+            isVisible: noViewIsMaximized || thisViewIsMaximized,
+            row: r,
+            column: c,
+            rect: Rect.fromLTWH(x, y, width, height)));
+
+        if (thisViewIsMaximized) {
+          maximizedViewWidget = state.toWidget(
+              constraints: constraints,
+              x: 0,
+              y: 0,
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              index: i);
+        } else {
+          views.add(state.toWidget(
+              constraints: constraints, x: x, y: y, width: width, height: height, index: i));
+        }
 
         i++;
+        c++;
         x += width;
       }
+
+      r++;
       y += height;
     }
+
+    // It's possible that the maximized view doesn't fit on the screen when not maximized...
+    if (maximizedView != null && maximizedViewWidget == null) {
+      rects.add(ViewRect(
+          uid: maximizedView.uid,
+          isVisible: true,
+          row: 0,
+          column: 0,
+          rect: Rect.fromLTWH(0, 0, constraints.maxWidth, constraints.maxHeight)));
+
+      maximizedViewWidget = maximizedView.toWidget(
+          constraints: constraints,
+          x: 0,
+          y: 0,
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          index: i);
+    }
+
+    if (maximizedViewWidget != null) views.add(maximizedViewWidget);
 
     return views;
   }

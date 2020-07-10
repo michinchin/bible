@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
@@ -58,10 +58,12 @@ extension ChapterHighlightsExt on ChapterHighlights {
 
 @freezed
 abstract class Highlight with _$Highlight {
-  const factory Highlight(HighlightType highlightType,
-      int color,
-      Reference ref,
-      DateTime modified,) = _Highlight;
+  const factory Highlight(
+    HighlightType highlightType,
+    int color,
+    Reference ref,
+    DateTime modified,
+  ) = _Highlight;
 
   factory Highlight.from(UserItem ui) {
     final ref = Reference(
@@ -74,7 +76,7 @@ abstract class Highlight with _$Highlight {
     );
 
     final highlightType =
-    (ui.color == 5 || ui.color > 1000) ? HighlightType.underline : HighlightType.highlight;
+        (ui.color == 5 || ui.color > 1000) ? HighlightType.underline : HighlightType.highlight;
 
     return Highlight(
       highlightType,
@@ -87,8 +89,7 @@ abstract class Highlight with _$Highlight {
 
 @freezed
 abstract class HighlightsEvent with _$HighlightsEvent {
-  const factory HighlightsEvent.updateFromDb(
-      {@required List<Highlight> hls}) = _UpdateFromDb;
+  const factory HighlightsEvent.updateFromDb({@required List<Highlight> hls}) = _UpdateFromDb;
   const factory HighlightsEvent.add(
       {@required HighlightType type, @required int color, @required Reference ref}) = _Add;
   const factory HighlightsEvent.clear(Reference ref) = _Clear;
@@ -113,6 +114,9 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
       for (final ui in uc) {
         hls.add(Highlight.from(ui));
       }
+
+      // We keep the highlights sorted by modified date with most recent at the bottom.
+      hls.sort((a, b) => a?.modified?.compareTo(b.modified) ?? 1);
 
       add(HighlightsEvent.updateFromDb(hls: hls));
     }

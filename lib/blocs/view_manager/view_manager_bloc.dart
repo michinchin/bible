@@ -25,8 +25,6 @@ const String _key = 'viewManagerState';
 /// ViewManagerBloc
 ///
 class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
-  final tec.KeyValueStore _kvStore;
-
   ///
   /// Returns a new [ViewManagerBloc]. This should only be done once at the
   /// appropriate place in your widget tree using `BlocProvider(create:)`.
@@ -35,11 +33,40 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       : assert(kvStore != null),
         _kvStore = kvStore;
 
+  final tec.KeyValueStore _kvStore;
+  var _viewRects = <ViewRect>[]; // ignore: prefer_final_fields
+
   ///
-  /// Returns the index of the view with the given uid, or -1 if not found.
+  /// Returns the total number of open views. Open does not mean visible.
+  ///
+  int get countOfOpenViews => state.views?.length ?? 0;
+
+  ///
+  /// Returns the number of views that are currently visible on the screen.
+  /// If a view is maximized, 1 is returned.
+  ///
+  int get countOfVisibleViews => _viewRects.where((e) => e.isVisible).length;
+
+  ///
+  /// Returns the ViewState of the view with the given [uid], or null if none.
+  ///
+  ViewState stateOfViewWithUid(int uid) =>
+      state.views.firstWhere((e) => e.uid == uid, orElse: () => null);
+
+  ///
+  /// Returns the index of the view with the given [uid], or -1 if not found.
   ///
   int indexOfView(int uid) => state.views.indexWhere((e) => e.uid == uid);
 
+  ///
+  /// Returns the ViewRect of the view with the given [uid], or null if none.
+  ///
+  ViewRect rectOfViewWithUid(int uid) =>
+      _viewRects.firstWhere((e) => e.uid == uid, orElse: () => null);
+
+  ///
+  /// Initial state
+  ///
   @override
   ViewManagerState get initialState {
     final jsonStr = _kvStore.getString(_key);
@@ -177,6 +204,20 @@ abstract class ViewState with _$ViewState {
 
   /// fromJson
   factory ViewState.fromJson(Map<String, dynamic> json) => _$ViewStateFromJson(json);
+}
+
+///
+/// View rectangle and other info.
+///
+@immutable
+class ViewRect {
+  final int uid;
+  final bool isVisible;
+  final int row;
+  final int column;
+  final Rect rect;
+
+  const ViewRect({this.uid, this.isVisible, this.row, this.column, this.rect});
 }
 
 ///
