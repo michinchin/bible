@@ -166,7 +166,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
     final scrollingChildren = [
       noColorButton,
       underlineButton,
-      for (final color in mainColors.take(4)) ...[
+      for (final color in mainColors.take(1)) ...[
         _ColorPickerButton(
           isForUnderline: _underlineMode,
           color: color,
@@ -179,23 +179,10 @@ class _SelectionSheetState extends State<SelectionSheet> {
           onPressed: () {},
         ),
       ],
-      const SizedBox(width: 15)
     ];
 
     Widget _miniView() => !_showAllColors
-        ? ShaderMask(
-            shaderCallback: (bounds) {
-              return LinearGradient(
-                begin: Alignment.centerRight,
-                end: Alignment(0.8, Alignment.centerRight.y),
-                colors: const [Colors.transparent, Colors.white],
-              ).createShader(bounds);
-            },
-            child: ListView.separated(
-                itemCount: scrollingChildren.length,
-                scrollDirection: Axis.horizontal,
-                separatorBuilder: (c, i) => const SizedBox(width: 5),
-                itemBuilder: (c, i) => scrollingChildren[i]))
+        ? Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: scrollingChildren)
         : Row(children: [
             Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
             noColorButton,
@@ -212,11 +199,13 @@ class _SelectionSheetState extends State<SelectionSheet> {
           children: mediumViewChildren,
         );
 
+    final smallScreen = MediaQuery.of(context).size.height < 600;
+
     return Padding(
       padding: const EdgeInsets.only(left: 15, right: 15),
       child: Column(children: [
         if (widget.sheetSize == SheetSize.mini)
-          Container(height: 50, child: _miniView())
+          Container(height: 40, child: _miniView())
         else if (widget.sheetSize == SheetSize.medium)
           _mediumView()
         else if (widget.sheetSize == SheetSize.full) ...[
@@ -385,6 +374,7 @@ class _ColorPickerButton extends StatelessWidget {
                 )),
             child: CircleAvatar(
               backgroundColor: color,
+              radius: 15,
             ),
           );
   }

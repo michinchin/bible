@@ -33,15 +33,15 @@ class _SnapSheetState extends State<SnapSheet> {
   List<double> _calculateHeightSnappings(Orientation orientation) {
     // figure out dimensions depending on view size
     final landscape = orientation == Orientation.landscape;
-    final bottomPadding =
-        MediaQuery.of(context).padding.bottom / 2 + (platformIs(Platform.iOS) ? 0 : 15);
-    final topBarHeight = (landscape ? 50.0 : 5.0) + bottomPadding;
+    final hasBottomPadding = MediaQuery.of(context).padding.bottom != 0;
+    final bottomPadding = (hasBottomPadding ? 0 : 5);
+    final topBarHeight = (landscape ? 40.0 : 0.0) + bottomPadding;
     final secondBarHeight = (landscape ? 140 : 120.0) + bottomPadding;
     final ratio = (topBarHeight / MediaQuery.of(context).size.height) + 0.1;
     final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height) + 0.1;
 
     // debugPrint(ratio.toString());
-    return [0, ratio, ratio + ratio2, 1.0];
+    return [ratio, ratio + ratio2, 1.0];
   }
 
   @override
@@ -107,7 +107,7 @@ class _SnapSheetState extends State<SnapSheet> {
                     child: Container(
                       height: 5,
                       margin: EdgeInsets.symmetric(
-                          vertical: 10,
+                          vertical: 5,
                           horizontal: wideView ? widthOfScreen / 4 - 15 : widthOfScreen / 2 - 15),
                       decoration: ShapeDecoration(
                           color: Theme.of(context).textColor.withOpacity(0.2),
@@ -136,9 +136,11 @@ class SheetButton extends StatelessWidget {
     return ButtonTheme(
       height: 50,
       child: OutlineButton.icon(
+          padding: const EdgeInsets.all(0),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          label: Text(
+          label: TecText(
             text,
+            autoSize: true,
             style: TextStyle(
               color: Theme.of(context).textColor.withOpacity(0.8),
             ),
@@ -171,6 +173,7 @@ class GreyCircleButton extends StatelessWidget {
                     ? Icon(
                         icon,
                         color: Colors.grey,
+                        size: 20,
                       )
                     : null)),
         decoration: BoxDecoration(
@@ -180,22 +183,51 @@ class GreyCircleButton extends StatelessWidget {
             width: 5,
           ),
         ));
-    return Column(
-      children: [
-        if (title != null) ...[
-          Expanded(child: circleIcon(20)),
-          Expanded(
-              child: TecText(
-            title,
-            autoSize: true,
-            textAlign: TextAlign.center,
+    return (title != null)
+        ? Column(children: [
+            Expanded(flex: 2, child: circleIcon(20)),
+            Expanded(
+                child: TecText(
+              title,
+              autoSize: true,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).textColor.withOpacity(0.5),
+              ),
+            )),
+          ])
+        : circleIcon(15);
+  }
+}
+
+class SheetIconButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final String text;
+  final IconData icon;
+  const SheetIconButton({this.onPressed, this.text, this.icon});
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      onPressed: onPressed,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: Theme.of(context).textColor.withOpacity(0.5),
+            size: 20,
+          ),
+          const SizedBox(height: 3),
+          TecText(
+            text,
             style: TextStyle(
+              fontSize: 11,
               color: Theme.of(context).textColor.withOpacity(0.5),
             ),
-          )),
-        ] else
-          circleIcon(),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }

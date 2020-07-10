@@ -39,28 +39,6 @@ class __HomeScreenState extends State<_HomeScreen> {
   Widget build(BuildContext context) {
     // tec.dmPrint('_HomeScreen build()');
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: BlocBuilder<SheetManagerBloc, SheetManagerState>(condition: (p, c) {
-        if (p != c) {
-          _previousSheetSize = p.size;
-        }
-        return p != c;
-      }, builder: (c, s) {
-        if (s.size == SheetSize.collapsed && s.type != SheetType.hidden) {
-          return FloatingActionButton(
-            backgroundColor: Theme.of(context).cardColor.withOpacity(0.7),
-            elevation: 0,
-            child: Icon(
-              Icons.keyboard_arrow_up,
-              color: Theme.of(context).textColor,
-              size: 30,
-            ),
-            tooltip: 'Sheet',
-            onPressed: () => context.bloc<SheetManagerBloc>().changeSize(_previousSheetSize),
-          );
-        }
-        return Container();
-      }),
       body: _BottomSheet(
         child: Container(
           color: Theme.of(context).canvasColor, // primaryColor,

@@ -12,7 +12,7 @@ import '../common/common.dart';
 void showTextSettingsDialog(BuildContext context) {
   showTecModalPopup<void>(
     context: context,
-    alignment: Alignment.bottomCenter,
+    alignment: Alignment.topRight,
     useRootNavigator: true,
     builder: (context) => SafeArea(child: TecPopupSheet(child: _TextSettings())),
   );
