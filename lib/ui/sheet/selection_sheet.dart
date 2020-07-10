@@ -15,7 +15,7 @@ import '../../ui/sheet/snap_sheet.dart';
 class SelectionSheet extends StatefulWidget {
   final SheetSize sheetSize;
   // final bool fullyExpanded;
-  const SelectionSheet({this.sheetSize});
+  const SelectionSheet({this.sheetSize, Key key}) : super(key: key);
   @override
   _SelectionSheetState createState() => _SelectionSheetState();
 }

@@ -86,18 +86,23 @@ class _SnapSheetState extends State<SnapSheet> {
                   Widget child;
                   switch (state.type) {
                     case SheetType.main:
-                      child = MainSheet(sheetSize: state.size);
+                      child = MainSheet(key: ValueKey(state.size), sheetSize: state.size);
                       break;
                     case SheetType.selection:
-                      child = SelectionSheet(sheetSize: state.size);
+                      child = SelectionSheet(key: ValueKey(state.size), sheetSize: state.size);
                       break;
                     case SheetType.windows:
-                      child = WindowManagerSheet(sheetSize: state.size);
+                      child = WindowManagerSheet(key: ValueKey(state.size), sheetSize: state.size);
                       break;
                     default:
                       child = Container();
                   }
-                  return Container(height: MediaQuery.of(context).size.height, child: child);
+                  return Container(
+                      height: MediaQuery.of(context).size.height,
+                      child: AnimatedSwitcher(
+                          switchInCurve: Curves.easeIn,
+                          duration: const Duration(milliseconds: 250),
+                          child: child));
                 },
                 body: widget.body,
                 headerBuilder: (context, s) {

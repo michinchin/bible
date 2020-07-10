@@ -9,7 +9,7 @@ import 'snap_sheet.dart';
 
 class WindowManagerSheet extends StatelessWidget {
   final SheetSize sheetSize;
-  const WindowManagerSheet({this.sheetSize});
+  const WindowManagerSheet({this.sheetSize, Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -6,7 +6,7 @@ import '../../ui/sheet/snap_sheet.dart';
 
 class MainSheet extends StatefulWidget {
   final SheetSize sheetSize;
-  const MainSheet({this.sheetSize});
+  const MainSheet({this.sheetSize, Key key}) : super(key: key);
   @override
   _MainSheetState createState() => _MainSheetState();
 }
