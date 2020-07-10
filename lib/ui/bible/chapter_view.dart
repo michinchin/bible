@@ -721,7 +721,7 @@ extension on Iterable<int> {
     if (isEmpty ?? true) return [];
     final set = Set.of(this);
     final sorted = List.of(set)..sort();
-    if (sorted.last - sorted.first > sorted.length) {
+    if (sorted.last - sorted.first >= sorted.length) {
       final first = sorted.first;
       final last = sorted.last;
       final missing = Set.of(Iterable<int>.generate((last - first) + 1, (i) => first + i))
