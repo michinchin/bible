@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
@@ -32,8 +33,10 @@ class _SnapSheetState extends State<SnapSheet> {
   List<double> _calculateHeightSnappings(Orientation orientation) {
     // figure out dimensions depending on view size
     final landscape = orientation == Orientation.landscape;
-    final topBarHeight = landscape ? 50.0 : 15.0;
-    final secondBarHeight = landscape ? 140 : 100.0;
+    final bottomPadding =
+        MediaQuery.of(context).padding.bottom / 2 + (platformIs(Platform.iOS) ? 0 : 15);
+    final topBarHeight = (landscape ? 50.0 : 5.0) + bottomPadding;
+    final secondBarHeight = (landscape ? 140 : 120.0) + bottomPadding;
     final ratio = (topBarHeight / MediaQuery.of(context).size.height) + 0.1;
     final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height) + 0.1;
 
@@ -55,11 +58,11 @@ class _SnapSheetState extends State<SnapSheet> {
           },
           builder: (context, state) {
             final widthOfScreen = MediaQuery.of(context).size.width;
+            final wideView = widthOfScreen > 500;
             EdgeInsets margin;
-            if (widthOfScreen > 500) {
+            if (wideView) {
               margin = EdgeInsets.only(left: widthOfScreen / 5, right: widthOfScreen / 5);
             }
-            _sheetController.snapToExtent(snappings[state.size.index]);
 
             return SafeArea(
               bottom: false,
@@ -103,11 +106,9 @@ class _SnapSheetState extends State<SnapSheet> {
                         state.size == SheetSize.mini ? SheetSize.medium : SheetSize.mini),
                     child: Container(
                       height: 5,
-                      margin: EdgeInsets.only(
-                          top: 10,
-                          bottom: 10,
-                          right: MediaQuery.of(context).size.width / 2 - 15,
-                          left: MediaQuery.of(context).size.width / 2 - 15),
+                      margin: EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: wideView ? widthOfScreen / 4 - 15 : widthOfScreen / 2 - 15),
                       decoration: ShapeDecoration(
                           color: Theme.of(context).textColor.withOpacity(0.2),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
