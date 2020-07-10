@@ -225,6 +225,7 @@ class _ChapterViewState extends State<_ChapterView> {
       htmlFragment: widget.html,
       fontSizePercent: (_contentScaleFactor * 100.0).round(),
       marginTop: '0px',
+      marginBottom: '60px',
       vendorFolder: (widget.baseUrl?.startsWith('http') ?? false)
           ? null
           : _useZondervanCss(widget.volumeId) ? 'zondervan' : 'tecarta',
