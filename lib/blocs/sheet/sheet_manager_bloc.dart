@@ -5,10 +5,9 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 part 'sheet_manager_bloc.freezed.dart';
 
-// hidden hides the fab away, collapsed still shows fab
-enum SheetType { hidden, main, selection, windows }
+enum SheetType { main, selection, windows }
 
-enum SheetSize { collapsed, mini, medium, full }
+enum SheetSize { mini, medium, full }
 
 @freezed
 abstract class SheetManagerState with _$SheetManagerState {

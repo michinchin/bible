@@ -41,7 +41,7 @@ class _SnapSheetState extends State<SnapSheet> {
     final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height) + 0.1;
 
     // debugPrint(ratio.toString());
-    return [0, ratio, ratio + ratio2, 1.0];
+    return [ratio, ratio + ratio2, 1.0];
   }
 
   @override

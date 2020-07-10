@@ -71,7 +71,7 @@ class WindowManagerSheet extends StatelessWidget {
       return vm.types.map<Widget>(
         (type) =>
             _menuItem(context, iconMap[vm.titleForType(type)], 'Add ${vm.titleForType(type)}', () {
-          context.bloc<SheetManagerBloc>().toDefaultView();
+          Navigator.of(context).maybePop();
           final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
           final position = bloc?.indexOfView(viewUid) ?? -1;
           bloc?.add(const ViewManagerEvent.restore());
@@ -86,15 +86,13 @@ class WindowManagerSheet extends StatelessWidget {
         if (context.bloc<ViewManagerBloc>().state.views.length > 1) ...[
           _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
               isMaximized ? 'Restore' : 'Maximize', () {
-            context.bloc<SheetManagerBloc>().toDefaultView();
+            Navigator.of(context).maybePop();
             bloc?.add(isMaximized
                 ? const ViewManagerEvent.restore()
                 : ViewManagerEvent.maximize(state.viewUid));
           }),
           _menuItem(context, Icons.close, 'Close View', () {
-            context.bloc<SheetManagerBloc>()
-              ..changeType(SheetType.main)
-              ..changeSize(SheetSize.collapsed);
+            Navigator.of(context).maybePop();
             context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.viewUid));
           }),
         ]
