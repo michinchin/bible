@@ -6,6 +6,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/app_theme_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
@@ -21,7 +22,8 @@ class SelectionSheet extends StatefulWidget {
 }
 
 class _SelectionSheetState extends State<SelectionSheet> {
-  List<Color> mainColors = [];
+  List<Color> defaultColors = [];
+  List<Color> secondaryColors = [];
 
   final buttons = <String, IconData>{
     'Learn': Icons.lightbulb_outline,
@@ -30,6 +32,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
     'Define': FeatherIcons.bookOpen,
     // 'Copy': FeatherIcons.copy,
     // 'Note': FeatherIcons.edit2,
+    'Audio': FeatherIcons.play,
     'Save': FeatherIcons.bookmark,
     'Print': FeatherIcons.printer,
     'Text': FeatherIcons.messageCircle,
@@ -44,7 +47,6 @@ class _SelectionSheetState extends State<SelectionSheet> {
   };
 
   final keyButtons = <String, IconData>{
-    'Audio': FeatherIcons.play,
     'Note': FeatherIcons.edit,
     'Share': FeatherIcons.share,
     // 'Learn': Icons.lightbulb_outline,
@@ -73,7 +75,11 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   List<Color> _addColors() {
     final colors = <Color>[];
-    for (var i = 1; i < 11; i++) {
+    for (var i = 1; i < 5; i++) {
+      colors.add(
+          tec.colorFromColorId(i, darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
+    }
+    for (var i = 6; i < 13; i++) {
       colors.add(
           tec.colorFromColorId(i, darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
     }
@@ -81,8 +87,10 @@ class _SelectionSheetState extends State<SelectionSheet> {
   }
 
   void _listenForThemeChange(ThemeMode mode) {
+    final colors = _addColors();
     setState(() {
-      mainColors = _addColors();
+      defaultColors = colors.getRange(0, 4).toList();
+      secondaryColors = colors.getRange(4, colors.length).toList();
     });
   }
 
@@ -100,8 +108,8 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final showColorsButton = GreyCircleButton(
-      icon: _showAllColors ? Icons.close : Icons.color_lens,
+    final editColorsButton = GreyCircleButton(
+      icon: _showAllColors ? Icons.close : Icons.colorize,
       onPressed: onShowAllColors,
     );
     final underlineButton = GreyCircleButton(
@@ -114,6 +122,14 @@ class _SelectionSheetState extends State<SelectionSheet> {
             type: HighlightType.clear,
           )),
     );
+    final expandButton = GreyCircleButton(
+      icon: Icons.keyboard_arrow_up,
+      onPressed: () => context.bloc<SheetManagerBloc>().changeSize(SheetSize.medium),
+    );
+
+    final smallScreen = MediaQuery.of(context).size.width < 350;
+    final miniViewColors = smallScreen ? defaultColors.take(2) : defaultColors;
+
     final colors = [
       if (_showAllColors) ...[
         Row(children: [
@@ -122,18 +138,31 @@ class _SelectionSheetState extends State<SelectionSheet> {
           const SizedBox(width: 5),
           underlineButton,
           const SizedBox(width: 5),
-          showColorsButton
+          editColorsButton
         ])
       ] else ...[
-        noColorButton,
-        underlineButton,
-        for (final color in mainColors) ...[
-          _ColorPickerButton(
-            isForUnderline: _underlineMode,
-            color: color,
-          ),
-        ],
-        showColorsButton,
+        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+          noColorButton,
+          underlineButton,
+          for (final color in defaultColors) ...[
+            _ColorPickerButton(
+              isForUnderline: _underlineMode,
+              color: color,
+            ),
+          ],
+          editColorsButton,
+        ]),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            for (final color in secondaryColors) ...[
+              _ColorPickerButton(
+                isForUnderline: _underlineMode,
+                color: color,
+              ),
+            ],
+          ],
+        )
       ],
     ];
     final mediumViewChildren = <Widget>[
@@ -163,34 +192,34 @@ class _SelectionSheetState extends State<SelectionSheet> {
       ),
     ];
 
-    final scrollingChildren = [
+    final miniChildren = [
       noColorButton,
       underlineButton,
-      for (final color in mainColors.take(1)) ...[
+      for (final color in miniViewColors) ...[
         _ColorPickerButton(
           isForUnderline: _underlineMode,
           color: color,
         ),
       ],
-      showColorsButton,
       for (final button in keyButtons.keys) ...[
         GreyCircleButton(
           icon: keyButtons[button],
           onPressed: () {},
         ),
       ],
+      expandButton,
     ];
 
-    Widget _miniView() => !_showAllColors
-        ? Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: scrollingChildren)
-        : Row(children: [
-            Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
-            noColorButton,
-            const SizedBox(width: 5),
-            underlineButton,
-            const SizedBox(width: 5),
-            showColorsButton
-          ]);
+    Widget _miniView() =>
+        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: miniChildren);
+    // : Row(children: [
+    //     Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
+    //     noColorButton,
+    //     const SizedBox(width: 5),
+    //     underlineButton,
+    //     const SizedBox(width: 5),
+    //     showColorsButton
+    //   ]);
 
     Widget _mediumView() => Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
@@ -344,36 +373,67 @@ class __ColorSliderState extends State<_ColorSlider> {
 class _ColorPickerButton extends StatelessWidget {
   final bool isForUnderline;
   final Color color;
-  const _ColorPickerButton({@required this.color, this.isForUnderline = false})
-      : assert(color != null);
+  final bool deletionMode;
+  final VoidCallback onDeletion;
+  final bool editMode;
+  final VoidCallback onEdit;
 
+  const _ColorPickerButton(
+      {@required this.color,
+      this.isForUnderline = false,
+      this.deletionMode = false,
+      this.editMode = false,
+      this.onDeletion,
+      this.onEdit})
+      : assert(color != null);
   @override
   Widget build(BuildContext context) {
-    return isForUnderline
-        ? InkWell(
-            customBorder: const RoundedRectangleBorder(),
-            onTap: () => context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-                  type: HighlightType.underline,
-                  color: color.value,
-                )),
-            child: Container(
+    const width = 15.0;
+
+    return InkWell(
+      customBorder: const CircleBorder(),
+      onTap: () {
+        if (deletionMode) {
+          onDeletion();
+        } else if (editMode) {
+          onEdit();
+        } else {
+          context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
+                type: HighlightType.highlight,
+                color: color.value,
+              ));
+        }
+      },
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (isForUnderline)
+            Container(
               decoration: ShapeDecoration(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   color: color),
-              width: 40,
-              height: 15,
-            ),
-          )
-        : InkWell(
-            customBorder: const CircleBorder(),
-            onTap: () => context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-                  type: HighlightType.highlight,
-                  color: color.value,
-                )),
-            child: CircleAvatar(
+              width: 35,
+              height: width,
+            )
+          else
+            CircleAvatar(
               backgroundColor: color,
-              radius: 15,
+              radius: width,
             ),
-          );
+          if (deletionMode)
+            Icon(
+              FeatherIcons.trash,
+              color: Theme.of(context).textColor.withOpacity(0.5),
+              size: width,
+            )
+          else if (editMode)
+            Icon(
+              Icons.colorize,
+              color: Theme.of(context).textColor.withOpacity(0.5),
+              size: width,
+            ),
+        ],
+      ),
+    );
   }
 }
