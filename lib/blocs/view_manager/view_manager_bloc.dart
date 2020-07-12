@@ -13,6 +13,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../main_menu.dart';
 import '../../ui/common/common.dart';
 import '../../ui/common/tec_page_view.dart';
+import '../selection/selection_bloc.dart';
 
 part 'view_manager.dart';
 part 'view_manager_bloc.freezed.dart';
@@ -34,7 +35,37 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
         _kvStore = kvStore;
 
   final tec.KeyValueStore _kvStore;
+
   var _viewRects = <ViewRect>[]; // ignore: prefer_final_fields
+  List<List<ViewState>> _rows = []; // ignore: prefer_final_fields
+
+  ///
+  /// Returns the number of rows currently displayed.
+  ///
+  /// Note, when a view is maximized this returns the number of rows that will be
+  /// displayed when the view is not maximized.
+  ///
+  int get rows => _rows.length;
+
+  ///
+  /// Returns the number of columns currently displayed in the given [row].
+  ///
+  /// Note, when a view is maximized this returns the number of columns that will be
+  /// displayed when the view is not maximized.
+  ///
+  int columnsInRow(int row) => row < 0 || row >= _rows.length ? 0 : _rows[row].length;
+
+  ///
+  /// Returns the view at the given [row] and [column], or `null` if [row] or [column] is
+  /// out of range.
+  ///
+  /// Note, when a view is maximized this returns the view that will be at the given row and column
+  /// when the view is not maximized.
+  ///
+  ViewState viewAt({int row, int column}) =>
+      row < 0 || row >= _rows.length || column < 0 || column >= _rows[row].length
+          ? null
+          : _rows[row][column];
 
   ///
   /// Returns the total number of open views. Open does not mean visible.
@@ -68,6 +99,58 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   ///
   ViewRect rectOfViewWithUid(int uid) =>
       _viewRects.firstWhere((e) => e.uid == uid, orElse: () => null);
+
+  ///
+  /// Returns `true` if the view with the given [uid] is visible on the screen.
+  ///
+  bool isViewWithUidVisible(int uid) => rectOfViewWithUid(uid)?.isVisible ?? false;
+
+  //-------------------------------------------------------------------------
+  // Selection related:
+
+  final _viewsWithSelections = <int>{};
+
+  ///
+  /// This should be called by views that support text selection, when their [hasSelections]
+  /// state changes.
+  ///
+  void notifyOfSelectionsInViewWithUid(
+    int uid,
+    BuildContext context, {
+    @required bool hasSelections,
+  }) {
+    assert(uid != null && context != null && hasSelections != null);
+
+    if (hasSelections) {
+      _viewsWithSelections.add(uid);
+    } else {
+      _viewsWithSelections.remove(uid);
+    }
+
+    // Remove invalid uid values from the set.
+    for (final uid in _viewsWithSelections.toList()) {
+      if (indexOfView(uid) == -1) _viewsWithSelections.remove(uid);
+    }
+
+    _updateSelectionBloc(context);
+  }
+
+  ///
+  /// Returns an iterator over the uids of the views with selections that are visible.
+  ///
+  Iterable<int> get _visibleViewsWithSelections =>
+      _viewsWithSelections.expand((uid) => isViewWithUidVisible(uid) ? [uid] : []);
+
+  ///
+  /// Updates the state of the [SelectionBloc] depending on the current state of visible
+  /// views with selections.
+  ///
+  void _updateSelectionBloc(BuildContext context) {
+    final isTextSelected = _visibleViewsWithSelections.isNotEmpty;
+    final bloc = context.bloc<SelectionBloc>(); // ignore: close_sinks
+    assert(bloc != null);
+    bloc?.add(SelectionState(isTextSelected: isTextSelected));
+  }
 
   ///
   /// Initial state
@@ -222,7 +305,13 @@ class ViewRect {
   final int column;
   final Rect rect;
 
-  const ViewRect({this.uid, this.isVisible, this.row, this.column, this.rect});
+  const ViewRect({
+    @required this.uid,
+    @required this.isVisible,
+    @required this.row,
+    @required this.column,
+    @required this.rect,
+  });
 }
 
 ///
