@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -81,7 +82,7 @@ class BibleChapterViewModel {
       } else if (tag.verse != null) {
         final v = tag.verse;
         var currentWord = tag.word;
-        final endWord = currentWord + tec.countOfWordsInString(text) - 1;
+        final endWord = math.max(currentWord, currentWord + tec.countOfWordsInString(text) - 1);
         var remainingText = text;
 
         ///
