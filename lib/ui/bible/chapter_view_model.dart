@@ -174,6 +174,8 @@ class BibleChapterViewModel {
   /// Returns `true` iff a word range is selected.
   bool get hasWordRangeSelected => _selectionStart != null;
 
+  bool get isSelectionTrialMode => _isSelectionTrialMode;
+
   /// Call to clear all selections, if any.
   void clearAllSelections(BuildContext context) {
     selectionController.deselectAll();
@@ -238,6 +240,8 @@ class BibleChapterViewModel {
 
     if (!_isSelectionTrialMode) {
       clearAllSelections(context);
+    } else if (hasWordRangeSelected) {
+      refreshFunc(() {});
     }
 
     if (selectionStyle.type == HighlightType.clear) {

@@ -187,8 +187,8 @@ class _ChapterView extends StatefulWidget {
     @required this.ref,
     @required this.baseUrl,
     @required this.html,
+    @required this.size,
     this.versesToShow,
-    this.size,
   })  : assert(volumeId != null && baseUrl != null && html != null),
         super(key: key);
 
@@ -258,7 +258,7 @@ class _ChapterViewState extends State<_ChapterView> {
                   ref: widget.ref,
                   baseUrl: widget.baseUrl,
                   html: _html,
-                  versesToShow: widget.versesToShow ?? [],
+                  versesToShow: widget.versesToShow ?? [], // ['1', '2', '3']
                   size: widget.size,
                   fontName: fontName,
                   highlights: highlights,
@@ -341,18 +341,16 @@ class _BibleHtmlState extends State<_BibleHtml> {
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
-    final selectedTextStyle = TextStyle(
-        backgroundColor:
-            isDarkTheme ? Colors.blueGrey[800] : const Color(0xffe6e6e6)); // Colors.blue[100]);
+    final selectionColor = isDarkTheme ? Colors.white.withAlpha(48) : Colors.black.withAlpha(32);
+    final selectedTextStyle =
+        TextStyle(backgroundColor: isDarkTheme ? Colors.grey[850] : const Color(0xffe6e6e6));
 
     // A new [TecHtmlBuildHelper] needs to be created for each build...
     final helper = _viewModel.tecHtmlBuildHelper();
 
     return BlocListener<SelectionStyleBloc, SelectionStyle>(
-      listener: (context, selectionStyle) => Future.delayed(
-          Duration.zero,
-          () => _viewModel.selectionStyleChanged(
-              context, selectionStyle, widget.volumeId, widget.ref.book, widget.ref.chapter)),
+      listener: (context, selectionStyle) => _viewModel.selectionStyleChanged(
+          context, selectionStyle, widget.volumeId, widget.ref.book, widget.ref.chapter),
       child: Semantics(
         //textDirection: textDirection,
         label: 'Bible text',
@@ -391,6 +389,9 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
                   // Word range selection related:
                   selectable: !kIsWeb && !_viewModel.hasVersesSelected,
+                  selectionColor: selectionColor,
+                  showSelection: !_viewModel.isSelectionTrialMode,
+                  showSelectionPopup: false,
                   selectionController: _selectionController,
 
                   // `versesToShow` related (when viewing a subset of verses in the chapter):

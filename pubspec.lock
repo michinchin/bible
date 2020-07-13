@@ -907,7 +907,7 @@ packages:
       name: tec_html
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "3.0.3"
+    version: "3.0.4"
   tec_platform_util:
     dependency: transitive
     description:
@@ -928,7 +928,7 @@ packages:
       name: tec_selectable
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.0"
+    version: "2.0.0"
   tec_user_account:
     dependency: "direct main"
     description:

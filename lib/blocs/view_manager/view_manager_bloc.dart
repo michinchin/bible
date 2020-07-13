@@ -59,8 +59,8 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   /// Returns the view at the given [row] and [column], or `null` if [row] or [column] is
   /// out of range.
   ///
-  /// Note, when a view is maximized this returns the view that will be at the given row and column
-  /// when the view is not maximized.
+  /// Note, when a view is maximized, this returns the view that will be at the given
+  /// row and column when the view is not maximized.
   ///
   ViewState viewAt({int row, int column}) =>
       row < 0 || row >= _rows.length || column < 0 || column >= _rows[row].length
@@ -68,7 +68,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
           : _rows[row][column];
 
   ///
-  /// Returns the total number of open views. Open does not mean visible.
+  /// Returns the total number of open views. Note, open does not mean visible.
   ///
   int get countOfOpenViews => state.views?.length ?? 0;
 
@@ -79,12 +79,17 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   int get countOfVisibleViews => _viewRects.where((e) => e.isVisible).length;
 
   ///
-  /// Returns the number of views that are currently not on the screen.
+  /// Returns the number of views that are currently not visible on the screen.
   ///
   int get countOfInvisibleViews => countOfOpenViews - countOfVisibleViews;
 
   ///
-  /// Returns the ViewState of the view with the given [uid], or null if none.
+  /// Returns `true` if the view with the given [uid] is visible on the screen.
+  ///
+  bool isViewWithUidVisible(int uid) => rectOfViewWithUid(uid)?.isVisible ?? false;
+
+  ///
+  /// Returns the [ViewState] of the view with the given [uid], or null if none.
   ///
   ViewState stateOfViewWithUid(int uid) =>
       state.views.firstWhere((e) => e.uid == uid, orElse: () => null);
@@ -95,15 +100,10 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   int indexOfView(int uid) => state.views.indexWhere((e) => e.uid == uid);
 
   ///
-  /// Returns the ViewRect of the view with the given [uid], or null if none.
+  /// Returns the [ViewRect] of the view with the given [uid], or null if none.
   ///
   ViewRect rectOfViewWithUid(int uid) =>
       _viewRects.firstWhere((e) => e.uid == uid, orElse: () => null);
-
-  ///
-  /// Returns `true` if the view with the given [uid] is visible on the screen.
-  ///
-  bool isViewWithUidVisible(int uid) => rectOfViewWithUid(uid)?.isVisible ?? false;
 
   //-------------------------------------------------------------------------
   // Selection related:

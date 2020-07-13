@@ -58,7 +58,7 @@ dependencies:
     hosted:
       name: tec_html
       url: http://noah.tecarta.com:8100
-    version: ^3.0.3
+    version: ^3.0.4
   tec_util:
     hosted:
       name: tec_util
