@@ -234,7 +234,7 @@ class _ChapterViewState extends State<_ChapterView> {
           ? null
           : useZondervanCss(widget.volumeId) ? 'zondervan' : 'tecarta',
       customStyles: ' .${useZondervanCss(widget.volumeId) ? 'C' : 'cno'} { display: none; } '
-          '.FOOTNO { line-height: inherit; }',
+          '.FOOTNO { line-height: inherit; top: inherit; }',
     );
 
     return Container(

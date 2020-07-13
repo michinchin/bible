@@ -3,12 +3,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
@@ -67,6 +68,9 @@ class BibleChapterViewModel {
     TextStyle selectedTextStyle, {
     bool isDarkTheme,
   }) {
+    if (tag is _VerseTag && tag.isInFootnote && text != ' ') {
+      return _footnoteSpan(context, style, tag);
+    }
     if (tag is _VerseTag) {
       final recognizer = tag.verse == null ? null : TapGestureRecognizer()
         ..onTap = () => _toggleSelectionForVerse(context, tag.verse);
@@ -97,7 +101,7 @@ class BibleChapterViewModel {
             final span = TaggableTextSpan(
                 text: remainingText.substring(0, endIndex),
                 style: style,
-                tag: _VerseTag(v, currentWord, tag.isInVerse),
+                tag: tag.copyWith(word: currentWord),
                 recognizer: recognizer);
             remainingText = remainingText.substring(endIndex);
             currentWord += wordCount;
@@ -152,7 +156,7 @@ class BibleChapterViewModel {
           spans.add(TaggableTextSpan(
               text: remainingText,
               style: style,
-              tag: _VerseTag(v, currentWord, tag.isInVerse),
+              tag: tag.copyWith(word: currentWord),
               recognizer: recognizer));
         }
 
@@ -309,6 +313,12 @@ class TecHtmlBuildHelper {
   var _nonVerseElementLevel = 0;
   var _wasInVerse = false;
 
+  var _isInFootnote = false;
+  var _isInXref = false;
+  var _xrefElementLevel = 0;
+
+  String _href;
+
   ///
   /// Returns the _VerseTag for the given HTML element.
   ///
@@ -322,7 +332,19 @@ class TecHtmlBuildHelper {
     if (_isInNonVerseElement && level <= _nonVerseElementLevel) {
       _isInNonVerseElement = false;
       _isInVerse = _wasInVerse;
+      _isInFootnote = false;
+      _href = null;
     }
+
+    if (_isInXref && level <= _xrefElementLevel) {
+      _isInXref = false;
+      _href = null;
+    } else if (!_isInXref && attrs.className.contains('xref')) {
+      _isInXref = true;
+      _xrefElementLevel = level;
+      _href = attrs['href'];
+    }
+
     if (!_isInNonVerseElement) {
       final id = attrs.id;
       if (tec.isNotNullOrEmpty(id) &&
@@ -348,14 +370,21 @@ class TecHtmlBuildHelper {
         _isInVerse = false;
         _isInNonVerseElement = true;
         _nonVerseElementLevel = level;
+
+        if (attrs.className.contains('FOOTNO')) {
+          _isInFootnote = true;
+          _href = attrs['href'];
+        }
       }
     }
+
+    var word = _currentWord;
 
     if (text?.isNotEmpty ?? false) {
       final wordCount = tec.countOfWordsInString(text);
       // tec.dmPrint('$wordCount words for text: $text');
       if (wordCount > 0) {
-        final word = _currentWord;
+        word = _currentWord;
         _currentWord += wordCount;
         if (_debugMode) {
           if (wordCount == 1) {
@@ -364,11 +393,17 @@ class TecHtmlBuildHelper {
             tec.dmPrint('verse: $_currentVerse, words $word-${word + wordCount - 1}: [$text]');
           }
         }
-        return _VerseTag(_currentVerse, word, _isInVerse);
       }
     }
 
-    return _VerseTag(_currentVerse, _currentWord, _isInVerse);
+    return _VerseTag(
+      verse: _currentVerse,
+      word: word,
+      isInVerse: _isInVerse,
+      isInXref: _isInXref,
+      isInFootnote: _isInFootnote,
+      href: _href,
+    );
   }
 
   ///
@@ -502,10 +537,39 @@ class _VerseTag {
   final int verse;
   final int word;
   final bool isInVerse;
+  final bool isInXref;
+  final bool isInFootnote;
+  final String href;
 
-  // ignore: avoid_positional_boolean_parameters
-  const _VerseTag(this.verse, this.word, this.isInVerse)
-      : assert(verse != null && word != null && isInVerse != null);
+  const _VerseTag({
+    @required this.verse,
+    @required this.word,
+    this.isInVerse = false,
+    this.isInXref = false,
+    this.isInFootnote = false,
+    this.href,
+  }) : assert(verse != null &&
+            word != null &&
+            isInVerse != null &&
+            isInXref != null &&
+            isInFootnote != null);
+
+  _VerseTag copyWith({
+    int verse,
+    int word,
+    bool isInVerse,
+    bool isInXref,
+    bool isInFootnote,
+    String href,
+  }) =>
+      _VerseTag(
+        verse: verse ?? this.verse,
+        word: word ?? this.word,
+        isInVerse: isInVerse ?? this.isInVerse,
+        isInXref: isInXref ?? this.isInXref,
+        isInFootnote: isInFootnote ?? this.isInFootnote,
+        href: href ?? this.href,
+      );
 
   @override
   bool operator ==(Object other) =>
@@ -585,4 +649,41 @@ extension ChapterViewModelExtOnString on String {
     }
     return i;
   }
+}
+
+InlineSpan _footnoteSpan(BuildContext context, TextStyle style, _VerseTag tag) {
+  // Example returning a WidgetSpan:
+  final size = style.fontSize ?? 16.0;
+  return TaggableWidgetSpan(
+    alignment: PlaceholderAlignment.top,
+    child: Transform.translate(
+      offset: Offset(0, -size / 3.0),
+      child: GestureDetector(
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Theme.of(context).accentColor,
+            borderRadius: BorderRadius.all(Radius.circular(size / 2.0)),
+          ),
+        ),
+        onTap: () {
+          tecShowSimpleAlertDialog<void>(context: context, content: tag.href);
+        },
+      ),
+    ),
+    style: style,
+    tag: tag,
+  );
+
+  // Example returning a TextSpan:
+  // return TaggableTextSpan(
+  //   text: '* ',
+  //   style: Theme.of(context).textTheme.headline6.copyWith(color: Theme.of(context).accentColor),
+  //   tag: tag,
+  //   recognizer: TapGestureRecognizer()
+  //     ..onTap = () {
+  //       tecShowSimpleAlertDialog<void>(context: context, content: 'Footnote ${tag.href}');
+  //     },
+  // );
 }
