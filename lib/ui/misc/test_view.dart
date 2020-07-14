@@ -4,7 +4,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../common/color_utils.dart';
+import '../../models/color_utils.dart';
 import 'color_picker.dart';
 
 const testViewType = 'TestView';
