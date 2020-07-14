@@ -51,7 +51,7 @@ class _TestViewState extends State<TestView> {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      child: Column(
+      child: ListView(
         children: [
           ColorPickerContext(
             parameters: const ColorPickerParameters(
@@ -93,13 +93,13 @@ class _Contents extends StatelessWidget {
           const SizedBox(height: 4),
           _BibleText(isDark: false, color: color),
           const SizedBox(height: 16),
-          const TecText('Dark Mode, Colored Text', style: style),
+          const TecText('Dark Mode', style: style),
           const SizedBox(height: 4),
           _BibleText(isDark: true, color: color, ifDarkSetTextColor: true),
-          const SizedBox(height: 16),
-          const TecText('Dark Mode Highlights:', style: style),
-          const SizedBox(height: 4),
-          _BibleText(isDark: true, color: color),
+          // const SizedBox(height: 16),
+          // const TecText('Dark Mode Highlights:', style: style),
+          // const SizedBox(height: 4),
+          // _BibleText(isDark: true, color: color),
         ],
       ),
     );
