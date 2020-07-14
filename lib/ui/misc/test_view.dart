@@ -79,15 +79,15 @@ class _Contents extends StatelessWidget {
           const SizedBox(height: 8),
           const TecText('Light Mode', style: style),
           const SizedBox(height: 4),
-          _BibleText(isDark: false, color: color),
+          _BibleText(isDarkMode: false, color: color),
           const SizedBox(height: 16),
           const TecText('Dark Mode', style: style),
           const SizedBox(height: 4),
-          _BibleText(isDark: true, color: color, ifDarkSetTextColor: true),
+          _BibleText(isDarkMode: true, color: color, ifDarkSetTextColor: true),
           // const SizedBox(height: 16),
           // const TecText('Dark Mode Highlights:', style: style),
           // const SizedBox(height: 4),
-          // _BibleText(isDark: true, color: color),
+          // _BibleText(isDarkMode: true, color: color),
         ],
       ),
     );
@@ -95,21 +95,21 @@ class _Contents extends StatelessWidget {
 }
 
 class _BibleText extends StatelessWidget {
-  final bool isDark;
+  final bool isDarkMode;
   final Color color;
   final bool ifDarkSetTextColor;
 
   const _BibleText({
     Key key,
-    this.isDark = false,
+    this.isDarkMode = false,
     this.color,
     this.ifDarkSetTextColor = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    //final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? const Color(0xffbbbbbb) : Colors.black;
+    //final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? const Color(0xffbbbbbb) : Colors.black;
 
     final sReg = TextStyle(color: textColor, height: 1.3);
     const sRed = TextStyle(color: Colors.red, height: 1.3);
@@ -119,8 +119,8 @@ class _BibleText extends StatelessWidget {
     TextSpan red(String text) => TextSpan(text: text, style: sRed);
     TextSpan bold(String text) => TextSpan(text: text, style: sBold);
 
-    final ulColor = colorWithColor(color, forHighlight: false, isDark: isDark);
-    final hlColor = colorWithColor(color, forHighlight: true, isDark: isDark);
+    final ulColor = colorWithColor(color, forHighlight: false, isDarkMode: isDarkMode);
+    final hlColor = colorWithColor(color, forHighlight: true, isDarkMode: isDarkMode);
 
     final sUl = TextStyle(
         decoration: TextDecoration.underline, decorationThickness: 2, decorationColor: ulColor);
@@ -133,7 +133,7 @@ class _BibleText extends StatelessWidget {
         : TextSpan(text: text, style: style.merge(sHl));
 
     return Container(
-      color: isDark ? Colors.black : Colors.white,
+      color: isDarkMode ? Colors.black : Colors.white,
       padding: const EdgeInsets.all(8),
       child: TecText.rich(
         TextSpan(

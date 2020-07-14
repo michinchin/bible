@@ -14,6 +14,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/color_utils.dart';
 
 const _debugMode = false; // kDebugMode
 
@@ -139,11 +140,15 @@ class BibleChapterViewModel {
                   style,
                   TextStyle(
                       decoration: TextDecoration.underline,
-                      decorationColor: color.withAlpha(192),
+                      decorationColor: textColorWith(color, isDarkMode: isDarkTheme),
                       decorationThickness: 2));
             } else {
               hlStyle = _merge(
-                  style, isDarkTheme ? TextStyle(color: color) : TextStyle(backgroundColor: color));
+                  style,
+                  isDarkTheme
+                      ? TextStyle(color: textColorWith(color, isDarkMode: isDarkTheme))
+                      : TextStyle(
+                          backgroundColor: highlightColorWith(color, isDarkMode: isDarkTheme)));
             }
           }
 

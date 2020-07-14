@@ -3,34 +3,68 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+//---------------------------------------------------------------------------
+// COLOR CACHES
+
+///
+/// Returns the color to use for text and underlines. Caches the result for
+/// quick access next time.
+///
+Color textColorWith(Color color, {bool isDarkMode = false}) => isDarkMode
+    ? _darkModeTx.colorFrom(color, isDarkMode: true, forHighlight: false)
+    : _lightModeTx.colorFrom(color, isDarkMode: false, forHighlight: false);
+
+final _darkModeTx = <Color, Color>{};
+final _lightModeTx = <Color, Color>{};
+
+///
+/// Returns the color to use for highlights. Caches the result for quick access
+/// next time.
+///
+Color highlightColorWith(Color color, {bool isDarkMode = false}) => isDarkMode
+    ? _darkModeHl.colorFrom(color, isDarkMode: true, forHighlight: true)
+    : _lightModeHl.colorFrom(color, isDarkMode: false, forHighlight: true);
+
+final _darkModeHl = <Color, Color>{};
+final _lightModeHl = <Color, Color>{};
+
+extension on Map<Color, Color> {
+  Color colorFrom(Color color, {bool isDarkMode = false, bool forHighlight = false}) =>
+      this[color] ??
+      (this[color] = colorWithColor(color, forHighlight: forHighlight, isDarkMode: isDarkMode));
+}
+
 ///
 /// Returns a new color, based on the given [color], that will look good for text
 /// or underlining. Or, if [forHighlight] is true, for highlighting text.
 ///
-/// If [isDark] is false (the default), the background color should be a light color
-/// (e.g. white) with dark (e.g. black) text.
+/// If [isDarkMode] is false (the default), the background color should be a light color
+/// with dark text. Otherwise, the background color should be a dark color with light
+/// text.
 ///
-/// If [isDark] is true,the background color should be a dark color (e.g. black) with
-/// light (e.g. light gray) text.
-///
-Color colorWithColor(Color color, {bool forHighlight = false, bool isDark = false}) {
-  // BRIGHTNESS
-  final b = forHighlight ? (isDark ? 32 : 255) : (isDark ? 150 : 160);
-  final cb = color.brightness();
-  final d = b - cb;
-  final brightnessColor = color.withBrightness(d);
-  //tec.dmPrint('Brightness goal: $b, current: $cb, delta: $d, result: ${brightnessColor.brightness()}');
+Color colorWithColor(Color color, {bool forHighlight = false, bool isDarkMode = false}) {
+  // Calculates the best color by tweaking the brightness.
+  Color _brightness(Color color) {
+    final idealBrightness = forHighlight ? (isDarkMode ? 32 : 255) : (isDarkMode ? 150 : 160);
+    return color.withBrightness(idealBrightness - color.brightness(), 0xff);
+  }
 
-  // LUMINANCE
-  final l = forHighlight ? (isDark ? 0.20 : 0.90) : (isDark ? 0.50 : 0.70);
-  final luminanceColor = isDark ? color.darkenedToLuminance(l) : color.lightenedToLuminance(l);
-  //newColor = isDark ? color.withLuminance(l) : color.withLuminance(l);
-  //tec.dmPrint('Luminance goal: $l, actual: ${luminanceColor.computeLuminance().toStringAsFixed(3)}');
+  // Calculates the best color by tweaking the luminance.
+  Color _luminance(Color color) {
+    final l = forHighlight ? (isDarkMode ? 0.20 : 0.90) : (isDarkMode ? 0.50 : 0.70);
+    return isDarkMode ? color.darkenedToLuminance(l) : color.lightenedToLuminance(l);
+    // return isDarkMode ? color.withLuminance(l) : color.withLuminance(l);
+  }
 
-  //final newColor = brightnessColor;
-  //final newColor = luminanceColor;
-  final newColor =
-      isDark ? brightnessColor : Color.lerp(brightnessColor, luminanceColor, color.blueness);
+  // For dark mode, the `brightness` algorithm seems to always produce the best color.
+  // For light mode, the `brightness` algorithm works best for non-blue colors, but
+  // the `luminance` algorithm works best for blue colors, so, we lerp between them
+  // based the blueness of the color.
+  final newColor = isDarkMode
+      ? _brightness(color)
+      : Color.lerp(_brightness(color), _luminance(color), color.blueness);
+  // final newColor = _brightness(color);
+  // final newColor = _luminance(color);
 
   return newColor;
 }
@@ -39,21 +73,33 @@ extension TecUtilExtOnColor on Color {
   //-------------------------------------------------------------------------
   // Brightness related
 
+  ///
+  /// Returns the "brightness" of this color. Black == 0, white == 255.
+  ///
   int brightness() {
     return ((red * 299 + green * 587 + blue * 114) / 1000).round();
   }
 
+  ///
+  /// Returns true if this a "light" color (i.e. its brightness is >= 128).
+  ///
   bool isLight() {
     return !isDark();
   }
 
+  ///
+  /// Returns true if this is a "dark" color (i.e. its brightness is less than 128).
+  ///
   bool isDark() {
     return brightness() < 128.0;
   }
 
-  Color withBrightness(int amount) {
+  ///
+  /// Returns the result of brightening this color to the given brightness value.
+  ///
+  Color withBrightness(int amount, [int alpha]) {
     final color = Color.fromARGB(
-      alpha,
+      alpha ?? this.alpha,
       math.max(0, math.min(255, red + amount)).round(),
       math.max(0, math.min(255, green + amount)).round(),
       math.max(0, math.min(255, blue + amount)).round(),
@@ -61,6 +107,10 @@ extension TecUtilExtOnColor on Color {
     return color;
   }
 
+  ///
+  /// Returns the result of brightening this color by the given amount. The
+  /// [amount] can be positive or negative and should be between -100 and 100.
+  ///
   Color brighten([int amount = 10]) {
     final color = Color.fromARGB(
       alpha,
@@ -74,76 +124,120 @@ extension TecUtilExtOnColor on Color {
   //-------------------------------------------------------------------------
   // Luminance related
 
-  Color lighten([int amount = 10]) {
-    final hsl = _toHsl()..l += amount / 100;
+  ///
+  /// Returns the result of lightening this color's luminance by the given amount.
+  ///
+  Color lightenBy(int amount, {int alpha}) {
+    final hsl = _toHsl(alpha: alpha)..l += amount / 100;
     hsl.l = _clamp01(hsl.l);
     return _colorFromHsl(hsl);
   }
 
-  Color darken([int amount = 10]) {
-    final hsl = _toHsl()..l -= amount / 100;
+  ///
+  /// Returns the result of darkening this color's luminance by the given amount.
+  ///
+  Color darkenBy(int amount, {int alpha}) {
+    final hsl = _toHsl(alpha: alpha)..l -= amount / 100;
     hsl.l = _clamp01(hsl.l);
     return _colorFromHsl(hsl);
   }
 
-  Color withLuminance(double l) {
-    final hsl = _toHsl()..l = _clamp01(l);
+  ///
+  /// Returns the result of updating this color's luminance to the given value.
+  ///
+  Color withLuminance(double l, {int alpha}) {
+    final hsl = _toHsl(alpha: alpha)..l = _clamp01(l);
     return _colorFromHsl(hsl);
   }
 
-  Color lightenedToLuminance(double l) {
-    final hsl = _toHsl();
-    hsl.l = math.max(hsl.l, _clamp01(l));
+  ///
+  /// Returns the result of lightening the luminance of this color to the given
+  /// value. If this color already has a luminance >= to the given value,
+  /// this color is returned unchanged.
+  ///
+  Color lightenedToLuminance(double l, {int alpha}) {
+    final hsl = _toHsl(alpha: alpha);
+    final clamped = _clamp01(l);
+    if (hsl.l >= clamped) return this;
+    hsl.l = clamped;
     return _colorFromHsl(hsl);
   }
 
-  Color darkenedToLuminance(double l) {
-    final hsl = _toHsl();
-    hsl.l = math.min(hsl.l, _clamp01(l));
+  ///
+  /// Returns the result of darkening the luminance of this color to the given
+  /// value. If this color already has a luminance <= to the given value,
+  /// this color is returned unchanged.
+  ///
+  Color darkenedToLuminance(double l, {int alpha}) {
+    final hsl = _toHsl(alpha: alpha);
+    final clamped = _clamp01(l);
+    if (hsl.l <= clamped) return this;
+    hsl.l = clamped;
     return _colorFromHsl(hsl);
   }
 
   //-------------------------------------------------------------------------
   // Saturation related
 
-  Color withSaturation(double s) {
-    final hsl = _toHsl()..s = _clamp01(s);
+  ///
+  /// Returns the result of updating this color's saturation to the given value.
+  ///
+  Color withSaturation(double s, {int alpha}) {
+    final hsl = _toHsl(alpha: alpha)..s = _clamp01(s);
     return _colorFromHsl(hsl);
   }
 
-  Color saturateTo(double s) {
-    final hsl = _toHsl();
+  ///
+  /// Returns the result of saturating this color to the given value.
+  ///
+  Color saturateTo(double s, {int alpha}) {
+    final hsl = _toHsl(alpha: alpha);
     hsl.s = math.max(hsl.s, _clamp01(s));
     return _colorFromHsl(hsl);
   }
 
-  Color desaturateTo(double s) {
-    final hsl = _toHsl();
+  ///
+  /// Returns the result of desaturating this color to the given value.
+  ///
+  Color desaturateTo(double s, {int alpha}) {
+    final hsl = _toHsl(alpha: alpha);
     hsl.s = math.min(hsl.s, _clamp01(s));
     return _colorFromHsl(hsl);
   }
 
-  Color saturate([int amount = 10]) {
-    final hsl = _toHsl()..s += amount / 100;
+  ///
+  /// Returns the result of saturating this color by the given [amount].
+  ///
+  Color saturateBy(int amount, {int alpha}) {
+    final hsl = _toHsl(alpha: alpha)..s += amount / 100;
     hsl.s = _clamp01(hsl.s);
     return _colorFromHsl(hsl);
   }
 
-  Color desaturate([int amount = 10]) {
-    final hsl = _toHsl()..s -= amount / 100;
+  ///
+  /// Returns the result of desaturating this color by the given [amount].
+  ///
+  Color desaturateBy(int amount, {int alpha}) {
+    final hsl = _toHsl(alpha: alpha)..s -= amount / 100;
     hsl.s = _clamp01(hsl.s);
     return _colorFromHsl(hsl);
   }
 
+  ///
+  /// Returns the result of desaturating this color by 100%.
+  ///
   Color greyscale() {
-    return desaturate(100);
+    return desaturateBy(100);
   }
 
   //-------------------------------------------------------------------------
   // Hue related
 
-  Color spin(double amount) {
-    final hsl = _toHsl();
+  ///
+  /// Returns the color on the color wheel that is the given [amount] from this color.
+  ///
+  Color spin(double amount, {int alpha}) {
+    final hsl = _toHsl(alpha: alpha);
     final hue = (hsl.h + amount) % 360;
     hsl.h = hue < 0 ? 360 + hue : hue;
     return _colorFromHsl(hsl);
@@ -152,25 +246,33 @@ extension TecUtilExtOnColor on Color {
   //-------------------------------------------------------------------------
   // Misc.
 
-  Color mix({@required Color input, int amount = 50}) {
-    assert(input != null);
+  ///
+  /// Returns the result of mixing this color with the [other] color.
+  ///
+  Color mix({@required Color other, int amount = 50}) {
+    assert(other != null);
     final p = (amount.toDouble() / 100.0).round();
-    final color = Color.fromARGB((input.alpha - alpha) * p + alpha, (input.red - red) * p + red,
-        (input.green - green) * p + green, (input.blue - blue) * p + blue);
-    return color;
+    final result = Color.fromARGB((other.alpha - alpha) * p + alpha, (other.red - red) * p + red,
+        (other.green - green) * p + green, (other.blue - blue) * p + blue);
+    return result;
   }
 
-  Color complement() {
-    final hsl = _toHsl();
+  ///
+  /// Returns this color's complementary color (i.e. the color opposite this color
+  /// on the color wheel).
+  ///
+  Color complement({int alpha}) {
+    final hsl = _toHsl(alpha: alpha);
     hsl.h = (hsl.h + 180) % 360;
     return _colorFromHsl(hsl);
   }
 
-  //double get blueness => ((blue - ((red + green) / 2.0)) + 255.0) / 510.0;
+  // Returns the "blueness" of the color, a number <= 0 && <= 1.0.
   double get blueness => (blue - math.max(red, green) + 255.0) / 510.0;
 
-  _HslColor _toHsl() {
-    return rgbToHsl(red.toDouble(), green.toDouble(), blue.toDouble(), alpha.toDouble());
+  _HslColor _toHsl({@required int alpha}) {
+    return _rgbToHsl(
+        red.toDouble(), green.toDouble(), blue.toDouble(), (alpha ?? this.alpha).toDouble());
   }
 }
 
@@ -210,7 +312,7 @@ double _linearizeColorComponent(double component) {
   return math.pow((component + 0.055) / 1.055, 2.4) as double;
 }
 
-_HslColor rgbToHsl(double r1, double g1, double b1, double alpha) {
+_HslColor _rgbToHsl(double r1, double g1, double b1, double alpha) {
   final r = _bound01(r1, 255.0);
   final g = _bound01(g1, 255.0);
   final b = _bound01(b1, 255.0);
