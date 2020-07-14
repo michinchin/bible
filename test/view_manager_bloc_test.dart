@@ -22,7 +22,7 @@ void main() {
     });
 
     test('initial state is empty list', () {
-      expect(bloc.initialState, ViewManagerState([], 0, 1));
+      expect(bloc.initialState, ViewManagerState([bcv], 0, 2));
     });
 
     blocTest<ViewManagerBloc, ViewManagerEvent, ViewManagerState>(
@@ -32,19 +32,19 @@ void main() {
         bloc
           ..add(add('1'))
           ..add(add('2'))
-          ..add(move(0, 1))
-          ..add(move(0, 1))
-          ..add(remove(0))
-          ..add(remove(0));
+          ..add(move(1, 2))
+          ..add(move(1, 2))
+          ..add(remove(2))
+          ..add(remove(3));
         return Future.value();
       },
       expect: <dynamic>[
-        ViewManagerState([view(1, '1')], 0, 2),
-        ViewManagerState([view(1, '1'), view(2, '2')], 0, 3),
-        ViewManagerState([view(2, '2'), view(1, '1')], 0, 3),
-        ViewManagerState([view(1, '1'), view(2, '2')], 0, 3),
-        ViewManagerState([view(2, '2')], 0, 3),
-        ViewManagerState([], 0, 3),
+        ViewManagerState([bcv, view(2, '1')], 0, 3),
+        ViewManagerState([bcv, view(2, '1'), view(3, '2')], 0, 4),
+        ViewManagerState([bcv, view(3, '2'), view(2, '1')], 0, 4),
+        ViewManagerState([bcv, view(2, '1'), view(3, '2')], 0, 4),
+        ViewManagerState([bcv, view(3, '2')], 0, 4),
+        ViewManagerState([bcv], 0, 4),
       ],
     );
   });
@@ -53,6 +53,8 @@ void main() {
 //
 // UTILITY FUNCTIONS
 //
+
+final bcv = ViewState(uid: 1, type: 'BibleChapter');
 
 ViewManagerEvent add(String data) => ViewManagerEvent.add(type: 'test', data: data);
 

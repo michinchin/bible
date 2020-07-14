@@ -30,13 +30,26 @@ class _VMViewStack extends StatelessWidget {
     final maximizedView =
         vmState.views.firstWhere((e) => e.uid == vmState.maximizedViewUid, orElse: () => null);
 
-    final viewRects = <ViewRect>[];
-    final rows = _buildRows(_Size.ideal, vmState, constraints)..balance(constraints);
-    final children = rows.toViewList(constraints, maximizedView, viewRects);
+    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+    assert(bloc != null);
 
-    // Update the view rects...
-    assert(context.bloc<ViewManagerBloc>() != null);
-    context.bloc<ViewManagerBloc>()?._viewRects = viewRects;
+    final wasVisibleTextSelected = (bloc?._visibleViewsWithSelections?.isNotEmpty ?? false);
+
+    // Build and update the rows.
+    final rows = _buildRows(_Size.ideal, vmState, constraints)..balance(constraints);
+    bloc?._rows = rows;
+
+    // Build children and save the view rects.
+    final viewRects = <ViewRect>[];
+    final children = rows.toViewList(constraints, maximizedView, viewRects);
+    bloc?._viewRects = viewRects;
+
+    // If the state of visible selected text changed, call _updateSelectionBloc after the build.
+    final isVisibleTextSelected = (bloc?._visibleViewsWithSelections?.isNotEmpty ?? false);
+    if (wasVisibleTextSelected != isVisibleTextSelected) {
+      WidgetsBinding.instance
+          .addPostFrameCallback((timeStamp) => bloc?._updateSelectionBloc(context));
+    }
 
     return Theme(
       data: theme.copyWith(

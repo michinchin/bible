@@ -12,7 +12,7 @@ import '../common/common.dart';
 void showTextSettingsDialog(BuildContext context) {
   showTecModalPopup<void>(
     context: context,
-    alignment: Alignment.topRight,
+    alignment: Alignment.bottomCenter,
     useRootNavigator: true,
     builder: (context) => SafeArea(child: TecPopupSheet(child: _TextSettings())),
   );
@@ -119,7 +119,8 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.grey[400] : Colors.grey[800];
-    final fontSize = textScaleFactorWith(context, forAbsoluteFontSize: true) * 25;
+    final fontSize =
+        textScaleFactorWith(context, forAbsoluteFontSize: true, maxScaleFactor: 1) * 25;
     return Material(
       child: SafeArea(
         child: Column(
@@ -149,6 +150,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                   const TextSpan(text: ' Font type: '),
                   TextSpan(text: _fontType, style: TextStyle(color: Theme.of(context).accentColor)),
                 ], style: Theme.of(context).textTheme.headline6),
+                maxScaleFactor: _maxTextScaleFactor,
               ),
               menuItems: const [
                 'recently used',
@@ -170,6 +172,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                       text: _sortAlphabetically ? 'alphabetically' : 'by popularity',
                       style: TextStyle(color: Theme.of(context).accentColor)),
                 ], style: Theme.of(context).textTheme.headline6),
+                maxScaleFactor: _maxTextScaleFactor,
               ),
               menuItems: const ['by popularity', 'alphabetically'],
               type: _sortAlphabetically ? 'alphabetically' : 'by popularity',
@@ -211,6 +214,7 @@ const TextStyle _defaultTextStyle = TextStyle(
 );
 
 const _defaultMenuItemHeight = 36.0;
+const _maxTextScaleFactor = 1.0;
 
 class _PopupMenuButton extends StatelessWidget {
   final Widget title;
@@ -229,7 +233,7 @@ class _PopupMenuButton extends StatelessWidget {
               value: typeName,
               child: TecText(
                 typeName,
-                maxScaleFactor: 1.2,
+                maxScaleFactor: _maxTextScaleFactor,
                 style: TextStyle(
                     fontWeight: typeName == type ? FontWeight.bold : FontWeight.normal,
                     color: typeName == type
