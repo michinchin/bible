@@ -138,46 +138,27 @@ const BoxConstraints _defaultConstraints = BoxConstraints(maxWidth: 320, maxHeig
 List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return [
     IconButton(
-      icon: const Icon(Icons.photo_size_select_large),
-      tooltip: 'Windows',
-      onPressed: () => showMoreMenu(context, bodyKey, state, size),
+      icon: Icon(_moreIcon(context)),
+      tooltip: 'More',
+      onPressed: () => _showMoreMenu(context, bodyKey, state, size),
     ),
-    if (context.bloc<ViewManagerBloc>().indexOfView(state.uid) == 0 ||
-        context.bloc<ViewManagerBloc>().state.maximizedViewUid == state.uid)
-      IconButton(
-        icon: const Icon(Icons.account_circle),
-        tooltip: 'Main Menu',
-        onPressed: () => showMainMenu(context),
-      ),
   ];
 }
 
-Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
+Future<void> _showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return showTecModalPopup<void>(
+    useRootNavigator: false,
     context: context,
     alignment: Alignment.topRight,
-    // useRootNavigator: false,
     builder: (context) {
-      final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-      final isMaximized = bloc?.state?.maximizedViewUid != 0;
       return TecPopupSheet(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if ((bloc?.state?.views?.length ?? 0) > 1)
-              _menuItem(context, Icons.close, 'Close View', () {
-                Navigator.of(context).maybePop();
-                bloc?.add(ViewManagerEvent.remove(state.uid));
-              }),
-            ..._generateOffScreenItems(context, state.uid),
-            if ((bloc?.state?.views?.length ?? 0) > 1)
-              _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
-                  isMaximized ? 'Restore' : 'Maximize', () {
-                Navigator.of(context).maybePop();
-                bloc?.add(isMaximized
-                    ? const ViewManagerEvent.restore()
-                    : ViewManagerEvent.maximize(state.uid));
-              }),
+            _menuItem(context, Icons.close, 'Close View', () {
+              Navigator.of(context).maybePop();
+              context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.uid));
+            }),
             ..._generateAddMenuItems(context, state.uid),
           ],
         ),
@@ -186,46 +167,10 @@ Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Si
   );
 }
 
-Iterable<Widget> _generateOffScreenItems(BuildContext context, int viewUid) {
-  final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-  final vm = ViewManager.shared;
-  final iconMap = <String, IconData>{
-    'Bible': FeatherIcons.book,
-    'Note': FeatherIcons.edit,
-    'Test View': FeatherIcons.plusSquare
-  };
-
-  final items = <Widget>[];
-  for (final each in bloc.state.views) {
-    if (!bloc.isViewWithUidVisible(each.uid)) {
-      var title = vm.titleForType(each.type);
-      if (each.type == 'BibleChapter') {
-        final bible = VolumesRepository.shared.bibleWithId(51);
-        final data =
-            ChapterData.fromJson(each.data) ?? const ChapterData(BookChapterVerse(50, 1, 1), 0);
-        final bcv = data.bcv;
-        title = bible.titleWithHref('${bcv.book}/${bcv.chapter}');
-      }
-      items.add(_menuItem(context, iconMap[vm.titleForType(each.type)], '$title', () {
-        if (bloc.state.maximizedViewUid == viewUid) {
-          Navigator.of(context).maybePop();
-          bloc?.add(ViewManagerEvent.move(fromPosition: bloc.indexOfView(each.uid), toPosition: 0));
-          bloc?.add(ViewManagerEvent.maximize(each.uid));
-        } else {
-          Navigator.of(context).maybePop();
-          bloc?.add(ViewManagerEvent.move(fromPosition: bloc.indexOfView(each.uid), toPosition: 0));
-        }
-      }));
-    }
-  }
-  return items;
-}
-
 Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
   final vm = ViewManager.shared;
-
   return vm.types.map<Widget>(
-    (type) => _menuItem(context, FeatherIcons.plusCircle, 'New ${vm.titleForType(type)}', () {
+    (type) => _menuItem(context, Icons.add, 'Add ${vm.titleForType(type)}', () {
       Navigator.of(context).maybePop();
       final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
       final position = bloc?.indexOfView(viewUid) ?? -1;
@@ -257,6 +202,16 @@ Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback
     borderRadius: null,
     onPressed: onPressed,
   );
+}
+
+IconData _moreIcon(BuildContext context) {
+  switch (Theme.of(context).platform) {
+    case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
+      return Icons.more_horiz;
+    default:
+      return Icons.more_vert;
+  }
 }
 
 // List<Widget> _testActionsForAdjustingSize(

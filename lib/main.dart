@@ -13,6 +13,7 @@ import 'blocs/app_theme_bloc.dart';
 import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'ui/bible/chapter_view.dart';
+import 'ui/common/view_actions.dart';
 import 'ui/home/home_screen.dart';
 import 'ui/misc/test_view.dart';
 import 'ui/note/note_view.dart';
@@ -58,9 +59,16 @@ void _registerViewTypes() {
         title: 'Bible',
         builder: bibleChapterViewBuilder,
         titleBuilder: bibleChapterTitleBuilder,
+        actionsBuilder: defaultActionsBuilder,
         keyMaker: bibleChapterKeyMaker)
-    ..register(noteViewTypeName, title: 'Note', builder: notesViewBuilder)
-    ..register(testViewType, title: 'Test View', builder: testViewBuilder);
+    ..register(noteViewTypeName,
+        title: 'Note', builder: notesViewBuilder, actionsBuilder: defaultActionsBuilder)
+    ..register(
+      testViewType,
+      title: 'Test View',
+      builder: testViewBuilder,
+      actionsBuilder: defaultActionsBuilder,
+    );
 }
 
 ///

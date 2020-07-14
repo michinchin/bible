@@ -154,8 +154,7 @@ class _ManagedViewScaffoldState extends State<_ManagedViewScaffold> {
         appBar: AppBar(
           title: ViewManager.shared
               ._buildViewTitle(context, _bodyKey, widget.state.viewState, widget.state.viewSize),
-          // leading:
-          // widget.state.viewIndex > 0
+          // leading: widget.state.viewIndex > 0
           //     ? null
           //     : IconButton(
           //         icon: const Icon(Icons.menu),

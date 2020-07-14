@@ -37,7 +37,7 @@ Widget bibleChapterViewBuilder(BuildContext context, Key bodyKey, ViewState stat
     state: state,
     size: size,
     controllerBuilder: () {
-      final chapterData = ChapterData.fromJson(state.data);
+      final chapterData = _ChapterData.fromJson(state.data);
       return TecPageController(initialPage: chapterData.page);
     },
     pageBuilder: (context, state, size, index) {
@@ -56,7 +56,7 @@ Widget bibleChapterViewBuilder(BuildContext context, Key bodyKey, ViewState stat
       if (bible != null) {
         final bcv = _initialReference.advancedBy(chapters: page, bible: bible);
         context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.setData(
-            uid: state.uid, data: tec.toJsonString(ChapterData(bcv, page))));
+            uid: state.uid, data: tec.toJsonString(_ChapterData(bcv, page))));
       }
     },
   );
@@ -64,7 +64,7 @@ Widget bibleChapterViewBuilder(BuildContext context, Key bodyKey, ViewState stat
 
 Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   final bible = VolumesRepository.shared.bibleWithId(_bibleId);
-  final bcv = ChapterData.fromJson(state.data).bcv;
+  final bcv = _ChapterData.fromJson(state.data).bcv;
   return CupertinoButton(
     child: Text(
       bible.titleWithHref('${bcv.book}/${bcv.chapter}'),
@@ -89,15 +89,21 @@ Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState sta
   );
 }
 
-class ChapterData {
+String bibleChapterTitleFromState(ViewState state) {
+  final bible = VolumesRepository.shared.bibleWithId(_bibleId);
+  final bcv = _ChapterData.fromJson(state.data).bcv ?? _initialReference;
+  return bible.titleWithHref('${bcv.book}/${bcv.chapter}');
+}
+
+class _ChapterData {
   final BookChapterVerse bcv;
   final int page;
 
-  const ChapterData(BookChapterVerse bcv, int page)
+  const _ChapterData(BookChapterVerse bcv, int page)
       : bcv = bcv ?? _initialReference,
         page = page ?? 0;
 
-  factory ChapterData.fromJson(Object object) {
+  factory _ChapterData.fromJson(Object object) {
     BookChapterVerse bcv;
     int page;
     final json = (object is String ? tec.parseJsonSync(object) : object);
@@ -105,7 +111,7 @@ class ChapterData {
       bcv = BookChapterVerse.fromJson(json['bcv']);
       page = tec.as<int>(json['page']);
     }
-    return ChapterData(bcv, page);
+    return _ChapterData(bcv, page);
   }
 
   Map<String, dynamic> toJson() {
