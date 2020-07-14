@@ -138,9 +138,7 @@ const BoxConstraints _defaultConstraints = BoxConstraints(maxWidth: 320, maxHeig
 List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return [
     IconButton(
-      icon: IconWithNumberBadge(
-          icon: Icons.photo_size_select_large,
-          value: context.bloc<ViewManagerBloc>().countOfInvisibleViews),
+      icon: const Icon(Icons.photo_size_select_large),
       tooltip: 'Windows',
       onPressed: () => showMoreMenu(context, bodyKey, state, size),
     ),
@@ -171,6 +169,7 @@ Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Si
                 Navigator.of(context).maybePop();
                 bloc?.add(ViewManagerEvent.remove(state.uid));
               }),
+            ..._generateOffScreenItems(context, state.uid),
             if ((bloc?.state?.views?.length ?? 0) > 1)
               _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
                   isMaximized ? 'Restore' : 'Maximize', () {
@@ -187,16 +186,46 @@ Future<void> showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Si
   );
 }
 
-Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
+Iterable<Widget> _generateOffScreenItems(BuildContext context, int viewUid) {
+  final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
   final vm = ViewManager.shared;
   final iconMap = <String, IconData>{
     'Bible': FeatherIcons.book,
-    'Notes': FeatherIcons.edit,
+    'Note': FeatherIcons.edit,
     'Test View': FeatherIcons.plusSquare
   };
+
+  final items = <Widget>[];
+  for (final each in bloc.state.views) {
+    if (!bloc.isViewWithUidVisible(each.uid)) {
+      var title = vm.titleForType(each.type);
+      if (each.type == 'BibleChapter') {
+        final bible = VolumesRepository.shared.bibleWithId(51);
+        final data =
+            ChapterData.fromJson(each.data) ?? const ChapterData(BookChapterVerse(50, 1, 1), 0);
+        final bcv = data.bcv;
+        title = bible.titleWithHref('${bcv.book}/${bcv.chapter}');
+      }
+      items.add(_menuItem(context, iconMap[vm.titleForType(each.type)], '$title', () {
+        if (bloc.state.maximizedViewUid == viewUid) {
+          Navigator.of(context).maybePop();
+          bloc?.add(ViewManagerEvent.move(fromPosition: bloc.indexOfView(each.uid), toPosition: 0));
+          bloc?.add(ViewManagerEvent.maximize(each.uid));
+        } else {
+          Navigator.of(context).maybePop();
+          bloc?.add(ViewManagerEvent.move(fromPosition: bloc.indexOfView(each.uid), toPosition: 0));
+        }
+      }));
+    }
+  }
+  return items;
+}
+
+Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
+  final vm = ViewManager.shared;
+
   return vm.types.map<Widget>(
-    (type) =>
-        _menuItem(context, iconMap[vm.titleForType(type)], 'Add ${vm.titleForType(type)}', () {
+    (type) => _menuItem(context, FeatherIcons.plusCircle, 'New ${vm.titleForType(type)}', () {
       Navigator.of(context).maybePop();
       final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
       final position = bloc?.indexOfView(viewUid) ?? -1;
