@@ -27,8 +27,7 @@ class _MainSheetState extends State<MainSheet> {
         child: Column(
           children: [
             if (widget.sheetSize == SheetSize.mini)
-              Container(
-                height: 100,
+              Expanded(
                 child: GridView.count(
                   crossAxisCount: 4,
                   childAspectRatio: landscape ? 2.0 : 1.0,
@@ -48,7 +47,7 @@ class _MainSheetState extends State<MainSheet> {
               Expanded(
                 child: GridView.count(
                   crossAxisCount: 2,
-                  childAspectRatio: landscape ? 4.0 : 2.0,
+                  childAspectRatio: landscape ? 4.0 : 3.0,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                   padding: const EdgeInsets.only(top: 0),

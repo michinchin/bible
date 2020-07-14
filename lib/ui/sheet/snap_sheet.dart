@@ -31,13 +31,11 @@ class _SnapSheetState extends State<SnapSheet> {
 
   List<double> _calculateHeightSnappings(Orientation orientation) {
     // figure out dimensions depending on view size
-    final landscape = orientation == Orientation.landscape;
-    final hasBottomPadding = MediaQuery.of(context).padding.bottom != 0;
-    final bottomPadding = (hasBottomPadding ? 0 : 5);
-    final topBarHeight = (landscape ? 40.0 : 0.0) + bottomPadding;
-    final secondBarHeight = (landscape ? 140 : 120.0) + bottomPadding;
-    final ratio = (topBarHeight / MediaQuery.of(context).size.height) + 0.1;
-    final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height) + 0.1;
+    final bottomPadding = MediaQuery.of(context).padding.bottom / 2 + 10;
+    final topBarHeight = 50.0 + bottomPadding;
+    final secondBarHeight = 170.0 + bottomPadding;
+    final ratio = (topBarHeight / MediaQuery.of(context).size.height);
+    final ratio2 = (secondBarHeight / MediaQuery.of(context).size.height);
 
     // debugPrint(ratio.toString());
     return [ratio, ratio + ratio2, 1.0];
@@ -110,14 +108,22 @@ class _SnapSheetState extends State<SnapSheet> {
                   return InkWell(
                     onTap: () => context.bloc<SheetManagerBloc>().changeSize(
                         state.size == SheetSize.mini ? SheetSize.medium : SheetSize.mini),
-                    child: Container(
-                      height: 5,
-                      margin: EdgeInsets.symmetric(
-                          vertical: 5,
-                          horizontal: wideView ? widthOfScreen / 4 - 15 : widthOfScreen / 2 - 15),
-                      decoration: ShapeDecoration(
-                          color: Theme.of(context).textColor.withOpacity(0.2),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            height: 5,
+                            width: 30,
+                            decoration: ShapeDecoration(
+                                color: Theme.of(context).textColor.withOpacity(0.2),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15))),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -170,7 +176,6 @@ class GreyCircleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget circleIcon([double radius]) => Container(
         child: InkWell(
-            customBorder: const CircleBorder(),
             onTap: onPressed ?? () {},
             child: CircleAvatar(
                 radius: radius,

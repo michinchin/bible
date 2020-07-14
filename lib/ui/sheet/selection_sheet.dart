@@ -210,8 +210,10 @@ class _SelectionSheetState extends State<SelectionSheet> {
       expandButton,
     ];
 
-    Widget _miniView() =>
-        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: miniChildren);
+    Widget _miniView() => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: miniChildren);
     // : Row(children: [
     //     Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
     //     noColorButton,
@@ -232,7 +234,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
       padding: const EdgeInsets.only(left: 15, right: 15),
       child: Column(children: [
         if (widget.sheetSize == SheetSize.mini)
-          Container(height: 40, child: _miniView())
+          Expanded(child: _miniView())
         else if (widget.sheetSize == SheetSize.medium)
           _mediumView()
         else if (widget.sheetSize == SheetSize.full) ...[
@@ -416,9 +418,17 @@ class _ColorPickerButton extends StatelessWidget {
               height: width,
             )
           else
-            CircleAvatar(
-              backgroundColor: color,
-              radius: width,
+            Container(
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.transparent,
+                    width: 5,
+                  )),
+              child: CircleAvatar(
+                backgroundColor: color,
+                radius: width,
+              ),
             ),
           if (deletionMode)
             Icon(
