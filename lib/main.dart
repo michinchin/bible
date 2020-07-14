@@ -59,7 +59,7 @@ void _registerViewTypes() {
         builder: bibleChapterViewBuilder,
         titleBuilder: bibleChapterTitleBuilder,
         keyMaker: bibleChapterKeyMaker)
-    ..register(noteViewTypeName, title: 'Notes', builder: notesViewBuilder)
+    ..register(noteViewTypeName, title: 'Note', builder: notesViewBuilder)
     ..register(testViewType, title: 'Test View', builder: testViewBuilder);
 }
 
