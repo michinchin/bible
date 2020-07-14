@@ -5,7 +5,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 part 'sheet_manager_bloc.freezed.dart';
 
-enum SheetType { main, selection, windows }
+enum SheetType { collapsed, main, selection, windows }
 
 enum SheetSize { mini, medium, full }
 

@@ -46,12 +46,22 @@ class _SnapSheetState extends State<SnapSheet> {
     return OrientationBuilder(builder: (context, orientation) {
       final snappings = _calculateHeightSnappings(orientation);
 
-      SheetSize _getSheetSize(double d) => SheetSize.values[snappings.indexWhere((s) => s == d)];
+      SheetSize _getSheetSize(double d) {
+        final snap = snappings.indexWhere((s) => s == d);
+        if (snap != -1) {
+          return SheetSize.values[snap];
+        }
+        return null;
+      }
 
       return BlocConsumer<SheetManagerBloc, SheetManagerState>(
           listenWhen: (previous, current) => previous != current,
           listener: (context, state) {
-            _sheetController.snapToExtent(snappings[state.size.index]);
+            if (state.type == SheetType.collapsed) {
+              _sheetController.hide();
+            } else {
+              _sheetController.snapToExtent(snappings[state.size.index]);
+            }
           },
           builder: (context, state) {
             final widthOfScreen = MediaQuery.of(context).size.width;
@@ -74,8 +84,12 @@ class _SnapSheetState extends State<SnapSheet> {
                 snapSpec: SnapSpec(
                   initialSnap: snappings[state.size.index],
                   snappings: snappings,
-                  onSnap: (s, snapPosition) =>
-                      context.bloc<SheetManagerBloc>().changeSize(_getSheetSize(snapPosition)),
+                  onSnap: (s, snapPosition) {
+                    final sheetSize = _getSheetSize(snapPosition);
+                    if (sheetSize != null) {
+                      context.bloc<SheetManagerBloc>().changeSize(sheetSize);
+                    }
+                  },
                   positioning: SnapPositioning.relativeToAvailableSpace,
                 ),
                 color: Theme.of(context).cardColor,
@@ -89,10 +103,10 @@ class _SnapSheetState extends State<SnapSheet> {
                       child =
                           SelectionSheet(key: ValueKey(state.size.index), sheetSize: state.size);
                       break;
-                    case SheetType.windows:
-                      child = WindowManagerSheet(
-                          key: ValueKey(state.size.index), sheetSize: state.size);
-                      break;
+                    // case SheetType.windows:
+                    //   child = WindowManagerSheet(
+                    //       key: ValueKey(state.size.index), sheetSize: state.size);
+                    //   break;
                     default:
                       child = Container();
                   }
