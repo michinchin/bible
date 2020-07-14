@@ -8,7 +8,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../main_menu.dart';
 import '../bible/chapter_view.dart';
-import 'common.dart';
+import '../common/common.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return [
