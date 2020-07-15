@@ -1,11 +1,14 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
@@ -14,6 +17,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/app_settings.dart';
 import '../../models/color_utils.dart';
 
 const _debugMode = false; // kDebugMode
@@ -58,6 +62,93 @@ class BibleChapterViewModel {
   // ignore: use_to_and_as_if_applicable
   TecHtmlBuildHelper tecHtmlBuildHelper() => TecHtmlBuildHelper(this);
 
+  // maintain a list of keys for footnotes, margin notes
+  final widgetKeys = <String, GlobalKey>{};
+  TapUpDetails tapUpDetails;
+
+  // only call widgetHitTest from onTap (and set tapUpDetails in onTapUp)
+  bool _widgetHitTest(double padding) {
+    if (tapUpDetails != null && _selectedVerses.isEmpty) {
+      final x = tapUpDetails.globalPosition.dx;
+      final y = tapUpDetails.globalPosition.dy;
+
+      // clear current details
+      tapUpDetails = null;
+
+      for (final key in widgetKeys.keys) {
+        final renderBox = widgetKeys[key].currentContext?.findRenderObject();
+        if (renderBox is RenderBox) {
+          final position = renderBox.localToGlobal(Offset.zero);
+
+          if (y < position.dy) {
+            // don't bother checking rest of chapter... tap is above those...
+            break;
+          }
+
+          final hit = x >= (position.dx - padding) &&
+              x <= (position.dx + renderBox.size.width + padding) &&
+              y >= (position.dy - padding) &&
+              y <= (position.dy + renderBox.size.height + padding);
+
+          if (hit) {
+            if (widgetKeys[key].currentWidget is GestureDetector) {
+              (widgetKeys[key].currentWidget as GestureDetector).onTap();
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  InlineSpan _footnoteSpan(BuildContext context, TextStyle style, _VerseTag tag, Key key) {
+    // Example returning a WidgetSpan:
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
+    final iconWidth = (style.fontSize ?? 16.0) / 1.5;
+
+    return TaggableWidgetSpan(
+      alignment: PlaceholderAlignment.top,
+      child: AbsorbPointer(
+        absorbing: _selectedVerses.isNotEmpty,
+        child: GestureDetector(
+          key: key,
+          child: Stack(children: <Widget>[
+            Container(
+              width: iconWidth,
+              // use app settings height to determine correct line height
+              height: AppSettings.shared.contentTextScaleFactor.value * 14.0,
+              decoration: BoxDecoration(color: backgroundColor),
+            ),
+            SvgPicture.asset('assets/footnote.svg',
+                width: iconWidth,
+                height: iconWidth,
+                color: Theme.of(context).accentColor,
+                semanticsLabel: 'Footnote')
+          ]),
+          onTap: () {
+            tecShowSimpleAlertDialog<void>(context: context, content: tag.href);
+          },
+        ),
+      ),
+      style: style,
+      tag: tag,
+    );
+  }
+
+  // Example returning a TextSpan:
+  // return TaggableTextSpan(
+  //   text: '* ',
+  //   style: Theme.of(context).textTheme.headline6.copyWith(color: Theme.of(context).accentColor),
+  //   tag: tag,
+  //   recognizer: TapGestureRecognizer()
+  //     ..onTap = () {
+  //       tecShowSimpleAlertDialog<void>(context: context, content: 'Footnote ${tag.href}');
+  //     },
+  // );
+
   ///
   /// Returns a TextSpan (or WidgetSpan) for the given HTML text node.
   ///
@@ -69,12 +160,26 @@ class BibleChapterViewModel {
     TextStyle selectedTextStyle, {
     bool isDarkTheme,
   }) {
+    final tapPadding = MediaQuery.of(context).devicePixelRatio * 2.0;
+
     if (tag is _VerseTag && tag.isInFootnote && text != ' ') {
-      return _footnoteSpan(context, style, tag);
+      // assign a unique key for this footnote
+      // this can (is) called multiple times per footnote - just create one key
+      if (!widgetKeys.containsKey('${tag.verse}-${tag.word}')) {
+        widgetKeys['${tag.verse}-${tag.word}'] = GlobalKey();
+      }
+
+      return _footnoteSpan(context, style, tag, widgetKeys['${tag.verse}-${tag.word}']);
     }
+
     if (tag is _VerseTag) {
-      final recognizer = tag.verse == null ? null : TapGestureRecognizer()
-        ..onTap = () => _toggleSelectionForVerse(context, tag.verse);
+      final recognizer = tag.verse == null ? null : TapGestureRecognizer();
+      recognizer?.onTapUp = (details) => tapUpDetails = details;
+      recognizer?.onTap = () {
+        if (!_widgetHitTest(tapPadding)) {
+          _toggleSelectionForVerse(context, tag.verse);
+        }
+      };
 
       // If not in trial mode, and this whole verse is selected, just
       // return a span with the selected text style.
@@ -654,41 +759,4 @@ extension ChapterViewModelExtOnString on String {
     }
     return i;
   }
-}
-
-InlineSpan _footnoteSpan(BuildContext context, TextStyle style, _VerseTag tag) {
-  // Example returning a WidgetSpan:
-  final size = style.fontSize ?? 16.0;
-  return TaggableWidgetSpan(
-    alignment: PlaceholderAlignment.top,
-    child: Transform.translate(
-      offset: Offset(0, -size / 3.0),
-      child: GestureDetector(
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: Theme.of(context).accentColor,
-            borderRadius: BorderRadius.all(Radius.circular(size / 2.0)),
-          ),
-        ),
-        onTap: () {
-          tecShowSimpleAlertDialog<void>(context: context, content: tag.href);
-        },
-      ),
-    ),
-    style: style,
-    tag: tag,
-  );
-
-  // Example returning a TextSpan:
-  // return TaggableTextSpan(
-  //   text: '* ',
-  //   style: Theme.of(context).textTheme.headline6.copyWith(color: Theme.of(context).accentColor),
-  //   tag: tag,
-  //   recognizer: TapGestureRecognizer()
-  //     ..onTap = () {
-  //       tecShowSimpleAlertDialog<void>(context: context, content: 'Footnote ${tag.href}');
-  //     },
-  // );
 }
