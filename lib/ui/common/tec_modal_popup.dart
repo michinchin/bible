@@ -123,6 +123,7 @@ Future<T> showTecDialog<T extends Object>({
   double maxWidth,
   double maxHeight,
   double cornerRadius,
+  EdgeInsets padding = const EdgeInsets.all(20),
 }) {
   var windowSize = Size.zero;
   if (maxWidth != null || maxHeight != null) {
@@ -149,7 +150,7 @@ Future<T> showTecDialog<T extends Object>({
               color: Theme.of(context).canvasColor,
               borderRadius: BorderRadius.circular(cornerRadius ?? 8),
             ),
-            padding: const EdgeInsets.all(20),
+            padding: padding,
             child: Builder(builder: builder),
           ),
         );

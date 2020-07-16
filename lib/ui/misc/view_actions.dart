@@ -29,6 +29,7 @@ Future<void> _showMoreMenu(BuildContext context, Key bodyKey, ViewState state, S
     context: context,
     // alignment: Alignment.center,
     // useRootNavigator: false,
+    padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
     builder: (context) {
       return SizedBox(height: 350, child: ViewNavigator(viewState: state));
     },

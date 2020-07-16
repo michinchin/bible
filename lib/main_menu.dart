@@ -16,11 +16,12 @@ import 'ui/misc/text_settings.dart';
 const tecartaBlue = Color(0xff4a7dee);
 
 Future<void> showMainMenu(BuildContext context) {
-  return showTecModalPopup<void>(
+  return showTecDialog<void>(
     context: context,
-    alignment: Alignment.topRight,
+    padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+    // alignment: Alignment.topRight,
     useRootNavigator: true,
-    builder: (context) => TecPopupSheet(child: MainMenu()),
+    builder: (context) => MainMenu(),
   );
 }
 
@@ -30,9 +31,8 @@ const _textMaxScaleFactor = 1.0;
 class MainMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final drawerTextColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : Colors.grey[700];
+    final drawerTextColor =
+        Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.grey[700];
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -40,14 +40,12 @@ class MainMenu extends StatelessWidget {
         textTheme: TextTheme(bodyText2: TextStyle(color: drawerTextColor)),
       ),
       child: SizedBox(
-        width: 255,
-        child: Material(
+        height: 350,
+        child: SingleChildScrollView(
           child: Column(
             children: [
               MenuListTile(
-                icon: tec.platformIs(tec.Platform.iOS)
-                    ? FeatherIcons.share
-                    : FeatherIcons.share2,
+                icon: tec.platformIs(tec.Platform.iOS) ? FeatherIcons.share : FeatherIcons.share2,
                 title: 'Share app',
                 onTap: null,
               ),
@@ -58,18 +56,15 @@ class MainMenu extends StatelessWidget {
               ),
               MenuListTile(
                 icon: Icons.lightbulb_outline,
-                switchValue: () =>
-                    context.bloc<ThemeModeBloc>().state == ThemeMode.dark,
+                switchValue: () => context.bloc<ThemeModeBloc>().state == ThemeMode.dark,
                 title: 'Dark Mode',
-                onTap: () =>
-                    context.bloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
+                onTap: () => context.bloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
               ),
               MenuListTile(
                 title: 'Autoscroll',
                 icon: Icons.play_circle_outline,
                 switchValue: TecAutoScroll.isEnabled,
-                onTap: () => TecAutoScroll.setEnabled(
-                    enabled: !TecAutoScroll.isEnabled()),
+                onTap: () => TecAutoScroll.setEnabled(enabled: !TecAutoScroll.isEnabled()),
               ),
               MenuListTile(
                 icon: Icons.format_size,
@@ -118,7 +113,7 @@ class MainMenu extends StatelessWidget {
 }
 
 const TextStyle _menuTitleStyle = TextStyle(
-  fontSize: 16,
+  fontSize: 12,
   fontWeight: FontWeight.w600,
 );
 
@@ -128,8 +123,7 @@ class MenuListTile extends StatefulWidget {
   final bool Function() switchValue;
   final GestureTapCallback onTap;
 
-  const MenuListTile(
-      {Key key, this.icon, this.title, this.switchValue, this.onTap})
+  const MenuListTile({Key key, this.icon, this.title, this.switchValue, this.onTap})
       : super(key: key);
 
   @override
@@ -139,18 +133,17 @@ class MenuListTile extends StatefulWidget {
 class _MenuListTileState extends State<MenuListTile> {
   @override
   Widget build(BuildContext context) {
-    final textColor = Color.lerp(Theme.of(context).textColor,
-        Theme.of(context).canvasColor, widget.onTap == null ? 0.75 : 0);
+    final textColor = Color.lerp(Theme.of(context).textColor, Theme.of(context).canvasColor,
+        widget.onTap == null ? 0.75 : 0);
     return widget.switchValue == null
         ? ListTile(
             dense: true,
-            leading: widget.icon == null
-                ? const Text('')
-                : MenuIcon(iconData: widget.icon),
+            leading: widget.icon == null ? const Text('') : MenuIcon(iconData: widget.icon),
             title: TecText(
               widget.title,
               maxScaleFactor: _textMaxScaleFactor,
-              style: _menuTitleStyle.copyWith(color: textColor),
+              // style: _menuTitleStyle.copyWith(color: textColor),
+              style: TextStyle(color: textColor),
             ),
             onTap: widget.onTap,
           )
@@ -162,14 +155,13 @@ class _MenuListTileState extends State<MenuListTile> {
             },
             value: widget.switchValue(),
             activeColor: tecartaBlue,
-            secondary: widget.icon == null
-                ? const Text('')
-                : MenuIcon(iconData: widget.icon),
+            secondary: widget.icon == null ? const Text('') : MenuIcon(iconData: widget.icon),
             dense: true,
             title: TecText(
               widget.title,
               maxScaleFactor: _textMaxScaleFactor,
-              style: _menuTitleStyle.copyWith(color: textColor),
+              style: TextStyle(color: textColor),
+              // style: _menuTitleStyle.copyWith(color: textColor),
             ),
           );
   }

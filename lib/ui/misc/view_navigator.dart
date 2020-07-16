@@ -84,7 +84,7 @@ class WindowManager extends StatelessWidget {
                 ? const ViewManagerEvent.restore()
                 : ViewManagerEvent.maximize(state.uid));
           }),
-        if (((bloc?.countOfInvisibleViews ?? 0) > 1 || isMaximized)) ...[
+        if (((bloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
           _titleDivider(context, isMaximized ? 'Switch' : 'Open'),
           ..._generateOffScreenItems(context, state.uid)
         ],
@@ -171,13 +171,11 @@ class WindowManager extends StatelessWidget {
 
   Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onPressed) {
     return ListTile(
+        dense: true,
         onTap: onPressed,
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).textColor.withOpacity(0.1),
-          child: Icon(
-            icon,
-            color: Theme.of(context).textColor.withOpacity(0.5),
-          ),
+        leading: Icon(
+          icon,
+          color: Theme.of(context).textColor.withOpacity(0.5),
         ),
         title: TecText(
           title,

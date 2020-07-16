@@ -75,11 +75,12 @@ class _SnapSheetState extends State<SnapSheet> {
               child: SlidingSheet(
                 margin: margin,
                 controller: _sheetController,
-                elevation: 8,
+                elevation: 3,
                 closeOnBackdropTap: state.type == SheetType.windows,
                 cornerRadius: 15,
                 duration: const Duration(milliseconds: 250),
                 addTopViewPaddingOnFullscreen: true,
+                parallaxSpec: const ParallaxSpec(),
                 snapSpec: SnapSpec(
                   initialSnap: snappings[state.size.index],
                   snappings: snappings,
