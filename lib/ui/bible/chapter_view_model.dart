@@ -107,7 +107,7 @@ class BibleChapterViewModel {
     // Example returning a WidgetSpan:
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
-    final iconWidth = (style.fontSize ?? 16.0) / 1.5;
+    final iconWidth = (style.fontSize ?? 16.0) / 1.2;
 
     return TaggableWidgetSpan(
       alignment: PlaceholderAlignment.top,
@@ -701,6 +701,7 @@ class _VerseTag {
 
 extension on TaggedText {
   int get verse => (tag is _VerseTag) ? (tag as _VerseTag).verse : null;
+
   int get word {
     final t = tag;
     if (t is _VerseTag) {

@@ -7,6 +7,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/app_settings.dart';
+import '../../models/color_utils.dart';
 import '../../models/shared_types.dart';
 
 export '../../models/shared_types.dart' show HighlightType;
@@ -62,7 +63,6 @@ abstract class Highlight with _$Highlight {
     HighlightType highlightType,
     int color,
     Reference ref,
-    DateTime modified,
   ) = _Highlight;
 
   factory Highlight.from(UserItem ui) {
@@ -76,13 +76,15 @@ abstract class Highlight with _$Highlight {
     );
 
     final highlightType =
-        (ui.color == 5 || ui.color > 1000) ? HighlightType.underline : HighlightType.highlight;
+        (ui.color == 5 || (ui.color >> 24 > 0)) ? HighlightType.underline : HighlightType.highlight;
+
+    final color =
+        (ui.color <= 5) ? defaultColorIntForIndex(ui.color) : 0xFF000000 | (ui.color & 0xFFFFFF);
 
     return Highlight(
       highlightType,
-      tec.intFromColorId(ui.color, darkMode: tec.Prefs.shared.getBool('isDarkTheme')),
+      color,
       ref,
-      ui.modifiedDT,
     );
   }
 }
@@ -109,18 +111,53 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
         .getItemsWithVBC(volume, book, chapter, ofTypes: [UserItemType.highlight]);
 
     if (uc.isNotEmpty) {
+      // We keep the highlights sorted by modified date with most recent at the bottom.
+      uc.sort((a, b) => a?.modified?.compareTo(b.modified) ?? 1);
+
       final hls = <Highlight>[];
 
       for (final ui in uc) {
         hls.add(Highlight.from(ui));
       }
 
-      // We keep the highlights sorted by modified date with most recent at the bottom.
-      hls.sort((a, b) => a?.modified?.compareTo(b.modified) ?? 1);
-
       _printHighlights(hls, withTitle: 'HIGHLIGHTS IMPORTED FROM DB:');
 
       add(HighlightsEvent.updateFromDb(hls: hls));
+    }
+  }
+
+  Future<void> _saveHighlightsToDb(List<int> verses, List<Highlight> hls) async {
+    final uc = await AppSettings.shared.userAccount.userDb
+        .getItemsWithVBC(volume, book, chapter, ofTypes: [UserItemType.highlight]);
+
+    // remove any existing hls in this reference range...
+    for (final ui in uc) {
+      if (verses.contains(ui.verse)) {
+        await AppSettings.shared.userAccount.userDb.deleteItem(ui);
+      }
+    }
+
+    // add any hls still in this reference range...
+    for (final hl in hls) {
+      for (final v in hl.ref.verses) {
+        if (verses.contains(v)) {
+          // create a new UserItem for this hl
+          final ui = UserItem(type: UserItemType.highlight.index,
+            volumeId: volume,
+            book: book,
+            chapter: chapter,
+            color: (hl.color & 0xFFFFFF) +
+                ((hl.highlightType == HighlightType.underline) ? 0x1000000 : 0),
+            verse: v,
+            verseEnd: v,
+            wordBegin: hl.ref.startWordForVerse(v),
+            wordEnd: hl.ref.endWordForVerse(v),
+            created: tec.dbIntFromDateTime(DateTime.now()),
+          );
+
+          await AppSettings.shared.userAccount.userDb.saveItem(ui);
+        }
+      }
     }
   }
 
@@ -155,12 +192,14 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
   ChapterHighlights _add(HighlightType type, int color, Reference ref) {
     assert(type != HighlightType.clear);
     final newList = state.highlights.copySubtracting(ref)
-      ..add(Highlight(type, color, ref, DateTime.now()));
+      ..add(Highlight(type, color, ref));
+    _saveHighlightsToDb(ref.verses.toList(), newList);
     return ChapterHighlights(volume, book, chapter, newList);
   }
 
   ChapterHighlights _clear(Reference ref) {
     final newList = state.highlights.copySubtracting(ref);
+    _saveHighlightsToDb(ref.verses.toList(), newList);
     return ChapterHighlights(volume, book, chapter, newList);
   }
 }

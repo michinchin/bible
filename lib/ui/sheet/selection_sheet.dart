@@ -1,29 +1,28 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/app_theme_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
+import '../../models/color_utils.dart';
 import '../../ui/sheet/snap_sheet.dart';
 
 class SelectionSheet extends StatefulWidget {
   final SheetSize sheetSize;
+
   // final bool fullyExpanded;
   const SelectionSheet({this.sheetSize, Key key}) : super(key: key);
+
   @override
   _SelectionSheetState createState() => _SelectionSheetState();
 }
 
 class _SelectionSheetState extends State<SelectionSheet> {
-  List<Color> defaultColors = [];
-  List<Color> secondaryColors = [];
+//  List<Color> defaultColors = [];
+//  List<Color> secondaryColors = [];
 
   final buttons = <String, IconData>{
     'Learn': Icons.lightbulb_outline,
@@ -53,51 +52,53 @@ class _SelectionSheetState extends State<SelectionSheet> {
     // 'Compare': FeatherIcons.compass
   };
 
-  bool _showAllColors;
+  // bool _showAllColors;
   bool _underlineMode;
-  StreamSubscription<ThemeMode> _themeChangeStream;
+
+  // StreamSubscription<ThemeMode> _themeChangeStream;
 
   @override
   void initState() {
-    _addColors();
-    _themeChangeStream = context.bloc<ThemeModeBloc>().listen(_listenForThemeChange);
+    //_addColors();
+    // _themeChangeStream = context.bloc<ThemeModeBloc>().listen(_listenForThemeChange);
 
-    _showAllColors = false;
+    // _showAllColors = false;
     _underlineMode = false;
     super.initState();
   }
 
   @override
   void dispose() {
-    _themeChangeStream.cancel();
+    // _themeChangeStream.cancel();
     super.dispose();
   }
 
-  List<Color> _addColors() {
-    final colors = <Color>[];
-    for (var i = 1; i < 5; i++) {
-      colors.add(
-          tec.colorFromColorId(i, darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
-    }
-    for (var i = 6; i < 13; i++) {
-      colors.add(
-          tec.colorFromColorId(i, darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
-    }
-    return colors;
-  }
+//  List<Color> _addColors() {
+//    final colors = <Color>[];
+//    for (var i = 1; i < 5; i++) {
+//      colors.add(
+//          tec.colorFromColorId(i, darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
+//    }
+//    for (var i = 6; i < 13; i++) {
+//      colors.add(
+//          tec.colorFromColorId(i, darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
+//    }
+//    return colors;
+//  }
 
-  void _listenForThemeChange(ThemeMode mode) {
-    final colors = _addColors();
-    setState(() {
-      defaultColors = colors.getRange(0, 4).toList();
-      secondaryColors = colors.getRange(4, colors.length).toList();
-    });
-  }
+//  void _listenForThemeChange(ThemeMode mode) {
+//    final colors = _addColors();
+//    setState(() {
+//      defaultColors = colors.getRange(0, 4).toList();
+//      secondaryColors = colors.getRange(4, colors.length).toList();
+//    });
+//  }
 
   void onShowAllColors() {
-    setState(() {
-      _showAllColors = !_showAllColors;
-    });
+    TecToast.show(context, 'this is moving to a dialog');
+//    setState(() {
+//      _showAllColors = !_showAllColors;
+//    });
   }
 
   void onSwitchToUnderline() {
@@ -109,7 +110,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
   @override
   Widget build(BuildContext context) {
     final editColorsButton = GreyCircleButton(
-      icon: _showAllColors ? Icons.close : Icons.colorize,
+      icon: /* _showAllColors ? Icons.close : */ Icons.colorize,
       onPressed: onShowAllColors,
     );
     final underlineButton = GreyCircleButton(
@@ -127,43 +128,54 @@ class _SelectionSheetState extends State<SelectionSheet> {
       onPressed: () => context.bloc<SheetManagerBloc>().changeSize(SheetSize.medium),
     );
 
+    final defaultColors = <Color>[
+      Color(defaultColorIntForIndex(1)),
+      Color(defaultColorIntForIndex(2)),
+      Color(defaultColorIntForIndex(3)),
+      Color(defaultColorIntForIndex(4)),
+    ];
+//    for (var i = 1; i < 5; i++) {
+//      colors.add(
+//          tec.colorFromColorId(i, darkMode: false));
+//    }
+
     final smallScreen = MediaQuery.of(context).size.width < 350;
     final miniViewColors = smallScreen ? defaultColors.take(2) : defaultColors;
 
     final colors = [
-      if (_showAllColors) ...[
-        Row(children: [
-          Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
-          noColorButton,
-          const SizedBox(width: 5),
-          underlineButton,
-          const SizedBox(width: 5),
-          editColorsButton
-        ])
-      ] else ...[
-        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-          noColorButton,
-          underlineButton,
-          for (final color in defaultColors) ...[
-            _ColorPickerButton(
-              isForUnderline: _underlineMode,
-              color: color,
-            ),
-          ],
-          editColorsButton,
-        ]),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            for (final color in secondaryColors) ...[
-              _ColorPickerButton(
-                isForUnderline: _underlineMode,
-                color: color,
-              ),
-            ],
-          ],
-        )
-      ],
+//      if (_showAllColors) ...[
+//        Row(children: [
+//          Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
+//          noColorButton,
+//          const SizedBox(width: 5),
+//          underlineButton,
+//          const SizedBox(width: 5),
+//          editColorsButton
+//        ])
+//      ] else ...[
+      Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        noColorButton,
+        underlineButton,
+        for (final color in defaultColors) ...[
+          _ColorPickerButton(
+            isForUnderline: _underlineMode,
+            color: color,
+          ),
+        ],
+        editColorsButton,
+      ]),
+//        Row(
+//          mainAxisAlignment: MainAxisAlignment.spaceAround,
+//          children: [
+//            for (final color in secondaryColors) ...[
+//              _ColorPickerButton(
+//                isForUnderline: _underlineMode,
+//                color: color,
+//              ),
+//            ],
+//          ],
+//        )
+//      ],
     ];
     final mediumViewChildren = <Widget>[
       ...colors,
@@ -270,6 +282,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
   }
 }
 
+/*
 class _ColorSlider extends StatefulWidget {
   final bool isUnderline;
   const _ColorSlider({this.isUnderline});
@@ -371,6 +384,7 @@ class __ColorSliderState extends State<_ColorSlider> {
     );
   }
 }
+*/
 
 class _ColorPickerButton extends StatelessWidget {
   final bool isForUnderline;
@@ -388,6 +402,7 @@ class _ColorPickerButton extends StatelessWidget {
       this.onDeletion,
       this.onEdit})
       : assert(color != null);
+
   @override
   Widget build(BuildContext context) {
     const width = 15.0;
@@ -401,7 +416,7 @@ class _ColorPickerButton extends StatelessWidget {
           onEdit();
         } else {
           context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-                type: HighlightType.highlight,
+                type: (isForUnderline) ? HighlightType.underline : HighlightType.highlight,
                 color: color.value,
               ));
         }

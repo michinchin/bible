@@ -187,13 +187,11 @@ abstract class _ChapterHighlights implements ChapterHighlights {
 class _$HighlightTearOff {
   const _$HighlightTearOff();
 
-  _Highlight call(HighlightType highlightType, int color, Reference ref,
-      DateTime modified) {
+  _Highlight call(HighlightType highlightType, int color, Reference ref) {
     return _Highlight(
       highlightType,
       color,
       ref,
-      modified,
     );
   }
 }
@@ -205,7 +203,6 @@ mixin _$Highlight {
   HighlightType get highlightType;
   int get color;
   Reference get ref;
-  DateTime get modified;
 
   $HighlightCopyWith<Highlight> get copyWith;
 }
@@ -213,11 +210,7 @@ mixin _$Highlight {
 abstract class $HighlightCopyWith<$Res> {
   factory $HighlightCopyWith(Highlight value, $Res Function(Highlight) then) =
       _$HighlightCopyWithImpl<$Res>;
-  $Res call(
-      {HighlightType highlightType,
-      int color,
-      Reference ref,
-      DateTime modified});
+  $Res call({HighlightType highlightType, int color, Reference ref});
 }
 
 class _$HighlightCopyWithImpl<$Res> implements $HighlightCopyWith<$Res> {
@@ -232,7 +225,6 @@ class _$HighlightCopyWithImpl<$Res> implements $HighlightCopyWith<$Res> {
     Object highlightType = freezed,
     Object color = freezed,
     Object ref = freezed,
-    Object modified = freezed,
   }) {
     return _then(_value.copyWith(
       highlightType: highlightType == freezed
@@ -240,7 +232,6 @@ class _$HighlightCopyWithImpl<$Res> implements $HighlightCopyWith<$Res> {
           : highlightType as HighlightType,
       color: color == freezed ? _value.color : color as int,
       ref: ref == freezed ? _value.ref : ref as Reference,
-      modified: modified == freezed ? _value.modified : modified as DateTime,
     ));
   }
 }
@@ -250,11 +241,7 @@ abstract class _$HighlightCopyWith<$Res> implements $HighlightCopyWith<$Res> {
           _Highlight value, $Res Function(_Highlight) then) =
       __$HighlightCopyWithImpl<$Res>;
   @override
-  $Res call(
-      {HighlightType highlightType,
-      int color,
-      Reference ref,
-      DateTime modified});
+  $Res call({HighlightType highlightType, int color, Reference ref});
 }
 
 class __$HighlightCopyWithImpl<$Res> extends _$HighlightCopyWithImpl<$Res>
@@ -270,7 +257,6 @@ class __$HighlightCopyWithImpl<$Res> extends _$HighlightCopyWithImpl<$Res>
     Object highlightType = freezed,
     Object color = freezed,
     Object ref = freezed,
-    Object modified = freezed,
   }) {
     return _then(_Highlight(
       highlightType == freezed
@@ -278,17 +264,15 @@ class __$HighlightCopyWithImpl<$Res> extends _$HighlightCopyWithImpl<$Res>
           : highlightType as HighlightType,
       color == freezed ? _value.color : color as int,
       ref == freezed ? _value.ref : ref as Reference,
-      modified == freezed ? _value.modified : modified as DateTime,
     ));
   }
 }
 
 class _$_Highlight with DiagnosticableTreeMixin implements _Highlight {
-  const _$_Highlight(this.highlightType, this.color, this.ref, this.modified)
+  const _$_Highlight(this.highlightType, this.color, this.ref)
       : assert(highlightType != null),
         assert(color != null),
-        assert(ref != null),
-        assert(modified != null);
+        assert(ref != null);
 
   @override
   final HighlightType highlightType;
@@ -296,12 +280,10 @@ class _$_Highlight with DiagnosticableTreeMixin implements _Highlight {
   final int color;
   @override
   final Reference ref;
-  @override
-  final DateTime modified;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Highlight(highlightType: $highlightType, color: $color, ref: $ref, modified: $modified)';
+    return 'Highlight(highlightType: $highlightType, color: $color, ref: $ref)';
   }
 
   @override
@@ -311,8 +293,7 @@ class _$_Highlight with DiagnosticableTreeMixin implements _Highlight {
       ..add(DiagnosticsProperty('type', 'Highlight'))
       ..add(DiagnosticsProperty('highlightType', highlightType))
       ..add(DiagnosticsProperty('color', color))
-      ..add(DiagnosticsProperty('ref', ref))
-      ..add(DiagnosticsProperty('modified', modified));
+      ..add(DiagnosticsProperty('ref', ref));
   }
 
   @override
@@ -325,10 +306,7 @@ class _$_Highlight with DiagnosticableTreeMixin implements _Highlight {
             (identical(other.color, color) ||
                 const DeepCollectionEquality().equals(other.color, color)) &&
             (identical(other.ref, ref) ||
-                const DeepCollectionEquality().equals(other.ref, ref)) &&
-            (identical(other.modified, modified) ||
-                const DeepCollectionEquality()
-                    .equals(other.modified, modified)));
+                const DeepCollectionEquality().equals(other.ref, ref)));
   }
 
   @override
@@ -336,8 +314,7 @@ class _$_Highlight with DiagnosticableTreeMixin implements _Highlight {
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(highlightType) ^
       const DeepCollectionEquality().hash(color) ^
-      const DeepCollectionEquality().hash(ref) ^
-      const DeepCollectionEquality().hash(modified);
+      const DeepCollectionEquality().hash(ref);
 
   @override
   _$HighlightCopyWith<_Highlight> get copyWith =>
@@ -345,8 +322,8 @@ class _$_Highlight with DiagnosticableTreeMixin implements _Highlight {
 }
 
 abstract class _Highlight implements Highlight {
-  const factory _Highlight(HighlightType highlightType, int color,
-      Reference ref, DateTime modified) = _$_Highlight;
+  const factory _Highlight(
+      HighlightType highlightType, int color, Reference ref) = _$_Highlight;
 
   @override
   HighlightType get highlightType;
@@ -354,8 +331,6 @@ abstract class _Highlight implements Highlight {
   int get color;
   @override
   Reference get ref;
-  @override
-  DateTime get modified;
   @override
   _$HighlightCopyWith<_Highlight> get copyWith;
 }

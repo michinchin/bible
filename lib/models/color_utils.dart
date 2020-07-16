@@ -6,6 +6,26 @@ import 'package:flutter/painting.dart';
 //---------------------------------------------------------------------------
 // COLOR CACHES
 
+int defaultColorIntForIndex(int index) {
+  assert(index >= 1 && index <= 5);
+
+  switch (index) {
+    case 1:
+      return 0xffcae1fe; // blue
+    case 2:
+      return 0xfffff193; // yellow
+    case 3:
+      return 0xffffc9e4; // pink
+    case 4:
+      return 0xffb3e487; // green
+    case 5:
+      return 0xff999999; // underline - gray
+  }
+
+  // assert will throw before we get here
+  return 0;
+}
+
 ///
 /// Returns the color to use for text and underlines. Caches the result for
 /// quick access next time.
