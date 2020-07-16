@@ -74,33 +74,57 @@ class WindowManager extends StatelessWidget {
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     final isMaximized = bloc?.state?.maximizedViewUid != 0;
 
-    return ListView(
-      children: [
-        if ((bloc?.state?.views?.length ?? 0) > 1)
-          _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
-              isMaximized ? 'Restore' : 'Maximize', () {
-            popOff();
-            bloc?.add(isMaximized
-                ? const ViewManagerEvent.restore()
-                : ViewManagerEvent.maximize(state.uid));
-          }),
-        if (((bloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
-          _titleDivider(context, isMaximized ? 'Switch' : 'Open'),
-          ..._generateOffScreenItems(context, state.uid)
-        ],
-        _titleDivider(context, 'New'),
-        ..._generateAddMenuItems(context, state.uid),
-        _menuItem(context, FeatherIcons.bookOpen, 'Translation',
-            () => Navigator.of(context).pushNamed('viewNav/bibleTranslation')),
-        if ((bloc?.state?.views?.length ?? 0) > 1) ...[
-          const Divider(),
-          _menuItem(context, Icons.close, 'Close View', () {
-            popOff();
-            bloc?.add(ViewManagerEvent.remove(state.uid));
-          }),
-        ]
-      ],
-    );
+    return Dialog(
+        useMaterialBorderRadius: true,
+        backgroundColor: Colors.transparent,
+        child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).canvasColor,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: const EdgeInsets.all(15),
+            child: Stack(
+              alignment: Alignment.topRight,
+              children: [
+                ListView(
+                  shrinkWrap: true,
+                  children: [
+                    if ((bloc?.state?.views?.length ?? 0) > 1)
+                      _menuItem(
+                          context,
+                          isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
+                          isMaximized ? 'Restore' : 'Maximize', () {
+                        popOff();
+                        bloc?.add(isMaximized
+                            ? const ViewManagerEvent.restore()
+                            : ViewManagerEvent.maximize(state.uid));
+                      }),
+                    if (((bloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
+                      _titleDivider(context, isMaximized ? 'Switch' : 'Open'),
+                      ..._generateOffScreenItems(context, state.uid)
+                    ],
+                    _titleDivider(context, 'New'),
+                    ..._generateAddMenuItems(context, state.uid),
+                    _menuItem(context, FeatherIcons.bookOpen, 'Translation',
+                        () => Navigator.of(context).pushNamed('viewNav/bibleTranslation')),
+                    if ((bloc?.state?.views?.length ?? 0) > 1) ...[
+                      const Divider(),
+                      _menuItem(context, Icons.close, 'Close View', () {
+                        popOff();
+                        bloc?.add(ViewManagerEvent.remove(state.uid));
+                      }),
+                    ],
+                  ],
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    color: Theme.of(context).textColor.withOpacity(0.5),
+                  ),
+                  onPressed: popOff,
+                )
+              ],
+            )));
   }
 
   Widget _titleDivider(BuildContext context, String title) => Row(

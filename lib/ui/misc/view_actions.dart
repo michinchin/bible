@@ -25,13 +25,11 @@ List<Widget> defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState 
 }
 
 Future<void> _showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
-  return showTecDialog<void>(
+  return showDialog<void>(
     context: context,
-    // alignment: Alignment.center,
-    // useRootNavigator: false,
-    padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+    barrierDismissible: true,
     builder: (context) {
-      return SizedBox(height: 350, child: ViewNavigator(viewState: state));
+      return ViewNavigator(viewState: state);
     },
   );
 }

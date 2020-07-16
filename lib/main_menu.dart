@@ -18,8 +18,8 @@ const tecartaBlue = Color(0xff4a7dee);
 Future<void> showMainMenu(BuildContext context) {
   return showTecDialog<void>(
     context: context,
-    padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
-    // alignment: Alignment.topRight,
+    padding: const EdgeInsets.all(15),
+    cornerRadius: 15,
     useRootNavigator: true,
     builder: (context) => MainMenu(),
   );
@@ -39,10 +39,11 @@ class MainMenu extends StatelessWidget {
         iconTheme: IconThemeData(color: drawerTextColor),
         textTheme: TextTheme(bodyText2: TextStyle(color: drawerTextColor)),
       ),
-      child: SizedBox(
-        height: 350,
-        child: SingleChildScrollView(
-          child: Column(
+      child: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          ListView(
+            shrinkWrap: true,
             children: [
               MenuListTile(
                 icon: tec.platformIs(tec.Platform.iOS) ? FeatherIcons.share : FeatherIcons.share2,
@@ -106,7 +107,14 @@ class MainMenu extends StatelessWidget {
               ),
             ],
           ),
-        ),
+          IconButton(
+            icon: Icon(
+              Icons.close,
+              color: Theme.of(context).textColor.withOpacity(0.5),
+            ),
+            onPressed: Navigator.of(context).maybePop,
+          )
+        ],
       ),
     );
   }
@@ -141,7 +149,7 @@ class _MenuListTileState extends State<MenuListTile> {
             leading: widget.icon == null ? const Text('') : MenuIcon(iconData: widget.icon),
             title: TecText(
               widget.title,
-              maxScaleFactor: _textMaxScaleFactor,
+              // maxScaleFactor: _textMaxScaleFactor,
               // style: _menuTitleStyle.copyWith(color: textColor),
               style: TextStyle(color: textColor),
             ),
@@ -159,7 +167,7 @@ class _MenuListTileState extends State<MenuListTile> {
             dense: true,
             title: TecText(
               widget.title,
-              maxScaleFactor: _textMaxScaleFactor,
+              // maxScaleFactor: _textMaxScaleFactor,
               style: TextStyle(color: textColor),
               // style: _menuTitleStyle.copyWith(color: textColor),
             ),

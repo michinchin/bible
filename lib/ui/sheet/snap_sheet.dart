@@ -81,6 +81,9 @@ class _SnapSheetState extends State<SnapSheet> {
                 duration: const Duration(milliseconds: 250),
                 addTopViewPaddingOnFullscreen: true,
                 parallaxSpec: const ParallaxSpec(),
+                listener: (s) {
+                  // TODO(abby): create value notifier to give to animated builder and shift position based on value
+                },
                 snapSpec: SnapSpec(
                   initialSnap: snappings[state.size.index],
                   snappings: snappings,
@@ -114,7 +117,10 @@ class _SnapSheetState extends State<SnapSheet> {
                       height: MediaQuery.of(context).size.height,
                       child: AnimatedSwitcher(
                           switchInCurve: Curves.easeIn,
+                          switchOutCurve: Curves.easeIn,
                           duration: const Duration(milliseconds: 250),
+                          transitionBuilder: (child, animation) =>
+                              FadeTransition(child: child, opacity: animation),
                           child: child));
                 },
                 body: widget.body,
