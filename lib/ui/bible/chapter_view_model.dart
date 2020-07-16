@@ -351,7 +351,7 @@ class BibleChapterViewModel {
             verse: _selectionStart.verse,
             word: _selectionStart.word,
             endVerse: _selectionEnd.verse,
-            endWord: _selectionEnd.word - 1);
+            endWord: math.max(_selectionStart.word, _selectionEnd.word - 1));
 
     if (!_isSelectionTrialMode) {
       clearAllSelections(context);
@@ -716,7 +716,7 @@ extension ChapterViewModelExtOnString on String {
   ///
   /// Returns the count of words in the string. If [toIndex] if provided, returns the count of
   /// words up to, but not including, that index.
-  /// 
+  ///
   /// Note, if [toIndex] is provided, and [toIndex] is in the middle of a word, that word is
   /// not counted. For example, if the string is 'cat dog', and [toIndex] is 0, 1, or 2, the
   /// function returns 0. If [toIndex] is 3, 4, 5, or 6, the function returns 1. If [toIndex]
