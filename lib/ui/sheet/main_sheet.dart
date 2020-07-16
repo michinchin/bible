@@ -14,7 +14,7 @@ class MainSheet extends StatefulWidget {
 class _MainSheetState extends State<MainSheet> {
   final miniViewIcons = {
     'Explore': FeatherIcons.compass,
-    'Libray': FeatherIcons.book,
+    'Library': FeatherIcons.book,
     'Listen': FeatherIcons.play,
     'Notes': FeatherIcons.edit2
   };

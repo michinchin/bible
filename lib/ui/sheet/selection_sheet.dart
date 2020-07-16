@@ -154,15 +154,17 @@ class _SelectionSheetState extends State<SelectionSheet> {
 //        ])
 //      ] else ...[
       Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-        noColorButton,
-        underlineButton,
+        Expanded(child: noColorButton),
+        Expanded(child: underlineButton),
         for (final color in defaultColors) ...[
-          _ColorPickerButton(
-            isForUnderline: _underlineMode,
-            color: color,
+          Expanded(
+            child: _ColorPickerButton(
+              isForUnderline: _underlineMode,
+              color: color,
+            ),
           ),
         ],
-        editColorsButton,
+        Expanded(child: editColorsButton),
       ]),
 //        Row(
 //          mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -223,9 +225,14 @@ class _SelectionSheetState extends State<SelectionSheet> {
     ];
 
     Widget _miniView() => Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: miniChildren);
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              for (final child in miniChildren)
+                Expanded(
+                  child: child,
+                )
+            ]);
     // : Row(children: [
     //     Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
     //     noColorButton,
