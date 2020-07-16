@@ -160,7 +160,7 @@ class BibleChapterViewModel {
     TextStyle selectedTextStyle, {
     bool isDarkTheme,
   }) {
-    final tapPadding = MediaQuery.of(context).devicePixelRatio * 2.0;
+    final tapPadding = MediaQuery.of(context).devicePixelRatio * 2.5;
 
     if (tag is _VerseTag && tag.isInFootnote && text != ' ') {
       // assign a unique key for this footnote
