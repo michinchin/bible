@@ -7,9 +7,20 @@ void main() {
     expect(''.countOfWords(), 0);
     expect('dog cat rabbit'.countOfWords(), 3);
     expect('  dog  cat  rabbit  '.countOfWords(), 3);
-    expect('  dog  cat  rabbit  '.countOfWords(toIndex: 3), 1);
     expect('  dog  cat  rabbit  '.countOfWords(toIndex: 2), 0);
-    expect('  dog  cat  rabbit  '.countOfWords(toIndex: 8), 2);
+    expect('  dog  cat  rabbit  '.countOfWords(toIndex: 3), 0);
+    expect('  dog  cat  rabbit  '.countOfWords(toIndex: 4), 0);
+    expect('  dog  cat  rabbit  '.countOfWords(toIndex: 5), 1);
+    expect('  dog  cat  rabbit  '.countOfWords(toIndex: 6), 1);
+    expect('  dog  cat  rabbit  '.countOfWords(toIndex: 7), 1);
+    expect('  dog  cat  rabbit  '.countOfWords(toIndex: 8), 1);
+    expect('  dog  cat  rabbit  '.countOfWords(toIndex: 9), 1);
+    expect('  dog  cat  rabbit  '.countOfWords(toIndex: 10), 2);
+    expect('  dog  cat  rabbit  '.countOfWords(toIndex: 11), 2);
+    expect('  dog  cat  rabbit'.countOfWords(toIndex: 17), 2);
+    expect('  dog  cat  rabbit'.countOfWords(toIndex: 18), 3);
+    expect('  dog  cat  rabbit'.countOfWords(), 3);
+    expect('"dog'.countOfWords(toIndex: 1), 0);
   });
 
   test('String.indexAtEndOfWord in bible_chapter_view.dart', () {
