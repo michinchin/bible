@@ -26,7 +26,7 @@ Future<void> showMainMenu(BuildContext context) {
 }
 
 // ignore_for_file: prefer_const_constructors
-const _textMaxScaleFactor = 1.0;
+// const _textMaxScaleFactor = 1.0;
 
 class MainMenu extends StatelessWidget {
   @override
@@ -120,10 +120,10 @@ class MainMenu extends StatelessWidget {
   }
 }
 
-const TextStyle _menuTitleStyle = TextStyle(
-  fontSize: 12,
-  fontWeight: FontWeight.w600,
-);
+// const TextStyle _menuTitleStyle = TextStyle(
+//   fontSize: 12,
+//   fontWeight: FontWeight.w600,
+// );
 
 class MenuListTile extends StatefulWidget {
   final IconData icon;

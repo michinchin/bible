@@ -4,8 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../main_menu.dart';
-import '../common/common.dart';
-import 'view_navigator.dart';
+import 'window_manager.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return [
@@ -25,11 +24,12 @@ List<Widget> defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState 
 }
 
 Future<void> _showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
-  return showDialog<void>(
+  return showWindowDialog(
     context: context,
-    barrierDismissible: true,
     builder: (context) {
-      return ViewNavigator(viewState: state);
+      return WindowManager(
+        state: state,
+      );
     },
   );
 }
