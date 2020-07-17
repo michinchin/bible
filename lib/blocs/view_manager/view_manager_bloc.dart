@@ -39,6 +39,14 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   List<List<ViewState>> _rows = []; // ignore: prefer_final_fields
 
   ///
+  /// Is the view manager full of views? True, if another view cannot fit on the screen,
+  /// false otherwise. Note, this can change if the screen orientation changes, or, as
+  /// in the case with iPad multitasking, the app window size changes.
+  ///
+  bool get isFull => _isFull;
+  bool _isFull = false; // ignore: prefer_final_fields
+
+  ///
   /// Returns the number of rows currently displayed.
   ///
   /// Note, when a view is maximized this returns the number of rows that will be

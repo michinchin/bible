@@ -88,7 +88,7 @@ class Nav extends StatelessWidget {
               color: bible.isNTBook(bookKeys[i]) ? ntColor : otColor,
               borderRadius: null,
               onPressed: () {
-                Navigator.of(context).maybePop(BookChapterVerse(book, 1, 1));
+                Navigator.of(context).maybePop(BookChapterVerse(book, book == 23 ? 119 : 1, 1));
               },
             ),
           ),
