@@ -33,7 +33,7 @@ class _VMViewStack extends StatelessWidget {
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     assert(bloc != null);
 
-    final wasVisibleTextSelected = (bloc?._visibleViewsWithSelections?.isNotEmpty ?? false);
+    final wasVisibleTextSelected = (bloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
 
     // Build and update the rows.
     final rows = _buildRows(bloc, _Size.ideal, vmState, constraints)..balance(constraints);
@@ -45,7 +45,7 @@ class _VMViewStack extends StatelessWidget {
     bloc?._viewRects = viewRects;
 
     // If the state of visible selected text changed, call _updateSelectionBloc after the build.
-    final isVisibleTextSelected = (bloc?._visibleViewsWithSelections?.isNotEmpty ?? false);
+    final isVisibleTextSelected = (bloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
     if (wasVisibleTextSelected != isVisibleTextSelected) {
       WidgetsBinding.instance
           .addPostFrameCallback((timeStamp) => bloc?._updateSelectionBloc(context));
@@ -186,7 +186,7 @@ List<List<ViewState>> _buildRows(
   BoxConstraints constraints,
 ) {
   final rows = <List<ViewState>>[];
-  bool isFull = false;
+  var isFull = false;
   for (final viewState in state.views) {
     // Add another row?
     if (rows.isEmpty ||

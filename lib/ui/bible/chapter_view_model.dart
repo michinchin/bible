@@ -327,10 +327,24 @@ class BibleChapterViewModel {
     }
 
     // Notify the view manager, if there is one.
-    context
-        .bloc<ViewManagerBloc>()
-        ?.notifyOfSelectionsInViewWithUid(viewUid, context, hasSelections: hasSelection);
+    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInViewWithUid(
+        viewUid, _selectionReference, context,
+        hasSelections: hasSelection);
   }
+
+  /// Returns the current selection reference, or null if nothing is selected.
+  Reference get _selectionReference => _selectedVerses.isNotEmpty
+      ? _referenceWithVerses(_selectedVerses, volume: volume, book: book, chapter: chapter)
+      : hasWordRangeSelected
+          ? Reference(
+              volume: volume,
+              book: book,
+              chapter: chapter,
+              verse: _selectionStart.verse,
+              word: _selectionStart.word,
+              endVerse: _selectionEnd.verse,
+              endWord: math.max(_selectionStart.word, _selectionEnd.word - 1))
+          : null;
 
   ///
   /// Handles selection style changed events.
@@ -342,16 +356,7 @@ class BibleChapterViewModel {
     if (bloc == null || !hasSelection) return;
     _isSelectionTrialMode = selectionStyle.isTrialMode;
 
-    final ref = _selectedVerses.isNotEmpty
-        ? _referenceWithVerses(_selectedVerses, volume: volume, book: book, chapter: chapter)
-        : Reference(
-            volume: volume,
-            book: book,
-            chapter: chapter,
-            verse: _selectionStart.verse,
-            word: _selectionStart.word,
-            endVerse: _selectionEnd.verse,
-            endWord: math.max(_selectionStart.word, _selectionEnd.word - 1));
+    final ref = _selectionReference;
 
     if (!_isSelectionTrialMode) {
       clearAllSelections(context);
@@ -391,15 +396,11 @@ class BibleChapterViewModel {
   }
 
   void _updateSelectedVersesInBlock(void Function() block, BuildContext context) {
-    final wasTextSelected = _selectedVerses.isNotEmpty;
     refreshFunc(block);
     tec.dmPrint('selected verses: $_selectedVerses');
-    final isTextSelected = _selectedVerses.isNotEmpty;
-    if (wasTextSelected != isTextSelected) {
-      context
-          .bloc<ViewManagerBloc>()
-          ?.notifyOfSelectionsInViewWithUid(viewUid, context, hasSelections: hasSelection);
-    }
+    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInViewWithUid(
+        viewUid, _selectionReference, context,
+        hasSelections: hasSelection);
   }
 }
 

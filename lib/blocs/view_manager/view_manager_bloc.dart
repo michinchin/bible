@@ -115,7 +115,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   //-------------------------------------------------------------------------
   // Selection related:
 
-  final _viewsWithSelections = <int>{};
+  final _viewsWithSelections = <int, Object>{};
 
   ///
   /// This should be called by views that support text selection, when their [hasSelections]
@@ -123,19 +123,20 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   ///
   void notifyOfSelectionsInViewWithUid(
     int uid,
+    Object selectionObject,
     BuildContext context, {
     @required bool hasSelections,
   }) {
     assert(uid != null && context != null && hasSelections != null);
 
     if (hasSelections) {
-      _viewsWithSelections.add(uid);
+      _viewsWithSelections[uid] = selectionObject;
     } else {
       _viewsWithSelections.remove(uid);
     }
 
     // Remove invalid uid values from the set.
-    for (final uid in _viewsWithSelections.toList()) {
+    for (final uid in List.of(_viewsWithSelections.keys)) {
       if (indexOfView(uid) == -1) _viewsWithSelections.remove(uid);
     }
 
@@ -145,18 +146,30 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   ///
   /// Returns an iterator over the uids of the views with selections that are visible.
   ///
-  Iterable<int> get _visibleViewsWithSelections =>
-      _viewsWithSelections.expand((uid) => isViewWithUidVisible(uid) ? [uid] : []);
+  Iterable<int> get visibleViewsWithSelections =>
+      _viewsWithSelections.keys.expand((uid) => isViewWithUidVisible(uid) ? [uid] : []);
+
+  ///
+  /// Returns the selection object for the view with the given [uid], or null if none.
+  ///
+  Object selectionObjectWithViewUid(int uid) => _viewsWithSelections[uid];
 
   ///
   /// Updates the state of the [SelectionBloc] depending on the current state of visible
   /// views with selections.
   ///
   void _updateSelectionBloc(BuildContext context) {
-    final isTextSelected = _visibleViewsWithSelections.isNotEmpty;
+    final isTextSelected = visibleViewsWithSelections.isNotEmpty;
     final bloc = context.bloc<SelectionBloc>(); // ignore: close_sinks
     assert(bloc != null);
     bloc?.add(SelectionState(isTextSelected: isTextSelected));
+
+    // tec.dmPrint('');
+    // tec.dmPrint('SELECTED REFERENCES:');
+    // for (final uid in visibleViewsWithSelections) {
+    //   tec.dmPrint(selectionObjectWithViewUid(uid));
+    // }
+    // tec.dmPrint('');
   }
 
   ///
