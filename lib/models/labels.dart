@@ -3,10 +3,13 @@ class Labels {
 
   // Preference key names:
 
-  // Font 
+  // Font
   static const prefContentTextScaleFactor = 'contentTextScaleFactor';
   static const prefContentFontName = 'contentFontName';
 
   // Highlighting
   static const prefSelectionSheetFullSize = 'selectionSheetFullSize';
+
+  // Links
+  static const tecartaBibleLink = 'https://tecartabible.com/';
 }

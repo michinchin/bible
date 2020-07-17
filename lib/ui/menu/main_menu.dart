@@ -1,17 +1,17 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_widgets/tec_widgets.dart';
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
-import 'blocs/app_theme_bloc.dart';
-import 'models/app_settings.dart';
-import 'models/labels.dart';
-import 'ui/common/common.dart';
-import 'ui/misc/text_settings.dart';
+import '../../blocs/app_theme_bloc.dart';
+import '../../models/app_settings.dart';
+import '../../models/labels.dart';
+import '../common/common.dart';
+import '../misc/text_settings.dart';
+import 'menu_model.dart';
 
 const tecartaBlue = Color(0xff4a7dee);
 
@@ -21,7 +21,7 @@ Future<void> showMainMenu(BuildContext context) {
     padding: const EdgeInsets.all(15),
     cornerRadius: 15,
     useRootNavigator: true,
-    builder: (context) => MainMenu(),
+    builder: (context) => MainMenu(menuModel: MenuModel()),
   );
 }
 
@@ -29,6 +29,8 @@ Future<void> showMainMenu(BuildContext context) {
 // const _textMaxScaleFactor = 1.0;
 
 class MainMenu extends StatelessWidget {
+  final MenuModel menuModel;
+  const MainMenu({this.menuModel});
   @override
   Widget build(BuildContext context) {
     final drawerTextColor =
@@ -48,7 +50,7 @@ class MainMenu extends StatelessWidget {
               MenuListTile(
                 icon: tec.platformIs(tec.Platform.iOS) ? FeatherIcons.share : FeatherIcons.share2,
                 title: 'Share app',
-                onTap: null,
+                onTap: () => menuModel.shareApp(context),
               ),
               MenuListTile(
                 icon: FeatherIcons.bell,
@@ -98,12 +100,12 @@ class MainMenu extends StatelessWidget {
               MenuListTile(
                 icon: FeatherIcons.helpCircle,
                 title: 'Help & Feedback',
-                onTap: null,
+                onTap: () => menuModel.emailFeedback(context),
               ),
               MenuListTile(
                 icon: FeatherIcons.info,
                 title: 'About',
-                onTap: null,
+                onTap: () => menuModel.showAboutDialog(context),
               ),
             ],
           ),
