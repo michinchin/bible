@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../../main_menu.dart';
+import '../menu/main_menu.dart';
 import 'window_manager.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {

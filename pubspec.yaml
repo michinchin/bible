@@ -41,9 +41,10 @@ dependencies:
   json_annotation: ^3.0.1
   provider: ^4.1.3
   rxdart: ^0.24.1
+  share: ^0.6.4+3
   sliding_sheet: ^0.3.5
   tuple: ^1.0.3
-
+  url_launcher: ^5.5.0
   zefyr:
     git:
       url: git://github.com/memspace/zefyr
@@ -104,7 +105,6 @@ flutter:
     - assets/0.zip
     - assets/fonts.json
     - assets/footnote.svg
-
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
