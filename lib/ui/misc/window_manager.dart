@@ -6,99 +6,69 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../bible/chapter_view.dart';
 
-class ViewNavigator extends StatelessWidget {
-  final ViewState viewState;
-  const ViewNavigator({this.viewState});
-  @override
-  Widget build(BuildContext context) {
-    return Navigator(
-      initialRoute: 'viewNav',
-      onGenerateRoute: (settings) {
-        WidgetBuilder builder;
-        switch (settings.name) {
-          case 'viewNav':
-            builder = (_) => WindowManager(
-                  state: viewState,
-                  popOff: () => Navigator.of(context).pop(),
-                );
-            break;
-          case 'viewNav/bibleTranslation':
-            builder = (_) => BibleTranslationSelection(
-                  popOff: () => Navigator.of(context).pop(),
-                );
-            break;
-          default:
-            throw Exception('Invalid route: ${settings.name}');
-        }
-        return MaterialPageRoute<void>(builder: builder, settings: settings);
-      },
-    );
-  }
-}
-
-class BibleTranslationSelection extends StatelessWidget {
-  final VoidCallback popOff;
-  const BibleTranslationSelection({this.popOff});
-  @override
-  Widget build(BuildContext context) {
-    const bt = [
-      'New International Version',
-      'New Living Translation',
-      'Christian Standard Bible',
-      'Amplified Bible',
-      'The Message',
-      'The Voice',
-    ];
-    return Scaffold(
-        appBar: AppBar(),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: ListView(children: [
-            for (final each in bt)
-              ListTile(
-                title: Text(each),
-                onTap: popOff,
-              )
-          ]),
-        ));
-  }
-}
+Future<void> showWindowDialog({BuildContext context, Widget Function(BuildContext) builder}) =>
+    showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (c) => Dialog(
+            useMaterialBorderRadius: true,
+            backgroundColor: Colors.transparent,
+            child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).canvasColor,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                padding: const EdgeInsets.all(15),
+                child: builder(c))));
 
 class WindowManager extends StatelessWidget {
   final ViewState state;
-  final VoidCallback popOff;
-  const WindowManager({this.state, this.popOff});
+  const WindowManager({this.state});
 
   @override
   Widget build(BuildContext context) {
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     final isMaximized = bloc?.state?.maximizedViewUid != 0;
 
-    return ListView(
+    return Stack(
+      alignment: Alignment.topRight,
       children: [
-        if ((bloc?.state?.views?.length ?? 0) > 1)
-          _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
-              isMaximized ? 'Restore' : 'Maximize', () {
-            popOff();
-            bloc?.add(isMaximized
-                ? const ViewManagerEvent.restore()
-                : ViewManagerEvent.maximize(state.uid));
-          }),
-        if (((bloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
-          _titleDivider(context, isMaximized ? 'Switch' : 'Open'),
-          ..._generateOffScreenItems(context, state.uid)
-        ],
-        _titleDivider(context, 'New'),
-        ..._generateAddMenuItems(context, state.uid),
-        _menuItem(context, FeatherIcons.bookOpen, 'Translation',
-            () => Navigator.of(context).pushNamed('viewNav/bibleTranslation')),
-        if ((bloc?.state?.views?.length ?? 0) > 1) ...[
-          const Divider(),
-          _menuItem(context, Icons.close, 'Close View', () {
-            popOff();
-            bloc?.add(ViewManagerEvent.remove(state.uid));
-          }),
-        ]
+        ListView(
+          shrinkWrap: true,
+          children: [
+            if ((bloc?.state?.views?.length ?? 0) > 1)
+              _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
+                  isMaximized ? 'Restore' : 'Maximize', () {
+                Navigator.of(context).maybePop();
+                bloc?.add(isMaximized
+                    ? const ViewManagerEvent.restore()
+                    : ViewManagerEvent.maximize(state.uid));
+              }),
+            if (((bloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
+              _titleDivider(context, isMaximized ? 'Switch' : 'Open'),
+              ..._generateOffScreenItems(context, state.uid)
+            ],
+            _titleDivider(context, 'New'),
+            ..._generateAddMenuItems(context, state.uid),
+            _menuItem(context, FeatherIcons.bookOpen, 'Translation', () {
+              showWindowDialog(context: context, builder: (c) => BibleTranslationSelection());
+            }),
+            if ((bloc?.state?.views?.length ?? 0) > 1) ...[
+              const Divider(),
+              _menuItem(context, Icons.close, 'Close View', () {
+                Navigator.of(context).maybePop();
+                bloc?.add(ViewManagerEvent.remove(state.uid));
+              }),
+            ],
+          ],
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.close,
+            color: Theme.of(context).textColor.withOpacity(0.5),
+          ),
+          onPressed: Navigator.of(context).maybePop,
+        )
       ],
     );
   }
@@ -139,11 +109,11 @@ class WindowManager extends StatelessWidget {
             bloc?.add(
                 ViewManagerEvent.move(fromPosition: bloc.indexOfView(each.uid), toPosition: 0));
             bloc?.add(ViewManagerEvent.maximize(each.uid));
-            popOff();
+            Navigator.of(context).maybePop();
           } else {
             bloc?.add(
                 ViewManagerEvent.move(fromPosition: bloc.indexOfView(each.uid), toPosition: 0));
-            popOff();
+            Navigator.of(context).maybePop();
           }
         }));
       }
@@ -160,7 +130,7 @@ class WindowManager extends StatelessWidget {
     };
     return vm.types.map<Widget>(
       (type) => _menuItem(context, iconMap[vm.titleForType(type)], '${vm.titleForType(type)}', () {
-        popOff();
+        Navigator.of(context).maybePop();
         final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
         final position = bloc?.indexOfView(viewUid) ?? -1;
         bloc?.add(ViewManagerEvent.add(
@@ -179,6 +149,31 @@ class WindowManager extends StatelessWidget {
         ),
         title: TecText(
           title,
+        ));
+  }
+}
+
+class BibleTranslationSelection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    const bt = [
+      'New International Version',
+      'New Living Translation',
+      'Christian Standard Bible',
+      'Amplified Bible',
+      'The Message',
+      'The Voice',
+    ];
+    return Scaffold(
+        appBar: AppBar(),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: ListView(children: [
+            for (final each in bt)
+              ListTile(
+                  title: Text(each),
+                  onTap: () => Navigator.of(context).popUntil((route) => route.isFirst))
+          ]),
         ));
   }
 }

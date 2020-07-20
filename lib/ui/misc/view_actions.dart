@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../../main_menu.dart';
-import '../common/common.dart';
-import 'view_navigator.dart';
+import '../menu/main_menu.dart';
+import 'window_manager.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   return [
@@ -25,13 +24,12 @@ List<Widget> defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState 
 }
 
 Future<void> _showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
-  return showTecDialog<void>(
+  return showWindowDialog(
     context: context,
-    // alignment: Alignment.center,
-    // useRootNavigator: false,
-    padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
     builder: (context) {
-      return SizedBox(height: 350, child: ViewNavigator(viewState: state));
+      return WindowManager(
+        state: state,
+      );
     },
   );
 }

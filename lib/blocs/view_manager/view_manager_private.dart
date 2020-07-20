@@ -33,10 +33,10 @@ class _VMViewStack extends StatelessWidget {
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     assert(bloc != null);
 
-    final wasVisibleTextSelected = (bloc?._visibleViewsWithSelections?.isNotEmpty ?? false);
+    final wasVisibleTextSelected = (bloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
 
     // Build and update the rows.
-    final rows = _buildRows(_Size.ideal, vmState, constraints)..balance(constraints);
+    final rows = _buildRows(bloc, _Size.ideal, vmState, constraints)..balance(constraints);
     bloc?._rows = rows;
 
     // Build children and save the view rects.
@@ -45,7 +45,7 @@ class _VMViewStack extends StatelessWidget {
     bloc?._viewRects = viewRects;
 
     // If the state of visible selected text changed, call _updateSelectionBloc after the build.
-    final isVisibleTextSelected = (bloc?._visibleViewsWithSelections?.isNotEmpty ?? false);
+    final isVisibleTextSelected = (bloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
     if (wasVisibleTextSelected != isVisibleTextSelected) {
       WidgetsBinding.instance
           .addPostFrameCallback((timeStamp) => bloc?._updateSelectionBloc(context));
@@ -180,11 +180,13 @@ enum _Size { min, ideal }
 /// Builds the rows of views.
 ///
 List<List<ViewState>> _buildRows(
+  ViewManagerBloc bloc,
   _Size size,
   ViewManagerState state,
   BoxConstraints constraints,
 ) {
   final rows = <List<ViewState>>[];
+  var isFull = false;
   for (final viewState in state.views) {
     // Add another row?
     if (rows.isEmpty ||
@@ -194,14 +196,27 @@ List<List<ViewState>> _buildRows(
       if (rows.isNotEmpty &&
           rows.height(constraints, size) + viewState.height(constraints, size) >
               constraints.maxHeight) {
+        isFull = true;
         break; // ---------------------------->
       }
       rows.add(<ViewState>[]);
     }
     rows.last.add(viewState);
   }
+
+  bloc?._isFull = isFull ||
+      (rows.isNotEmpty &&
+          rows.last.width(constraints, size) + _defaultViewState.width(constraints, size) >
+              constraints.maxWidth &&
+          rows.height(constraints, size) + _defaultViewState.height(constraints, size) >
+              constraints.maxHeight);
+
+  // tec.dmPrint('ViewManagerBloc.isFull == ${bloc?.isFull}');
+
   return rows;
 }
+
+final _defaultViewState = ViewState(uid: 0, type: 'default');
 
 ///
 /// ViewState extensions.

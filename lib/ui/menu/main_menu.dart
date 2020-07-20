@@ -1,34 +1,36 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_widgets/tec_widgets.dart';
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
-import 'blocs/app_theme_bloc.dart';
-import 'models/app_settings.dart';
-import 'models/labels.dart';
-import 'ui/common/common.dart';
-import 'ui/misc/text_settings.dart';
+import '../../blocs/app_theme_bloc.dart';
+import '../../models/app_settings.dart';
+import '../../models/labels.dart';
+import '../common/common.dart';
+import '../misc/text_settings.dart';
+import 'menu_model.dart';
 
 const tecartaBlue = Color(0xff4a7dee);
 
 Future<void> showMainMenu(BuildContext context) {
   return showTecDialog<void>(
     context: context,
-    padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
-    // alignment: Alignment.topRight,
+    padding: const EdgeInsets.all(15),
+    cornerRadius: 15,
     useRootNavigator: true,
-    builder: (context) => MainMenu(),
+    builder: (context) => MainMenu(menuModel: MenuModel()),
   );
 }
 
 // ignore_for_file: prefer_const_constructors
-const _textMaxScaleFactor = 1.0;
+// const _textMaxScaleFactor = 1.0;
 
 class MainMenu extends StatelessWidget {
+  final MenuModel menuModel;
+  const MainMenu({this.menuModel});
   @override
   Widget build(BuildContext context) {
     final drawerTextColor =
@@ -39,15 +41,16 @@ class MainMenu extends StatelessWidget {
         iconTheme: IconThemeData(color: drawerTextColor),
         textTheme: TextTheme(bodyText2: TextStyle(color: drawerTextColor)),
       ),
-      child: SizedBox(
-        height: 350,
-        child: SingleChildScrollView(
-          child: Column(
+      child: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          ListView(
+            shrinkWrap: true,
             children: [
               MenuListTile(
                 icon: tec.platformIs(tec.Platform.iOS) ? FeatherIcons.share : FeatherIcons.share2,
                 title: 'Share app',
-                onTap: null,
+                onTap: () => menuModel.shareApp(context),
               ),
               MenuListTile(
                 icon: FeatherIcons.bell,
@@ -97,25 +100,32 @@ class MainMenu extends StatelessWidget {
               MenuListTile(
                 icon: FeatherIcons.helpCircle,
                 title: 'Help & Feedback',
-                onTap: null,
+                onTap: () => menuModel.emailFeedback(context),
               ),
               MenuListTile(
                 icon: FeatherIcons.info,
                 title: 'About',
-                onTap: null,
+                onTap: () => menuModel.showAboutDialog(context),
               ),
             ],
           ),
-        ),
+          IconButton(
+            icon: Icon(
+              Icons.close,
+              color: Theme.of(context).textColor.withOpacity(0.5),
+            ),
+            onPressed: Navigator.of(context).maybePop,
+          )
+        ],
       ),
     );
   }
 }
 
-const TextStyle _menuTitleStyle = TextStyle(
-  fontSize: 12,
-  fontWeight: FontWeight.w600,
-);
+// const TextStyle _menuTitleStyle = TextStyle(
+//   fontSize: 12,
+//   fontWeight: FontWeight.w600,
+// );
 
 class MenuListTile extends StatefulWidget {
   final IconData icon;
@@ -141,7 +151,7 @@ class _MenuListTileState extends State<MenuListTile> {
             leading: widget.icon == null ? const Text('') : MenuIcon(iconData: widget.icon),
             title: TecText(
               widget.title,
-              maxScaleFactor: _textMaxScaleFactor,
+              // maxScaleFactor: _textMaxScaleFactor,
               // style: _menuTitleStyle.copyWith(color: textColor),
               style: TextStyle(color: textColor),
             ),
@@ -159,7 +169,7 @@ class _MenuListTileState extends State<MenuListTile> {
             dense: true,
             title: TecText(
               widget.title,
-              maxScaleFactor: _textMaxScaleFactor,
+              // maxScaleFactor: _textMaxScaleFactor,
               style: TextStyle(color: textColor),
               // style: _menuTitleStyle.copyWith(color: textColor),
             ),
