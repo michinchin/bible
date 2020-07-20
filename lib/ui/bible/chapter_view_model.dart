@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -65,89 +64,158 @@ class BibleChapterViewModel {
   // maintain a list of keys for footnotes, margin notes
   final widgetKeys = <String, GlobalKey>{};
   TapUpDetails tapUpDetails;
+  var _marginNoteVerse = 0;
+
+  Color _backgroundColor(bool isDarkTheme) {
+    return isDarkTheme ? Colors.black : Colors.white;
+  }
 
   // only call widgetHitTest from onTap (and set tapUpDetails in onTapUp)
-  bool _widgetHitTest(double padding) {
-    if (tapUpDetails != null && _selectedVerses.isEmpty) {
-      final x = tapUpDetails.globalPosition.dx;
-      final y = tapUpDetails.globalPosition.dy;
+  void _widgetHitTest(BuildContext context, Object tag) {
+    final padding = MediaQuery.of(context).devicePixelRatio * 2.5;
 
-      // clear current details
-      tapUpDetails = null;
+    if (tag is _VerseTag) {
+      if (_selectedVerses.isEmpty && tapUpDetails != null) {
+        final x = tapUpDetails.globalPosition.dx;
+        final y = tapUpDetails.globalPosition.dy;
 
-      for (final key in widgetKeys.keys) {
-        final renderBox = widgetKeys[key].currentContext?.findRenderObject();
-        if (renderBox is RenderBox) {
-          final position = renderBox.localToGlobal(Offset.zero);
+        // clear current details
+        tapUpDetails = null;
 
-          if (y < position.dy) {
-            // don't bother checking rest of chapter... tap is above those...
-            break;
-          }
+        for (final key in widgetKeys.keys) {
+          final renderBox = widgetKeys[key].currentContext?.findRenderObject();
+          if (renderBox is RenderBox) {
+            final position = renderBox.localToGlobal(Offset.zero);
 
-          final hit = x >= (position.dx - padding) &&
-              x <= (position.dx + renderBox.size.width + padding) &&
-              y >= (position.dy - padding) &&
-              y <= (position.dy + renderBox.size.height + padding);
+            if (y < position.dy) {
+              // don't bother checking rest of chapter... tap is above those...
+              break;
+            }
 
-          if (hit) {
-            if (widgetKeys[key].currentWidget is GestureDetector) {
-              (widgetKeys[key].currentWidget as GestureDetector).onTap();
-              return true;
+            final hit = x >= (position.dx - padding) &&
+                x <= (position.dx + renderBox.size.width + padding) &&
+                y >= (position.dy - padding) &&
+                y <= (position.dy + renderBox.size.height + padding);
+
+            if (hit) {
+              if (widgetKeys[key].currentWidget is GestureDetector) {
+                // this is a widget hit - execute the tap...
+                (widgetKeys[key].currentWidget as GestureDetector).onTap();
+                return;
+              }
             }
           }
         }
       }
-    }
 
-    return false;
+      _toggleSelectionForVerse(context, tag.verse);
+    }
   }
 
-  InlineSpan _footnoteSpan(BuildContext context, TextStyle style, _VerseTag tag, Key key) {
-    // Example returning a WidgetSpan:
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
+  InlineSpan _marginNoteSpan(
+      BuildContext context, TextStyle style, _VerseTag tag, Key key, bool isDarkTheme) {
+    final color = isDarkTheme ? const Color(0xFFFAFAFA) : const Color(0xFFA1090E);
     final iconWidth = (style.fontSize ?? 16.0) / 1.2;
+    final widgetWidth = iconWidth;
 
-    return TaggableWidgetSpan(
-      alignment: PlaceholderAlignment.top,
-      child: AbsorbPointer(
-        absorbing: _selectedVerses.isNotEmpty,
+    return TecWidgetSpan(
+      alignment: PlaceholderAlignment.middle,
+      childWidth: widgetWidth,
+      child: Transform.translate(
+        offset: Offset(-iconWidth / 4.5, 0),
         child: GestureDetector(
           key: key,
-          child: Stack(children: <Widget>[
-            Container(
-              width: iconWidth,
-              // use app settings height to determine correct line height
-              height: AppSettings.shared.contentTextScaleFactor.value * 14.0,
-              decoration: BoxDecoration(color: backgroundColor),
+          child: Container(
+            width: widgetWidth,
+            // use app settings height to determine correct line height
+            height: AppSettings.shared.contentTextScaleFactor.value * 18.0,
+            decoration: BoxDecoration(color: _backgroundColor(isDarkTheme)),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 3.0),
+                child: SvgPicture.asset('assets/marginNote.svg',
+                    width: iconWidth, height: iconWidth, color: color, semanticsLabel: 'Margin Note'),
+              ),
             ),
-            SvgPicture.asset('assets/footnote.svg',
-                width: iconWidth,
-                height: iconWidth,
-                color: Theme.of(context).accentColor,
-                semanticsLabel: 'Footnote')
-          ]),
+          ),
           onTap: () {
-            tecShowSimpleAlertDialog<void>(context: context, content: tag.href);
+            if (_selectedVerses.isEmpty) {
+              tecShowSimpleAlertDialog<void>(context: context, content: 'margin note ${tag.verse}');
+            } else {
+              TecToast.show(context, 'Clear selection to view margin note');
+              // not sure if I want to force this...
+              // _toggleSelectionForVerse(context, tag.verse);
+            }
           },
         ),
       ),
-      style: style,
-      tag: tag,
     );
   }
 
-  // Example returning a TextSpan:
-  // return TaggableTextSpan(
-  //   text: '* ',
-  //   style: Theme.of(context).textTheme.headline6.copyWith(color: Theme.of(context).accentColor),
-  //   tag: tag,
-  //   recognizer: TapGestureRecognizer()
-  //     ..onTap = () {
-  //       tecShowSimpleAlertDialog<void>(context: context, content: 'Footnote ${tag.href}');
-  //     },
-  // );
+  InlineSpan _footnoteSpan(
+      BuildContext context, TextStyle style, _VerseTag tag, Key key, bool isDarkTheme) {
+    final iconWidth = (style.fontSize ?? 16.0) / 1.2;
+
+    return TecWidgetSpan(
+      alignment: PlaceholderAlignment.top,
+      childWidth: iconWidth,
+      child: GestureDetector(
+        key: key,
+        child: Container(
+          width: iconWidth,
+          // use app settings height to determine correct line height
+          height: AppSettings.shared.contentTextScaleFactor.value * 18.0,
+          decoration: BoxDecoration(color: _backgroundColor(isDarkTheme)),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+                padding: const EdgeInsets.only(top: 3.0),
+                child: SvgPicture.asset('assets/footnote.svg',
+                    width: iconWidth,
+                    height: iconWidth,
+                    color: Theme.of(context).accentColor,
+                    semanticsLabel: 'Footnote')),
+          ),
+        ),
+        onTap: () {
+          if (_selectedVerses.isEmpty) {
+            tecShowSimpleAlertDialog<void>(context: context, content: tag.href);
+          } else {
+            TecToast.show(context, 'Clear selection to view footnote');
+            // not sure if I want to force this...
+            // _toggleSelectionForVerse(context, tag.verse);
+          }
+        },
+      ),
+    );
+  }
+
+  ///
+  /// Returns a TecWidgetSpan to add space between spans.
+  ///
+  InlineSpan spanForSpace(
+    BuildContext context,
+    double width,
+    Object tag, {
+    bool isDarkTheme,
+  }) {
+    return TecWidgetSpan(
+      alignment: PlaceholderAlignment.top,
+      childWidth: width,
+      child: GestureDetector(
+        onTapUp: (details) => tapUpDetails = details,
+        onTap: () => _widgetHitTest(context, tag),
+        child: Container(
+          width: width,
+          height: AppSettings.shared.contentTextScaleFactor.value * 18.0,
+          decoration: BoxDecoration(
+            color: _backgroundColor(isDarkTheme),
+          ),
+        ),
+      ),
+    );
+  }
 
   ///
   /// Returns a TextSpan (or WidgetSpan) for the given HTML text node.
@@ -160,8 +228,6 @@ class BibleChapterViewModel {
     TextStyle selectedTextStyle, {
     bool isDarkTheme,
   }) {
-    final tapPadding = MediaQuery.of(context).devicePixelRatio * 2.5;
-
     if (tag is _VerseTag && tag.isInFootnote && text != ' ') {
       // assign a unique key for this footnote
       // this can (is) called multiple times per footnote - just create one key
@@ -169,26 +235,57 @@ class BibleChapterViewModel {
         widgetKeys['${tag.verse}-${tag.word}'] = GlobalKey();
       }
 
-      return _footnoteSpan(context, style, tag, widgetKeys['${tag.verse}-${tag.word}']);
+      return _footnoteSpan(
+          context, style, tag, widgetKeys['${tag.verse}-${tag.word}'], isDarkTheme);
     }
 
     if (tag is _VerseTag) {
       final recognizer = tag.verse == null ? null : TapGestureRecognizer();
       recognizer?.onTapUp = (details) => tapUpDetails = details;
-      recognizer?.onTap = () {
-        if (!_widgetHitTest(tapPadding)) {
-          _toggleSelectionForVerse(context, tag.verse);
+      recognizer?.onTap = () => _widgetHitTest(context, tag);
+
+      // We're building a list of one or more spans...
+      final spans = <InlineSpan>[];
+
+      // local function to add a margin not icon if there is a margin note on this verse
+      void _addMarginNote() {
+        // margin note icons are placed before the first "inVerse" span of a verse...
+        if (_marginNoteVerse != tag.verse && tag.isInVerse) {
+          _marginNoteVerse = tag.verse;
+          // assign a unique key for this margin note
+          // this can (is) called multiple times per margin note - just create one key
+          if (!widgetKeys.containsKey('mn${tag.verse}')) {
+            widgetKeys['mn${tag.verse}'] = GlobalKey();
+          }
+
+          spans.add(_marginNoteSpan(
+            context,
+            style,
+            tag,
+            widgetKeys['mn${tag.verse}'],
+            isDarkTheme,
+          ));
         }
-      };
+      }
 
       // If not in trial mode, and this whole verse is selected, just
       // return a span with the selected text style.
       if (!_isSelectionTrialMode && _selectedVerses.contains(tag.verse)) {
-        return TaggableTextSpan(
+        _addMarginNote();
+
+        final textSpan = TaggableTextSpan(
             text: text,
             style: tag.isInVerse ? _merge(style, selectedTextStyle) : style,
             tag: tag,
             recognizer: recognizer);
+
+        if (spans.isEmpty) {
+          return textSpan;
+        }
+        else {
+          spans.add(textSpan);
+          return TextSpan(children: spans, recognizer: recognizer);
+        }
       } else if (tag.verse != null) {
         final v = tag.verse;
         var currentWord = tag.word;
@@ -221,8 +318,7 @@ class BibleChapterViewModel {
           }
         }
 
-        // We're building a list of one or more spans...
-        final spans = <InlineSpan>[];
+        _addMarginNote();
 
         // Iterate through all the highlights for the words in the tag...
         for (final highlight

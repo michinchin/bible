@@ -241,12 +241,17 @@ class _ChapterViewState extends State<_ChapterView> {
 
     return Container(
       color: isDarkTheme ? Colors.black : Colors.white,
-      child: BlocProvider(
-        create: (_) => ChapterHighlightsBloc(
-          volume: widget.volumeId,
-          book: widget.ref.book,
-          chapter: widget.ref.chapter,
-        ),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) =>
+                ChapterHighlightsBloc(
+                  volume: widget.volumeId,
+                  book: widget.ref.book,
+                  chapter: widget.ref.chapter,
+                ),
+          ),
+        ],
         child: BlocBuilder<ChapterHighlightsBloc, ChapterHighlights>(
           builder: (context, highlights) {
             return StreamBuilder<String>(
@@ -254,6 +259,17 @@ class _ChapterViewState extends State<_ChapterView> {
               builder: (c, snapshot) {
                 final fontName =
                     (snapshot.hasData ? snapshot.data : AppSettings.shared.contentFontName.value);
+
+                // TODO(mike): fix multiple reloading of a chapter...
+                // Psalm 119 example...
+                // on first load - chapter is loaded 2x - snapshot.hasData = false, then snapShot.hasData = true
+                // nav to a different part of the bible - current chapter is reloaded (hasData = true)
+                // swipe to next chapter - chapter is loaded 3x (hasData = true)
+                // swipe back - chapter is loaded 5x (hasData = false, 4x hasData = true)
+                if (widget.ref.chapter == 119) {
+                  debugPrint('loading 119');
+                }
+
                 return _BibleHtml(
                   viewUid: widget.viewUid,
                   volumeId: widget.volumeId,
@@ -390,6 +406,10 @@ class _BibleHtmlState extends State<_BibleHtml> {
                   spanForText: (text, style, tag) => _viewModel.spanForText(
                       context, text, style, tag, selectedTextStyle,
                       isDarkTheme: isDarkTheme),
+
+                  // Rendering CSS padding/margin to a WidgetSpan:
+                  spanForSpace: (width, tag) => _viewModel.spanForSpace(
+                      context, width, tag, isDarkTheme: isDarkTheme),
 
                   // Word range selection related:
                   selectable: !kIsWeb && !_viewModel.hasVersesSelected,
