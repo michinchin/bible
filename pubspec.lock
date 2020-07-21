@@ -942,7 +942,7 @@ packages:
       name: tec_html
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "3.0.5"
+    version: "3.0.6"
   tec_platform_util:
     dependency: transitive
     description:

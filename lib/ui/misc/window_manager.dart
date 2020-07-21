@@ -11,7 +11,8 @@ Future<void> showWindowDialog({BuildContext context, Widget Function(BuildContex
         context: context,
         barrierDismissible: true,
         builder: (c) => Dialog(
-            useMaterialBorderRadius: true,
+          // this property has been removed in flutter 1.20
+          // useMaterialBorderRadius: true,
             backgroundColor: Colors.transparent,
             child: Container(
                 decoration: BoxDecoration(
