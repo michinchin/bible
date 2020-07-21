@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tec_env/tec_env.dart';
@@ -11,6 +10,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
+import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
@@ -18,7 +18,6 @@ import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
 import '../nav/nav.dart';
-
 import 'chapter_view_model.dart';
 
 const bibleChapterType = 'BibleChapter';
@@ -244,45 +243,63 @@ class _ChapterViewState extends State<_ChapterView> {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (_) =>
-                ChapterHighlightsBloc(
-                  volume: widget.volumeId,
-                  book: widget.ref.book,
-                  chapter: widget.ref.chapter,
-                ),
+            create: (_) => ChapterMarginNotesBloc(
+              volume: widget.volumeId,
+              book: widget.ref.book,
+              chapter: widget.ref.chapter,
+            ),
+          ),
+          BlocProvider(
+            create: (_) => ChapterHighlightsBloc(
+              volume: widget.volumeId,
+              book: widget.ref.book,
+              chapter: widget.ref.chapter,
+            ),
           ),
         ],
-        child: BlocBuilder<ChapterHighlightsBloc, ChapterHighlights>(
-          builder: (context, highlights) {
-            return StreamBuilder<String>(
-              stream: AppSettings.shared.contentFontName.stream,
-              builder: (c, snapshot) {
-                final fontName =
-                    (snapshot.hasData ? snapshot.data : AppSettings.shared.contentFontName.value);
+        child: BlocBuilder<ChapterMarginNotesBloc, ChapterMarginNotes>(
+          builder: (context, marginNotes) {
+            return BlocBuilder<ChapterHighlightsBloc, ChapterHighlights>(
+                builder: (context, highlights) {
+              return StreamBuilder<String>(
+                stream: AppSettings.shared.contentFontName.stream,
+                builder: (c, snapshot) {
+                  if (snapshot.hasData && highlights.loaded && marginNotes.loaded) {
+                    final fontName = snapshot.data;
 
-                // TODO(mike): fix multiple reloading of a chapter...
-                // Psalm 119 example...
-                // on first load - chapter is loaded 2x - snapshot.hasData = false, then snapShot.hasData = true
-                // nav to a different part of the bible - current chapter is reloaded (hasData = true)
-                // swipe to next chapter - chapter is loaded 3x (hasData = true)
-                // swipe back - chapter is loaded 5x (hasData = false, 4x hasData = true)
-                if (widget.ref.chapter == 119) {
-                  debugPrint('loading 119');
-                }
+                    // TODO(mike): fix multiple reloading of a chapter...
+                    // Psalm 119 example...
+                    // on first load - chapter is loaded 2x - snapshot.hasData = false, then snapShot.hasData = true
+                    // nav to a different part of the bible - current chapter is reloaded (hasData = true)
+                    // swipe to next chapter - chapter is loaded 3x (hasData = true)
+                    // swipe back - chapter is loaded 5x (hasData = false, 4x hasData = true)
+                    if (widget.ref.chapter == 119) {
+                      debugPrint('loading 119');
+                    }
+                    else {
+                      debugPrint('loading ${widget.ref.chapter}');
+                    }
 
-                return _BibleHtml(
-                  viewUid: widget.viewUid,
-                  volumeId: widget.volumeId,
-                  ref: widget.ref,
-                  baseUrl: widget.baseUrl,
-                  html: _html,
-                  versesToShow: widget.versesToShow ?? [], // ['1', '2', '3']
-                  size: widget.size,
-                  fontName: fontName,
-                  highlights: highlights,
-                );
-              },
-            );
+                    return _BibleHtml(
+                      viewUid: widget.viewUid,
+                      volumeId: widget.volumeId,
+                      ref: widget.ref,
+                      baseUrl: widget.baseUrl,
+                      html: _html,
+                      versesToShow: widget.versesToShow ?? [],
+                      // ['1', '2', '3']
+                      size: widget.size,
+                      fontName: fontName,
+                      highlights: highlights,
+                      marginNotes: marginNotes,
+                    );
+                  }
+                  else {
+                    return Container();
+                  }
+                },
+              );
+            });
           },
         ),
       ),
@@ -300,6 +317,7 @@ class _BibleHtml extends StatefulWidget {
   final List<String> versesToShow;
   final String fontName;
   final ChapterHighlights highlights;
+  final ChapterMarginNotes marginNotes;
 
   const _BibleHtml({
     Key key,
@@ -312,6 +330,7 @@ class _BibleHtml extends StatefulWidget {
     @required this.size,
     @required this.fontName,
     @required this.highlights,
+    @required this.marginNotes,
   }) : super(key: key);
 
   @override
@@ -335,6 +354,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
       chapter: widget.ref.chapter,
       versesToShow: () => widget.versesToShow,
       highlights: () => widget.highlights,
+      marginNotes: () => widget.marginNotes,
       selectionController: _selectionController,
       refreshFunc: _refresh,
     );

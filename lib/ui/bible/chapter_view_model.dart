@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tec_html/tec_html.dart';
@@ -14,6 +13,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
+import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
@@ -31,6 +31,7 @@ class BibleChapterViewModel {
   final int chapter;
   final List<String> Function() versesToShow;
   final ChapterHighlights Function() highlights;
+  final ChapterMarginNotes Function() marginNotes;
   final TecSelectableController selectionController;
   final void Function(VoidCallback fn) refreshFunc;
 
@@ -48,6 +49,7 @@ class BibleChapterViewModel {
     @required this.chapter,
     @required this.versesToShow,
     @required this.highlights,
+    @required this.marginNotes,
     @required this.selectionController,
     @required this.refreshFunc,
   }) : assert(volume != null &&
@@ -118,6 +120,17 @@ class BibleChapterViewModel {
     final iconWidth = (style.fontSize ?? 16.0) / 1.2;
     final widgetWidth = iconWidth;
 
+    void _onPress() {
+      if (_selectedVerses.isEmpty) {
+        final text = marginNotes().marginNoteForVerse(tag.verse).text;
+        tecShowSimpleAlertDialog<void>(context: context, content: '${tag.verse}: $text');
+      } else {
+        TecToast.show(context, 'Clear selection to view margin note');
+        // not sure if I want to force this...
+        // _toggleSelectionForVerse(context, tag.verse);
+      }
+    }
+
     return TecWidgetSpan(
       alignment: PlaceholderAlignment.middle,
       childWidth: widgetWidth,
@@ -139,15 +152,8 @@ class BibleChapterViewModel {
               ),
             ),
           ),
-          onTap: () {
-            if (_selectedVerses.isEmpty) {
-              tecShowSimpleAlertDialog<void>(context: context, content: 'margin note ${tag.verse}');
-            } else {
-              TecToast.show(context, 'Clear selection to view margin note');
-              // not sure if I want to force this...
-              // _toggleSelectionForVerse(context, tag.verse);
-            }
-          },
+          onTap: _onPress,
+          onLongPress: _onPress,
         ),
       ),
     );
@@ -156,6 +162,16 @@ class BibleChapterViewModel {
   InlineSpan _footnoteSpan(
       BuildContext context, TextStyle style, _VerseTag tag, Key key, bool isDarkTheme) {
     final iconWidth = (style.fontSize ?? 16.0) / 1.2;
+
+    void _onPress() {
+      if (_selectedVerses.isEmpty) {
+        tecShowSimpleAlertDialog<void>(context: context, content: tag.href);
+      } else {
+        TecToast.show(context, 'Clear selection to view footnote');
+        // not sure if I want to force this...
+        // _toggleSelectionForVerse(context, tag.verse);
+      }
+    }
 
     return TecWidgetSpan(
       alignment: PlaceholderAlignment.top,
@@ -178,15 +194,8 @@ class BibleChapterViewModel {
                     semanticsLabel: 'Footnote')),
           ),
         ),
-        onTap: () {
-          if (_selectedVerses.isEmpty) {
-            tecShowSimpleAlertDialog<void>(context: context, content: tag.href);
-          } else {
-            TecToast.show(context, 'Clear selection to view footnote');
-            // not sure if I want to force this...
-            // _toggleSelectionForVerse(context, tag.verse);
-          }
-        },
+        onTap: _onPress,
+        onLongPress: _onPress,
       ),
     );
   }
@@ -252,19 +261,22 @@ class BibleChapterViewModel {
         // margin note icons are placed before the first "inVerse" span of a verse...
         if (_marginNoteVerse != tag.verse && tag.isInVerse) {
           _marginNoteVerse = tag.verse;
-          // assign a unique key for this margin note
-          // this can (is) called multiple times per margin note - just create one key
-          if (!widgetKeys.containsKey('mn${tag.verse}')) {
-            widgetKeys['mn${tag.verse}'] = GlobalKey();
-          }
 
-          spans.add(_marginNoteSpan(
-            context,
-            style,
-            tag,
-            widgetKeys['mn${tag.verse}'],
-            isDarkTheme,
-          ));
+          if (marginNotes().hasMarginNoteForVerse(_marginNoteVerse)) {
+            // assign a unique key for this margin note
+            // this can (is) called multiple times per margin note - just create one key
+            if (!widgetKeys.containsKey('mn${tag.verse}')) {
+              widgetKeys['mn${tag.verse}'] = GlobalKey();
+            }
+
+            spans.add(_marginNoteSpan(
+              context,
+              style,
+              tag,
+              widgetKeys['mn${tag.verse}'],
+              isDarkTheme,
+            ));
+          }
         }
       }
 

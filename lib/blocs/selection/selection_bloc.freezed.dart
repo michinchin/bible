@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named
+// ignore_for_file: deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies
 
 part of 'selection_bloc.dart';
 
@@ -12,6 +12,7 @@ T _$identity<T>(T value) => value;
 class _$SelectionStateTearOff {
   const _$SelectionStateTearOff();
 
+// ignore: unused_element
   _SelectionState call({bool isTextSelected}) {
     return _SelectionState(
       isTextSelected: isTextSelected,
@@ -128,6 +129,7 @@ abstract class _SelectionState implements SelectionState {
 class _$SelectionStyleTearOff {
   const _$SelectionStyleTearOff();
 
+// ignore: unused_element
   _SelectionStyle call(
       {HighlightType type,
       int color,

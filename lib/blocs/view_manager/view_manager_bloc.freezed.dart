@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named
+// ignore_for_file: deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies
 
 part of 'view_manager_bloc.dart';
 
@@ -12,6 +12,7 @@ T _$identity<T>(T value) => value;
 class _$ViewManagerEventTearOff {
   const _$ViewManagerEventTearOff();
 
+// ignore: unused_element
   _Add add({@required String type, int position, String data}) {
     return _Add(
       type: type,
@@ -20,22 +21,26 @@ class _$ViewManagerEventTearOff {
     );
   }
 
+// ignore: unused_element
   _Remove remove(int uid) {
     return _Remove(
       uid,
     );
   }
 
+// ignore: unused_element
   _Maximize maximize(int uid) {
     return _Maximize(
       uid,
     );
   }
 
+// ignore: unused_element
   _Restore restore() {
     return const _Restore();
   }
 
+// ignore: unused_element
   _Move move({int fromPosition, int toPosition}) {
     return _Move(
       fromPosition: fromPosition,
@@ -43,6 +48,7 @@ class _$ViewManagerEventTearOff {
     );
   }
 
+// ignore: unused_element
   _SetWidth setWidth({int position, double width}) {
     return _SetWidth(
       position: position,
@@ -50,6 +56,7 @@ class _$ViewManagerEventTearOff {
     );
   }
 
+// ignore: unused_element
   _SetHeight setHeight({int position, double height}) {
     return _SetHeight(
       position: position,
@@ -57,6 +64,7 @@ class _$ViewManagerEventTearOff {
     );
   }
 
+// ignore: unused_element
   _SetData setData({int uid, String data}) {
     return _SetData(
       uid: uid,
@@ -1406,6 +1414,7 @@ ViewState _$ViewStateFromJson(Map<String, dynamic> json) {
 class _$ViewStateTearOff {
   const _$ViewStateTearOff();
 
+// ignore: unused_element
   _ViewState call(
       {int uid,
       String type,
@@ -1628,6 +1637,7 @@ ViewManagerState _$ViewManagerStateFromJson(Map<String, dynamic> json) {
 class _$ViewManagerStateTearOff {
   const _$ViewManagerStateTearOff();
 
+// ignore: unused_element
   _Views call(List<ViewState> views, int maximizedViewUid, int nextUid) {
     return _Views(
       views,
@@ -1793,6 +1803,7 @@ abstract class _Views implements ViewManagerState {
 class _$ManagedViewStateTearOff {
   const _$ManagedViewStateTearOff();
 
+// ignore: unused_element
   _ManagedViewState call(BoxConstraints parentConstraints, ViewState viewState,
       Size viewSize, int viewIndex) {
     return _ManagedViewState(

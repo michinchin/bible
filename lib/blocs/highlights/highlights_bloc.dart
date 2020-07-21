@@ -16,8 +16,8 @@ part 'highlights_bloc.freezed.dart';
 
 @freezed
 abstract class ChapterHighlights with _$ChapterHighlights {
-  const factory ChapterHighlights(int volume, int book, int chapter, List<Highlight> highlights) =
-      _ChapterHighlights;
+  const factory ChapterHighlights(int volume, int book, int chapter, List<Highlight> highlights,
+      {bool loaded}) = _ChapterHighlights;
 }
 
 extension ChapterHighlightsExt on ChapterHighlights {
@@ -92,8 +92,10 @@ abstract class Highlight with _$Highlight {
 @freezed
 abstract class HighlightsEvent with _$HighlightsEvent {
   const factory HighlightsEvent.updateFromDb({@required List<Highlight> hls}) = _UpdateFromDb;
+
   const factory HighlightsEvent.add(
       {@required HighlightType type, @required int color, @required Reference ref}) = _Add;
+
   const factory HighlightsEvent.clear(Reference ref) = _Clear;
 }
 
@@ -101,8 +103,10 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
   final int volume;
   final int book;
   final int chapter;
+  final bool loaded;
 
-  ChapterHighlightsBloc({@required this.volume, @required this.book, @required this.chapter}) {
+  ChapterHighlightsBloc(
+      {@required this.volume, @required this.book, @required this.chapter, this.loaded = false}) {
     _initUserContent();
   }
 
@@ -113,17 +117,17 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
     if (uc.isNotEmpty) {
       // We keep the highlights sorted by modified date with most recent at the bottom.
       uc.sort((a, b) => a?.modified?.compareTo(b.modified) ?? 1);
-
-      final hls = <Highlight>[];
-
-      for (final ui in uc) {
-        hls.add(Highlight.from(ui));
-      }
-
-      _printHighlights(hls, withTitle: 'HIGHLIGHTS IMPORTED FROM DB:');
-
-      add(HighlightsEvent.updateFromDb(hls: hls));
     }
+
+    final hls = <Highlight>[];
+
+    for (final ui in uc) {
+      hls.add(Highlight.from(ui));
+    }
+
+    // _printHighlights(hls, withTitle: 'HIGHLIGHTS IMPORTED FROM DB:');
+
+    add(HighlightsEvent.updateFromDb(hls: hls));
   }
 
   Future<void> _saveHighlightsToDb(List<int> verses, List<Highlight> hls) async {
@@ -142,7 +146,8 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
       for (final v in hl.ref.verses) {
         if (verses.contains(v)) {
           // create a new UserItem for this hl
-          final ui = UserItem(type: UserItemType.highlight.index,
+          final ui = UserItem(
+            type: UserItemType.highlight.index,
             volumeId: volume,
             book: book,
             chapter: chapter,
@@ -162,7 +167,7 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
   }
 
   @override
-  ChapterHighlights get initialState => ChapterHighlights(volume, book, chapter, []);
+  ChapterHighlights get initialState => ChapterHighlights(volume, book, chapter, [], loaded: false);
 
   @override
   Stream<ChapterHighlights> mapEventToState(HighlightsEvent event) async* {
@@ -172,35 +177,40 @@ class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
   }
 
   ChapterHighlights _updateFromDb(List<Highlight> hls) {
-    Stopwatch stopwatch;
-    if (kDebugMode) stopwatch = Stopwatch()..start();
+    var newList = hls;
 
-    var newList = state.highlights;
-    for (final hl in hls) {
-      newList = newList.copySubtracting(hl.ref)..add(hl);
+    if (hls.isNotEmpty) {
+      Stopwatch stopwatch;
+      if (kDebugMode) {
+        stopwatch = Stopwatch()..start();
+      }
+
+      newList = state.highlights;
+      for (final hl in hls) {
+        newList = newList.copySubtracting(hl.ref)..add(hl);
+      }
+
+      if (kDebugMode) {
+        tec.dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');
+      }
+
+      _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
     }
 
-    if (kDebugMode) {
-      tec.dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');
-    }
-
-    _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
-
-    return ChapterHighlights(volume, book, chapter, newList);
+    return ChapterHighlights(volume, book, chapter, newList, loaded: true);
   }
 
   ChapterHighlights _add(HighlightType type, int color, Reference ref) {
     assert(type != HighlightType.clear);
-    final newList = state.highlights.copySubtracting(ref)
-      ..add(Highlight(type, color, ref));
+    final newList = state.highlights.copySubtracting(ref)..add(Highlight(type, color, ref));
     _saveHighlightsToDb(ref.verses.toList(), newList);
-    return ChapterHighlights(volume, book, chapter, newList);
+    return ChapterHighlights(volume, book, chapter, newList, loaded: true);
   }
 
   ChapterHighlights _clear(Reference ref) {
     final newList = state.highlights.copySubtracting(ref);
     _saveHighlightsToDb(ref.verses.toList(), newList);
-    return ChapterHighlights(volume, book, chapter, newList);
+    return ChapterHighlights(volume, book, chapter, newList, loaded: true);
   }
 }
 

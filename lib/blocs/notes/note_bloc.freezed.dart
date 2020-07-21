@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named
+// ignore_for_file: deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies
 
 part of 'note_bloc.dart';
 
@@ -15,6 +15,7 @@ Note _$NoteFromJson(Map<String, dynamic> json) {
 class _$NoteTearOff {
   const _$NoteTearOff();
 
+// ignore: unused_element
   _Note call({@required int id, @required NotusDocument doc}) {
     return _Note(
       id: id,
@@ -157,16 +158,19 @@ abstract class _Note implements Note {
 class _$NoteEventTearOff {
   const _$NoteEventTearOff();
 
+// ignore: unused_element
   _LoadNote load() {
     return const _LoadNote();
   }
 
+// ignore: unused_element
   _SaveNote save({Note note}) {
     return _SaveNote(
       note: note,
     );
   }
 
+// ignore: unused_element
   _DeleteNote delete() {
     return const _DeleteNote();
   }
@@ -555,6 +559,7 @@ NoteManagerState _$NoteManagerStateFromJson(Map<String, dynamic> json) {
 class _$NoteManagerStateTearOff {
   const _$NoteManagerStateTearOff();
 
+// ignore: unused_element
   _Notes call(List<Note> notes) {
     return _Notes(
       notes,
@@ -682,28 +687,33 @@ abstract class _Notes implements NoteManagerState {
 class _$NoteManagerEventTearOff {
   const _$NoteManagerEventTearOff();
 
+// ignore: unused_element
   _LoadNotes load() {
     return const _LoadNotes();
   }
 
+// ignore: unused_element
   _AddToNotes addNote(Note note) {
     return _AddToNotes(
       note,
     );
   }
 
+// ignore: unused_element
   _UpdateNote updateNote(Note note) {
     return _UpdateNote(
       note,
     );
   }
 
+// ignore: unused_element
   _RemoveFromNotes remove({@required int id}) {
     return _RemoveFromNotes(
       id: id,
     );
   }
 
+// ignore: unused_element
   _SaveNotes save() {
     return const _SaveNotes();
   }

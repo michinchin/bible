@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named
+// ignore_for_file: deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies
 
 part of 'highlights_bloc.dart';
 
@@ -12,13 +12,16 @@ T _$identity<T>(T value) => value;
 class _$ChapterHighlightsTearOff {
   const _$ChapterHighlightsTearOff();
 
+// ignore: unused_element
   _ChapterHighlights call(
-      int volume, int book, int chapter, List<Highlight> highlights) {
+      int volume, int book, int chapter, List<Highlight> highlights,
+      {bool loaded}) {
     return _ChapterHighlights(
       volume,
       book,
       chapter,
       highlights,
+      loaded: loaded,
     );
   }
 }
@@ -31,6 +34,7 @@ mixin _$ChapterHighlights {
   int get book;
   int get chapter;
   List<Highlight> get highlights;
+  bool get loaded;
 
   $ChapterHighlightsCopyWith<ChapterHighlights> get copyWith;
 }
@@ -39,7 +43,12 @@ abstract class $ChapterHighlightsCopyWith<$Res> {
   factory $ChapterHighlightsCopyWith(
           ChapterHighlights value, $Res Function(ChapterHighlights) then) =
       _$ChapterHighlightsCopyWithImpl<$Res>;
-  $Res call({int volume, int book, int chapter, List<Highlight> highlights});
+  $Res call(
+      {int volume,
+      int book,
+      int chapter,
+      List<Highlight> highlights,
+      bool loaded});
 }
 
 class _$ChapterHighlightsCopyWithImpl<$Res>
@@ -56,6 +65,7 @@ class _$ChapterHighlightsCopyWithImpl<$Res>
     Object book = freezed,
     Object chapter = freezed,
     Object highlights = freezed,
+    Object loaded = freezed,
   }) {
     return _then(_value.copyWith(
       volume: volume == freezed ? _value.volume : volume as int,
@@ -64,6 +74,7 @@ class _$ChapterHighlightsCopyWithImpl<$Res>
       highlights: highlights == freezed
           ? _value.highlights
           : highlights as List<Highlight>,
+      loaded: loaded == freezed ? _value.loaded : loaded as bool,
     ));
   }
 }
@@ -74,7 +85,12 @@ abstract class _$ChapterHighlightsCopyWith<$Res>
           _ChapterHighlights value, $Res Function(_ChapterHighlights) then) =
       __$ChapterHighlightsCopyWithImpl<$Res>;
   @override
-  $Res call({int volume, int book, int chapter, List<Highlight> highlights});
+  $Res call(
+      {int volume,
+      int book,
+      int chapter,
+      List<Highlight> highlights,
+      bool loaded});
 }
 
 class __$ChapterHighlightsCopyWithImpl<$Res>
@@ -93,12 +109,14 @@ class __$ChapterHighlightsCopyWithImpl<$Res>
     Object book = freezed,
     Object chapter = freezed,
     Object highlights = freezed,
+    Object loaded = freezed,
   }) {
     return _then(_ChapterHighlights(
       volume == freezed ? _value.volume : volume as int,
       book == freezed ? _value.book : book as int,
       chapter == freezed ? _value.chapter : chapter as int,
       highlights == freezed ? _value.highlights : highlights as List<Highlight>,
+      loaded: loaded == freezed ? _value.loaded : loaded as bool,
     ));
   }
 }
@@ -107,7 +125,8 @@ class _$_ChapterHighlights
     with DiagnosticableTreeMixin
     implements _ChapterHighlights {
   const _$_ChapterHighlights(
-      this.volume, this.book, this.chapter, this.highlights)
+      this.volume, this.book, this.chapter, this.highlights,
+      {this.loaded})
       : assert(volume != null),
         assert(book != null),
         assert(chapter != null),
@@ -121,10 +140,12 @@ class _$_ChapterHighlights
   final int chapter;
   @override
   final List<Highlight> highlights;
+  @override
+  final bool loaded;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'ChapterHighlights(volume: $volume, book: $book, chapter: $chapter, highlights: $highlights)';
+    return 'ChapterHighlights(volume: $volume, book: $book, chapter: $chapter, highlights: $highlights, loaded: $loaded)';
   }
 
   @override
@@ -135,7 +156,8 @@ class _$_ChapterHighlights
       ..add(DiagnosticsProperty('volume', volume))
       ..add(DiagnosticsProperty('book', book))
       ..add(DiagnosticsProperty('chapter', chapter))
-      ..add(DiagnosticsProperty('highlights', highlights));
+      ..add(DiagnosticsProperty('highlights', highlights))
+      ..add(DiagnosticsProperty('loaded', loaded));
   }
 
   @override
@@ -151,7 +173,9 @@ class _$_ChapterHighlights
                     .equals(other.chapter, chapter)) &&
             (identical(other.highlights, highlights) ||
                 const DeepCollectionEquality()
-                    .equals(other.highlights, highlights)));
+                    .equals(other.highlights, highlights)) &&
+            (identical(other.loaded, loaded) ||
+                const DeepCollectionEquality().equals(other.loaded, loaded)));
   }
 
   @override
@@ -160,7 +184,8 @@ class _$_ChapterHighlights
       const DeepCollectionEquality().hash(volume) ^
       const DeepCollectionEquality().hash(book) ^
       const DeepCollectionEquality().hash(chapter) ^
-      const DeepCollectionEquality().hash(highlights);
+      const DeepCollectionEquality().hash(highlights) ^
+      const DeepCollectionEquality().hash(loaded);
 
   @override
   _$ChapterHighlightsCopyWith<_ChapterHighlights> get copyWith =>
@@ -169,8 +194,8 @@ class _$_ChapterHighlights
 
 abstract class _ChapterHighlights implements ChapterHighlights {
   const factory _ChapterHighlights(
-          int volume, int book, int chapter, List<Highlight> highlights) =
-      _$_ChapterHighlights;
+      int volume, int book, int chapter, List<Highlight> highlights,
+      {bool loaded}) = _$_ChapterHighlights;
 
   @override
   int get volume;
@@ -181,12 +206,15 @@ abstract class _ChapterHighlights implements ChapterHighlights {
   @override
   List<Highlight> get highlights;
   @override
+  bool get loaded;
+  @override
   _$ChapterHighlightsCopyWith<_ChapterHighlights> get copyWith;
 }
 
 class _$HighlightTearOff {
   const _$HighlightTearOff();
 
+// ignore: unused_element
   _Highlight call(HighlightType highlightType, int color, Reference ref) {
     return _Highlight(
       highlightType,
@@ -338,12 +366,14 @@ abstract class _Highlight implements Highlight {
 class _$HighlightsEventTearOff {
   const _$HighlightsEventTearOff();
 
+// ignore: unused_element
   _UpdateFromDb updateFromDb({@required List<Highlight> hls}) {
     return _UpdateFromDb(
       hls: hls,
     );
   }
 
+// ignore: unused_element
   _Add add(
       {@required HighlightType type,
       @required int color,
@@ -355,6 +385,7 @@ class _$HighlightsEventTearOff {
     );
   }
 
+// ignore: unused_element
   _Clear clear(Reference ref) {
     return _Clear(
       ref,
