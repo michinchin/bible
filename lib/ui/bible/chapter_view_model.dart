@@ -161,7 +161,8 @@ class BibleChapterViewModel {
 
   InlineSpan _footnoteSpan(
       BuildContext context, TextStyle style, _VerseTag tag, Key key, bool isDarkTheme) {
-    final iconWidth = (style.fontSize ?? 16.0) / 1.2;
+    final iconWidth = (style.fontSize ?? 16.0) / 1.1;
+    final containerWidth = iconWidth + 2.0; // small right padding
 
     void _onPress() {
       if (_selectedVerses.isEmpty) {
@@ -175,16 +176,16 @@ class BibleChapterViewModel {
 
     return TecWidgetSpan(
       alignment: PlaceholderAlignment.top,
-      childWidth: iconWidth,
+      childWidth: containerWidth,
       child: GestureDetector(
         key: key,
         child: Container(
-          width: iconWidth,
+          width: containerWidth,
           // use app settings height to determine correct line height
           height: AppSettings.shared.contentTextScaleFactor.value * 18.0,
           decoration: BoxDecoration(color: _backgroundColor(isDarkTheme)),
           child: Align(
-            alignment: Alignment.topCenter,
+            alignment: Alignment.topLeft,
             child: Padding(
                 padding: const EdgeInsets.only(top: 3.0),
                 child: SvgPicture.asset('assets/footnote.svg',
