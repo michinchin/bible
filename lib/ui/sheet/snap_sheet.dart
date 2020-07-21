@@ -160,14 +160,16 @@ class _SnapSheetState extends State<SnapSheet> {
 class SheetButton extends StatelessWidget {
   final String text;
   final IconData icon;
-  const SheetButton({@required this.text, @required this.icon})
+  final VoidCallback onPressed;
+  const SheetButton({@required this.text, @required this.icon, @required this.onPressed})
       : assert(text != null),
-        assert(icon != null);
+        assert(icon != null),
+        assert(onPressed != null);
   @override
   Widget build(BuildContext context) {
     return ButtonTheme(
-      height: 50,
-      child: OutlineButton.icon(
+        height: 50,
+        child: OutlineButton.icon(
           padding: const EdgeInsets.all(0),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           label: TecText(
@@ -182,8 +184,8 @@ class SheetButton extends StatelessWidget {
             size: 18,
             color: Theme.of(context).textColor.withOpacity(0.8),
           ),
-          onPressed: () {}),
-    );
+          onPressed: onPressed,
+        ));
   }
 }
 
@@ -196,7 +198,7 @@ class GreyCircleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget circleIcon([double radius]) => Container(
         child: InkWell(
-            onTap: onPressed ?? () {},
+            onTap: onPressed,
             child: CircleAvatar(
                 radius: radius,
                 backgroundColor: Colors.transparent,

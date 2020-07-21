@@ -18,6 +18,9 @@ class _MainSheetState extends State<MainSheet> {
     'Listen': FeatherIcons.play,
     'Notes': FeatherIcons.edit2
   };
+
+  final buttonActions = <String, VoidCallback>{};
+
   @override
   Widget build(BuildContext context) {
     final landscape = MediaQuery.of(context).orientation == Orientation.landscape;
@@ -56,7 +59,7 @@ class _MainSheetState extends State<MainSheet> {
                     for (final key in miniViewIcons.keys)
                       SheetButton(
                         icon: miniViewIcons[key],
-                        // onPressed: () {},
+                        onPressed: buttonActions[key] ?? () {},
                         text: key,
                       ),
                   ],

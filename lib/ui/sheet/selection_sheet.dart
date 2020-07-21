@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:share/share.dart';
+import 'package:tec_volumes/tec_volumes.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
+import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/color_utils.dart';
+import '../../models/verses.dart';
 import '../../ui/sheet/snap_sheet.dart';
 
 class SelectionSheet extends StatefulWidget {
@@ -24,7 +29,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
 //  List<Color> defaultColors = [];
 //  List<Color> secondaryColors = [];
 
-  final buttons = <String, IconData>{
+  static const buttons = <String, IconData>{
     'Learn': Icons.lightbulb_outline,
     'Explore': FeatherIcons.compass,
     'Compare': Icons.compare_arrows,
@@ -40,12 +45,12 @@ class _SelectionSheetState extends State<SelectionSheet> {
     'Twitter': FeatherIcons.twitter
   };
 
-  final medButtons = <String, IconData>{
+  static const medButtons = <String, IconData>{
     'Compare': Icons.compare_arrows,
     'Define': FeatherIcons.bookOpen,
   };
 
-  final keyButtons = <String, IconData>{
+  static const keyButtons = <String, IconData>{
     'Note': FeatherIcons.edit,
     'Share': FeatherIcons.share,
     // 'Learn': Icons.lightbulb_outline,
@@ -93,6 +98,32 @@ class _SelectionSheetState extends State<SelectionSheet> {
 //      secondaryColors = colors.getRange(4, colors.length).toList();
 //    });
 //  }
+  void buttonAction(String type) {
+    switch (type) {
+      case 'Share':
+        _share(context);
+        break;
+      default:
+        break;
+    }
+  }
+
+  ///
+  /// PRIVATE FUNCTIONS
+  ///
+
+  // TODO(abby): move to model?
+  Future<void> _share(BuildContext c) async {
+    final bloc = c.bloc<ViewManagerBloc>(); //ignore: close_sinks
+    final views = bloc.visibleViewsWithSelections.toList();
+    final refs = <Reference>[];
+    for (final v in views) {
+      refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
+    }
+    final first = refs[0];
+    final verses = await ChapterVerses.fetch(refForChapter: first);
+    await Share.share(ChapterVerses.formatForShare(refs, verses.data));
+  }
 
   void onShowAllColors() {
     TecToast.show(context, 'this is moving to a dialog');
@@ -187,7 +218,11 @@ class _SelectionSheetState extends State<SelectionSheet> {
         children: [
           for (final each in medButtons.keys) ...[
             Expanded(
-              child: SheetButton(text: each, icon: medButtons[each]),
+              child: SheetButton(
+                text: each,
+                icon: medButtons[each],
+                onPressed: () => buttonAction(each),
+              ),
             ),
             if (buttons.keys.last != each) const SizedBox(width: 10)
           ]
@@ -198,7 +233,8 @@ class _SelectionSheetState extends State<SelectionSheet> {
         children: [
           for (final each in keyButtons.keys) ...[
             Expanded(
-              child: SheetButton(text: each, icon: keyButtons[each]),
+              child: SheetButton(
+                  text: each, icon: keyButtons[each], onPressed: () => buttonAction(each)),
             ),
             if (buttons.keys.last != each) const SizedBox(width: 10)
           ]
@@ -218,7 +254,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
       for (final button in keyButtons.keys) ...[
         GreyCircleButton(
           icon: keyButtons[button],
-          onPressed: () {},
+          onPressed: () => buttonAction(button),
         ),
       ],
       expandButton,

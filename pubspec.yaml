@@ -52,6 +52,11 @@ dependencies:
       commit: 0d69499
 
   # Internal dependencies
+  tec_cache:
+    hosted:
+      name: tec_cache
+      url: http://noah.tecarta.com:8100
+    version: ^1.0.0
   tec_env:
     hosted:
       name: tec_env
@@ -83,7 +88,7 @@ dependencies:
       url: http://noah.tecarta.com:8100
     version: ^1.0.10
 
-dependency_overrides:
+# dependency_overrides:
 #  tec_widgets:
 #    path: ../shared/tec_widgets
 #  tec_html:
@@ -110,7 +115,6 @@ flutter:
     - assets/fonts.json
     - assets/footnote.svg
     - assets/marginNote.svg
-
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
