@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
@@ -27,24 +28,30 @@ class HomeScreen extends StatelessWidget {
 
 class _HomeScreen extends StatelessWidget {
   const _HomeScreen();
-  
+
   @override
   Widget build(BuildContext context) {
+    final canvasColor = Theme.of(context).canvasColor;
+    final brightness = ThemeData.estimateBrightnessForColor(canvasColor);
+
     // tec.dmPrint('_HomeScreen build()');
     return Scaffold(
-      body: _BottomSheet(
-        child: Container(
-          color: Theme.of(context).canvasColor, // primaryColor,
-          child: SafeArea(
-            left: false,
-            right: false,
-            bottom: false,
-            child: Container(
-              color: Theme.of(context).canvasColor,
-              child: SafeArea(
-                bottom: false,
-                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-                  builder: (_, state) => ViewManagerWidget(state: state),
+      body: TecSystemUiOverlayWidget(
+        brightness == Brightness.light ? darkOverlayStyle : lightOverlayStyle,
+        child: _BottomSheet(
+          child: Container(
+            color: canvasColor, // primaryColor,
+            child: SafeArea(
+              left: false,
+              right: false,
+              bottom: false,
+              child: Container(
+                color: canvasColor,
+                child: SafeArea(
+                  bottom: false,
+                  child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+                    builder: (_, state) => ViewManagerWidget(state: state),
+                  ),
                 ),
               ),
             ),

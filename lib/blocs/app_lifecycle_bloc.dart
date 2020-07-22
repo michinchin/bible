@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../models/app_settings.dart';
 
@@ -76,9 +78,6 @@ extension on AppLifecycleBloc {
       tec.dmPrint('App resumed after being paused for $pausedDuration');
     }
 
-    // See if today changed.
-    // _dayOffsetListener(dayOffset.value);
-
     // If a user is signed in, initiate a sync.
     if (AppSettings.shared.userAccount.isSignedIn) {
       AppSettings.shared.userAccount.syncUserDb<void>();
@@ -123,8 +122,22 @@ class _AppBindingObserverState extends State<_AppBindingObserver> with WidgetsBi
     super.dispose();
   }
 
+  AppLifecycleState _prevState;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_prevState == state) return;
+    _prevState = state;
+
+    // On Android, if you switch away from the app, then return to it,
+    // the systemNavigationBarIconBrightness is not set back to what it
+    // should be. This code fixes that bug.
+    if (state == AppLifecycleState.resumed) {
+      final brightness = ThemeData.estimateBrightnessForColor(Theme.of(context).canvasColor);
+      SystemChrome.setSystemUIOverlayStyle(
+          brightness == Brightness.light ? darkOverlayStyle : lightOverlayStyle);
+    }
+
     context.bloc<AppLifecycleBloc>()?.add(state);
   }
 
