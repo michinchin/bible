@@ -314,7 +314,10 @@ class _SelectionSheetState extends State<SelectionSheet> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 5,
                 runSpacing: 10,
-                children: [...mediumViewChildren, if (!excludeSheetButtons) ...sheetButtons],
+                children: [
+                  ...mediumViewChildren,
+                  if (!excludeSheetButtons && !_showColorPicker) ...sheetButtons
+                ],
               );
 
           return Padding(

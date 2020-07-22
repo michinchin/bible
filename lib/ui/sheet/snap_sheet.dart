@@ -91,8 +91,21 @@ class _SnapSheetState extends State<SnapSheet> {
                   snappings: snappings,
                   onSnap: (s, snapPosition) {
                     final sheetSize = _getSheetSize(snapPosition);
+                    // only snap to one size up (i.e. can't fling to full from mini)
                     if (sheetSize != null) {
-                      context.bloc<SheetManagerBloc>().changeSize(sheetSize);
+                      final prevSize = state.size.index;
+                      if (sheetSize.index != prevSize) {
+                        // will snap accordingly on one sized down and on drag down
+                        if (sheetSize.index - 1 == prevSize || sheetSize.index < prevSize) {
+                          context.bloc<SheetManagerBloc>().changeSize(sheetSize);
+                          // if trying to go from mini to full, then only allow medium
+                        } else if (sheetSize.index <= SheetSize.full.index &&
+                            prevSize < SheetSize.full.index) {
+                          context
+                              .bloc<SheetManagerBloc>()
+                              .changeSize(SheetSize.values[prevSize + 1]);
+                        }
+                      }
                     }
                   },
                   positioning: SnapPositioning.relativeToAvailableSpace,
