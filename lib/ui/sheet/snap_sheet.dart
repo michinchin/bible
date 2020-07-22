@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
+import '../../models/pref_item.dart';
 import 'main_sheet.dart';
 import 'selection_sheet.dart';
 
@@ -103,8 +105,11 @@ class _SnapSheetState extends State<SnapSheet> {
                       child = MainSheet(key: ValueKey(state.size.index), sheetSize: state.size);
                       break;
                     case SheetType.selection:
-                      child =
-                          SelectionSheet(key: ValueKey(state.size.index), sheetSize: state.size);
+                      child = BlocProvider<PrefItemsBloc>(
+                          create: (context) =>
+                              PrefItemsBloc(prefItemsType: PrefItemType.customColors),
+                          child: SelectionSheet(
+                              key: ValueKey(state.size.index), sheetSize: state.size));
                       break;
                     // case SheetType.windows:
                     //   child = WindowManagerSheet(
