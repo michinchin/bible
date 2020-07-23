@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -38,10 +40,51 @@ class ChapterMarginNotesBloc extends Bloc<MarginNotesEvent, ChapterMarginNotes> 
   final int book;
   final int chapter;
   final bool loaded;
+  StreamSubscription<UserDbChange> _userDbChangeSubscription;
 
   ChapterMarginNotesBloc(
       {@required this.volume, @required this.book, @required this.chapter, this.loaded = false}) {
     _initUserContent();
+
+    // Start listening for changes to the db.
+    _userDbChangeSubscription =
+        AppSettings.shared.userAccount.userDbChangeStream.listen(_userDbChangeListener);
+  }
+
+  @override
+  Future<void> close() {
+    _userDbChangeSubscription?.cancel();
+    _userDbChangeSubscription = null;
+    return super.close();
+  }
+
+  void _userDbChangeListener(UserDbChange change) {
+    var reload = false;
+
+    debugPrint('got a db listener message for chapter $chapter');
+
+    if (change != null && change.includesItemType(UserItemType.marginNote)) {
+      if (change.type == UserDbChangeType.itemAdded &&
+          change.after?.volumeId == volume &&
+          change.after?.book == book &&
+          change.after?.chapter == chapter) {
+        reload = true;
+      }
+      else if (change.type == UserDbChangeType.itemDeleted &&
+          change.before?.volumeId == volume &&
+          change.before?.book == book &&
+          change.before?.chapter == chapter) {
+        reload = true;
+      }
+      else if (change.type == UserDbChangeType.multipleChanges) {
+        reload = true;
+      }
+    }
+
+    if (reload) {
+      // margin notes for this chapter changed, reload...
+      _initUserContent();
+    }
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -18,6 +19,7 @@ import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/color_utils.dart';
+import '../note/margin_note_view.dart';
 
 const _debugMode = false; // kDebugMode
 
@@ -122,8 +124,24 @@ class BibleChapterViewModel {
 
     void _onPress() {
       if (_selectedVerses.isEmpty) {
-        final text = marginNotes().marginNoteForVerse(tag.verse).text;
-        tecShowSimpleAlertDialog<void>(context: context, content: '${tag.verse}: $text');
+        final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+        final position = bloc?.indexOfView(viewUid) ?? -1;
+        final mn = marginNotes().marginNoteForVerse(tag.verse);
+        final data = <String, dynamic>{};
+
+        final ref = Reference(
+          volume: mn.volumeId,
+          book: mn.book,
+          chapter: mn.chapter,
+          verse: mn.verse,
+        );
+
+        data['title'] = '${ref.label()} Note';
+        data['id'] = mn.id;
+
+        bloc?.add(ViewManagerEvent.add(type: marginNoteViewTypeName,
+            data: json.encode(data),
+            position: position == -1 ? null : position + 1));
       } else {
         TecToast.show(context, 'Clear selection to view margin note');
         // not sure if I want to force this...
@@ -161,8 +179,8 @@ class BibleChapterViewModel {
 
   InlineSpan _footnoteSpan(
       BuildContext context, TextStyle style, _VerseTag tag, Key key, bool isDarkTheme) {
-    final iconWidth = (style.fontSize ?? 16.0) / 1.1;
-    final containerWidth = iconWidth + 2.0; // small right padding
+    final iconWidth = (style.fontSize ?? 16.0) * 0.6;
+    final containerWidth = iconWidth + 4.0; // small right padding
 
     void _onPress() {
       if (_selectedVerses.isEmpty) {

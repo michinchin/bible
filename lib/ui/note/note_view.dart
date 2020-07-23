@@ -1,13 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:zefyr/zefyr.dart';
 
 import '../../blocs/notes/note_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import 'tec_image_delegate.dart';
 
 const noteViewTypeName = 'NoteView';
 
@@ -72,35 +69,10 @@ class __NoteScreenState extends State<_NoteScreen> {
                     padding: const EdgeInsets.all(16),
                     controller: _controller,
                     focusNode: _focusNode,
-                    imageDelegate: NoteImageDelegate(),
+                    imageDelegate: TecImageDelegate(),
                   ),
                 ),
               ));
         });
-  }
-}
-
-class NoteImageDelegate implements ZefyrImageDelegate<ImageSource> {
-  @override
-  ImageSource get cameraSource => ImageSource.camera;
-
-  @override
-  ImageSource get gallerySource => ImageSource.gallery;
-
-  @override
-  Future<String> pickImage(ImageSource source) async {
-    final file = await ImagePicker().getImage(source: source);
-    if (file == null) return null;
-    return file.path;
-  }
-
-  @override
-  Widget buildImage(BuildContext context, String key) {
-    final file = File.fromUri(Uri.parse(key));
-
-    /// Create standard [FileImage] provider. If [key] was an HTTP link
-    /// we could use [NetworkImage] instead.
-    final image = FileImage(file);
-    return Image(image: image);
   }
 }
