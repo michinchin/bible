@@ -1,15 +1,18 @@
 import 'dart:convert';
 
+import 'package:bible/blocs/margin_notes/margin_note.dart';
+import 'package:bible/ui/misc/view_actions.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quill_delta/quill_delta.dart';
 import 'package:tec_user_account/tec_user_account.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:zefyr/zefyr.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import 'tec_image_delegate.dart';
@@ -23,54 +26,57 @@ Widget marginNoteTitleBuilder(BuildContext context, Key bodyKey, ViewState state
   return Text(tec.as<Map<String, dynamic>>(json.decode(state.data))['title'] as String);
 }
 
-List<Widget> marginNoteActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
-  return [
-    IconButton(
-        icon: const Icon(FeatherIcons.trash2),
-        tooltip: 'Delete Note',
-        onPressed: () {
-          // delete the note
-          tecShowSimpleAlertDialog<void>(
-              context: context,
-              content: 'Delete note?',
-              useRootNavigator: true,
-              actions: <Widget>[
-                TecDialogButton(
-                  child: const TecText('Delete'),
-                  onPressed: () async {
-                    await Navigator.of(context, rootNavigator: true).maybePop();
+List<Widget> marginNoteActionsBuilder(
+    BuildContext context, Key bodyKey, ViewState state, Size size) {
+  if (MarginNote.isEditing(state.data)) {
+    return [
+      IconButton(
+          icon: const Icon(FeatherIcons.trash2),
+          tooltip: 'Delete Note',
+          onPressed: () {
+            // delete the note
+            tecShowSimpleAlertDialog<void>(
+                context: context,
+                content: 'Delete note?',
+                useRootNavigator: true,
+                actions: <Widget>[
+                  TecDialogButton(
+                    child: const TecText('Delete'),
+                    onPressed: () async {
+                      await Navigator.of(context, rootNavigator: true).maybePop();
 
-                    // delete this margin note
-                    // how do we gain access to to the note already retrieved ?
-                    final item =
-                        await AppSettings.shared.userAccount.userDb.getItem(int.parse(state.data));
-                    await AppSettings.shared.userAccount.userDb.deleteItem(item);
+                      // delete this margin note
+                      // how do we gain access to to the note already retrieved ?
+                      final item = await AppSettings.shared.userAccount.userDb
+                          .getItem(int.parse(state.data));
+                      await AppSettings.shared.userAccount.userDb.deleteItem(item);
 
-                    // close the note view
-                    // ignore: close_sinks
-                    final bloc = context.bloc<ViewManagerBloc>();
-                    bloc?.add(ViewManagerEvent.remove(state.uid));
-                  },
-                ),
-                TecDialogButton(
-                  child: const TecText('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context, rootNavigator: true).maybePop();
-                  },
-                ),
-              ]);
-        }
-    ),
-    IconButton(
-      icon: const Icon(Icons.close),
-      tooltip: 'Close Note',
-      onPressed: () {
-        // ignore: close_sinks
-        final bloc = context.bloc<ViewManagerBloc>();
-        bloc?.add(ViewManagerEvent.remove(state.uid));
-      }
-    ),
-  ];
+                      // close the note view
+                      // ignore: close_sinks
+                      final bloc = context.bloc<ViewManagerBloc>();
+                      bloc?.add(ViewManagerEvent.remove(state.uid));
+                    },
+                  ),
+                  TecDialogButton(
+                    child: const TecText('Cancel'),
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true).maybePop();
+                    },
+                  ),
+                ]);
+          }),
+      IconButton(
+          icon: const Icon(Icons.close),
+          tooltip: 'Close Note',
+          onPressed: () {
+            // ignore: close_sinks
+            final bloc = context.bloc<ViewManagerBloc>();
+            bloc?.add(ViewManagerEvent.remove(state.uid));
+          }),
+    ];
+  } else {
+    return defaultActionsBuilder(context, bodyKey, state, size);
+  }
 }
 
 class _MarginNoteView extends StatefulWidget {
@@ -88,10 +94,8 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   var _editMode = false;
 
   Future<void> load() async {
-    final id = tec.as<Map<String, dynamic>>(json.decode(widget.viewState.data))['id'] as int;
-
-    item =
-        await AppSettings.shared.userAccount.userDb.getItem(id);
+    item = await AppSettings.shared.userAccount.userDb
+        .getItem(MarginNote.idFromStateData(widget.viewState.data));
 
     if (item?.type == UserItemType.marginNote.index) {
       Delta delta;
@@ -123,11 +127,24 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     load();
   }
 
-  void _toogleEditMode() {
+  void _toggleEditMode() {
     debugPrint('switch to edit mode');
     setState(() {
       _editMode = !_editMode;
     });
+
+    if (_editMode) {
+      context.bloc<SheetManagerBloc>().changeType(SheetType.collapsed);
+    }
+    else {
+      context.bloc<SheetManagerBloc>().toDefaultView();
+    }
+
+    // ignore: close_sinks
+    final bloc = context.bloc<ViewManagerBloc>();
+    bloc?.add(ViewManagerEvent.setData(
+        uid: widget.viewState.uid,
+        data: MarginNote.setEditing(widget.viewState.data, editing: _editMode)));
   }
 
   @override
@@ -141,19 +158,11 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     }
     else {
       return GestureDetector(
-        onTap: _toogleEditMode,
+        onTap: _toggleEditMode,
         child: ViewScreen(doc),
       );
     }
   }
-//    return ZefyrEditor(
-//      padding: const EdgeInsets.all(16),
-//      controller: _controller,
-//      focusNode: _focusNode,
-//      // imageDelegate: NoteImageDelegate(),
-//    );
-    // return Container(color: Colors.red,);
-
 
 //const doc =
 //    r'[{"insert":"Zefyr"},{"insert":"\n","attributes":{"heading":1}},{"insert":"Soft and gentle rich text editing for Flutter applications.","attributes":{"i":true}},{"insert":"\n"},{"insert":"​","attributes":{"embed":{"type":"image","source":"asset://assets/breeze.jpg"}}},{"insert":"\n"},{"insert":"Photo by Hiroyuki Takeda.","attributes":{"i":true}},{"insert":"\nZefyr is currently in "},{"insert":"early preview","attributes":{"b":true}},{"insert":". If you have a feature request or found a bug, please file it at the "},{"insert":"issue tracker","attributes":{"a":"https://github.com/memspace/zefyr/issues"}},{"insert":'

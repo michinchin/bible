@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:bible/blocs/margin_notes/margin_note.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -127,20 +128,9 @@ class BibleChapterViewModel {
         final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
         final position = bloc?.indexOfView(viewUid) ?? -1;
         final mn = marginNotes().marginNoteForVerse(tag.verse);
-        final data = <String, dynamic>{};
-
-        final ref = Reference(
-          volume: mn.volumeId,
-          book: mn.book,
-          chapter: mn.chapter,
-          verse: mn.verse,
-        );
-
-        data['title'] = '${ref.label()} Note';
-        data['id'] = mn.id;
 
         bloc?.add(ViewManagerEvent.add(type: marginNoteViewTypeName,
-            data: json.encode(data),
+            data: MarginNote.createStateData(mn),
             position: position == -1 ? null : position + 1));
       } else {
         TecToast.show(context, 'Clear selection to view margin note');
