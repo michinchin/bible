@@ -56,18 +56,9 @@ Future<void> main() async {
 ///
 void _registerViewTypes() {
   ViewManager.shared
-    ..register(bibleChapterType,
-        title: 'Bible',
-        bodyBuilder: bibleChapterViewBuilder,
-        titleBuilder: bibleChapterTitleBuilder,
-        actionsBuilder: defaultActionsBuilder,
-        keyMaker: bibleChapterKeyMaker)
-    ..register(
-      noteViewTypeName,
-      title: 'Note',
-      bodyBuilder: notesViewBuilder,
-      actionsBuilder: defaultActionsBuilder,
-    )
+    ..register(bibleChapterType, title: 'Bible', scaffoldBuilder: bibleChapterViewBuilder)
+    ..register(noteViewTypeName,
+        title: 'Note', bodyBuilder: notesViewBuilder, actionsBuilder: defaultActionsBuilder)
     ..register(
       marginNoteViewTypeName,
       title: 'Margin Note',

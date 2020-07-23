@@ -13,7 +13,6 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
-import '../../blocs/margin_notes/margin_note.dart';
 import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
@@ -129,7 +128,7 @@ class BibleChapterViewModel {
         final mn = marginNotes().marginNoteForVerse(tag.verse);
 
         bloc?.add(ViewManagerEvent.add(type: marginNoteViewTypeName,
-            data: MarginNote.createStateData(mn),
+            data: mn.id.toString(),
             position: position == -1 ? null : position + 1));
       } else {
         TecToast.show(context, 'Clear selection to view margin note');
