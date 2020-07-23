@@ -33,7 +33,6 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   NotusDocument doc;
   UserItem item;
   var _editMode = false;
-  var _restoreSize = false;
   ViewManagerBloc viewManagerBloc;
   SheetManagerBloc sheetManagerBloc;
 
@@ -85,15 +84,6 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
       viewManagerBloc?.requestingKeyboardFocusInView(widget.state.uid);
     }
 
-    // if (!_editMode && !maximized) {
-    //   // going into edit mode - make sure window is maximized
-    //   _restoreSize = true;
-    //   viewManagerBloc?.add(ViewManagerEvent.maximize(widget.state.uid));
-    //   // give the window manager some time to maximize
-    //   Future.delayed(const Duration(milliseconds: 250), _toggleEditMode);
-    //   return;
-    // }
-
     setState(() {
       _editMode = !_editMode;
     });
@@ -102,18 +92,6 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
       sheetManagerBloc?.changeType(SheetType.collapsed);
     } else {
       sheetManagerBloc?.toDefaultView();
-
-      if (maximized && _restoreSize) {
-        // coming out of edit mode and window was forced into maximize mode - restore it
-        _restoreSize = false;
-
-        // let the keyboard drop then...
-        Future.delayed(const Duration(milliseconds: 250), () {
-          viewManagerBloc?.add(const ViewManagerEvent.restore());
-        });
-      }
-
-      _restoreSize = false;
     }
   }
 
