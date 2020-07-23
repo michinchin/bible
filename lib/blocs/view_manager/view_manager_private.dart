@@ -135,25 +135,8 @@ class _ManagedViewScaffoldState extends State<_ManagedViewScaffold> {
   @override
   Widget build(BuildContext context) {
     // tec.dmPrint('_ManagedViewScaffold building ${state.viewState.uid} with index ${state.viewIndex}');
-    return Scaffold(
-      appBar: ManagedViewAppBar(
-        appBar: AppBar(
-          title: ViewManager.shared
-              ._buildViewTitle(context, _bodyKey, widget.state.viewState, widget.state.viewSize),
-          // leading: widget.state.viewIndex > 0
-          //     ? null
-          //     : IconButton(
-          //         icon: const Icon(Icons.menu),
-          //         tooltip: 'Main Menu',
-          //         onPressed: () => showMainMenu(context),
-          //       ),
-          actions: ViewManager.shared
-              ._buildViewActions(context, _bodyKey, widget.state.viewState, widget.state.viewSize),
-        ),
-      ),
-      body: ViewManager.shared
-          ._buildViewBody(context, _bodyKey, widget.state.viewState, widget.state.viewSize),
-    );
+    return ViewManager.shared
+        ._buildScaffold(context, _bodyKey, widget.state.viewState, widget.state.viewSize);
   }
 }
 

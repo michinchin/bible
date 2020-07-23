@@ -48,18 +48,20 @@ class ViewManager {
   void register(
     String key, {
     @required String title,
-    @required BuilderWithViewState builder,
+    BuilderWithViewState scaffoldBuilder,
+    BuilderWithViewState bodyBuilder,
     BuilderWithViewState titleBuilder,
     ActionsBuilderWithViewState actionsBuilder,
     KeyMaker keyMaker,
     ViewSizeFunc minWidth,
     ViewSizeFunc minHeight,
   }) {
-    assert(tec.isNotNullOrEmpty(key) && builder != null);
+    assert(tec.isNotNullOrEmpty(key) && (scaffoldBuilder != null || bodyBuilder != null));
     assert(!_types.containsKey(key));
     _types[key] = _ViewTypeAPI(
       title,
-      builder,
+      scaffoldBuilder,
+      bodyBuilder,
       titleBuilder,
       actionsBuilder,
       keyMaker,
@@ -75,8 +77,11 @@ class ViewManager {
   Key _makeKey(BuildContext context, ViewState state) =>
       (_types[state.type]?.keyMaker ?? _defaultKeyMaker)(context, state);
 
+  Widget _buildScaffold(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+      (_types[state.type]?.scaffoldBuilder ?? _defaultScaffoldBuilder)(context, bodyKey, state, size);
+
   Widget _buildViewBody(BuildContext context, Key bodyKey, ViewState state, Size size) =>
-      (_types[state.type]?.builder ?? _defaultBuilder)(context, bodyKey, state, size);
+      (_types[state.type]?.bodyBuilder ?? _defaultBodyBuilder)(context, bodyKey, state, size);
 
   Widget _buildViewTitle(BuildContext context, Key bodyKey, ViewState state, Size size) =>
       (_types[state.type]?.titleBuilder ?? _defaultTitleBuilder)(context, bodyKey, state, size);
@@ -100,7 +105,8 @@ class ViewManager {
 
 class _ViewTypeAPI {
   final String title;
-  final BuilderWithViewState builder;
+  final BuilderWithViewState scaffoldBuilder;
+  final BuilderWithViewState bodyBuilder;
   final BuilderWithViewState titleBuilder;
   final ActionsBuilderWithViewState actionsBuilder;
   final KeyMaker keyMaker;
@@ -109,7 +115,8 @@ class _ViewTypeAPI {
 
   const _ViewTypeAPI(
     this.title,
-    this.builder,
+    this.scaffoldBuilder,
+    this.bodyBuilder,
     this.titleBuilder,
     this.actionsBuilder,
     this.keyMaker,
@@ -124,7 +131,25 @@ const _maxMinWidth = 400.0;
 
 Key _defaultKeyMaker(BuildContext context, ViewState state) => null;
 
-Widget _defaultBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+Widget _defaultScaffoldBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+    Scaffold(
+      appBar: ManagedViewAppBar(
+        appBar: AppBar(
+          title: ViewManager.shared._buildViewTitle(context, bodyKey, state, size),
+          // leading: widget.state.viewIndex > 0
+          //     ? null
+          //     : IconButton(
+          //         icon: const Icon(Icons.menu),
+          //         tooltip: 'Main Menu',
+          //         onPressed: () => showMainMenu(context),
+          //       ),
+          actions: ViewManager.shared._buildViewActions(context, bodyKey, state, size),
+        ),
+      ),
+      body: ViewManager.shared._buildViewBody(context, bodyKey, state, size),
+    );
+
+Widget _defaultBodyBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
     Container(key: bodyKey);
 
 double _defaultMinWidth(BoxConstraints constraints) => math.max(_minSize,
