@@ -9,8 +9,8 @@ import 'note_view.dart';
 
 const notesViewTypeName = 'NotesView';
 
-Widget notesViewBuilder(BuildContext context, Key key, ViewState viewState, Size size) =>
-    NotesView(key: key, viewState: viewState);
+Widget notesViewBuilder(BuildContext context, ViewState viewState, Size size) =>
+    NotesView(viewState: viewState);
 
 class NotesView extends StatelessWidget {
   final ViewState viewState;

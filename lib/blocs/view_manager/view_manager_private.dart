@@ -111,32 +111,15 @@ class _ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
 ///
 /// Scaffold for a managed view.
 ///
-class _ManagedViewScaffold extends StatefulWidget {
+class _ManagedViewScaffold extends StatelessWidget {
   final ManagedViewState state;
 
-  const _ManagedViewScaffold(
-    this.state, {
-    Key key,
-  }) : super(key: key);
-
-  @override
-  _ManagedViewScaffoldState createState() => _ManagedViewScaffoldState();
-}
-
-class _ManagedViewScaffoldState extends State<_ManagedViewScaffold> {
-  Key _bodyKey;
-
-  @override
-  void initState() {
-    super.initState();
-    _bodyKey = ViewManager.shared._makeKey(context, widget.state.viewState);
-  }
+  const _ManagedViewScaffold(this.state, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // tec.dmPrint('_ManagedViewScaffold building ${state.viewState.uid} with index ${state.viewIndex}');
-    return ViewManager.shared
-        ._buildScaffold(context, _bodyKey, widget.state.viewState, widget.state.viewSize);
+    return ViewManager.shared._buildScaffold(context, state.viewState, state.viewSize);
   }
 }
 
