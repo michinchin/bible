@@ -58,27 +58,27 @@ void _registerViewTypes() {
   ViewManager.shared
     ..register(bibleChapterType,
         title: 'Bible',
-        builder: bibleChapterViewBuilder,
+        bodyBuilder: bibleChapterViewBuilder,
         titleBuilder: bibleChapterTitleBuilder,
         actionsBuilder: defaultActionsBuilder,
         keyMaker: bibleChapterKeyMaker)
     ..register(
       noteViewTypeName,
       title: 'Note',
-      builder: notesViewBuilder,
+      bodyBuilder: notesViewBuilder,
       actionsBuilder: defaultActionsBuilder,
     )
     ..register(
       marginNoteViewTypeName,
       title: 'Margin Note',
-      builder: marginNoteViewBuilder,
+      bodyBuilder: marginNoteViewBuilder,
       titleBuilder: marginNoteTitleBuilder,
       actionsBuilder: marginNoteActionsBuilder,
     )
     ..register(
       testViewType,
       title: 'Test View',
-      builder: testViewBuilder,
+      bodyBuilder: testViewBuilder,
       actionsBuilder: defaultActionsBuilder,
     );
 }

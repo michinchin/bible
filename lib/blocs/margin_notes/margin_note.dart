@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:tec_user_account/tec_user_account.dart';
