@@ -19,12 +19,21 @@ import 'tec_image_delegate.dart';
 
 const marginNoteViewTypeName = 'MarginNoteView';
 
-Widget marginNoteViewBuilder(BuildContext context, Key key, ViewState viewState, Size size) =>
-    _MarginNoteView(key: key, viewState: viewState);
-
-Widget marginNoteTitleBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
-  return Text(tec.as<Map<String, dynamic>>(json.decode(state.data))['title'] as String);
-}
+Widget marginNoteScaffoldBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+    Scaffold(
+      appBar: ManagedViewAppBar(
+        appBar: AppBar(
+          title: Text(tec.as<Map<String, dynamic>>(json.decode(state.data))['title'] as String),
+          leading: IconButton(
+            icon: const Icon(Icons.menu),
+            tooltip: 'Main Menu',
+            onPressed: () => debugPrint('mike'),
+          ),
+          actions: marginNoteActionsBuilder(context, bodyKey, state, size),
+        ),
+      ),
+      body: _MarginNoteView(key: bodyKey, viewState: state),
+    );
 
 List<Widget> marginNoteActionsBuilder(
     BuildContext context, Key bodyKey, ViewState state, Size size) {
@@ -102,9 +111,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
 
       // we're showing an existing marginNote
       if (item.info.startsWith('QuillDelta')) {
-
-      }
-      else {
+      } else {
         // old margin note - create a delta
         delta = Delta();
         for (final s in item.info.trim().split('\n')) {
@@ -128,20 +135,27 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   }
 
   void _toggleEditMode() {
-    debugPrint('switch to edit mode');
+    // ignore: close_sinks
+    final bloc = context.bloc<ViewManagerBloc>();
+    final maximized = bloc?.state?.maximizedViewUid == widget.viewState.uid;
+
+    if (!maximized) {
+      bloc?.add(ViewManagerEvent.maximize(widget.viewState.uid));
+      // give the window manager some time to maximize
+      Future.delayed(const Duration(milliseconds: 250), _toggleEditMode);
+      return;
+    }
+
     setState(() {
       _editMode = !_editMode;
     });
 
     if (_editMode) {
       context.bloc<SheetManagerBloc>().changeType(SheetType.collapsed);
-    }
-    else {
+    } else {
       context.bloc<SheetManagerBloc>().toDefaultView();
     }
 
-    // ignore: close_sinks
-    final bloc = context.bloc<ViewManagerBloc>();
     bloc?.add(ViewManagerEvent.setData(
         uid: widget.viewState.uid,
         data: MarginNote.setEditing(widget.viewState.data, editing: _editMode)));
@@ -155,8 +169,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
 
     if (_editMode) {
       return EditScreen(doc);
-    }
-    else {
+    } else {
       return GestureDetector(
         onTap: _toggleEditMode,
         child: ViewScreen(doc),
@@ -179,6 +192,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
 
 class EditScreen extends StatefulWidget {
   final NotusDocument doc;
+
   const EditScreen(this.doc);
 
   @override
@@ -211,6 +225,7 @@ class _EditScreen extends State<EditScreen> {
 
 class ViewScreen extends StatefulWidget {
   final NotusDocument doc;
+
   const ViewScreen(this.doc);
 
   @override
@@ -218,7 +233,6 @@ class ViewScreen extends StatefulWidget {
 }
 
 class _ViewScreen extends State<ViewScreen> {
-
   @override
   Widget build(BuildContext context) {
     return ListView(

@@ -71,9 +71,7 @@ void _registerViewTypes() {
     ..register(
       marginNoteViewTypeName,
       title: 'Margin Note',
-      bodyBuilder: marginNoteViewBuilder,
-      titleBuilder: marginNoteTitleBuilder,
-      actionsBuilder: marginNoteActionsBuilder,
+      scaffoldBuilder: marginNoteScaffoldBuilder,
     )
     ..register(
       testViewType,
