@@ -17,6 +17,7 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
+import '../misc/view_actions.dart';
 import '../nav/nav.dart';
 import 'chapter_view_model.dart';
 
@@ -25,43 +26,72 @@ const bibleChapterType = 'BibleChapter';
 const _initialReference = BookChapterVerse(50, 1, 1);
 const _bibleId = 51;
 
-Key bibleChapterKeyMaker(BuildContext context, ViewState state) {
-  return GlobalKey<PageableViewState>();
-}
-
 Widget bibleChapterViewBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
   // tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
-  return PageableView(
-    key: bodyKey,
-    state: state,
-    size: size,
-    controllerBuilder: () {
-      final chapterData = _ChapterData.fromJson(state.data);
-      return TecPageController(initialPage: chapterData.page);
-    },
-    pageBuilder: (context, state, size, index) {
-      final bible = VolumesRepository.shared.bibleWithId(_bibleId);
-      final ref = _initialReference.advancedBy(chapters: index, bible: bible);
-
-      // If the bible doesn't have the given reference, or we advanced past either end, return null.
-      if (ref == null || ref.advancedBy(chapters: -index, bible: bible) != _initialReference) {
-        return null;
-      }
-      return _BibleChapterView(viewUid: state.uid, size: size, bible: bible, ref: ref);
-    },
-    onPageChanged: (context, state, page) async {
-      tec.dmPrint('View ${state.uid} onPageChanged($page)');
-      final bible = VolumesRepository.shared.bibleWithId(_bibleId);
-      if (bible != null) {
-        final bcv = _initialReference.advancedBy(chapters: page, bible: bible);
-        context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.setData(
-            uid: state.uid, data: tec.toJsonString(_ChapterData(bcv, page))));
-      }
-    },
-  );
+  return _PageableBibleView(state: state, size: size);
 }
 
-Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
+String bibleChapterTitleFromState(ViewState state) {
+  final bible = VolumesRepository.shared.bibleWithId(_bibleId);
+  final bcv = _ChapterData.fromJson(state.data).bcv ?? _initialReference;
+  return bible.titleWithHref('${bcv.book}/${bcv.chapter}');
+}
+
+class _PageableBibleView extends StatefulWidget {
+  final ViewState state;
+  final Size size;
+
+  const _PageableBibleView({Key key, this.state, this.size}) : super(key: key);
+
+  @override
+  __PageableBibleViewState createState() => __PageableBibleViewState();
+}
+
+class __PageableBibleViewState extends State<_PageableBibleView> {
+  final _pageableViewStateKey = GlobalKey<PageableViewState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: ManagedViewAppBar(
+        appBar: AppBar(
+          title: _titleBuilder(context, _pageableViewStateKey, widget.state, widget.size),
+          actions: defaultActionsBuilder(context, null, widget.state, widget.size),
+        ),
+      ),
+      body: PageableView(
+        key: _pageableViewStateKey,
+        state: widget.state,
+        size: widget.size,
+        controllerBuilder: () {
+          final chapterData = _ChapterData.fromJson(widget.state.data);
+          return TecPageController(initialPage: chapterData.page);
+        },
+        pageBuilder: (context, state, size, index) {
+          final bible = VolumesRepository.shared.bibleWithId(_bibleId);
+          final ref = _initialReference.advancedBy(chapters: index, bible: bible);
+
+          // If the bible doesn't have the given reference, or we advanced past either end, return null.
+          if (ref == null || ref.advancedBy(chapters: -index, bible: bible) != _initialReference) {
+            return null;
+          }
+          return _BibleChapterView(viewUid: state.uid, size: size, bible: bible, ref: ref);
+        },
+        onPageChanged: (context, state, page) async {
+          tec.dmPrint('View ${state.uid} onPageChanged($page)');
+          final bible = VolumesRepository.shared.bibleWithId(_bibleId);
+          if (bible != null) {
+            final bcv = _initialReference.advancedBy(chapters: page, bible: bible);
+            context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.setData(
+                uid: state.uid, data: tec.toJsonString(_ChapterData(bcv, page))));
+          }
+        },
+      ),
+    );
+  }
+}
+
+Widget _titleBuilder(BuildContext context, Key pageableViewStateKey, ViewState state, Size size) {
   final bible = VolumesRepository.shared.bibleWithId(_bibleId);
   final bcv = _ChapterData.fromJson(state.data).bcv;
   return CupertinoButton(
@@ -72,7 +102,7 @@ Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState sta
     onPressed: () async {
       final bcv = await navigate(context);
       if (bcv != null) {
-        final key = tec.as<GlobalKey<PageableViewState>>(bodyKey);
+        final key = tec.as<GlobalKey<PageableViewState>>(pageableViewStateKey);
         final pageController = key?.currentState?.pageController;
         if (pageController != null) {
           final _bible = VolumesRepository.shared.bibleWithId(_bibleId);
@@ -86,12 +116,6 @@ Widget bibleChapterTitleBuilder(BuildContext context, Key bodyKey, ViewState sta
       }
     },
   );
-}
-
-String bibleChapterTitleFromState(ViewState state) {
-  final bible = VolumesRepository.shared.bibleWithId(_bibleId);
-  final bcv = _ChapterData.fromJson(state.data).bcv ?? _initialReference;
-  return bible.titleWithHref('${bcv.book}/${bcv.chapter}');
 }
 
 class _ChapterData {
@@ -275,8 +299,7 @@ class _ChapterViewState extends State<_ChapterView> {
                     // swipe back - chapter is loaded 5x (hasData = false, 4x hasData = true)
                     if (widget.ref.chapter == 119) {
                       debugPrint('loading 119');
-                    }
-                    else {
+                    } else {
                       debugPrint('loading ${widget.ref.chapter}');
                     }
 
@@ -293,8 +316,7 @@ class _ChapterViewState extends State<_ChapterView> {
                       highlights: highlights,
                       marginNotes: marginNotes,
                     );
-                  }
-                  else {
+                  } else {
                     return Container();
                   }
                 },
@@ -428,8 +450,8 @@ class _BibleHtmlState extends State<_BibleHtml> {
                       isDarkTheme: isDarkTheme),
 
                   // Rendering CSS padding/margin to a WidgetSpan:
-                  spanForSpace: (width, tag) => _viewModel.spanForSpace(
-                      context, width, tag, isDarkTheme: isDarkTheme),
+                  spanForSpace: (width, tag) =>
+                      _viewModel.spanForSpace(context, width, tag, isDarkTheme: isDarkTheme),
 
                   // Word range selection related:
                   selectable: !kIsWeb && !_viewModel.hasVersesSelected,
