@@ -154,7 +154,7 @@ class _SnapSheetState extends State<SnapSheet> {
                     //       key: ValueKey(state.size.index), sheetSize: state.size);
                     //   break;
                     default:
-                      child = Container();
+                      return Container();
                   }
                   return ValueListenableBuilder<double>(
                       valueListenable: onDragValue ??= ValueNotifier<double>(snappings.first),
