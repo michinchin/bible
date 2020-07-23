@@ -24,6 +24,9 @@ class SnapSheet extends StatefulWidget {
 // TODO(abby): save sheet size to prefs so open on default sizing
 class _SnapSheetState extends State<SnapSheet> {
   SheetController _sheetController;
+
+  ValueNotifier<double> onDragValue;
+
   @override
   void initState() {
     _sheetController = SheetController();
@@ -47,6 +50,29 @@ class _SnapSheetState extends State<SnapSheet> {
     return OrientationBuilder(builder: (context, orientation) {
       final snappings = _calculateHeightSnappings(orientation);
 
+      double _dragOpacityValue(double value, SheetSize size) {
+        // value should always approach 0
+        // when reaches snapping point should be 1
+        bool approxEqual(double a, double b) => (a * 100).round() == (b * 100).round();
+
+        if (approxEqual(value, snappings[size.index])) {
+          return 1.0;
+        }
+
+        if (value < snappings[size.index]) {
+          //decreasing in height
+          final opacity = 1 -
+              (snappings[size.index] - value) / (snappings[size.index] - snappings[size.index - 1]);
+          return opacity <= 0 ? 0 : opacity;
+        } else {
+          // increasing in height
+          final opacity = 1 -
+              (value - snappings[size.index]) / (snappings[size.index + 1] - snappings[size.index]);
+          return opacity <= 0 ? 0 : opacity;
+        }
+      }
+
+      // current sheet size
       SheetSize _getSheetSize(double d) {
         final snap = snappings.indexWhere((s) => s == d);
         if (snap != -1) {
@@ -84,7 +110,7 @@ class _SnapSheetState extends State<SnapSheet> {
                 addTopViewPaddingOnFullscreen: true,
                 parallaxSpec: const ParallaxSpec(),
                 listener: (s) {
-                  // TODO(abby): create value notifier to give to animated builder and shift position based on value
+                  onDragValue.value = s.extent;
                 },
                 snapSpec: SnapSpec(
                   initialSnap: snappings[state.size.index],
@@ -115,14 +141,13 @@ class _SnapSheetState extends State<SnapSheet> {
                   Widget child;
                   switch (state.type) {
                     case SheetType.main:
-                      child = MainSheet(key: ValueKey(state.size.index), sheetSize: state.size);
+                      child = MainSheet(sheetSize: state.size);
                       break;
                     case SheetType.selection:
                       child = BlocProvider<PrefItemsBloc>(
                           create: (context) =>
                               PrefItemsBloc(prefItemsType: PrefItemType.customColors),
-                          child: SelectionSheet(
-                              key: ValueKey(state.size.index), sheetSize: state.size));
+                          child: SelectionSheet(sheetSize: state.size, onDragValue: onDragValue));
                       break;
                     // case SheetType.windows:
                     //   child = WindowManagerSheet(
@@ -131,15 +156,11 @@ class _SnapSheetState extends State<SnapSheet> {
                     default:
                       child = Container();
                   }
-                  return Container(
-                      height: MediaQuery.of(context).size.height,
-                      child: AnimatedSwitcher(
-                          switchInCurve: Curves.easeIn,
-                          switchOutCurve: Curves.easeIn,
-                          duration: const Duration(milliseconds: 250),
-                          transitionBuilder: (child, animation) =>
-                              FadeTransition(child: child, opacity: animation),
-                          child: child));
+                  return ValueListenableBuilder<double>(
+                      valueListenable: onDragValue ??= ValueNotifier<double>(snappings.first),
+                      child: Container(height: MediaQuery.of(context).size.height, child: child),
+                      builder: (_, value, c) =>
+                          Opacity(opacity: _dragOpacityValue(value, state.size), child: c));
                 },
                 body: widget.body,
                 headerBuilder: (context, s) {

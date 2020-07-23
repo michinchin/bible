@@ -18,15 +18,16 @@ import '../misc/color_picker.dart';
 
 class SelectionSheet extends StatefulWidget {
   final SheetSize sheetSize;
+  final ValueNotifier<double> onDragValue;
 
   // final bool fullyExpanded;
-  const SelectionSheet({this.sheetSize, Key key}) : super(key: key);
+  const SelectionSheet({this.sheetSize, this.onDragValue, Key key}) : super(key: key);
 
   @override
   _SelectionSheetState createState() => _SelectionSheetState();
 }
 
-class _SelectionSheetState extends State<SelectionSheet> {
+class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProviderStateMixin {
   static const buttons = <String, IconData>{
     'Learn': Icons.lightbulb_outline,
     'Explore': FeatherIcons.compass,
@@ -66,6 +67,7 @@ class _SelectionSheetState extends State<SelectionSheet> {
     _showColorPicker = false;
     _underlineMode = false;
     _colorIndex = 0;
+   
     super.initState();
   }
 
@@ -319,7 +321,6 @@ class _SelectionSheetState extends State<SelectionSheet> {
                   if (!excludeSheetButtons && !_showColorPicker) ...sheetButtons
                 ],
               );
-
           return Padding(
             padding: const EdgeInsets.only(left: 15, right: 15),
             child: Column(children: [
