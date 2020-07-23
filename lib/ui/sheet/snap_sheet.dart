@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
+import '../../models/pref_item.dart';
 import 'main_sheet.dart';
 import 'selection_sheet.dart';
 
@@ -22,6 +24,9 @@ class SnapSheet extends StatefulWidget {
 // TODO(abby): save sheet size to prefs so open on default sizing
 class _SnapSheetState extends State<SnapSheet> {
   SheetController _sheetController;
+
+  ValueNotifier<double> onDragValue;
+
   @override
   void initState() {
     _sheetController = SheetController();
@@ -45,6 +50,29 @@ class _SnapSheetState extends State<SnapSheet> {
     return OrientationBuilder(builder: (context, orientation) {
       final snappings = _calculateHeightSnappings(orientation);
 
+      double _dragOpacityValue(double value, SheetSize size) {
+        // value should always approach 0
+        // when reaches snapping point should be 1
+        bool approxEqual(double a, double b) => (a * 100).round() == (b * 100).round();
+
+        if (approxEqual(value, snappings[size.index])) {
+          return 1.0;
+        }
+
+        if (value < snappings[size.index]) {
+          //decreasing in height
+          final opacity = 1 -
+              (snappings[size.index] - value) / (snappings[size.index] - snappings[size.index - 1]);
+          return opacity <= 0 ? 0 : opacity;
+        } else {
+          // increasing in height
+          final opacity = 1 -
+              (value - snappings[size.index]) / (snappings[size.index + 1] - snappings[size.index]);
+          return opacity <= 0 ? 0 : opacity;
+        }
+      }
+
+      // current sheet size
       SheetSize _getSheetSize(double d) {
         final snap = snappings.indexWhere((s) => s == d);
         if (snap != -1) {
@@ -82,15 +110,28 @@ class _SnapSheetState extends State<SnapSheet> {
                 addTopViewPaddingOnFullscreen: true,
                 parallaxSpec: const ParallaxSpec(),
                 listener: (s) {
-                  // TODO(abby): create value notifier to give to animated builder and shift position based on value
+                  onDragValue.value = s.extent;
                 },
                 snapSpec: SnapSpec(
                   initialSnap: snappings[state.size.index],
                   snappings: snappings,
                   onSnap: (s, snapPosition) {
                     final sheetSize = _getSheetSize(snapPosition);
+                    // only snap to one size up (i.e. can't fling to full from mini)
                     if (sheetSize != null) {
-                      context.bloc<SheetManagerBloc>().changeSize(sheetSize);
+                      final prevSize = state.size.index;
+                      if (sheetSize.index != prevSize) {
+                        // will snap accordingly on one sized down and on drag down
+                        if (sheetSize.index - 1 == prevSize || sheetSize.index < prevSize) {
+                          context.bloc<SheetManagerBloc>().changeSize(sheetSize);
+                          // if trying to go from mini to full, then only allow medium
+                        } else if (sheetSize.index <= SheetSize.full.index &&
+                            prevSize < SheetSize.full.index) {
+                          context
+                              .bloc<SheetManagerBloc>()
+                              .changeSize(SheetSize.values[prevSize + 1]);
+                        }
+                      }
                     }
                   },
                   positioning: SnapPositioning.relativeToAvailableSpace,
@@ -100,11 +141,13 @@ class _SnapSheetState extends State<SnapSheet> {
                   Widget child;
                   switch (state.type) {
                     case SheetType.main:
-                      child = MainSheet(key: ValueKey(state.size.index), sheetSize: state.size);
+                      child = MainSheet(sheetSize: state.size);
                       break;
                     case SheetType.selection:
-                      child =
-                          SelectionSheet(key: ValueKey(state.size.index), sheetSize: state.size);
+                      child = BlocProvider<PrefItemsBloc>(
+                          create: (context) =>
+                              PrefItemsBloc(prefItemsType: PrefItemType.customColors),
+                          child: SelectionSheet(sheetSize: state.size, onDragValue: onDragValue));
                       break;
                     // case SheetType.windows:
                     //   child = WindowManagerSheet(
@@ -113,15 +156,11 @@ class _SnapSheetState extends State<SnapSheet> {
                     default:
                       child = Container();
                   }
-                  return Container(
-                      height: MediaQuery.of(context).size.height,
-                      child: AnimatedSwitcher(
-                          switchInCurve: Curves.easeIn,
-                          switchOutCurve: Curves.easeIn,
-                          duration: const Duration(milliseconds: 250),
-                          transitionBuilder: (child, animation) =>
-                              FadeTransition(child: child, opacity: animation),
-                          child: child));
+                  return ValueListenableBuilder<double>(
+                      valueListenable: onDragValue ??= ValueNotifier<double>(snappings.first),
+                      child: Container(height: MediaQuery.of(context).size.height, child: child),
+                      builder: (_, value, c) =>
+                          Opacity(opacity: _dragOpacityValue(value, state.size), child: c));
                 },
                 body: widget.body,
                 headerBuilder: (context, s) {

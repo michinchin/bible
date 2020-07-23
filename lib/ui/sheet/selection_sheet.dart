@@ -1,34 +1,33 @@
-import 'package:flutter/material.dart';
-
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share/share.dart';
-import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-
+import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
+import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/color_utils.dart';
+import '../../models/pref_item.dart';
 import '../../models/verses.dart';
 import '../../ui/sheet/snap_sheet.dart';
+import '../misc/color_picker.dart';
 
 class SelectionSheet extends StatefulWidget {
   final SheetSize sheetSize;
+  final ValueNotifier<double> onDragValue;
 
   // final bool fullyExpanded;
-  const SelectionSheet({this.sheetSize, Key key}) : super(key: key);
+  const SelectionSheet({this.sheetSize, this.onDragValue, Key key}) : super(key: key);
 
   @override
   _SelectionSheetState createState() => _SelectionSheetState();
 }
 
-class _SelectionSheetState extends State<SelectionSheet> {
-//  List<Color> defaultColors = [];
-//  List<Color> secondaryColors = [];
-
+class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProviderStateMixin {
   static const buttons = <String, IconData>{
     'Learn': Icons.lightbulb_outline,
     'Explore': FeatherIcons.compass,
@@ -57,47 +56,26 @@ class _SelectionSheetState extends State<SelectionSheet> {
     // 'Compare': FeatherIcons.compass
   };
 
-  // bool _showAllColors;
+  bool _showColorPicker;
   bool _underlineMode;
-
-  // StreamSubscription<ThemeMode> _themeChangeStream;
+  bool _editMode;
+  int _colorIndex;
 
   @override
   void initState() {
-    //_addColors();
-    // _themeChangeStream = context.bloc<ThemeModeBloc>().listen(_listenForThemeChange);
-
-    // _showAllColors = false;
+    _editMode = false;
+    _showColorPicker = false;
     _underlineMode = false;
+    _colorIndex = 0;
+   
     super.initState();
   }
 
   @override
   void dispose() {
-    // _themeChangeStream.cancel();
     super.dispose();
   }
 
-//  List<Color> _addColors() {
-//    final colors = <Color>[];
-//    for (var i = 1; i < 5; i++) {
-//      colors.add(
-//          tec.colorFromColorId(i, darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
-//    }
-//    for (var i = 6; i < 13; i++) {
-//      colors.add(
-//          tec.colorFromColorId(i, darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
-//    }
-//    return colors;
-//  }
-
-//  void _listenForThemeChange(ThemeMode mode) {
-//    final colors = _addColors();
-//    setState(() {
-//      defaultColors = colors.getRange(0, 4).toList();
-//      secondaryColors = colors.getRange(4, colors.length).toList();
-//    });
-//  }
   void buttonAction(String type) {
     switch (type) {
       case 'Share':
@@ -125,11 +103,23 @@ class _SelectionSheetState extends State<SelectionSheet> {
     await Share.share(ChapterVerses.formatForShare(refs, verses.data));
   }
 
-  void onShowAllColors() {
-    TecToast.show(context, 'this is moving to a dialog');
-//    setState(() {
-//      _showAllColors = !_showAllColors;
-//    });
+  void onShowColorPicker() {
+    setState(() {
+      _showColorPicker = !_showColorPicker;
+    });
+  }
+
+  void _onEditColors() {
+    setState(() {
+      _editMode = !_editMode;
+    });
+  }
+
+  void _onEditColor(int colorIndex) {
+    setState(() {
+      _showColorPicker = !_showColorPicker;
+      _colorIndex = colorIndex;
+    });
   }
 
   void onSwitchToUnderline() {
@@ -140,294 +130,227 @@ class _SelectionSheetState extends State<SelectionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final editColorsButton = GreyCircleButton(
-      icon: /* _showAllColors ? Icons.close : */ Icons.colorize,
-      onPressed: onShowAllColors,
-    );
-    final underlineButton = GreyCircleButton(
-      icon: _underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
-      onPressed: onSwitchToUnderline,
-    );
-    final noColorButton = GreyCircleButton(
-      icon: Icons.format_color_reset,
-      onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
-            type: HighlightType.clear,
-          )),
-    );
-    final expandButton = GreyCircleButton(
-      icon: Icons.keyboard_arrow_up,
-      onPressed: () => context.bloc<SheetManagerBloc>().changeSize(SheetSize.medium),
-    );
-
-    final defaultColors = <Color>[
-      Color(defaultColorIntForIndex(1)),
-      Color(defaultColorIntForIndex(2)),
-      Color(defaultColorIntForIndex(3)),
-      Color(defaultColorIntForIndex(4)),
-    ];
-//    for (var i = 1; i < 5; i++) {
-//      colors.add(
-//          tec.colorFromColorId(i, darkMode: false));
-//    }
-
-    final smallScreen = MediaQuery.of(context).size.width < 350;
-    final miniViewColors = smallScreen ? defaultColors.take(2) : defaultColors;
-
-    final colors = [
-//      if (_showAllColors) ...[
-//        Row(children: [
-//          Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
-//          noColorButton,
-//          const SizedBox(width: 5),
-//          underlineButton,
-//          const SizedBox(width: 5),
-//          editColorsButton
-//        ])
-//      ] else ...[
-      Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-        Expanded(child: noColorButton),
-        Expanded(child: underlineButton),
-        for (final color in defaultColors) ...[
-          Expanded(
-            child: _ColorPickerButton(
-              isForUnderline: _underlineMode,
-              color: color,
-            ),
-          ),
-        ],
-        Expanded(child: editColorsButton),
-      ]),
-//        Row(
-//          mainAxisAlignment: MainAxisAlignment.spaceAround,
-//          children: [
-//            for (final color in secondaryColors) ...[
-//              _ColorPickerButton(
-//                isForUnderline: _underlineMode,
-//                color: color,
-//              ),
-//            ],
-//          ],
-//        )
-//      ],
-    ];
-    final mediumViewChildren = <Widget>[
-      ...colors,
-      const SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          for (final each in medButtons.keys) ...[
-            Expanded(
-              child: SheetButton(
-                text: each,
-                icon: medButtons[each],
-                onPressed: () => buttonAction(each),
-              ),
-            ),
-            if (buttons.keys.last != each) const SizedBox(width: 10)
-          ]
-        ],
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          for (final each in keyButtons.keys) ...[
-            Expanded(
-              child: SheetButton(
-                  text: each, icon: keyButtons[each], onPressed: () => buttonAction(each)),
-            ),
-            if (buttons.keys.last != each) const SizedBox(width: 10)
-          ]
-        ],
-      ),
-    ];
-
-    final miniChildren = [
-      noColorButton,
-      underlineButton,
-      for (final color in miniViewColors) ...[
-        _ColorPickerButton(
-          isForUnderline: _underlineMode,
-          color: color,
-        ),
-      ],
-      for (final button in keyButtons.keys) ...[
-        GreyCircleButton(
-          icon: keyButtons[button],
-          onPressed: () => buttonAction(button),
-        ),
-      ],
-      expandButton,
-    ];
-
-    Widget _miniView() => Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              for (final child in miniChildren)
-                Expanded(
-                  child: child,
-                )
-            ]);
-    // : Row(children: [
-    //     Expanded(child: _ColorSlider(isUnderline: _underlineMode)),
-    //     noColorButton,
-    //     const SizedBox(width: 5),
-    //     underlineButton,
-    //     const SizedBox(width: 5),
-    //     showColorsButton
-    //   ]);
-
-    Widget _mediumView() => Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 5,
-          runSpacing: 10,
-          children: mediumViewChildren,
-        );
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 15, right: 15),
-      child: Column(children: [
-        if (widget.sheetSize == SheetSize.mini)
-          Expanded(child: _miniView())
-        else if (widget.sheetSize == SheetSize.medium)
-          _mediumView()
-        else if (widget.sheetSize == SheetSize.full) ...[
-          Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 5,
-            runSpacing: 10,
-            children: colors,
-          ),
-          const Divider(
-            color: Colors.transparent,
-            height: 10,
-          ),
-          // if (!widget.fullyExpanded)
-          const Divider(color: Colors.transparent),
-          Expanded(
-            child: GridView.count(
-                crossAxisCount: 4,
-                padding: const EdgeInsets.only(top: 0),
-                children: [
-                  for (final each in buttons.keys) ...[
-                    GreyCircleButton(
-                      icon: buttons[each],
-                      onPressed: () {},
-                      title: each,
-                    ),
-                  ],
-                ]),
-          ),
-        ]
-      ]),
-    );
-  }
-}
-
-/*
-class _ColorSlider extends StatefulWidget {
-  final bool isUnderline;
-  const _ColorSlider({this.isUnderline});
-  @override
-  __ColorSliderState createState() => __ColorSliderState();
-}
-
-class __ColorSliderState extends State<_ColorSlider> {
-  List<Color> allColors = [];
-  double _colorValue;
-  bool _canEnd;
-  StreamSubscription<ThemeMode> _themeChangeStream;
-
-  @override
-  void initState() {
-    allColors = _addColors();
-    _themeChangeStream = context.bloc<ThemeModeBloc>().listen(_listenForThemeChange);
-    _colorValue = 0;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _themeChangeStream.cancel();
-    _themeChangeStream = null;
-    super.dispose();
-  }
-
-  List<Color> _addColors() {
-    final colors = <Color>[];
-    for (var i = 6; i < 365; i++) {
-      colors.add(
-          tec.colorFromColorId(i, darkMode: context.bloc<ThemeModeBloc>().state == ThemeMode.dark));
-    }
-    return colors;
-  }
-
-  void _listenForThemeChange(ThemeMode mode) {
-    final colors = _addColors();
-    setState(() {
-      allColors = colors;
-    });
-  }
-
-  void changeColor(double value) {
-    context.bloc<SelectionStyleBloc>()?.add(
-          SelectionStyle(
-              type: widget.isUnderline ? HighlightType.underline : HighlightType.highlight,
-              color: allColors[_colorValue.toInt()].value,
-              isTrialMode: true),
-        );
-    setState(() {
-      _colorValue = value;
-      _canEnd = true;
-    });
-  }
-
-  void finishWithColor(double value) {
-    if (_canEnd) {
-      context.bloc<SelectionStyleBloc>()?.add(
-            SelectionStyle(
-              type: widget.isUnderline ? HighlightType.underline : HighlightType.highlight,
-              color: allColors[_colorValue.toInt()].value,
-            ),
+    return BlocBuilder<PrefItemsBloc, PrefItems>(
+        bloc: context.bloc<PrefItemsBloc>(),
+        builder: (context, state) {
+          // only grab custom color pref items
+          final prefItems = state?.items?.where((i) => i.book >= 1 && i.book <= 4)?.toList() ?? [];
+          final underlineButton = GreyCircleButton(
+            icon: _underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
+            onPressed: onSwitchToUnderline,
           );
-    }
-  }
+          final noColorButton = GreyCircleButton(
+            icon: Icons.format_color_reset,
+            onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
+                  type: HighlightType.clear,
+                )),
+          );
+          final expandButton = GreyCircleButton(
+            icon: Icons.keyboard_arrow_up,
+            onPressed: () => context.bloc<SheetManagerBloc>().changeSize(SheetSize.medium),
+          );
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 15, right: 15),
-      child: Stack(alignment: Alignment.center, children: [
-        Container(
-          height: 20,
-          decoration: ShapeDecoration(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              gradient: LinearGradient(colors: allColors)),
-        ),
-        GestureDetector(
-            onTapCancel: () {
-              _canEnd = false;
-            },
-            child: SliderTheme(
-                data: SliderThemeData(
-                    thumbColor: allColors[_colorValue.toInt()],
-                    activeTrackColor: Colors.transparent,
-                    inactiveTrackColor: Colors.transparent,
-                    activeTickMarkColor: Colors.green,
-                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 20)),
-                child: Slider(
-                  onChanged: changeColor,
-                  onChangeEnd: finishWithColor,
-                  value: _colorValue,
-                  min: 0,
-                  max: 358,
-                ))),
-      ]),
-    );
+          final defaultColors = <Color>[
+            Color(defaultColorIntForIndex(1)),
+            Color(defaultColorIntForIndex(2)),
+            Color(defaultColorIntForIndex(3)),
+            Color(defaultColorIntForIndex(4)),
+          ];
+
+          final customColors = [for (final color in prefItems) Color(color.verse)];
+
+          final smallScreen = MediaQuery.of(context).size.width < 350;
+          final miniViewColors = smallScreen ? defaultColors.take(2) : defaultColors;
+          int colorChosen;
+
+          final colors = [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+              Expanded(child: noColorButton),
+              Expanded(child: underlineButton),
+              for (final color in defaultColors) ...[
+                Expanded(
+                  child: _ColorPickerButton(
+                    isForUnderline: _underlineMode,
+                    color: color,
+                  ),
+                ),
+              ],
+            ]),
+          ];
+
+          final sheetButtons = [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (final each in medButtons.keys) ...[
+                  Expanded(
+                    child: SheetButton(
+                      text: each,
+                      icon: medButtons[each],
+                      onPressed: () => buttonAction(each),
+                    ),
+                  ),
+                  if (buttons.keys.last != each) const SizedBox(width: 10)
+                ]
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (final each in keyButtons.keys) ...[
+                  Expanded(
+                    child: SheetButton(
+                        text: each, icon: keyButtons[each], onPressed: () => buttonAction(each)),
+                  ),
+                  if (buttons.keys.last != each) const SizedBox(width: 10)
+                ]
+              ],
+            ),
+          ];
+          final mediumViewChildren = <Widget>[
+            if (_showColorPicker)
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 200,
+                      child: ColorPicker(
+                          showColorContainer: false,
+                          color: Color(prefItems[_colorIndex]?.verse ?? 0xff999999),
+                          onColorChanged: (c) {
+                            colorChosen = c.value;
+                            context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
+                                type: _underlineMode
+                                    ? HighlightType.underline
+                                    : HighlightType.highlight,
+                                isTrialMode: true,
+                                color: colorChosen));
+                          }),
+                    ),
+                  ),
+                  const VerticalDivider(),
+                  Column(
+                    children: [
+                      GreyCircleButton(
+                          icon: Icons.close,
+                          onPressed: () {
+                            context
+                                .bloc<SelectionStyleBloc>()
+                                ?.add(const SelectionStyle(type: HighlightType.clear));
+                          }),
+                      const Divider(color: Colors.transparent),
+                      GreyCircleButton(
+                        icon: Icons.done,
+                        onPressed: () {
+                          context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
+                              type: _underlineMode
+                                  ? HighlightType.underline
+                                  : HighlightType.highlight,
+                              color: colorChosen));
+                          context.bloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
+                              prefItem: PrefItem.from(
+                                  prefItems[_colorIndex].copyWith(verse: colorChosen))));
+                          onShowColorPicker();
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            else ...[
+              ...colors,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (customColors.isNotEmpty)
+                    for (var i = 0; i < 4; i++) ...[
+                      Expanded(
+                        child: _ColorPickerButton(
+                          isForUnderline: _underlineMode,
+                          editMode: _editMode,
+                          onEdit: () => _onEditColor(i),
+                          color: customColors[i],
+                        ),
+                      ),
+                    ],
+                  Expanded(
+                    child: GreyCircleButton(
+                      icon: _editMode ? Icons.close : Icons.colorize,
+                      onPressed: _onEditColors,
+                    ),
+                  ),
+                ],
+              ),
+            ]
+          ];
+
+          final miniChildren = [
+            noColorButton,
+            underlineButton,
+            for (final color in miniViewColors) ...[
+              _ColorPickerButton(
+                isForUnderline: _underlineMode,
+                color: color,
+              ),
+            ],
+            for (final button in keyButtons.keys) ...[
+              GreyCircleButton(
+                icon: keyButtons[button],
+                onPressed: () => buttonAction(button),
+              ),
+            ],
+            expandButton,
+          ];
+
+          Widget _miniView() => Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    for (final child in miniChildren)
+                      Expanded(
+                        child: child,
+                      )
+                  ]);
+
+          Widget _sheetItems({bool excludeSheetButtons = false}) => Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 5,
+                runSpacing: 10,
+                children: [
+                  ...mediumViewChildren,
+                  if (!excludeSheetButtons && !_showColorPicker) ...sheetButtons
+                ],
+              );
+          return Padding(
+            padding: const EdgeInsets.only(left: 15, right: 15),
+            child: Column(children: [
+              if (widget.sheetSize == SheetSize.mini)
+                Expanded(child: _miniView())
+              else if (widget.sheetSize == SheetSize.medium) ...[
+                _sheetItems(),
+              ] else if (widget.sheetSize == SheetSize.full) ...[
+                _sheetItems(excludeSheetButtons: true),
+                const Divider(color: Colors.transparent),
+                Expanded(
+                  child: GridView.count(
+                      crossAxisCount: 4,
+                      padding: const EdgeInsets.only(top: 0),
+                      children: [
+                        for (final each in buttons.keys) ...[
+                          GreyCircleButton(
+                            icon: buttons[each],
+                            onPressed: () {},
+                            title: each,
+                          ),
+                        ],
+                      ]),
+                ),
+              ]
+            ]),
+          );
+        });
   }
 }
-*/
 
 class _ColorPickerButton extends StatelessWidget {
   final bool isForUnderline;
@@ -467,27 +390,29 @@ class _ColorPickerButton extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          if (isForUnderline)
-            Container(
-              decoration: ShapeDecoration(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  color: color),
-              width: 35,
-              height: width,
-            )
-          else
-            Container(
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.transparent,
-                    width: 5,
-                  )),
-              child: CircleAvatar(
-                backgroundColor: color,
-                radius: width,
-              ),
+          Container(
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.transparent,
+                  width: 5,
+                )),
+            child: CircleAvatar(
+              backgroundColor: isForUnderline ? Colors.transparent : color,
+              radius: width,
+              child: isForUnderline
+                  ? Container(
+                      decoration: ShapeDecoration(
+                          color: color,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          )),
+                      width: 35,
+                      height: width,
+                    )
+                  : null,
             ),
+          ),
           if (deletionMode)
             Icon(
               FeatherIcons.trash,

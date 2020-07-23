@@ -11,20 +11,6 @@ class _VMViewStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final barColor = theme.canvasColor;
-    // final barColor = theme.appBarTheme.color ?? theme.primaryColor;
-    final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
-        ? Colors.grey[700]
-        : Colors.white;
-    final newAppBarTheme = theme.appBarTheme.copyWith(
-      elevation: 0,
-      color: barColor,
-      actionsIconTheme: IconThemeData(color: barTextColor),
-      iconTheme: IconThemeData(color: barTextColor),
-      textTheme: theme.copyOfAppBarTextThemeWithColor(barTextColor),
-    );
-
     // tec.dmPrint('_VMViewStackState build()');
 
     final maximizedView =
@@ -52,8 +38,8 @@ class _VMViewStack extends StatelessWidget {
     }
 
     return Theme(
-      data: theme.copyWith(
-        appBarTheme: newAppBarTheme,
+      data: Theme.of(context).copyWith(
+        appBarTheme: appBarThemeWithContext(context),
         pageTransitionsTheme: tecPageTransitionsTheme(context),
       ),
       child: Stack(children: children),

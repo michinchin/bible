@@ -4,17 +4,16 @@ import 'package:tec_user_account/tec_user_account.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
 
 enum PrefItemDataType { json, string, bool, int }
-enum PrefItemType { // pref item ids
-  /*1-11*/ highlight, 
-  /*12-22*/ underline
+enum PrefItemType {
+  /*1-4*/ customColors,
 }
 
 class PrefItem extends tua.UserItem {
   PrefItem({
     @required PrefItemDataType prefItemDataType,
-    @required int prefItemId,
+    @required int prefItemId, // 1-4 for custom colors
     int verse, // 0|1 for bool value or as int value
-    String info,
+    String info = '',
     DateTime created,
     int deleted = 0,
     int id,

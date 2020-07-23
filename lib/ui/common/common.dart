@@ -1,9 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'tec_tab_indicator.dart';
+
 export 'tec_modal_popup.dart';
 export 'tec_page_route.dart';
+export 'tec_tab_indicator.dart';
 
+///
+/// Loading indicator with consistent look for the app.
+///
 class LoadingIndicator extends StatelessWidget {
   final double radius;
 
@@ -18,9 +24,53 @@ class LoadingIndicator extends StatelessWidget {
 }
 
 ///
+/// Returns an [AppBarTheme] appropriate for the lightness or darkness of the given [context].
+///
+AppBarTheme appBarThemeWithContext(BuildContext context) {
+  final theme = Theme.of(context);
+  final barColor = theme.canvasColor;
+  // final barColor = theme.appBarTheme.color ?? theme.primaryColor;
+  final brightness = ThemeData.estimateBrightnessForColor(barColor);
+  final barTextColor = brightness == Brightness.light ? Colors.grey[700] : Colors.white;
+  return theme.appBarTheme.copyWith(
+    brightness: brightness,
+    color: barColor,
+    elevation: 0,
+    // shadowColor: Colors.transparent,
+    iconTheme: IconThemeData(color: barTextColor),
+    actionsIconTheme: IconThemeData(color: barTextColor),
+    textTheme: theme.copyOfAppBarTextThemeWithColor(barTextColor),
+    centerTitle: true,
+  );
+}
+
+///
+/// Returns a [TabBarTheme] appropriate for the lightness or darkness of the given [context].
+/// 
+TabBarTheme tabBarThemeWithContext(BuildContext context) {
+  final theme = Theme.of(context);
+  final barColor = theme.canvasColor;
+  final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
+      ? Colors.grey[700]
+      : Colors.white;
+  return theme.tabBarTheme.copyWith(
+    indicator: const TecTabIndicator(
+        indicatorHeight: 4, indicatorColor: null, indicatorSize: TecTabIndicatorSize.full),
+    indicatorSize: TabBarIndicatorSize.label,
+    labelColor: barTextColor,
+    // labelStyle: const TextStyle(fontWeight: FontWeight.w700),
+    // unselectedLabelColor: Theme.of(context).textColor,
+    // unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+  );
+}
+
+///
 /// ThemeData extensions.
 ///
 extension ExtOnThemeData on ThemeData {
+  ///
+  /// Returns a copy of this ThemeData with the appBarTheme.textTheme updated the given [color].
+  ///
   TextTheme copyOfAppBarTextThemeWithColor(Color color) =>
       appBarTheme.textTheme?.apply(bodyColor: color) ??
       primaryTextTheme?.apply(bodyColor: color) ??
@@ -62,13 +112,3 @@ class IconWithNumberBadge extends StatelessWidget {
     ]);
   }
 }
-
-///
-/// AppBarTheme extensions.
-///
-// extension _ExtOnAppBarTheme on AppBarTheme {
-//   IconThemeData copyOfActionsIconThemeWithColor(Color color) =>
-//       actionsIconTheme?.copyWith(color: color) ?? IconThemeData(color: color);
-//   IconThemeData copyOfIconThemeWithColor(Color color) =>
-//       iconTheme?.copyWith(color: color) ?? IconThemeData(color: color);
-// }
