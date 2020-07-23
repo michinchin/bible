@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_user_account/tec_user_account.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/app_settings.dart';
@@ -13,7 +13,8 @@ part 'margin_notes_bloc.freezed.dart';
 
 @freezed
 abstract class MarginNotesEvent with _$MarginNotesEvent {
-  const factory MarginNotesEvent.updateFromDb({@required Map<int, MarginNote> marginNotes}) = _UpdateFromDb;
+  const factory MarginNotesEvent.updateFromDb({@required Map<int, MarginNote> marginNotes}) =
+      _UpdateFromDb;
   const factory MarginNotesEvent.add({@required String text, @required Reference ref}) = _Add;
   const factory MarginNotesEvent.delete(MarginNote marginNote) = _Delete;
 }
@@ -35,7 +36,7 @@ extension ChapterMarginNotesExt on ChapterMarginNotes {
   }
 }
 
-class ChapterMarginNotesBloc extends Bloc<MarginNotesEvent, ChapterMarginNotes> {
+class ChapterMarginNotesBloc extends tec.SafeBloc<MarginNotesEvent, ChapterMarginNotes> {
   final int volume;
   final int book;
   final int chapter;
@@ -69,14 +70,12 @@ class ChapterMarginNotesBloc extends Bloc<MarginNotesEvent, ChapterMarginNotes> 
           change.after?.book == book &&
           change.after?.chapter == chapter) {
         reload = true;
-      }
-      else if (change.type == UserDbChangeType.itemDeleted &&
+      } else if (change.type == UserDbChangeType.itemDeleted &&
           change.before?.volumeId == volume &&
           change.before?.book == book &&
           change.before?.chapter == chapter) {
         reload = true;
-      }
-      else if (change.type == UserDbChangeType.multipleChanges) {
+      } else if (change.type == UserDbChangeType.multipleChanges) {
         reload = true;
       }
     }
@@ -99,8 +98,8 @@ class ChapterMarginNotesBloc extends Bloc<MarginNotesEvent, ChapterMarginNotes> 
 
   ChapterMarginNotes _add(String text, Reference ref) {
     final newMap = Map<int, MarginNote>.from(state.marginNotes);
-    final marginNote = MarginNote(
-        volume: volume, book: book, chapter: chapter, verse: ref.verse, text: text);
+    final marginNote =
+        MarginNote(volume: volume, book: book, chapter: chapter, verse: ref.verse, text: text);
     newMap[ref.verse] = marginNote;
     return ChapterMarginNotes(volume, book, chapter, newMap, loaded: true);
   }

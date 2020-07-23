@@ -93,13 +93,12 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   ///
   /// Returns `true` if the view with the given [uid] is visible on the screen.
   ///
-  bool isViewWithUidVisible(int uid) => rectOfViewWithUid(uid)?.isVisible ?? false;
+  bool isViewVisible(int uid) => rectOfView(uid)?.isVisible ?? false;
 
   ///
   /// Returns the [ViewState] of the view with the given [uid], or null if none.
   ///
-  ViewState stateOfViewWithUid(int uid) =>
-      state.views.firstWhere((e) => e.uid == uid, orElse: () => null);
+  ViewState stateOfView(int uid) => state.views.firstWhere((e) => e.uid == uid, orElse: () => null);
 
   ///
   /// Returns the index of the view with the given [uid], or -1 if not found.
@@ -109,8 +108,27 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   ///
   /// Returns the [ViewRect] of the view with the given [uid], or null if none.
   ///
-  ViewRect rectOfViewWithUid(int uid) =>
-      _viewRects.firstWhere((e) => e.uid == uid, orElse: () => null);
+  ViewRect rectOfView(int uid) => _viewRects.firstWhere((e) => e.uid == uid, orElse: () => null);
+
+  //-------------------------------------------------------------------------
+  // Keyboard focus related:
+
+  int _viewWithKeyboardFocus = 0;
+
+  ///
+  /// This should be called by a view before it requests keyboard focus.
+  ///
+  void requestingKeyboardFocusInView(int uid) {
+    assert(uid != null && uid > 0);
+    _viewWithKeyboardFocus = uid;
+  }
+
+  ///
+  /// This should be called by a view when it releases keyboard focus.
+  ///
+  void releasingKeyboardFocusInView(int uid) {
+    if (_viewWithKeyboardFocus == uid) _viewWithKeyboardFocus = 0;
+  }
 
   //-------------------------------------------------------------------------
   // Selection related:
@@ -121,7 +139,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   /// This should be called by views that support text selection, when their [hasSelections]
   /// state changes.
   ///
-  void notifyOfSelectionsInViewWithUid(
+  void notifyOfSelectionsInView(
     int uid,
     Object selectionObject,
     BuildContext context, {
@@ -147,7 +165,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   /// Returns an iterator over the uids of the views with selections that are visible.
   ///
   Iterable<int> get visibleViewsWithSelections =>
-      _viewsWithSelections.keys.expand((uid) => isViewWithUidVisible(uid) ? [uid] : []);
+      _viewsWithSelections.keys.expand((uid) => isViewVisible(uid) ? [uid] : []);
 
   ///
   /// Returns the selection object for the view with the given [uid], or null if none.

@@ -1,4 +1,3 @@
-import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -99,7 +98,7 @@ abstract class HighlightsEvent with _$HighlightsEvent {
   const factory HighlightsEvent.clear(Reference ref) = _Clear;
 }
 
-class ChapterHighlightsBloc extends Bloc<HighlightsEvent, ChapterHighlights> {
+class ChapterHighlightsBloc extends tec.SafeBloc<HighlightsEvent, ChapterHighlights> {
   final int volume;
   final int book;
   final int chapter;

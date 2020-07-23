@@ -79,14 +79,20 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   void _toggleEditMode() {
     final maximized = viewManagerBloc?.state?.maximizedViewUid == widget.state.uid;
 
-    if (!_editMode && !maximized) {
-      // going into edit mode - make sure window is maximized
-      _restoreSize = true;
-      viewManagerBloc?.add(ViewManagerEvent.maximize(widget.state.uid));
-      // give the window manager some time to maximize
-      Future.delayed(const Duration(milliseconds: 250), _toggleEditMode);
-      return;
+    if (_editMode) {
+      viewManagerBloc?.releasingKeyboardFocusInView(widget.state.uid);
+    } else {
+      viewManagerBloc?.requestingKeyboardFocusInView(widget.state.uid);
     }
+
+    // if (!_editMode && !maximized) {
+    //   // going into edit mode - make sure window is maximized
+    //   _restoreSize = true;
+    //   viewManagerBloc?.add(ViewManagerEvent.maximize(widget.state.uid));
+    //   // give the window manager some time to maximize
+    //   Future.delayed(const Duration(milliseconds: 250), _toggleEditMode);
+    //   return;
+    // }
 
     setState(() {
       _editMode = !_editMode;

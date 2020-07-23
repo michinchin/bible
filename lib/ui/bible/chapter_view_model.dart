@@ -127,7 +127,8 @@ class BibleChapterViewModel {
         final position = bloc?.indexOfView(viewUid) ?? -1;
         final mn = marginNotes().marginNoteForVerse(tag.verse);
 
-        bloc?.add(ViewManagerEvent.add(type: marginNoteViewTypeName,
+        bloc?.add(ViewManagerEvent.add(
+            type: marginNoteViewTypeName,
             data: mn.id.toString(),
             position: position == -1 ? null : position + 1));
       } else {
@@ -154,7 +155,10 @@ class BibleChapterViewModel {
               child: Padding(
                 padding: const EdgeInsets.only(top: 3.0),
                 child: SvgPicture.asset('assets/marginNote.svg',
-                    width: iconWidth, height: iconWidth, color: color, semanticsLabel: 'Margin Note'),
+                    width: iconWidth,
+                    height: iconWidth,
+                    color: color,
+                    semanticsLabel: 'Margin Note'),
               ),
             ),
           ),
@@ -300,8 +304,7 @@ class BibleChapterViewModel {
 
         if (spans.isEmpty) {
           return textSpan;
-        }
-        else {
+        } else {
           spans.add(textSpan);
           return TextSpan(children: spans, recognizer: recognizer);
         }
@@ -442,8 +445,7 @@ class BibleChapterViewModel {
     }
 
     // Notify the view manager, if there is one.
-    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInViewWithUid(
-        viewUid, _selectionReference, context,
+    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInView(viewUid, _selectionReference, context,
         hasSelections: hasSelection);
   }
 
@@ -513,8 +515,7 @@ class BibleChapterViewModel {
   void _updateSelectedVersesInBlock(void Function() block, BuildContext context) {
     refreshFunc(block);
     tec.dmPrint('selected verses: $_selectedVerses');
-    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInViewWithUid(
-        viewUid, _selectionReference, context,
+    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInView(viewUid, _selectionReference, context,
         hasSelections: hasSelection);
   }
 }

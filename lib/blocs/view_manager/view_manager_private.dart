@@ -13,9 +13,6 @@ class _VMViewStack extends StatelessWidget {
   Widget build(BuildContext context) {
     // tec.dmPrint('_VMViewStackState build()');
 
-    final maximizedView =
-        vmState.views.firstWhere((e) => e.uid == vmState.maximizedViewUid, orElse: () => null);
-
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     assert(bloc != null);
 
@@ -25,9 +22,23 @@ class _VMViewStack extends StatelessWidget {
     final rows = _buildRows(bloc, _Size.ideal, vmState, constraints)..balance(constraints);
     bloc?._rows = rows;
 
+    // Is there a maximized view?
+    var maximizedView =
+        vmState.views.firstWhere((e) => e.uid == vmState.maximizedViewUid, orElse: () => null);
+
+    // Is there a view with keyboard focus?
+    final uidOfViewWithKeyboardFocus = bloc?._viewWithKeyboardFocus;
+    var viewWithKeyboardFocus = tec.isNullOrZero(uidOfViewWithKeyboardFocus)
+        ? null
+        : vmState.views.firstWhere((e) => e.uid == uidOfViewWithKeyboardFocus, orElse: () => null);
+    if (uidOfViewWithKeyboardFocus != null && maximizedView != null) {
+      maximizedView = viewWithKeyboardFocus;
+      viewWithKeyboardFocus = null;
+    }
+
     // Build children and save the view rects.
     final viewRects = <ViewRect>[];
-    final children = rows.toViewList(constraints, maximizedView, viewRects);
+    final children = rows.toViewList(constraints, maximizedView, viewWithKeyboardFocus, viewRects);
     bloc?._viewRects = viewRects;
 
     // If the state of visible selected text changed, call _updateSelectionBloc after the build.
@@ -287,8 +298,12 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
   List<Widget> toViewList(
     BoxConstraints constraints,
     ViewState maximizedView,
+    ViewState viewWithKeyboardFocus,
     List<ViewRect> rects,
   ) {
+    // Cannot have both a maximizedView and a viewWithKeyboardFocus.
+    assert(maximizedView == null || viewWithKeyboardFocus == null);
+
     final views = <Widget>[];
 
     var i = 0;
@@ -299,6 +314,8 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
     final noViewIsMaximized = (maximizedView == null);
     Widget maximizedViewWidget;
+
+    var viewWithKeyboardFocusIsVisible = false;
 
     var r = 0;
     for (final row in this) {
@@ -331,6 +348,10 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
         final thisViewIsMaximized = (maximizedView?.uid == state.uid);
 
+        if (viewWithKeyboardFocus?.uid == state.uid) {
+          viewWithKeyboardFocusIsVisible = true;
+        }
+
         // This is always created with the view's no-maximized rect. Should it be?
         rects.add(ViewRect(
             uid: state.uid,
@@ -361,16 +382,24 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
       y += height;
     }
 
-    // It's possible that the maximized view doesn't fit on the screen when not maximized...
-    if (maximizedView != null && maximizedViewWidget == null) {
+    var maximizeView = maximizedView;
+
+    // If the view with keyboard focus isn't visible, auto-maximize it!
+    if (viewWithKeyboardFocus != null && !viewWithKeyboardFocusIsVisible) {
+      assert(maximizeView == null);
+      maximizeView = viewWithKeyboardFocus;
+    }
+
+    // It is possible that the maximized view doesn't fit on the screen when not maximized...
+    if (maximizeView != null && maximizedViewWidget == null) {
       rects.add(ViewRect(
-          uid: maximizedView.uid,
+          uid: maximizeView.uid,
           isVisible: true,
           row: 0,
           column: 0,
           rect: Rect.fromLTWH(0, 0, constraints.maxWidth, constraints.maxHeight)));
 
-      maximizedViewWidget = maximizedView.toWidget(
+      maximizedViewWidget = maximizeView.toWidget(
           constraints: constraints,
           x: 0,
           y: 0,
@@ -379,7 +408,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           index: i);
     }
 
-    if (maximizedViewWidget != null) views.add(maximizedViewWidget);
+    if (maximizeView != null) views.add(maximizedViewWidget);
 
     return views;
   }

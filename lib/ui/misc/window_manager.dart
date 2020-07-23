@@ -11,8 +11,8 @@ Future<void> showWindowDialog({BuildContext context, Widget Function(BuildContex
         context: context,
         barrierDismissible: true,
         builder: (c) => Dialog(
-          // this property has been removed in flutter 1.20
-          // useMaterialBorderRadius: true,
+            // this property has been removed in flutter 1.20
+            // useMaterialBorderRadius: true,
             backgroundColor: Colors.transparent,
             child: Container(
                 decoration: BoxDecoration(
@@ -100,7 +100,7 @@ class WindowManager extends StatelessWidget {
 
     final items = <Widget>[];
     for (final each in bloc.state.views) {
-      if (!bloc.isViewWithUidVisible(each.uid)) {
+      if (!bloc.isViewVisible(each.uid)) {
         var title = vm.titleForType(each.type);
         if (each.type == 'BibleChapter') {
           title = bibleChapterTitleFromState(each);
