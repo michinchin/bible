@@ -16,8 +16,8 @@ import 'tec_image_delegate.dart';
 
 const marginNoteViewTypeName = 'MarginNoteView';
 
-Widget marginNoteScaffoldBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
-    _MarginNoteView(key: bodyKey, state: state, size: size);
+Widget marginNoteScaffoldBuilder(BuildContext context, ViewState state, Size size) =>
+    _MarginNoteView(state: state, size: size);
 
 class _MarginNoteView extends StatefulWidget {
   final ViewState state;
@@ -122,7 +122,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
             tooltip: 'End editing',
             onPressed: () => { _toggleEditMode() },
           ),
-          actions: marginNoteActionsBuilder(widget.key, widget.size),
+          actions: marginNoteActionsBuilder(widget.size),
         ),
       ),
       body: bodyBuilder(),
@@ -144,7 +144,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     }
   }
 
-  List<Widget> marginNoteActionsBuilder(Key bodyKey, Size size) {
+  List<Widget> marginNoteActionsBuilder(Size size) {
     if (_editMode) {
       return [
         IconButton(
@@ -179,7 +179,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
             }),
       ];
     } else {
-      return defaultActionsBuilder(context, bodyKey, widget.state, size);
+      return defaultActionsBuilder(context, widget.state, size);
     }
   }
 }
