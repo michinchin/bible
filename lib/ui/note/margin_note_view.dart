@@ -67,10 +67,6 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
 
   @override
   void dispose() {
-    viewManagerBloc?.close();
-    viewManagerBloc = null;
-    sheetManagerBloc?.close();
-    sheetManagerBloc = null;
     super.dispose();
   }
 
@@ -92,15 +88,6 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
       return;
     }
 
-    if (_editMode && maximized && _restoreSize) {
-      // coming out of edit mode and window was forced into maximize mode - restore it
-      _restoreSize = false;
-      viewManagerBloc?.add(const ViewManagerEvent.restore());
-      // give the window manager some time to maximize
-      Future.delayed(const Duration(milliseconds: 250), _toggleEditMode);
-      return;
-    }
-
     setState(() {
       _editMode = !_editMode;
     });
@@ -109,6 +96,18 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
       sheetManagerBloc?.changeType(SheetType.collapsed);
     } else {
       sheetManagerBloc?.toDefaultView();
+
+      if (maximized && _restoreSize) {
+        // coming out of edit mode and window was forced into maximize mode - restore it
+        _restoreSize = false;
+
+        // let the keyboard drop then...
+        Future.delayed(const Duration(milliseconds: 250), () {
+          viewManagerBloc?.add(const ViewManagerEvent.restore());
+        });
+      }
+
+      _restoreSize = false;
     }
   }
 
@@ -117,7 +116,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     return Scaffold(
       appBar: ManagedViewAppBar(
         appBar: AppBar(
-          title: Text(MarginNote.getTitle(item)),
+          title: (doc == null) ? null : Text(MarginNote.getTitle(item)),
           leading: (!_editMode) ? null : IconButton(
             icon: const Icon(Icons.arrow_back_ios),
             tooltip: 'End editing',

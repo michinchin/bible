@@ -129,15 +129,19 @@ class WindowManager extends StatelessWidget {
       'Note': FeatherIcons.edit,
       'Test View': FeatherIcons.plusSquare
     };
-    return vm.types.map<Widget>(
-      (type) => _menuItem(context, iconMap[vm.titleForType(type)], '${vm.titleForType(type)}', () {
+    return vm.types.map<Widget>((type) {
+      final title = vm.titleForType(type);
+      if (title == null) {
+        return Container();
+      }
+      return _menuItem(context, iconMap[title], '${vm.titleForType(type)}', () {
         Navigator.of(context).maybePop();
         final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
         final position = bloc?.indexOfView(viewUid) ?? -1;
         bloc?.add(ViewManagerEvent.add(
             type: type, data: '', position: position == -1 ? null : position + 1));
-      }),
-    );
+      });
+    });
   }
 
   Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onPressed) {
