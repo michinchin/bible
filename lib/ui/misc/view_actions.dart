@@ -6,12 +6,12 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../menu/main_menu.dart';
 import 'window_manager.dart';
 
-List<Widget> defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
+List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   return [
     IconButton(
       icon: const Icon(Icons.photo_size_select_large),
       tooltip: 'Windows',
-      onPressed: () => _showMoreMenu(context, bodyKey, state, size),
+      onPressed: () => _showMoreMenu(context, state, size),
     ),
     if (context.bloc<ViewManagerBloc>().indexOfView(state.uid) == 0 ||
         context.bloc<ViewManagerBloc>().state.maximizedViewUid == state.uid)
@@ -23,7 +23,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState 
   ];
 }
 
-Future<void> _showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
+Future<void> _showMoreMenu(BuildContext context, ViewState state, Size size) {
   return showWindowDialog(
     context: context,
     builder: (context) {

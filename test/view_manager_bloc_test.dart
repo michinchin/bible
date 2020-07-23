@@ -13,7 +13,7 @@ void main() {
 
     setUpAll(() {
       ViewManager.shared.register('test',
-          title: 'test', bodyBuilder: (context, key, state, size) => Container(key: key));
+          title: 'test', bodyBuilder: (context, state, size) => Container());
     });
 
     setUp(() {

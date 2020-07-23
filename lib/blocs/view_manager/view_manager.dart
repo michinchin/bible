@@ -1,21 +1,15 @@
 part of 'view_manager_bloc.dart';
 
 ///
-/// Signature of a function that creates a key for a given view state.
-///
-typedef KeyMaker = Key Function(BuildContext context, ViewState state);
-
-///
 /// Signature of a function that creates a widget for a given view state.
 ///
-typedef BuilderWithViewState = Widget Function(
-    BuildContext context, Key bodyKey, ViewState state, Size size);
+typedef BuilderWithViewState = Widget Function(BuildContext context, ViewState state, Size size);
 
 ///
 /// Signature of a function that creates a list of "action" widgets for a given view state.
 ///
 typedef ActionsBuilderWithViewState = List<Widget> Function(
-    BuildContext context, Key bodyKey, ViewState state, Size size);
+    BuildContext context, ViewState state, Size size);
 
 ///
 /// Signature of a function that creates a widget for a given view state and index.
@@ -34,7 +28,7 @@ typedef ViewSizeFunc = double Function(BoxConstraints constraints);
 /// Use the [register] function to register a view type. For example:
 ///
 /// ```dart
-/// register('MyType', builder: (context, bodyKey, state, size) => Container());
+/// register('MyType', builder: (context, state, size) => Container());
 /// ```
 ///
 class ViewManager {
@@ -52,7 +46,6 @@ class ViewManager {
     BuilderWithViewState bodyBuilder,
     BuilderWithViewState titleBuilder,
     ActionsBuilderWithViewState actionsBuilder,
-    KeyMaker keyMaker,
     ViewSizeFunc minWidth,
     ViewSizeFunc minHeight,
   }) {
@@ -64,7 +57,6 @@ class ViewManager {
       bodyBuilder,
       titleBuilder,
       actionsBuilder,
-      keyMaker,
       minWidth,
       minHeight,
     );
@@ -74,23 +66,20 @@ class ViewManager {
 
   String titleForType(String type) => _types[type]?.title;
 
-  Key _makeKey(BuildContext context, ViewState state) =>
-      (_types[state.type]?.keyMaker ?? _defaultKeyMaker)(context, state);
+  Widget _buildScaffold(BuildContext context, ViewState state, Size size) =>
+      (_types[state.type]?.scaffoldBuilder ?? _defaultScaffoldBuilder)(context, state, size);
 
-  Widget _buildScaffold(BuildContext context, Key bodyKey, ViewState state, Size size) =>
-      (_types[state.type]?.scaffoldBuilder ?? _defaultScaffoldBuilder)(context, bodyKey, state, size);
+  Widget _buildViewBody(BuildContext context, ViewState state, Size size) =>
+      (_types[state.type]?.bodyBuilder ?? _defaultBodyBuilder)(context, state, size);
 
-  Widget _buildViewBody(BuildContext context, Key bodyKey, ViewState state, Size size) =>
-      (_types[state.type]?.bodyBuilder ?? _defaultBodyBuilder)(context, bodyKey, state, size);
+  Widget _buildViewTitle(BuildContext context, ViewState state, Size size) =>
+      (_types[state.type]?.titleBuilder ?? _defaultTitleBuilder)(context, state, size);
 
-  Widget _buildViewTitle(BuildContext context, Key bodyKey, ViewState state, Size size) =>
-      (_types[state.type]?.titleBuilder ?? _defaultTitleBuilder)(context, bodyKey, state, size);
-
-  Widget _defaultTitleBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
+  Widget _defaultTitleBuilder(BuildContext context, ViewState state, Size size) =>
       Text(_types[state.type]?.title ?? state.uid.toString());
 
-  List<Widget> _buildViewActions(BuildContext context, Key bodyKey, ViewState state, Size size) =>
-      (_types[state.type]?.actionsBuilder ?? _defaultActionsBuilder)(context, bodyKey, state, size);
+  List<Widget> _buildViewActions(BuildContext context, ViewState state, Size size) =>
+      (_types[state.type]?.actionsBuilder ?? _defaultActionsBuilder)(context, state, size);
 
   double _minWidthForType(String type, BoxConstraints constraints) =>
       (_types[type]?.minWidth ?? _defaultMinWidth)(constraints);
@@ -109,7 +98,6 @@ class _ViewTypeAPI {
   final BuilderWithViewState bodyBuilder;
   final BuilderWithViewState titleBuilder;
   final ActionsBuilderWithViewState actionsBuilder;
-  final KeyMaker keyMaker;
   final ViewSizeFunc minWidth;
   final ViewSizeFunc minHeight;
 
@@ -119,7 +107,6 @@ class _ViewTypeAPI {
     this.bodyBuilder,
     this.titleBuilder,
     this.actionsBuilder,
-    this.keyMaker,
     this.minWidth,
     this.minHeight,
   );
@@ -129,13 +116,10 @@ const _iPhoneSEHeight = 568.0;
 const _minSize = (_iPhoneSEHeight - 20.0) / 2;
 const _maxMinWidth = 400.0;
 
-Key _defaultKeyMaker(BuildContext context, ViewState state) => null;
-
-Widget _defaultScaffoldBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
-    Scaffold(
+Widget _defaultScaffoldBuilder(BuildContext context, ViewState state, Size size) => Scaffold(
       appBar: ManagedViewAppBar(
         appBar: AppBar(
-          title: ViewManager.shared._buildViewTitle(context, bodyKey, state, size),
+          title: ViewManager.shared._buildViewTitle(context, state, size),
           // leading: widget.state.viewIndex > 0
           //     ? null
           //     : IconButton(
@@ -143,14 +127,13 @@ Widget _defaultScaffoldBuilder(BuildContext context, Key bodyKey, ViewState stat
           //         tooltip: 'Main Menu',
           //         onPressed: () => showMainMenu(context),
           //       ),
-          actions: ViewManager.shared._buildViewActions(context, bodyKey, state, size),
+          actions: ViewManager.shared._buildViewActions(context, state, size),
         ),
       ),
-      body: ViewManager.shared._buildViewBody(context, bodyKey, state, size),
+      body: ViewManager.shared._buildViewBody(context, state, size),
     );
 
-Widget _defaultBodyBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) =>
-    Container(key: bodyKey);
+Widget _defaultBodyBuilder(BuildContext context, ViewState state, Size size) => Container();
 
 double _defaultMinWidth(BoxConstraints constraints) => math.max(_minSize,
     math.min(_maxMinWidth, ((constraints ?? _defaultConstraints).maxWidth / 3).roundToDouble()));
@@ -160,17 +143,17 @@ double _defaultMinHeight(BoxConstraints constraints) =>
 
 const BoxConstraints _defaultConstraints = BoxConstraints(maxWidth: 320, maxHeight: 480);
 
-List<Widget> _defaultActionsBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
+List<Widget> _defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   return [
     IconButton(
       icon: Icon(_moreIcon(context)),
       tooltip: 'More',
-      onPressed: () => _showMoreMenu(context, bodyKey, state, size),
+      onPressed: () => _showMoreMenu(context, state, size),
     ),
   ];
 }
 
-Future<void> _showMoreMenu(BuildContext context, Key bodyKey, ViewState state, Size size) {
+Future<void> _showMoreMenu(BuildContext context, ViewState state, Size size) {
   return showTecModalPopup<void>(
     useRootNavigator: false,
     context: context,
@@ -240,7 +223,7 @@ IconData _moreIcon(BuildContext context) {
 }
 
 // List<Widget> _testActionsForAdjustingSize(
-//     BuildContext context, Key bodyKey, ViewState state, Size size) {
+//     BuildContext context, ViewState state, Size size) {
 //   final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
 //   return <Widget>[
 //     IconButton(

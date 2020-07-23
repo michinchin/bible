@@ -26,7 +26,7 @@ const bibleChapterType = 'BibleChapter';
 const _initialReference = BookChapterVerse(50, 1, 1);
 const _bibleId = 51;
 
-Widget bibleChapterViewBuilder(BuildContext context, Key bodyKey, ViewState state, Size size) {
+Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size) {
   // tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
   return _PageableBibleView(state: state, size: size);
 }
@@ -56,7 +56,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
       appBar: ManagedViewAppBar(
         appBar: AppBar(
           title: _titleBuilder(context, _pageableViewStateKey, widget.state, widget.size),
-          actions: defaultActionsBuilder(context, null, widget.state, widget.size),
+          actions: defaultActionsBuilder(context, widget.state, widget.size),
         ),
       ),
       body: PageableView(
