@@ -29,28 +29,92 @@ class _MarginNoteView extends StatefulWidget {
   __MarginNoteScreenState createState() => __MarginNoteScreenState();
 }
 
+class ToolbarDelegate implements ZefyrToolbarDelegate {
+  static const kDefaultButtonIcons = {
+    ZefyrToolbarAction.bold: Icons.format_bold,
+    ZefyrToolbarAction.italic: Icons.format_italic,
+    ZefyrToolbarAction.heading: Icons.format_size,
+    ZefyrToolbarAction.bulletList: Icons.format_list_bulleted,
+    ZefyrToolbarAction.numberList: Icons.format_list_numbered,
+    ZefyrToolbarAction.quote: Icons.format_quote,
+  };
+
+  static const kIgnoreButtonIcons = {
+    ZefyrToolbarAction.link: Icons.link,
+    ZefyrToolbarAction.unlink: Icons.link_off,
+    ZefyrToolbarAction.clipboardCopy: Icons.content_copy,
+    ZefyrToolbarAction.horizontalRule: Icons.remove,
+    ZefyrToolbarAction.openInBrowser: Icons.open_in_new,
+    ZefyrToolbarAction.code: Icons.code,
+    ZefyrToolbarAction.image: Icons.photo,
+    ZefyrToolbarAction.cameraImage: Icons.photo_camera,
+    ZefyrToolbarAction.galleryImage: Icons.photo_library,
+    ZefyrToolbarAction.hideKeyboard: Icons.keyboard_hide,
+    ZefyrToolbarAction.close: Icons.close,
+    ZefyrToolbarAction.confirm: Icons.check,
+  };
+
+  static const kSpecialIconSizes = {
+    ZefyrToolbarAction.unlink: 20.0,
+    ZefyrToolbarAction.clipboardCopy: 20.0,
+    ZefyrToolbarAction.openInBrowser: 20.0,
+    ZefyrToolbarAction.close: 20.0,
+    ZefyrToolbarAction.confirm: 20.0,
+  };
+
+  static const kDefaultButtonTexts = {
+    ZefyrToolbarAction.headingLevel1: 'H1',
+    ZefyrToolbarAction.headingLevel2: 'H2',
+    ZefyrToolbarAction.headingLevel3: 'H3',
+  };
+
+  @override
+  Widget buildButton(BuildContext context, ZefyrToolbarAction action, {VoidCallback onPressed}) {
+    if (kDefaultButtonIcons.containsKey(action)) {
+      final icon = kDefaultButtonIcons[action];
+      final size = kSpecialIconSizes[action];
+      return ZefyrButton.icon(
+        action: action,
+        icon: icon,
+        iconSize: size,
+        onPressed: onPressed,
+      );
+    } else if (kDefaultButtonTexts.containsKey(action)) {
+      final theme = Theme.of(context);
+      final style = theme.textTheme.caption.copyWith(fontWeight: FontWeight.bold, fontSize: 14.0);
+      return ZefyrButton.text(
+        action: action,
+        text: kDefaultButtonTexts[action],
+        style: style,
+        onPressed: onPressed,
+      );
+    } else {
+      return Container();
+    }
+  }
+}
+
 class __MarginNoteScreenState extends State<_MarginNoteView> {
-  NotusDocument doc;
-  UserItem item;
+  UserItem _item;
   var _editMode = false;
+  var _selecting = false;
+  FocusNode _focusNode;
+  ZefyrController _controller;
   ViewManagerBloc viewManagerBloc;
   SheetManagerBloc sheetManagerBloc;
 
   Future<void> load() async {
-    viewManagerBloc = context.bloc<ViewManagerBloc>();
-    sheetManagerBloc = context.bloc<SheetManagerBloc>();
+    _item = await AppSettings.shared.userAccount.userDb.getItem(int.parse(widget.state.data));
 
-    item = await AppSettings.shared.userAccount.userDb
-        .getItem(int.parse(widget.state.data));
-
-    if (item?.type == UserItemType.marginNote.index) {
+    if (_item?.type == UserItemType.marginNote.index) {
       Delta delta;
 
       // we're showing an existing marginNote
-      if (item.info.startsWith('QuillDelta')) {} else {
+      if (_item.info.startsWith('QuillDelta')) {
+      } else {
         // old margin note - create a delta
         delta = Delta();
-        for (final s in item.info.trim().split('\n')) {
+        for (final s in _item.info.trim().split('\n')) {
           if (s.isNotEmpty) {
             delta.insert(s);
           }
@@ -59,24 +123,49 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
       }
 
       setState(() {
-        doc = NotusDocument.fromDelta(delta);
+        _editMode = false;
+        _controller = ZefyrController(NotusDocument.fromDelta(delta))..addListener(_zephyrListener);
+        _focusNode = FocusNode();
       });
+    }
+  }
+
+  void _zephyrListener() {
+    if (_editMode) {
+      debugPrint('editing');
+    } else {
+      if (_controller.selection.baseOffset == _controller.selection.extentOffset) {
+        // tap
+        if (_selecting) {
+          _selecting = false;
+        } else {
+          _toggleEditMode();
+          debugPrint('edit at ${_controller.selection.baseOffset}');
+        }
+      } else {
+        _selecting = true;
+      }
     }
   }
 
   @override
   void dispose() {
+    _controller?.removeListener(_zephyrListener);
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+
+    viewManagerBloc = context.bloc<ViewManagerBloc>();
+    sheetManagerBloc = context.bloc<SheetManagerBloc>();
+
     load();
   }
 
   void _toggleEditMode() {
-    final maximized = viewManagerBloc?.state?.maximizedViewUid == widget.state.uid;
+    // final maximized = viewManagerBloc?.state?.maximizedViewUid == widget.state.uid;
 
     if (_editMode) {
       viewManagerBloc?.releasingKeyboardFocusInView(widget.state.uid);
@@ -95,76 +184,70 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     }
   }
 
+  void _deleteNoteDialog() {
+    tecShowSimpleAlertDialog<void>(
+        context: context,
+        content: 'Delete note?',
+        useRootNavigator: true,
+        actions: <Widget>[
+          TecDialogButton(
+            child: const TecText('Delete'),
+            onPressed: () async {
+              await Navigator.of(context, rootNavigator: true).maybePop();
+
+              // delete this margin note
+              await AppSettings.shared.userAccount.userDb.deleteItem(_item);
+
+              // close the note view
+              viewManagerBloc?.add(ViewManagerEvent.remove(widget.state.uid));
+            },
+          ),
+          TecDialogButton(
+            child: const TecText('Cancel'),
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).maybePop();
+            },
+          ),
+        ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ManagedViewAppBar(
         appBar: AppBar(
-          title: (doc == null) ? null : Text(MarginNote.getTitle(item)),
-          leading: (!_editMode) ? null : IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            tooltip: 'End editing',
-            onPressed: () => { _toggleEditMode() },
-          ),
-          actions: marginNoteActionsBuilder(widget.size),
+          title: (_item == null) ? null : Text(MarginNote.getTitle(_item)),
+          leading: (!_editMode)
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.arrow_back_ios),
+                  tooltip: 'End editing',
+                  onPressed: () => {_toggleEditMode()},
+                ),
+          actions: _editMode
+              ? [
+                  IconButton(
+                    icon: const Icon(FeatherIcons.trash2),
+                    tooltip: 'Delete Note',
+                    onPressed: _deleteNoteDialog,
+                  ),
+                ]
+              : defaultActionsBuilder(context, widget.state, widget.size),
         ),
       ),
-      body: bodyBuilder(),
+      body: (_controller == null)
+          ? Container()
+          : ZefyrScaffold(
+              child: ZefyrEditor(
+                padding: const EdgeInsets.all(16),
+                controller: _controller,
+                focusNode: _focusNode,
+                toolbarDelegate: ToolbarDelegate(),
+                mode: _editMode ? ZefyrMode.edit : ZefyrMode.select,
+                imageDelegate: TecImageDelegate(),
+              ),
+            ),
     );
-  }
-
-  Widget bodyBuilder() {
-    if (doc == null) {
-      return Container();
-    }
-
-    if (_editMode) {
-      return EditScreen(doc);
-    } else {
-      return GestureDetector(
-        onTap: _toggleEditMode,
-        child: ViewScreen(doc),
-      );
-    }
-  }
-
-  List<Widget> marginNoteActionsBuilder(Size size) {
-    if (_editMode) {
-      return [
-        IconButton(
-            icon: const Icon(FeatherIcons.trash2),
-            tooltip: 'Delete Note',
-            onPressed: () {
-              // delete the note
-              tecShowSimpleAlertDialog<void>(
-                  context: context,
-                  content: 'Delete note?',
-                  useRootNavigator: true,
-                  actions: <Widget>[
-                    TecDialogButton(
-                      child: const TecText('Delete'),
-                      onPressed: () async {
-                        await Navigator.of(context, rootNavigator: true).maybePop();
-
-                        // delete this margin note
-                        await AppSettings.shared.userAccount.userDb.deleteItem(item);
-
-                        // close the note view
-                        viewManagerBloc?.add(ViewManagerEvent.remove(widget.state.uid));
-                      },
-                    ),
-                    TecDialogButton(
-                      child: const TecText('Cancel'),
-                      onPressed: () {
-                        Navigator.of(context, rootNavigator: true).maybePop();
-                      },
-                    ),
-                  ]);
-            }),
-      ];
-    } else {
-      return defaultActionsBuilder(context, widget.state, size);
-    }
   }
 }
 
@@ -179,62 +262,3 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
 //  return Delta.fromJson(json.decode(doc) as List);
 //}
 //final doc = NotusDocument.fromDelta(getDelta());
-
-class EditScreen extends StatefulWidget {
-  final NotusDocument doc;
-
-  const EditScreen(this.doc);
-
-  @override
-  _EditScreen createState() => _EditScreen();
-}
-
-class _EditScreen extends State<EditScreen> {
-  FocusNode _focusNode;
-  ZefyrController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = ZefyrController(widget.doc);
-    _focusNode = FocusNode();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ZefyrScaffold(
-      child: ZefyrEditor(
-        padding: const EdgeInsets.all(16),
-        controller: _controller,
-        focusNode: _focusNode,
-        imageDelegate: TecImageDelegate(),
-      ),
-    );
-  }
-}
-
-class ViewScreen extends StatefulWidget {
-  final NotusDocument doc;
-
-  const ViewScreen(this.doc);
-
-  @override
-  _ViewScreen createState() => _ViewScreen();
-}
-
-class _ViewScreen extends State<ViewScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ZefyrView(
-            document: widget.doc,
-            imageDelegate: TecImageDelegate(),
-          ),
-        )
-      ],
-    );
-  }
-}
