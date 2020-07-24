@@ -59,18 +59,20 @@ class _SnapSheetState extends State<SnapSheet> {
         if (approxEqual(value, snappings[size.index]) || state.type == SheetType.collapsed) {
           return 1.0;
         }
-
+        var opacity = 1.0;
         if (value < snappings[size.index]) {
           //decreasing in height
-          final opacity = 1 -
-              (snappings[size.index] - value) / (snappings[size.index] - snappings[size.index - 1]);
-          return opacity <= 0 ? 0 : opacity;
+          if (size.index != 0) {
+            opacity = 1 -
+                (snappings[size.index] - value) /
+                    (snappings[size.index] - snappings[size.index - 1]);
+          }
         } else {
           // increasing in height
-          final opacity = 1 -
+          opacity = 1 -
               (value - snappings[size.index]) / (snappings[size.index + 1] - snappings[size.index]);
-          return opacity <= 0 ? 0 : opacity;
         }
+        return opacity <= 0 ? 0 : opacity;
       }
 
       // current sheet size
@@ -156,6 +158,7 @@ class _SnapSheetState extends State<SnapSheet> {
                     default:
                       child = Container();
                   }
+
                   return ValueListenableBuilder<double>(
                       valueListenable: onDragValue ??= ValueNotifier<double>(snappings.first),
                       child: Container(height: MediaQuery.of(context).size.height, child: child),
