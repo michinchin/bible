@@ -6,6 +6,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../sheet/snap_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key key}) : super(key: key);
@@ -48,12 +49,42 @@ class _HomeScreen extends StatelessWidget {
               child: SafeArea(
                 bottom: false,
                 child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-                  builder: (_, state) => ViewManagerWidget(state: state),
+                  builder: (_, state) => _BottomSheet(
+                    child: ViewManagerWidget(state: state),
+                  ),
                 ),
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _BottomSheet extends StatelessWidget {
+  final Widget child;
+
+  const _BottomSheet({Key key, this.child}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<SelectionBloc, SelectionState>(
+      bloc: context.bloc<SelectionBloc>(),
+      // condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
+      listener: (context, state) {
+        if (state.isTextSelected) {
+          context.bloc<SheetManagerBloc>()
+            ..changeType(SheetType.selection)
+            ..changeSize(SheetSize.mini);
+        } else {
+          context.bloc<SheetManagerBloc>()
+            ..changeType(SheetType.main)
+            ..changeSize(SheetSize.mini);
+        }
+      },
+      child: SnapSheet(
+        body: child,
       ),
     );
   }

@@ -1,9 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -11,9 +12,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../ui/common/common.dart';
 import '../../ui/common/tec_page_view.dart';
-import '../../ui/sheet/snap_sheet.dart';
 import '../selection/selection_bloc.dart';
-import '../sheet/sheet_manager_bloc.dart';
 
 part 'view_manager.dart';
 part 'view_manager_bloc.freezed.dart';
@@ -386,42 +385,11 @@ class ViewManagerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // tec.dmPrint('ViewManagerWidget build()');
     return LayoutBuilder(
-      builder: (context, constraints) => BottomNavbarSheet(
-          child: _VMViewStack(
+      builder: (context, constraints) => _VMViewStack(
         vmState: state,
         constraints: constraints,
-      )),
+      ),
     );
-  }
-}
-
-///
-/// Bottom navigation sheet that expands or collapses
-///
-class BottomNavbarSheet extends StatelessWidget {
-  final Widget child;
-
-  const BottomNavbarSheet({Key key, this.child}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocListener<SelectionBloc, SelectionState>(
-        bloc: context.bloc<SelectionBloc>(),
-        // condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
-        listener: (context, state) {
-          if (state.isTextSelected) {
-            context.bloc<SheetManagerBloc>()
-              ..changeType(SheetType.selection)
-              ..changeSize(SheetSize.mini);
-          } else {
-            context.bloc<SheetManagerBloc>()
-              ..changeType(SheetType.main)
-              ..changeSize(SheetSize.mini);
-          }
-        },
-        child: SnapSheet(
-          body: child,
-        ));
   }
 }
 
