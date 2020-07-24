@@ -1,8 +1,12 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quill_delta/quill_delta.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:zefyr/zefyr.dart';
@@ -102,45 +106,60 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   ZefyrController _controller;
   ViewManagerBloc viewManagerBloc;
   SheetManagerBloc sheetManagerBloc;
+  Timer _saveTimer;
 
   Future<void> load() async {
     _item = await AppSettings.shared.userAccount.userDb.getItem(int.parse(widget.state.data));
 
     if (_item?.type == UserItemType.marginNote.index) {
-      Delta delta;
+      NotusDocument doc;
 
       // we're showing an existing marginNote
-      if (_item.info.startsWith('QuillDelta')) {
-      } else {
+      try {
+        doc = NotusDocument.fromJson(json.decode(_item.info) as List);
+      }
+      catch (_) {
         // old margin note - create a delta
-        delta = Delta();
+        final delta = Delta();
         for (final s in _item.info.trim().split('\n')) {
           if (s.isNotEmpty) {
             delta.insert(s);
           }
           delta.insert('\n');
         }
+        doc = NotusDocument.fromDelta(delta);
       }
 
       setState(() {
         _editMode = false;
-        _controller = ZefyrController(NotusDocument.fromDelta(delta))..addListener(_zephyrListener);
+        _controller = ZefyrController(doc)..addListener(_zephyrListener);
+        _controller.document.changes.listen((_) => _documentChange());
         _focusNode = FocusNode();
       });
     }
   }
 
+  void _documentChange() {
+    if (_saveTimer != null) {
+      _saveTimer.cancel();
+    }
+    _saveTimer = Timer(const Duration(seconds: 2), _saveDocument);
+  }
+
+  Future<void> _saveDocument() async {
+    _saveTimer = null;
+    _item = _item.copyWith(info: jsonEncode(_controller.document));
+    await AppSettings.shared.userAccount.userDb.saveItem(_item);
+  }
+
   void _zephyrListener() {
-    if (_editMode) {
-      debugPrint('editing');
-    } else {
+    if (!_editMode) {
       if (_controller.selection.baseOffset == _controller.selection.extentOffset) {
         // tap
         if (_selecting) {
           _selecting = false;
         } else {
           _toggleEditMode();
-          debugPrint('edit at ${_controller.selection.baseOffset}');
         }
       } else {
         _selecting = true;
@@ -150,6 +169,12 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
 
   @override
   void dispose() {
+    if (_saveTimer != null) {
+      _saveTimer.cancel();
+      _saveTimer = null;
+      _saveDocument();
+    }
+
     _controller?.removeListener(_zephyrListener);
     super.dispose();
   }
