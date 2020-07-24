@@ -60,6 +60,8 @@ PODS:
     - FMDB (~> 2.7.2)
   - tec_platform_util (0.0.1):
     - Flutter
+  - tec_web_view (0.0.1):
+    - Flutter
   - url_launcher (0.0.1):
     - Flutter
   - wakelock (0.0.1):
@@ -80,6 +82,7 @@ DEPENDENCIES:
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - tec_platform_util (from `.symlinks/plugins/tec_platform_util/ios`)
+  - tec_web_view (from `.symlinks/plugins/tec_web_view/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
   - wakelock (from `.symlinks/plugins/wakelock/ios`)
 
@@ -122,6 +125,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqflite/ios"
   tec_platform_util:
     :path: ".symlinks/plugins/tec_platform_util/ios"
+  tec_web_view:
+    :path: ".symlinks/plugins/tec_web_view/ios"
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
   wakelock:
@@ -149,6 +154,7 @@ SPEC CHECKSUMS:
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
   tec_platform_util: 7dd8310843a8c6118e27624e370bbeacc7a0cd3f
+  tec_web_view: 1fa4ae0861ce5f49367bfdd85385345d2e4e7688
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   wakelock: 0d4a70faf8950410735e3f61fb15d517c8a6efc4
 

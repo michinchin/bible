@@ -1,20 +1,16 @@
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:share/share.dart';
-import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_volumes/tec_volumes.dart';
+
 import 'package:tec_widgets/tec_widgets.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../../models/color_utils.dart';
 import '../../models/pref_item.dart';
-import '../../models/verses.dart';
 import '../../ui/sheet/snap_sheet.dart';
 import '../misc/color_picker.dart';
+import 'selection_sheet_model.dart';
 
 class SelectionSheet extends StatefulWidget {
   final SheetSize sheetSize;
@@ -28,46 +24,13 @@ class SelectionSheet extends StatefulWidget {
 }
 
 class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProviderStateMixin {
-  static const buttons = <String, IconData>{
-    'Learn': Icons.lightbulb_outline,
-    'Explore': FeatherIcons.compass,
-    'Compare': Icons.compare_arrows,
-    'Define': FeatherIcons.bookOpen,
-    // 'Copy': FeatherIcons.copy,
-    // 'Note': FeatherIcons.edit2,
-    'Audio': FeatherIcons.play,
-    'Save': FeatherIcons.bookmark,
-    'Print': FeatherIcons.printer,
-    'Text': FeatherIcons.messageCircle,
-    'Email': FeatherIcons.mail,
-    'Facebook': FeatherIcons.facebook,
-    'Twitter': FeatherIcons.twitter
-  };
-
-  static const medButtons = <String, IconData>{
-    'Compare': Icons.compare_arrows,
-    'Define': FeatherIcons.bookOpen,
-  };
-
-  static const keyButtons = <String, IconData>{
-    'Note': FeatherIcons.edit,
-    'Share': FeatherIcons.share,
-    // 'Learn': Icons.lightbulb_outline,
-    // 'Compare': FeatherIcons.compass
-  };
-
-  bool _showColorPicker;
-  bool _underlineMode;
-  bool _editMode;
-  int _colorIndex;
+  bool showColorPicker;
+  bool underlineMode;
 
   @override
   void initState() {
-    _editMode = false;
-    _showColorPicker = false;
-    _underlineMode = false;
-    _colorIndex = 0;
-   
+    showColorPicker = false;
+    underlineMode = false;
     super.initState();
   }
 
@@ -76,36 +39,113 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
     super.dispose();
   }
 
-  void buttonAction(String type) {
-    switch (type) {
-      case 'Share':
-        _share(context);
-        break;
-      default:
-        break;
-    }
-  }
-
   ///
-  /// PRIVATE FUNCTIONS
+  /// CHANGE MODES FOR SHEET
   ///
-
-  // TODO(abby): move to model?
-  Future<void> _share(BuildContext c) async {
-    final bloc = c.bloc<ViewManagerBloc>(); //ignore: close_sinks
-    final views = bloc.visibleViewsWithSelections.toList();
-    final refs = <Reference>[];
-    for (final v in views) {
-      refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
-    }
-    final first = refs[0];
-    final verses = await ChapterVerses.fetch(refForChapter: first);
-    await Share.share(ChapterVerses.formatForShare(refs, verses.data));
-  }
 
   void onShowColorPicker() {
     setState(() {
-      _showColorPicker = !_showColorPicker;
+      showColorPicker = !showColorPicker;
+    });
+  }
+
+  void onSwitchToUnderline() {
+    setState(() {
+      underlineMode = !underlineMode;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 15, right: 15),
+      child: Column(children: [
+        if (widget.sheetSize == SheetSize.mini)
+          Expanded(
+              child: _MiniView(
+            underlineMode: underlineMode,
+            onSwitchToUnderline: onSwitchToUnderline,
+          ))
+        else if (widget.sheetSize == SheetSize.medium) ...[
+          _MediumFullSheetItems(
+            isMediumView: true,
+            showColorPicker: showColorPicker,
+            onShowColorPicker: onShowColorPicker,
+            onSwitchToUnderline: onSwitchToUnderline,
+            underlineMode: underlineMode,
+          ),
+        ] else if (widget.sheetSize == SheetSize.full) ...[
+          _MediumFullSheetItems(
+            isMediumView: false,
+            showColorPicker: showColorPicker,
+            onShowColorPicker: onShowColorPicker,
+            onSwitchToUnderline: onSwitchToUnderline,
+            underlineMode: underlineMode,
+          ),
+          const Divider(color: Colors.transparent),
+          Expanded(
+            child: GridView.count(
+                crossAxisCount: 4,
+                padding: const EdgeInsets.only(top: 0),
+                children: [
+                  for (final each in SelectionSheetModel.buttons.keys) ...[
+                    GreyCircleButton(
+                      icon: SelectionSheetModel.buttons[each],
+                      onPressed: () {},
+                      title: each,
+                    ),
+                  ],
+                ]),
+          ),
+        ]
+      ]),
+    );
+  }
+}
+
+class _MediumFullSheetItems extends StatefulWidget {
+  final bool isMediumView;
+  final bool showColorPicker;
+  final bool underlineMode;
+
+  final VoidCallback onSwitchToUnderline;
+  final VoidCallback onShowColorPicker;
+
+  const _MediumFullSheetItems({
+    @required this.isMediumView,
+    @required this.showColorPicker,
+    @required this.underlineMode,
+    @required this.onShowColorPicker,
+    @required this.onSwitchToUnderline,
+  });
+
+  @override
+  __MediumFullSheetItemsState createState() => __MediumFullSheetItemsState();
+}
+
+class __MediumFullSheetItemsState extends State<_MediumFullSheetItems> {
+  int _colorChosen;
+  int _colorIndex;
+  bool _editMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _colorChosen = 0xff999999;
+    _colorIndex = 0;
+    _editMode = false;
+  }
+
+  void _setColor(int color) {
+    setState(() {
+      _colorChosen = color;
+    });
+  }
+
+  void _onEditColor(int colorIndex) {
+    widget.onShowColorPicker();
+    setState(() {
+      _colorIndex = colorIndex;
     });
   }
 
@@ -115,62 +155,24 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
     });
   }
 
-  void _onEditColor(int colorIndex) {
-    setState(() {
-      _showColorPicker = !_showColorPicker;
-      _colorIndex = colorIndex;
-    });
-  }
-
-  void onSwitchToUnderline() {
-    setState(() {
-      _underlineMode = !_underlineMode;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PrefItemsBloc, PrefItems>(
         bloc: context.bloc<PrefItemsBloc>(),
         builder: (context, state) {
-          // only grab custom color pref items
           final prefItems = state?.items?.where((i) => i.book >= 1 && i.book <= 4)?.toList() ?? [];
-          final underlineButton = GreyCircleButton(
-            icon: _underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
-            onPressed: onSwitchToUnderline,
-          );
-          final noColorButton = GreyCircleButton(
-            icon: Icons.format_color_reset,
-            onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
-                  type: HighlightType.clear,
-                )),
-          );
-          final expandButton = GreyCircleButton(
-            icon: Icons.keyboard_arrow_up,
-            onPressed: () => context.bloc<SheetManagerBloc>().changeSize(SheetSize.medium),
-          );
-
-          final defaultColors = <Color>[
-            Color(defaultColorIntForIndex(1)),
-            Color(defaultColorIntForIndex(2)),
-            Color(defaultColorIntForIndex(3)),
-            Color(defaultColorIntForIndex(4)),
-          ];
-
           final customColors = [for (final color in prefItems) Color(color.verse)];
-
-          final smallScreen = MediaQuery.of(context).size.width < 350;
-          final miniViewColors = smallScreen ? defaultColors.take(2) : defaultColors;
-          int colorChosen;
-
           final colors = [
             Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-              Expanded(child: noColorButton),
-              Expanded(child: underlineButton),
-              for (final color in defaultColors) ...[
+              Expanded(child: SelectionSheetModel.noColorButton(context)),
+              Expanded(
+                  child: SelectionSheetModel.underlineButton(
+                      underlineMode: widget.underlineMode,
+                      onSwitchToUnderline: widget.onSwitchToUnderline)),
+              for (final color in SelectionSheetModel.defaultColors) ...[
                 Expanded(
                   child: _ColorPickerButton(
-                    isForUnderline: _underlineMode,
+                    isForUnderline: widget.underlineMode,
                     color: color,
                   ),
                 ),
@@ -182,33 +184,37 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                for (final each in medButtons.keys) ...[
-                  Expanded(
-                    child: SheetButton(
-                      text: each,
-                      icon: medButtons[each],
-                      onPressed: () => buttonAction(each),
-                    ),
+                Expanded(
+                  child: SheetButton(
+                    text: SelectionSheetModel.medButtons.keys.first,
+                    icon: SelectionSheetModel.medButtons.values.first,
+                    onPressed: () => SelectionSheetModel.buttonAction(
+                        context, SelectionSheetModel.medButtons.keys.first),
                   ),
-                  if (buttons.keys.last != each) const SizedBox(width: 10)
-                ]
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SelectionSheetModel.defineButton(context),
+                ),
               ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                for (final each in keyButtons.keys) ...[
+                for (final each in SelectionSheetModel.keyButtons.keys) ...[
                   Expanded(
                     child: SheetButton(
-                        text: each, icon: keyButtons[each], onPressed: () => buttonAction(each)),
+                        text: each,
+                        icon: SelectionSheetModel.keyButtons[each],
+                        onPressed: () => SelectionSheetModel.buttonAction(context, each)),
                   ),
-                  if (buttons.keys.last != each) const SizedBox(width: 10)
+                  if (SelectionSheetModel.keyButtons.keys.last != each) const SizedBox(width: 10)
                 ]
               ],
             ),
           ];
           final mediumViewChildren = <Widget>[
-            if (_showColorPicker)
+            if (widget.showColorPicker)
               Row(
                 children: [
                   Expanded(
@@ -216,15 +222,15 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
                       height: 200,
                       child: ColorPicker(
                           showColorContainer: false,
-                          color: Color(prefItems[_colorIndex]?.verse ?? 0xff999999),
+                          color: Color(prefItems[_colorIndex]?.verse ?? _colorChosen),
                           onColorChanged: (c) {
-                            colorChosen = c.value;
                             context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-                                type: _underlineMode
+                                type: widget.underlineMode
                                     ? HighlightType.underline
                                     : HighlightType.highlight,
                                 isTrialMode: true,
-                                color: colorChosen));
+                                color: c.value));
+                            _setColor(c.value);
                           }),
                     ),
                   ),
@@ -243,14 +249,14 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
                         icon: Icons.done,
                         onPressed: () {
                           context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-                              type: _underlineMode
+                              type: widget.underlineMode
                                   ? HighlightType.underline
                                   : HighlightType.highlight,
-                              color: colorChosen));
+                              color: _colorChosen));
                           context.bloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
                               prefItem: PrefItem.from(
-                                  prefItems[_colorIndex].copyWith(verse: colorChosen))));
-                          onShowColorPicker();
+                                  prefItems[_colorIndex].copyWith(verse: _colorChosen))));
+                          widget.onShowColorPicker();
                         },
                       ),
                     ],
@@ -262,11 +268,11 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (customColors.isNotEmpty)
+                  if (tec.isNotNullOrEmpty(customColors))
                     for (var i = 0; i < 4; i++) ...[
                       Expanded(
                         child: _ColorPickerButton(
-                          isForUnderline: _underlineMode,
+                          isForUnderline: widget.underlineMode,
                           editMode: _editMode,
                           onEdit: () => _onEditColor(i),
                           color: customColors[i],
@@ -283,90 +289,67 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
               ),
             ]
           ];
-
-          final miniChildren = [
-            noColorButton,
-            underlineButton,
-            for (final color in miniViewColors) ...[
-              _ColorPickerButton(
-                isForUnderline: _underlineMode,
-                color: color,
-              ),
+          return Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 5,
+            runSpacing: 10,
+            children: [
+              ...mediumViewChildren,
+              if (widget.isMediumView && !widget.showColorPicker) ...sheetButtons
             ],
-            for (final button in keyButtons.keys) ...[
-              GreyCircleButton(
-                icon: keyButtons[button],
-                onPressed: () => buttonAction(button),
-              ),
-            ],
-            expandButton,
-          ];
-
-          Widget _miniView() => Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    for (final child in miniChildren)
-                      Expanded(
-                        child: child,
-                      )
-                  ]);
-
-          Widget _sheetItems({bool excludeSheetButtons = false}) => Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 5,
-                runSpacing: 10,
-                children: [
-                  ...mediumViewChildren,
-                  if (!excludeSheetButtons && !_showColorPicker) ...sheetButtons
-                ],
-              );
-          return Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15),
-            child: Column(children: [
-              if (widget.sheetSize == SheetSize.mini)
-                Expanded(child: _miniView())
-              else if (widget.sheetSize == SheetSize.medium) ...[
-                _sheetItems(),
-              ] else if (widget.sheetSize == SheetSize.full) ...[
-                _sheetItems(excludeSheetButtons: true),
-                const Divider(color: Colors.transparent),
-                Expanded(
-                  child: GridView.count(
-                      crossAxisCount: 4,
-                      padding: const EdgeInsets.only(top: 0),
-                      children: [
-                        for (final each in buttons.keys) ...[
-                          GreyCircleButton(
-                            icon: buttons[each],
-                            onPressed: () {},
-                            title: each,
-                          ),
-                        ],
-                      ]),
-                ),
-              ]
-            ]),
           );
         });
+  }
+}
+
+class _MiniView extends StatelessWidget {
+  final bool underlineMode;
+  final VoidCallback onSwitchToUnderline;
+  const _MiniView({@required this.underlineMode, @required this.onSwitchToUnderline});
+  @override
+  Widget build(BuildContext context) {
+    final smallScreen = MediaQuery.of(context).size.width < 350;
+    final miniViewColors =
+        smallScreen ? SelectionSheetModel.defaultColors.take(2) : SelectionSheetModel.defaultColors;
+
+    final miniChildren = [
+      SelectionSheetModel.noColorButton(context),
+      SelectionSheetModel.underlineButton(
+          underlineMode: underlineMode, onSwitchToUnderline: onSwitchToUnderline),
+      for (final color in miniViewColors) ...[
+        _ColorPickerButton(
+          isForUnderline: underlineMode,
+          color: color,
+        ),
+      ],
+      for (final button in SelectionSheetModel.keyButtons.keys) ...[
+        GreyCircleButton(
+          icon: SelectionSheetModel.keyButtons[button],
+          onPressed: () => SelectionSheetModel.buttonAction(context, button),
+        ),
+      ],
+      SelectionSheetModel.expandButton(context),
+    ];
+    return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          for (final child in miniChildren)
+            Expanded(
+              child: child,
+            )
+        ]);
   }
 }
 
 class _ColorPickerButton extends StatelessWidget {
   final bool isForUnderline;
   final Color color;
-  final bool deletionMode;
-  final VoidCallback onDeletion;
   final bool editMode;
   final VoidCallback onEdit;
 
   const _ColorPickerButton(
-      {@required this.color,
-      this.isForUnderline = false,
-      this.deletionMode = false,
-      this.editMode = false,
-      this.onDeletion,
-      this.onEdit})
+      {@required this.color, this.isForUnderline = false, this.editMode = false, this.onEdit})
       : assert(color != null);
 
   @override
@@ -376,9 +359,7 @@ class _ColorPickerButton extends StatelessWidget {
     return InkWell(
       customBorder: const CircleBorder(),
       onTap: () {
-        if (deletionMode) {
-          onDeletion();
-        } else if (editMode) {
+        if (editMode) {
           onEdit();
         } else {
           context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
@@ -413,13 +394,7 @@ class _ColorPickerButton extends StatelessWidget {
                   : null,
             ),
           ),
-          if (deletionMode)
-            Icon(
-              FeatherIcons.trash,
-              color: Theme.of(context).textColor.withOpacity(0.5),
-              size: width,
-            )
-          else if (editMode)
+          if (editMode)
             Icon(
               Icons.colorize,
               color: Theme.of(context).textColor.withOpacity(0.5),
