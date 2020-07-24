@@ -79,19 +79,14 @@ class SelectionSheetModel {
       );
 
   static Widget defineButton(BuildContext c) {
-    final bloc = c.bloc<ViewManagerBloc>(); //ignore: close_sinks
-    final views = bloc.visibleViewsWithSelections.toList();
-    final refs = <Reference>[];
-    for (final v in views) {
-      refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
-    }
+    final refs = _grabRefs(c);
     VoidCallback onPressed;
     var title = 'Web Search';
     var icon = FeatherIcons.compass;
-    String words;
     if (refs.length > 1) {
       onPressed = () => TecToast.show(c, 'Cannot search on multiple references');
     } else {
+      onPressed = () => defineWebSearch(c);
       final ref = refs[0];
 
       if (ref.word != 0 && ref.endWord != 9999) {
@@ -99,32 +94,10 @@ class SelectionSheetModel {
           //single word define
           title = 'Define';
           icon = FeatherIcons.bookOpen;
-          onPressed = () async {
-            final verses = await ChapterVerses.fetch(refForChapter: ref);
-            words = verses.data[ref.verse].split(' ')[ref.word - 1];
-            await defineWebSearch(c, words);
-          };
-        } else {
-          // multiple word define
-          onPressed = () async {
-            final verses = await ChapterVerses.fetch(refForChapter: ref);
-            words = verses.data[ref.verse].split(' ').getRange(ref.word - 1, ref.endWord).join(' ');
-            await defineWebSearch(c, words);
-          };
         }
-      } else {
-        onPressed = () async {
-          words = ref.label();
-          await defineWebSearch(c, words);
-        };
       }
     }
-
-    return SheetButton(
-      text: title,
-      icon: icon,
-      onPressed: onPressed,
-    );
+    return SheetButton(text: title, icon: icon, onPressed: onPressed);
   }
 
   static void buttonAction(BuildContext context, String type) {
@@ -152,7 +125,21 @@ class SelectionSheetModel {
     await Share.share(ChapterVerses.formatForShare(refs, verses.data));
   }
 
-  static Future<void> defineWebSearch(BuildContext c, String words) async {
+  static Future<void> defineWebSearch(BuildContext c) async {
+    final ref = _grabRefs(c).first;
+    final verses = await ChapterVerses.fetch(refForChapter: ref);
+    var words = '';
+    final verseArray = verses.data[ref.verse].split(' ');
+    if (ref.word != 0 && ref.endWord != 9999) {
+      if (ref.word == ref.endWord) {
+        words = verseArray[ref.word - 1];
+      } else if (verseArray.length > ref.word - 1 && verseArray.length > ref.endWord) {
+        words = verseArray.getRange(ref.word - 1, ref.endWord).join(' ');
+      }
+    } else {
+      words = ref.label();
+    }
+
     await showModalBottomSheet<void>(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         context: c,
@@ -161,6 +148,16 @@ class SelectionSheetModel {
         enableDrag: false,
         builder: (c) =>
             SizedBox(height: 3 * MediaQuery.of(c).size.height / 4, child: _DefineWebView(words)));
+  }
+
+  static List<Reference> _grabRefs(BuildContext c) {
+    final bloc = c.bloc<ViewManagerBloc>(); //ignore: close_sinks
+    final views = bloc.visibleViewsWithSelections.toList();
+    final refs = <Reference>[];
+    for (final v in views) {
+      refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
+    }
+    return refs;
   }
 }
 
