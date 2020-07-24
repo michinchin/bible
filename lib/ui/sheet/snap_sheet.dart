@@ -108,7 +108,6 @@ class _SnapSheetState extends State<SnapSheet> {
                 cornerRadius: 15,
                 duration: const Duration(milliseconds: 250),
                 addTopViewPaddingOnFullscreen: true,
-                parallaxSpec: const ParallaxSpec(),
                 listener: (s) {
                   onDragValue.value = s.extent;
                 },

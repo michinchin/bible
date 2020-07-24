@@ -26,12 +26,12 @@ class _VMViewStack extends StatelessWidget {
     var maximizedView =
         vmState.views.firstWhere((e) => e.uid == vmState.maximizedViewUid, orElse: () => null);
 
+    // tec.dmPrint('_VMViewStack build, maximizedView: ${maximizedView?.uid ?? 'none'}');
+
     // Is there a view with keyboard focus?
-    final uidOfViewWithKeyboardFocus = bloc?._viewWithKeyboardFocus;
-    var viewWithKeyboardFocus = tec.isNullOrZero(uidOfViewWithKeyboardFocus)
-        ? null
-        : vmState.views.firstWhere((e) => e.uid == uidOfViewWithKeyboardFocus, orElse: () => null);
-    if (uidOfViewWithKeyboardFocus != null && maximizedView != null) {
+    var viewWithKeyboardFocus =
+        vmState.views.firstWhere((e) => e.uid == bloc?._viewWithKeyboardFocus, orElse: () => null);
+    if (viewWithKeyboardFocus != null && maximizedView != null) {
       maximizedView = viewWithKeyboardFocus;
       viewWithKeyboardFocus = null;
     }
