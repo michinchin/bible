@@ -50,26 +50,29 @@ class _SnapSheetState extends State<SnapSheet> {
     return OrientationBuilder(builder: (context, orientation) {
       final snappings = _calculateHeightSnappings(orientation);
 
-      double _dragOpacityValue(double value, SheetSize size) {
+      double _dragOpacityValue(double value, SheetManagerState state) {
+        final size = state.size;
         // value should always approach 0
         // when reaches snapping point should be 1
         bool approxEqual(double a, double b) => (a * 100).round() == (b * 100).round();
 
-        if (approxEqual(value, snappings[size.index])) {
+        if (approxEqual(value, snappings[size.index]) || state.type == SheetType.collapsed) {
           return 1.0;
         }
-
+        var opacity = 1.0;
         if (value < snappings[size.index]) {
           //decreasing in height
-          final opacity = 1 -
-              (snappings[size.index] - value) / (snappings[size.index] - snappings[size.index - 1]);
-          return opacity <= 0 ? 0 : opacity;
+          if (size.index != 0) {
+            opacity = 1 -
+                (snappings[size.index] - value) /
+                    (snappings[size.index] - snappings[size.index - 1]);
+          }
         } else {
           // increasing in height
-          final opacity = 1 -
+          opacity = 1 -
               (value - snappings[size.index]) / (snappings[size.index + 1] - snappings[size.index]);
-          return opacity <= 0 ? 0 : opacity;
         }
+        return opacity <= 0 ? 0 : opacity;
       }
 
       // current sheet size
@@ -153,13 +156,14 @@ class _SnapSheetState extends State<SnapSheet> {
                     //       key: ValueKey(state.size.index), sheetSize: state.size);
                     //   break;
                     default:
-                      return Container();
+                      child = Container();
                   }
+
                   return ValueListenableBuilder<double>(
                       valueListenable: onDragValue ??= ValueNotifier<double>(snappings.first),
                       child: Container(height: MediaQuery.of(context).size.height, child: child),
                       builder: (_, value, c) =>
-                          Opacity(opacity: _dragOpacityValue(value, state.size), child: c));
+                          Opacity(opacity: _dragOpacityValue(value, state), child: c));
                 },
                 body: widget.body,
                 headerBuilder: (context, s) {

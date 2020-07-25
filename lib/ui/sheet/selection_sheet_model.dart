@@ -88,13 +88,10 @@ class SelectionSheetModel {
     } else {
       onPressed = () => defineWebSearch(c);
       final ref = refs[0];
-
-      if (ref.word != 0 && ref.endWord != 9999) {
-        if (ref.word == ref.endWord) {
-          //single word define
-          title = 'Define';
-          icon = FeatherIcons.bookOpen;
-        }
+      if (ref.word == ref.endWord) {
+        //single word define
+        title = 'Define';
+        icon = FeatherIcons.bookOpen;
       }
     }
     return SheetButton(text: title, icon: icon, onPressed: onPressed);
@@ -105,9 +102,9 @@ class SelectionSheetModel {
       case 'Share':
         share(context);
         break;
-      // case 'Define':
-      //   defineWebSearch(context);
-      //   break;
+      case 'Define':
+        defineWebSearch(context);
+        break;
       default:
         break;
     }
