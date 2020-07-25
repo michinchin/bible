@@ -1,25 +1,22 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:share/share.dart';
-
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_web_view/tec_web_view.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
+import '../../models/compare_results.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
-
 import '../../models/color_utils.dart';
 import '../../models/shared_types.dart';
 import '../../models/verses.dart';
-
+import 'compare_verse.dart';
 import 'snap_sheet.dart';
 
 class SelectionSheetModel {
@@ -105,6 +102,9 @@ class SelectionSheetModel {
       case 'Define':
         defineWebSearch(context);
         break;
+      case 'Compare':
+        compare(context);
+        break;
       default:
         break;
     }
@@ -145,6 +145,32 @@ class SelectionSheetModel {
         enableDrag: false,
         builder: (c) =>
             SizedBox(height: 3 * MediaQuery.of(c).size.height / 4, child: _DefineWebView(words)));
+  }
+
+  static Future<void> compare(BuildContext c) async {
+    final bloc = c.bloc<ViewManagerBloc>(); //ignore: close_sinks
+    final views = bloc.visibleViewsWithSelections.toList();
+    final refs = <Reference>[];
+    for (final v in views) {
+      refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
+    }
+    final ref = refs[0];
+    final compareResults =
+        await CompareResults.fetch(book: ref.book, chapter: ref.chapter, verse: ref.verse);
+
+    await showModalBottomSheet<void>(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        context: c,
+        useRootNavigator: true,
+        isScrollControlled: true,
+        enableDrag: false,
+        builder: (c) => SizedBox(
+              height: 3 * MediaQuery.of(c).size.height / 4,
+              child: CompareVerseScreen(
+                results: compareResults,
+                title: ref.label(),
+              ),
+            ));
   }
 
   static List<Reference> _grabRefs(BuildContext c) {
