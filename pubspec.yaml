@@ -68,7 +68,7 @@ dependencies:
     hosted:
       name: tec_html
       url: http://noah.tecarta.com:8100
-    version: ^3.0.6
+    version: ^3.0.7
   tec_util:
     hosted:
       name: tec_util
@@ -78,7 +78,7 @@ dependencies:
     hosted:
       name: tec_user_account
       url: http://noah.tecarta.com:8100
-    version: ^1.4.10
+    version: ^2.0.0
   tec_volumes:
     hosted:
       name: tec_volumes
@@ -93,15 +93,15 @@ dependencies:
     hosted:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
-    version: ^1.0.10
+    version: ^2.0.1
 
 # dependency_overrides:
-#  tec_widgets:
-#    path: ../shared/tec_widgets
-#  tec_html:
-#    path: ../shared/tec_html
-# tec_volumes:
-#   path: ../shared/tec_volumes
+  # tec_widgets:
+  #   path: ../shared/tec_widgets
+  # tec_html:
+  #   path: ../shared/tec_html
+  # tec_volumes:
+  #  path: ../shared/tec_volumes
 
 dev_dependencies:
   flutter_test:

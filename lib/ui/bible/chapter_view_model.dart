@@ -138,7 +138,7 @@ class BibleChapterViewModel {
       }
     }
 
-    return TecWidgetSpan(
+    return TaggableWidgetSpan(
       alignment: PlaceholderAlignment.middle,
       childWidth: widgetWidth,
       child: Transform.translate(
@@ -184,7 +184,7 @@ class BibleChapterViewModel {
       }
     }
 
-    return TecWidgetSpan(
+    return TaggableWidgetSpan(
       alignment: PlaceholderAlignment.top,
       childWidth: containerWidth,
       child: GestureDetector(
@@ -207,32 +207,6 @@ class BibleChapterViewModel {
         ),
         onTap: _onPress,
         onLongPress: _onPress,
-      ),
-    );
-  }
-
-  ///
-  /// Returns a TecWidgetSpan to add space between spans.
-  ///
-  InlineSpan spanForSpace(
-    BuildContext context,
-    double width,
-    Object tag, {
-    bool isDarkTheme,
-  }) {
-    return TecWidgetSpan(
-      alignment: PlaceholderAlignment.top,
-      childWidth: width,
-      child: GestureDetector(
-        onTapUp: (details) => tapUpDetails = details,
-        onTap: () => _widgetHitTest(context, tag),
-        child: Container(
-          width: width,
-          height: AppSettings.shared.contentTextScaleFactor.value * 18.0,
-          decoration: BoxDecoration(
-            color: _backgroundColor(isDarkTheme),
-          ),
-        ),
       ),
     );
   }
@@ -597,14 +571,12 @@ class TecHtmlBuildHelper {
         _isInVerse = false;
         _isInNonVerseElement = true;
         _nonVerseElementLevel = level;
-      }
-    }
 
-    // footnotes can be in verse text or section titles (non verse text)...
-    // see Psalm 119 NLT before verse 1
-    if (attrs.className.contains('FOOTNO')) {
-      _isInFootnote = true;
-      _href = attrs['href'];
+        if (attrs.className.contains('FOOTNO')) {
+          _isInFootnote = true;
+          _href = attrs['href'];
+        }
+      }
     }
 
     var word = _currentWord;

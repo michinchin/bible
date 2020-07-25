@@ -260,6 +260,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.2.1"
+  fixed_width_widget_span:
+    dependency: transitive
+    description:
+      name: fixed_width_widget_span
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
+    version: "1.0.0"
   fixnum:
     dependency: transitive
     description:
@@ -921,7 +928,7 @@ packages:
       name: tec_auto_size_text
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.0"
+    version: "2.0.0"
   tec_cache:
     dependency: "direct main"
     description:
@@ -949,7 +956,7 @@ packages:
       name: tec_html
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "3.0.6"
+    version: "3.0.7"
   tec_platform_util:
     dependency: transitive
     description:
@@ -970,14 +977,14 @@ packages:
       name: tec_selectable
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   tec_user_account:
     dependency: "direct main"
     description:
       name: tec_user_account
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.4.10"
+    version: "2.0.0"
   tec_util:
     dependency: "direct main"
     description:
@@ -1005,7 +1012,7 @@ packages:
       name: tec_widgets
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.10"
+    version: "2.0.1"
   term_glyph:
     dependency: transitive
     description:
