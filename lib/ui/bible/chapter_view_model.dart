@@ -515,6 +515,8 @@ class TecHtmlBuildHelper {
   var _wasInVerse = false;
 
   var _isInFootnote = false;
+  var _footnoteElementLevel = 0;
+
   var _isInXref = false;
   var _xrefElementLevel = 0;
 
@@ -533,8 +535,15 @@ class TecHtmlBuildHelper {
     if (_isInNonVerseElement && level <= _nonVerseElementLevel) {
       _isInNonVerseElement = false;
       _isInVerse = _wasInVerse;
+    }
+
+    if (_isInFootnote && level <= _footnoteElementLevel) {
       _isInFootnote = false;
       _href = null;
+    } else if (!_isInFootnote && attrs.className.contains('FOOTNO')) {
+      _isInFootnote = true;
+      _footnoteElementLevel = level;
+      _href = attrs['href'];
     }
 
     if (_isInXref && level <= _xrefElementLevel) {
@@ -571,11 +580,6 @@ class TecHtmlBuildHelper {
         _isInVerse = false;
         _isInNonVerseElement = true;
         _nonVerseElementLevel = level;
-
-        if (attrs.className.contains('FOOTNO')) {
-          _isInFootnote = true;
-          _href = attrs['href'];
-        }
       }
     }
 
