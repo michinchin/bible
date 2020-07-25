@@ -64,29 +64,31 @@ class BibleChapterViewModel {
   // ignore: use_to_and_as_if_applicable
   TecHtmlBuildHelper tecHtmlBuildHelper() => TecHtmlBuildHelper(this);
 
-  // maintain a list of keys for footnotes, margin notes
-  final widgetKeys = <String, GlobalKey>{};
-  TapUpDetails tapUpDetails;
+  // Maintain a list of keys for footnotes, margin notes, ...
+  final _widgetKeys = <String, GlobalKey>{};
+
+  TapUpDetails _tapUpDetails;
   var _marginNoteVerse = 0;
+  String _currentFootnoteHref;
 
   Color _backgroundColor(bool isDarkTheme) {
     return isDarkTheme ? Colors.black : Colors.white;
   }
 
-  // only call widgetHitTest from onTap (and set tapUpDetails in onTapUp)
+  // only call widgetHitTest from onTap (and set _tapUpDetails in onTapUp)
   void _widgetHitTest(BuildContext context, Object tag) {
     final padding = MediaQuery.of(context).devicePixelRatio * 2.5;
 
     if (tag is _VerseTag) {
-      if (_selectedVerses.isEmpty && tapUpDetails != null) {
-        final x = tapUpDetails.globalPosition.dx;
-        final y = tapUpDetails.globalPosition.dy;
+      if (_selectedVerses.isEmpty && _tapUpDetails != null) {
+        final x = _tapUpDetails.globalPosition.dx;
+        final y = _tapUpDetails.globalPosition.dy;
 
         // clear current details
-        tapUpDetails = null;
+        _tapUpDetails = null;
 
-        for (final key in widgetKeys.keys) {
-          final renderBox = widgetKeys[key].currentContext?.findRenderObject();
+        for (final key in _widgetKeys.keys) {
+          final renderBox = _widgetKeys[key].currentContext?.findRenderObject();
           if (renderBox is RenderBox) {
             final position = renderBox.localToGlobal(Offset.zero);
 
@@ -101,9 +103,9 @@ class BibleChapterViewModel {
                 y <= (position.dy + renderBox.size.height + padding);
 
             if (hit) {
-              if (widgetKeys[key].currentWidget is GestureDetector) {
+              if (_widgetKeys[key].currentWidget is GestureDetector) {
                 // this is a widget hit - execute the tap...
-                (widgetKeys[key].currentWidget as GestureDetector).onTap();
+                (_widgetKeys[key].currentWidget as GestureDetector).onTap();
                 return;
               }
             }
@@ -222,60 +224,47 @@ class BibleChapterViewModel {
     TextStyle selectedTextStyle, {
     bool isDarkTheme,
   }) {
-    if (tag is _VerseTag && tag.isInFootnote && text != ' ') {
-      // assign a unique key for this footnote
-      // this can (is) called multiple times per footnote - just create one key
-      if (!widgetKeys.containsKey('${tag.verse}-${tag.word}')) {
-        widgetKeys['${tag.verse}-${tag.word}'] = GlobalKey();
+    if (tag is _VerseTag && tag.isInFootnote) {
+      if (tag.href != _currentFootnoteHref) {
+        _currentFootnoteHref = tag.href;
+
+        // Assign a unique key for this footnote.
+        final key = '${tag.verse}-${tag.word}';
+        _widgetKeys[key] ??= GlobalKey();
+        return _footnoteSpan(context, style, tag, _widgetKeys[key], isDarkTheme);
       }
 
-      return _footnoteSpan(
-          context, style, tag, widgetKeys['${tag.verse}-${tag.word}'], isDarkTheme);
+      return null;
     }
 
     if (tag is _VerseTag) {
       final recognizer = tag.verse == null ? null : TapGestureRecognizer();
-      recognizer?.onTapUp = (details) => tapUpDetails = details;
+      recognizer?.onTapUp = (details) => _tapUpDetails = details;
       recognizer?.onTap = () => _widgetHitTest(context, tag);
 
       // We're building a list of one or more spans...
       final spans = <InlineSpan>[];
 
-      // local function to add a margin not icon if there is a margin note on this verse
-      void _addMarginNote() {
-        // margin note icons are placed before the first "inVerse" span of a verse...
-        if (_marginNoteVerse != tag.verse && tag.isInVerse) {
-          _marginNoteVerse = tag.verse;
+      // Margin note icons are placed before the first "inVerse" span of a verse...
+      if (tag.verse != null && _marginNoteVerse != tag.verse && tag.isInVerse) {
+        _marginNoteVerse = tag.verse;
 
-          if (marginNotes().hasMarginNoteForVerse(_marginNoteVerse)) {
-            // assign a unique key for this margin note
-            // this can (is) called multiple times per margin note - just create one key
-            if (!widgetKeys.containsKey('mn${tag.verse}')) {
-              widgetKeys['mn${tag.verse}'] = GlobalKey();
-            }
-
-            spans.add(_marginNoteSpan(
-              context,
-              style,
-              tag,
-              widgetKeys['mn${tag.verse}'],
-              isDarkTheme,
-            ));
-          }
+        if (marginNotes().hasMarginNoteForVerse(_marginNoteVerse)) {
+          // Assign a unique key for this margin note.
+          final key = 'mn${tag.verse}';
+          _widgetKeys[key] ??= GlobalKey();
+          spans.add(_marginNoteSpan(context, style, tag, _widgetKeys[key], isDarkTheme));
         }
       }
 
       // If not in trial mode, and this whole verse is selected, just
       // return a span with the selected text style.
       if (!_isSelectionTrialMode && _selectedVerses.contains(tag.verse)) {
-        _addMarginNote();
-
         final textSpan = TaggableTextSpan(
             text: text,
             style: tag.isInVerse ? _merge(style, selectedTextStyle) : style,
             tag: tag,
             recognizer: recognizer);
-
         if (spans.isEmpty) {
           return textSpan;
         } else {
@@ -313,8 +302,6 @@ class BibleChapterViewModel {
             return const TextSpan(text: 'FAILED!');
           }
         }
-
-        _addMarginNote();
 
         // Iterate through all the highlights for the words in the tag...
         for (final highlight
