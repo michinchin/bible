@@ -448,10 +448,6 @@ class _BibleHtmlState extends State<_BibleHtml> {
                       context, text, style, tag, selectedTextStyle,
                       isDarkTheme: isDarkTheme),
 
-                  // Rendering CSS padding/margin to a WidgetSpan:
-                  spanForSpace: (width, tag) =>
-                      _viewModel.spanForSpace(context, width, tag, isDarkTheme: isDarkTheme),
-
                   // Word range selection related:
                   selectable: !kIsWeb && !_viewModel.hasVersesSelected,
                   selectionColor: selectionColor,
