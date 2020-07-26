@@ -1,3 +1,4 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -56,19 +57,31 @@ Future<void> main() async {
 ///
 void _registerViewTypes() {
   ViewManager.shared
-    ..register(bibleChapterType, title: 'Bible', scaffoldBuilder: bibleChapterViewBuilder)
-    ..register(noteViewTypeName,
-        title: 'Note', bodyBuilder: notesViewBuilder, actionsBuilder: defaultActionsBuilder)
     ..register(
-      marginNoteViewTypeName,
+      bibleChapterType,
+      title: 'Bible',
+      scaffoldBuilder: bibleChapterViewBuilder,
+      icon: FeatherIcons.book,
+    )
+    ..register(
+      noteViewType,
+      title: 'Note',
+      bodyBuilder: notesViewBuilder,
+      actionsBuilder: defaultActionsBuilder,
+      icon: FeatherIcons.edit,
+    )
+    ..register(
+      marginNoteViewType,
       title: null,
       scaffoldBuilder: marginNoteScaffoldBuilder,
+      icon: TecIcons.marginNoteOutline,
     )
     ..register(
       testViewType,
       title: 'Test View',
       bodyBuilder: testViewBuilder,
       actionsBuilder: defaultActionsBuilder,
+      icon: FeatherIcons.plusSquare,
     );
 }
 

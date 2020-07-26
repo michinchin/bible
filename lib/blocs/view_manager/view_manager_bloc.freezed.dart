@@ -13,7 +13,7 @@ class _$ViewManagerEventTearOff {
   const _$ViewManagerEventTearOff();
 
 // ignore: unused_element
-  _Add add({@required String type, int position, String data}) {
+  _Add add({@required String type, int position, Map<String, dynamic> data}) {
     return _Add(
       type: type,
       position: position,
@@ -65,7 +65,7 @@ class _$ViewManagerEventTearOff {
   }
 
 // ignore: unused_element
-  _SetData setData({int uid, String data}) {
+  _SetData setData({int uid, Map<String, dynamic> data}) {
     return _SetData(
       uid: uid,
       data: data,
@@ -79,25 +79,25 @@ const $ViewManagerEvent = _$ViewManagerEventTearOff();
 mixin _$ViewManagerEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(String type, int position, String data),
+    @required Result add(String type, int position, Map<String, dynamic> data),
     @required Result remove(int uid),
     @required Result maximize(int uid),
     @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
-    @required Result setData(int uid, String data),
+    @required Result setData(int uid, Map<String, dynamic> data),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(String type, int position, String data),
+    Result add(String type, int position, Map<String, dynamic> data),
     Result remove(int uid),
     Result maximize(int uid),
     Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
-    Result setData(int uid, String data),
+    Result setData(int uid, Map<String, dynamic> data),
     @required Result orElse(),
   });
   @optionalTypeArgs
@@ -143,7 +143,7 @@ class _$ViewManagerEventCopyWithImpl<$Res>
 abstract class _$AddCopyWith<$Res> {
   factory _$AddCopyWith(_Add value, $Res Function(_Add) then) =
       __$AddCopyWithImpl<$Res>;
-  $Res call({String type, int position, String data});
+  $Res call({String type, int position, Map<String, dynamic> data});
 }
 
 class __$AddCopyWithImpl<$Res> extends _$ViewManagerEventCopyWithImpl<$Res>
@@ -163,7 +163,7 @@ class __$AddCopyWithImpl<$Res> extends _$ViewManagerEventCopyWithImpl<$Res>
     return _then(_Add(
       type: type == freezed ? _value.type : type as String,
       position: position == freezed ? _value.position : position as int,
-      data: data == freezed ? _value.data : data as String,
+      data: data == freezed ? _value.data : data as Map<String, dynamic>,
     ));
   }
 }
@@ -177,7 +177,7 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   @override
   final int position;
   @override
-  final String data;
+  final Map<String, dynamic> data;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -221,14 +221,14 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(String type, int position, String data),
+    @required Result add(String type, int position, Map<String, dynamic> data),
     @required Result remove(int uid),
     @required Result maximize(int uid),
     @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
-    @required Result setData(int uid, String data),
+    @required Result setData(int uid, Map<String, dynamic> data),
   }) {
     assert(add != null);
     assert(remove != null);
@@ -244,14 +244,14 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(String type, int position, String data),
+    Result add(String type, int position, Map<String, dynamic> data),
     Result remove(int uid),
     Result maximize(int uid),
     Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
-    Result setData(int uid, String data),
+    Result setData(int uid, Map<String, dynamic> data),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -306,12 +306,14 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
 }
 
 abstract class _Add implements ViewManagerEvent {
-  const factory _Add({@required String type, int position, String data}) =
-      _$_Add;
+  const factory _Add(
+      {@required String type,
+      int position,
+      Map<String, dynamic> data}) = _$_Add;
 
   String get type;
   int get position;
-  String get data;
+  Map<String, dynamic> get data;
   _$AddCopyWith<_Add> get copyWith;
 }
 
@@ -377,14 +379,14 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(String type, int position, String data),
+    @required Result add(String type, int position, Map<String, dynamic> data),
     @required Result remove(int uid),
     @required Result maximize(int uid),
     @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
-    @required Result setData(int uid, String data),
+    @required Result setData(int uid, Map<String, dynamic> data),
   }) {
     assert(add != null);
     assert(remove != null);
@@ -400,14 +402,14 @@ class _$_Remove with DiagnosticableTreeMixin implements _Remove {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(String type, int position, String data),
+    Result add(String type, int position, Map<String, dynamic> data),
     Result remove(int uid),
     Result maximize(int uid),
     Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
-    Result setData(int uid, String data),
+    Result setData(int uid, Map<String, dynamic> data),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -530,14 +532,14 @@ class _$_Maximize with DiagnosticableTreeMixin implements _Maximize {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(String type, int position, String data),
+    @required Result add(String type, int position, Map<String, dynamic> data),
     @required Result remove(int uid),
     @required Result maximize(int uid),
     @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
-    @required Result setData(int uid, String data),
+    @required Result setData(int uid, Map<String, dynamic> data),
   }) {
     assert(add != null);
     assert(remove != null);
@@ -553,14 +555,14 @@ class _$_Maximize with DiagnosticableTreeMixin implements _Maximize {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(String type, int position, String data),
+    Result add(String type, int position, Map<String, dynamic> data),
     Result remove(int uid),
     Result maximize(int uid),
     Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
-    Result setData(int uid, String data),
+    Result setData(int uid, Map<String, dynamic> data),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -660,14 +662,14 @@ class _$_Restore with DiagnosticableTreeMixin implements _Restore {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(String type, int position, String data),
+    @required Result add(String type, int position, Map<String, dynamic> data),
     @required Result remove(int uid),
     @required Result maximize(int uid),
     @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
-    @required Result setData(int uid, String data),
+    @required Result setData(int uid, Map<String, dynamic> data),
   }) {
     assert(add != null);
     assert(remove != null);
@@ -683,14 +685,14 @@ class _$_Restore with DiagnosticableTreeMixin implements _Restore {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(String type, int position, String data),
+    Result add(String type, int position, Map<String, dynamic> data),
     Result remove(int uid),
     Result maximize(int uid),
     Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
-    Result setData(int uid, String data),
+    Result setData(int uid, Map<String, dynamic> data),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -822,14 +824,14 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(String type, int position, String data),
+    @required Result add(String type, int position, Map<String, dynamic> data),
     @required Result remove(int uid),
     @required Result maximize(int uid),
     @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
-    @required Result setData(int uid, String data),
+    @required Result setData(int uid, Map<String, dynamic> data),
   }) {
     assert(add != null);
     assert(remove != null);
@@ -845,14 +847,14 @@ class _$_Move with DiagnosticableTreeMixin implements _Move {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(String type, int position, String data),
+    Result add(String type, int position, Map<String, dynamic> data),
     Result remove(int uid),
     Result maximize(int uid),
     Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
-    Result setData(int uid, String data),
+    Result setData(int uid, Map<String, dynamic> data),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -986,14 +988,14 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(String type, int position, String data),
+    @required Result add(String type, int position, Map<String, dynamic> data),
     @required Result remove(int uid),
     @required Result maximize(int uid),
     @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
-    @required Result setData(int uid, String data),
+    @required Result setData(int uid, Map<String, dynamic> data),
   }) {
     assert(add != null);
     assert(remove != null);
@@ -1009,14 +1011,14 @@ class _$_SetWidth with DiagnosticableTreeMixin implements _SetWidth {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(String type, int position, String data),
+    Result add(String type, int position, Map<String, dynamic> data),
     Result remove(int uid),
     Result maximize(int uid),
     Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
-    Result setData(int uid, String data),
+    Result setData(int uid, Map<String, dynamic> data),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -1152,14 +1154,14 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(String type, int position, String data),
+    @required Result add(String type, int position, Map<String, dynamic> data),
     @required Result remove(int uid),
     @required Result maximize(int uid),
     @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
-    @required Result setData(int uid, String data),
+    @required Result setData(int uid, Map<String, dynamic> data),
   }) {
     assert(add != null);
     assert(remove != null);
@@ -1175,14 +1177,14 @@ class _$_SetHeight with DiagnosticableTreeMixin implements _SetHeight {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(String type, int position, String data),
+    Result add(String type, int position, Map<String, dynamic> data),
     Result remove(int uid),
     Result maximize(int uid),
     Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
-    Result setData(int uid, String data),
+    Result setData(int uid, Map<String, dynamic> data),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -1247,7 +1249,7 @@ abstract class _SetHeight implements ViewManagerEvent {
 abstract class _$SetDataCopyWith<$Res> {
   factory _$SetDataCopyWith(_SetData value, $Res Function(_SetData) then) =
       __$SetDataCopyWithImpl<$Res>;
-  $Res call({int uid, String data});
+  $Res call({int uid, Map<String, dynamic> data});
 }
 
 class __$SetDataCopyWithImpl<$Res> extends _$ViewManagerEventCopyWithImpl<$Res>
@@ -1265,7 +1267,7 @@ class __$SetDataCopyWithImpl<$Res> extends _$ViewManagerEventCopyWithImpl<$Res>
   }) {
     return _then(_SetData(
       uid: uid == freezed ? _value.uid : uid as int,
-      data: data == freezed ? _value.data : data as String,
+      data: data == freezed ? _value.data : data as Map<String, dynamic>,
     ));
   }
 }
@@ -1276,7 +1278,7 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
   @override
   final int uid;
   @override
-  final String data;
+  final Map<String, dynamic> data;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -1315,14 +1317,14 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result add(String type, int position, String data),
+    @required Result add(String type, int position, Map<String, dynamic> data),
     @required Result remove(int uid),
     @required Result maximize(int uid),
     @required Result restore(),
     @required Result move(int fromPosition, int toPosition),
     @required Result setWidth(int position, double width),
     @required Result setHeight(int position, double height),
-    @required Result setData(int uid, String data),
+    @required Result setData(int uid, Map<String, dynamic> data),
   }) {
     assert(add != null);
     assert(remove != null);
@@ -1338,14 +1340,14 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result add(String type, int position, String data),
+    Result add(String type, int position, Map<String, dynamic> data),
     Result remove(int uid),
     Result maximize(int uid),
     Result restore(),
     Result move(int fromPosition, int toPosition),
     Result setWidth(int position, double width),
     Result setHeight(int position, double height),
-    Result setData(int uid, String data),
+    Result setData(int uid, Map<String, dynamic> data),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -1400,10 +1402,10 @@ class _$_SetData with DiagnosticableTreeMixin implements _SetData {
 }
 
 abstract class _SetData implements ViewManagerEvent {
-  const factory _SetData({int uid, String data}) = _$_SetData;
+  const factory _SetData({int uid, Map<String, dynamic> data}) = _$_SetData;
 
   int get uid;
-  String get data;
+  Map<String, dynamic> get data;
   _$SetDataCopyWith<_SetData> get copyWith;
 }
 
@@ -1420,7 +1422,7 @@ class _$ViewStateTearOff {
       String type,
       double preferredWidth,
       double preferredHeight,
-      String data}) {
+      Map<String, dynamic> data}) {
     return _ViewState(
       uid: uid,
       type: type,
@@ -1439,7 +1441,7 @@ mixin _$ViewState {
   String get type;
   double get preferredWidth;
   double get preferredHeight;
-  String get data;
+  Map<String, dynamic> get data;
 
   Map<String, dynamic> toJson();
   $ViewStateCopyWith<ViewState> get copyWith;
@@ -1453,7 +1455,7 @@ abstract class $ViewStateCopyWith<$Res> {
       String type,
       double preferredWidth,
       double preferredHeight,
-      String data});
+      Map<String, dynamic> data});
 }
 
 class _$ViewStateCopyWithImpl<$Res> implements $ViewStateCopyWith<$Res> {
@@ -1480,7 +1482,7 @@ class _$ViewStateCopyWithImpl<$Res> implements $ViewStateCopyWith<$Res> {
       preferredHeight: preferredHeight == freezed
           ? _value.preferredHeight
           : preferredHeight as double,
-      data: data == freezed ? _value.data : data as String,
+      data: data == freezed ? _value.data : data as Map<String, dynamic>,
     ));
   }
 }
@@ -1495,7 +1497,7 @@ abstract class _$ViewStateCopyWith<$Res> implements $ViewStateCopyWith<$Res> {
       String type,
       double preferredWidth,
       double preferredHeight,
-      String data});
+      Map<String, dynamic> data});
 }
 
 class __$ViewStateCopyWithImpl<$Res> extends _$ViewStateCopyWithImpl<$Res>
@@ -1523,7 +1525,7 @@ class __$ViewStateCopyWithImpl<$Res> extends _$ViewStateCopyWithImpl<$Res>
       preferredHeight: preferredHeight == freezed
           ? _value.preferredHeight
           : preferredHeight as double,
-      data: data == freezed ? _value.data : data as String,
+      data: data == freezed ? _value.data : data as Map<String, dynamic>,
     ));
   }
 }
@@ -1549,7 +1551,7 @@ class _$_ViewState with DiagnosticableTreeMixin implements _ViewState {
   @override
   final double preferredHeight;
   @override
-  final String data;
+  final Map<String, dynamic> data;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -1611,7 +1613,7 @@ abstract class _ViewState implements ViewState {
       String type,
       double preferredWidth,
       double preferredHeight,
-      String data}) = _$_ViewState;
+      Map<String, dynamic> data}) = _$_ViewState;
 
   factory _ViewState.fromJson(Map<String, dynamic> json) =
       _$_ViewState.fromJson;
@@ -1625,7 +1627,7 @@ abstract class _ViewState implements ViewState {
   @override
   double get preferredHeight;
   @override
-  String get data;
+  Map<String, dynamic> get data;
   @override
   _$ViewStateCopyWith<_ViewState> get copyWith;
 }

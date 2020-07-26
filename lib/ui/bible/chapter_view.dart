@@ -31,12 +31,6 @@ Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size)
   return _PageableBibleView(state: state, size: size);
 }
 
-String bibleChapterTitleFromState(ViewState state) {
-  final bible = VolumesRepository.shared.bibleWithId(_bibleId);
-  final bcv = _ChapterData.fromJson(state.data).bcv ?? _initialReference;
-  return bible.titleWithHref('${bcv.book}/${bcv.chapter}');
-}
-
 class _PageableBibleView extends StatefulWidget {
   final ViewState state;
   final Size size;
@@ -83,7 +77,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
           if (bible != null) {
             final bcv = _initialReference.advancedBy(chapters: page, bible: bible);
             context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.setData(
-                uid: state.uid, data: tec.toJsonString(_ChapterData(bcv, page))));
+                uid: state.uid, data: _ChapterData(bcv, page).toJson()));
           }
         },
       ),
@@ -138,7 +132,12 @@ class _ChapterData {
   }
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{'bcv': bcv, 'page': page};
+    final bible = VolumesRepository.shared.bibleWithId(_bibleId);
+    final _bcv = bcv ?? _initialReference;
+    final abbreviation = (bible.abbreviation == null) ? '' : ' ${bible.abbreviation}';
+    final title = bible.titleWithHref('${_bcv.book}/${_bcv.chapter}$abbreviation}');
+
+    return <String, dynamic>{'bcv': bcv, 'page': page, 'title': title };
   }
 }
 

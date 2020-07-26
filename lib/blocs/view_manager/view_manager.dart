@@ -48,6 +48,7 @@ class ViewManager {
     ActionsBuilderWithViewState actionsBuilder,
     ViewSizeFunc minWidth,
     ViewSizeFunc minHeight,
+    IconData icon,
   }) {
     assert(tec.isNotNullOrEmpty(key) && (scaffoldBuilder != null || bodyBuilder != null));
     assert(!_types.containsKey(key));
@@ -59,10 +60,13 @@ class ViewManager {
       actionsBuilder,
       minWidth,
       minHeight,
+      icon,
     );
   }
 
   List<String> get types => _types.keys.toList();
+
+  IconData iconForType(String type) => _types[type]?.icon;
 
   String titleForType(String type) => _types[type]?.title;
 
@@ -100,6 +104,7 @@ class _ViewTypeAPI {
   final ActionsBuilderWithViewState actionsBuilder;
   final ViewSizeFunc minWidth;
   final ViewSizeFunc minHeight;
+  final IconData icon;
 
   const _ViewTypeAPI(
     this.title,
@@ -109,6 +114,7 @@ class _ViewTypeAPI {
     this.actionsBuilder,
     this.minWidth,
     this.minHeight,
+    this.icon,
   );
 }
 
@@ -183,7 +189,7 @@ Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
       final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
       final position = bloc?.indexOfView(viewUid) ?? -1;
       bloc?.add(ViewManagerEvent.add(
-          type: type, data: '', position: position == -1 ? null : position + 1));
+          type: type, data: <String, dynamic>{}, position: position == -1 ? null : position + 1));
     }),
   );
 }

@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quill_delta/quill_delta.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:zefyr/zefyr.dart';
@@ -18,7 +17,7 @@ import '../../models/app_settings.dart';
 import '../misc/view_actions.dart';
 import 'tec_image_delegate.dart';
 
-const marginNoteViewTypeName = 'MarginNoteView';
+const marginNoteViewType = 'MarginNoteView';
 
 Widget marginNoteScaffoldBuilder(BuildContext context, ViewState state, Size size) =>
     _MarginNoteView(state: state, size: size);
@@ -109,7 +108,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   Timer _saveTimer;
 
   Future<void> load() async {
-    _item = await AppSettings.shared.userAccount.userDb.getItem(int.parse(widget.state.data));
+    _item = await AppSettings.shared.userAccount.userDb.getItem(widget.state.data['id'] as int);
 
     if (_item?.type == UserItemType.marginNote.index) {
       NotusDocument doc;

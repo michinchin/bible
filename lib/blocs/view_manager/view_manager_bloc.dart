@@ -234,7 +234,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     }
   }
 
-  ViewManagerState _add(String type, int position, String data) {
+  ViewManagerState _add(String type, int position, Map<String, dynamic> data) {
     final nextUid = (state.nextUid ?? 1);
     final viewState = ViewState(uid: nextUid, type: type, data: data);
     final newViews = List.of(state.views); // shallow copy
@@ -291,7 +291,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     return ViewManagerState(newViews, state.maximizedViewUid, state.nextUid);
   }
 
-  ViewManagerState _setData(int uid, String data) {
+  ViewManagerState _setData(int uid, Map<String, dynamic> data) {
     final position = indexOfView(uid);
     if (position < 0) return state;
     final newViews = List.of(state.views); // shallow copy
@@ -305,14 +305,14 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
 ///
 @freezed
 abstract class ViewManagerEvent with _$ViewManagerEvent {
-  const factory ViewManagerEvent.add({@required String type, int position, String data}) = _Add;
+  const factory ViewManagerEvent.add({@required String type, int position, Map<String, dynamic> data}) = _Add;
   const factory ViewManagerEvent.remove(int uid) = _Remove;
   const factory ViewManagerEvent.maximize(int uid) = _Maximize;
   const factory ViewManagerEvent.restore() = _Restore;
   const factory ViewManagerEvent.move({int fromPosition, int toPosition}) = _Move;
   const factory ViewManagerEvent.setWidth({int position, double width}) = _SetWidth;
   const factory ViewManagerEvent.setHeight({int position, double height}) = _SetHeight;
-  const factory ViewManagerEvent.setData({int uid, String data}) = _SetData;
+  const factory ViewManagerEvent.setData({int uid, Map<String, dynamic> data}) = _SetData;
 }
 
 ///
@@ -325,7 +325,7 @@ abstract class ViewState with _$ViewState {
     String type,
     double preferredWidth,
     double preferredHeight,
-    String data,
+    Map<String, dynamic> data,
   }) = _ViewState;
 
   /// fromJson

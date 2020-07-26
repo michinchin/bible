@@ -14,12 +14,11 @@ _$_ViewState _$_$_ViewStateFromJson(Map<String, dynamic> json) {
     type: json['type'] as String,
     preferredWidth: (json['preferredWidth'] as num)?.toDouble(),
     preferredHeight: (json['preferredHeight'] as num)?.toDouble(),
-    data: json['data'] as String,
+    data: json['data'] as Map<String, dynamic>,
   );
 }
 
-Map<String, dynamic> _$_$_ViewStateToJson(_$_ViewState instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$_$_ViewStateToJson(_$_ViewState instance) => <String, dynamic>{
       'uid': instance.uid,
       'type': instance.type,
       'preferredWidth': instance.preferredWidth,
@@ -30,8 +29,7 @@ Map<String, dynamic> _$_$_ViewStateToJson(_$_ViewState instance) =>
 _$_Views _$_$_ViewsFromJson(Map<String, dynamic> json) {
   return _$_Views(
     (json['views'] as List)
-        ?.map((dynamic e) =>
-            e == null ? null : ViewState.fromJson(e as Map<String, dynamic>))
+        ?.map((dynamic e) => e == null ? null : ViewState.fromJson(e as Map<String, dynamic>))
         ?.toList(),
     json['maximizedViewUid'] as int,
     json['nextUid'] as int,

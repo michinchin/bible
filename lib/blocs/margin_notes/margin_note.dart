@@ -53,5 +53,12 @@ class MarginNote extends UserItem {
 
     return '${ref.label()} Note';
   }
+
+  static Map<String, dynamic> createState(UserItem item) {
+    final data = <String, dynamic>{};
+    data['id'] = item.id;
+    data['title'] = getTitle(item);
+    return data;
+  }
 }
 

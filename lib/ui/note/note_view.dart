@@ -6,7 +6,7 @@ import '../../blocs/notes/note_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import 'tec_image_delegate.dart';
 
-const noteViewTypeName = 'NoteView';
+const noteViewType = 'NoteView';
 
 Widget noteViewBuilder(BuildContext context, int id) => NoteView(id);
 

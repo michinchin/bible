@@ -1000,11 +1000,11 @@ packages:
     source: hosted
     version: "1.0.0"
   tec_widgets:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
-      name: tec_widgets
-      url: "http://noah.tecarta.com:8100"
-    source: hosted
+      path: "../shared/tec_widgets"
+      relative: true
+    source: path
     version: "1.0.10"
   term_glyph:
     dependency: transitive

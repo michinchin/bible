@@ -30,8 +30,8 @@ void main() {
       build: () async => bloc,
       act: (bloc) {
         bloc
-          ..add(add('1'))
-          ..add(add('2'))
+          ..add(add(<String, dynamic>{'viewNum': 1}))
+          ..add(add(<String, dynamic>{'viewNum': 2}))
           ..add(move(1, 2))
           ..add(move(1, 2))
           ..add(remove(2))
@@ -39,11 +39,11 @@ void main() {
         return Future.value();
       },
       expect: <dynamic>[
-        ViewManagerState([bcv, view(2, '1')], 0, 3),
-        ViewManagerState([bcv, view(2, '1'), view(3, '2')], 0, 4),
-        ViewManagerState([bcv, view(3, '2'), view(2, '1')], 0, 4),
-        ViewManagerState([bcv, view(2, '1'), view(3, '2')], 0, 4),
-        ViewManagerState([bcv, view(3, '2')], 0, 4),
+        ViewManagerState([bcv, view(2, <String, dynamic>{'viewNum': 1})], 0, 3),
+        ViewManagerState([bcv, view(2, <String, dynamic>{'viewNum': 1}), view(3, <String, dynamic>{'viewNum': 2})], 0, 4),
+        ViewManagerState([bcv, view(3, <String, dynamic>{'viewNum': 2}), view(2, <String, dynamic>{'viewNum': 1})], 0, 4),
+        ViewManagerState([bcv, view(2, <String, dynamic>{'viewNum': 1}), view(3, <String, dynamic>{'viewNum': 2})], 0, 4),
+        ViewManagerState([bcv, view(3, <String, dynamic>{'viewNum': 2})], 0, 4),
         ViewManagerState([bcv], 0, 4),
       ],
     );
@@ -56,11 +56,11 @@ void main() {
 
 final bcv = ViewState(uid: 1, type: 'BibleChapter');
 
-ViewManagerEvent add(String data) => ViewManagerEvent.add(type: 'test', data: data);
+ViewManagerEvent add(Map<String, dynamic> data) => ViewManagerEvent.add(type: 'test', data: data);
 
 ViewManagerEvent move(int from, int to) =>
     ViewManagerEvent.move(fromPosition: from, toPosition: to);
 
 ViewManagerEvent remove(int position) => ViewManagerEvent.remove(position);
 
-ViewState view(int uid, String data) => ViewState(uid: uid, type: 'test', data: data);
+ViewState view(int uid, Map<String, dynamic> data) => ViewState(uid: uid, type: 'test', data: data);

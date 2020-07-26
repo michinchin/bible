@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../bible/chapter_view.dart';
 
 Future<void> showWindowDialog({BuildContext context, Widget Function(BuildContext) builder}) =>
     showDialog<void>(
@@ -92,20 +91,19 @@ class WindowManager extends StatelessWidget {
   Iterable<Widget> _generateOffScreenItems(BuildContext context, int viewUid) {
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     final vm = ViewManager.shared;
-    final iconMap = <String, IconData>{
-      'Bible': FeatherIcons.book,
-      'Note': FeatherIcons.edit,
-      'Test View': FeatherIcons.plusSquare
-    };
-
     final items = <Widget>[];
     for (final each in bloc.state.views) {
       if (!bloc.isViewVisible(each.uid)) {
-        var title = vm.titleForType(each.type);
-        if (each.type == 'BibleChapter') {
-          title = bibleChapterTitleFromState(each);
+        String title;
+
+        if (each.data != null && each.data.keys.contains('title')) {
+          title = each.data['title'] as String;
         }
-        items.add(_menuItem(context, iconMap[vm.titleForType(each.type)], '$title', () {
+        else {
+          title = vm.titleForType(each.type);
+        }
+
+        items.add(_menuItem(context, vm.iconForType(each.type), '$title', () {
           if (bloc.state.maximizedViewUid == viewUid) {
             bloc?.add(
                 ViewManagerEvent.move(fromPosition: bloc.indexOfView(each.uid), toPosition: 0));
@@ -124,22 +122,19 @@ class WindowManager extends StatelessWidget {
 
   Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
     final vm = ViewManager.shared;
-    final iconMap = <String, IconData>{
-      'Bible': FeatherIcons.book,
-      'Note': FeatherIcons.edit,
-      'Test View': FeatherIcons.plusSquare
-    };
     return vm.types.map<Widget>((type) {
       final title = vm.titleForType(type);
       if (title == null) {
+        // null titles are views that cannot be created from the menu
         return Container();
       }
-      return _menuItem(context, iconMap[title], '${vm.titleForType(type)}', () {
+
+      return _menuItem(context, vm.iconForType(type), '${vm.titleForType(type)}', () {
         Navigator.of(context).maybePop();
         final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
         final position = bloc?.indexOfView(viewUid) ?? -1;
         bloc?.add(ViewManagerEvent.add(
-            type: type, data: '', position: position == -1 ? null : position + 1));
+            type: type, data: <String, dynamic>{}, position: position == -1 ? null : position + 1));
       });
     });
   }
