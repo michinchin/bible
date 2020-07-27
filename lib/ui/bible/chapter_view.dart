@@ -253,6 +253,8 @@ class _ChapterViewState extends State<_ChapterView> {
     _html ??= _env.html(
       htmlFragment: widget.html,
       fontSizePercent: (_contentScaleFactor * 100.0).round(),
+      marginLeft: '0px',
+      marginRight: '0px',
       marginTop: '0px',
       marginBottom: '60px',
       vendorFolder: (widget.baseUrl?.startsWith('http') ?? false)
