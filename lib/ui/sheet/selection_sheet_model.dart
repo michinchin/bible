@@ -9,11 +9,11 @@ import 'package:tec_web_view/tec_web_view.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
-import '../../models/compare_results.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/color_utils.dart';
+import '../../models/compare_results.dart';
 import '../../models/shared_types.dart';
 import '../../models/verses.dart';
 import 'compare_verse.dart';

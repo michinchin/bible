@@ -77,7 +77,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
           if (bible != null) {
             final bcv = _initialReference.advancedBy(chapters: page, bible: bible);
             context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.setData(
-                uid: state.uid, data: _ChapterData(bcv, page).toJson()));
+                uid: state.uid, data: tec.toJsonString(_ChapterData(bcv, page).toJson())));
           }
         },
       ),
@@ -96,17 +96,21 @@ Widget _titleBuilder(BuildContext context, Key pageableViewStateKey, ViewState s
     onPressed: () async {
       final bcv = await navigate(context);
       if (bcv != null) {
-        final key = tec.as<GlobalKey<PageableViewState>>(pageableViewStateKey);
-        final pageController = key?.currentState?.pageController;
-        if (pageController != null) {
-          final _bible = VolumesRepository.shared.bibleWithId(_bibleId);
-          final page = _initialReference.chaptersTo(bcv, bible: _bible);
-          if (page == null) {
-            tec.dmPrint('bibleChapterTitleBuilder unable to navigate to $bcv');
-          } else {
-            pageController.jumpToPage(page);
+        // small delay to allow the nav popup to clean up before we navigate
+        // looks cleaner...
+        Future.delayed(const Duration(milliseconds: 350), () {
+          final key = tec.as<GlobalKey<PageableViewState>>(pageableViewStateKey);
+          final pageController = key?.currentState?.pageController;
+          if (pageController != null) {
+            final _bible = VolumesRepository.shared.bibleWithId(_bibleId);
+            final page = _initialReference.chaptersTo(bcv, bible: _bible);
+            if (page == null) {
+              tec.dmPrint('bibleChapterTitleBuilder unable to navigate to $bcv');
+            } else {
+              pageController.jumpToPage(page);
+            }
           }
-        }
+        });
       }
     },
   );
@@ -135,7 +139,7 @@ class _ChapterData {
     final bible = VolumesRepository.shared.bibleWithId(_bibleId);
     final _bcv = bcv ?? _initialReference;
     final abbreviation = (bible.abbreviation == null) ? '' : ' ${bible.abbreviation}';
-    final title = bible.titleWithHref('${_bcv.book}/${_bcv.chapter}$abbreviation}');
+    final title = bible.titleWithHref('${_bcv.book}/${_bcv.chapter}$abbreviation');
 
     return <String, dynamic>{'bcv': bcv, 'page': page, 'title': title };
   }

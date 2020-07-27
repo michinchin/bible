@@ -137,7 +137,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                 return IntrinsicHeight(
                   child: Slider.adaptive(
                     min: 0.75,
-                    max: 2.0,
+                    max: 3.0,
                     onChanged: AppSettings.shared.contentTextScaleFactor.add,
                     value: percent,
                   ),
@@ -360,7 +360,7 @@ Future<_Fonts> _loadFonts() async {
     tec.dmPrint('TextSettings loadFonts failed with error: ${e.toString()}');
   }
 
-  //await Future.delayed(Duration(seconds: 5), () {});
+
 
   return _Fonts(fonts);
 }

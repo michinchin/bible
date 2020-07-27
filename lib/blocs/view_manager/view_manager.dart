@@ -189,7 +189,7 @@ Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
       final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
       final position = bloc?.indexOfView(viewUid) ?? -1;
       bloc?.add(ViewManagerEvent.add(
-          type: type, data: <String, dynamic>{}, position: position == -1 ? null : position + 1));
+          type: type, data: '', position: position == -1 ? null : position + 1));
     }),
   );
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -96,8 +98,9 @@ class WindowManager extends StatelessWidget {
       if (!bloc.isViewVisible(each.uid)) {
         String title;
 
-        if (each.data != null && each.data.keys.contains('title')) {
-          title = each.data['title'] as String;
+        final data = jsonDecode(each.data) as Map<String, dynamic>;
+        if (data != null && data.containsKey('title')) {
+          title = data['title'] as String;
         }
         else {
           title = vm.titleForType(each.type);
@@ -134,7 +137,7 @@ class WindowManager extends StatelessWidget {
         final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
         final position = bloc?.indexOfView(viewUid) ?? -1;
         bloc?.add(ViewManagerEvent.add(
-            type: type, data: <String, dynamic>{}, position: position == -1 ? null : position + 1));
+            type: type, data: '', position: position == -1 ? null : position + 1));
       });
     });
   }

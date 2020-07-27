@@ -14,7 +14,7 @@ _$_ViewState _$_$_ViewStateFromJson(Map<String, dynamic> json) {
     type: json['type'] as String,
     preferredWidth: (json['preferredWidth'] as num)?.toDouble(),
     preferredHeight: (json['preferredHeight'] as num)?.toDouble(),
-    data: json['data'] as Map<String, dynamic>,
+    data: json['data'] as String,
   );
 }
 

@@ -43,21 +43,17 @@ class MarginNote extends UserItem {
 
   String get text => info;
 
-  static String getTitle(UserItem item) {
+  Map<String, dynamic> stateJson() {
     final ref = Reference(
-      volume: item.volumeId,
-      book: item.book,
-      chapter: item.chapter,
-      verse: item.verse,
+      volume: volumeId,
+      book: book,
+      chapter: chapter,
+      verse: verse,
     );
 
-    return '${ref.label()} Note';
-  }
-
-  static Map<String, dynamic> createState(UserItem item) {
     final data = <String, dynamic>{};
-    data['id'] = item.id;
-    data['title'] = getTitle(item);
+    data['id'] = id;
+    data['title'] = '${ref.label()} Note';
     return data;
   }
 }

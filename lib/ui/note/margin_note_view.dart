@@ -10,7 +10,6 @@ import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:zefyr/zefyr.dart';
 
-import '../../blocs/margin_notes/margin_note.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
@@ -106,21 +105,30 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   ViewManagerBloc viewManagerBloc;
   SheetManagerBloc sheetManagerBloc;
   Timer _saveTimer;
+  String _title;
+  static const oldAppPrefix = 'You\'re using an old app.';
 
   Future<void> load() async {
-    _item = await AppSettings.shared.userAccount.userDb.getItem(widget.state.data['id'] as int);
+    final mnData = jsonDecode(widget.state.data) as Map<String, dynamic>;
+    _title = mnData['title'] as String;
+    _item = await AppSettings.shared.userAccount.userDb.getItem(mnData['id'] as int);
 
     if (_item?.type == UserItemType.marginNote.index) {
       NotusDocument doc;
+      var info = _item.info;
+
+      if (info.startsWith(oldAppPrefix)) {
+        info = info.substring(oldAppPrefix.length);
+      }
 
       // we're showing an existing marginNote
       try {
-        doc = NotusDocument.fromJson(json.decode(_item.info) as List);
+        doc = NotusDocument.fromJson(json.decode(info) as List);
       }
       catch (_) {
         // old margin note - create a delta
         final delta = Delta();
-        for (final s in _item.info.trim().split('\n')) {
+        for (final s in  info.trim().split('\n')) {
           if (s.isNotEmpty) {
             delta.insert(s);
           }
@@ -147,7 +155,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
 
   Future<void> _saveDocument() async {
     _saveTimer = null;
-    _item = _item.copyWith(info: jsonEncode(_controller.document));
+    _item = _item.copyWith(info: '$oldAppPrefix${jsonEncode(_controller.document)}');
     await AppSettings.shared.userAccount.userDb.saveItem(_item);
   }
 
@@ -167,11 +175,11 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     if (_saveTimer != null) {
       _saveTimer.cancel();
       _saveTimer = null;
-      _saveDocument();
+      await _saveDocument();
     }
 
     _controller?.removeListener(_zephyrListener);
@@ -240,7 +248,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     return Scaffold(
       appBar: ManagedViewAppBar(
         appBar: AppBar(
-          title: (_item == null) ? null : Text(MarginNote.getTitle(_item)),
+          title: (_item == null) ? null : Text(_title),
           leading: (!_editMode)
               ? null
               : IconButton(

@@ -76,7 +76,7 @@ class WindowManagerSheet extends StatelessWidget {
           final position = bloc?.indexOfView(viewUid) ?? -1;
           bloc?.add(const ViewManagerEvent.restore());
           bloc?.add(ViewManagerEvent.add(
-              type: type, data: <String, dynamic>{}, position: position == -1 ? null : position + 1));
+              type: type, data: '', position: position == -1 ? null : position + 1));
         }),
       );
     }
