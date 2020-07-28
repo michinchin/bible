@@ -9,11 +9,11 @@ import 'package:tec_web_view/tec_web_view.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
-import '../../models/compare_results.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/color_utils.dart';
+import '../../models/compare_results.dart';
 import '../../models/shared_types.dart';
 import '../../models/verses.dart';
 import 'compare_verse.dart';
@@ -84,11 +84,13 @@ class SelectionSheetModel {
       onPressed = () => TecToast.show(c, 'Cannot search on multiple references');
     } else {
       onPressed = () => defineWebSearch(c);
-      final ref = refs[0];
-      if (ref.word == ref.endWord) {
-        //single word define
-        title = 'Define';
-        icon = FeatherIcons.bookOpen;
+      if (refs.isNotEmpty) {
+        final ref = refs[0];
+        if (ref.word == ref.endWord) {
+          //single word define
+          title = 'Define';
+          icon = FeatherIcons.bookOpen;
+        }
       }
     }
     return SheetButton(text: title, icon: icon, onPressed: onPressed);
@@ -119,12 +121,21 @@ class SelectionSheetModel {
     }
     final first = refs[0];
     final verses = await ChapterVerses.fetch(refForChapter: first);
-    await Share.share(ChapterVerses.formatForShare(refs, verses.data));
+    await tecShowProgressDlg<void>(
+        context: c,
+        title: 'Preparing to share...',
+        future: Share.share(ChapterVerses.formatForShare(refs, verses.data)));
   }
 
   static Future<void> defineWebSearch(BuildContext c) async {
     final ref = _grabRefs(c).first;
-    final verses = await ChapterVerses.fetch(refForChapter: ref);
+
+    final value = await tecShowProgressDlg<ChapterVerses>(
+        context: c, future: ChapterVerses.fetch(refForChapter: ref));
+    ChapterVerses verses;
+    if (value.error == null) {
+      verses = value.value;
+    }
     var words = '';
     final verseArray = verses.data[ref.verse].split(' ');
     if (ref.word != 0 && ref.endWord != 9999) {
