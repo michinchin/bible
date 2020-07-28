@@ -1,8 +1,10 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../ui/sheet/snap_sheet.dart';
+import '../library/library.dart';
 
 class MainSheet extends StatefulWidget {
   final SheetSize sheetSize;
@@ -41,7 +43,10 @@ class _MainSheetState extends State<MainSheet> {
                       SheetIconButton(
                         text: key,
                         icon: miniViewIcons[key],
-                        onPressed: () {},
+                        onPressed: () {
+                          tec.dmPrint('Tapped button $key');
+                          if (key == 'Library') showLibrary(context);
+                        },
                       )
                   ],
                 ),

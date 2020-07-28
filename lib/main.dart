@@ -38,6 +38,8 @@ Future<void> main() async {
     ],
   );
 
+  await VolumesRepository.shared.loadProducts();
+
   await AppSettings.shared.load(appName: 'Bible', itemsToSync: [
     tua.UserItemType.license,
     tua.UserItemType.highlight,

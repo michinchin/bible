@@ -121,7 +121,7 @@ packages:
     source: hosted
     version: "7.1.0"
   cached_network_image:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: cached_network_image
       url: "https://pub.dartlang.org"
@@ -233,12 +233,12 @@ packages:
     source: hosted
     version: "0.4.2+4"
   equatable:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: equatable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.2"
+    version: "1.2.3"
   fake_async:
     dependency: transitive
     description:
@@ -998,7 +998,7 @@ packages:
       name: tec_volumes
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.6"
+    version: "1.0.7"
   tec_web_view:
     dependency: "direct main"
     description:
