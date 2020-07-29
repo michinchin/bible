@@ -1,8 +1,11 @@
 import 'dart:convert';
 
+import 'package:bible/models/bible_chapter_state.dart';
+import 'package:bible/ui/bible/chapter_view.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 
@@ -52,7 +55,8 @@ class WindowManager extends StatelessWidget {
             _titleDivider(context, 'New'),
             ..._generateAddMenuItems(context, state.uid),
             _menuItem(context, FeatherIcons.bookOpen, 'Translation', () {
-              showWindowDialog(context: context, builder: (c) => BibleTranslationSelection());
+              showWindowDialog(
+                  context: context, builder: (c) => BibleTranslationSelection(bloc, state));
             }),
             if ((bloc?.state?.views?.length ?? 0) > 1) ...[
               const Divider(),
@@ -158,25 +162,94 @@ class WindowManager extends StatelessWidget {
 }
 
 class BibleTranslationSelection extends StatelessWidget {
+  final ViewManagerBloc bloc;
+  final ViewState state;
+
+  const BibleTranslationSelection(this.bloc, this.state);
+
   @override
   Widget build(BuildContext context) {
-    const bt = [
-      'New International Version',
-      'New Living Translation',
-      'Christian Standard Bible',
-      'Amplified Bible',
-      'The Message',
-      'The Voice',
-    ];
+    // this is the correct code when volumes package is finished
+//    final bibles = VolumesRepository.shared.volumesWithIds(
+//        VolumesRepository.shared.volumeIdsWithType(VolumeType.bible));
+
+    final bibles = <int, Volume>{
+      8: Volume(
+          id: 8,
+          name: 'American Standard Version',
+          type: VolumeType.bible,
+          repository: VolumesRepository.shared),
+      250: Volume(
+          id: 250,
+          name: 'Amplified Bible',
+          type: VolumeType.bible,
+          repository: VolumesRepository.shared),
+      231: Volume(
+          id: 231,
+          name: 'Christian Standard Bible',
+          type: VolumeType.bible,
+          repository: VolumesRepository.shared),
+      218: Volume(
+          id: 218,
+          name: 'Easy-to-Read Version',
+          type: VolumeType.bible,
+          repository: VolumesRepository.shared),
+      47: Volume(
+          id: 47,
+          name: 'English Standard Version',
+          type: VolumeType.bible,
+          repository: VolumesRepository.shared),
+      9: Volume(
+          id: 9,
+          name: 'King James Version',
+          type: VolumeType.bible,
+          repository: VolumesRepository.shared),
+      49: Volume(
+          id: 49,
+          name: 'New American Standard Bible',
+          type: VolumeType.bible,
+          repository: VolumesRepository.shared),
+      78: Volume(
+          id: 78,
+          name: 'New Century Version',
+          type: VolumeType.bible,
+          repository: VolumesRepository.shared),
+      32: Volume(
+          id: 32,
+          name: 'New International Version',
+          type: VolumeType.bible,
+          repository: VolumesRepository.shared),
+      50: Volume(
+          id: 50,
+          name: 'New King James Version',
+          type: VolumeType.bible,
+          repository: VolumesRepository.shared),
+      51: Volume(
+          id: 51,
+          name: 'New Living Translation',
+          type: VolumeType.bible,
+          repository: VolumesRepository.shared),
+    };
+
     return Scaffold(
         appBar: AppBar(),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: ListView(children: [
-            for (final each in bt)
+            for (final bibleId in bibles.keys)
               ListTile(
-                  title: Text(each),
-                  onTap: () => Navigator.of(context).popUntil((route) => route.isFirst))
+                  title: Text(bibles[bibleId].name),
+                  onTap: () {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    final previous = BibleChapterState.fromJson(state.data);
+                    if (previous != null) {
+                      final current = BibleChapterState(bibleId, previous.bcv, previous.page);
+                      // following line is approximate if we wanted to change translation in save view
+                      //bloc?.add(ViewManagerEvent.setData(uid: state.uid, data: current.toString()));
+                      bloc?.add(
+                          ViewManagerEvent.add(type: bibleChapterType, data: current.toString()));
+                    }
+                  })
           ]),
         ));
   }

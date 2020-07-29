@@ -289,7 +289,6 @@ class _BookView extends StatelessWidget {
 //               color: bible.isNTBook(bookKeys[i]) ? ntColor : otColor,
 //               borderRadius: null,
 //               onPressed: () {
-//                 // TODO(mike): Remove this after nav is done
 //                 Navigator.of(context).maybePop(BookChapterVerse(book, book == 23 ? 119 : 1, 1));
 //               },
 //             ),
