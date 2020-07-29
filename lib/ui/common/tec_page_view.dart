@@ -149,8 +149,12 @@ class _TecPageViewState extends State<TecPageView> {
       allowImplicitScrolling: widget.allowImplicitScrolling ?? false,
       onPageChanged: widget.onPageChanged == null
           ? null
-          : (page) =>
-              widget.onPageChanged(_controller._fauxPageFromActualPage(page.toDouble()).round()),
+          : (page) {
+              final fauxPage = _controller._fauxPageFromActualPage(page.toDouble()).round();
+              if (_controller._isInRange(fauxPage)) {
+                widget.onPageChanged(fauxPage);
+              }
+            },
       controller: _controller._pageController,
       physics: _physics,
       // Set itemCount to `maxPossiblePages * 2` to allow the initial page to be the first or last page.
@@ -235,6 +239,12 @@ class TecPageController implements PageController {
 
   double _fauxPageFromActualPage(double actualPage) =>
       _fauxInitialPage + (actualPage - _pageController.initialPage);
+
+  bool _isInRange(int page) {
+    if (page == null) return false;
+    final actualPage = _actualPageFromFauxPage(page);
+    return actualPage >= _minPage && actualPage <= _maxPage;
+  }
 
   void enablePage(int page) {
     _enableActualPage(_actualPageFromFauxPage(page));

@@ -125,9 +125,6 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
         onPageChanged: (context, _, page) async {
           tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
           final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
-
-          // it's possible to get a page change message when we are out of bounds...
-          // TODO(ron): Probably shouldn't call onPageChanged when pageBuilder returns null
           if (bcv != null) {
             updateLocation(bcv, page);
           }
