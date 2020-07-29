@@ -148,7 +148,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
   }
 }
 
-class _BibleChapterView extends StatelessWidget {
+class _BibleChapterView extends StatefulWidget {
   final int viewUid;
   final Size size;
   final Bible bible;
@@ -163,9 +163,22 @@ class _BibleChapterView extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _BibleChapterViewState createState() => _BibleChapterViewState();
+}
+
+class _BibleChapterViewState extends State<_BibleChapterView> {
+  Future<tec.ErrorOrValue<String>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = widget.bible.chapterHtmlWith(widget.ref.book, widget.ref.chapter);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return TecFutureBuilder<tec.ErrorOrValue<String>>(
-      future: bible.chapterHtmlWith(ref.book, ref.chapter),
+      future: _future,
       builder: (context, data, error) {
         final html = data?.value;
         if (tec.isNotNullOrEmpty(html)) {
@@ -176,12 +189,12 @@ class _BibleChapterView extends StatelessWidget {
               if (data != null) {
                 // when we get here, html and text scale are actually loaded and ready to go...
                 return _ChapterView(
-                  viewUid: viewUid,
-                  volumeId: bible.id,
-                  ref: ref,
-                  baseUrl: bible.baseUrl,
+                  viewUid: widget.viewUid,
+                  volumeId: widget.bible.id,
+                  ref: widget.ref,
+                  baseUrl: widget.bible.baseUrl,
                   html: html,
-                  size: size,
+                  size: widget.size,
                 );
               } else {
                 return _blankContainer(context, error);
@@ -189,7 +202,7 @@ class _BibleChapterView extends StatelessWidget {
             },
           );
         } else {
-          tec.dmPrint('VIEW $viewUid waiting for HTML to load...');
+          tec.dmPrint('VIEW ${widget.viewUid} waiting for HTML to load...');
           return _blankContainer(context, error ?? data?.error);
         }
       },

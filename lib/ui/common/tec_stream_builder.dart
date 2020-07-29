@@ -47,7 +47,7 @@ class _TecStreamBuilderState<T> extends State<TecStreamBuilder<T>> {
       _subscription = widget.stream.listen((data) {
         if (data != _data) {
           setState(() {
-            print('TecStreamBuilder rebuilding, $data != $_data');
+            // print('TecStreamBuilder rebuilding, $data != $_data');
             _data = data;
           });
         }

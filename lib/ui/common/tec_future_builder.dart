@@ -57,7 +57,7 @@ class _TecFutureBuilderState<T> extends State<TecFutureBuilder<T>> {
         if (_activeCallbackIdentity == callbackIdentity) {
           if (data != _data) {
             setState(() {
-              print('TecFutureBuilder rebuilding, $data != $_data');
+              // print('TecFutureBuilder rebuilding, $data != $_data');
               _data = data;
             });
           }
