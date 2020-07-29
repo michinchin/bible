@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
@@ -48,9 +49,15 @@ class _HomeScreen extends StatelessWidget {
               color: canvasColor,
               child: SafeArea(
                 bottom: false,
-                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-                  builder: (_, state) => _BottomSheet(
-                    child: ViewManagerWidget(state: state),
+                child: BlocProvider<ViewManagerBloc>(
+                  create: (_) => ViewManagerBloc(kvStore: tec.Prefs.shared),
+                  child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+                    condition: (previous, current) {
+                      return current.rebuild == ViewManagerStateBuildInfo.build;
+                    },
+                    builder: (context, state) => _BottomSheet(
+                      child: ViewManagerWidget(state: state),
+                    ),
                   ),
                 ),
               ),
@@ -75,12 +82,10 @@ class _BottomSheet extends StatelessWidget {
       listener: (context, state) {
         if (state.isTextSelected) {
           context.bloc<SheetManagerBloc>()
-            ..changeType(SheetType.selection)
-            ..changeSize(SheetSize.mini);
+            ..changeTypeSize(SheetType.selection, SheetSize.mini);
         } else {
           context.bloc<SheetManagerBloc>()
-            ..changeType(SheetType.main)
-            ..changeSize(SheetSize.mini);
+            ..changeTypeSize(SheetType.main, SheetSize.mini);
         }
       },
       child: SnapSheet(

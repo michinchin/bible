@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,12 +25,58 @@ import 'chapter_view_model.dart';
 
 const bibleChapterType = 'BibleChapter';
 
-const _initialReference = BookChapterVerse(50, 1, 1);
-const _bibleId = 51;
-
 Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size) {
   // tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
   return _PageableBibleView(state: state, size: size);
+}
+
+String bibleChapterDefaultData() {
+  return tec.toJsonString(_ChapterState.initial());
+}
+
+class _ChapterState {
+  final int bibleId;
+  final BookChapterVerse bcv;
+  final int page;
+  String title;
+
+  _ChapterState(this.bibleId, this.bcv, this.page, {String title}) {
+    if (title == null) {
+      final bible = VolumesRepository.shared.bibleWithId(bibleId);
+      final abbreviation = (bible.abbreviation == null) ? '' : ' ${bible.abbreviation}';
+      this.title = bible.titleWithHref('${bcv.book}/${bcv.chapter}$abbreviation');
+    } else {
+      this.title = title;
+    }
+  }
+
+  static BookChapterVerse initialBCV() {
+    return const BookChapterVerse(50, 1, 1);
+  }
+
+  factory _ChapterState.initial() {
+    return _ChapterState(51, initialBCV(), 0);
+  }
+
+  factory _ChapterState.fromJson(Object o) {
+    BookChapterVerse bcv;
+    int page, bibleId;
+    String title;
+
+    final json = (o is String) ? tec.parseJsonSync(o) : o;
+    if (json is Map<String, dynamic>) {
+      bibleId = tec.as<int>(json['vid']);
+      bcv = BookChapterVerse.fromJson(json['bcv']);
+      page = tec.as<int>(json['page']);
+      title = tec.as<String>(json['title']);
+    }
+
+    return _ChapterState(bibleId, bcv, page, title: title);
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{'vid': bibleId, 'bcv': bcv, 'page': page, 'title': title};
+  }
 }
 
 class _PageableBibleView extends StatefulWidget {
@@ -44,12 +92,58 @@ class _PageableBibleView extends StatefulWidget {
 class __PageableBibleViewState extends State<_PageableBibleView> {
   final _pageableViewStateKey = GlobalKey<PageableViewState>();
 
+  StreamController<String> _title;
+  Bible _bible;
+  BookChapterVerse _bcvPageZero;
+
+  @override
+  void initState() {
+    final chapterState = _ChapterState.fromJson(widget.state.data);
+    // we're putting title in a stream so we can update outside of setState - as that
+    // rebuilds the PageableView :(
+    _title = StreamController<String>()..add(chapterState.title);
+    _bible = VolumesRepository.shared.bibleWithId(chapterState.bibleId);
+    _bcvPageZero = chapterState.bcv;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ManagedViewAppBar(
         appBar: AppBar(
-          title: _titleBuilder(context, _pageableViewStateKey, widget.state, widget.size),
+          title: CupertinoButton(
+            child: StreamBuilder<String>(
+                stream: _title.stream,
+                builder: (context, snapshot) {
+                  return Text(
+                    (snapshot.hasData) ? snapshot.data : '',
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline6
+                        .copyWith(color: Theme.of(context).accentColor),
+                  );
+                }),
+            onPressed: () async {
+              final bcv = await navigate(context);
+              if (bcv != null) {
+                // small delay to allow the nav popup to clean up before we navigate
+                // away...
+                Future.delayed(const Duration(milliseconds: 350), () {
+                  final pageController = _pageableViewStateKey.currentState?.pageController;
+                  if (pageController != null) {
+                    final page = _bcvPageZero.chaptersTo(bcv, bible: _bible);
+                    if (page == null) {
+                      tec.dmPrint('bibleChapterTitleBuilder unable to navigate to $bcv');
+                    } else {
+                      pageController.jumpToPage(page);
+                      updateLocation(bcv, page);
+                    }
+                  }
+                });
+              }
+            },
+          ),
           actions: defaultActionsBuilder(context, widget.state, widget.size),
         ),
       ),
@@ -58,90 +152,44 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
         state: widget.state,
         size: widget.size,
         controllerBuilder: () {
-          final chapterData = _ChapterData.fromJson(widget.state.data);
-          return TecPageController(initialPage: chapterData.page);
+          return TecPageController(initialPage: 0);
         },
-        pageBuilder: (context, state, size, index) {
-          final bible = VolumesRepository.shared.bibleWithId(_bibleId);
-          final ref = _initialReference.advancedBy(chapters: index, bible: bible);
+        pageBuilder: (context, _, size, index) {
+          final ref = _bcvPageZero.advancedBy(chapters: index, bible: _bible);
 
-          // If the bible doesn't have the given reference, or we advanced past either end, return null.
-          if (ref == null || ref.advancedBy(chapters: -index, bible: bible) != _initialReference) {
+          // If the bible doesn't have the given reference, or we advanced past either end,
+          // return null.
+          if (ref == null) {
             return null;
           }
-          return _BibleChapterView(viewUid: state.uid, size: size, bible: bible, ref: ref);
+
+          debugPrint('page builder: ${ref.toString()}');
+          return _BibleChapterView(
+              viewUid: widget.state.uid, size: size, bible: _bible, ref: ref);
         },
-        onPageChanged: (context, state, page) async {
-          tec.dmPrint('View ${state.uid} onPageChanged($page)');
-          final bible = VolumesRepository.shared.bibleWithId(_bibleId);
-          if (bible != null) {
-            final bcv = _initialReference.advancedBy(chapters: page, bible: bible);
-            context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.setData(
-                uid: state.uid, data: tec.toJsonString(_ChapterData(bcv, page).toJson())));
+        onPageChanged: (context, _, page) async {
+          tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
+          final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
+
+          // it's possible to get a page change message when we are out of bounds...
+          // TODO(ron): Probably shouldn't call onPageChanged when pageBuilder returns null
+          if (bcv != null) {
+            updateLocation(bcv, page);
           }
         },
       ),
     );
   }
-}
 
-Widget _titleBuilder(BuildContext context, Key pageableViewStateKey, ViewState state, Size size) {
-  final bible = VolumesRepository.shared.bibleWithId(_bibleId);
-  final bcv = _ChapterData.fromJson(state.data).bcv;
-  return CupertinoButton(
-    child: Text(
-      bible.titleWithHref('${bcv.book}/${bcv.chapter}'),
-      style: Theme.of(context).textTheme.headline6.copyWith(color: Theme.of(context).accentColor),
-    ),
-    onPressed: () async {
-      final bcv = await navigate(context);
-      if (bcv != null) {
-        // small delay to allow the nav popup to clean up before we navigate
-        // looks cleaner...
-        Future.delayed(const Duration(milliseconds: 350), () {
-          final key = tec.as<GlobalKey<PageableViewState>>(pageableViewStateKey);
-          final pageController = key?.currentState?.pageController;
-          if (pageController != null) {
-            final _bible = VolumesRepository.shared.bibleWithId(_bibleId);
-            final page = _initialReference.chaptersTo(bcv, bible: _bible);
-            if (page == null) {
-              tec.dmPrint('bibleChapterTitleBuilder unable to navigate to $bcv');
-            } else {
-              pageController.jumpToPage(page);
-            }
-          }
-        });
-      }
-    },
-  );
-}
+  void updateLocation(BookChapterVerse bcv, int page) {
+    final nextViewState = _ChapterState(_bible.id, bcv, page);
+    _title.add(nextViewState.title);
 
-class _ChapterData {
-  final BookChapterVerse bcv;
-  final int page;
-
-  const _ChapterData(BookChapterVerse bcv, int page)
-      : bcv = bcv ?? _initialReference,
-        page = page ?? 0;
-
-  factory _ChapterData.fromJson(Object object) {
-    BookChapterVerse bcv;
-    int page;
-    final json = (object is String ? tec.parseJsonSync(object) : object);
-    if (json is Map<String, dynamic>) {
-      bcv = BookChapterVerse.fromJson(json['bcv']);
-      page = tec.as<int>(json['page']);
-    }
-    return _ChapterData(bcv, page);
-  }
-
-  Map<String, dynamic> toJson() {
-    final bible = VolumesRepository.shared.bibleWithId(_bibleId);
-    final _bcv = bcv ?? _initialReference;
-    final abbreviation = (bible.abbreviation == null) ? '' : ' ${bible.abbreviation}';
-    final title = bible.titleWithHref('${_bcv.book}/${_bcv.chapter}$abbreviation');
-
-    return <String, dynamic>{'bcv': bcv, 'page': page, 'title': title };
+    // update the view manager state
+    context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.updateData(
+          uid: widget.state.uid,
+          data: tec.toJsonString(nextViewState),
+        ));
   }
 }
 
@@ -165,33 +213,45 @@ class _BibleChapterView extends StatelessWidget {
       future: bible.chapterHtmlWith(ref.book, ref.chapter),
       builder: (context, snapshot) {
         final html = snapshot.hasData ? snapshot.data.value : null;
-        if (tec.isNotNullOrEmpty(html)) {
+        // FutureBuilder calls this with state waiting a couple of times, then state == done
+        if (snapshot.connectionState != ConnectionState.waiting && tec.isNotNullOrEmpty(html)) {
           return StreamBuilder<double>(
             stream: AppSettings.shared.contentTextScaleFactor.stream,
             builder: (c, snapshot) {
-              return _ChapterView(
-                viewUid: viewUid,
-                volumeId: bible.id,
-                ref: ref,
-                baseUrl: bible.baseUrl,
-                html: html,
-                size: size,
-              );
+              // StreamBuilder calls this with state == waiting then state == active
+              if (snapshot.connectionState != ConnectionState.waiting) {
+                // when we get here, html and text scale are actually loaded and ready to go...
+                return _ChapterView(
+                  viewUid: viewUid,
+                  volumeId: bible.id,
+                  ref: ref,
+                  baseUrl: bible.baseUrl,
+                  html: html,
+                  size: size,
+                );
+              } else {
+                final error = snapshot.hasError ? snapshot.error : null;
+                return _blankContainer(context, error);
+              }
             },
           );
         } else {
           final error =
               snapshot.hasError ? snapshot.error : snapshot.hasData ? snapshot.data.error : null;
-          final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-          final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
-          return Container(
-            color: backgroundColor,
-            child: Center(
-              child: error == null ? const LoadingIndicator() : Text(error.toString()),
-            ),
-          );
+          return _blankContainer(context, error);
         }
       },
+    );
+  }
+
+  Widget _blankContainer(BuildContext context, Object error) {
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
+    return Container(
+      color: backgroundColor,
+      child: Center(
+        child: error == null ? const LoadingIndicator() : Text(error.toString()),
+      ),
     );
   }
 }
@@ -300,6 +360,7 @@ class _ChapterViewState extends State<_ChapterView> {
                     // nav to a different part of the bible - current chapter is reloaded (hasData = true)
                     // swipe to next chapter - chapter is loaded 3x (hasData = true)
                     // swipe back - chapter is loaded 5x (hasData = false, 4x hasData = true)
+
                     if (widget.ref.chapter == 119) {
                       debugPrint('loading 119');
                     } else {

@@ -22,7 +22,7 @@ void main() {
     });
 
     test('initial state is empty list', () {
-      expect(bloc.initialState, ViewManagerState([bcv], 0, 2));
+      expect(bloc.initialState, ViewManagerState([bcv], 0, 2, ViewManagerStateBuildInfo.build));
     });
 
     blocTest<ViewManagerBloc, ViewManagerEvent, ViewManagerState>(
@@ -39,12 +39,12 @@ void main() {
         return Future.value();
       },
       expect: <dynamic>[
-        ViewManagerState([bcv, view(2, '1')], 0, 3),
-        ViewManagerState([bcv, view(2, '1'), view(3, '2')], 0, 4),
-        ViewManagerState([bcv, view(3, '2'), view(2, '1')], 0, 4),
-        ViewManagerState([bcv, view(2, '1'), view(3, '2')], 0, 4),
-        ViewManagerState([bcv, view(3, '2')], 0, 4),
-        ViewManagerState([bcv], 0, 4),
+        ViewManagerState([bcv, view(2, '1')], 0, 3, ViewManagerStateBuildInfo.build),
+        ViewManagerState([bcv, view(2, '1'), view(3, '2')], 0, 4, ViewManagerStateBuildInfo.build),
+        ViewManagerState([bcv, view(3, '2'), view(2, '1')], 0, 4, ViewManagerStateBuildInfo.build),
+        ViewManagerState([bcv, view(2, '1'), view(3, '2')], 0, 4, ViewManagerStateBuildInfo.build),
+        ViewManagerState([bcv, view(3, '2')], 0, 4, ViewManagerStateBuildInfo.build),
+        ViewManagerState([bcv], 0, 4, ViewManagerStateBuildInfo.build),
       ],
     );
   });

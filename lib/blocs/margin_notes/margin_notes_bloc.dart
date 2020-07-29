@@ -62,8 +62,6 @@ class ChapterMarginNotesBloc extends tec.SafeBloc<MarginNotesEvent, ChapterMargi
   void _userDbChangeListener(UserDbChange change) {
     var reload = false;
 
-    debugPrint('got a db listener message for chapter $chapter');
-
     if (change != null && change.includesItemType(UserItemType.marginNote)) {
       if (change.type == UserDbChangeType.itemAdded &&
           change.after?.volumeId == volume &&
@@ -82,6 +80,7 @@ class ChapterMarginNotesBloc extends tec.SafeBloc<MarginNotesEvent, ChapterMargi
 
     if (reload) {
       // margin notes for this chapter changed, reload...
+      debugPrint('new margin notes for chapter $chapter');
       _initUserContent();
     }
   }

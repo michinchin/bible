@@ -219,6 +219,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       setWidth: _setWidth,
       setHeight: _setHeight,
       setData: _setData,
+      updateData: _updateData,
     );
     assert(value != null);
     if (value == null) {
@@ -226,7 +227,10 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       yield state;
     } else {
       if (value != state) {
-        final strValue = tec.toJsonString(value);
+        // remove any 'ignore' build info...and save state
+        final json = value.toJson();
+        json['rebuild'] = 'build';
+        final strValue = tec.toJsonString(json);
         // tec.dmPrint('VM mapEventToState saving state: $strValue');
         await _kvStore.setString(_key, strValue);
       }
@@ -244,6 +248,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       newViews,
       state.maximizedViewUid == 0 ? 0 : nextUid,
       tec.nextIntWithJsSafeWraparound(nextUid, wrapTo: 1),
+      ViewManagerStateBuildInfo.build,
     );
   }
 
@@ -257,38 +262,54 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       newViews,
       state.maximizedViewUid == uid ? 0 : state.maximizedViewUid,
       state.nextUid,
+      ViewManagerStateBuildInfo.build,
     );
   }
 
   ViewManagerState _maximize(int uid) {
     final position = indexOfView(uid);
     if (position < 0) return state;
-    return ViewManagerState(state.views, uid, state.nextUid);
+    return ViewManagerState(state.views, uid, state.nextUid, ViewManagerStateBuildInfo.build);
   }
 
   ViewManagerState _restore() {
-    return ViewManagerState(state.views, 0, state.nextUid);
+    return ViewManagerState(state.views, 0, state.nextUid, ViewManagerStateBuildInfo.build);
   }
 
   ViewManagerState _move(int from, int to) {
     if (from == to) return state;
     final newViews = List.of(state.views) // shallow copy
       ..move(from: from, to: to);
-    return ViewManagerState(newViews, state.maximizedViewUid, state.nextUid);
+    return ViewManagerState(
+      newViews,
+      state.maximizedViewUid,
+      state.nextUid,
+      ViewManagerStateBuildInfo.build,
+    );
   }
 
   ViewManagerState _setWidth(int position, double width) {
     assert(state.views.isValidIndex(position));
     final newViews = List.of(state.views); // shallow copy
     newViews[position] = newViews[position].copyWith(preferredWidth: width);
-    return ViewManagerState(newViews, state.maximizedViewUid, state.nextUid);
+    return ViewManagerState(
+      newViews,
+      state.maximizedViewUid,
+      state.nextUid,
+      ViewManagerStateBuildInfo.build,
+    );
   }
 
   ViewManagerState _setHeight(int position, double height) {
     assert(state.views.isValidIndex(position));
     final newViews = List.of(state.views); // shallow copy
     newViews[position] = newViews[position].copyWith(preferredHeight: height);
-    return ViewManagerState(newViews, state.maximizedViewUid, state.nextUid);
+    return ViewManagerState(
+      newViews,
+      state.maximizedViewUid,
+      state.nextUid,
+      ViewManagerStateBuildInfo.build,
+    );
   }
 
   ViewManagerState _setData(int uid, String data) {
@@ -296,7 +317,25 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     if (position < 0) return state;
     final newViews = List.of(state.views); // shallow copy
     newViews[position] = newViews[position].copyWith(data: data);
-    return ViewManagerState(newViews, state.maximizedViewUid, state.nextUid);
+    return ViewManagerState(
+      newViews,
+      state.maximizedViewUid,
+      state.nextUid,
+      ViewManagerStateBuildInfo.build,
+    );
+  }
+
+  ViewManagerState _updateData(int uid, String data) {
+    final position = indexOfView(uid);
+    if (position < 0) return state;
+    final newViews = List.of(state.views); // shallow copy
+    newViews[position] = newViews[position].copyWith(data: data);
+    return ViewManagerState(
+      newViews,
+      state.maximizedViewUid,
+      state.nextUid,
+      ViewManagerStateBuildInfo.ignore,
+    );
   }
 }
 
@@ -313,6 +352,7 @@ abstract class ViewManagerEvent with _$ViewManagerEvent {
   const factory ViewManagerEvent.setWidth({int position, double width}) = _SetWidth;
   const factory ViewManagerEvent.setHeight({int position, double height}) = _SetHeight;
   const factory ViewManagerEvent.setData({int uid, String data}) = _SetData;
+  const factory ViewManagerEvent.updateData({int uid, String data}) = _UpdateData;
 }
 
 ///
@@ -355,9 +395,14 @@ class ViewRect {
 ///
 /// ViewManagerState
 ///
+var _defaultViewType = 'BibleChapter';
+String _defaultViewData;
+enum ViewManagerStateBuildInfo { build, ignore }
+
 @freezed
 abstract class ViewManagerState with _$ViewManagerState {
-  factory ViewManagerState(List<ViewState> views, int maximizedViewUid, int nextUid) = _Views;
+  factory ViewManagerState(List<ViewState> views, int maximizedViewUid, int nextUid,
+      ViewManagerStateBuildInfo rebuild) = _Views;
 
   /// fromJson
   factory ViewManagerState.fromJson(Map<String, dynamic> json) {
@@ -367,9 +412,19 @@ abstract class ViewManagerState with _$ViewManagerState {
     } catch (_) {}
     return state ?? _defaultViewManagerState;
   }
+
+  static void setDefaults(String defaultViewType, String defaultViewData) {
+    _defaultViewType = defaultViewType;
+    _defaultViewData = defaultViewData;
+  }
 }
 
-final _defaultViewManagerState = ViewManagerState([ViewState(uid: 1, type: 'BibleChapter')], 0, 2);
+final _defaultViewManagerState = ViewManagerState(
+  [ViewState(uid: 1, type: _defaultViewType, data: _defaultViewData)],
+  0,
+  2,
+  ViewManagerStateBuildInfo.build,
+);
 
 extension ViewManagerExtOnState on ViewManagerState {}
 

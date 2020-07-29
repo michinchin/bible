@@ -186,6 +186,14 @@ class _$SheetEventTearOff {
       uid,
     );
   }
+
+// ignore: unused_element
+  _ChangeTypeSize changeTypeSize(SheetType type, SheetSize size) {
+    return _ChangeTypeSize(
+      type,
+      size,
+    );
+  }
 }
 
 // ignore: unused_element
@@ -197,12 +205,14 @@ mixin _$SheetEvent {
     @required Result changeSize(SheetSize size),
     @required Result changeType(SheetType type),
     @required Result changeView(int uid),
+    @required Result changeTypeSize(SheetType type, SheetSize size),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result changeSize(SheetSize size),
     Result changeType(SheetType type),
     Result changeView(int uid),
+    Result changeTypeSize(SheetType type, SheetSize size),
     @required Result orElse(),
   });
   @optionalTypeArgs
@@ -210,12 +220,14 @@ mixin _$SheetEvent {
     @required Result changeSize(_ChangeSize value),
     @required Result changeType(_ChangeType value),
     @required Result changeView(_ChangeView value),
+    @required Result changeTypeSize(_ChangeTypeSize value),
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result changeSize(_ChangeSize value),
     Result changeType(_ChangeType value),
     Result changeView(_ChangeView value),
+    Result changeTypeSize(_ChangeTypeSize value),
     @required Result orElse(),
   });
 }
@@ -301,10 +313,12 @@ class _$_ChangeSize with DiagnosticableTreeMixin implements _ChangeSize {
     @required Result changeSize(SheetSize size),
     @required Result changeType(SheetType type),
     @required Result changeView(int uid),
+    @required Result changeTypeSize(SheetType type, SheetSize size),
   }) {
     assert(changeSize != null);
     assert(changeType != null);
     assert(changeView != null);
+    assert(changeTypeSize != null);
     return changeSize(size);
   }
 
@@ -314,6 +328,7 @@ class _$_ChangeSize with DiagnosticableTreeMixin implements _ChangeSize {
     Result changeSize(SheetSize size),
     Result changeType(SheetType type),
     Result changeView(int uid),
+    Result changeTypeSize(SheetType type, SheetSize size),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -329,10 +344,12 @@ class _$_ChangeSize with DiagnosticableTreeMixin implements _ChangeSize {
     @required Result changeSize(_ChangeSize value),
     @required Result changeType(_ChangeType value),
     @required Result changeView(_ChangeView value),
+    @required Result changeTypeSize(_ChangeTypeSize value),
   }) {
     assert(changeSize != null);
     assert(changeType != null);
     assert(changeView != null);
+    assert(changeTypeSize != null);
     return changeSize(this);
   }
 
@@ -342,6 +359,7 @@ class _$_ChangeSize with DiagnosticableTreeMixin implements _ChangeSize {
     Result changeSize(_ChangeSize value),
     Result changeType(_ChangeType value),
     Result changeView(_ChangeView value),
+    Result changeTypeSize(_ChangeTypeSize value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -426,10 +444,12 @@ class _$_ChangeType with DiagnosticableTreeMixin implements _ChangeType {
     @required Result changeSize(SheetSize size),
     @required Result changeType(SheetType type),
     @required Result changeView(int uid),
+    @required Result changeTypeSize(SheetType type, SheetSize size),
   }) {
     assert(changeSize != null);
     assert(changeType != null);
     assert(changeView != null);
+    assert(changeTypeSize != null);
     return changeType(type);
   }
 
@@ -439,6 +459,7 @@ class _$_ChangeType with DiagnosticableTreeMixin implements _ChangeType {
     Result changeSize(SheetSize size),
     Result changeType(SheetType type),
     Result changeView(int uid),
+    Result changeTypeSize(SheetType type, SheetSize size),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -454,10 +475,12 @@ class _$_ChangeType with DiagnosticableTreeMixin implements _ChangeType {
     @required Result changeSize(_ChangeSize value),
     @required Result changeType(_ChangeType value),
     @required Result changeView(_ChangeView value),
+    @required Result changeTypeSize(_ChangeTypeSize value),
   }) {
     assert(changeSize != null);
     assert(changeType != null);
     assert(changeView != null);
+    assert(changeTypeSize != null);
     return changeType(this);
   }
 
@@ -467,6 +490,7 @@ class _$_ChangeType with DiagnosticableTreeMixin implements _ChangeType {
     Result changeSize(_ChangeSize value),
     Result changeType(_ChangeType value),
     Result changeView(_ChangeView value),
+    Result changeTypeSize(_ChangeTypeSize value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -551,10 +575,12 @@ class _$_ChangeView with DiagnosticableTreeMixin implements _ChangeView {
     @required Result changeSize(SheetSize size),
     @required Result changeType(SheetType type),
     @required Result changeView(int uid),
+    @required Result changeTypeSize(SheetType type, SheetSize size),
   }) {
     assert(changeSize != null);
     assert(changeType != null);
     assert(changeView != null);
+    assert(changeTypeSize != null);
     return changeView(uid);
   }
 
@@ -564,6 +590,7 @@ class _$_ChangeView with DiagnosticableTreeMixin implements _ChangeView {
     Result changeSize(SheetSize size),
     Result changeType(SheetType type),
     Result changeView(int uid),
+    Result changeTypeSize(SheetType type, SheetSize size),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -579,10 +606,12 @@ class _$_ChangeView with DiagnosticableTreeMixin implements _ChangeView {
     @required Result changeSize(_ChangeSize value),
     @required Result changeType(_ChangeType value),
     @required Result changeView(_ChangeView value),
+    @required Result changeTypeSize(_ChangeTypeSize value),
   }) {
     assert(changeSize != null);
     assert(changeType != null);
     assert(changeView != null);
+    assert(changeTypeSize != null);
     return changeView(this);
   }
 
@@ -592,6 +621,7 @@ class _$_ChangeView with DiagnosticableTreeMixin implements _ChangeView {
     Result changeSize(_ChangeSize value),
     Result changeType(_ChangeType value),
     Result changeView(_ChangeView value),
+    Result changeTypeSize(_ChangeTypeSize value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -607,4 +637,150 @@ abstract class _ChangeView implements SheetEvent {
 
   int get uid;
   _$ChangeViewCopyWith<_ChangeView> get copyWith;
+}
+
+abstract class _$ChangeTypeSizeCopyWith<$Res> {
+  factory _$ChangeTypeSizeCopyWith(
+          _ChangeTypeSize value, $Res Function(_ChangeTypeSize) then) =
+      __$ChangeTypeSizeCopyWithImpl<$Res>;
+  $Res call({SheetType type, SheetSize size});
+}
+
+class __$ChangeTypeSizeCopyWithImpl<$Res> extends _$SheetEventCopyWithImpl<$Res>
+    implements _$ChangeTypeSizeCopyWith<$Res> {
+  __$ChangeTypeSizeCopyWithImpl(
+      _ChangeTypeSize _value, $Res Function(_ChangeTypeSize) _then)
+      : super(_value, (v) => _then(v as _ChangeTypeSize));
+
+  @override
+  _ChangeTypeSize get _value => super._value as _ChangeTypeSize;
+
+  @override
+  $Res call({
+    Object type = freezed,
+    Object size = freezed,
+  }) {
+    return _then(_ChangeTypeSize(
+      type == freezed ? _value.type : type as SheetType,
+      size == freezed ? _value.size : size as SheetSize,
+    ));
+  }
+}
+
+class _$_ChangeTypeSize
+    with DiagnosticableTreeMixin
+    implements _ChangeTypeSize {
+  const _$_ChangeTypeSize(this.type, this.size)
+      : assert(type != null),
+        assert(size != null);
+
+  @override
+  final SheetType type;
+  @override
+  final SheetSize size;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'SheetEvent.changeTypeSize(type: $type, size: $size)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'SheetEvent.changeTypeSize'))
+      ..add(DiagnosticsProperty('type', type))
+      ..add(DiagnosticsProperty('size', size));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _ChangeTypeSize &&
+            (identical(other.type, type) ||
+                const DeepCollectionEquality().equals(other.type, type)) &&
+            (identical(other.size, size) ||
+                const DeepCollectionEquality().equals(other.size, size)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(type) ^
+      const DeepCollectionEquality().hash(size);
+
+  @override
+  _$ChangeTypeSizeCopyWith<_ChangeTypeSize> get copyWith =>
+      __$ChangeTypeSizeCopyWithImpl<_ChangeTypeSize>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result changeSize(SheetSize size),
+    @required Result changeType(SheetType type),
+    @required Result changeView(int uid),
+    @required Result changeTypeSize(SheetType type, SheetSize size),
+  }) {
+    assert(changeSize != null);
+    assert(changeType != null);
+    assert(changeView != null);
+    assert(changeTypeSize != null);
+    return changeTypeSize(type, size);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result changeSize(SheetSize size),
+    Result changeType(SheetType type),
+    Result changeView(int uid),
+    Result changeTypeSize(SheetType type, SheetSize size),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (changeTypeSize != null) {
+      return changeTypeSize(type, size);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result changeSize(_ChangeSize value),
+    @required Result changeType(_ChangeType value),
+    @required Result changeView(_ChangeView value),
+    @required Result changeTypeSize(_ChangeTypeSize value),
+  }) {
+    assert(changeSize != null);
+    assert(changeType != null);
+    assert(changeView != null);
+    assert(changeTypeSize != null);
+    return changeTypeSize(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result changeSize(_ChangeSize value),
+    Result changeType(_ChangeType value),
+    Result changeView(_ChangeView value),
+    Result changeTypeSize(_ChangeTypeSize value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (changeTypeSize != null) {
+      return changeTypeSize(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _ChangeTypeSize implements SheetEvent {
+  const factory _ChangeTypeSize(SheetType type, SheetSize size) =
+      _$_ChangeTypeSize;
+
+  SheetType get type;
+  SheetSize get size;
+  _$ChangeTypeSizeCopyWith<_ChangeTypeSize> get copyWith;
 }

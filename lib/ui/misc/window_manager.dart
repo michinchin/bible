@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 
@@ -25,11 +24,11 @@ Future<void> showWindowDialog({BuildContext context, Widget Function(BuildContex
 
 class WindowManager extends StatelessWidget {
   final ViewState state;
-  const WindowManager({this.state});
+  final ViewManagerBloc bloc;
+  const WindowManager({this.state, this.bloc});
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     final isMaximized = bloc?.state?.maximizedViewUid != 0;
 
     return Stack(
@@ -91,14 +90,17 @@ class WindowManager extends StatelessWidget {
       );
 
   Iterable<Widget> _generateOffScreenItems(BuildContext context, int viewUid) {
-    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     final vm = ViewManager.shared;
     final items = <Widget>[];
     for (final each in bloc.state.views) {
       if (!bloc.isViewVisible(each.uid)) {
         String title;
+        Map<String, dynamic> data;
 
-        final data = jsonDecode(each.data) as Map<String, dynamic>;
+        if (each.data != null) {
+          data = jsonDecode(each.data) as Map<String, dynamic>;
+        }
+
         if (data != null && data.containsKey('title')) {
           title = data['title'] as String;
         }
@@ -134,10 +136,9 @@ class WindowManager extends StatelessWidget {
 
       return _menuItem(context, vm.iconForType(type), '${vm.titleForType(type)}', () {
         Navigator.of(context).maybePop();
-        final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
         final position = bloc?.indexOfView(viewUid) ?? -1;
         bloc?.add(ViewManagerEvent.add(
-            type: type, data: '', position: position == -1 ? null : position + 1));
+            type: type, data: vm.dataForType(type), position: position == -1 ? null : position + 1));
       });
     });
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -103,10 +105,48 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightsEvent, ChapterHighlig
   final int book;
   final int chapter;
   final bool loaded;
+  StreamSubscription<UserDbChange> _userDbChangeSubscription;
 
   ChapterHighlightsBloc(
       {@required this.volume, @required this.book, @required this.chapter, this.loaded = false}) {
     _initUserContent();
+
+    // Start listening for changes to the db.
+    _userDbChangeSubscription =
+        AppSettings.shared.userAccount.userDbChangeStream.listen(_userDbChangeListener);
+  }
+
+  @override
+  Future<void> close() {
+    _userDbChangeSubscription?.cancel();
+    _userDbChangeSubscription = null;
+    return super.close();
+  }
+
+  void _userDbChangeListener(UserDbChange change) {
+    var reload = false;
+
+    if (change != null && change.includesItemType(UserItemType.highlight)) {
+      if (change.type == UserDbChangeType.itemAdded &&
+          change.after?.volumeId == volume &&
+          change.after?.book == book &&
+          change.after?.chapter == chapter) {
+        reload = true;
+      } else if (change.type == UserDbChangeType.itemDeleted &&
+          change.before?.volumeId == volume &&
+          change.before?.book == book &&
+          change.before?.chapter == chapter) {
+        reload = true;
+      } else if (change.type == UserDbChangeType.multipleChanges) {
+        reload = true;
+      }
+    }
+
+    if (reload) {
+      // margin notes for this chapter changed, reload...
+      debugPrint('new hls for chapter $chapter');
+      _initUserContent();
+    }
   }
 
   Future<void> _initUserContent() async {

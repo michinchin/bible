@@ -6,6 +6,11 @@ part of 'view_manager_bloc.dart';
 typedef BuilderWithViewState = Widget Function(BuildContext context, ViewState state, Size size);
 
 ///
+/// Signature of a function that returns the default data for a new view.
+///
+typedef DefaultDataBuilder = String Function();
+
+///
 /// Signature of a function that creates a list of "action" widgets for a given view state.
 ///
 typedef ActionsBuilderWithViewState = List<Widget> Function(
@@ -46,6 +51,7 @@ class ViewManager {
     BuilderWithViewState bodyBuilder,
     BuilderWithViewState titleBuilder,
     ActionsBuilderWithViewState actionsBuilder,
+    DefaultDataBuilder defaultDataBuilder,
     ViewSizeFunc minWidth,
     ViewSizeFunc minHeight,
     IconData icon,
@@ -58,6 +64,7 @@ class ViewManager {
       bodyBuilder,
       titleBuilder,
       actionsBuilder,
+      defaultDataBuilder,
       minWidth,
       minHeight,
       icon,
@@ -69,6 +76,11 @@ class ViewManager {
   IconData iconForType(String type) => _types[type]?.icon;
 
   String titleForType(String type) => _types[type]?.title;
+
+  String dataForType(String type) {
+    final ddb = _types[type]?.defaultDataBuilder;
+    return (ddb == null) ? '{}' : ddb();
+  }
 
   Widget _buildScaffold(BuildContext context, ViewState state, Size size) =>
       (_types[state.type]?.scaffoldBuilder ?? _defaultScaffoldBuilder)(context, state, size);
@@ -102,6 +114,7 @@ class _ViewTypeAPI {
   final BuilderWithViewState bodyBuilder;
   final BuilderWithViewState titleBuilder;
   final ActionsBuilderWithViewState actionsBuilder;
+  final DefaultDataBuilder defaultDataBuilder;
   final ViewSizeFunc minWidth;
   final ViewSizeFunc minHeight;
   final IconData icon;
@@ -112,6 +125,7 @@ class _ViewTypeAPI {
     this.bodyBuilder,
     this.titleBuilder,
     this.actionsBuilder,
+    this.defaultDataBuilder,
     this.minWidth,
     this.minHeight,
     this.icon,
@@ -189,7 +203,7 @@ Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
       final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
       final position = bloc?.indexOfView(viewUid) ?? -1;
       bloc?.add(ViewManagerEvent.add(
-          type: type, data: '', position: position == -1 ? null : position + 1));
+          type: type, data: vm.dataForType(type), position: position == -1 ? null : position + 1));
     }),
   );
 }

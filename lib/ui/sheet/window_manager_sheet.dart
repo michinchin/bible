@@ -72,18 +72,17 @@ class WindowManagerSheet extends StatelessWidget {
         (type) =>
             _menuItem(context, iconMap[vm.titleForType(type)], 'Add ${vm.titleForType(type)}', () {
           Navigator.of(context).maybePop();
-          final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
           final position = bloc?.indexOfView(viewUid) ?? -1;
           bloc?.add(const ViewManagerEvent.restore());
           bloc?.add(ViewManagerEvent.add(
-              type: type, data: '', position: position == -1 ? null : position + 1));
+              type: type, data: vm.dataForType(type), position: position == -1 ? null : position + 1));
         }),
       );
     }
 
     final children = _generateAddMenuItems(context, state.viewUid).toList()
       ..addAll([
-        if (context.bloc<ViewManagerBloc>().state.views.length > 1) ...[
+        if (bloc != null && bloc.state.views.length > 1) ...[
           _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
               isMaximized ? 'Restore' : 'Maximize', () {
             Navigator.of(context).maybePop();
@@ -93,7 +92,7 @@ class WindowManagerSheet extends StatelessWidget {
           }),
           _menuItem(context, Icons.close, 'Close View', () {
             Navigator.of(context).maybePop();
-            context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.viewUid));
+            bloc?.add(ViewManagerEvent.remove(state.viewUid));
           }),
         ]
       ]);
