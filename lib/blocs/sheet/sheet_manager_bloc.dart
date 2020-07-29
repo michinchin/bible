@@ -1,11 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 part 'sheet_manager_bloc.freezed.dart';
 
-enum SheetType { collapsed, main, selection, windows }
+enum SheetType { main, selection, windows }
 
 enum SheetSize { mini, medium, full }
 
@@ -49,7 +51,8 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
   void changeSize(SheetSize size) => add(SheetEvent.changeSize(size));
   void changeTypeSize(SheetType type, SheetSize size) => add(SheetEvent.changeTypeSize(type, size));
   void setUid(int uid) => add(SheetEvent.changeView(uid));
-
+  void collapse(BuildContext context) => SheetController.of(context).hide();
+  
   void toDefaultView() {
     // Only change the state if it actually needs to change.
     // Otherwise, creates unnecessary rebuilds
@@ -66,8 +69,7 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
     if (state.type != SheetType.main) {
       // update the type
       changeType(SheetType.main);
-    }
-    else {
+    } else {
       // update the size
       changeSize(SheetSize.mini);
     }

@@ -452,7 +452,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
             allowAutoscroll: () => !context.bloc<SelectionBloc>().state.isTextSelected,
             autoscrollActive: (active) {
               if (active) {
-                context.bloc<SheetManagerBloc>().changeType(SheetType.collapsed);
+                context.bloc<SheetManagerBloc>().collapse(context);
               } else {
                 context.bloc<SheetManagerBloc>().toDefaultView();
               }

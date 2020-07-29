@@ -46,7 +46,7 @@ class _HomeScreen extends StatelessWidget {
             right: false,
             bottom: false,
             child: Container(
-              color: canvasColor,
+              color: brightness == Brightness.light ? Colors.white: Colors.black,
               child: SafeArea(
                 bottom: false,
                 child: BlocProvider<ViewManagerBloc>(

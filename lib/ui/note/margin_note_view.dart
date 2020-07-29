@@ -5,6 +5,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:quill_delta/quill_delta.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -124,11 +125,10 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
       // we're showing an existing marginNote
       try {
         doc = NotusDocument.fromJson(json.decode(info) as List);
-      }
-      catch (_) {
+      } catch (_) {
         // old margin note - create a delta
         final delta = Delta();
-        for (final s in  info.trim().split('\n')) {
+        for (final s in info.trim().split('\n')) {
           if (s.isNotEmpty) {
             delta.insert(s);
           }
@@ -189,7 +189,13 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   @override
   void initState() {
     super.initState();
-
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (visible) {
+        if (visible) {
+          context.bloc<SheetManagerBloc>().collapse(context);
+        }
+      },
+    );
     viewManagerBloc = context.bloc<ViewManagerBloc>();
     sheetManagerBloc = context.bloc<SheetManagerBloc>();
 
@@ -210,7 +216,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     });
 
     if (_editMode) {
-      sheetManagerBloc?.changeType(SheetType.collapsed);
+      sheetManagerBloc?.collapse(context);
     } else {
       sheetManagerBloc?.toDefaultView();
     }

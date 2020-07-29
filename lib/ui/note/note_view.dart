@@ -1,5 +1,7 @@
+import 'package:bible/blocs/sheet/sheet_manager_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:zefyr/zefyr.dart';
 
 import '../../blocs/notes/note_bloc.dart';
@@ -39,6 +41,13 @@ class __NoteScreenState extends State<_NoteScreen> {
   void initState() {
     super.initState();
     _focusNode = FocusNode();
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (visible) {
+        if (visible) {
+          context.bloc<SheetManagerBloc>().collapse(context);
+        }
+      },
+    );
     bloc().load();
   }
 
