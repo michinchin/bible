@@ -44,7 +44,8 @@ class _ChapterState {
     if (title == null) {
       final bible = VolumesRepository.shared.bibleWithId(bibleId);
       final abbreviation = (bible.abbreviation == null) ? '' : ' ${bible.abbreviation}';
-      this.title = bible.titleWithHref('${bcv.book}/${bcv.chapter}$abbreviation');
+      final title = bible.titleWithHref('${bcv.book}/${bcv.chapter}');
+      this.title = '$title$abbreviation';
     } else {
       this.title = title;
     }
@@ -125,7 +126,8 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                   );
                 }),
             onPressed: () async {
-              final bcv = await navigate(context);
+              // TODO(abby): is this the correct bcv value to pass in?
+              final bcv = await navigate(context, _bcvPageZero);
               if (bcv != null) {
                 // small delay to allow the nav popup to clean up before we navigate
                 // away...
@@ -137,7 +139,6 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                       tec.dmPrint('bibleChapterTitleBuilder unable to navigate to $bcv');
                     } else {
                       pageController.jumpToPage(page);
-                      updateLocation(bcv, page);
                     }
                   }
                 });
@@ -164,8 +165,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
           }
 
           debugPrint('page builder: ${ref.toString()}');
-          return _BibleChapterView(
-              viewUid: widget.state.uid, size: size, bible: _bible, ref: ref);
+          return _BibleChapterView(viewUid: widget.state.uid, size: size, bible: _bible, ref: ref);
         },
         onPageChanged: (context, _, page) async {
           tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
@@ -316,6 +316,8 @@ class _ChapterViewState extends State<_ChapterView> {
     _html ??= _env.html(
       htmlFragment: widget.html,
       fontSizePercent: (_contentScaleFactor * 100.0).round(),
+      marginLeft: '0px',
+      marginRight: '0px',
       marginTop: '0px',
       marginBottom: '60px',
       vendorFolder: (widget.baseUrl?.startsWith('http') ?? false)
@@ -497,7 +499,8 @@ class _BibleHtmlState extends State<_BibleHtml> {
                   debugId: '${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}',
                   scrollController: _scrollController,
                   baseUrl: widget.baseUrl,
-                  textScaleFactor: 1.0, // HTML is already scaled.
+                  textScaleFactor: 1.0,
+                  // HTML is already scaled.
                   textStyle: widget.fontName.isEmpty
                       ? _htmlDefaultTextStyle.merge(TextStyle(color: textColor))
                       : GoogleFonts.getFont(widget.fontName, color: textColor),
