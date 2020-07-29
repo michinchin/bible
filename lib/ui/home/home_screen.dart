@@ -30,6 +30,17 @@ class HomeScreen extends StatelessWidget {
 class _HomeScreen extends StatelessWidget {
   const _HomeScreen();
 
+  Future<double> whenNotZero(Stream<double> source) async {
+    await for (final value in source) {
+      if (value > 0) {
+        return value;
+      }
+    }
+
+    // stream exited without a true value, maybe return an exception.
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final canvasColor = Theme.of(context).canvasColor;
@@ -55,9 +66,23 @@ class _HomeScreen extends StatelessWidget {
                     condition: (previous, current) {
                       return current.rebuild == ViewManagerStateBuildInfo.build;
                     },
-                    builder: (context, state) => _BottomSheet(
-                      child: ViewManagerWidget(state: state),
-                    ),
+                    builder: (context, state) {
+                      return FutureBuilder(
+                        future: whenNotZero(
+                          Stream<double>.periodic(const Duration(milliseconds: 50),
+                              (x) => MediaQuery.of(context).size.height),
+                        ),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return _BottomSheet(
+                              child: ViewManagerWidget(state: state),
+                            );
+                          } else {
+                            return Container();
+                          }
+                        },
+                      );
+                    },
                   ),
                 ),
               ),
