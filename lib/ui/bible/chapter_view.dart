@@ -209,17 +209,16 @@ class _BibleChapterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<tec.ErrorOrValue<String>>(
+    return TecFutureBuilder<tec.ErrorOrValue<String>>(
       future: bible.chapterHtmlWith(ref.book, ref.chapter),
-      builder: (context, snapshot) {
-        final html = snapshot.hasData ? snapshot.data.value : null;
-        // FutureBuilder calls this with state waiting a couple of times, then state == done
-        if (snapshot.connectionState != ConnectionState.waiting && tec.isNotNullOrEmpty(html)) {
-          return StreamBuilder<double>(
+      builder: (context, data, error) {
+        final html = data?.value;
+        if (tec.isNotNullOrEmpty(html)) {
+          return TecStreamBuilder<double>(
             stream: AppSettings.shared.contentTextScaleFactor.stream,
-            builder: (c, snapshot) {
-              // StreamBuilder calls this with state == waiting then state == active
-              if (snapshot.connectionState != ConnectionState.waiting) {
+            initialData: AppSettings.shared.contentTextScaleFactor.value,
+            builder: (c, data, error) {
+              if (data != null) {
                 // when we get here, html and text scale are actually loaded and ready to go...
                 return _ChapterView(
                   viewUid: viewUid,
@@ -230,15 +229,13 @@ class _BibleChapterView extends StatelessWidget {
                   size: size,
                 );
               } else {
-                final error = snapshot.hasError ? snapshot.error : null;
                 return _blankContainer(context, error);
               }
             },
           );
         } else {
-          final error =
-              snapshot.hasError ? snapshot.error : snapshot.hasData ? snapshot.data.error : null;
-          return _blankContainer(context, error);
+          tec.dmPrint('VIEW $viewUid waiting for HTML to load...');
+          return _blankContainer(context, error ?? data?.error);
         }
       },
     );
@@ -350,12 +347,12 @@ class _ChapterViewState extends State<_ChapterView> {
           builder: (context, marginNotes) {
             return BlocBuilder<ChapterHighlightsBloc, ChapterHighlights>(
                 builder: (context, highlights) {
-              return StreamBuilder<String>(
+              return TecStreamBuilder<String>(
                 stream: AppSettings.shared.contentFontName.stream,
-                builder: (c, snapshot) {
-                  if (snapshot.hasData && highlights.loaded && marginNotes.loaded) {
-                    final fontName = snapshot.data;
-
+                initialData: AppSettings.shared.contentFontName.value,
+                builder: (c, fontName, error) {
+                  assert(fontName != null);
+                  if (highlights.loaded && marginNotes.loaded) {
                     // TODO(mike): fix multiple reloading of a chapter...
                     // Psalm 119 example...
                     // on first load - chapter is loaded 2x - snapshot.hasData = false, then snapShot.hasData = true
@@ -383,6 +380,7 @@ class _ChapterViewState extends State<_ChapterView> {
                       marginNotes: marginNotes,
                     );
                   } else {
+                    tec.dmPrint('VIEW ${widget.viewUid} waiting for highlights and margin notes');
                     return Container();
                   }
                 },
@@ -465,6 +463,9 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
   @override
   Widget build(BuildContext context) {
+    final debugId = '${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}';
+    tec.dmPrint('_BibleHtml building TecHtml for $debugId ${widget.size}');
+
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
     final selectionColor = isDarkTheme ? Colors.white.withAlpha(48) : Colors.black.withAlpha(32);
@@ -496,7 +497,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
               children: <Widget>[
                 TecHtml(
                   widget.html,
-                  debugId: '${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}',
+                  debugId: debugId,
                   scrollController: _scrollController,
                   baseUrl: widget.baseUrl,
                   textScaleFactor: 1.0,

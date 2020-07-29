@@ -135,7 +135,9 @@ class VolumeCard extends StatelessWidget {
         elevation: elevation,
         padding: padding,
         onTap: onTapped ??
-            () {
+            () async {
+              //if (volume.type == VolumeType.bible && (volume.isStreamable))
+
               // navigatorPush(
               //   context,
               //   (_) => VolumeScreen(

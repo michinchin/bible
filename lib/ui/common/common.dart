@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 
 import 'tec_tab_indicator.dart';
 
+export 'tec_future_builder.dart';
 export 'tec_modal_popup.dart';
 export 'tec_page_route.dart';
+export 'tec_stream_builder.dart';
 export 'tec_tab_indicator.dart';
 
 ///
@@ -46,7 +48,7 @@ AppBarTheme appBarThemeWithContext(BuildContext context) {
 
 ///
 /// Returns a [TabBarTheme] appropriate for the lightness or darkness of the given [context].
-/// 
+///
 TabBarTheme tabBarThemeWithContext(BuildContext context) {
   final theme = Theme.of(context);
   final barColor = theme.canvasColor;

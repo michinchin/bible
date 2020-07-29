@@ -65,7 +65,7 @@ class VolumesState extends Equatable {
       final ownedSet = owned.toSet();
       ids.removeWhere(ownedSet.contains);
     }
-    
+
     final volumes = ids
         .map<Volume>((id) => VolumesRepository.shared.volumeWithId(id))
         .where((v) => filter.language.isEmpty || (v.language == filter.language))
