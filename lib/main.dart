@@ -92,71 +92,18 @@ void _registerViewTypes() {
 ///
 /// App
 ///
-
-// I don't believe we need to have a ViewManagerBloc provider here...
-
-/// class App extends StatelessWidget {
-//  @override
-//  Widget build(BuildContext context) {
-//    return MultiBlocProvider(
-//      providers: [
-//        BlocProvider<ViewManagerBloc>(
-//          create: (_) => ViewManagerBloc(kvStore: tec.Prefs.shared),
-//        ),
-//        BlocProvider<ThemeModeBloc>(
-//          create: (_) => ThemeModeBloc(),
-//        ),
-//      ],
-//      child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-//        condition: (previous, current) {
-//          return current.rebuild == ViewManagerStateBuildInfo.build;
-//        },
-//        builder: (_, viewManagerState) {
-//          return BlocBuilder<ThemeModeBloc, ThemeMode>(
-//            builder: (_, themeMode) {
-//              return tec.BlocProvider<TecStyleBloc>(
-//                bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
-//                child: OKToast(
-//                  child: AppLifecycleWrapper(
-//                    child: MaterialApp(
-//                      theme: ThemeData.light(),
-//                      darkTheme: ThemeData.dark(),
-//                      themeMode: themeMode,
-//                      debugShowCheckedModeBanner: false,
-//                      localizationsDelegates: const [
-//                        GlobalMaterialLocalizations.delegate,
-//                        GlobalWidgetsLocalizations.delegate,
-//                        GlobalCupertinoLocalizations.delegate,
-//                      ],
-//                      supportedLocales: const [
-//                        Locale('en', 'US'),
-//                        Locale('es'), // Spanish
-//                        Locale('ar'), // Arabic
-//                      ],
-//                      title: _appTitle,
-//                      home: I18n(
-//                        //initialLocale: const Locale('es'),
-//                        //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
-//                        //child: Adaptive(),
-//                        child: const HomeScreen(),
-//                      ),
-//                    ),
-//                  ),
-//                ),
-//              );
-//            },
-//          );
-//        },
-//      ),
-//    );
-//  }
-//}
-
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ThemeModeBloc>(
-      create: (_) => ThemeModeBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ViewManagerBloc>(
+          create: (_) => ViewManagerBloc(kvStore: tec.Prefs.shared),
+        ),
+        BlocProvider<ThemeModeBloc>(
+          create: (_) => ThemeModeBloc(),
+        ),
+      ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (_, themeMode) {
           return tec.BlocProvider<TecStyleBloc>(

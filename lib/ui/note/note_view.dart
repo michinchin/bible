@@ -1,10 +1,10 @@
-import 'package:bible/blocs/sheet/sheet_manager_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:zefyr/zefyr.dart';
 
 import '../../blocs/notes/note_bloc.dart';
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import 'tec_image_delegate.dart';
 

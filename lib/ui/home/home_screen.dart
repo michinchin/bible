@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
@@ -46,26 +45,23 @@ class _HomeScreen extends StatelessWidget {
             right: false,
             bottom: false,
             child: Container(
-              color: brightness == Brightness.light ? Colors.white: Colors.black,
+              color: brightness == Brightness.light ? Colors.white : Colors.black,
               child: SafeArea(
                 bottom: false,
-                child: BlocProvider<ViewManagerBloc>(
-                  create: (_) => ViewManagerBloc(kvStore: tec.Prefs.shared),
-                  child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-                    condition: (previous, current) {
-                      return current.rebuild == ViewManagerStateBuildInfo.build;
-                    },
-                    builder: (context, state) {
-                      final size = MediaQuery.of(context).size;
-                      if (size == Size.zero) {
-                        return Container();
-                      } else {
-                        return _BottomSheet(
-                          child: ViewManagerWidget(state: state),
-                        );
-                      }
-                    },
-                  ),
+                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+                  condition: (previous, current) {
+                    return current.rebuild == ViewManagerStateBuildInfo.build;
+                  },
+                  builder: (context, state) {
+                    final size = MediaQuery.of(context).size;
+                    if (size == Size.zero) {
+                      return Container();
+                    } else {
+                      return _BottomSheet(
+                        child: ViewManagerWidget(state: state),
+                      );
+                    }
+                  },
                 ),
               ),
             ),

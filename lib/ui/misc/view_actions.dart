@@ -29,10 +29,6 @@ Future<void> _showMoreMenu(BuildContext context, ViewState state, Size size) {
     builder: (_) {
       return WindowManager(
         state: state,
-        // the bloc is now wrapping home screen not the whole app
-        // dialog will not have the home screen as a parent
-        // so pass in the bloc
-        bloc: context.bloc<ViewManagerBloc>(),
       );
     },
   );

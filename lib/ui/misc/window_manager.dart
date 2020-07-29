@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -28,11 +29,12 @@ Future<void> showWindowDialog({BuildContext context, Widget Function(BuildContex
 
 class WindowManager extends StatelessWidget {
   final ViewState state;
-  final ViewManagerBloc bloc;
-  const WindowManager({this.state, this.bloc});
+  const WindowManager({this.state});
 
   @override
   Widget build(BuildContext context) {
+    // ignore: close_sinks
+    final bloc = context.bloc<ViewManagerBloc>();
     final isMaximized = bloc?.state?.maximizedViewUid != 0;
 
     return Stack(
@@ -95,6 +97,8 @@ class WindowManager extends StatelessWidget {
       );
 
   Iterable<Widget> _generateOffScreenItems(BuildContext context, int viewUid) {
+    // ignore: close_sinks
+    final bloc = context.bloc<ViewManagerBloc>();
     final vm = ViewManager.shared;
     final items = <Widget>[];
     for (final each in bloc.state.views) {
@@ -131,6 +135,8 @@ class WindowManager extends StatelessWidget {
   }
 
   Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
+    // ignore: close_sinks
+    final bloc = context.bloc<ViewManagerBloc>();
     final vm = ViewManager.shared;
     return vm.types.map<Widget>((type) {
       final title = vm.titleForType(type);
