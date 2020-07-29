@@ -9,7 +9,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../common/common.dart';
 
-Future<BookChapterVerse> navigate(BuildContext context) {
+Future<BookChapterVerse> navigate(BuildContext context, BookChapterVerse bcv) {
   // return showTecModalPopup<BookChapterVerse>(
   //   context: context,
   //   alignment: Alignment.center,
@@ -30,7 +30,7 @@ Future<BookChapterVerse> navigate(BuildContext context) {
       .push<BookChapterVerse>(TecPageRoute<BookChapterVerse>(
           fullscreenDialog: true,
           builder: (context) => BlocProvider(
-                create: (context) => NavBloc(BookChapterVerse.fromHref('51/1/1')),
+                create: (context) => NavBloc(bcv),
                 child: Nav(),
               )));
 }
@@ -96,30 +96,40 @@ class _ChapterView extends StatelessWidget {
       final book = s.bcv.book;
       final chapters = bible.chaptersIn(book: s.bcv.book);
 
-      return GridView.count(
-        crossAxisCount: 5,
-        shrinkWrap: true,
-        childAspectRatio: 2,
-        padding: const EdgeInsets.all(15),
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
+      return Column(
         children: [
-          for (var i = 1; i <= chapters; i++) ...[
-            FlatButton(
-              padding: const EdgeInsets.all(0),
-              shape: const StadiumBorder(),
-              color: Colors.grey.withOpacity(0.1),
-              textColor: textColor,
-              onPressed: () {
-                context.bloc<NavBloc>().add(const NavEvent.changeIndex(index: 2));
-                context
-                    .bloc<NavBloc>()
-                    .add(NavEvent.setBookChapterVerse(bcv: BookChapterVerse(book, i, 1)));
-                // Navigator.of(context).maybePop(BookChapterVerse(book, book == 23 ? 119 : 1, 1));
-              },
-              child: Text(i.toString()),
+          // Align(
+          //   alignment: Alignment.topRight,
+          //   child: Switch.adaptive(value: twoTap, onChanged: (b) {}),
+          // ),
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 5,
+              shrinkWrap: true,
+              childAspectRatio: 2,
+              padding: const EdgeInsets.all(15),
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              children: [
+                for (var i = 1; i <= chapters; i++) ...[
+                  FlatButton(
+                    padding: const EdgeInsets.all(0),
+                    shape: const StadiumBorder(),
+                    color: Colors.grey.withOpacity(0.1),
+                    textColor: textColor,
+                    onPressed: () {
+                      context.bloc<NavBloc>().add(const NavEvent.changeIndex(index: 2));
+                      context
+                          .bloc<NavBloc>()
+                          .add(NavEvent.setBookChapterVerse(bcv: BookChapterVerse(book, i, 1)));
+                      // Navigator.of(context).maybePop(BookChapterVerse(book, book == 23 ? 119 : 1, 1));
+                    },
+                    child: Text(i.toString()),
+                  ),
+                ]
+              ],
             ),
-          ]
+          ),
         ],
       );
     });

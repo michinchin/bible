@@ -20,7 +20,8 @@ class NavBloc extends Bloc<NavEvent, NavState> {
   NavBloc(this.initialRef);
 
   @override
-  NavState get initialState => NavState(bcv: initialRef, tabIndex: 0);
+  NavState get initialState =>
+      NavState(bcv: initialRef ?? BookChapterVerse.fromHref('50/1/1'), tabIndex: 0);
 
   @override
   Stream<NavState> mapEventToState(NavEvent event) async* {

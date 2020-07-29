@@ -100,15 +100,15 @@ Widget _titleBuilder(BuildContext context, Key pageableViewStateKey, ViewState s
       style: Theme.of(context).textTheme.headline6.copyWith(color: Theme.of(context).accentColor),
     ),
     onPressed: () async {
-      final bcv = await navigate(context);
-      if (bcv != null) {
+      final bookChapterVerse = await navigate(context, bcv);
+      if (bookChapterVerse != null) {
         final key = tec.as<GlobalKey<PageableViewState>>(pageableViewStateKey);
         final pageController = key?.currentState?.pageController;
         if (pageController != null) {
           final _bible = VolumesRepository.shared.bibleWithId(_bibleId);
-          final page = _initialReference.chaptersTo(bcv, bible: _bible);
+          final page = _initialReference.chaptersTo(bookChapterVerse, bible: _bible);
           if (page == null) {
-            tec.dmPrint('bibleChapterTitleBuilder unable to navigate to $bcv');
+            tec.dmPrint('bibleChapterTitleBuilder unable to navigate to $bookChapterVerse');
           } else {
             pageController.jumpToPage(page);
           }
