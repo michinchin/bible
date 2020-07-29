@@ -1,13 +1,14 @@
 import 'dart:convert';
 
-import 'package:bible/models/bible_chapter_state.dart';
-import 'package:bible/ui/bible/chapter_view.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
+
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/bible_chapter_state.dart';
+import '../bible/chapter_view.dart';
 
 Future<void> showWindowDialog({BuildContext context, Widget Function(BuildContext) builder}) =>
     showDialog<void>(
