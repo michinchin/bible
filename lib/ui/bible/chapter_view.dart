@@ -17,6 +17,7 @@ import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
+import '../../models/bible_chapter_state.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
 import '../misc/view_actions.dart';
@@ -31,53 +32,7 @@ Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size)
 }
 
 String bibleChapterDefaultData() {
-  return tec.toJsonString(_ChapterState.initial());
-}
-
-class _ChapterState {
-  final int bibleId;
-  final BookChapterVerse bcv;
-  final int page;
-  String title;
-
-  _ChapterState(this.bibleId, this.bcv, this.page, {String title}) {
-    if (title == null) {
-      final bible = VolumesRepository.shared.bibleWithId(bibleId);
-      final abbreviation = (bible.abbreviation == null) ? '' : ' ${bible.abbreviation}';
-      final title = bible.titleWithHref('${bcv.book}/${bcv.chapter}');
-      this.title = '$title$abbreviation';
-    } else {
-      this.title = title;
-    }
-  }
-
-  static BookChapterVerse initialBCV() {
-    return const BookChapterVerse(50, 1, 1);
-  }
-
-  factory _ChapterState.initial() {
-    return _ChapterState(51, initialBCV(), 0);
-  }
-
-  factory _ChapterState.fromJson(Object o) {
-    BookChapterVerse bcv;
-    int page, bibleId;
-    String title;
-
-    final json = (o is String) ? tec.parseJsonSync(o) : o;
-    if (json is Map<String, dynamic>) {
-      bibleId = tec.as<int>(json['vid']);
-      bcv = BookChapterVerse.fromJson(json['bcv']);
-      page = tec.as<int>(json['page']);
-      title = tec.as<String>(json['title']);
-    }
-
-    return _ChapterState(bibleId, bcv, page, title: title);
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{'vid': bibleId, 'bcv': bcv, 'page': page, 'title': title};
-  }
+  return tec.toJsonString(BibleChapterState.initial());
 }
 
 class _PageableBibleView extends StatefulWidget {
@@ -99,7 +54,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
 
   @override
   void initState() {
-    final chapterState = _ChapterState.fromJson(widget.state.data);
+    final chapterState = BibleChapterState.fromJson(widget.state.data);
     // we're putting title in a stream so we can update outside of setState - as that
     // rebuilds the PageableView :(
     _title = StreamController<String>()..add(chapterState.title);
@@ -182,7 +137,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
   }
 
   void updateLocation(BookChapterVerse bcv, int page) {
-    final nextViewState = _ChapterState(_bible.id, bcv, page);
+    final nextViewState = BibleChapterState(_bible.id, bcv, page);
     _title.add(nextViewState.title);
 
     // update the view manager state
