@@ -71,17 +71,24 @@ Color colorWithColor(Color color, {bool forHighlight = false, bool isDarkMode = 
 
   // Calculates the best color by tweaking the luminance.
   Color _luminance(Color color) {
-    final l = forHighlight ? (isDarkMode ? 0.20 : 0.90) : (isDarkMode ? 0.50 : 0.70);
+    // dark mode version 1 - used : (isDarkMode ? 0.50 : 0.70)
+    // dark mode version 2 - used : (isDarkMode ? 0.70 : 0.70)
+
+    final l = forHighlight ? (isDarkMode ? 0.20 : 0.90) : (isDarkMode ? 0.70 : 0.70);
     return isDarkMode ? color.darkenedToLuminance(l) : color.lightenedToLuminance(l);
     // return isDarkMode ? color.withLuminance(l) : color.withLuminance(l);
   }
 
-  // For dark mode, the `brightness` algorithm seems to always produce the best color.
+  // For dark mode, the `luminance` algorithm seems to always produce the best color.
   // For light mode, the `brightness` algorithm works best for non-blue colors, but
   // the `luminance` algorithm works best for blue colors, so, we lerp between them
   // based the blueness of the color.
+
+  // dark mode version 1 - used _brightness(color)
+  // dark mode version 2 - used _luminance(color)
+
   final newColor = isDarkMode
-      ? _brightness(color)
+      ? _luminance(color)
       : Color.lerp(_brightness(color), _luminance(color), color.blueness);
   // final newColor = _brightness(color);
   // final newColor = _luminance(color);
