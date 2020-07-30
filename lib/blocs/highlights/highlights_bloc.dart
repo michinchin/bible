@@ -90,17 +90,22 @@ abstract class Highlight with _$Highlight {
   }
 }
 
+enum HighlightMode { preview, save }
+
 @freezed
-abstract class HighlightsEvent with _$HighlightsEvent {
-  const factory HighlightsEvent.updateFromDb({@required List<Highlight> hls}) = _UpdateFromDb;
+abstract class HighlightEvent with _$HighlightEvent {
+  const factory HighlightEvent.updateFromDb({@required List<Highlight> hls}) = _UpdateFromDb;
 
-  const factory HighlightsEvent.add(
-      {@required HighlightType type, @required int color, @required Reference ref}) = _Add;
+  const factory HighlightEvent.add(
+      {@required HighlightType type,
+      @required int color,
+      @required Reference ref,
+      @required HighlightMode mode}) = _Add;
 
-  const factory HighlightsEvent.clear(Reference ref) = _Clear;
+  const factory HighlightEvent.clear(Reference ref, HighlightMode mode) = _Clear;
 }
 
-class ChapterHighlightsBloc extends tec.SafeBloc<HighlightsEvent, ChapterHighlights> {
+class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighlights> {
   final int volume;
   final int book;
   final int chapter;
@@ -166,7 +171,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightsEvent, ChapterHighlig
 
     // _printHighlights(hls, withTitle: 'HIGHLIGHTS IMPORTED FROM DB:');
 
-    add(HighlightsEvent.updateFromDb(hls: hls));
+    add(HighlightEvent.updateFromDb(hls: hls));
   }
 
   Future<void> _saveHighlightsToDb(List<int> verses, List<Highlight> hls) async {
@@ -209,7 +214,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightsEvent, ChapterHighlig
   ChapterHighlights get initialState => ChapterHighlights(volume, book, chapter, [], loaded: false);
 
   @override
-  Stream<ChapterHighlights> mapEventToState(HighlightsEvent event) async* {
+  Stream<ChapterHighlights> mapEventToState(HighlightEvent event) async* {
     final newState = event.when(add: _add, clear: _clear, updateFromDb: _updateFromDb);
     // tec.dmPrint('Updated to $newState');
     yield newState;
@@ -233,22 +238,29 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightsEvent, ChapterHighlig
         tec.dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');
       }
 
-      _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
+//      _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
     }
 
     return ChapterHighlights(volume, book, chapter, newList, loaded: true);
   }
 
-  ChapterHighlights _add(HighlightType type, int color, Reference ref) {
+  ChapterHighlights _add(HighlightType type, int color, Reference ref, HighlightMode mode) {
     assert(type != HighlightType.clear);
     final newList = state.highlights.copySubtracting(ref)..add(Highlight(type, color, ref));
-    _saveHighlightsToDb(ref.verses.toList(), newList);
+    if (mode == HighlightMode.save) {
+      _saveHighlightsToDb(ref.verses.toList(), newList);
+    }
     return ChapterHighlights(volume, book, chapter, newList, loaded: true);
   }
 
-  ChapterHighlights _clear(Reference ref) {
+  ChapterHighlights _clear(Reference ref, HighlightMode mode) {
     final newList = state.highlights.copySubtracting(ref);
-    _saveHighlightsToDb(ref.verses.toList(), newList);
+    if (mode == HighlightMode.preview) {
+      // need to reset the hls...
+      _initUserContent();
+    } else {
+      _saveHighlightsToDb(ref.verses.toList(), newList);
+    }
     return ChapterHighlights(volume, book, chapter, newList, loaded: true);
   }
 }
@@ -262,17 +274,17 @@ extension HighlightsBlocExtOnListOfHighlight on List<Highlight> {
   }
 }
 
-void _printHighlights(List<Highlight> hls, {String withTitle}) {
-  if (kDebugMode) {
-    tec.dmPrint('');
-    tec.dmPrint('-----------------------------------------------------');
-    if (withTitle?.isNotEmpty ?? false) tec.dmPrint(withTitle);
-    tec.dmPrint('');
-    for (final hl in hls) {
-      tec.dmPrint(hl.ref);
-    }
-    tec.dmPrint('');
-    tec.dmPrint('-----------------------------------------------------\n');
-    tec.dmPrint('');
-  }
-}
+//void _printHighlights(List<Highlight> hls, {String withTitle}) {
+//  if (kDebugMode) {
+//    tec.dmPrint('');
+//    tec.dmPrint('-----------------------------------------------------');
+//    if (withTitle?.isNotEmpty ?? false) tec.dmPrint(withTitle);
+//    tec.dmPrint('');
+//    for (final hl in hls) {
+//      tec.dmPrint(hl.ref);
+//    }
+//    tec.dmPrint('');
+//    tec.dmPrint('-----------------------------------------------------\n');
+//    tec.dmPrint('');
+//  }
+//}

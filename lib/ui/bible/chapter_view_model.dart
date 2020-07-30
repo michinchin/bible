@@ -436,17 +436,24 @@ class BibleChapterViewModel {
 
     final ref = _selectionReference;
 
-    if (!_isSelectionTrialMode) {
+    // when existing from color picker with "cancel" - style is in preview mode, but
+    // we still need to clear the selection
+    if (!_isSelectionTrialMode || selectionStyle.type == HighlightType.clear) {
       clearAllSelections(context);
     } else if (hasWordRangeSelected) {
       refreshFunc(() {});
     }
 
+    final mode = (_isSelectionTrialMode) ? HighlightMode.preview : HighlightMode.save;
     if (selectionStyle.type == HighlightType.clear) {
-      bloc.add(HighlightsEvent.clear(ref));
+      bloc.add(HighlightEvent.clear(ref, mode));
     } else {
-      bloc.add(
-          HighlightsEvent.add(type: selectionStyle.type, color: selectionStyle.color, ref: ref));
+      bloc.add(HighlightEvent.add(
+        type: selectionStyle.type,
+        color: selectionStyle.color,
+        ref: ref,
+        mode: mode,
+      ));
     }
   }
 

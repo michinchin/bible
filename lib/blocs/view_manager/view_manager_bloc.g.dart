@@ -18,8 +18,7 @@ _$_ViewState _$_$_ViewStateFromJson(Map<String, dynamic> json) {
   );
 }
 
-Map<String, dynamic> _$_$_ViewStateToJson(_$_ViewState instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$_$_ViewStateToJson(_$_ViewState instance) => <String, dynamic>{
       'uid': instance.uid,
       'type': instance.type,
       'preferredWidth': instance.preferredWidth,
@@ -30,8 +29,7 @@ Map<String, dynamic> _$_$_ViewStateToJson(_$_ViewState instance) =>
 _$_Views _$_$_ViewsFromJson(Map<String, dynamic> json) {
   return _$_Views(
     (json['views'] as List)
-        ?.map((dynamic e) =>
-            e == null ? null : ViewState.fromJson(e as Map<String, dynamic>))
+        ?.map((dynamic e) => e == null ? null : ViewState.fromJson(e as Map<String, dynamic>))
         ?.toList(),
     json['maximizedViewUid'] as int,
     json['nextUid'] as int,
@@ -56,9 +54,7 @@ T _$enumDecode<T>(
         '${enumValues.values.join(', ')}');
   }
 
-  final value = enumValues.entries
-      .singleWhere((e) => e.value == source, orElse: () => null)
-      ?.key;
+  final value = enumValues.entries.singleWhere((e) => e.value == source, orElse: () => null)?.key;
 
   if (value == null && unknownValue == null) {
     throw ArgumentError('`$source` is not one of the supported values: '

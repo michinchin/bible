@@ -240,9 +240,8 @@ class __MediumFullSheetItemsState extends State<_MediumFullSheetItems> {
                       GreyCircleButton(
                           icon: Icons.close,
                           onPressed: () {
-                            context
-                                .bloc<SelectionStyleBloc>()
-                                ?.add(const SelectionStyle(type: HighlightType.clear));
+                            context.bloc<SelectionStyleBloc>()?.add(
+                                const SelectionStyle(type: HighlightType.clear, isTrialMode: true));
                           }),
                       const Divider(color: Colors.transparent),
                       GreyCircleButton(

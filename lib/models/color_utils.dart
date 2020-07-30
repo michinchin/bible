@@ -79,6 +79,18 @@ Color colorWithColor(Color color, {bool forHighlight = false, bool isDarkMode = 
     // return isDarkMode ? color.withLuminance(l) : color.withLuminance(l);
   }
 
+  // dark mode version 3 - greens need to be more green. For green colors, we lerp
+  // between the lumiance color and pure green
+  // For all other colors, just return luminance(color) (save as version 2)
+  Color _darkModeText(Color color) {
+    if (!forHighlight && color.greenness > 0.55) {
+      return Color.lerp(_luminance(color), const Color(0xff00ff00), color.greenness);
+    }
+    else {
+      return _luminance(color);
+    }
+  }
+
   // For dark mode, the `luminance` algorithm seems to always produce the best color.
   // For light mode, the `brightness` algorithm works best for non-blue colors, but
   // the `luminance` algorithm works best for blue colors, so, we lerp between them
@@ -88,10 +100,8 @@ Color colorWithColor(Color color, {bool forHighlight = false, bool isDarkMode = 
   // dark mode version 2 - used _luminance(color)
 
   final newColor = isDarkMode
-      ? _luminance(color)
+      ? _darkModeText(color)
       : Color.lerp(_brightness(color), _luminance(color), color.blueness);
-  // final newColor = _brightness(color);
-  // final newColor = _luminance(color);
 
   return newColor;
 }
@@ -296,6 +306,9 @@ extension TecUtilExtOnColor on Color {
 
   // Returns the "blueness" of the color, a number <= 0 && <= 1.0.
   double get blueness => (blue - math.max(red, green) + 255.0) / 510.0;
+
+  // Returns the "greenness" of the color, a number <= 0 && <= 1.0.
+  double get greenness => (green - math.max(red, blue) + 255.0) / 510.0;
 
   _HslColor _toHsl({@required int alpha}) {
     return _rgbToHsl(

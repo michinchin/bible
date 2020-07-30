@@ -363,8 +363,8 @@ abstract class _Highlight implements Highlight {
   _$HighlightCopyWith<_Highlight> get copyWith;
 }
 
-class _$HighlightsEventTearOff {
-  const _$HighlightsEventTearOff();
+class _$HighlightEventTearOff {
+  const _$HighlightEventTearOff();
 
 // ignore: unused_element
   _UpdateFromDb updateFromDb({@required List<Highlight> hls}) {
@@ -377,37 +377,43 @@ class _$HighlightsEventTearOff {
   _Add add(
       {@required HighlightType type,
       @required int color,
-      @required Reference ref}) {
+      @required Reference ref,
+      @required HighlightMode mode}) {
     return _Add(
       type: type,
       color: color,
       ref: ref,
+      mode: mode,
     );
   }
 
 // ignore: unused_element
-  _Clear clear(Reference ref) {
+  _Clear clear(Reference ref, HighlightMode mode) {
     return _Clear(
       ref,
+      mode,
     );
   }
 }
 
 // ignore: unused_element
-const $HighlightsEvent = _$HighlightsEventTearOff();
+const $HighlightEvent = _$HighlightEventTearOff();
 
-mixin _$HighlightsEvent {
+mixin _$HighlightEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result updateFromDb(List<Highlight> hls),
-    @required Result add(HighlightType type, int color, Reference ref),
-    @required Result clear(Reference ref),
+    @required
+        Result add(
+            HighlightType type, int color, Reference ref, HighlightMode mode),
+    @required Result clear(Reference ref, HighlightMode mode),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result updateFromDb(List<Highlight> hls),
-    Result add(HighlightType type, int color, Reference ref),
-    Result clear(Reference ref),
+    Result add(
+        HighlightType type, int color, Reference ref, HighlightMode mode),
+    Result clear(Reference ref, HighlightMode mode),
     @required Result orElse(),
   });
   @optionalTypeArgs
@@ -425,19 +431,19 @@ mixin _$HighlightsEvent {
   });
 }
 
-abstract class $HighlightsEventCopyWith<$Res> {
-  factory $HighlightsEventCopyWith(
-          HighlightsEvent value, $Res Function(HighlightsEvent) then) =
-      _$HighlightsEventCopyWithImpl<$Res>;
+abstract class $HighlightEventCopyWith<$Res> {
+  factory $HighlightEventCopyWith(
+          HighlightEvent value, $Res Function(HighlightEvent) then) =
+      _$HighlightEventCopyWithImpl<$Res>;
 }
 
-class _$HighlightsEventCopyWithImpl<$Res>
-    implements $HighlightsEventCopyWith<$Res> {
-  _$HighlightsEventCopyWithImpl(this._value, this._then);
+class _$HighlightEventCopyWithImpl<$Res>
+    implements $HighlightEventCopyWith<$Res> {
+  _$HighlightEventCopyWithImpl(this._value, this._then);
 
-  final HighlightsEvent _value;
+  final HighlightEvent _value;
   // ignore: unused_field
-  final $Res Function(HighlightsEvent) _then;
+  final $Res Function(HighlightEvent) _then;
 }
 
 abstract class _$UpdateFromDbCopyWith<$Res> {
@@ -448,7 +454,7 @@ abstract class _$UpdateFromDbCopyWith<$Res> {
 }
 
 class __$UpdateFromDbCopyWithImpl<$Res>
-    extends _$HighlightsEventCopyWithImpl<$Res>
+    extends _$HighlightEventCopyWithImpl<$Res>
     implements _$UpdateFromDbCopyWith<$Res> {
   __$UpdateFromDbCopyWithImpl(
       _UpdateFromDb _value, $Res Function(_UpdateFromDb) _then)
@@ -475,14 +481,14 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'HighlightsEvent.updateFromDb(hls: $hls)';
+    return 'HighlightEvent.updateFromDb(hls: $hls)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('type', 'HighlightsEvent.updateFromDb'))
+      ..add(DiagnosticsProperty('type', 'HighlightEvent.updateFromDb'))
       ..add(DiagnosticsProperty('hls', hls));
   }
 
@@ -506,8 +512,10 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result updateFromDb(List<Highlight> hls),
-    @required Result add(HighlightType type, int color, Reference ref),
-    @required Result clear(Reference ref),
+    @required
+        Result add(
+            HighlightType type, int color, Reference ref, HighlightMode mode),
+    @required Result clear(Reference ref, HighlightMode mode),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
@@ -519,8 +527,9 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result updateFromDb(List<Highlight> hls),
-    Result add(HighlightType type, int color, Reference ref),
-    Result clear(Reference ref),
+    Result add(
+        HighlightType type, int color, Reference ref, HighlightMode mode),
+    Result clear(Reference ref, HighlightMode mode),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -559,7 +568,7 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
   }
 }
 
-abstract class _UpdateFromDb implements HighlightsEvent {
+abstract class _UpdateFromDb implements HighlightEvent {
   const factory _UpdateFromDb({@required List<Highlight> hls}) =
       _$_UpdateFromDb;
 
@@ -570,10 +579,10 @@ abstract class _UpdateFromDb implements HighlightsEvent {
 abstract class _$AddCopyWith<$Res> {
   factory _$AddCopyWith(_Add value, $Res Function(_Add) then) =
       __$AddCopyWithImpl<$Res>;
-  $Res call({HighlightType type, int color, Reference ref});
+  $Res call({HighlightType type, int color, Reference ref, HighlightMode mode});
 }
 
-class __$AddCopyWithImpl<$Res> extends _$HighlightsEventCopyWithImpl<$Res>
+class __$AddCopyWithImpl<$Res> extends _$HighlightEventCopyWithImpl<$Res>
     implements _$AddCopyWith<$Res> {
   __$AddCopyWithImpl(_Add _value, $Res Function(_Add) _then)
       : super(_value, (v) => _then(v as _Add));
@@ -586,20 +595,27 @@ class __$AddCopyWithImpl<$Res> extends _$HighlightsEventCopyWithImpl<$Res>
     Object type = freezed,
     Object color = freezed,
     Object ref = freezed,
+    Object mode = freezed,
   }) {
     return _then(_Add(
       type: type == freezed ? _value.type : type as HighlightType,
       color: color == freezed ? _value.color : color as int,
       ref: ref == freezed ? _value.ref : ref as Reference,
+      mode: mode == freezed ? _value.mode : mode as HighlightMode,
     ));
   }
 }
 
 class _$_Add with DiagnosticableTreeMixin implements _Add {
-  const _$_Add({@required this.type, @required this.color, @required this.ref})
+  const _$_Add(
+      {@required this.type,
+      @required this.color,
+      @required this.ref,
+      @required this.mode})
       : assert(type != null),
         assert(color != null),
-        assert(ref != null);
+        assert(ref != null),
+        assert(mode != null);
 
   @override
   final HighlightType type;
@@ -607,20 +623,23 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   final int color;
   @override
   final Reference ref;
+  @override
+  final HighlightMode mode;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'HighlightsEvent.add(type: $type, color: $color, ref: $ref)';
+    return 'HighlightEvent.add(type: $type, color: $color, ref: $ref, mode: $mode)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('type', 'HighlightsEvent.add'))
+      ..add(DiagnosticsProperty('type', 'HighlightEvent.add'))
       ..add(DiagnosticsProperty('type', type))
       ..add(DiagnosticsProperty('color', color))
-      ..add(DiagnosticsProperty('ref', ref));
+      ..add(DiagnosticsProperty('ref', ref))
+      ..add(DiagnosticsProperty('mode', mode));
   }
 
   @override
@@ -632,7 +651,9 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
             (identical(other.color, color) ||
                 const DeepCollectionEquality().equals(other.color, color)) &&
             (identical(other.ref, ref) ||
-                const DeepCollectionEquality().equals(other.ref, ref)));
+                const DeepCollectionEquality().equals(other.ref, ref)) &&
+            (identical(other.mode, mode) ||
+                const DeepCollectionEquality().equals(other.mode, mode)));
   }
 
   @override
@@ -640,7 +661,8 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(type) ^
       const DeepCollectionEquality().hash(color) ^
-      const DeepCollectionEquality().hash(ref);
+      const DeepCollectionEquality().hash(ref) ^
+      const DeepCollectionEquality().hash(mode);
 
   @override
   _$AddCopyWith<_Add> get copyWith =>
@@ -650,26 +672,29 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result updateFromDb(List<Highlight> hls),
-    @required Result add(HighlightType type, int color, Reference ref),
-    @required Result clear(Reference ref),
+    @required
+        Result add(
+            HighlightType type, int color, Reference ref, HighlightMode mode),
+    @required Result clear(Reference ref, HighlightMode mode),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
-    return add(type, color, ref);
+    return add(type, color, ref, mode);
   }
 
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result updateFromDb(List<Highlight> hls),
-    Result add(HighlightType type, int color, Reference ref),
-    Result clear(Reference ref),
+    Result add(
+        HighlightType type, int color, Reference ref, HighlightMode mode),
+    Result clear(Reference ref, HighlightMode mode),
     @required Result orElse(),
   }) {
     assert(orElse != null);
     if (add != null) {
-      return add(type, color, ref);
+      return add(type, color, ref, mode);
     }
     return orElse();
   }
@@ -703,25 +728,27 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
   }
 }
 
-abstract class _Add implements HighlightsEvent {
+abstract class _Add implements HighlightEvent {
   const factory _Add(
       {@required HighlightType type,
       @required int color,
-      @required Reference ref}) = _$_Add;
+      @required Reference ref,
+      @required HighlightMode mode}) = _$_Add;
 
   HighlightType get type;
   int get color;
   Reference get ref;
+  HighlightMode get mode;
   _$AddCopyWith<_Add> get copyWith;
 }
 
 abstract class _$ClearCopyWith<$Res> {
   factory _$ClearCopyWith(_Clear value, $Res Function(_Clear) then) =
       __$ClearCopyWithImpl<$Res>;
-  $Res call({Reference ref});
+  $Res call({Reference ref, HighlightMode mode});
 }
 
-class __$ClearCopyWithImpl<$Res> extends _$HighlightsEventCopyWithImpl<$Res>
+class __$ClearCopyWithImpl<$Res> extends _$HighlightEventCopyWithImpl<$Res>
     implements _$ClearCopyWith<$Res> {
   __$ClearCopyWithImpl(_Clear _value, $Res Function(_Clear) _then)
       : super(_value, (v) => _then(v as _Clear));
@@ -732,30 +759,37 @@ class __$ClearCopyWithImpl<$Res> extends _$HighlightsEventCopyWithImpl<$Res>
   @override
   $Res call({
     Object ref = freezed,
+    Object mode = freezed,
   }) {
     return _then(_Clear(
       ref == freezed ? _value.ref : ref as Reference,
+      mode == freezed ? _value.mode : mode as HighlightMode,
     ));
   }
 }
 
 class _$_Clear with DiagnosticableTreeMixin implements _Clear {
-  const _$_Clear(this.ref) : assert(ref != null);
+  const _$_Clear(this.ref, this.mode)
+      : assert(ref != null),
+        assert(mode != null);
 
   @override
   final Reference ref;
+  @override
+  final HighlightMode mode;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'HighlightsEvent.clear(ref: $ref)';
+    return 'HighlightEvent.clear(ref: $ref, mode: $mode)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('type', 'HighlightsEvent.clear'))
-      ..add(DiagnosticsProperty('ref', ref));
+      ..add(DiagnosticsProperty('type', 'HighlightEvent.clear'))
+      ..add(DiagnosticsProperty('ref', ref))
+      ..add(DiagnosticsProperty('mode', mode));
   }
 
   @override
@@ -763,12 +797,16 @@ class _$_Clear with DiagnosticableTreeMixin implements _Clear {
     return identical(this, other) ||
         (other is _Clear &&
             (identical(other.ref, ref) ||
-                const DeepCollectionEquality().equals(other.ref, ref)));
+                const DeepCollectionEquality().equals(other.ref, ref)) &&
+            (identical(other.mode, mode) ||
+                const DeepCollectionEquality().equals(other.mode, mode)));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(ref);
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(ref) ^
+      const DeepCollectionEquality().hash(mode);
 
   @override
   _$ClearCopyWith<_Clear> get copyWith =>
@@ -778,26 +816,29 @@ class _$_Clear with DiagnosticableTreeMixin implements _Clear {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result updateFromDb(List<Highlight> hls),
-    @required Result add(HighlightType type, int color, Reference ref),
-    @required Result clear(Reference ref),
+    @required
+        Result add(
+            HighlightType type, int color, Reference ref, HighlightMode mode),
+    @required Result clear(Reference ref, HighlightMode mode),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
-    return clear(ref);
+    return clear(ref, mode);
   }
 
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result updateFromDb(List<Highlight> hls),
-    Result add(HighlightType type, int color, Reference ref),
-    Result clear(Reference ref),
+    Result add(
+        HighlightType type, int color, Reference ref, HighlightMode mode),
+    Result clear(Reference ref, HighlightMode mode),
     @required Result orElse(),
   }) {
     assert(orElse != null);
     if (clear != null) {
-      return clear(ref);
+      return clear(ref, mode);
     }
     return orElse();
   }
@@ -831,9 +872,10 @@ class _$_Clear with DiagnosticableTreeMixin implements _Clear {
   }
 }
 
-abstract class _Clear implements HighlightsEvent {
-  const factory _Clear(Reference ref) = _$_Clear;
+abstract class _Clear implements HighlightEvent {
+  const factory _Clear(Reference ref, HighlightMode mode) = _$_Clear;
 
   Reference get ref;
+  HighlightMode get mode;
   _$ClearCopyWith<_Clear> get copyWith;
 }
