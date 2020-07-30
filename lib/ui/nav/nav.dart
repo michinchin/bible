@@ -77,8 +77,13 @@ class _NavState extends State<Nav> with SingleTickerProviderStateMixin {
                 decoration: InputDecoration(suffixIcon: Icon(Icons.search), hintText: 'Navigate'),
               ),
               bottom: TabBar(
+                indicatorSize: TabBarIndicatorSize.label,
+                indicator: BubbleTabIndicator(color: Theme.of(context).textColor.withOpacity(0.5)),
                 controller: _tabController,
-                tabs: const [Tab(text: 'Book'), Tab(text: 'Chapter'), Tab(text: 'Verse')],
+                labelColor: Theme.of(context).textColor.withOpacity(0.7),
+                unselectedLabelColor: Theme.of(context).textColor.withOpacity(0.7),
+                // labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                tabs: const [Tab(text: 'BOOK'), Tab(text: 'CHAPTER'), Tab(text: 'VERSE')],
               ),
             ),
             body: SafeArea(
@@ -206,115 +211,84 @@ class _BookView extends StatelessWidget {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor =
         isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
-    final isLargeScreen = MediaQuery.of(context).size.width > 500;
-    final wideScreen = MediaQuery.of(context).size.width > 400;
+    // final isLargeScreen = MediaQuery.of(context).size.width > 500;
+    // final wideScreen = MediaQuery.of(context).size.width > 400;
 
-    List<Widget> _lineInGridView() {
-      final divs = <Widget>[];
-      final count = isLargeScreen ? 9 : 6;
-      for (var i = 0; i < count; i++) {
-        divs.add(const VerticalDivider(color: Colors.transparent));
-      }
-      return divs;
-    }
+    // List<Widget> _lineInGridView() {
+    //   final divs = <Widget>[];
+    //   final count = isLargeScreen ? 9 : 6;
+    //   for (var i = 0; i < count; i++) {
+    //     divs.add(const VerticalDivider(color: Colors.transparent));
+    //   }
+    //   return divs;
+    // }
 
-    return GridView.count(
-      crossAxisCount: isLargeScreen || wideScreen ? 6 : 5,
-      shrinkWrap: true,
-      childAspectRatio: isLargeScreen ? 3 : 2,
-      padding: const EdgeInsets.all(15),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      children: [
-        for (final book in bookNames.keys) ...[
-          FlatButton(
-            padding: const EdgeInsets.all(0),
-            shape: const StadiumBorder(),
-            color: Colors.grey.withOpacity(0.1),
-            textColor: textColor,
-            onPressed: () {
-              context.bloc<NavBloc>().add(const NavEvent.changeIndex(index: 1));
-              context.bloc<NavBloc>().add(NavEvent.setBookChapterVerse(
-                  bcv: BookChapterVerse(book, book == 23 ? 119 : 1, 1)));
-              // Navigator.of(context).maybePop(BookChapterVerse(book, book == 23 ? 119 : 1, 1));
-            },
-            child: Text(
-              bookNames[book],
-            ),
-          ),
-          if (book == 46) ..._lineInGridView(),
-        ]
-      ],
+    final ot = bookNames.keys.takeWhile(bible.isOTBook);
+    final nt = bookNames.keys.where(bible.isNTBook);
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              child: Text(
+                'OLD TESTAMENT',
+                style: Theme.of(context).textTheme.caption,
+              )),
+          Wrap(spacing: 5, runSpacing: 0, children: [
+            for (final book in ot) ...[
+              ButtonTheme(
+                minWidth: 50,
+                child: FlatButton(
+                  padding: const EdgeInsets.all(0),
+                  shape: const StadiumBorder(),
+                  color: Colors.grey.withOpacity(0.1),
+                  textColor: textColor,
+                  onPressed: () {
+                    context.bloc<NavBloc>().add(const NavEvent.changeIndex(index: 1));
+                    context.bloc<NavBloc>().add(NavEvent.setBookChapterVerse(
+                        bcv: BookChapterVerse(book, book == 23 ? 119 : 1, 1)));
+                    // Navigator.of(context).maybePop(BookChapterVerse(book, book == 23 ? 119 : 1, 1));
+                  },
+                  child: Text(
+                    bookNames[book],
+                  ),
+                ),
+              ),
+            ]
+          ]),
+          Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              child: Text(
+                'NEW TESTAMENT',
+                style: Theme.of(context).textTheme.caption,
+              )),
+          Wrap(spacing: 5, children: [
+            for (final book in nt) ...[
+              ButtonTheme(
+                minWidth: 50,
+                child: FlatButton(
+                  padding: const EdgeInsets.all(0),
+                  shape: const StadiumBorder(),
+                  color: Colors.grey.withOpacity(0.1),
+                  textColor: textColor,
+                  onPressed: () {
+                    context.bloc<NavBloc>().add(const NavEvent.changeIndex(index: 1));
+                    context.bloc<NavBloc>().add(NavEvent.setBookChapterVerse(
+                        bcv: BookChapterVerse(book, book == 23 ? 119 : 1, 1)));
+                    // Navigator.of(context).maybePop(BookChapterVerse(book, book == 23 ? 119 : 1, 1));
+                  },
+                  child: Text(
+                    bookNames[book],
+                  ),
+                ),
+              ),
+            ]
+          ]),
+          const Divider(color: Colors.transparent),
+        ],
+      ),
     );
   }
 }
-
-// class Nav extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return LayoutBuilder(builder: (context, constraints) {
-//       //tec.dmPrint('Nav constraints: $constraints');
-
-//       final bible = VolumesRepository.shared.bibleWithId(51);
-
-//       // ignore: prefer_collection_literals
-//       final bookNames = LinkedHashMap<int, String>();
-//       var book = bible.firstBook;
-//       while (book != 0) {
-//         bookNames[book] = bible.shortNameOfBook(book);
-//         final nextBook = bible.bookAfter(book);
-//         book = (nextBook == book ? 0 : nextBook);
-//       }
-
-//       final bookKeys = bookNames.keys.toList();
-
-//       final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-//       final otColor = isDarkTheme ? const Color(0xff111122) : Colors.blue[50];
-//       final ntColor = isDarkTheme ? const Color(0xff221111) : Colors.red[50];
-//       final textColor = isDarkTheme ? const Color(0xff777777) : const Color(0xff333333);
-
-//       const minCellWidth = 46.0;
-//       final cellWidth = constraints.maxWidth == double.infinity
-//           ? minCellWidth
-//           : math.min(66.0, (constraints.maxWidth / 6).roundToDouble());
-//       const cellHeight = 34.0;
-//       const rowCount = 6;
-//       var x = 0.0, y = 0.0, c = 0;
-//       final b = <Widget>[
-//         Container(
-//             width: cellWidth * rowCount,
-//             height: (bookKeys.length.toDouble() / rowCount).ceilToDouble() * cellHeight)
-//       ];
-//       for (var i = 0; i < bookKeys.length; i++) {
-//         c += 1;
-//         if (c > rowCount) {
-//           c = 1;
-//           x = 0;
-//           y += cellHeight;
-//         }
-//         final book = bookKeys[i];
-//         b.add(
-//           Positioned.fromRect(
-//             rect: Rect.fromLTWH(x, y, cellWidth - 2, cellHeight - 2),
-//             child: CupertinoButton(
-//               padding: EdgeInsets.zero,
-//               child: Text(
-//                 '${bookNames[book]}',
-//                 style: TextStyle(color: textColor),
-//               ),
-//               color: bible.isNTBook(bookKeys[i]) ? ntColor : otColor,
-//               borderRadius: null,
-//               onPressed: () {
-//                 Navigator.of(context).maybePop(BookChapterVerse(book, book == 23 ? 119 : 1, 1));
-//               },
-//             ),
-//           ),
-//         );
-
-//         x += cellWidth;
-//       }
-
-//       return Stack(children: b);
-//     });
-//   }
-// }

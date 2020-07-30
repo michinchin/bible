@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 ///
@@ -62,4 +63,43 @@ enum TecTabIndicatorSize {
   tiny,
   normal,
   full,
+}
+
+class BubbleTabIndicator extends Decoration {
+  final Color color;
+  const BubbleTabIndicator({this.color});
+  @override
+  _BubblePainter createBoxPainter([VoidCallback onChanged]) {
+    return _BubblePainter(this, onChanged, color);
+  }
+}
+
+class _BubblePainter extends BoxPainter {
+  final BubbleTabIndicator decoration;
+  final Color color;
+
+  _BubblePainter(this.decoration, VoidCallback onChanged, this.color)
+      : assert(decoration != null),
+        super(onChanged);
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    assert(configuration != null);
+    assert(configuration.size != null);
+
+    //offset is the position from where the decoration should be drawn.
+    //configuration.size tells us about the height and width of the tab.
+    const indicatorHeight = 25.0;
+    const strokeWidth = 2.0;
+    final rect = Offset(offset.dx, (configuration.size.height / 2) - indicatorHeight / 2) &
+        Size(configuration.size.width, indicatorHeight);
+    const padding = EdgeInsets.symmetric(vertical: 3.0, horizontal: 15.0);
+    final indicator = padding.resolve(configuration.textDirection).inflateRect(rect);
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawRRect(RRect.fromRectAndRadius(indicator, const Radius.circular(15.0)), paint);
+  }
 }
