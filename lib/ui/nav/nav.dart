@@ -10,21 +10,28 @@ import '../../blocs/search/nav_bloc.dart';
 import '../common/common.dart';
 
 Future<BookChapterVerse> navigate(BuildContext context, BookChapterVerse bcv) {
-  // return showTecModalPopup<BookChapterVerse>(
-  //   context: context,
-  //   alignment: Alignment.center,
-  //   // useRootNavigator: false,
-  //   builder: (context) => TecPopupSheet(child: Nav()),
-  // );
+  final isLargeScreen =
+      MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 600;
+  if (isLargeScreen) {
+    return showTecDialog<BookChapterVerse>(
+      context: context,
+      useRootNavigator: true,
+      cornerRadius: 15,
+      builder: (context) => BlocProvider(
+          create: (context) => NavBloc(bcv),
+          child: Container(height: 600, width: 500, child: Nav())),
+    );
+  }
 
   // Other ways we could show the nav UI:
-
-  // return showTecDialog<BookChapterVerse>(
-  //   context: context,
-  //   useRootNavigator: false,
-  //   maxWidth: 400,
-  //   builder: (context) => Scaffold(appBar: const ManagedViewAppBar(), body: Nav()),
-  // );
+//  return showTecModalPopup<BookChapterVerse>(
+//       context: context,
+//       alignment: Alignment.center,
+//       // useRootNavigator: false,
+//       builder: (context) => TecPopupSheet(
+//           child: BlocProvider(
+//               create: (context) => NavBloc(bcv),
+//               child: Container(height: 600, width: 500, child: Nav()))),
 
   return Navigator.of(context, rootNavigator: true)
       .push<BookChapterVerse>(TecPageRoute<BookChapterVerse>(
@@ -74,11 +81,13 @@ class _NavState extends State<Nav> with SingleTickerProviderStateMixin {
                 tabs: const [Tab(text: 'Book'), Tab(text: 'Chapter'), Tab(text: 'Verse')],
               ),
             ),
-            body: TabBarView(controller: _tabController, children: [
-              _BookView(),
-              _ChapterView(),
-              _VerseView(),
-            ]),
+            body: SafeArea(
+              child: TabBarView(controller: _tabController, children: [
+                _BookView(),
+                _ChapterView(),
+                _VerseView(),
+              ]),
+            ),
           )),
     );
   }
@@ -91,6 +100,8 @@ class _ChapterView extends StatelessWidget {
     final textColor =
         isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
     final bible = VolumesRepository.shared.bibleWithId(51);
+    final isLargeScreen = MediaQuery.of(context).size.width > 500;
+    final wideScreen = MediaQuery.of(context).size.width > 400;
 
     return BlocBuilder<NavBloc, NavState>(builder: (c, s) {
       final book = s.bcv.book;
@@ -104,9 +115,9 @@ class _ChapterView extends StatelessWidget {
           // ),
           Expanded(
             child: GridView.count(
-              crossAxisCount: 5,
+              crossAxisCount: isLargeScreen || wideScreen ? 6 : 5,
               shrinkWrap: true,
-              childAspectRatio: 2,
+              childAspectRatio: isLargeScreen ? 3 : 2,
               padding: const EdgeInsets.all(15),
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
@@ -143,6 +154,8 @@ class _VerseView extends StatelessWidget {
     final textColor =
         isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
     final bible = VolumesRepository.shared.bibleWithId(51);
+    final isLargeScreen = MediaQuery.of(context).size.width > 500;
+    final wideScreen = MediaQuery.of(context).size.width > 400;
 
     return BlocBuilder<NavBloc, NavState>(builder: (c, s) {
       final book = s.bcv.book;
@@ -150,9 +163,9 @@ class _VerseView extends StatelessWidget {
       final verses = bible.versesIn(book: book, chapter: chapter);
 
       return GridView.count(
-        crossAxisCount: 5,
+        crossAxisCount: isLargeScreen || wideScreen ? 6 : 5,
         shrinkWrap: true,
-        childAspectRatio: 2,
+        childAspectRatio: isLargeScreen ? 3 : 2,
         padding: const EdgeInsets.all(15),
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
@@ -193,19 +206,22 @@ class _BookView extends StatelessWidget {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor =
         isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
+    final isLargeScreen = MediaQuery.of(context).size.width > 500;
+    final wideScreen = MediaQuery.of(context).size.width > 400;
 
     List<Widget> _lineInGridView() {
       final divs = <Widget>[];
-      for (var i = 0; i < 6; i++) {
+      final count = isLargeScreen ? 9 : 6;
+      for (var i = 0; i < count; i++) {
         divs.add(const VerticalDivider(color: Colors.transparent));
       }
       return divs;
     }
 
     return GridView.count(
-      crossAxisCount: 5,
+      crossAxisCount: isLargeScreen || wideScreen ? 6 : 5,
       shrinkWrap: true,
-      childAspectRatio: 2,
+      childAspectRatio: isLargeScreen ? 3 : 2,
       padding: const EdgeInsets.all(15),
       mainAxisSpacing: 10,
       crossAxisSpacing: 10,
