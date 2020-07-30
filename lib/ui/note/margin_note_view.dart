@@ -5,7 +5,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:quill_delta/quill_delta.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -189,10 +189,10 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   @override
   void initState() {
     super.initState();
-    KeyboardVisibilityNotification().addNewListener(
-      onChange: (visible) {
+    KeyboardVisibility.onChange.listen(
+      (visible) {
         if (visible) {
-          context.bloc<SheetManagerBloc>().collapse(context);
+          context?.bloc<SheetManagerBloc>()?.collapse(context);
         }
       },
     );
