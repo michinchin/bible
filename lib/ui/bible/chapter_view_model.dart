@@ -444,7 +444,7 @@ class BibleChapterViewModel {
       refreshFunc(() {});
     }
 
-    final mode = (_isSelectionTrialMode) ? HighlightMode.preview : HighlightMode.save;
+    final mode = (_isSelectionTrialMode) ? HighlightMode.trial : HighlightMode.save;
     if (selectionStyle.type == HighlightType.clear) {
       bloc.add(HighlightEvent.clear(ref, mode));
     } else {

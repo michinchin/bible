@@ -90,7 +90,7 @@ abstract class Highlight with _$Highlight {
   }
 }
 
-enum HighlightMode { preview, save }
+enum HighlightMode { trial, save }
 
 @freezed
 abstract class HighlightEvent with _$HighlightEvent {
@@ -255,7 +255,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
 
   ChapterHighlights _clear(Reference ref, HighlightMode mode) {
     final newList = state.highlights.copySubtracting(ref);
-    if (mode == HighlightMode.preview) {
+    if (mode == HighlightMode.trial) {
       // need to reset the hls...
       _initUserContent();
     } else {
