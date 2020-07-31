@@ -8,13 +8,13 @@ import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../../models/app_settings.dart';
 
-class VolumesBloc extends tec.SafeBloc<VolumesState, VolumesState> {
+class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
+  final String key;
+  final tec.KeyValueStore _kvStore;
+
   VolumesBloc({@required this.key, @required tec.KeyValueStore kvStore})
       : assert(tec.isNotNullOrEmpty(key) && kvStore != null),
         _kvStore = kvStore;
-
-  final String key;
-  final tec.KeyValueStore _kvStore;
 
   @override
   VolumesState get initialState {
@@ -36,9 +36,41 @@ class VolumesBloc extends tec.SafeBloc<VolumesState, VolumesState> {
   }
 
   @override
-  Stream<VolumesState> mapEventToState(VolumesState event) async* {
-    yield event;
+  Stream<VolumesState> mapEventToState(VolumesFilter event) async* {
+    final volumes = await _volumesWith(event);
+    yield VolumesState(event, volumes);
   }
+
+  Future<void> refresh() async {
+    add(state.filter);
+  }
+}
+
+Future<List<Volume>> _volumesWith(VolumesFilter filter) async {
+  final strs = filter.searchFilter.split(' ').map((s) => s.toLowerCase()).toList();
+  var ids =
+      VolumesRepository.shared.volumeIdsWithType(filter.volumeType, location: filter.location);
+  final owned = filter.ownershipStatus == OwnershipStatus.any
+      ? null
+      : await AppSettings.shared.userAccount.userDb.fullyLicensedVolumesInList(ids);
+
+  if (filter.ownershipStatus == OwnershipStatus.owned) {
+    ids = owned;
+  } else if (filter.ownershipStatus == OwnershipStatus.unowned) {
+    final ownedSet = owned.toSet();
+    ids.removeWhere(ownedSet.contains);
+  }
+
+  final volumes = ids
+      .map<Volume>((id) => VolumesRepository.shared.volumeWithId(id))
+      .where((v) => filter.language.isEmpty || (v.language == filter.language))
+      .where((v) =>
+          strs.isEmpty ||
+          (strs.firstWhere((s) => v.matchesSearchString(s), orElse: () => null) != null))
+      .toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+
+  return volumes;
 }
 
 @immutable
@@ -50,31 +82,6 @@ class VolumesState extends Equatable {
 
   @override
   List<Object> get props => [filter, volumes];
-
-  static Future<VolumesState> generateFrom(VolumesFilter filter) async {
-    final strs = filter.searchFilter.split(' ').map((s) => s.toLowerCase()).toList();
-    var ids = VolumesRepository.shared
-        .volumeIdsWithType(filter.volumeType ?? VolumeType.anyType, location: filter.location);
-    final owned = filter.ownershipStatus == OwnershipStatus.any
-        ? null
-        : await AppSettings.shared.userAccount.userDb.fullyLicensedVolumesInList(ids);
-
-    if (filter.ownershipStatus == OwnershipStatus.owned) {
-      ids = owned;
-    } else if (filter.ownershipStatus == OwnershipStatus.unowned) {
-      final ownedSet = owned.toSet();
-      ids.removeWhere(ownedSet.contains);
-    }
-
-    final volumes = ids
-        .map<Volume>((id) => VolumesRepository.shared.volumeWithId(id))
-        .where((v) => filter.language.isEmpty || (v.language == filter.language))
-        .where((v) =>
-            strs.isEmpty ||
-            (strs.firstWhere((s) => v.matchesSearchString(s), orElse: () => null) != null))
-        .toList();
-    return VolumesState(filter, volumes);
-  }
 
   factory VolumesState.fromJson(Object object) {
     final json = (object is String ? tec.parseJsonSync(object) : object);

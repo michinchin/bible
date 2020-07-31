@@ -14,6 +14,7 @@ import 'package:zefyr/zefyr.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
+import '../common/common.dart';
 import '../misc/view_actions.dart';
 import 'tec_image_delegate.dart';
 
@@ -252,7 +253,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ManagedViewAppBar(
+      appBar: MinHeightAppBar(
         appBar: AppBar(
           title: (_item == null) ? null : Text(_title),
           leading: (!_editMode)

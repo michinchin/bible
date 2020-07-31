@@ -137,7 +137,7 @@ const _minSize = (_iPhoneSEHeight - 20.0) / 2;
 const _maxMinWidth = 400.0;
 
 Widget _defaultScaffoldBuilder(BuildContext context, ViewState state, Size size) => Scaffold(
-      appBar: ManagedViewAppBar(
+      appBar: MinHeightAppBar(
         appBar: AppBar(
           title: ViewManager.shared._buildViewTitle(context, state, size),
           // leading: widget.state.viewIndex > 0

@@ -5,7 +5,7 @@ import 'package:zefyr/zefyr.dart';
 
 import '../../blocs/notes/note_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../common/common.dart';
 import 'tec_image_delegate.dart';
 
 const noteViewType = 'NoteView';
@@ -59,7 +59,7 @@ class __NoteScreenState extends State<_NoteScreen> {
           final doc = state.doc;
           _controller = ZefyrController(doc);
           return Scaffold(
-              appBar: ManagedViewAppBar(
+              appBar: MinHeightAppBar(
                 appBar: AppBar(
                   title: const Text('Edit Note'),
                   actions: <Widget>[

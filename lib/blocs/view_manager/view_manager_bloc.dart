@@ -449,24 +449,6 @@ class ViewManagerWidget extends StatelessWidget {
 }
 
 ///
-/// Reduced height AppBar, so managed views have more space for content.
-///
-class ManagedViewAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final PreferredSizeWidget appBar;
-
-  const ManagedViewAppBar({Key key, this.appBar}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => appBar ?? AppBar();
-
-  @override
-  Size get preferredSize => _managedViewAppBarPreferredSize;
-}
-
-final _managedViewAppBarPreferredSize =
-    Size.fromHeight((AppBar().preferredSize.height * 0.75).roundToDouble());
-
-///
 /// View that uses a [TecPageView] for paging.
 ///
 class PageableView extends StatefulWidget {

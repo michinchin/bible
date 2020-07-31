@@ -79,6 +79,21 @@ extension ExtOnThemeData on ThemeData {
       TextTheme(headline6: TextStyle(color: color));
 }
 
+///
+/// Removes the eight pixel padding from the top and bottom of the default AppBar.
+///
+class MinHeightAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final AppBar appBar;
+
+  const MinHeightAppBar({Key key, this.appBar}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => appBar ?? AppBar();
+
+  @override
+  Size get preferredSize => Size.fromHeight((appBar ?? AppBar()).preferredSize.height - 16.0);
+}
+
 class IconWithNumberBadge extends StatelessWidget {
   final IconData icon;
   final int value;

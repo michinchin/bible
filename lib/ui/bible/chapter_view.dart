@@ -66,7 +66,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ManagedViewAppBar(
+      appBar: MinHeightAppBar(
         appBar: AppBar(
           title: CupertinoButton(
             child: StreamBuilder<String>(

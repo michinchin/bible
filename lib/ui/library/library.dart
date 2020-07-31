@@ -41,11 +41,13 @@ class _LibraryScreen extends StatelessWidget {
       child: DefaultTabController(
         length: 3,
         child: Scaffold(
-          appBar: AppBar(
-            leading: BackButton(onPressed: closeLibrary),
-            title: const Text('Library'),
-            bottom: const TabBar(
-              tabs: [Tab(text: 'Bibles'), Tab(text: 'Purchased'), Tab(text: 'Store')],
+          appBar: MinHeightAppBar(
+            appBar: AppBar(
+              leading: BackButton(onPressed: closeLibrary),
+              title: const Text('Library'),
+              bottom: const TabBar(
+                tabs: [Tab(text: 'Bibles'), Tab(text: 'Purchased'), Tab(text: 'Store')],
+              ),
             ),
           ),
           body: const TabBarView(children: [
@@ -71,30 +73,11 @@ class _VolumesView extends StatefulWidget {
 }
 
 class _VolumesViewState extends State<_VolumesView> {
-  VolumesBloc _bloc;
-
-  @override
-  void initState() {
-    super.initState();
-    _bloc = VolumesBloc(key: '_library${widget.type}', kvStore: tec.Prefs.shared);
-    _foo();
-  }
-
-  Future<void> _foo() async {
-    final state = await VolumesState.generateFrom(_bloc.state.filter);
-    if (mounted) _bloc.add(state);
-  }
-
-  @override
-  void dispose() {
-    _bloc.close();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _bloc,
+    return BlocProvider<VolumesBloc>(
+      create: (_) =>
+          VolumesBloc(key: '_library${widget.type}', kvStore: tec.Prefs.shared)..refresh(),
       child: BlocBuilder<VolumesBloc, VolumesState>(
         builder: (context, state) {
           return Scrollbar(
