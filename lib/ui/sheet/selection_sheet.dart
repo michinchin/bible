@@ -272,7 +272,7 @@ class __MediumFullSheetItemsState extends State<_MediumFullSheetItems> {
                       Expanded(
                         child: _ColorPickerButton(
                           isForUnderline: widget.underlineMode,
-                          editMode: _editMode,
+                          editMode: _editMode || customColors[i] == unsetHighlightColor,
                           onEdit: () => _onEditColor(i),
                           color: customColors[i],
                         ),

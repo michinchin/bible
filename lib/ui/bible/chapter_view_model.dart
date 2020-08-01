@@ -432,19 +432,20 @@ class BibleChapterViewModel {
     final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
 
     if (bloc == null || !hasSelection) return;
-    _isSelectionTrialMode = selectionStyle.isTrialMode;
+    final mode = (selectionStyle.isTrialMode) ? HighlightMode.trial : HighlightMode.save;
+
+    // when color picker exists with "cancel(clear)" - style is in preview mode, but trial is over
+    _isSelectionTrialMode =
+        selectionStyle.isTrialMode && selectionStyle.type != HighlightType.clear;
 
     final ref = _selectionReference;
 
-    // when existing from color picker with "cancel" - style is in preview mode, but
-    // we still need to clear the selection
-    if (!_isSelectionTrialMode || selectionStyle.type == HighlightType.clear) {
+    if (!_isSelectionTrialMode) {
       clearAllSelections(context);
     } else if (hasWordRangeSelected) {
       refreshFunc(() {});
     }
 
-    final mode = (_isSelectionTrialMode) ? HighlightMode.trial : HighlightMode.save;
     if (selectionStyle.type == HighlightType.clear) {
       bloc.add(HighlightEvent.clear(ref, mode));
     } else {

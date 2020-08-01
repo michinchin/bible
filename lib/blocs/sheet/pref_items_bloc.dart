@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -8,6 +10,8 @@ import '../../models/app_settings.dart';
 import '../../models/pref_item.dart';
 
 part 'pref_items_bloc.freezed.dart';
+
+const unsetHighlightColor = Color(0xff999999);
 
 @freezed
 abstract class PrefItemEvent with _$PrefItemEvent {
@@ -40,7 +44,9 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
       for (var i = 1; i <= 4; i++) {
         add(PrefItemEvent.add(
             prefItem: PrefItem(
-                prefItemDataType: PrefItemDataType.int, prefItemId: i, verse: 0xff999999)));
+                prefItemDataType: PrefItemDataType.int,
+                prefItemId: i,
+                verse: unsetHighlightColor.value)));
       }
     } else if (prefItems.isNotEmpty) {
       add(PrefItemEvent.updateFromDb(prefItems: prefItems));
