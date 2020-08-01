@@ -79,14 +79,14 @@ void _registerViewTypes() {
       title: null,
       scaffoldBuilder: marginNoteScaffoldBuilder,
       icon: TecIcons.marginNoteOutline,
-    )
-    ..register(
-      testViewType,
-      title: 'Test View',
-      bodyBuilder: testViewBuilder,
-      actionsBuilder: defaultActionsBuilder,
-      icon: FeatherIcons.plusSquare,
     );
+//    ..register(
+//      testViewType,
+//      title: 'Test View',
+//      bodyBuilder: testViewBuilder,
+//      actionsBuilder: defaultActionsBuilder,
+//      icon: FeatherIcons.plusSquare,
+//    );
 }
 
 ///

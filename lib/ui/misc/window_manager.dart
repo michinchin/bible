@@ -70,13 +70,13 @@ class WindowManager extends StatelessWidget {
             ],
           ],
         ),
-        IconButton(
-          icon: Icon(
-            Icons.close,
-            color: Theme.of(context).textColor.withOpacity(0.5),
-          ),
-          onPressed: Navigator.of(context).maybePop,
-        )
+//        IconButton(
+//          icon: Icon(
+//            Icons.close,
+//            color: Theme.of(context).textColor.withOpacity(0.5),
+//          ),
+//          onPressed: Navigator.of(context).maybePop,
+//        )
       ],
     );
   }
