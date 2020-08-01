@@ -8,12 +8,9 @@ enum ThemeModeEvent { toggle }
 class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
   @override
   ThemeMode get initialState {
-    final isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
-    if (isDarkTheme == null) {
-      return ThemeMode.system;
-    } else {
-      return isDarkTheme ? ThemeMode.dark : ThemeMode.light;
-    }
+    final isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme',
+        defaultValue: WidgetsBinding.instance.window.platformBrightness == Brightness.dark);
+    return isDarkTheme ? ThemeMode.dark : ThemeMode.light;
   }
 
   @override
