@@ -454,7 +454,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
               if (active) {
                 context.bloc<SheetManagerBloc>().collapse(context);
               } else {
-                context.bloc<SheetManagerBloc>().toDefaultView();
+                context.bloc<SheetManagerBloc>().restore(context);
               }
             },
             child: ListView(

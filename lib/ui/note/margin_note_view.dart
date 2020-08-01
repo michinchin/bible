@@ -219,7 +219,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     if (_editMode) {
       sheetManagerBloc?.collapse(context);
     } else {
-      sheetManagerBloc?.toDefaultView();
+      sheetManagerBloc?.restore(context);
     }
   }
 

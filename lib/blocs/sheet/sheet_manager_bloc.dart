@@ -52,26 +52,21 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
   void changeTypeSize(SheetType type, SheetSize size) => add(SheetEvent.changeTypeSize(type, size));
   void setUid(int uid) => add(SheetEvent.changeView(uid));
   void collapse(BuildContext context) => SheetController.of(context).hide();
-  
-  void toDefaultView() {
+  void restore(BuildContext context) {
     // Only change the state if it actually needs to change.
-    // Otherwise, creates unnecessary rebuilds
-    if (state.type == SheetType.main && state.size == SheetSize.mini) {
-      return;
-    }
 
-    // update both type and size
     if (state.type != SheetType.main && state.size != SheetSize.mini) {
+      // update both type and size
       changeTypeSize(SheetType.main, SheetSize.mini);
-      return;
     }
-
-    if (state.type != SheetType.main) {
+    else if (state.type != SheetType.main) {
       // update the type
       changeType(SheetType.main);
-    } else {
+    } else if (state.size != SheetSize.mini) {
       // update the size
       changeSize(SheetSize.mini);
     }
+
+    SheetController.of(context).show();
   }
 }
