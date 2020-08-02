@@ -16,6 +16,8 @@ import 'menu_model.dart';
 const tecartaBlue = Color(0xff4a7dee);
 
 Future<void> showMainMenu(BuildContext context) {
+  TecAutoScroll.stopAutoscroll();
+
   return showTecDialog<void>(
     context: context,
     padding: const EdgeInsets.all(15),

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../menu/main_menu.dart';
@@ -24,6 +25,8 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
 }
 
 Future<void> _showMoreMenu(BuildContext context, ViewState state, Size size) {
+  TecAutoScroll.stopAutoscroll();
+
   return showWindowDialog(
     context: context,
     builder: (_) {

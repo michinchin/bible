@@ -15,7 +15,6 @@ import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'ui/bible/chapter_view.dart';
 import 'ui/home/home_screen.dart';
-import 'ui/misc/test_view.dart';
 import 'ui/misc/view_actions.dart';
 import 'ui/note/margin_note_view.dart';
 import 'ui/note/note_view.dart';

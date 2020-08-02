@@ -81,6 +81,8 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                   );
                 }),
             onPressed: () async {
+              TecAutoScroll.stopAutoscroll();
+
               // TODO(abby): is this the correct bcv value to pass in?
               final bcv = await navigate(context, _bcvPageZero);
               if (bcv != null) {
