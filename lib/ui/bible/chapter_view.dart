@@ -65,81 +65,83 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<BibleChapterState>(
-        stream: _chapterState.stream,
-        builder: (context, snapshot) {
-          final title = snapshot.hasData ? snapshot.data.title : '';
-          final currentBcv = snapshot.hasData ? snapshot.data.bcv : _bcvPageZero;
-          final translation = snapshot.hasData ? snapshot.data.bibleId : _bible.id;
-
-          return Scaffold(
-            appBar: MinHeightAppBar(
-              appBar: AppBar(
-                title: CupertinoButton(
-                  child: Text(
-                    title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline6
-                        .copyWith(color: Theme.of(context).accentColor),
-                  ),
-                  onPressed: () async {
-                    TecAutoScroll.stopAutoscroll();
-                    final ref = await navigate(
-                      context,
-                      Reference.fromHref(currentBcv.toString(), volume: translation),
-                    );
-                    if (ref != null) {
-                      // small delay to allow the nav popup to clean up before we navigate
-                      // away...
-                      await Future.delayed(const Duration(milliseconds: 350), () {
-                        final pageController = _pageableViewStateKey.currentState?.pageController;
-                        if (pageController != null) {
-                          final bcv = BookChapterVerse.fromRef(ref);
-                          final page = _bcvPageZero.chaptersTo(bcv, bible: _bible);
-                          if (page == null) {
-                            tec.dmPrint('bibleChapterTitleBuilder unable to navigate to $bcv');
-                          } else {
-                            pageController.jumpToPage(page);
+    return Scaffold(
+      appBar: MinHeightAppBar(
+        appBar: AppBar(
+          title: StreamBuilder<BibleChapterState>(
+            stream: _chapterState.stream,
+            builder:(context, snapshot) {
+                return (snapshot.hasData)
+                    ? CupertinoButton(
+                        child: Text(
+                          snapshot.data.title,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline6
+                              .copyWith(color: Theme.of(context).accentColor),
+                        ),
+                        onPressed: () async {
+                          TecAutoScroll.stopAutoscroll();
+                          final ref = await navigate(
+                            context,
+                            Reference.fromHref(snapshot.data.bcv.toString(),
+                                volume: snapshot.data.bibleId),
+                          );
+                          if (ref != null) {
+                            // small delay to allow the nav popup to clean up before we navigate
+                            // away...
+                            await Future.delayed(const Duration(milliseconds: 350), () {
+                              final pageController =
+                                  _pageableViewStateKey.currentState?.pageController;
+                              if (pageController != null) {
+                                final bcv = BookChapterVerse.fromRef(ref);
+                                final page = _bcvPageZero.chaptersTo(bcv, bible: _bible);
+                                if (page == null) {
+                                  tec.dmPrint(
+                                      'bibleChapterTitleBuilder unable to navigate to $bcv');
+                                } else {
+                                  pageController.jumpToPage(page);
+                                }
+                              }
+                            });
                           }
-                        }
-                      });
-                    }
-                  },
-                ),
-                actions: defaultActionsBuilder(context, widget.state, widget.size),
-              ),
-            ),
-            body: PageableView(
-              key: _pageableViewStateKey,
-              state: widget.state,
-              size: widget.size,
-              controllerBuilder: () {
-                return TecPageController(initialPage: 0);
-              },
-              pageBuilder: (context, _, size, index) {
-                final ref = _bcvPageZero.advancedBy(chapters: index, bible: _bible);
+                        },
+                      )
+                    : Container();
+              }
+          ),
+          actions: defaultActionsBuilder(context, widget.state, widget.size),
+        ),
+      ),
+      body: PageableView(
+        key: _pageableViewStateKey,
+        state: widget.state,
+        size: widget.size,
+        controllerBuilder: () {
+          return TecPageController(initialPage: 0);
+        },
+        pageBuilder: (context, _, size, index) {
+          final ref = _bcvPageZero.advancedBy(chapters: index, bible: _bible);
 
-                // If the bible doesn't have the given reference, or we advanced past either end,
-                // return null.
-                if (ref == null) {
-                  return null;
-                }
+          // If the bible doesn't have the given reference, or we advanced past either end,
+          // return null.
+          if (ref == null) {
+            return null;
+          }
 
-                debugPrint('page builder: ${ref.toString()}');
-                return _BibleChapterView(
-                    viewUid: widget.state.uid, size: size, bible: _bible, ref: ref);
-              },
-              onPageChanged: (context, _, page) async {
-                tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
-                final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
-                if (bcv != null) {
-                  updateLocation(bcv, page);
-                }
-              },
-            ),
-          );
-        });
+          debugPrint('page builder: ${ref.toString()}');
+          return _BibleChapterView(
+              viewUid: widget.state.uid, size: size, bible: _bible, ref: ref);
+        },
+        onPageChanged: (context, _, page) async {
+          tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
+          final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
+          if (bcv != null) {
+            updateLocation(bcv, page);
+          }
+        },
+      ),
+    );
   }
 
   void updateLocation(BookChapterVerse bcv, int page) {
@@ -327,18 +329,7 @@ class _ChapterViewState extends State<_ChapterView> {
                 builder: (c, fontName, error) {
                   assert(fontName != null);
                   if (highlights.loaded && marginNotes.loaded) {
-                    // TODO(mike): fix multiple reloading of a chapter...
-                    // Psalm 119 example...
-                    // on first load - chapter is loaded 2x - snapshot.hasData = false, then snapShot.hasData = true
-                    // nav to a different part of the bible - current chapter is reloaded (hasData = true)
-                    // swipe to next chapter - chapter is loaded 3x (hasData = true)
-                    // swipe back - chapter is loaded 5x (hasData = false, 4x hasData = true)
-
-                    if (widget.ref.chapter == 119) {
-                      debugPrint('loading 119');
-                    } else {
-                      debugPrint('loading ${widget.ref.chapter}');
-                    }
+                    debugPrint('loading ${widget.ref.chapter}');
 
                     return _BibleHtml(
                       viewUid: widget.viewUid,
