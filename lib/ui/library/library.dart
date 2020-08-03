@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:collection';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -6,8 +10,9 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/is_licensed_bloc.dart';
 import '../common/common.dart';
-import 'volumes_bloc/volumes_bloc.dart';
+import 'volumes_bloc.dart';
 
 void showLibrary(BuildContext context) {
   Navigator.of(context, rootNavigator: true)
@@ -38,23 +43,35 @@ class _LibraryScreen extends StatelessWidget {
         appBarTheme: appBarThemeWithContext(context),
         tabBarTheme: tabBarThemeWithContext(context),
       ),
-      child: DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: MinHeightAppBar(
-            appBar: AppBar(
-              leading: BackButton(onPressed: closeLibrary),
-              title: const Text('Library'),
-              bottom: const TabBar(
-                tabs: [Tab(text: 'Bibles'), Tab(text: 'Purchased'), Tab(text: 'Store')],
+      child: BlocProvider<IsLicensedBloc>(
+        create: (_) => IsLicensedBloc(
+            volumeIds: VolumesRepository.shared.volumeIdsWithType(VolumeType.anyType)),
+        child: BlocBuilder<IsLicensedBloc, bool>(
+          builder: (context, hasLicensedVolumes) {
+            final tabs = [
+              const Tab(text: 'Bibles'),
+              if (hasLicensedVolumes) const Tab(text: 'Purchased'),
+              const Tab(text: 'Store'),
+            ];
+            final tabContents = <Widget>[
+              const _VolumesView(type: _ViewType.bibles),
+              if (hasLicensedVolumes) const _VolumesView(type: _ViewType.purchased),
+              const _VolumesView(type: _ViewType.store)
+            ];
+            return DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                appBar: MinHeightAppBar(
+                  appBar: AppBar(
+                    leading: BackButton(onPressed: closeLibrary),
+                    title: const Text('Library'),
+                    bottom: TabBar(tabs: tabs),
+                  ),
+                ),
+                body: TabBarView(children: tabContents),
               ),
-            ),
-          ),
-          body: const TabBarView(children: [
-            _VolumesView(type: _ViewType.bibles),
-            _VolumesView(type: _ViewType.purchased),
-            _VolumesView(type: _ViewType.store)
-          ]),
+            );
+          },
         ),
       ),
     );
@@ -73,21 +90,192 @@ class _VolumesView extends StatefulWidget {
 }
 
 class _VolumesViewState extends State<_VolumesView> {
+  TextEditingController _searchController;
+  Timer _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController()..addListener(_searchListener);
+  }
+
+  @override
+  void dispose() {
+    _searchController?.removeListener(_searchListener);
+    _searchController?.dispose();
+    _debounce?.cancel();
+    _debounce = null;
+    super.dispose();
+  }
+
+  void _searchListener() {
+    if (!mounted) return;
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted && _searchController.text.trim().isNotEmpty) {
+        // TODO
+      }
+    });
+  }
+
+  VolumesFilter _filterForType(_ViewType type) {
+    switch (type) {
+      case _ViewType.bibles:
+        return const VolumesFilter(volumeType: VolumeType.bible);
+      case _ViewType.purchased:
+        return const VolumesFilter(ownershipStatus: OwnershipStatus.owned);
+      default:
+        return const VolumesFilter();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<VolumesBloc>(
-      create: (_) =>
-          VolumesBloc(key: '_library${widget.type}', kvStore: tec.Prefs.shared)..refresh(),
+      create: (_) => VolumesBloc(
+        key: '_library${widget.type}',
+        kvStore: tec.Prefs.shared,
+        defaultFilter: _filterForType(widget.type),
+      )..refresh(),
       child: BlocBuilder<VolumesBloc, VolumesState>(
         builder: (context, state) {
-          return Scrollbar(
-            child: TecListView<Volume>(
-              items: state.volumes,
-              itemBuilder: (context, volume, index, total) =>
-                  VolumeCard(volume: volume, padding: 0),
-            ),
+          return Column(
+            children: [
+              SearchBox(
+                searchFieldController: _searchController,
+                onSubmit: (s) => _searchListener(),
+                suffixIcon: IconButton(
+                    tooltip: 'more filter option',
+                    icon: const Icon(Icons.filter_list),
+                    onPressed: () async => _showFilterSheet(context)),
+              ),
+              Expanded(
+                child: Scrollbar(
+                  child: TecListView<Volume>(
+                    items: state.volumes,
+                    itemBuilder: (context, volume, index, total) =>
+                        VolumeCard(volume: volume, padding: 0),
+                  ),
+                ),
+              ),
+            ],
           );
         },
+      ),
+    );
+  }
+}
+
+Future<void> _showFilterSheet(BuildContext context) async {
+  final bloc = context.bloc<VolumesBloc>(); // ignore: close_sinks
+  await showModalBottomSheet<void>(
+    context: context,
+    shape: bottomSheetShapeBorder,
+    builder: (_) => LibraryFilterSheet(volumesBloc: bloc),
+  );
+  //await _itemScrollController.scrollTo(index: 0, duration: const Duration(milliseconds: 250));
+  //setState(() {});
+}
+
+class LibraryFilterSheet extends StatelessWidget {
+  final VolumesBloc volumesBloc;
+
+  const LibraryFilterSheet({Key key, this.volumesBloc}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final languages = volumesBloc.languages;
+    final categories = volumesBloc.categories;
+    final textStyle = Theme.of(context).textTheme.headline6;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          //ListTile(title: Text('Hello World!')),
+          _PopupMenuButton<String>(
+            title: TecText('Language', style: textStyle),
+            values: languages,
+          ),
+          const SizedBox(
+            height: 16,
+          ),
+          _PopupMenuButton<int>(
+            title: TecText('Category', style: textStyle),
+            values: categories,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+const bottomSheetRadius = Radius.circular(15);
+const bottomSheetShapeBorder = RoundedRectangleBorder(
+    borderRadius: BorderRadius.only(topLeft: bottomSheetRadius, topRight: bottomSheetRadius));
+
+class SearchBox extends StatefulWidget {
+  final void Function(String) onSubmit;
+  final TextEditingController searchFieldController;
+  final Widget suffixIcon;
+
+  const SearchBox({
+    Key key,
+    this.onSubmit,
+    this.searchFieldController,
+    this.suffixIcon,
+  }) : super(key: key);
+
+  @override
+  _SearchBoxState createState() => _SearchBoxState();
+}
+
+class _SearchBoxState extends State<SearchBox> {
+  List<BoxShadow> shadow = const [
+    BoxShadow(color: Color(0xffcccccc), offset: Offset(0, 2), blurRadius: 2, spreadRadius: 1),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return PreferredSize(
+      preferredSize: AppBar().preferredSize,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        child: Container(
+          decoration: BoxDecoration(
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(16),
+              color: Theme.of(context).cardColor,
+              boxShadow: shadow),
+          child: Center(
+            child: Stack(
+              children: <Widget>[
+                TextField(
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    prefixIcon: IconButton(
+                      icon: const Icon(Icons.search),
+                      onPressed: () {},
+                    ),
+                    suffixIcon: widget.searchFieldController.text.isNotEmpty
+                        ? IconButton(
+                            splashColor: Colors.transparent,
+                            icon: const Icon(CupertinoIcons.clear_circled),
+                            onPressed: () => setState(() => widget.searchFieldController.clear()),
+                          )
+                        : null,
+                  ),
+                ),
+                if (widget.searchFieldController.text.isEmpty && widget.suffixIcon != null)
+                  Positioned(
+                    right: 0,
+                    child: widget.suffixIcon,
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -257,3 +445,98 @@ final TecTextStyle cardSubtitleCompactStyle = TecTextStyle(
   fontWeight: FontWeight.w400, // w500 == Normal
   color: Colors.grey[500],
 );
+
+class UnderlinePSW extends StatelessWidget implements PreferredSizeWidget {
+  final PreferredSizeWidget child;
+  final double lineHeight;
+  final Color color;
+
+  const UnderlinePSW({
+    Key key,
+    @required this.child,
+    this.color,
+    this.lineHeight = 1.5,
+  })  : assert(child != null),
+        assert(lineHeight != null),
+        super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final line = Container(
+      //width: double.infinity,
+      height: lineHeight ?? 1.0,
+      color: color ?? Theme.of(context).primaryColor,
+    );
+
+    // return Stack(children: [child, Positioned(left: 0, right: 0, bottom: 0, child: line)]);
+    return Column(children: [child, line]);
+  }
+
+  @override
+  Size get preferredSize => Size.fromHeight(child.preferredSize.height + lineHeight);
+}
+
+const _defaultMenuItemHeight = 36.0;
+const _maxTextScaleFactor = 1.0;
+
+class _PopupMenuButton<T> extends StatelessWidget {
+  final Widget title;
+  final LinkedHashMap<T, String> values;
+  final T currentValue;
+  final T defaultValue;
+  final String defaultName;
+  final void Function(T value) onSelectValue;
+
+  const _PopupMenuButton({
+    Key key,
+    @required this.title,
+    @required this.values,
+    this.currentValue,
+    this.defaultValue,
+    this.defaultName,
+    this.onSelectValue,
+  })  : assert(title != null),
+        assert(values != null),
+        assert(defaultValue == null || defaultName != null),
+        super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final keys = values.keys.toList();
+    if (defaultValue != null && !keys.contains(defaultValue)) {
+      keys.insert(0, defaultValue);
+    }
+    final items = values.keys
+        .map<PopupMenuEntry<String>>(
+          (key) => PopupMenuItem<String>(
+            height: _defaultMenuItemHeight,
+            value: values[key],
+            child: TecText(
+              values[key],
+              maxScaleFactor: _maxTextScaleFactor,
+              style: TextStyle(
+                fontWeight: key == currentValue ? FontWeight.bold : FontWeight.normal,
+                color: key == currentValue
+                    ? (Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black)
+                    : (Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white70
+                        : Colors.black87),
+              ),
+            ),
+          ),
+        )
+        .toList();
+
+    return PopupMenuButton<String>(
+      child: title,
+      offset: const Offset(150, 0),
+      onSelected: (value) {
+        onSelectValue?.call(values.keys.firstWhere((k) => values[k] == value, orElse: () => null));
+      },
+      itemBuilder: (context) => items,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+    );
+  }
+}
