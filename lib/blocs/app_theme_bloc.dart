@@ -8,9 +8,12 @@ enum ThemeModeEvent { toggle }
 class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
   @override
   ThemeMode get initialState {
-    final isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme',
-        defaultValue: WidgetsBinding.instance.window.platformBrightness == Brightness.dark);
-    return isDarkTheme ? ThemeMode.dark : ThemeMode.light;
+    final isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
+    if (isDarkTheme == null) {
+      return ThemeMode.system;
+    } else {
+      return isDarkTheme ? ThemeMode.dark : ThemeMode.light;
+    }
   }
 
   @override
@@ -18,9 +21,18 @@ class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
     switch (event) {
       case ThemeModeEvent.toggle:
         {
-          final isDarkTheme = state != ThemeMode.dark;
-          await tec.Prefs.shared.setBool('isDarkTheme', isDarkTheme);
-          yield isDarkTheme ? ThemeMode.dark : ThemeMode.light;
+          ThemeMode newThemeMode;
+          final isDark = (WidgetsBinding.instance.window.platformBrightness == Brightness.dark);
+          // tec.dmPrint('platformBrightness: ${isDark ? 'dark' : 'light'}');
+          if (state == ThemeMode.system || ((state == ThemeMode.dark) == isDark)) {
+            newThemeMode = isDark ? ThemeMode.light : ThemeMode.dark;
+            await tec.Prefs.shared.setBool('isDarkTheme', !isDark);
+          } else {
+            newThemeMode = ThemeMode.system;
+            await tec.Prefs.shared.remove('isDarkTheme');
+          }
+          // tec.dmPrint('newThemeMode: $newThemeMode');
+          yield newThemeMode;
           break;
         }
     }

@@ -61,7 +61,10 @@ class MainMenu extends StatelessWidget {
               ),
               MenuListTile(
                 icon: Icons.lightbulb_outline,
-                switchValue: () => context.bloc<ThemeModeBloc>().state == ThemeMode.dark,
+                switchValue: () =>
+                    context.bloc<ThemeModeBloc>().state == ThemeMode.dark ||
+                    (context.bloc<ThemeModeBloc>().state == ThemeMode.system &&
+                        WidgetsBinding.instance.window.platformBrightness == Brightness.dark),
                 title: 'Dark Mode',
                 onTap: () => context.bloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
               ),
