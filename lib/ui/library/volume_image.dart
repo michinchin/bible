@@ -4,6 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 class VolumeImage extends StatelessWidget {
+  final Volume volume;
+  final double width;
+  final double height;
+  final BoxFit fit;
+  final bool heroAnimated;
+
   const VolumeImage({
     Key key,
     @required this.volume,
@@ -12,12 +18,6 @@ class VolumeImage extends StatelessWidget {
     this.fit = BoxFit.fill,
     this.heroAnimated = true,
   }) : super(key: key);
-
-  final Volume volume;
-  final double width;
-  final double height;
-  final BoxFit fit;
-  final bool heroAnimated;
 
   @override
   Widget build(BuildContext context) {

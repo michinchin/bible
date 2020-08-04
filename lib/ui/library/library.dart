@@ -11,12 +11,48 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/is_licensed_bloc.dart';
 import '../common/common.dart';
 import 'volume_card.dart';
+import 'volume_detail.dart';
 import 'volumes_bloc.dart';
 import 'volumes_filter_sheet.dart';
 
+export 'volumes_bloc.dart' show VolumesFilter;
+
 void showLibrary(BuildContext context) {
   Navigator.of(context, rootNavigator: true)
-      .push<void>(MaterialPageRoute(builder: (_) => _LibraryNavigator()));
+      .push<void>(MaterialPageRoute(builder: (context) => _LibraryNavigator()));
+}
+
+Future<int> selectVolume(BuildContext context, {VolumesFilter filter, String title}) {
+  // final originalContext = context;
+  return Navigator.of(context, rootNavigator: true).push<int>(
+    MaterialPageRoute(
+      builder: (context) => Navigator(
+        onGenerateRoute: (settings) => MaterialPageRoute<int>(
+          builder: (context) {
+            return Theme(
+              data: Theme.of(context).copyWith(appBarTheme: appBarThemeWithContext(context)),
+              child: Scaffold(
+                appBar: MinHeightAppBar(
+                  appBar: AppBar(
+                    leading: BackButton(
+                        onPressed: () => Navigator.of(context, rootNavigator: true).maybePop()),
+                    title: tec.isNullOrEmpty(title) ? null : TecText(title),
+                  ),
+                ),
+                body: _VolumesView(
+                  type: _ViewType.store,
+                  filter: filter,
+                  onTapVolume: (id) {
+                    Navigator.of(context, rootNavigator: true).maybePop<int>(id);
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    ),
+  );
 }
 
 class _LibraryNavigator extends StatelessWidget {
@@ -24,7 +60,7 @@ class _LibraryNavigator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Navigator(
       onGenerateRoute: (settings) => MaterialPageRoute<void>(
-          builder: (_) => _LibraryScreen(
+          builder: (context) => _LibraryScreen(
               closeLibrary: () => Navigator.of(context, rootNavigator: true).maybePop()),
           settings: settings),
     );
@@ -44,7 +80,7 @@ class _LibraryScreen extends StatelessWidget {
         tabBarTheme: tabBarThemeWithContext(context),
       ),
       child: BlocProvider<IsLicensedBloc>(
-        create: (_) => IsLicensedBloc(
+        create: (context) => IsLicensedBloc(
             volumeIds: VolumesRepository.shared.volumeIdsWithType(VolumeType.anyType)),
         child: BlocBuilder<IsLicensedBloc, bool>(
           builder: (context, hasLicensedVolumes) {
@@ -80,10 +116,19 @@ class _LibraryScreen extends StatelessWidget {
 
 enum _ViewType { bibles, purchased, store }
 
+typedef _TappedVolumeFunc = void Function(int volume);
+
 class _VolumesView extends StatelessWidget {
   final _ViewType type;
+  final VolumesFilter filter;
+  final _TappedVolumeFunc onTapVolume;
 
-  const _VolumesView({Key key, this.type}) : super(key: key);
+  const _VolumesView({
+    Key key,
+    this.type,
+    this.filter,
+    this.onTapVolume,
+  }) : super(key: key);
 
   VolumesFilter _filterForType(_ViewType type) {
     switch (type) {
@@ -99,13 +144,13 @@ class _VolumesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<VolumesBloc>(
-      create: (_) => VolumesBloc(
-        key: '_library$type',
-        kvStore: tec.Prefs.shared,
-        defaultFilter: _filterForType(type),
+      create: (context) => VolumesBloc(
+        key: filter != null ? null : '_library$type',
+        kvStore: filter != null ? null : tec.Prefs.shared,
+        defaultFilter: filter ?? _filterForType(type),
       )..refresh(),
       child: BlocBuilder<VolumesBloc, VolumesState>(
-        builder: (context, state) => _VolumesList(type: type),
+        builder: (context, state) => _VolumesList(type: type, onTapVolume: onTapVolume),
       ),
     );
   }
@@ -113,8 +158,9 @@ class _VolumesView extends StatelessWidget {
 
 class _VolumesList extends StatefulWidget {
   final _ViewType type;
+  final _TappedVolumeFunc onTapVolume;
 
-  const _VolumesList({Key key, this.type}) : super(key: key);
+  const _VolumesList({Key key, this.type, this.onTapVolume}) : super(key: key);
 
   @override
   _VolumesListState createState() => _VolumesListState();
@@ -174,42 +220,22 @@ class _VolumesListState extends State<_VolumesList> {
           child: Scrollbar(
             child: TecListView<Volume>(
               items: bloc.state.volumes,
-              itemBuilder: (context, volume, index, total) =>
-                  VolumeCard(volume: volume, padding: 0),
+              itemBuilder: (context, volume, index, total) => VolumeCard(
+                volume: volume,
+                padding: 0,
+                onTap: widget.onTapVolume != null
+                    ? () {
+                        widget.onTapVolume(volume.id);
+                      }
+                    : () {
+                        Navigator.of(context).push<void>(
+                            MaterialPageRoute(builder: (context) => VolumeDetail(volume: volume)));
+                      },
+              ),
             ),
           ),
         ),
       ],
     );
   }
-}
-
-class UnderlinePSW extends StatelessWidget implements PreferredSizeWidget {
-  final PreferredSizeWidget child;
-  final double lineHeight;
-  final Color color;
-
-  const UnderlinePSW({
-    Key key,
-    @required this.child,
-    this.color,
-    this.lineHeight = 1.5,
-  })  : assert(child != null),
-        assert(lineHeight != null),
-        super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final line = Container(
-      //width: double.infinity,
-      height: lineHeight ?? 1.0,
-      color: color ?? Theme.of(context).primaryColor,
-    );
-
-    // return Stack(children: [child, Positioned(left: 0, right: 0, bottom: 0, child: line)]);
-    return Column(children: [child, line]);
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(child.preferredSize.height + lineHeight);
 }

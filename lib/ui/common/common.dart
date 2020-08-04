@@ -96,6 +96,36 @@ class MinHeightAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => Size.fromHeight((appBar ?? AppBar()).preferredSize.height - 16.0);
 }
 
+class PrefSizeWidgetUnderlined extends StatelessWidget implements PreferredSizeWidget {
+  final PreferredSizeWidget child;
+  final double lineHeight;
+  final Color color;
+
+  const PrefSizeWidgetUnderlined({
+    Key key,
+    @required this.child,
+    this.color,
+    this.lineHeight = 1.5,
+  })  : assert(child != null),
+        assert(lineHeight != null),
+        super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final line = Container(
+      //width: double.infinity,
+      height: lineHeight,
+      color: color ?? Theme.of(context).primaryColor,
+    );
+
+    // return Stack(children: [child, Positioned(left: 0, right: 0, bottom: 0, child: line)]);
+    return Column(children: [child, line]);
+  }
+
+  @override
+  Size get preferredSize => Size.fromHeight(child.preferredSize.height + lineHeight);
+}
+
 class IconWithNumberBadge extends StatelessWidget {
   final IconData icon;
   final int value;

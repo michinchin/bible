@@ -7,7 +7,7 @@ import 'volume_image.dart';
 
 class VolumeCard extends StatelessWidget {
   final Volume volume;
-  final VoidCallback onTapped;
+  final VoidCallback onTap;
   final Color color;
   final double elevation;
   final double padding;
@@ -16,7 +16,7 @@ class VolumeCard extends StatelessWidget {
   const VolumeCard({
     Key key,
     @required this.volume,
-    this.onTapped,
+    this.onTap,
     this.color,
     this.elevation = 0,
     this.padding,
@@ -29,18 +29,7 @@ class VolumeCard extends StatelessWidget {
         color: color,
         elevation: elevation,
         padding: padding,
-        onTap: onTapped ??
-            () async {
-              //if (volume.type == VolumeType.bible && (volume.isStreamable))
-
-              // navigatorPush(
-              //   context,
-              //   (_) => VolumeScreen(
-              //     volume: volume,
-              //     // showReadNow: showReadNow,
-              //   ),
-              // );
-            },
+        onTap: onTap,
       );
 
   Widget builder(BuildContext context) {
