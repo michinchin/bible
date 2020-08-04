@@ -133,7 +133,7 @@ class _ViewTypeAPI {
 }
 
 const _iPhoneSEHeight = 568.0;
-const _minSize = (_iPhoneSEHeight - 20.0) / 2;
+var _minSize = (_iPhoneSEHeight - 44.0) / 2;
 const _maxMinWidth = 400.0;
 
 Widget _defaultScaffoldBuilder(BuildContext context, ViewState state, Size size) => Scaffold(

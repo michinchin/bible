@@ -842,9 +842,9 @@ packages:
     dependency: "direct main"
     description:
       name: sliding_sheet
-      url: "https://pub.dartlang.org"
+      url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "0.3.7"
+    version: "0.3.9"
   source_gen:
     dependency: transitive
     description:
