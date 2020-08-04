@@ -4,12 +4,14 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/bible_chapter_state.dart';
 import '../bible/chapter_view.dart';
+import '../library/library.dart';
 
 Future<void> showWindowDialog({BuildContext context, Widget Function(BuildContext) builder}) =>
     showDialog<void>(
@@ -57,9 +59,27 @@ class WindowManager extends StatelessWidget {
             ],
             _titleDivider(context, 'New'),
             ..._generateAddMenuItems(context, state.uid),
-            _menuItem(context, FeatherIcons.bookOpen, 'Translation', () {
-              showWindowDialog(
-                  context: context, builder: (c) => BibleTranslationSelection(bloc, state));
+            _menuItem(context, FeatherIcons.bookOpen, 'Translation', () async {
+              final bibleId = await selectVolume(context,
+                  filter: const VolumesFilter(
+                    volumeType: VolumeType.bible,
+                  ));
+              tec.dmPrint('selected $bibleId');
+
+              if (bibleId != null) {
+                final previous = BibleChapterState.fromJson(state.data);
+                if (previous != null) {
+                  final current = BibleChapterState(bibleId, previous.bcv, previous.page);
+                  // following line is approximate if we wanted to change translation in save view
+                  //bloc?.add(ViewManagerEvent.setData(uid: state.uid, data: current.toString()));
+                  bloc?.add(ViewManagerEvent.add(type: bibleChapterType, data: current.toString()));
+                }
+              }
+
+              await Navigator.of(context).maybePop();
+
+              // showWindowDialog(
+              //     context: context, builder: (c) => BibleTranslationSelection(bloc, state));
             }),
             if ((bloc?.state?.views?.length ?? 0) > 1) ...[
               const Divider(),
@@ -112,8 +132,7 @@ class WindowManager extends StatelessWidget {
 
         if (data != null && data.containsKey('title')) {
           title = data['title'] as String;
-        }
-        else {
+        } else {
           title = vm.titleForType(each.type);
         }
 
@@ -149,7 +168,9 @@ class WindowManager extends StatelessWidget {
         Navigator.of(context).maybePop();
         final position = bloc?.indexOfView(viewUid) ?? -1;
         bloc?.add(ViewManagerEvent.add(
-            type: type, data: vm.dataForType(type), position: position == -1 ? null : position + 1));
+            type: type,
+            data: vm.dataForType(type),
+            position: position == -1 ? null : position + 1));
       });
     });
   }
