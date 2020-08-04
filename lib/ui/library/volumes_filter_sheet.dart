@@ -11,7 +11,7 @@ Future<void> showVolumesFilterSheet(BuildContext context) async {
   await showModalBottomSheet<void>(
     context: context,
     shape: bottomSheetShapeBorder,
-    builder: (_) => BlocBuilder<VolumesBloc, VolumesState>(
+    builder: (context) => BlocBuilder<VolumesBloc, VolumesState>(
       bloc: bloc,
       builder: (context, state) => VolumesFilterSheet(volumesBloc: bloc),
     ),

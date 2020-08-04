@@ -15,10 +15,10 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<SelectionBloc>(create: (_) => SelectionBloc()),
-        BlocProvider<SelectionStyleBloc>(create: (_) => SelectionStyleBloc()),
+        BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
+        BlocProvider<SelectionStyleBloc>(create: (context) => SelectionStyleBloc()),
         BlocProvider<SheetManagerBloc>(
-          create: (_) => SheetManagerBloc(),
+          create: (context) => SheetManagerBloc(),
         ),
       ],
       child: const _HomeScreen(),

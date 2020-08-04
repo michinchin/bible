@@ -29,7 +29,7 @@ Future<void> _showMoreMenu(BuildContext context, ViewState state, Size size) {
 
   return showWindowDialog(
     context: context,
-    builder: (_) {
+    builder: (context) {
       return WindowManager(
         state: state,
       );
