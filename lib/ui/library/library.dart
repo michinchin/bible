@@ -210,6 +210,9 @@ class LibraryFilterSheet extends StatelessWidget {
     final language = volumesBloc.state.filter.language;
     final category = volumesBloc.state.filter.category;
 
+    const animationDuration = Duration(milliseconds: 300);
+    final buttonHeight = 16 + (20 * textScaleFactor).roundToDouble();
+
     return SafeArea(
       child: Container(
         padding: EdgeInsets.all(padding),
@@ -226,8 +229,10 @@ class LibraryFilterSheet extends StatelessWidget {
               ),
             ),
             const Divider(),
-            if (languages.length > 1)
-              TecPopupMenuButton<String>(
+            AnimatedContainer(
+              duration: animationDuration,
+              height: languages.length > 1 ? buttonHeight : 0,
+              child: TecPopupMenuButton<String>(
                 title: 'Language',
                 values: languages,
                 currentValue: language,
@@ -237,8 +242,11 @@ class LibraryFilterSheet extends StatelessWidget {
                   volumesBloc.add(volumesBloc.state.filter.copyWith(language: value));
                 },
               ),
-            if (categories.length > 1)
-              TecPopupMenuButton<int>(
+            ),
+            AnimatedContainer(
+              duration: animationDuration,
+              height: categories.length > 1 ? buttonHeight : 0,
+              child: TecPopupMenuButton<int>(
                 title: 'Category',
                 values: categories,
                 currentValue: category,
@@ -248,11 +256,15 @@ class LibraryFilterSheet extends StatelessWidget {
                   volumesBloc.add(volumesBloc.state.filter.copyWith(category: value));
                 },
               ),
-            if (volumesBloc.state.filter != volumesBloc.defaultFilter)
-              TecTextButton(
-                title: 'Reset to Defaults',
+            ),
+            AnimatedContainer(
+              duration: animationDuration,
+              height: volumesBloc.state.filter != volumesBloc.defaultFilter ? buttonHeight : 0,
+              child: TecTextButton(
+                title: 'Clear Filters',
                 onTap: () => volumesBloc.add(volumesBloc.defaultFilter),
               ),
+            ),
           ],
         ),
       ),
