@@ -1,39 +1,48 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class TecSearchField extends StatefulWidget {
+class TecSearchField extends StatefulWidget implements PreferredSizeWidget {
   final void Function(String) onSubmit;
   final TextEditingController textEditingController;
   final Widget suffixIcon;
+  final EdgeInsets padding;
 
   const TecSearchField({
     Key key,
     this.onSubmit,
     this.textEditingController,
     this.suffixIcon,
+    this.padding,
   }) : super(key: key);
+
+  @override
+  Size get preferredSize => AppBar().preferredSize;
 
   @override
   _TecSearchFieldState createState() => _TecSearchFieldState();
 }
 
 class _TecSearchFieldState extends State<TecSearchField> {
-  List<BoxShadow> shadow = const [
-    BoxShadow(color: Color(0xffcccccc), offset: Offset(0, 2), blurRadius: 2, spreadRadius: 1),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return PreferredSize(
       preferredSize: AppBar().preferredSize,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: widget.padding ?? const EdgeInsets.all(12),
         child: Container(
           decoration: BoxDecoration(
               shape: BoxShape.rectangle,
               borderRadius: BorderRadius.circular(16),
               color: Theme.of(context).cardColor,
-              boxShadow: shadow),
+              boxShadow: [
+                BoxShadow(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black38
+                        : Colors.black12,
+                    offset: const Offset(0, 2),
+                    blurRadius: 2,
+                    spreadRadius: 1),
+              ]),
           child: Center(
             child: Stack(
               children: <Widget>[

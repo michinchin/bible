@@ -19,8 +19,8 @@ import '../../models/verses.dart';
 import 'compare_verse.dart';
 import 'snap_sheet.dart';
 
+//ignore: avoid_classes_with_only_static_members
 class SelectionSheetModel {
-  //ignore: avoid_classes_with_only_static_members
   static const buttons = <String, IconData>{
     'Learn': Icons.lightbulb_outline,
     'Explore': FeatherIcons.compass,
@@ -203,7 +203,6 @@ class _DefineWebView extends StatefulWidget {
 }
 
 class __DefineWebViewState extends State<_DefineWebView> {
-  WebController _webController;
   String url;
   @override
   void initState() {
@@ -212,7 +211,7 @@ class __DefineWebViewState extends State<_DefineWebView> {
   }
 
   void onWebCreated(WebController webController) {
-    _webController = webController..loadUrl(url);
+    webController..loadUrl(url);
   }
 
   Future<void> _launchSearch() async {

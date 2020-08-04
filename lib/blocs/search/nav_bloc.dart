@@ -56,14 +56,14 @@ class NavBloc extends Bloc<NavEvent, NavState> {
         changeTabIndex: _changeTabIndex,
         changeState: _changeState,
         setRef: _setReference);
-    debugPrint('$newState');
+    // debugPrint('$newState');
     yield newState;
   }
 
   NavState _changeNavView(NavViewState vs) => state.copyWith(navViewState: vs);
 
   NavState _onSearchChange(String s) {
-    final bible = VolumesRepository.shared.bibleWithId(initialRef.volume);
+    final bible = VolumesRepository.shared.bibleWithId(state.ref.volume);
     final lastChar = s.isNotEmpty ? s[s.length - 1] : null;
     final selectedBook = bible.nameOfBook(state.ref.book);
 
@@ -114,7 +114,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
                   tabIndex: 1,
                   ref: state.ref.copyWith(book: book),
                   search: '${bible.nameOfBook(book)} ');
-            } else if (name.startsWith(s)) {
+            } else if (name.startsWith(s.toLowerCase())) {
               matches[book] = bible.nameOfBook(book);
             }
             final nextBook = bible.bookAfter(book);
@@ -182,7 +182,9 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
   NavState _onSearchFinished() {
     // TODO(abby): on submit typing 'judges 3' will not go to correct place...
-    return state.copyWith(search: state.search, navViewState: NavViewState.searchResults);
+    // check to see if bible ref and ask to navigate appropriately
+    //
+    return state.copyWith(navViewState: NavViewState.searchResults);
   }
 
   NavState _changeState(NavState s) => s;
@@ -197,19 +199,26 @@ class NavBloc extends Bloc<NavEvent, NavState> {
     return [];
   }
 
-  NavState _changeTabIndex(int index) => state.copyWith(tabIndex: index);
+  NavState _changeTabIndex(int index) {
+    final bible = VolumesRepository.shared.bibleWithId(initialRef.volume);
+    final bookName = bible.nameOfBook(state.ref.book);
+    var search = '';
+    if (index > NavTabs.book.index) {
+      search += bookName;
+      if (index == NavTabs.verse.index) {
+        search += ' ${state.ref.chapter}:';
+      }
+    }
+    return state.copyWith(search: search, tabIndex: index);
+  }
 
   NavState _setReference(Reference ref) => state.copyWith(ref: ref);
 
   void selectBook(int bookId, String bookName) {
     // need to set ref before changing tab index or else will cause issues
     final ref = state.ref.copyWith(book: bookId);
-    var search = state.search;
-    if (state.search.isEmpty) {
-      search = bookName;
-    }
     add(NavEvent.changeState(
-        state.copyWith(ref: ref, tabIndex: NavTabs.chapter.index, search: search)));
+        state.copyWith(ref: ref, tabIndex: NavTabs.chapter.index, search: bookName)));
   }
 
   void selectChapter(int bookId, String bookName, int chapter) {
