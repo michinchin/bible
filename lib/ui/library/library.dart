@@ -80,43 +80,10 @@ class _LibraryScreen extends StatelessWidget {
 
 enum _ViewType { bibles, purchased, store }
 
-class _VolumesView extends StatefulWidget {
+class _VolumesView extends StatelessWidget {
   final _ViewType type;
 
   const _VolumesView({Key key, this.type}) : super(key: key);
-
-  @override
-  _VolumesViewState createState() => _VolumesViewState();
-}
-
-class _VolumesViewState extends State<_VolumesView> {
-  TextEditingController _searchController;
-  Timer _debounce;
-
-  @override
-  void initState() {
-    super.initState();
-    _searchController = TextEditingController()..addListener(_searchListener);
-  }
-
-  @override
-  void dispose() {
-    _searchController?.removeListener(_searchListener);
-    _searchController?.dispose();
-    _debounce?.cancel();
-    _debounce = null;
-    super.dispose();
-  }
-
-  void _searchListener() {
-    if (!mounted) return;
-    if (_debounce?.isActive ?? false) _debounce.cancel();
-    _debounce = Timer(const Duration(milliseconds: 300), () {
-      if (mounted && _searchController.text.trim().isNotEmpty) {
-        // TODO
-      }
-    });
-  }
 
   VolumesFilter _filterForType(_ViewType type) {
     switch (type) {
@@ -133,35 +100,86 @@ class _VolumesViewState extends State<_VolumesView> {
   Widget build(BuildContext context) {
     return BlocProvider<VolumesBloc>(
       create: (_) => VolumesBloc(
-        key: '_library${widget.type}',
+        key: '_library$type',
         kvStore: tec.Prefs.shared,
-        defaultFilter: _filterForType(widget.type),
+        defaultFilter: _filterForType(type),
       )..refresh(),
       child: BlocBuilder<VolumesBloc, VolumesState>(
-        builder: (context, state) {
-          return Column(
-            children: [
-              SearchBox(
-                searchFieldController: _searchController,
-                onSubmit: (s) => _searchListener(),
-                suffixIcon: IconButton(
-                    tooltip: 'more filter option',
-                    icon: const Icon(Icons.filter_list),
-                    onPressed: () async => _showFilterSheet(context)),
-              ),
-              Expanded(
-                child: Scrollbar(
-                  child: TecListView<Volume>(
-                    items: state.volumes,
-                    itemBuilder: (context, volume, index, total) =>
-                        VolumeCard(volume: volume, padding: 0),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
+        builder: (context, state) => _VolumesList(type: type),
       ),
+    );
+  }
+}
+
+class _VolumesList extends StatefulWidget {
+  final _ViewType type;
+
+  const _VolumesList({Key key, this.type}) : super(key: key);
+
+  @override
+  _VolumesListState createState() => _VolumesListState();
+}
+
+class _VolumesListState extends State<_VolumesList> {
+  TextEditingController _textEditingController;
+  Timer _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _textEditingController = TextEditingController()..addListener(_searchListener);
+  }
+
+  @override
+  void dispose() {
+    _textEditingController?.removeListener(_searchListener);
+    _textEditingController?.dispose();
+    _debounce?.cancel();
+    _debounce = null;
+    super.dispose();
+  }
+
+  void _searchListener() {
+    if (!mounted) return;
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        tec.dmPrint('search string: ${_textEditingController.text.trim()}');
+        context.bloc<VolumesBloc>()?.add(
+              context.bloc<VolumesBloc>().state.filter.copyWith(
+                    searchFilter: _textEditingController.text.trim(),
+                  ),
+            );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bloc = context.bloc<VolumesBloc>(); // ignore: close_sinks
+    final showFilter = (bloc.languages?.length ?? 0) > 1 || (bloc.categories?.length ?? 0) > 1;
+    return Column(
+      children: [
+        SearchBox(
+          textEditingController: _textEditingController,
+          onSubmit: (s) => _searchListener(),
+          suffixIcon: showFilter
+              ? IconButton(
+                  tooltip: 'filters',
+                  icon: const Icon(Icons.filter_list),
+                  onPressed: () => _showFilterSheet(context))
+              : null,
+        ),
+        Expanded(
+          child: Scrollbar(
+            child: TecListView<Volume>(
+              items: bloc.state.volumes,
+              itemBuilder: (context, volume, index, total) =>
+                  VolumeCard(volume: volume, padding: 0),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -176,8 +194,6 @@ Future<void> _showFilterSheet(BuildContext context) async {
       builder: (context, state) => LibraryFilterSheet(volumesBloc: bloc),
     ),
   );
-  //await _itemScrollController.scrollTo(index: 0, duration: const Duration(milliseconds: 250));
-  //setState(() {});
 }
 
 class LibraryFilterSheet extends StatelessWidget {
@@ -210,27 +226,28 @@ class LibraryFilterSheet extends StatelessWidget {
               ),
             ),
             const Divider(),
-            TecPopupMenuButton<String>(
-              title: 'Language',
-              values: languages,
-              currentValue: language,
-              defaultValue: '',
-              defaultName: 'Any',
-              onSelectValue: (value) {
-                volumesBloc.add(volumesBloc.state.filter.copyWith(language: value));
-              },
-            ),
-            //SizedBox(height: halfPad),
-            TecPopupMenuButton<int>(
-              title: 'Category',
-              values: categories,
-              currentValue: category,
-              defaultValue: 0,
-              defaultName: 'Any',
-              onSelectValue: (value) {
-                volumesBloc.add(volumesBloc.state.filter.copyWith(category: value));
-              },
-            ),
+            if (languages.length > 1)
+              TecPopupMenuButton<String>(
+                title: 'Language',
+                values: languages,
+                currentValue: language,
+                defaultValue: '',
+                defaultName: 'Any',
+                onSelectValue: (value) {
+                  volumesBloc.add(volumesBloc.state.filter.copyWith(language: value));
+                },
+              ),
+            if (categories.length > 1)
+              TecPopupMenuButton<int>(
+                title: 'Category',
+                values: categories,
+                currentValue: category,
+                defaultValue: 0,
+                defaultName: 'Any',
+                onSelectValue: (value) {
+                  volumesBloc.add(volumesBloc.state.filter.copyWith(category: value));
+                },
+              ),
             if (volumesBloc.state.filter != volumesBloc.defaultFilter)
               TecTextButton(
                 title: 'Reset to Defaults',
@@ -249,13 +266,13 @@ const bottomSheetShapeBorder = RoundedRectangleBorder(
 
 class SearchBox extends StatefulWidget {
   final void Function(String) onSubmit;
-  final TextEditingController searchFieldController;
+  final TextEditingController textEditingController;
   final Widget suffixIcon;
 
   const SearchBox({
     Key key,
     this.onSubmit,
-    this.searchFieldController,
+    this.textEditingController,
     this.suffixIcon,
   }) : super(key: key);
 
@@ -284,22 +301,24 @@ class _SearchBoxState extends State<SearchBox> {
             child: Stack(
               children: <Widget>[
                 TextField(
+                  autocorrect: false,
+                  controller: widget.textEditingController,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     prefixIcon: IconButton(
                       icon: const Icon(Icons.search),
                       onPressed: () {},
                     ),
-                    suffixIcon: widget.searchFieldController.text.isNotEmpty
+                    suffixIcon: widget.textEditingController.text.isNotEmpty
                         ? IconButton(
                             splashColor: Colors.transparent,
                             icon: const Icon(CupertinoIcons.clear_circled),
-                            onPressed: () => setState(() => widget.searchFieldController.clear()),
+                            onPressed: () => widget.textEditingController.clear(),
                           )
                         : null,
                   ),
                 ),
-                if (widget.searchFieldController.text.isEmpty && widget.suffixIcon != null)
+                if (widget.textEditingController.text.isEmpty && widget.suffixIcon != null)
                   Positioned(
                     right: 0,
                     child: widget.suffixIcon,

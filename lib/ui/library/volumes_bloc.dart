@@ -28,6 +28,7 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
       if (tec.isNotNullOrEmpty(jsonStr)) {
         final json = tec.parseJsonSync(jsonStr);
         if (json != null) filter = VolumesFilter.fromJson(json);
+        filter = filter.copyWith(searchFilter: '');
       }
       if (filter != null) return VolumesState(filter, const []);
     }
@@ -84,8 +85,9 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
 
   LinkedHashMap<String, String> get languages => _languages;
 
-  LinkedHashMap<int, String> get categories =>
-      {for (final c in _categories.values) c.id: c.name} as LinkedHashMap<int, String>;
+  LinkedHashMap<int, String> get categories => _categories == null
+      ? null
+      : {for (final c in _categories.values) c.id: c.name} as LinkedHashMap<int, String>;
 }
 
 Future<List<vol.Volume>> _volumesWith(VolumesFilter filter) async {
