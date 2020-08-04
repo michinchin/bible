@@ -171,7 +171,10 @@ Future<void> _showFilterSheet(BuildContext context) async {
   await showModalBottomSheet<void>(
     context: context,
     shape: bottomSheetShapeBorder,
-    builder: (_) => LibraryFilterSheet(volumesBloc: bloc),
+    builder: (_) => BlocBuilder<VolumesBloc, VolumesState>(
+      bloc: bloc,
+      builder: (context, state) => LibraryFilterSheet(volumesBloc: bloc),
+    ),
   );
   //await _itemScrollController.scrollTo(index: 0, duration: const Duration(milliseconds: 250));
   //setState(() {});
@@ -184,28 +187,57 @@ class LibraryFilterSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textScaleFactor = textScaleFactorWith(context);
+    final padding = 8 * textScaleFactor;
     final languages = volumesBloc.languages;
     final categories = volumesBloc.categories;
-    final textStyle = Theme.of(context).textTheme.headline6;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          //ListTile(title: Text('Hello World!')),
-          _PopupMenuButton<String>(
-            title: TecText('Language', style: textStyle),
-            values: languages,
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          _PopupMenuButton<int>(
-            title: TecText('Category', style: textStyle),
-            values: categories,
-          ),
-        ],
+    final language = volumesBloc.state.filter.language;
+    final category = volumesBloc.state.filter.category;
+
+    return SafeArea(
+      child: Container(
+        padding: EdgeInsets.all(padding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              child: TecText(
+                'Filter By',
+                textScaleFactor: textScaleFactor,
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const Divider(),
+            TecPopupMenuButton<String>(
+              title: 'Language',
+              values: languages,
+              currentValue: language,
+              defaultValue: '',
+              defaultName: 'Any',
+              onSelectValue: (value) {
+                volumesBloc.add(volumesBloc.state.filter.copyWith(language: value));
+              },
+            ),
+            //SizedBox(height: halfPad),
+            TecPopupMenuButton<int>(
+              title: 'Category',
+              values: categories,
+              currentValue: category,
+              defaultValue: 0,
+              defaultName: 'Any',
+              onSelectValue: (value) {
+                volumesBloc.add(volumesBloc.state.filter.copyWith(category: value));
+              },
+            ),
+            if (volumesBloc.state.filter != volumesBloc.defaultFilter)
+              TecTextButton(
+                title: 'Reset to Defaults',
+                onTap: () => volumesBloc.add(volumesBloc.defaultFilter),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -320,10 +352,10 @@ class VolumeCard extends StatelessWidget {
       );
 
   Widget builder(BuildContext context) {
-    final scale = textScaleFactorWith(context, forAbsoluteFontSize: true);
-    final padding = (6.0 * scale).roundToDouble();
+    final textScaleFactor = textScaleFactorWith(context);
+    final padding = (6.0 * textScaleFactor).roundToDouble();
 
-    final imgWidth = 60.0 * scale;
+    final imgWidth = 60.0 * textScaleFactor;
     final imgHeight = 1.47368 * imgWidth;
 
     return Row(
@@ -359,17 +391,19 @@ class VolumeCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          TecText.rich(
-                            TextSpan(
-                              style: cardTitleCompactStyle.copyWith(
-                                  color: Theme.of(context).textTheme.bodyText2.color),
-                              text: '${volume.name}\n',
-                            ),
+                          TecText(
+                            '${volume.name}\n',
+                            textScaleFactor: textScaleFactor,
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                           ),
                           TecText(
                             volume.publisher,
-                            style: cardSubtitleCompactStyle.copyWith(
-                                color: Theme.of(context).textColor),
+                            textScaleFactor: textScaleFactor,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Theme.of(context).textColor,
+                            ),
                           ),
                         ],
                       ),
@@ -418,34 +452,6 @@ class VolumeImage extends StatelessWidget {
   }
 }
 
-class TecTextStyle extends TextStyle {
-  const TecTextStyle({
-    double fontSize = 12.0,
-    FontWeight fontWeight = FontWeight.normal,
-    Color color = Colors.black,
-    double height,
-  }) : super(
-          inherit: false,
-          color: color,
-          // fontFamily: 'Avenir',
-          fontSize: fontSize,
-          fontWeight: fontWeight,
-          textBaseline: TextBaseline.alphabetic,
-          height: height,
-        );
-}
-
-const TextStyle cardTitleCompactStyle = TecTextStyle(
-  fontSize: 16,
-  fontWeight: FontWeight.w600, // w700 == Bold
-);
-
-final TecTextStyle cardSubtitleCompactStyle = TecTextStyle(
-  fontSize: 14,
-  fontWeight: FontWeight.w400, // w500 == Normal
-  color: Colors.grey[500],
-);
-
 class UnderlinePSW extends StatelessWidget implements PreferredSizeWidget {
   final PreferredSizeWidget child;
   final double lineHeight;
@@ -476,18 +482,15 @@ class UnderlinePSW extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => Size.fromHeight(child.preferredSize.height + lineHeight);
 }
 
-const _defaultMenuItemHeight = 36.0;
-const _maxTextScaleFactor = 1.0;
-
-class _PopupMenuButton<T> extends StatelessWidget {
-  final Widget title;
+class TecPopupMenuButton<T> extends StatelessWidget {
+  final String title;
   final LinkedHashMap<T, String> values;
   final T currentValue;
   final T defaultValue;
   final String defaultName;
   final void Function(T value) onSelectValue;
 
-  const _PopupMenuButton({
+  const TecPopupMenuButton({
     Key key,
     @required this.title,
     @required this.values,
@@ -502,18 +505,21 @@ class _PopupMenuButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textScaleFactor = textScaleFactorWith(context);
+    final entryHeight = (32.0 * textScaleFactor).roundToDouble();
+
     final keys = values.keys.toList();
     if (defaultValue != null && !keys.contains(defaultValue)) {
       keys.insert(0, defaultValue);
     }
-    final items = values.keys
+    final items = keys
         .map<PopupMenuEntry<String>>(
           (key) => PopupMenuItem<String>(
-            height: _defaultMenuItemHeight,
-            value: values[key],
+            height: entryHeight,
+            value: values[key] ?? defaultName,
             child: TecText(
-              values[key],
-              maxScaleFactor: _maxTextScaleFactor,
+              values[key] ?? defaultName,
+              textScaleFactor: textScaleFactor,
               style: TextStyle(
                 fontWeight: key == currentValue ? FontWeight.bold : FontWeight.normal,
                 color: key == currentValue
@@ -529,14 +535,61 @@ class _PopupMenuButton<T> extends StatelessWidget {
         )
         .toList();
 
+    final currentName = currentValue == null ? null : values[currentValue] ?? defaultName;
     return PopupMenuButton<String>(
-      child: title,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        child: TecText.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: title.endsWith(': ') ? title : '$title: '),
+              if (tec.isNotNullOrEmpty(currentName))
+                TextSpan(
+                  text: currentName,
+                  style: TextStyle(color: Theme.of(context).accentColor),
+                ),
+            ],
+          ),
+          textScaleFactor: textScaleFactor,
+          style: const TextStyle(fontSize: 16),
+        ),
+      ),
       offset: const Offset(150, 0),
-      onSelected: (value) {
-        onSelectValue?.call(values.keys.firstWhere((k) => values[k] == value, orElse: () => null));
+      onSelected: (string) {
+        final value = values.keys.firstWhere(
+          (k) => values[k] == string,
+          orElse: () => defaultValue,
+        );
+        onSelectValue?.call(value);
       },
       itemBuilder: (context) => items,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+    );
+  }
+}
+
+class TecTextButton extends StatelessWidget {
+  final String title;
+  final String tooltip;
+  final void Function() onTap;
+
+  const TecTextButton({Key key, this.title, this.tooltip, this.onTap}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          child: TecText(
+            title,
+            textScaleFactor: textScaleFactorWith(context),
+            style: TextStyle(fontSize: 16, color: Theme.of(context).accentColor),
+          ),
+        ),
+      ),
     );
   }
 }

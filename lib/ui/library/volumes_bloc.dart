@@ -11,6 +11,8 @@ import 'package:tec_volumes/tec_volumes.dart' as vol;
 import '../../models/app_settings.dart';
 import '../../models/language_utils.dart';
 
+export '../../models/language_utils.dart';
+
 class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
   final String key;
   final tec.KeyValueStore _kvStore;
