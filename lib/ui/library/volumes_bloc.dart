@@ -11,6 +11,8 @@ import 'package:tec_volumes/tec_volumes.dart' as vol;
 import '../../models/app_settings.dart';
 import '../../models/language_utils.dart';
 
+export '../../models/language_utils.dart';
+
 class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
   final String key;
   final tec.KeyValueStore _kvStore;
@@ -26,6 +28,7 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
       if (tec.isNotNullOrEmpty(jsonStr)) {
         final json = tec.parseJsonSync(jsonStr);
         if (json != null) filter = VolumesFilter.fromJson(json);
+        filter = filter.copyWith(searchFilter: '');
       }
       if (filter != null) return VolumesState(filter, const []);
     }
@@ -35,10 +38,8 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
 
   @override
   Stream<VolumesState> mapEventToState(VolumesFilter event) async* {
-    // Update caches if we need to.
-    if (_defaultVolumes == null) {
-      await updateCaches();
-    }
+    // Update caches.
+    await _updateCaches(event);
 
     // If there's a key and store, save the filter.
     if (tec.isNotNullOrEmpty(key) && _kvStore != null) {
@@ -54,16 +55,14 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
   }
 
   // Caches
-  List<vol.Volume> _defaultVolumes;
   LinkedHashMap<String, String> _languages;
   LinkedHashMap<int, vol.Category> _categories;
 
-  Future<void> updateCaches() async {
-    _defaultVolumes = await _volumesWith(defaultFilter);
-
+  Future<void> _updateCaches(VolumesFilter filter) async {
     final vr = vol.VolumesRepository.shared;
 
-    final languageCodes = _defaultVolumes.map((v) => v.language).toSet().toList()
+    final volumesWithAnyLanguage = await _volumesWith(filter.copyWith(language: ''));
+    final languageCodes = volumesWithAnyLanguage.map((v) => v.language).toSet().toList()
       ..sort((a, b) => languageNameFromCode(a).compareTo(languageNameFromCode(b)));
     _languages = {for (final code in languageCodes) code: languageNameFromCode(code)}
         as LinkedHashMap<String, String>;
@@ -71,19 +70,24 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
     _categories = {for (final id in vr.categoryIds()) id: vr.categoryWithId(id)}
         as LinkedHashMap<int, vol.Category>;
 
-    // Remove the categories that don't contain a volume in _defaultVolumes.
+    // Remove the categories that don't contain a volume in volumesWithAnyCategory.
+    final volumesWithAnyCategory = await _volumesWith(filter.copyWith(category: 0));
     for (final id in vr.categoryIds()) {
       final catVolIdSet = _categories[id].volumeIds.toSet();
-      final contains =
-          _defaultVolumes.firstWhere((v) => catVolIdSet.contains(v.id), orElse: () => null) != null;
+      final contains = volumesWithAnyCategory.firstWhere(
+            (v) => catVolIdSet.contains(v.id),
+            orElse: () => null,
+          ) !=
+          null;
       if (!contains) _categories.remove(id);
     }
   }
 
   LinkedHashMap<String, String> get languages => _languages;
 
-  LinkedHashMap<int, String> get categories =>
-      {for (final c in _categories.values) c.id: c.name} as LinkedHashMap<int, String>;
+  LinkedHashMap<int, String> get categories => _categories == null
+      ? null
+      : {for (final c in _categories.values) c.id: c.name} as LinkedHashMap<int, String>;
 }
 
 Future<List<vol.Volume>> _volumesWith(VolumesFilter filter) async {
@@ -111,7 +115,7 @@ Future<List<vol.Volume>> _volumesWith(VolumesFilter filter) async {
       .where((v) => categoryVolumeIds == null || categoryVolumeIds.contains(v.id))
       .where((v) =>
           strs.isEmpty ||
-          (strs.firstWhere((s) => v.matchesSearchString(s), orElse: () => null) != null))
+          (strs.firstWhere((s) => !v.matchesSearchString(s), orElse: () => null) == null))
       .toList()
         ..sort((a, b) => a.name.compareTo(b.name));
 

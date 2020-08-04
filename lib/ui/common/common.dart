@@ -6,6 +6,8 @@ import 'tec_tab_indicator.dart';
 export 'tec_future_builder.dart';
 export 'tec_modal_popup.dart';
 export 'tec_page_route.dart';
+export 'tec_popup_menu.dart';
+export 'tec_search_field.dart';
 export 'tec_stream_builder.dart';
 export 'tec_tab_indicator.dart';
 
