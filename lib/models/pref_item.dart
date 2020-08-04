@@ -4,9 +4,18 @@ import 'package:tec_user_account/tec_user_account.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
 
 enum PrefItemDataType { json, string, bool, int }
-enum PrefItemType {
-  /*1-4*/ customColors,
-}
+// enum PrefItemType {
+//   /*1-4*/ customColors,
+//   /*5-6*/ navPrefs,
+// }
+
+const customColor1 = 1;
+const customColor2 = 2;
+const customColor3 = 3;
+const customColor4 = 4;
+const customColors = [customColor1, customColor2, customColor3, customColor4];
+const navLayout = 5; // grid view default (0), scroll view (1)
+const nav2Tap = 6; // 3-tap default (0), 2-tap (1)
 
 class PrefItem extends tua.UserItem {
   PrefItem({

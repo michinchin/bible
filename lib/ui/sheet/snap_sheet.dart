@@ -5,7 +5,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../models/pref_item.dart';
 import 'main_sheet.dart';
 import 'selection_sheet.dart';
 
@@ -133,8 +132,7 @@ class _SnapSheetState extends State<SnapSheet> {
                     break;
                   case SheetType.selection:
                     child = BlocProvider<PrefItemsBloc>(
-                        create: (context) =>
-                            PrefItemsBloc(prefItemsType: PrefItemType.customColors),
+                        create: (context) => PrefItemsBloc(),
                         child: SelectionSheet(sheetSize: state.size, onDragValue: onDragValue));
                     break;
                   // case SheetType.windows:

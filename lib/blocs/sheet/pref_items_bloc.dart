@@ -27,9 +27,7 @@ abstract class PrefItems with _$PrefItems {
 }
 
 class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
-  final PrefItemType prefItemsType;
-
-  PrefItemsBloc({this.prefItemsType}) {
+  PrefItemsBloc() {
     _loadFromDb();
   }
 
@@ -39,18 +37,26 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
   Future<void> _loadFromDb() async {
     final items =
         await AppSettings.shared.userAccount.userDb.getItemsOfTypes([tua.UserItemType.prefItem]);
-    final prefItems = items.map((i) => PrefItem.from(i)).toList();
-    if (prefItems.isEmpty && prefItemsType == PrefItemType.customColors) {
-      for (var i = 1; i <= 4; i++) {
-        add(PrefItemEvent.add(
-            prefItem: PrefItem(
-                prefItemDataType: PrefItemDataType.int,
-                prefItemId: i,
-                verse: unsetHighlightColor.value)));
+    final prefItems = items.map<PrefItem>((i) => PrefItem.from(i)).toList();
+    final itemIds = prefItems.map((p) => p.id);
+
+    if (!itemIds.contains(customColor1)) {
+      // Custom color initialization
+      for (var i = customColor1; i <= customColors.length; i++) {
+        prefItems.add(PrefItem(
+            prefItemDataType: PrefItemDataType.int,
+            prefItemId: i,
+            verse: unsetHighlightColor.value));
       }
-    } else if (prefItems.isNotEmpty) {
-      add(PrefItemEvent.updateFromDb(prefItems: prefItems));
     }
+    if (!itemIds.contains(navLayout)) {
+      // Nav pref initialization
+      prefItems
+        ..add(PrefItem(prefItemDataType: PrefItemDataType.bool, prefItemId: navLayout, verse: 0))
+        ..add(PrefItem(prefItemDataType: PrefItemDataType.bool, prefItemId: nav2Tap, verse: 0));
+    }
+
+    add(PrefItemEvent.updateFromDb(prefItems: prefItems));
   }
 
   @override
@@ -96,6 +102,8 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
 
 extension PrefItemsBlocExtOnListOfPrefItem on List<PrefItem> {
   bool hasItem(PrefItem prefItem) => indexOfItem(prefItem) != -1;
+  int valueOfItemWithId(int id) => itemWithId(id)?.verse;
+  PrefItem itemWithId(int id) => firstWhere((p) => p.book == id, orElse: () => null);
   int indexOfItem(PrefItem prefItem) => indexWhere((p) => p.book == prefItem.book);
   void removeItem(PrefItem prefItem) => removeWhere((p) => p.book == prefItem.book);
 }
