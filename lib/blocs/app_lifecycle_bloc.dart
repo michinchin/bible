@@ -57,7 +57,7 @@ class AppLifecycleWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AppLifecycleBloc>(
-      create: (_) => AppLifecycleBloc(),
+      create: (context) => AppLifecycleBloc(),
       child: _AppBindingObserver(child: child),
     );
   }

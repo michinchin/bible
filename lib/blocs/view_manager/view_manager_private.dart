@@ -118,7 +118,7 @@ class _ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
   }
 
   Widget _routeBuilder(BuildContext context) => BlocBuilder<ManagedViewBloc, ManagedViewState>(
-      builder: (_, state) => _ManagedViewScaffold(state));
+      builder: (context, state) => _ManagedViewScaffold(state));
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +225,7 @@ extension _ExtOnViewState on ViewState {
       height: height,
       // child: _ManagedViewScaffold(mvs),
       child: BlocProvider(
-        create: (_) => ManagedViewBloc(mvs),
+        create: (context) => ManagedViewBloc(mvs),
         child: _ManagedViewNavigator(mvs),
       ),
     );

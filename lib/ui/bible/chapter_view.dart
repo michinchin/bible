@@ -305,14 +305,14 @@ class _ChapterViewState extends State<_ChapterView> {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (_) => ChapterMarginNotesBloc(
+            create: (context) => ChapterMarginNotesBloc(
               volume: widget.volumeId,
               book: widget.ref.book,
               chapter: widget.ref.chapter,
             ),
           ),
           BlocProvider(
-            create: (_) => ChapterHighlightsBloc(
+            create: (context) => ChapterHighlightsBloc(
               volume: widget.volumeId,
               book: widget.ref.book,
               chapter: widget.ref.chapter,

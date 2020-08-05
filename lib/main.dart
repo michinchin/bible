@@ -97,14 +97,14 @@ class App extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ViewManagerBloc>(
-          create: (_) => ViewManagerBloc(kvStore: tec.Prefs.shared),
+          create: (context) => ViewManagerBloc(kvStore: tec.Prefs.shared),
         ),
         BlocProvider<ThemeModeBloc>(
-          create: (_) => ThemeModeBloc(),
+          create: (context) => ThemeModeBloc(),
         ),
       ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
-        builder: (_, themeMode) {
+        builder: (context, themeMode) {
           return tec.BlocProvider<TecStyleBloc>(
             bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
             child: OKToast(

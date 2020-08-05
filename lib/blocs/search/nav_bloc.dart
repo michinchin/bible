@@ -1,3 +1,4 @@
+import 'package:bible/models/autocomplete.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:bloc/bloc.dart';
@@ -14,6 +15,7 @@ abstract class NavEvent with _$NavEvent {
   const factory NavEvent.setRef({Reference ref}) = _SetRef;
   const factory NavEvent.onSearchChange({String search}) = _OnSearchChange;
   const factory NavEvent.loadHistory() = _LoadHistory;
+  const factory NavEvent.loadWordSuggestions({String search}) = _LoadWordSuggestions;
   const factory NavEvent.changeNavView({NavViewState state}) = _ChangeNavView;
   const factory NavEvent.onSearchFinished() = _OnSearchFinished;
   const factory NavEvent.changeState(NavState state) = _ChangeNavState;
@@ -48,16 +50,22 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
   @override
   Stream<NavState> mapEventToState(NavEvent event) async* {
-    final newState = event.when(
-        changeNavView: _changeNavView,
-        onSearchChange: _onSearchChange,
-        onSearchFinished: _onSearchFinished,
-        loadHistory: _loadHistory,
-        changeTabIndex: _changeTabIndex,
-        changeState: _changeState,
-        setRef: _setReference);
-    // debugPrint('$newState');
-    yield newState;
+    if (event is _LoadWordSuggestions) {
+      final suggestions = await _loadWordSuggestions(event.search);
+      yield state.copyWith(wordSuggestions: suggestions);
+    } else {
+      final newState = event.when(
+          changeNavView: _changeNavView,
+          onSearchChange: _onSearchChange,
+          onSearchFinished: _onSearchFinished,
+          loadHistory: _loadHistory,
+          loadWordSuggestions: (_) {},
+          changeTabIndex: _changeTabIndex,
+          changeState: _changeState,
+          setRef: _setReference);
+      // debugPrint('$newState');
+      yield newState;
+    }
   }
 
   NavState _changeNavView(NavViewState vs) => state.copyWith(navViewState: vs);
@@ -128,12 +136,10 @@ class NavBloc extends Bloc<NavEvent, NavState> {
                   search: '${matches.values.first} ');
             }
           }
-
-          final wordSuggestions = _loadWordSuggestions(s);
+          add(NavEvent.loadWordSuggestions(search: s));
 
           currState = currState.copyWith(
               search: s,
-              wordSuggestions: wordSuggestions,
               bookSuggestions: matches.keys.toList(),
               navViewState: NavViewState.searchSuggestions);
 
@@ -194,9 +200,9 @@ class NavBloc extends Bloc<NavEvent, NavState> {
     return state;
   }
 
-  List<String> _loadWordSuggestions(String s) {
-    // TODO(abby): implement
-    return [];
+  Future<List<String>> _loadWordSuggestions(String s) async {
+    final ac = await AutoComplete.fetch(phrase: s, translationIds: '${state.ref.volume}');
+    return ac?.possibles;
   }
 
   NavState _changeTabIndex(int index) {
