@@ -39,6 +39,13 @@ class _$NavEventTearOff {
   }
 
 // ignore: unused_element
+  _LoadWordSuggestions loadWordSuggestions({String search}) {
+    return _LoadWordSuggestions(
+      search: search,
+    );
+  }
+
+// ignore: unused_element
   _ChangeNavView changeNavView({NavViewState state}) {
     return _ChangeNavView(
       state: state,
@@ -68,6 +75,7 @@ mixin _$NavEvent {
     @required Result setRef(Reference ref),
     @required Result onSearchChange(String search),
     @required Result loadHistory(),
+    @required Result loadWordSuggestions(String search),
     @required Result changeNavView(NavViewState state),
     @required Result onSearchFinished(),
     @required Result changeState(NavState state),
@@ -78,6 +86,7 @@ mixin _$NavEvent {
     Result setRef(Reference ref),
     Result onSearchChange(String search),
     Result loadHistory(),
+    Result loadWordSuggestions(String search),
     Result changeNavView(NavViewState state),
     Result onSearchFinished(),
     Result changeState(NavState state),
@@ -89,6 +98,7 @@ mixin _$NavEvent {
     @required Result setRef(_SetRef value),
     @required Result onSearchChange(_OnSearchChange value),
     @required Result loadHistory(_LoadHistory value),
+    @required Result loadWordSuggestions(_LoadWordSuggestions value),
     @required Result changeNavView(_ChangeNavView value),
     @required Result onSearchFinished(_OnSearchFinished value),
     @required Result changeState(_ChangeNavState value),
@@ -99,6 +109,7 @@ mixin _$NavEvent {
     Result setRef(_SetRef value),
     Result onSearchChange(_OnSearchChange value),
     Result loadHistory(_LoadHistory value),
+    Result loadWordSuggestions(_LoadWordSuggestions value),
     Result changeNavView(_ChangeNavView value),
     Result onSearchFinished(_OnSearchFinished value),
     Result changeState(_ChangeNavState value),
@@ -187,6 +198,7 @@ class _$_ChangeIndex with DiagnosticableTreeMixin implements _ChangeIndex {
     @required Result setRef(Reference ref),
     @required Result onSearchChange(String search),
     @required Result loadHistory(),
+    @required Result loadWordSuggestions(String search),
     @required Result changeNavView(NavViewState state),
     @required Result onSearchFinished(),
     @required Result changeState(NavState state),
@@ -195,6 +207,7 @@ class _$_ChangeIndex with DiagnosticableTreeMixin implements _ChangeIndex {
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -208,6 +221,7 @@ class _$_ChangeIndex with DiagnosticableTreeMixin implements _ChangeIndex {
     Result setRef(Reference ref),
     Result onSearchChange(String search),
     Result loadHistory(),
+    Result loadWordSuggestions(String search),
     Result changeNavView(NavViewState state),
     Result onSearchFinished(),
     Result changeState(NavState state),
@@ -227,6 +241,7 @@ class _$_ChangeIndex with DiagnosticableTreeMixin implements _ChangeIndex {
     @required Result setRef(_SetRef value),
     @required Result onSearchChange(_OnSearchChange value),
     @required Result loadHistory(_LoadHistory value),
+    @required Result loadWordSuggestions(_LoadWordSuggestions value),
     @required Result changeNavView(_ChangeNavView value),
     @required Result onSearchFinished(_OnSearchFinished value),
     @required Result changeState(_ChangeNavState value),
@@ -235,6 +250,7 @@ class _$_ChangeIndex with DiagnosticableTreeMixin implements _ChangeIndex {
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -248,6 +264,7 @@ class _$_ChangeIndex with DiagnosticableTreeMixin implements _ChangeIndex {
     Result setRef(_SetRef value),
     Result onSearchChange(_OnSearchChange value),
     Result loadHistory(_LoadHistory value),
+    Result loadWordSuggestions(_LoadWordSuggestions value),
     Result changeNavView(_ChangeNavView value),
     Result onSearchFinished(_OnSearchFinished value),
     Result changeState(_ChangeNavState value),
@@ -334,6 +351,7 @@ class _$_SetRef with DiagnosticableTreeMixin implements _SetRef {
     @required Result setRef(Reference ref),
     @required Result onSearchChange(String search),
     @required Result loadHistory(),
+    @required Result loadWordSuggestions(String search),
     @required Result changeNavView(NavViewState state),
     @required Result onSearchFinished(),
     @required Result changeState(NavState state),
@@ -342,6 +360,7 @@ class _$_SetRef with DiagnosticableTreeMixin implements _SetRef {
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -355,6 +374,7 @@ class _$_SetRef with DiagnosticableTreeMixin implements _SetRef {
     Result setRef(Reference ref),
     Result onSearchChange(String search),
     Result loadHistory(),
+    Result loadWordSuggestions(String search),
     Result changeNavView(NavViewState state),
     Result onSearchFinished(),
     Result changeState(NavState state),
@@ -374,6 +394,7 @@ class _$_SetRef with DiagnosticableTreeMixin implements _SetRef {
     @required Result setRef(_SetRef value),
     @required Result onSearchChange(_OnSearchChange value),
     @required Result loadHistory(_LoadHistory value),
+    @required Result loadWordSuggestions(_LoadWordSuggestions value),
     @required Result changeNavView(_ChangeNavView value),
     @required Result onSearchFinished(_OnSearchFinished value),
     @required Result changeState(_ChangeNavState value),
@@ -382,6 +403,7 @@ class _$_SetRef with DiagnosticableTreeMixin implements _SetRef {
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -395,6 +417,7 @@ class _$_SetRef with DiagnosticableTreeMixin implements _SetRef {
     Result setRef(_SetRef value),
     Result onSearchChange(_OnSearchChange value),
     Result loadHistory(_LoadHistory value),
+    Result loadWordSuggestions(_LoadWordSuggestions value),
     Result changeNavView(_ChangeNavView value),
     Result onSearchFinished(_OnSearchFinished value),
     Result changeState(_ChangeNavState value),
@@ -485,6 +508,7 @@ class _$_OnSearchChange
     @required Result setRef(Reference ref),
     @required Result onSearchChange(String search),
     @required Result loadHistory(),
+    @required Result loadWordSuggestions(String search),
     @required Result changeNavView(NavViewState state),
     @required Result onSearchFinished(),
     @required Result changeState(NavState state),
@@ -493,6 +517,7 @@ class _$_OnSearchChange
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -506,6 +531,7 @@ class _$_OnSearchChange
     Result setRef(Reference ref),
     Result onSearchChange(String search),
     Result loadHistory(),
+    Result loadWordSuggestions(String search),
     Result changeNavView(NavViewState state),
     Result onSearchFinished(),
     Result changeState(NavState state),
@@ -525,6 +551,7 @@ class _$_OnSearchChange
     @required Result setRef(_SetRef value),
     @required Result onSearchChange(_OnSearchChange value),
     @required Result loadHistory(_LoadHistory value),
+    @required Result loadWordSuggestions(_LoadWordSuggestions value),
     @required Result changeNavView(_ChangeNavView value),
     @required Result onSearchFinished(_OnSearchFinished value),
     @required Result changeState(_ChangeNavState value),
@@ -533,6 +560,7 @@ class _$_OnSearchChange
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -546,6 +574,7 @@ class _$_OnSearchChange
     Result setRef(_SetRef value),
     Result onSearchChange(_OnSearchChange value),
     Result loadHistory(_LoadHistory value),
+    Result loadWordSuggestions(_LoadWordSuggestions value),
     Result changeNavView(_ChangeNavView value),
     Result onSearchFinished(_OnSearchFinished value),
     Result changeState(_ChangeNavState value),
@@ -611,6 +640,7 @@ class _$_LoadHistory with DiagnosticableTreeMixin implements _LoadHistory {
     @required Result setRef(Reference ref),
     @required Result onSearchChange(String search),
     @required Result loadHistory(),
+    @required Result loadWordSuggestions(String search),
     @required Result changeNavView(NavViewState state),
     @required Result onSearchFinished(),
     @required Result changeState(NavState state),
@@ -619,6 +649,7 @@ class _$_LoadHistory with DiagnosticableTreeMixin implements _LoadHistory {
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -632,6 +663,7 @@ class _$_LoadHistory with DiagnosticableTreeMixin implements _LoadHistory {
     Result setRef(Reference ref),
     Result onSearchChange(String search),
     Result loadHistory(),
+    Result loadWordSuggestions(String search),
     Result changeNavView(NavViewState state),
     Result onSearchFinished(),
     Result changeState(NavState state),
@@ -651,6 +683,7 @@ class _$_LoadHistory with DiagnosticableTreeMixin implements _LoadHistory {
     @required Result setRef(_SetRef value),
     @required Result onSearchChange(_OnSearchChange value),
     @required Result loadHistory(_LoadHistory value),
+    @required Result loadWordSuggestions(_LoadWordSuggestions value),
     @required Result changeNavView(_ChangeNavView value),
     @required Result onSearchFinished(_OnSearchFinished value),
     @required Result changeState(_ChangeNavState value),
@@ -659,6 +692,7 @@ class _$_LoadHistory with DiagnosticableTreeMixin implements _LoadHistory {
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -672,6 +706,7 @@ class _$_LoadHistory with DiagnosticableTreeMixin implements _LoadHistory {
     Result setRef(_SetRef value),
     Result onSearchChange(_OnSearchChange value),
     Result loadHistory(_LoadHistory value),
+    Result loadWordSuggestions(_LoadWordSuggestions value),
     Result changeNavView(_ChangeNavView value),
     Result onSearchFinished(_OnSearchFinished value),
     Result changeState(_ChangeNavState value),
@@ -687,6 +722,165 @@ class _$_LoadHistory with DiagnosticableTreeMixin implements _LoadHistory {
 
 abstract class _LoadHistory implements NavEvent {
   const factory _LoadHistory() = _$_LoadHistory;
+}
+
+abstract class _$LoadWordSuggestionsCopyWith<$Res> {
+  factory _$LoadWordSuggestionsCopyWith(_LoadWordSuggestions value,
+          $Res Function(_LoadWordSuggestions) then) =
+      __$LoadWordSuggestionsCopyWithImpl<$Res>;
+  $Res call({String search});
+}
+
+class __$LoadWordSuggestionsCopyWithImpl<$Res>
+    extends _$NavEventCopyWithImpl<$Res>
+    implements _$LoadWordSuggestionsCopyWith<$Res> {
+  __$LoadWordSuggestionsCopyWithImpl(
+      _LoadWordSuggestions _value, $Res Function(_LoadWordSuggestions) _then)
+      : super(_value, (v) => _then(v as _LoadWordSuggestions));
+
+  @override
+  _LoadWordSuggestions get _value => super._value as _LoadWordSuggestions;
+
+  @override
+  $Res call({
+    Object search = freezed,
+  }) {
+    return _then(_LoadWordSuggestions(
+      search: search == freezed ? _value.search : search as String,
+    ));
+  }
+}
+
+class _$_LoadWordSuggestions
+    with DiagnosticableTreeMixin
+    implements _LoadWordSuggestions {
+  const _$_LoadWordSuggestions({this.search});
+
+  @override
+  final String search;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'NavEvent.loadWordSuggestions(search: $search)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'NavEvent.loadWordSuggestions'))
+      ..add(DiagnosticsProperty('search', search));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _LoadWordSuggestions &&
+            (identical(other.search, search) ||
+                const DeepCollectionEquality().equals(other.search, search)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^ const DeepCollectionEquality().hash(search);
+
+  @override
+  _$LoadWordSuggestionsCopyWith<_LoadWordSuggestions> get copyWith =>
+      __$LoadWordSuggestionsCopyWithImpl<_LoadWordSuggestions>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result changeTabIndex(int index),
+    @required Result setRef(Reference ref),
+    @required Result onSearchChange(String search),
+    @required Result loadHistory(),
+    @required Result loadWordSuggestions(String search),
+    @required Result changeNavView(NavViewState state),
+    @required Result onSearchFinished(),
+    @required Result changeState(NavState state),
+  }) {
+    assert(changeTabIndex != null);
+    assert(setRef != null);
+    assert(onSearchChange != null);
+    assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
+    assert(changeNavView != null);
+    assert(onSearchFinished != null);
+    assert(changeState != null);
+    return loadWordSuggestions(search);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result changeTabIndex(int index),
+    Result setRef(Reference ref),
+    Result onSearchChange(String search),
+    Result loadHistory(),
+    Result loadWordSuggestions(String search),
+    Result changeNavView(NavViewState state),
+    Result onSearchFinished(),
+    Result changeState(NavState state),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (loadWordSuggestions != null) {
+      return loadWordSuggestions(search);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result changeTabIndex(_ChangeIndex value),
+    @required Result setRef(_SetRef value),
+    @required Result onSearchChange(_OnSearchChange value),
+    @required Result loadHistory(_LoadHistory value),
+    @required Result loadWordSuggestions(_LoadWordSuggestions value),
+    @required Result changeNavView(_ChangeNavView value),
+    @required Result onSearchFinished(_OnSearchFinished value),
+    @required Result changeState(_ChangeNavState value),
+  }) {
+    assert(changeTabIndex != null);
+    assert(setRef != null);
+    assert(onSearchChange != null);
+    assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
+    assert(changeNavView != null);
+    assert(onSearchFinished != null);
+    assert(changeState != null);
+    return loadWordSuggestions(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result changeTabIndex(_ChangeIndex value),
+    Result setRef(_SetRef value),
+    Result onSearchChange(_OnSearchChange value),
+    Result loadHistory(_LoadHistory value),
+    Result loadWordSuggestions(_LoadWordSuggestions value),
+    Result changeNavView(_ChangeNavView value),
+    Result onSearchFinished(_OnSearchFinished value),
+    Result changeState(_ChangeNavState value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (loadWordSuggestions != null) {
+      return loadWordSuggestions(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _LoadWordSuggestions implements NavEvent {
+  const factory _LoadWordSuggestions({String search}) = _$_LoadWordSuggestions;
+
+  String get search;
+  _$LoadWordSuggestionsCopyWith<_LoadWordSuggestions> get copyWith;
 }
 
 abstract class _$ChangeNavViewCopyWith<$Res> {
@@ -757,6 +951,7 @@ class _$_ChangeNavView with DiagnosticableTreeMixin implements _ChangeNavView {
     @required Result setRef(Reference ref),
     @required Result onSearchChange(String search),
     @required Result loadHistory(),
+    @required Result loadWordSuggestions(String search),
     @required Result changeNavView(NavViewState state),
     @required Result onSearchFinished(),
     @required Result changeState(NavState state),
@@ -765,6 +960,7 @@ class _$_ChangeNavView with DiagnosticableTreeMixin implements _ChangeNavView {
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -778,6 +974,7 @@ class _$_ChangeNavView with DiagnosticableTreeMixin implements _ChangeNavView {
     Result setRef(Reference ref),
     Result onSearchChange(String search),
     Result loadHistory(),
+    Result loadWordSuggestions(String search),
     Result changeNavView(NavViewState state),
     Result onSearchFinished(),
     Result changeState(NavState state),
@@ -797,6 +994,7 @@ class _$_ChangeNavView with DiagnosticableTreeMixin implements _ChangeNavView {
     @required Result setRef(_SetRef value),
     @required Result onSearchChange(_OnSearchChange value),
     @required Result loadHistory(_LoadHistory value),
+    @required Result loadWordSuggestions(_LoadWordSuggestions value),
     @required Result changeNavView(_ChangeNavView value),
     @required Result onSearchFinished(_OnSearchFinished value),
     @required Result changeState(_ChangeNavState value),
@@ -805,6 +1003,7 @@ class _$_ChangeNavView with DiagnosticableTreeMixin implements _ChangeNavView {
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -818,6 +1017,7 @@ class _$_ChangeNavView with DiagnosticableTreeMixin implements _ChangeNavView {
     Result setRef(_SetRef value),
     Result onSearchChange(_OnSearchChange value),
     Result loadHistory(_LoadHistory value),
+    Result loadWordSuggestions(_LoadWordSuggestions value),
     Result changeNavView(_ChangeNavView value),
     Result onSearchFinished(_OnSearchFinished value),
     Result changeState(_ChangeNavState value),
@@ -885,6 +1085,7 @@ class _$_OnSearchFinished
     @required Result setRef(Reference ref),
     @required Result onSearchChange(String search),
     @required Result loadHistory(),
+    @required Result loadWordSuggestions(String search),
     @required Result changeNavView(NavViewState state),
     @required Result onSearchFinished(),
     @required Result changeState(NavState state),
@@ -893,6 +1094,7 @@ class _$_OnSearchFinished
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -906,6 +1108,7 @@ class _$_OnSearchFinished
     Result setRef(Reference ref),
     Result onSearchChange(String search),
     Result loadHistory(),
+    Result loadWordSuggestions(String search),
     Result changeNavView(NavViewState state),
     Result onSearchFinished(),
     Result changeState(NavState state),
@@ -925,6 +1128,7 @@ class _$_OnSearchFinished
     @required Result setRef(_SetRef value),
     @required Result onSearchChange(_OnSearchChange value),
     @required Result loadHistory(_LoadHistory value),
+    @required Result loadWordSuggestions(_LoadWordSuggestions value),
     @required Result changeNavView(_ChangeNavView value),
     @required Result onSearchFinished(_OnSearchFinished value),
     @required Result changeState(_ChangeNavState value),
@@ -933,6 +1137,7 @@ class _$_OnSearchFinished
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -946,6 +1151,7 @@ class _$_OnSearchFinished
     Result setRef(_SetRef value),
     Result onSearchChange(_OnSearchChange value),
     Result loadHistory(_LoadHistory value),
+    Result loadWordSuggestions(_LoadWordSuggestions value),
     Result changeNavView(_ChangeNavView value),
     Result onSearchFinished(_OnSearchFinished value),
     Result changeState(_ChangeNavState value),
@@ -1045,6 +1251,7 @@ class _$_ChangeNavState
     @required Result setRef(Reference ref),
     @required Result onSearchChange(String search),
     @required Result loadHistory(),
+    @required Result loadWordSuggestions(String search),
     @required Result changeNavView(NavViewState state),
     @required Result onSearchFinished(),
     @required Result changeState(NavState state),
@@ -1053,6 +1260,7 @@ class _$_ChangeNavState
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -1066,6 +1274,7 @@ class _$_ChangeNavState
     Result setRef(Reference ref),
     Result onSearchChange(String search),
     Result loadHistory(),
+    Result loadWordSuggestions(String search),
     Result changeNavView(NavViewState state),
     Result onSearchFinished(),
     Result changeState(NavState state),
@@ -1085,6 +1294,7 @@ class _$_ChangeNavState
     @required Result setRef(_SetRef value),
     @required Result onSearchChange(_OnSearchChange value),
     @required Result loadHistory(_LoadHistory value),
+    @required Result loadWordSuggestions(_LoadWordSuggestions value),
     @required Result changeNavView(_ChangeNavView value),
     @required Result onSearchFinished(_OnSearchFinished value),
     @required Result changeState(_ChangeNavState value),
@@ -1093,6 +1303,7 @@ class _$_ChangeNavState
     assert(setRef != null);
     assert(onSearchChange != null);
     assert(loadHistory != null);
+    assert(loadWordSuggestions != null);
     assert(changeNavView != null);
     assert(onSearchFinished != null);
     assert(changeState != null);
@@ -1106,6 +1317,7 @@ class _$_ChangeNavState
     Result setRef(_SetRef value),
     Result onSearchChange(_OnSearchChange value),
     Result loadHistory(_LoadHistory value),
+    Result loadWordSuggestions(_LoadWordSuggestions value),
     Result changeNavView(_ChangeNavView value),
     Result onSearchFinished(_OnSearchFinished value),
     Result changeState(_ChangeNavState value),

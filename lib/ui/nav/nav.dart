@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -59,19 +60,14 @@ class Nav extends StatefulWidget {
 class _NavState extends State<Nav> with TickerProviderStateMixin {
   TabController _tabController;
   TextEditingController _searchController;
+  Timer _debounce;
 
   NavBloc navBloc() => context.bloc<NavBloc>();
   PrefItemsBloc prefsBloc() => context.bloc<PrefItemsBloc>();
 
   @override
   void initState() {
-    _searchController = TextEditingController(text: '');
-
-    _searchController.addListener(() {
-      if (navBloc().state.search != _searchController.text) {
-        navBloc().add(NavEvent.onSearchChange(search: _searchController.text));
-      }
-    });
+    _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
     final nav2TapEnabled = (prefsBloc().state.items?.valueOfItemWithId(nav2Tap) ?? 0) != 0;
     final tabLength = nav2TapEnabled ? 2 : 3;
     _tabController = TabController(length: tabLength, vsync: this)
@@ -81,6 +77,21 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         }
       });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    super.dispose();
+  }
+
+  void _searchControllerListener() {
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(const Duration(milliseconds: 250), () {
+      if (navBloc().state.search != _searchController.text) {
+        navBloc().add(NavEvent.onSearchChange(search: _searchController.text));
+      }
+    });
   }
 
   void _changeTabController() {
@@ -109,32 +120,34 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     showModalBottomSheet<void>(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         context: context,
-        builder: (c) => ListView(
-              shrinkWrap: true,
-              children: [
-                // const Align(alignment: Alignment.topRight, child: CloseButton()),
-                ListTile(
-                  // leading: Icon(FeatherIcons.bookOpen),
-                  title: Text(
-                      navGridViewEnabled ? 'Show full name for books' : 'Show abbreviated books'),
-                  onTap: () {
-                    prefsBloc().add(PrefItemEvent.update(
-                        prefItem: PrefItem.from(items
-                            .itemWithId(navLayout)
-                            .copyWith(verse: navGridViewEnabled ? 0 : 1))));
-                    Navigator.of(context).maybePop();
-                  },
-                ),
-                ListTile(
-                  title: Text(nav2TapEnabled ? 'Show verse tab' : 'Hide verse tab'),
-                  onTap: () {
-                    prefsBloc().add(PrefItemEvent.update(
-                        prefItem: PrefItem.from(
-                            items.itemWithId(nav2Tap).copyWith(verse: nav2TapEnabled ? 0 : 1))));
-                    Navigator.of(context).maybePop();
-                  },
-                ),
-              ],
+        builder: (c) => SafeArea(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  // const Align(alignment: Alignment.topRight, child: CloseButton()),
+                  ListTile(
+                    // leading: Icon(FeatherIcons.bookOpen),
+                    title: Text(
+                        navGridViewEnabled ? 'Show full name for books' : 'Show abbreviated books'),
+                    onTap: () {
+                      prefsBloc().add(PrefItemEvent.update(
+                          prefItem: PrefItem.from(items
+                              .itemWithId(navLayout)
+                              .copyWith(verse: navGridViewEnabled ? 0 : 1))));
+                      Navigator.of(context).maybePop();
+                    },
+                  ),
+                  ListTile(
+                    title: Text(nav2TapEnabled ? 'Show verse tab' : 'Hide verse tab'),
+                    onTap: () {
+                      prefsBloc().add(PrefItemEvent.update(
+                          prefItem: PrefItem.from(
+                              items.itemWithId(nav2Tap).copyWith(verse: nav2TapEnabled ? 0 : 1))));
+                      Navigator.of(context).maybePop();
+                    },
+                  ),
+                ],
+              ),
             ));
   }
 
@@ -161,10 +174,14 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           },
           builder: (c, s) => Scaffold(
                 appBar: AppBar(
-                  title: TecSearchField(
-                      onSubmit: (s) => _onSubmit(),
-                      padding: const EdgeInsets.all(0),
-                      textEditingController: _searchController),
+                  elevation: 1,
+                  title: TextField(
+                      onEditingComplete: _onSubmit,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Search the Bible',
+                      ),
+                      controller: _searchController),
                   titleSpacing: 0,
                   actions: [
                     IconButton(
@@ -220,10 +237,6 @@ class _SearchSuggestionsView extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          for (final word in wordSuggestions)
-            ListTile(
-              title: Text(word),
-            ),
           for (final book in bookSuggestions)
             ListTile(
                 leading: const Icon(FeatherIcons.bookOpen),
@@ -231,6 +244,26 @@ class _SearchSuggestionsView extends StatelessWidget {
                 onTap: () {
                   bloc.add(NavEvent.onSearchChange(search: bible.nameOfBook(book)));
                 }),
+          for (final word in wordSuggestions)
+            ListTile(
+              leading: const Icon(Icons.search),
+              title: Text(word),
+              onTap: () {
+                final a = word;
+                var query = bloc.state.search;
+                if (' '.allMatches(query).length < 4 &&
+                    query.substring(query.length - 1, query.length) == ' ') {
+                  query += '$a ';
+                  bloc.add(NavEvent.onSearchChange(search: query));
+                } else {
+                  final words = query.split(' ')..last = a;
+                  query = words.join(' ');
+                  bloc
+                    ..add(NavEvent.onSearchChange(search: query))
+                    ..add(const NavEvent.onSearchFinished());
+                }
+              },
+            ),
         ],
       ),
     );
