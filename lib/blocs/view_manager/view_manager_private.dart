@@ -20,7 +20,7 @@ class _VMViewStack extends StatelessWidget {
       // this is a phone or small app window...
       // only allow 2 views
       final viewPadding = MediaQuery.of(context).viewPadding;
-      _minSize = (maxSize - viewPadding.top - viewPadding.bottom) / 2;
+      _minSize = math.max((maxSize - viewPadding.top - viewPadding.bottom) / 2, 272);
     }
     else {
       // larger window or tablet...
