@@ -52,8 +52,6 @@ class ViewManager {
     BuilderWithViewState titleBuilder,
     ActionsBuilderWithViewState actionsBuilder,
     DefaultDataBuilder defaultDataBuilder,
-    ViewSizeFunc minWidth,
-    ViewSizeFunc minHeight,
     IconData icon,
   }) {
     assert(tec.isNotNullOrEmpty(key) && (scaffoldBuilder != null || bodyBuilder != null));
@@ -65,8 +63,6 @@ class ViewManager {
       titleBuilder,
       actionsBuilder,
       defaultDataBuilder,
-      minWidth,
-      minHeight,
       icon,
     );
   }
@@ -96,12 +92,6 @@ class ViewManager {
 
   List<Widget> _buildViewActions(BuildContext context, ViewState state, Size size) =>
       (_types[state.type]?.actionsBuilder ?? _defaultActionsBuilder)(context, state, size);
-
-  double _minWidthForType(String type, BoxConstraints constraints) =>
-      (_types[type]?.minWidth ?? _defaultMinWidth)(constraints);
-
-  double _minHeightForType(String type, BoxConstraints constraints) =>
-      (_types[type]?.minHeight ?? _defaultMinHeight)(constraints);
 }
 
 //
@@ -115,8 +105,6 @@ class _ViewTypeAPI {
   final BuilderWithViewState titleBuilder;
   final ActionsBuilderWithViewState actionsBuilder;
   final DefaultDataBuilder defaultDataBuilder;
-  final ViewSizeFunc minWidth;
-  final ViewSizeFunc minHeight;
   final IconData icon;
 
   const _ViewTypeAPI(
@@ -126,15 +114,9 @@ class _ViewTypeAPI {
     this.titleBuilder,
     this.actionsBuilder,
     this.defaultDataBuilder,
-    this.minWidth,
-    this.minHeight,
     this.icon,
   );
 }
-
-const _iPhoneSEHeight = 568.0;
-var _minSize = (_iPhoneSEHeight - 44.0) / 2;
-const _maxMinWidth = 400.0;
 
 Widget _defaultScaffoldBuilder(BuildContext context, ViewState state, Size size) => Scaffold(
       appBar: MinHeightAppBar(
@@ -154,14 +136,6 @@ Widget _defaultScaffoldBuilder(BuildContext context, ViewState state, Size size)
     );
 
 Widget _defaultBodyBuilder(BuildContext context, ViewState state, Size size) => Container();
-
-double _defaultMinWidth(BoxConstraints constraints) => math.max(_minSize,
-    math.min(_maxMinWidth, ((constraints ?? _defaultConstraints).maxWidth / 3).roundToDouble()));
-
-double _defaultMinHeight(BoxConstraints constraints) =>
-    math.max(_minSize, ((constraints ?? _defaultConstraints).maxHeight / 3).roundToDouble());
-
-const BoxConstraints _defaultConstraints = BoxConstraints(maxWidth: 320, maxHeight: 480);
 
 List<Widget> _defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   return [

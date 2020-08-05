@@ -183,9 +183,9 @@ List<List<ViewState>> _buildRows(
 
   bloc?._isFull = isFull ||
       (rows.isNotEmpty &&
-          rows.last.width(constraints, size) + _defaultViewState.width(constraints, size) >
+          rows.last.width(constraints, size) + _defaultMinWidth(constraints) >
               constraints.maxWidth &&
-          rows.height(constraints, size) + _defaultViewState.height(constraints, size) >
+          rows.height(constraints, size) + _defaultMinHeight(constraints) >
               constraints.maxHeight);
 
   // tec.dmPrint('ViewManagerBloc.isFull == ${bloc?.isFull}');
@@ -193,14 +193,43 @@ List<List<ViewState>> _buildRows(
   return rows;
 }
 
-final _defaultViewState = ViewState(uid: 0, type: 'default');
+const _iPhoneSEHeight = 568.0;
+var _minSize = (_iPhoneSEHeight - 20.0) / 2; // 274
+
+const BoxConstraints _defaultConstraints = BoxConstraints(maxWidth: 320, maxHeight: 480);
+
+///
+/// Returns the minimum width for a view that is never less than _minSize,
+/// otherwise it is the width that will fit at least three columns, or more
+/// if each column has a width of at least 400.
+///
+double _defaultMinWidth(BoxConstraints constraints) => math.max(
+    // Make sure each column's width is not less than _minSize.
+    _minSize,
+    math.min(
+      // Allow more than three columns if each column's width is >= 400.0.
+      400.0,
+      // The maximum width that will allow three columns.
+      ((constraints ?? _defaultConstraints).maxWidth / 3.0).floor().toDouble(),
+    ));
+
+///
+/// Returns the minimum height for a view that is never less than _minSize and
+/// never greater than the height that allows for more than three rows.
+///
+double _defaultMinHeight(BoxConstraints constraints) => math.max(
+      // Make sure each row's height is not less than _minSize.
+      _minSize,
+      // The maximum height that will allow three rows.
+      ((constraints ?? _defaultConstraints).maxHeight / 3.0).floor().toDouble(),
+    );
 
 ///
 /// ViewState extensions.
 ///
 extension _ExtOnViewState on ViewState {
-  double minWidth(BoxConstraints c) => ViewManager.shared._minWidthForType(type, c);
-  double minHeight(BoxConstraints c) => ViewManager.shared._minHeightForType(type, c);
+  double minWidth(BoxConstraints c) => _defaultMinWidth(c);
+  double minHeight(BoxConstraints c) => _defaultMinHeight(c);
   double idealWidth(BoxConstraints c) => math.max(preferredWidth ?? 0, minWidth(c));
   double idealHeight(BoxConstraints c) => math.max(preferredHeight ?? 0, minHeight(c));
   double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
