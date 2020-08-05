@@ -10,9 +10,7 @@ class BibleChapterState {
   BibleChapterState(this.bibleId, this.bcv, this.page, {String title}) {
     if (title == null) {
       final bible = VolumesRepository.shared.bibleWithId(bibleId);
-      final abbreviation = (bible.abbreviation == null) ? '' : ' ${bible.abbreviation}';
-      final title = bible.titleWithHref('${bcv.book}/${bcv.chapter}');
-      this.title = '$title$abbreviation';
+      this.title = bible.titleWithHref('${bcv.book}/${bcv.chapter}');
     } else {
       this.title = title;
     }
@@ -36,10 +34,9 @@ class BibleChapterState {
       bibleId = tec.as<int>(json['vid']);
       bcv = BookChapterVerse.fromJson(json['bcv']);
       page = tec.as<int>(json['page']);
-      title = tec.as<String>(json['title']);
     }
 
-    return BibleChapterState(bibleId, bcv, page, title: title);
+    return BibleChapterState(bibleId, bcv, page);
   }
 
   Map<String, dynamic> toJson() {
