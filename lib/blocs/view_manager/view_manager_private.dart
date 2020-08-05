@@ -11,28 +11,21 @@ class _VMViewStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double height, checkHeight;
-
     // at this point orientation variable is correct, however, the size
     // may not have been adjusted yet..
-    height = math.max(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
+    final maxSize = math.max(constraints.maxWidth, constraints.maxHeight);
 
-    if (MediaQuery.of(context).orientation == Orientation.portrait) {
-      checkHeight = 1024.0;
+    // maxSize includes status bar use 1004 instead of 1024
+    if (maxSize < 1004.0) {
+      // this is a phone or small app window...
+      // only allow 2 views
+      final viewPadding = MediaQuery.of(context).viewPadding;
+      _minSize = (maxSize - viewPadding.top - viewPadding.bottom) / 2;
     }
     else {
-      checkHeight = 768.0;
+      // larger window or tablet...
+      _minSize = 300;
     }
-
-    if (height < checkHeight) {
-      // this is a phone...
-      _minSize = (height - 44) / 2;
-    }
-    else {
-      // old default...
-      _minSize = (_iPhoneSEHeight - 44.0) / 2;
-    }
-
 
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     assert(bloc != null);
