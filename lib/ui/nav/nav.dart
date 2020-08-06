@@ -1,17 +1,18 @@
 import 'dart:async';
-import 'dart:collection';
 
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/nav_bloc.dart';
+import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
+import 'bcv_tab.dart';
+import 'search_results_view.dart';
+import 'search_suggestions.dart';
 
 const tabColors = [Colors.blue, Colors.orange, Colors.green];
 
@@ -87,7 +88,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   void _searchControllerListener() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
-    _debounce = Timer(const Duration(milliseconds: 250), () {
+    _debounce = Timer(const Duration(milliseconds: 600), () {
       if (navBloc().state.search != _searchController.text) {
         navBloc().add(NavEvent.onSearchChange(search: _searchController.text));
       }
@@ -108,9 +109,14 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   void _onSubmit() {
-    navBloc().add(NavEvent.onSearchChange(search: _searchController.text));
-    Navigator.of(context).maybePop(navBloc().state.ref);
+    FocusScope.of(context).unfocus();
+    navBloc()
+      ..add(NavEvent.onSearchChange(search: _searchController.text))
+      ..add(const NavEvent.onSearchFinished());
+    // Navigator.of(context).maybePop(navBloc().state.ref);
   }
+
+  void _translation() {}
 
   void _moreButton() {
     final prefState = prefsBloc()?.state;
@@ -124,9 +130,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  // const Align(alignment: Alignment.topRight, child: CloseButton()),
                   ListTile(
-                    // leading: Icon(FeatherIcons.bookOpen),
                     title: Text(
                         navGridViewEnabled ? 'Show full name for books' : 'Show abbreviated books'),
                     onTap: () {
@@ -153,10 +157,22 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final prefState = prefsBloc()?.state;
-    final items = prefState?.items ?? [];
-    final navGridViewEnabled = (items.valueOfItemWithId(navLayout) ?? 0) != 0;
-    final nav2TapEnabled = (items.valueOfItemWithId(nav2Tap) ?? 0) != 0;
+    Widget body(NavViewState navViewState) {
+      switch (navViewState) {
+        case NavViewState.bcvTabs:
+          return BCVTabView(
+            listener: (c, s) => _changeTabController(),
+            tabController: _tabController,
+          );
+        case NavViewState.searchSuggestions:
+          return SearchSuggestionsView();
+        case NavViewState.searchResults:
+          return BlocProvider(
+              create: (_) => SearchBloc()..add(SearchEvent.request(search: navBloc().state.search)),
+              child: SearchResultsView());
+      }
+      return Container();
+    }
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -174,313 +190,37 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           },
           builder: (c, s) => Scaffold(
                 appBar: AppBar(
-                  elevation: 1,
+                  elevation: 2,
                   title: TextField(
                       onEditingComplete: _onSubmit,
                       decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Search the Bible',
-                      ),
+                          border: InputBorder.none,
+                          hintText: 'Enter references or keywords',
+                          hintStyle: TextStyle(fontStyle: FontStyle.italic)),
                       controller: _searchController),
                   titleSpacing: 0,
+                  leading: s.navViewState == NavViewState.bcvTabs
+                      ? const CloseButton()
+                      : BackButton(
+                          onPressed: () {
+                            c.bloc<NavBloc>()
+                              ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
+                              ..add(const NavEvent.onSearchChange(search: ''));
+                          },
+                        ),
                   actions: [
                     IconButton(
                       icon: const Icon(Icons.history),
-                      onPressed: () => navBloc().add(const NavEvent.loadHistory()),
+                      onPressed: () => c.bloc<NavBloc>().add(const NavEvent.loadHistory()),
                     ),
-                    IconButton(icon: const Icon(Icons.more_horiz), onPressed: _moreButton)
+                    if (s.navViewState == NavViewState.bcvTabs)
+                      IconButton(icon: const Icon(Icons.more_horiz), onPressed: _moreButton),
+                    if (s.navViewState == NavViewState.searchResults)
+                      IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
                   ],
                 ),
-                body: s.navViewState == NavViewState.bcvTabs
-                    ? BlocListener<PrefItemsBloc, PrefItems>(
-                        listener: (c, s) => _changeTabController(),
-                        child: SafeArea(
-                            child: Column(
-                          children: [
-                            const SizedBox(height: 5),
-                            TabBar(
-                              indicatorSize: TabBarIndicatorSize.label,
-                              indicator: BubbleTabIndicator(
-                                  color: tabColors[navBloc().state.tabIndex].withOpacity(0.5)),
-                              controller: _tabController,
-                              labelColor: Theme.of(context).textColor.withOpacity(0.7),
-                              unselectedLabelColor: Theme.of(context).textColor.withOpacity(0.7),
-                              tabs: [
-                                const Tab(text: 'BOOK'),
-                                const Tab(text: 'CHAPTER'),
-                                if (!nav2TapEnabled) const Tab(text: 'VERSE')
-                              ],
-                            ),
-                            Expanded(
-                              child: TabBarView(controller: _tabController, children: [
-                                _BookView(navGridViewEnabled: navGridViewEnabled),
-                                _ChapterView(nav2TapEnabled: nav2TapEnabled),
-                                if (!nav2TapEnabled) _VerseView(),
-                              ]),
-                            ),
-                          ],
-                        )))
-                    : _SearchSuggestionsView(),
+                body: body(s.navViewState),
               )),
-    );
-  }
-}
-
-class _SearchSuggestionsView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    // ignore: close_sinks
-    final bloc = context.bloc<NavBloc>();
-    final bible = VolumesRepository.shared.bibleWithId(51);
-    final wordSuggestions = bloc.state.wordSuggestions ?? [];
-    final bookSuggestions = bloc.state.bookSuggestions ?? [];
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          for (final book in bookSuggestions)
-            ListTile(
-                leading: const Icon(FeatherIcons.bookOpen),
-                title: Text(bible.nameOfBook(book)),
-                onTap: () {
-                  bloc.add(NavEvent.onSearchChange(search: bible.nameOfBook(book)));
-                }),
-          for (final word in wordSuggestions)
-            ListTile(
-              leading: const Icon(Icons.search),
-              title: Text(word),
-              onTap: () {
-                final a = word;
-                var query = bloc.state.search;
-                if (' '.allMatches(query).length < 4 &&
-                    query.substring(query.length - 1, query.length) == ' ') {
-                  query += '$a ';
-                  bloc.add(NavEvent.onSearchChange(search: query));
-                } else {
-                  final words = query.split(' ')..last = a;
-                  query = words.join(' ');
-                  bloc
-                    ..add(NavEvent.onSearchChange(search: query))
-                    ..add(const NavEvent.onSearchFinished());
-                }
-              },
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ChapterView extends StatelessWidget {
-  final bool nav2TapEnabled;
-  const _ChapterView({this.nav2TapEnabled});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final textColor =
-        isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
-    final bible = VolumesRepository.shared.bibleWithId(51);
-    final isLargeScreen = MediaQuery.of(context).size.width > 500;
-    final wideScreen = MediaQuery.of(context).size.width > 400;
-
-    final ref = context.bloc<NavBloc>().state.ref;
-    final chapters = bible.chaptersIn(book: ref.book);
-
-    return Column(
-      children: [
-        // Align(
-        //   alignment: Alignment.topRight,
-        //   child: Switch.adaptive(value: twoTap, onChanged: (b) {}),
-        // ),
-        Expanded(
-          child: GridView.count(
-            crossAxisCount: isLargeScreen || wideScreen ? 6 : 5,
-            shrinkWrap: true,
-            childAspectRatio: isLargeScreen ? 3 : 2,
-            padding: const EdgeInsets.all(15),
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            children: [
-              for (var i = 1; i <= chapters; i++) ...[
-                FlatButton(
-                  padding: const EdgeInsets.all(0),
-                  shape: const StadiumBorder(),
-                  color: Colors.grey.withOpacity(0.1),
-                  textColor: ref.chapter == i ? tabColors[1] : textColor,
-                  onPressed: () {
-                    if (nav2TapEnabled) {
-                      Navigator.of(context).maybePop(ref.copyWith(chapter: i));
-                    } else {
-                      context
-                          .bloc<NavBloc>()
-                          .selectChapter(ref.book, bible.nameOfBook(ref.book), i);
-                    }
-                  },
-                  child: Text(i.toString()),
-                ),
-              ]
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _VerseView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final textColor =
-        isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
-    final bible = VolumesRepository.shared.bibleWithId(51);
-    final isLargeScreen = MediaQuery.of(context).size.width > 500;
-    final wideScreen = MediaQuery.of(context).size.width > 400;
-
-    final ref = context.bloc<NavBloc>().state.ref;
-    final book = ref.book;
-    final chapter = ref.chapter;
-    final verses = bible.versesIn(book: book, chapter: chapter);
-
-    return GridView.count(
-      crossAxisCount: isLargeScreen || wideScreen ? 6 : 5,
-      shrinkWrap: true,
-      childAspectRatio: isLargeScreen ? 3 : 2,
-      padding: const EdgeInsets.all(15),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      children: [
-        for (var i = 1; i <= verses; i++) ...[
-          FlatButton(
-            padding: const EdgeInsets.all(0),
-            shape: const StadiumBorder(),
-            color: Colors.grey.withOpacity(0.1),
-            textColor: ref.verse == i ? tabColors[2] : textColor,
-            onPressed: () {
-              // TODO(abby): manually assigning end verse...probably shouldn't do this
-              final updatedRef = ref.copyWith(verse: i, endVerse: i);
-              context.bloc<NavBloc>().add(NavEvent.setRef(ref: updatedRef));
-              Navigator.of(context).maybePop(updatedRef);
-            },
-            child: Text(i.toString()),
-          ),
-        ]
-      ],
-    );
-  }
-}
-
-class _BookView extends StatelessWidget {
-  final bool navGridViewEnabled;
-  const _BookView({this.navGridViewEnabled});
-
-  @override
-  Widget build(BuildContext context) {
-    final bible = VolumesRepository.shared.bibleWithId(51);
-    // ignore: prefer_collection_literals
-    final bookNames = LinkedHashMap<int, String>();
-    var book = bible.firstBook;
-    while (book != 0) {
-      bookNames[book] = bible.shortNameOfBook(book);
-      final nextBook = bible.bookAfter(book);
-      book = (nextBook == book ? 0 : nextBook);
-    }
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final textColor =
-        isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
-
-    final ot = bookNames.keys.takeWhile(bible.isOTBook).toList();
-    final nt = bookNames.keys.where(bible.isNTBook).toList();
-    final ref = context.bloc<NavBloc>().state.ref;
-    final smallScreen = MediaQuery.of(context).size.height <= 568;
-
-    Widget gridView(List<int> books) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: GridView.extent(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          maxCrossAxisExtent: 50,
-          childAspectRatio: smallScreen ? 1.8 : 1.5,
-          crossAxisSpacing: smallScreen ? 5 : 10,
-          mainAxisSpacing: smallScreen ? 5 : 10,
-          children: [
-            for (final book in books) ...[
-              ButtonTheme(
-                minWidth: 50,
-                child: FlatButton(
-                  padding: const EdgeInsets.all(0),
-                  shape: const StadiumBorder(),
-                  color: Colors.grey.withOpacity(0.1),
-                  textColor: ref.book == book ? tabColors[0] : textColor,
-                  onPressed: () => context.bloc<NavBloc>().selectBook(book, bible.nameOfBook(book)),
-                  child: Text(
-                    bookNames[book],
-                  ),
-                ),
-              ),
-            ]
-          ],
-        ));
-
-    // Widget wrap(List<int> books) => Padding(
-    //     padding: const EdgeInsets.symmetric(horizontal: 5),
-    //     child: Wrap(spacing: 2, children: [
-    //       for (final book in books) ...[
-    //         ButtonTheme(
-    //           minWidth: 50,
-    //           child: FlatButton(
-    //             padding: const EdgeInsets.all(0),
-    //             shape: const StadiumBorder(),
-    //             color: Colors.grey.withOpacity(0.1),
-    //             textColor: ref.book == book ? tabColors[0] : textColor,
-    //             onPressed: () => context.bloc<NavBloc>().selectBook(book, bible.nameOfBook(book)),
-    //             child: Text(
-    //               bookNames[book],
-    //             ),
-    //           ),
-    //         ),
-    //       ]
-    //     ]));
-
-    Widget list(List<int> books) => ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: books.length,
-        separatorBuilder: (c, i) => const Divider(
-              height: 1,
-            ),
-        itemBuilder: (c, i) => ListTile(
-              onTap: () => c.bloc<NavBloc>().selectBook(books[i], bible.nameOfBook(books[i])),
-              title: Text(
-                bible.nameOfBook(books[i]),
-                textAlign: TextAlign.left,
-                style: TextStyle(color: ref.book == books[i] ? tabColors[0] : textColor),
-              ),
-            ));
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Container(
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-              child: Text(
-                'OLD TESTAMENT',
-                style: Theme.of(context).textTheme.caption,
-              )),
-          if (navGridViewEnabled) gridView(ot) else list(ot),
-          const Divider(color: Colors.transparent),
-          Container(
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-              child: Text(
-                'NEW TESTAMENT',
-                style: Theme.of(context).textTheme.caption,
-              )),
-          if (navGridViewEnabled) gridView(nt) else list(nt),
-          const Divider(color: Colors.transparent),
-        ],
-      ),
     );
   }
 }

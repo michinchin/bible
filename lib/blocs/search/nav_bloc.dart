@@ -1,8 +1,9 @@
-import 'package:bible/models/autocomplete.dart';
-import 'package:flutter/foundation.dart';
-import 'package:tec_volumes/tec_volumes.dart';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tec_volumes/tec_volumes.dart';
+
+import '../../models/autocomplete.dart';
 
 part 'nav_bloc.freezed.dart';
 
@@ -74,6 +75,9 @@ class NavBloc extends Bloc<NavEvent, NavState> {
     final bible = VolumesRepository.shared.bibleWithId(state.ref.volume);
     final lastChar = s.isNotEmpty ? s[s.length - 1] : null;
     final selectedBook = bible.nameOfBook(state.ref.book);
+
+    // TODO(abby): if the search entered is wrong (Micah 10) then will not show view correctly
+    // for books with just 1 chapter, skip chapter view
 
     var currState = state;
 

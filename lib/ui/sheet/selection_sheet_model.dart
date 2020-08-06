@@ -12,10 +12,10 @@ import 'package:url_launcher/url_launcher.dart' as launcher;
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
 import '../../models/compare_results.dart';
 import '../../models/shared_types.dart';
-import '../../models/verses.dart';
 import 'compare_verse.dart';
 import 'snap_sheet.dart';
 

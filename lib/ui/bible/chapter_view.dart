@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:bible/ui/library/library.dart';
-import 'package:bible/ui/library/volumes_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +20,8 @@ import '../../models/app_settings.dart';
 import '../../models/bible_chapter_state.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
+import '../library/library.dart';
+import '../library/volumes_bloc.dart';
 import '../misc/view_actions.dart';
 import '../nav/nav.dart';
 import 'chapter_view_model.dart';
