@@ -12,6 +12,7 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/bible_chapter_state.dart';
 import '../bible/chapter_view.dart';
 import '../library/library.dart';
+import '../note/note_view.dart';
 
 Future<void> showWindowDialog({BuildContext context, Widget Function(BuildContext) builder}) =>
     showDialog<void>(
@@ -58,8 +59,8 @@ class WindowManager extends StatelessWidget {
               ..._generateOffScreenItems(context, state.uid)
             ],
             _titleDivider(context, 'New'),
-            ..._generateAddMenuItems(context, state.uid),
-            _menuItem(context, FeatherIcons.bookOpen, 'Translation', () async {
+            //...generateAddMenuItems(context, state.uid),
+            _menuItem(context, FeatherIcons.book, 'Bible', () async {
               final bibleId = await selectVolume(context,
                   title: 'Select Bible Translation',
                   filter: const VolumesFilter(
@@ -82,6 +83,7 @@ class WindowManager extends StatelessWidget {
               // showWindowDialog(
               //     context: context, builder: (c) => BibleTranslationSelection(bloc, state));
             }),
+            _menuItemForType(noteViewType, context: context, viewUid: state.uid),
             if ((bloc?.state?.views?.length ?? 0) > 1) ...[
               const Divider(),
               _menuItem(context, Icons.close, 'Close View', () {
@@ -154,9 +156,8 @@ class WindowManager extends StatelessWidget {
     return items;
   }
 
-  Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
+  Iterable<Widget> generateAddMenuItems(BuildContext context, int viewUid) {
     // ignore: close_sinks
-    final bloc = context.bloc<ViewManagerBloc>();
     final vm = ViewManager.shared;
     return vm.types.map<Widget>((type) {
       final title = vm.titleForType(type);
@@ -164,15 +165,23 @@ class WindowManager extends StatelessWidget {
         // null titles are views that cannot be created from the menu
         return Container();
       }
+      return _menuItemForType(type, context: context, viewUid: viewUid);
+    });
+  }
 
-      return _menuItem(context, vm.iconForType(type), '${vm.titleForType(type)}', () {
-        Navigator.of(context).maybePop();
-        final position = bloc?.indexOfView(viewUid) ?? -1;
-        bloc?.add(ViewManagerEvent.add(
-            type: type,
-            data: vm.dataForType(type),
-            position: position == -1 ? null : position + 1));
-      });
+  Widget _menuItemForType(
+    String type, {
+    @required BuildContext context,
+    @required int viewUid,
+  }) {
+    assert(tec.isNotNullOrEmpty(type) && context != null && viewUid != null);
+    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+    final vm = ViewManager.shared;
+    return _menuItem(context, vm.iconForType(type), '${vm.titleForType(type)}', () {
+      Navigator.of(context).maybePop();
+      final position = bloc?.indexOfView(viewUid) ?? -1;
+      bloc?.add(ViewManagerEvent.add(
+          type: type, data: vm.dataForType(type), position: position == -1 ? null : position + 1));
     });
   }
 
