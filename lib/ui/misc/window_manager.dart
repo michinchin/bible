@@ -61,6 +61,7 @@ class WindowManager extends StatelessWidget {
             ..._generateAddMenuItems(context, state.uid),
             _menuItem(context, FeatherIcons.bookOpen, 'Translation', () async {
               final bibleId = await selectVolume(context,
+                  title: 'Select Bible Translation',
                   filter: const VolumesFilter(
                     volumeType: VolumeType.bible,
                   ));

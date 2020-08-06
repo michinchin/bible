@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -18,59 +19,132 @@ import 'volumes_filter_sheet.dart';
 export 'volumes_bloc.dart' show VolumesFilter;
 
 void showLibrary(BuildContext context) {
-  Navigator.of(context, rootNavigator: true)
-      .push<void>(MaterialPageRoute(builder: (context) => _LibraryNavigator()));
-}
-
-Future<int> selectVolume(BuildContext context, {VolumesFilter filter, String title}) {
-  // final originalContext = context;
-  return Navigator.of(context, rootNavigator: true).push<int>(
+  Navigator.of(context, rootNavigator: true).push<void>(
     MaterialPageRoute(
-      builder: (context) => Navigator(
-        onGenerateRoute: (settings) => MaterialPageRoute<int>(
-          builder: (context) {
-            return Theme(
-              data: Theme.of(context).copyWith(appBarTheme: appBarThemeWithContext(context)),
-              child: Scaffold(
-                appBar: MinHeightAppBar(
-                  appBar: AppBar(
-                    leading: BackButton(
-                        onPressed: () => Navigator.of(context, rootNavigator: true).maybePop()),
-                    title: tec.isNullOrEmpty(title) ? null : TecText(title),
-                  ),
-                ),
-                body: _VolumesView(
-                  type: _ViewType.store,
-                  filter: filter,
-                  onTapVolume: (id) {
-                    Navigator.of(context, rootNavigator: true).maybePop<int>(id);
-                  },
-                ),
-              ),
-            );
-          },
-        ),
+      fullscreenDialog: true,
+      builder: (context) => _TabbedLibraryScreen(
+        closeLibrary: () => Navigator.of(context, rootNavigator: true).maybePop(),
       ),
     ),
   );
 }
 
-class _LibraryNavigator extends StatelessWidget {
+Future<int> selectVolume(
+  BuildContext context, {
+  String title,
+  VolumesFilter filter,
+  int selectedVolume,
+  bool scrollToSelectedVolume = true,
+}) {
+  return Navigator.of(context, rootNavigator: true).push<int>(
+    MaterialPageRoute(
+      fullscreenDialog: true,
+      builder: (context) => _LibraryScreen(title: title, filter: filter),
+    ),
+  );
+}
+
+Future<List<int>> selectVolumes(
+  BuildContext context, {
+  String title,
+  VolumesFilter filter,
+  Iterable<int> selectedVolumes,
+  bool scrollToSelectedVolumes = true,
+}) {
+  return Navigator.of(context, rootNavigator: true).push<List<int>>(
+    MaterialPageRoute(
+      fullscreenDialog: true,
+      builder: (context) => _LibraryScreen(
+        title: title,
+        filter: filter,
+        selectedVolumes: selectedVolumes,
+        scrollToSelectedVolumes: scrollToSelectedVolumes,
+        allowMultipleSelections: true,
+      ),
+    ),
+  );
+}
+
+class _LibraryScreen extends StatefulWidget {
+  final String title;
+  final VolumesFilter filter;
+  final Iterable<int> selectedVolumes;
+  final bool scrollToSelectedVolumes;
+  final bool allowMultipleSelections;
+
+  const _LibraryScreen({
+    Key key,
+    this.title,
+    this.filter,
+    this.selectedVolumes,
+    this.scrollToSelectedVolumes = true,
+    this.allowMultipleSelections = false,
+  }) : super(key: key);
+
+  @override
+  _LibraryScreenState createState() => _LibraryScreenState();
+}
+
+class _LibraryScreenState extends State<_LibraryScreen> {
+  final _selectedVolumes = <int>{};
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.selectedVolumes != null) _selectedVolumes.addAll(widget.selectedVolumes);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      onGenerateRoute: (settings) => MaterialPageRoute<void>(
-          builder: (context) => _LibraryScreen(
-              closeLibrary: () => Navigator.of(context, rootNavigator: true).maybePop()),
-          settings: settings),
+    return Theme(
+      data: Theme.of(context).copyWith(appBarTheme: appBarThemeWithContext(context)),
+      child: Scaffold(
+        appBar: MinHeightAppBar(
+          appBar: AppBar(
+            leading:
+                CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop()),
+            title: tec.isNullOrEmpty(widget.title) ? null : TecText(widget.title),
+            actions: !widget.allowMultipleSelections
+                ? null
+                : [
+                    CupertinoButton(
+                      padding: const EdgeInsets.only(top: 0, bottom: 0, right: 16.0),
+                      child: TecText(
+                        'Done',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headline6
+                            .copyWith(color: Theme.of(context).accentColor),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context, rootNavigator: true)
+                            .maybePop<List<int>>(_selectedVolumes.toList());
+                      },
+                    ),
+                  ],
+          ),
+        ),
+        body: _VolumesView(
+          type: _ViewType.store,
+          filter: widget.filter,
+          selectedVolumes: _selectedVolumes,
+          scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
+          allowMultipleSelections: widget.allowMultipleSelections,
+          onTapVolume: widget.allowMultipleSelections
+              ? null
+              : (id) {
+                  Navigator.of(context, rootNavigator: true).maybePop<int>(id);
+                },
+        ),
+      ),
     );
   }
 }
 
-class _LibraryScreen extends StatelessWidget {
+class _TabbedLibraryScreen extends StatelessWidget {
   final VoidCallback closeLibrary;
 
-  const _LibraryScreen({Key key, this.closeLibrary}) : super(key: key);
+  const _TabbedLibraryScreen({Key key, this.closeLibrary}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +173,8 @@ class _LibraryScreen extends StatelessWidget {
               child: Scaffold(
                 appBar: MinHeightAppBar(
                   appBar: AppBar(
-                    leading: BackButton(onPressed: closeLibrary),
+                    leading: CloseButton(onPressed: closeLibrary),
+                    // leading: BackButton(onPressed: closeLibrary),
                     title: const Text('Library'),
                     bottom: TabBar(tabs: tabs),
                   ),
@@ -121,13 +196,21 @@ typedef _TappedVolumeFunc = void Function(int volume);
 class _VolumesView extends StatelessWidget {
   final _ViewType type;
   final VolumesFilter filter;
+  final Set<int> selectedVolumes;
+  final bool scrollToSelectedVolumes;
+  final bool allowMultipleSelections;
   final _TappedVolumeFunc onTapVolume;
+  final VoidCallback onDone;
 
   const _VolumesView({
     Key key,
     this.type,
     this.filter,
+    this.selectedVolumes,
+    this.scrollToSelectedVolumes = true,
+    this.allowMultipleSelections = false,
     this.onTapVolume,
+    this.onDone,
   }) : super(key: key);
 
   VolumesFilter _filterForType(_ViewType type) {
@@ -150,7 +233,14 @@ class _VolumesView extends StatelessWidget {
         defaultFilter: filter ?? _filterForType(type),
       )..refresh(),
       child: BlocBuilder<VolumesBloc, VolumesState>(
-        builder: (context, state) => _VolumesList(type: type, onTapVolume: onTapVolume),
+        builder: (context, state) => _VolumesList(
+          type: type,
+          selectedVolumes: selectedVolumes,
+          scrollToSelectedVolumes: scrollToSelectedVolumes,
+          allowMultipleSelections: allowMultipleSelections,
+          onTapVolume: onTapVolume,
+          onDone: onDone,
+        ),
       ),
     );
   }
@@ -158,9 +248,21 @@ class _VolumesView extends StatelessWidget {
 
 class _VolumesList extends StatefulWidget {
   final _ViewType type;
+  final Set<int> selectedVolumes;
+  final bool scrollToSelectedVolumes;
+  final bool allowMultipleSelections;
   final _TappedVolumeFunc onTapVolume;
+  final VoidCallback onDone;
 
-  const _VolumesList({Key key, this.type, this.onTapVolume}) : super(key: key);
+  const _VolumesList({
+    Key key,
+    this.type,
+    this.selectedVolumes,
+    this.scrollToSelectedVolumes = true,
+    this.allowMultipleSelections = false,
+    this.onTapVolume,
+    this.onDone,
+  }) : super(key: key);
 
   @override
   _VolumesListState createState() => _VolumesListState();
@@ -168,12 +270,14 @@ class _VolumesList extends StatefulWidget {
 
 class _VolumesListState extends State<_VolumesList> {
   TextEditingController _textEditingController;
+  ItemScrollController _volumeScrollController;
   Timer _debounce;
 
   @override
   void initState() {
     super.initState();
     _textEditingController = TextEditingController()..addListener(_searchListener);
+    _volumeScrollController = ItemScrollController();
   }
 
   @override
@@ -188,15 +292,28 @@ class _VolumesListState extends State<_VolumesList> {
   void _searchListener() {
     if (!mounted) return;
     if (_debounce?.isActive ?? false) _debounce.cancel();
-    _debounce = Timer(const Duration(milliseconds: 300), () {
-      if (mounted) {
-        tec.dmPrint('search string: ${_textEditingController.text.trim()}');
-        context.bloc<VolumesBloc>()?.add(
-              context.bloc<VolumesBloc>().state.filter.copyWith(
-                    searchFilter: _textEditingController.text.trim(),
-                  ),
-            );
-      }
+    _debounce = Timer(
+      const Duration(milliseconds: 300),
+      () {
+        if (mounted) {
+          tec.dmPrint('search string: ${_textEditingController.text.trim()}');
+          context.bloc<VolumesBloc>()?.add(
+                context.bloc<VolumesBloc>().state.filter.copyWith(
+                      searchFilter: _textEditingController.text.trim(),
+                    ),
+              );
+        }
+      },
+    );
+  }
+
+  void _refresh(VoidCallback fn) {
+    if (mounted) setState(fn);
+  }
+
+  void _toggle(int id) {
+    _refresh(() {
+      if (!widget.selectedVolumes.remove(id)) widget.selectedVolumes.add(id);
     });
   }
 
@@ -219,13 +336,23 @@ class _VolumesListState extends State<_VolumesList> {
         Expanded(
           child: Scrollbar(
             child: TecListView<Volume>(
+              itemScrollController: _volumeScrollController,
               items: bloc.state.volumes,
               itemBuilder: (context, volume, index, total) => VolumeCard(
                 volume: volume,
-                padding: 0,
-                onTap: widget.onTapVolume != null
+                trailing: !widget.allowMultipleSelections
+                    ? null
+                    : Checkbox(
+                        value: widget.selectedVolumes.contains(volume.id),
+                        onChanged: (checked) => _toggle(volume.id),
+                      ),
+                onTap: widget.onTapVolume != null || widget.allowMultipleSelections
                     ? () {
-                        widget.onTapVolume(volume.id);
+                        if (widget.allowMultipleSelections) {
+                          _toggle(volume.id);
+                        } else {
+                          widget.onTapVolume(volume.id);
+                        }
                       }
                     : () {
                         Navigator.of(context).push<void>(
