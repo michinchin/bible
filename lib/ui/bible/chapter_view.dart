@@ -130,9 +130,11 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                             ),
                             onPressed: () async {
                               final bibleId = await selectVolume(context,
+                                  title: 'Select Bible Translation',
                                   filter: const VolumesFilter(
                                     volumeType: VolumeType.bible,
-                                  ));
+                                  ),
+                                  selectedVolume: _bible.id);
 
                               if (bibleId != null) {
                                 await Future.delayed(const Duration(milliseconds: 350), () {
