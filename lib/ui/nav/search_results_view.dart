@@ -72,7 +72,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
                 ),
                 childrenPadding: EdgeInsets.zero,
                 subtitle: TecText.rich(TextSpan(
-                    children: textToDisplay(widget.res.verses[0].verseContent,
+                    children: searchResTextSpans(widget.res.verses[0].verseContent,
                         context.bloc<SearchBloc>().state.search))),
                 children: [
                   Padding(
