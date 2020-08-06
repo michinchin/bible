@@ -39,7 +39,12 @@ Future<int> selectVolume(
   return Navigator.of(context, rootNavigator: true).push<int>(
     MaterialPageRoute(
       fullscreenDialog: true,
-      builder: (context) => _LibraryScreen(title: title, filter: filter),
+      builder: (context) => _LibraryScreen(
+        title: title,
+        filter: filter,
+        selectedVolumes: selectedVolume == null ? null : [selectedVolume],
+        scrollToSelectedVolumes: scrollToSelectedVolume,
+      ),
     ),
   );
 }
@@ -338,6 +343,10 @@ class _VolumesListState extends State<_VolumesList> {
             child: TecListView<Volume>(
               itemScrollController: _volumeScrollController,
               items: bloc.state.volumes,
+              initialScrollItem: widget.scrollToSelectedVolumes
+                  ? bloc.state.volumes
+                      .firstWhere((v) => widget.selectedVolumes.contains(v.id), orElse: () => null)
+                  : null,
               itemBuilder: (context, volume, index, total) => VolumeCard(
                 volume: volume,
                 trailing: !widget.allowMultipleSelections
