@@ -224,6 +224,14 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
   }
 
   @override
+  void didUpdateWidget(_BibleChapterView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.bible.id != widget.bible.id || oldWidget.ref != widget.ref) {
+      _future = widget.bible.chapterHtmlWith(widget.ref.book, widget.ref.chapter);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return TecFutureBuilder<tec.ErrorOrValue<String>>(
       future: _future,

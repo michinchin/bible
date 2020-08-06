@@ -4,6 +4,35 @@ import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+///
+/// An easier to use TecPopupMenuButton where the menu item strings and values 
+/// are the same, so just requires an iterable list of menu item strings 
+/// instead of a map of values and strings like TecPopupMenuButton.
+/// 
+class TecEZPopupMenuButton extends TecPopupMenuButton<String> {
+  TecEZPopupMenuButton({
+    Key key,
+    @required String title,
+    @required Iterable<String> menuItems,
+    final String currentValue,
+    final String defaultValue,
+    final void Function(String value) onSelectValue,
+  })  : assert(title != null),
+        assert(menuItems != null),
+        super(
+          key: key,
+          title: title,
+          values: {for (final s in menuItems) s: s} as LinkedHashMap<String, String>,
+          currentValue: currentValue,
+          defaultValue: defaultValue,
+          defaultName: defaultValue,
+          onSelectValue: onSelectValue,
+        );
+}
+
+///
+/// A button that shows a popup menu when tapped.
+/// 
 class TecPopupMenuButton<T> extends StatelessWidget {
   final String title;
   final LinkedHashMap<T, String> values;
@@ -90,6 +119,9 @@ class TecPopupMenuButton<T> extends StatelessWidget {
   }
 }
 
+///
+/// A text button.
+/// 
 class TecTextButton extends StatelessWidget {
   final String title;
   final String tooltip;

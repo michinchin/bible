@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -71,22 +69,8 @@ class AppSettings {
 ///
 /// Returns the text scale factor for content (e.g. Bible or study content HTML).
 ///
-double contentTextScaleFactorWith(
-  BuildContext context, {
-  bool forAbsoluteFontSize = true,
-  double dampingFactor = defaultDampingFactor,
-  double minScaleFactor = minContentScaleFactor,
-  double maxScaleFactor = maxContentScaleFactor,
-}) {
-  var scale = scaleFactorWith(
-    context,
-    dampingFactor: dampingFactor,
-  );
-  if (forAbsoluteFontSize) {
-    scale = scale * MediaQuery.of(context).textScaleFactor;
-  }
-  scale = scale * AppSettings.shared.contentTextScaleFactor.value;
-  return math.min(maxScaleFactor, math.max(minScaleFactor, scale));
+double contentTextScaleFactorWith(BuildContext context) {
+  return textScaleFactorWith(context) * AppSettings.shared.contentTextScaleFactor.value;
 }
 
 //
