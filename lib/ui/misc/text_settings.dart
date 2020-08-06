@@ -104,7 +104,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
   void _setSortType(String sortType) {
     if (mounted) {
       setState(() {
-        _sortAlphabetically = sortType == 'alphabetically';
+        _sortAlphabetically = sortType == _strAlphabetically;
         _fontNames = widget.fonts.filterBy(_fontType, alphabetically: _sortAlphabetically);
         _scrollController.jumpTo(0);
       });
@@ -119,8 +119,8 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.grey[400] : Colors.grey[800];
-    final fontSize =
-        textScaleFactorWith(context, forAbsoluteFontSize: true, maxScaleFactor: 1) * 25;
+    final textScale = textScaleFactorWith(context);
+    const fontSize = 25.0;
     return Material(
       child: SafeArea(
         child: Column(
@@ -132,8 +132,6 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                 final percent = (snapshot.hasData
                     ? snapshot.data
                     : AppSettings.shared.contentTextScaleFactor.value);
-                //final fontSize = 20.0 * percent;
-                //tec.dmPrint('fontSize: $fontSize');
                 return IntrinsicHeight(
                   child: Slider.adaptive(
                     min: 0.75,
@@ -144,42 +142,27 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                 );
               },
             ),
-            _PopupMenuButton(
-              title: TecText.rich(
-                TextSpan(children: [
-                  const TextSpan(text: ' Font type: '),
-                  TextSpan(text: _fontType, style: TextStyle(color: Theme.of(context).accentColor)),
-                ], style: Theme.of(context).textTheme.headline6),
-                maxScaleFactor: _maxTextScaleFactor,
-              ),
+            TecEZPopupMenuButton(
+              title: 'Font type',
+              currentValue: _fontType,
+              onSelectValue: _setFontType,
               menuItems: const [
-                'recently used',
-                'sans-serif',
-                'serif',
-                'handwriting',
-                'monospace',
-                'display'
+                _strRecentlyUsed,
+                _strSansSerif,
+                _strSerif,
+                _strHandwriting,
+                _strMonospace,
+                _strDisplay
               ],
-              type: _fontType,
-              selectType: _setFontType,
             ),
-            const SizedBox(height: 8),
-            _PopupMenuButton(
-              title: TecText.rich(
-                TextSpan(children: [
-                  const TextSpan(text: ' Sort: '),
-                  TextSpan(
-                      text: _sortAlphabetically ? 'alphabetically' : 'by popularity',
-                      style: TextStyle(color: Theme.of(context).accentColor)),
-                ], style: Theme.of(context).textTheme.headline6),
-                maxScaleFactor: _maxTextScaleFactor,
-              ),
-              menuItems: const ['by popularity', 'alphabetically'],
-              type: _sortAlphabetically ? 'alphabetically' : 'by popularity',
-              selectType: _setSortType,
+            TecEZPopupMenuButton(
+              title: 'Sort',
+              currentValue: _sortAlphabetically ? _strAlphabetically : _strByPopularity,
+              onSelectValue: _setSortType,
+              menuItems: const [_strByPopularity, _strAlphabetically],
             ),
             Container(
-              height: fontSize * 2,
+              height: fontSize * textScale * 2,
               //color: Colors.red,
               child: ListView.builder(
                 controller: _scrollController,
@@ -191,8 +174,9 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                     padding: EdgeInsets.zero,
                     child: Text(
                       ' $name${index == _fontNames.length - 1 ? '' : ', '}',
+                      textScaleFactor: textScale,
                       style: name == _Fonts._systemDefault
-                          ? _defaultTextStyle.merge(TextStyle(fontSize: fontSize, color: textColor))
+                          ? TextStyle(fontSize: fontSize, color: textColor)
                           : GoogleFonts.getFont(name, fontSize: fontSize, color: textColor),
                     ),
                     onPressed: () => AppSettings.shared.contentFontName
@@ -208,62 +192,15 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
   }
 }
 
-const TextStyle _defaultTextStyle = TextStyle(
-  inherit: false,
-  //fontWeight: FontWeight.normal,
-);
+const _strAlphabetically = 'alphabetically';
+const _strByPopularity = 'by popularity';
 
-const _defaultMenuItemHeight = 36.0;
-const _maxTextScaleFactor = 1.0;
-
-class _PopupMenuButton extends StatelessWidget {
-  final Widget title;
-  final String type;
-  final void Function(String type) selectType;
-  final List<String> menuItems;
-
-  const _PopupMenuButton({Key key, this.title, this.type, this.selectType, this.menuItems})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final items = menuItems
-        .map<PopupMenuEntry<String>>((typeName) => PopupMenuItem<String>(
-              height: _defaultMenuItemHeight,
-              value: typeName,
-              child: TecText(
-                typeName,
-                maxScaleFactor: _maxTextScaleFactor,
-                style: TextStyle(
-                    fontWeight: typeName == type ? FontWeight.bold : FontWeight.normal,
-                    color: typeName == type
-                        ? (Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black)
-                        : (Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white70
-                            : Colors.black87)),
-              ),
-            ))
-        .toList();
-
-    // return Theme(
-    //   data: Theme.of(context).copyWith(
-    //     textTheme: const TextTheme(subtitle1: TextStyle(textBaseline: TextBaseline.alphabetic)),
-    //   ),
-    //   child:
-    return PopupMenuButton<String>(
-      child: title,
-      offset: const Offset(150, 0),
-      onSelected: (value) {
-        selectType?.call(value);
-      },
-      itemBuilder: (context) => items,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-      //),
-    );
-  }
-}
+const _strRecentlyUsed = 'recently used';
+const _strSansSerif = 'sans-serif';
+const _strSerif = 'serif';
+const _strHandwriting = 'handwriting';
+const _strMonospace = 'monospace';
+const _strDisplay = 'display';
 
 class _Fonts {
   final List<_Font> all;
@@ -278,7 +215,7 @@ class _Fonts {
   /// Font type to filter by.
   String get fontType => _fontType;
   String _fontType =
-      Prefs.shared.getString('_font_settings_filter_type', defaultValue: 'recently used');
+      Prefs.shared.getString('_font_settings_filter_type', defaultValue: _strRecentlyUsed);
 
   /// Alphabetically (== true) or by popularity (== false).
   bool get sortAlphabetically => _alphabetically;
@@ -286,7 +223,6 @@ class _Fonts {
       Prefs.shared.getBool('_font_settings_sort_alphabetically', defaultValue: false);
 
   static const _all = 'all';
-  static const _recentlyUsed = 'recently used';
   static const _systemDefault = 'System Default';
 
   var _filtered = <String>[];
@@ -308,11 +244,11 @@ class _Fonts {
 
     if (_fontType == _all) {
       _filtered = all.map((e) => e.name).toList()..insert(0, _systemDefault);
-    } else if (_fontType == _recentlyUsed) {
+    } else if (_fontType == _strRecentlyUsed) {
       _filtered = List.of(recent);
     } else {
       _filtered = all.where((e) => e.type == _fontType).map((e) => e.name).toList();
-      if (_fontType == 'san-serif') _filtered.insert(0, _systemDefault);
+      if (_fontType == _strSansSerif) _filtered.insert(0, _systemDefault);
     }
 
     if (alphabetically) _filtered.sort();
@@ -360,7 +296,7 @@ Future<_Fonts> _loadFonts() async {
     tec.dmPrint('TextSettings loadFonts failed with error: ${e.toString()}');
   }
 
-
+  // await Future.delayed(Duration(seconds: 2), () {});
 
   return _Fonts(fonts);
 }
