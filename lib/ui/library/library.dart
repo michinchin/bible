@@ -277,12 +277,39 @@ class _VolumesListState extends State<_VolumesList> {
   TextEditingController _textEditingController;
   ItemScrollController _volumeScrollController;
   Timer _debounce;
+  bool _scrollToVolume;
 
   @override
   void initState() {
     super.initState();
     _textEditingController = TextEditingController()..addListener(_searchListener);
     _volumeScrollController = ItemScrollController();
+    _scrollToVolume = widget.scrollToSelectedVolumes && widget.selectedVolumes.isNotEmpty;
+    if (_scrollToVolume) _scrollToVolumeAfterBuild();
+  }
+
+  @override
+  void didUpdateWidget(_VolumesList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_scrollToVolume) _scrollToVolumeAfterBuild();
+  }
+
+  void _scrollToVolumeAfterBuild() {
+    if (_scrollToVolume && context.bloc<VolumesBloc>().state.volumes.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        if (_volumeScrollController.isAttached) {
+          final index = context
+              .bloc<VolumesBloc>()
+              .state
+              .volumes
+              .indexWhere((v) => widget.selectedVolumes.contains(v.id));
+          if (index >= 0) {
+            _scrollToVolume = false;
+            _volumeScrollController.jumpTo(index: index);
+          }
+        }
+      });
+    }
   }
 
   @override
@@ -343,10 +370,6 @@ class _VolumesListState extends State<_VolumesList> {
             child: TecListView<Volume>(
               itemScrollController: _volumeScrollController,
               items: bloc.state.volumes,
-              initialScrollItem: widget.scrollToSelectedVolumes
-                  ? bloc.state.volumes
-                      .firstWhere((v) => widget.selectedVolumes.contains(v.id), orElse: () => null)
-                  : null,
               itemBuilder: (context, volume, index, total) => VolumeCard(
                 volume: volume,
                 trailing: !widget.allowMultipleSelections
