@@ -43,6 +43,8 @@ extension AppExtOnThemeData on ThemeData {
   ///
   ThemeData copyWithAppTheme() {
     return copyWith(
+      // primaryColor: brightness == Brightness.light ? primaryColor : primaryColor,
+      accentColor: brightness == Brightness.light ? accentColor : Colors.blue,
       bottomSheetTheme: bottomSheetTheme.copyWith(elevation: 4, shape: bottomSheetShape),
       appBarTheme: tecAppBarTheme(),
       tabBarTheme: tecTabBarTheme(),
@@ -93,8 +95,8 @@ extension AppExtOnThemeData on ThemeData {
   ///
   TextTheme copyOfAppBarTextThemeWithColor(Color color) =>
       appBarTheme.textTheme?.apply(bodyColor: color) ??
-      primaryTextTheme?.apply(bodyColor: color) ??
-      TextTheme(headline6: TextStyle(color: color));
+      // primaryTextTheme?.apply(bodyColor: color) ??
+      TextTheme(headline6: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w500));
 }
 
 ///

@@ -129,7 +129,6 @@ class App extends StatelessWidget {
                   home: I18n(
                     //initialLocale: const Locale('es'),
                     //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
-                    //child: Adaptive(),
                     child: const HomeScreen(),
                   ),
                 ),
