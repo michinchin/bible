@@ -14,6 +14,7 @@ import 'blocs/app_theme_bloc.dart';
 import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'ui/bible/chapter_view.dart';
+import 'ui/common/common.dart';
 import 'ui/home/home_screen.dart';
 import 'ui/misc/view_actions.dart';
 import 'ui/note/margin_note_view.dart';
@@ -64,7 +65,7 @@ void _registerViewTypes() {
       title: 'Bible',
       scaffoldBuilder: bibleChapterViewBuilder,
       icon: FeatherIcons.book,
-      defaultDataBuilder: bibleChapterDefaultData
+      defaultDataBuilder: bibleChapterDefaultData,
     )
     ..register(
       noteViewType,
@@ -110,8 +111,8 @@ class App extends StatelessWidget {
             child: OKToast(
               child: AppLifecycleWrapper(
                 child: MaterialApp(
-                  theme: ThemeData.light(),
-                  darkTheme: ThemeData.dark(),
+                  theme: ThemeData.light().copyWithAppTheme(),
+                  darkTheme: ThemeData.dark().copyWithAppTheme(),
                   themeMode: themeMode,
                   debugShowCheckedModeBanner: false,
                   localizationsDelegates: const [

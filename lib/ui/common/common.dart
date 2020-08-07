@@ -35,50 +35,59 @@ class LoadingIndicator extends StatelessWidget {
 }
 
 ///
-/// Returns an [AppBarTheme] appropriate for the lightness or darkness of the given [context].
+/// ThemeData extensions
 ///
-AppBarTheme appBarThemeWithContext(BuildContext context) {
-  final theme = Theme.of(context);
-  final barColor = theme.canvasColor;
-  // final barColor = theme.appBarTheme.color ?? theme.primaryColor;
-  final brightness = ThemeData.estimateBrightnessForColor(barColor);
-  final barTextColor = brightness == Brightness.light ? Colors.grey[700] : Colors.white;
-  return theme.appBarTheme.copyWith(
-    brightness: brightness,
-    color: barColor,
-    elevation: 0,
-    // shadowColor: Colors.transparent,
-    iconTheme: IconThemeData(color: barTextColor),
-    actionsIconTheme: IconThemeData(color: barTextColor),
-    textTheme: theme.copyOfAppBarTextThemeWithColor(barTextColor),
-    centerTitle: true,
-  );
-}
+extension AppExtOnThemeData on ThemeData {
+  ///
+  /// Returns a copy of this theme with app customizations.
+  ///
+  ThemeData copyWithAppTheme() {
+    return copyWith(
+      bottomSheetTheme: bottomSheetTheme.copyWith(elevation: 4, shape: bottomSheetShape),
+      appBarTheme: tecAppBarTheme(),
+      tabBarTheme: tecTabBarTheme(),
+    );
+  }
 
-///
-/// Returns a [TabBarTheme] appropriate for the lightness or darkness of the given [context].
-///
-TabBarTheme tabBarThemeWithContext(BuildContext context) {
-  final theme = Theme.of(context);
-  final barColor = theme.canvasColor;
-  final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
-      ? Colors.grey[700]
-      : Colors.white;
-  return theme.tabBarTheme.copyWith(
-    indicator: const TecTabIndicator(
-        indicatorHeight: 4, indicatorColor: null, indicatorSize: TecTabIndicatorSize.full),
-    indicatorSize: TabBarIndicatorSize.label,
-    labelColor: barTextColor,
-    // labelStyle: const TextStyle(fontWeight: FontWeight.w700),
-    // unselectedLabelColor: Theme.of(context).textColor,
-    // unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
-  );
-}
+  ///
+  /// Returns our special [AppBarTheme].
+  ///
+  AppBarTheme tecAppBarTheme() {
+    final barColor = canvasColor;
+    // final barColor = theme.appBarTheme.color ?? theme.primaryColor;
+    final brightness = ThemeData.estimateBrightnessForColor(barColor);
+    final barTextColor = brightness == Brightness.light ? Colors.grey[700] : Colors.white;
+    return appBarTheme.copyWith(
+      brightness: brightness,
+      color: barColor,
+      elevation: 0,
+      // shadowColor: Colors.transparent,
+      iconTheme: IconThemeData(color: barTextColor),
+      actionsIconTheme: IconThemeData(color: barTextColor),
+      textTheme: copyOfAppBarTextThemeWithColor(barTextColor),
+      centerTitle: true,
+    );
+  }
 
-///
-/// ThemeData extensions.
-///
-extension ExtOnThemeData on ThemeData {
+  ///
+  /// Returns our special [TabBarTheme].
+  ///
+  TabBarTheme tecTabBarTheme() {
+    final barColor = canvasColor;
+    final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
+        ? Colors.grey[700]
+        : Colors.white;
+    return tabBarTheme.copyWith(
+      indicator: const TecTabIndicator(
+          indicatorHeight: 4, indicatorColor: null, indicatorSize: TecTabIndicatorSize.full),
+      indicatorSize: TabBarIndicatorSize.label,
+      labelColor: barTextColor,
+      // labelStyle: const TextStyle(fontWeight: FontWeight.w700),
+      // unselectedLabelColor: Theme.of(context).textColor,
+      // unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+    );
+  }
+
   ///
   /// Returns a copy of this ThemeData with the appBarTheme.textTheme updated the given [color].
   ///

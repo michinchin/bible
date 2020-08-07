@@ -34,6 +34,7 @@ class VolumeCard extends StatelessWidget {
         Expanded(
           child: GestureDetector(
             onTap: onTap,
+            behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: EdgeInsets.only(left: padding * 2, top: padding, bottom: padding),
               child: Row(

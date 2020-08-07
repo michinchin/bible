@@ -12,7 +12,6 @@ import '../common/common.dart';
 void showTextSettingsDialog(BuildContext context) {
   showModalBottomSheet<void>(
     context: context,
-    shape: bottomSheetShape,
     barrierColor: Colors.black12,
     builder: (context) => _TextSettings(),
   );
@@ -120,10 +119,8 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
     final buttonColor = isDarkTheme ? Colors.grey[800] : Colors.grey[200];
     final textScale = textScaleFactorWith(context, dampingFactor: 0.5, maxScaleFactor: 1);
     const fontSize = 25.0;
-    return Material(
-      shape: bottomSheetShape,
-      child: SafeArea(
-          child: Column(
+    return SafeArea(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -190,7 +187,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(halfPad, 0, halfPad, halfPad),
+            padding: EdgeInsets.fromLTRB(halfPad, halfPad, halfPad, 0),
             child: StreamBuilder<double>(
               stream: AppSettings.shared.contentTextScaleFactor.stream,
               builder: (c, snapshot) {
@@ -210,7 +207,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
             ),
           ),
         ],
-      )),
+      ),
     );
   }
 }

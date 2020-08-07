@@ -101,46 +101,43 @@ class _LibraryScreenState extends State<_LibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(appBarTheme: appBarThemeWithContext(context)),
-      child: Scaffold(
-        appBar: MinHeightAppBar(
-          appBar: AppBar(
-            leading:
-                CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop()),
-            title: tec.isNullOrEmpty(widget.title) ? null : TecText(widget.title),
-            actions: !widget.allowMultipleSelections
-                ? null
-                : [
-                    CupertinoButton(
-                      padding: const EdgeInsets.only(top: 0, bottom: 0, right: 16.0),
-                      child: TecText(
-                        'Done',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headline6
-                            .copyWith(color: Theme.of(context).accentColor),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context, rootNavigator: true)
-                            .maybePop<List<int>>(_selectedVolumes.toList());
-                      },
-                    ),
-                  ],
-          ),
-        ),
-        body: _VolumesView(
-          type: _ViewType.store,
-          filter: widget.filter,
-          selectedVolumes: _selectedVolumes,
-          scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
-          allowMultipleSelections: widget.allowMultipleSelections,
-          onTapVolume: widget.allowMultipleSelections
+    return Scaffold(
+      appBar: MinHeightAppBar(
+        appBar: AppBar(
+          leading:
+              CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop()),
+          title: tec.isNullOrEmpty(widget.title) ? null : TecText(widget.title),
+          actions: !widget.allowMultipleSelections
               ? null
-              : (id) {
-                  Navigator.of(context, rootNavigator: true).maybePop<int>(id);
-                },
+              : [
+                  CupertinoButton(
+                    padding: const EdgeInsets.only(top: 0, bottom: 0, right: 16.0),
+                    child: TecText(
+                      'Done',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline6
+                          .copyWith(color: Theme.of(context).accentColor),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true)
+                          .maybePop<List<int>>(_selectedVolumes.toList());
+                    },
+                  ),
+                ],
         ),
+      ),
+      body: _VolumesView(
+        type: _ViewType.store,
+        filter: widget.filter,
+        selectedVolumes: _selectedVolumes,
+        scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
+        allowMultipleSelections: widget.allowMultipleSelections,
+        onTapVolume: widget.allowMultipleSelections
+            ? null
+            : (id) {
+                Navigator.of(context, rootNavigator: true).maybePop<int>(id);
+              },
       ),
     );
   }
@@ -153,42 +150,36 @@ class _TabbedLibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        appBarTheme: appBarThemeWithContext(context),
-        tabBarTheme: tabBarThemeWithContext(context),
-      ),
-      child: BlocProvider<IsLicensedBloc>(
-        create: (context) => IsLicensedBloc(
-            volumeIds: VolumesRepository.shared.volumeIdsWithType(VolumeType.anyType)),
-        child: BlocBuilder<IsLicensedBloc, bool>(
-          builder: (context, hasLicensedVolumes) {
-            final tabs = [
-              const Tab(text: 'Bibles'),
-              if (hasLicensedVolumes) const Tab(text: 'Purchased'),
-              const Tab(text: 'Store'),
-            ];
-            final tabContents = <Widget>[
-              const _VolumesView(type: _ViewType.bibles),
-              if (hasLicensedVolumes) const _VolumesView(type: _ViewType.purchased),
-              const _VolumesView(type: _ViewType.store)
-            ];
-            return DefaultTabController(
-              length: tabs.length,
-              child: Scaffold(
-                appBar: MinHeightAppBar(
-                  appBar: AppBar(
-                    leading: CloseButton(onPressed: closeLibrary),
-                    // leading: BackButton(onPressed: closeLibrary),
-                    title: const Text('Library'),
-                    bottom: TabBar(tabs: tabs),
-                  ),
+    return BlocProvider<IsLicensedBloc>(
+      create: (context) =>
+          IsLicensedBloc(volumeIds: VolumesRepository.shared.volumeIdsWithType(VolumeType.anyType)),
+      child: BlocBuilder<IsLicensedBloc, bool>(
+        builder: (context, hasLicensedVolumes) {
+          final tabs = [
+            const Tab(text: 'Bibles'),
+            if (hasLicensedVolumes) const Tab(text: 'Purchased'),
+            const Tab(text: 'Store'),
+          ];
+          final tabContents = <Widget>[
+            const _VolumesView(type: _ViewType.bibles),
+            if (hasLicensedVolumes) const _VolumesView(type: _ViewType.purchased),
+            const _VolumesView(type: _ViewType.store)
+          ];
+          return DefaultTabController(
+            length: tabs.length,
+            child: Scaffold(
+              appBar: MinHeightAppBar(
+                appBar: AppBar(
+                  leading: CloseButton(onPressed: closeLibrary),
+                  // leading: BackButton(onPressed: closeLibrary),
+                  title: const Text('Library'),
+                  bottom: TabBar(tabs: tabs),
                 ),
-                body: TabBarView(children: tabContents),
               ),
-            );
-          },
-        ),
+              body: TabBarView(children: tabContents),
+            ),
+          );
+        },
       ),
     );
   }

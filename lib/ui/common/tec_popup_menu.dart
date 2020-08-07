@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+const _buttonFontSize = 18.0;
+
 ///
 /// An easier to use TecPopupMenuButton where the menu item strings and values
 /// are the same, so just requires an iterable list of menu item strings
@@ -61,7 +63,7 @@ class TecPopupMenuButton<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScaleFactor = textScaleFactorWith(context);
-    final entryHeight = (32.0 * textScaleFactor).roundToDouble();
+    final entryHeight = (36.0 * textScaleFactor).roundToDouble();
 
     final keys = values.keys.toList();
     if (defaultValue != null && !keys.contains(defaultValue)) {
@@ -72,10 +74,11 @@ class TecPopupMenuButton<T> extends StatelessWidget {
           (key) => PopupMenuItem<String>(
             height: entryHeight,
             value: values[key] ?? defaultName,
-            child: TecText(
+            child: Text(
               values[key] ?? defaultName,
               textScaleFactor: textScaleFactor,
               style: TextStyle(
+                fontSize: _buttonFontSize,
                 fontWeight: key == currentValue ? FontWeight.bold : FontWeight.normal,
                 color: key == currentValue
                     ? (Theme.of(context).brightness == Brightness.dark
@@ -94,7 +97,7 @@ class TecPopupMenuButton<T> extends StatelessWidget {
     return PopupMenuButton<String>(
       child: Container(
         padding: EdgeInsets.all(padding ?? 8.0),
-        child: TecText.rich(
+        child: Text.rich(
           TextSpan(
             children: [
               TextSpan(text: title.endsWith(': ') || title.isEmpty ? title : '$title: '),
@@ -106,7 +109,7 @@ class TecPopupMenuButton<T> extends StatelessWidget {
             ],
           ),
           textScaleFactor: textScaleFactor,
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: _buttonFontSize),
         ),
       ),
       offset: const Offset(150, 0),
@@ -148,10 +151,10 @@ class TecTextButton extends StatelessWidget {
         onTap: onTap,
         child: Container(
           padding: EdgeInsets.all(padding ?? 8.0),
-          child: TecText(
+          child: Text(
             title,
             textScaleFactor: textScaleFactorWith(context),
-            style: TextStyle(fontSize: 16, color: Theme.of(context).accentColor),
+            style: TextStyle(fontSize: _buttonFontSize, color: Theme.of(context).accentColor),
           ),
         ),
       ),

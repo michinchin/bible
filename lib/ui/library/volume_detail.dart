@@ -15,16 +15,13 @@ class VolumeDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(appBarTheme: appBarThemeWithContext(context)),
-      child: Scaffold(
-        appBar: MinHeightAppBar(
-          appBar: AppBar(
-              //title: TecText(volume.name, maxLines: 2, textAlign: TextAlign.center),
-              ),
-        ),
-        body: _VolumeCard(volume: volume),
+    return Scaffold(
+      appBar: MinHeightAppBar(
+        appBar: AppBar(
+            //title: TecText(volume.name, maxLines: 2, textAlign: TextAlign.center),
+            ),
       ),
+      body: _VolumeCard(volume: volume),
     );
   }
 }

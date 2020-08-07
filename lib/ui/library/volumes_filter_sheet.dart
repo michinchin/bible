@@ -10,7 +10,6 @@ Future<void> showVolumesFilterSheet(BuildContext context) async {
   final bloc = context.bloc<VolumesBloc>(); // ignore: close_sinks
   await showModalBottomSheet<void>(
     context: context,
-    shape: bottomSheetShape,
     barrierColor: Colors.black12,
     builder: (context) => BlocBuilder<VolumesBloc, VolumesState>(
       bloc: bloc,
@@ -34,7 +33,7 @@ class VolumesFilterSheet extends StatelessWidget {
     final category = volumesBloc.state.filter.category;
 
     const animationDuration = Duration(milliseconds: 300);
-    final buttonHeight = 16 + (20 * textScaleFactor).roundToDouble();
+    final buttonHeight = 16 + (22 * textScaleFactor).roundToDouble();
 
     return SafeArea(
       child: Container(
@@ -48,10 +47,10 @@ class VolumesFilterSheet extends StatelessWidget {
               child: TecText(
                 'Filter By',
                 textScaleFactor: textScaleFactor,
-                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            const Divider(),
+            Divider(height: padding, thickness: 1.5),
             AnimatedContainer(
               duration: animationDuration,
               height: languages.length > 1 ? buttonHeight : 0,
