@@ -10,7 +10,8 @@ Future<void> showVolumesFilterSheet(BuildContext context) async {
   final bloc = context.bloc<VolumesBloc>(); // ignore: close_sinks
   await showModalBottomSheet<void>(
     context: context,
-    shape: bottomSheetShapeBorder,
+    shape: bottomSheetShape,
+    barrierColor: Colors.black12,
     builder: (context) => BlocBuilder<VolumesBloc, VolumesState>(
       bloc: bloc,
       builder: (context, state) => VolumesFilterSheet(volumesBloc: bloc),
@@ -93,7 +94,3 @@ class VolumesFilterSheet extends StatelessWidget {
     );
   }
 }
-
-const bottomSheetRadius = Radius.circular(15);
-const bottomSheetShapeBorder = RoundedRectangleBorder(
-    borderRadius: BorderRadius.only(topLeft: bottomSheetRadius, topRight: bottomSheetRadius));

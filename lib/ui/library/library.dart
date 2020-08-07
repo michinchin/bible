@@ -42,7 +42,7 @@ Future<int> selectVolume(
       builder: (context) => _LibraryScreen(
         title: title,
         filter: filter,
-        selectedVolumes: selectedVolume == null ? null : [selectedVolume],
+        selectedVolumes: selectedVolume == null ? [] : [selectedVolume],
         scrollToSelectedVolumes: scrollToSelectedVolume,
       ),
     ),
@@ -62,7 +62,7 @@ Future<List<int>> selectVolumes(
       builder: (context) => _LibraryScreen(
         title: title,
         filter: filter,
-        selectedVolumes: selectedVolumes,
+        selectedVolumes: selectedVolumes ?? [],
         scrollToSelectedVolumes: scrollToSelectedVolumes,
         allowMultipleSelections: true,
       ),
@@ -81,7 +81,7 @@ class _LibraryScreen extends StatefulWidget {
     Key key,
     this.title,
     this.filter,
-    this.selectedVolumes,
+    this.selectedVolumes = const [],
     this.scrollToSelectedVolumes = true,
     this.allowMultipleSelections = false,
   }) : super(key: key);
@@ -211,7 +211,7 @@ class _VolumesView extends StatelessWidget {
     Key key,
     this.type,
     this.filter,
-    this.selectedVolumes,
+    this.selectedVolumes = const {},
     this.scrollToSelectedVolumes = true,
     this.allowMultipleSelections = false,
     this.onTapVolume,

@@ -5,10 +5,10 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 ///
-/// An easier to use TecPopupMenuButton where the menu item strings and values 
-/// are the same, so just requires an iterable list of menu item strings 
+/// An easier to use TecPopupMenuButton where the menu item strings and values
+/// are the same, so just requires an iterable list of menu item strings
 /// instead of a map of values and strings like TecPopupMenuButton.
-/// 
+///
 class TecEZPopupMenuButton extends TecPopupMenuButton<String> {
   TecEZPopupMenuButton({
     Key key,
@@ -17,6 +17,7 @@ class TecEZPopupMenuButton extends TecPopupMenuButton<String> {
     final String currentValue,
     final String defaultValue,
     final void Function(String value) onSelectValue,
+    final double padding = 8.0,
   })  : assert(title != null),
         assert(menuItems != null),
         super(
@@ -27,12 +28,13 @@ class TecEZPopupMenuButton extends TecPopupMenuButton<String> {
           defaultValue: defaultValue,
           defaultName: defaultValue,
           onSelectValue: onSelectValue,
+          padding: padding,
         );
 }
 
 ///
 /// A button that shows a popup menu when tapped.
-/// 
+///
 class TecPopupMenuButton<T> extends StatelessWidget {
   final String title;
   final LinkedHashMap<T, String> values;
@@ -40,6 +42,7 @@ class TecPopupMenuButton<T> extends StatelessWidget {
   final T defaultValue;
   final String defaultName;
   final void Function(T value) onSelectValue;
+  final double padding;
 
   const TecPopupMenuButton({
     Key key,
@@ -49,6 +52,7 @@ class TecPopupMenuButton<T> extends StatelessWidget {
     this.defaultValue,
     this.defaultName,
     this.onSelectValue,
+    this.padding = 8.0,
   })  : assert(title != null),
         assert(values != null),
         assert(defaultValue == null || defaultName != null),
@@ -89,11 +93,11 @@ class TecPopupMenuButton<T> extends StatelessWidget {
     final currentName = currentValue == null ? null : values[currentValue] ?? defaultName;
     return PopupMenuButton<String>(
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: EdgeInsets.all(padding ?? 8.0),
         child: TecText.rich(
           TextSpan(
             children: [
-              TextSpan(text: title.endsWith(': ') ? title : '$title: '),
+              TextSpan(text: title.endsWith(': ') || title.isEmpty ? title : '$title: '),
               if (tec.isNotNullOrEmpty(currentName))
                 TextSpan(
                   text: currentName,
@@ -121,13 +125,20 @@ class TecPopupMenuButton<T> extends StatelessWidget {
 
 ///
 /// A text button.
-/// 
+///
 class TecTextButton extends StatelessWidget {
   final String title;
   final String tooltip;
   final void Function() onTap;
+  final double padding;
 
-  const TecTextButton({Key key, this.title, this.tooltip, this.onTap}) : super(key: key);
+  const TecTextButton({
+    Key key,
+    this.title,
+    this.tooltip,
+    this.onTap,
+    this.padding,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +147,7 @@ class TecTextButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(padding ?? 8.0),
           child: TecText(
             title,
             textScaleFactor: textScaleFactorWith(context),

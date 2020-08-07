@@ -515,11 +515,11 @@ class _BibleHtmlState extends State<_BibleHtml> {
                   debugId: debugId,
                   scrollController: _scrollController,
                   baseUrl: widget.baseUrl,
-                  textScaleFactor: 1.0,
-                  // HTML is already scaled.
-                  textStyle: widget.fontName.isEmpty
-                      ? _htmlDefaultTextStyle.merge(TextStyle(color: textColor))
-                      : GoogleFonts.getFont(widget.fontName, color: textColor),
+                  textScaleFactor: 1.0, // HTML is already scaled.
+                  textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
+                      ? TextStyle(color: textColor)
+                      : GoogleFonts.getFont(widget.fontName, color: textColor)),
+
                   padding: EdgeInsets.symmetric(
                     horizontal: (widget.size.width * _marginPercent).roundToDouble(),
                   ),
