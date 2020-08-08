@@ -4,10 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_widgets/flutter_widgets.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/is_licensed_bloc.dart';
 import '../common/common.dart';
@@ -106,13 +105,13 @@ class _LibraryScreenState extends State<_LibraryScreen> {
         appBar: AppBar(
           leading:
               CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop()),
-          title: tec.isNullOrEmpty(widget.title) ? null : TecText(widget.title),
+          title: tec.isNullOrEmpty(widget.title) ? null : Text(widget.title),
           actions: !widget.allowMultipleSelections
               ? null
               : [
                   CupertinoButton(
-                    padding: const EdgeInsets.only(top: 0, bottom: 0, right: 16.0),
-                    child: TecText(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: Text(
                       'Done',
                       style: Theme.of(context)
                           .textTheme
@@ -266,7 +265,7 @@ class _VolumesList extends StatefulWidget {
 
 class _VolumesListState extends State<_VolumesList> {
   TextEditingController _textEditingController;
-  ItemScrollController _volumeScrollController;
+  final _scrollController = ItemScrollController();
   Timer _debounce;
   bool _scrollToVolume;
 
@@ -274,7 +273,6 @@ class _VolumesListState extends State<_VolumesList> {
   void initState() {
     super.initState();
     _textEditingController = TextEditingController()..addListener(_searchListener);
-    _volumeScrollController = ItemScrollController();
     _scrollToVolume = widget.scrollToSelectedVolumes && widget.selectedVolumes.isNotEmpty;
     if (_scrollToVolume) _scrollToVolumeAfterBuild();
   }
@@ -288,7 +286,7 @@ class _VolumesListState extends State<_VolumesList> {
   void _scrollToVolumeAfterBuild() {
     if (_scrollToVolume && context.bloc<VolumesBloc>().state.volumes.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        if (_volumeScrollController.isAttached) {
+        if (mounted && _scrollController.isAttached) {
           final index = context
               .bloc<VolumesBloc>()
               .state
@@ -296,7 +294,7 @@ class _VolumesListState extends State<_VolumesList> {
               .indexWhere((v) => widget.selectedVolumes.contains(v.id));
           if (index >= 0) {
             _scrollToVolume = false;
-            _volumeScrollController.jumpTo(index: index);
+            _scrollController.jumpTo(index: index);
           }
         }
       });
@@ -319,7 +317,7 @@ class _VolumesListState extends State<_VolumesList> {
       const Duration(milliseconds: 300),
       () {
         if (mounted) {
-          tec.dmPrint('search string: ${_textEditingController.text.trim()}');
+          // tec.dmPrint('search string: ${_textEditingController.text.trim()}');
           context.bloc<VolumesBloc>()?.add(
                 context.bloc<VolumesBloc>().state.filter.copyWith(
                       searchFilter: _textEditingController.text.trim(),
@@ -358,30 +356,33 @@ class _VolumesListState extends State<_VolumesList> {
         ),
         Expanded(
           child: Scrollbar(
-            child: TecListView<Volume>(
-              itemScrollController: _volumeScrollController,
-              items: bloc.state.volumes,
-              itemBuilder: (context, volume, index, total) => VolumeCard(
-                volume: volume,
-                trailing: !widget.allowMultipleSelections
-                    ? null
-                    : Checkbox(
-                        value: widget.selectedVolumes.contains(volume.id),
-                        onChanged: (checked) => _toggle(volume.id),
-                      ),
-                onTap: widget.onTapVolume != null || widget.allowMultipleSelections
-                    ? () {
-                        if (widget.allowMultipleSelections) {
-                          _toggle(volume.id);
-                        } else {
-                          widget.onTapVolume(volume.id);
+            child: ScrollablePositionedList.builder(
+              itemScrollController: _scrollController,
+              itemCount: bloc.state.volumes.length,
+              itemBuilder: (context, index) {
+                final volume = bloc.state.volumes[index];
+                return VolumeCard(
+                  volume: volume,
+                  trailing: !widget.allowMultipleSelections
+                      ? null
+                      : Checkbox(
+                          value: widget.selectedVolumes.contains(volume.id),
+                          onChanged: (checked) => _toggle(volume.id),
+                        ),
+                  onTap: widget.onTapVolume != null || widget.allowMultipleSelections
+                      ? () {
+                          if (widget.allowMultipleSelections) {
+                            _toggle(volume.id);
+                          } else {
+                            widget.onTapVolume(volume.id);
+                          }
                         }
-                      }
-                    : () {
-                        Navigator.of(context).push<void>(
-                            MaterialPageRoute(builder: (context) => VolumeDetail(volume: volume)));
-                      },
-              ),
+                      : () {
+                          Navigator.of(context).push<void>(MaterialPageRoute(
+                              builder: (context) => VolumeDetail(volume: volume)));
+                        },
+                );
+              },
             ),
           ),
         ),
