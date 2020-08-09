@@ -95,6 +95,14 @@ Future<List<vol.Volume>> _volumesWith(VolumesFilter filter) async {
 
   final strs = filter.searchFilter.split(' ').map((s) => s.toLowerCase()).toList();
   var ids = vr.volumeIdsWithType(filter.volumeType, location: filter.location);
+
+  for (var i = 0; i < ids.length; i++) {
+    final id = ids[i];
+    if (i > 0 && ids.indexWhere((el) => el == id) < i) {
+      tec.dmPrint('VolumesBloc volume id $id has duplicates!');
+    }
+  }
+
   final owned = filter.ownershipStatus == OwnershipStatus.any
       ? null
       : await AppSettings.shared.userAccount.userDb.fullyLicensedVolumesInList(ids);
@@ -210,7 +218,7 @@ class VolumesFilter extends Equatable {
             vol.Location.values.length - 1, math.max(0, tec.as<int>(json['location']) ?? 0))],
         ownershipStatus: OwnershipStatus.values[math.min(OwnershipStatus.values.length - 1,
             math.max(0, tec.as<int>(json['ownershipStatus']) ?? 0))],
-        category: 0,
+        category: tec.as<int>(json['category']) ?? 0,
         language: tec.as<String>(json['language']) ?? '',
         searchFilter: tec.as<String>(json['searchFilter']) ?? '',
       );
@@ -223,6 +231,7 @@ class VolumesFilter extends Equatable {
       if (volumeType != vol.VolumeType.anyType) 'volumeType': volumeType.index,
       if (location != vol.Location.any) 'location': location.index,
       if (ownershipStatus != OwnershipStatus.any) 'ownershipStatus': ownershipStatus.index,
+      if (category != 0) 'category': category,
       if (language.isNotEmpty) 'language': language,
       if (searchFilter.isNotEmpty) 'searchFilter': searchFilter,
     };

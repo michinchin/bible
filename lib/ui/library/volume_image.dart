@@ -1,6 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 class VolumeImage extends StatelessWidget {
@@ -21,8 +22,7 @@ class VolumeImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final path = 'https://cf-stream.tecartabible.com/7/covers/${volume.id}.jpg';
-
+    final path = '${tec.streamUrl}/covers/${volume.id}.jpg';
     final heroTag = '${volume.hashCode}-${volume.id}';
     Widget img() => CachedNetworkImage(
           width: width,
