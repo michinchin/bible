@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:bible/models/app_settings.dart';
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
@@ -9,7 +8,8 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../models/iap.dart';
+import '../../models/app_settings.dart';
+// import '../../models/iap.dart';
 import '../common/common.dart';
 import 'volume_image.dart';
 
@@ -183,7 +183,7 @@ class _VolumeCard extends StatelessWidget {
               highlightColor: Colors.transparent,
               child: TecText('BUY', textScaleFactor: textScaleFactor),
               onPressed: () {
-                InAppPurchases.purchase(volume.appStoreId, consumable: false);
+                // InAppPurchases.purchase(volume.appStoreId, consumable: false);
               },
             ),
           ),
