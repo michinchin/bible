@@ -26,8 +26,8 @@ class _VolumeDetailState extends State<VolumeDetail> {
   @override
   Widget build(BuildContext context) {
     // We're deliberately using `scaleFactorWith` instead of `textScaleFactor...` because
-    // if the user had their device text scaling set very high, it can cause overflow
-    // with this UI.
+    // if the user has their device text scaling set very high, it can cause overflow
+    // the the name and publisher text.
     final textScaleFactor = scaleFactorWith(
       context,
       dampingFactor: 0.5,
@@ -227,7 +227,7 @@ class _VolumeDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = TextStyle(
-      fontSize: 15,
+      fontSize: 14,
       height: 1.3,
       color: Theme.of(context).textColor,
     );
@@ -240,6 +240,8 @@ class _VolumeDescription extends StatelessWidget {
           return TecText(
             description ?? '',
             style: textStyle,
+            // We're deliberately using `contentTextScaleFactorWith` here because this is
+            // a large amount of text and we want it to scale with the user's text scale setting.
             textScaleFactor: contentTextScaleFactorWith(context),
             // textAlign: TextAlign.justify,
           );
