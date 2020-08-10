@@ -357,6 +357,7 @@ class _VolumesListState extends State<_VolumesList> {
         Expanded(
           child: Scrollbar(
             child: ScrollablePositionedList.builder(
+              padding: MediaQuery.of(context)?.padding,
               itemScrollController: _scrollController,
               itemCount: bloc.state.volumes.length,
               itemBuilder: (context, index) {
