@@ -27,7 +27,6 @@ class BibleChapterState {
   factory BibleChapterState.fromJson(Object o) {
     BookChapterVerse bcv;
     int page, bibleId;
-    String title;
 
     final json = (o is String) ? tec.parseJsonSync(o) : o;
     if (json is Map<String, dynamic>) {

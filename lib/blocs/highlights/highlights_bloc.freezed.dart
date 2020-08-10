@@ -14,10 +14,10 @@ class _$ChapterHighlightsTearOff {
 
 // ignore: unused_element
   _ChapterHighlights call(
-      int volume, int book, int chapter, List<Highlight> highlights,
+      int volumeId, int book, int chapter, List<Highlight> highlights,
       {bool loaded}) {
     return _ChapterHighlights(
-      volume,
+      volumeId,
       book,
       chapter,
       highlights,
@@ -30,7 +30,7 @@ class _$ChapterHighlightsTearOff {
 const $ChapterHighlights = _$ChapterHighlightsTearOff();
 
 mixin _$ChapterHighlights {
-  int get volume;
+  int get volumeId;
   int get book;
   int get chapter;
   List<Highlight> get highlights;
@@ -44,7 +44,7 @@ abstract class $ChapterHighlightsCopyWith<$Res> {
           ChapterHighlights value, $Res Function(ChapterHighlights) then) =
       _$ChapterHighlightsCopyWithImpl<$Res>;
   $Res call(
-      {int volume,
+      {int volumeId,
       int book,
       int chapter,
       List<Highlight> highlights,
@@ -61,14 +61,14 @@ class _$ChapterHighlightsCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object volume = freezed,
+    Object volumeId = freezed,
     Object book = freezed,
     Object chapter = freezed,
     Object highlights = freezed,
     Object loaded = freezed,
   }) {
     return _then(_value.copyWith(
-      volume: volume == freezed ? _value.volume : volume as int,
+      volumeId: volumeId == freezed ? _value.volumeId : volumeId as int,
       book: book == freezed ? _value.book : book as int,
       chapter: chapter == freezed ? _value.chapter : chapter as int,
       highlights: highlights == freezed
@@ -86,7 +86,7 @@ abstract class _$ChapterHighlightsCopyWith<$Res>
       __$ChapterHighlightsCopyWithImpl<$Res>;
   @override
   $Res call(
-      {int volume,
+      {int volumeId,
       int book,
       int chapter,
       List<Highlight> highlights,
@@ -105,14 +105,14 @@ class __$ChapterHighlightsCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object volume = freezed,
+    Object volumeId = freezed,
     Object book = freezed,
     Object chapter = freezed,
     Object highlights = freezed,
     Object loaded = freezed,
   }) {
     return _then(_ChapterHighlights(
-      volume == freezed ? _value.volume : volume as int,
+      volumeId == freezed ? _value.volumeId : volumeId as int,
       book == freezed ? _value.book : book as int,
       chapter == freezed ? _value.chapter : chapter as int,
       highlights == freezed ? _value.highlights : highlights as List<Highlight>,
@@ -125,15 +125,15 @@ class _$_ChapterHighlights
     with DiagnosticableTreeMixin
     implements _ChapterHighlights {
   const _$_ChapterHighlights(
-      this.volume, this.book, this.chapter, this.highlights,
+      this.volumeId, this.book, this.chapter, this.highlights,
       {this.loaded})
-      : assert(volume != null),
+      : assert(volumeId != null),
         assert(book != null),
         assert(chapter != null),
         assert(highlights != null);
 
   @override
-  final int volume;
+  final int volumeId;
   @override
   final int book;
   @override
@@ -145,7 +145,7 @@ class _$_ChapterHighlights
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'ChapterHighlights(volume: $volume, book: $book, chapter: $chapter, highlights: $highlights, loaded: $loaded)';
+    return 'ChapterHighlights(volumeId: $volumeId, book: $book, chapter: $chapter, highlights: $highlights, loaded: $loaded)';
   }
 
   @override
@@ -153,7 +153,7 @@ class _$_ChapterHighlights
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'ChapterHighlights'))
-      ..add(DiagnosticsProperty('volume', volume))
+      ..add(DiagnosticsProperty('volumeId', volumeId))
       ..add(DiagnosticsProperty('book', book))
       ..add(DiagnosticsProperty('chapter', chapter))
       ..add(DiagnosticsProperty('highlights', highlights))
@@ -164,8 +164,9 @@ class _$_ChapterHighlights
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other is _ChapterHighlights &&
-            (identical(other.volume, volume) ||
-                const DeepCollectionEquality().equals(other.volume, volume)) &&
+            (identical(other.volumeId, volumeId) ||
+                const DeepCollectionEquality()
+                    .equals(other.volumeId, volumeId)) &&
             (identical(other.book, book) ||
                 const DeepCollectionEquality().equals(other.book, book)) &&
             (identical(other.chapter, chapter) ||
@@ -181,7 +182,7 @@ class _$_ChapterHighlights
   @override
   int get hashCode =>
       runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(volume) ^
+      const DeepCollectionEquality().hash(volumeId) ^
       const DeepCollectionEquality().hash(book) ^
       const DeepCollectionEquality().hash(chapter) ^
       const DeepCollectionEquality().hash(highlights) ^
@@ -194,11 +195,11 @@ class _$_ChapterHighlights
 
 abstract class _ChapterHighlights implements ChapterHighlights {
   const factory _ChapterHighlights(
-      int volume, int book, int chapter, List<Highlight> highlights,
+      int volumeId, int book, int chapter, List<Highlight> highlights,
       {bool loaded}) = _$_ChapterHighlights;
 
   @override
-  int get volume;
+  int get volumeId;
   @override
   int get book;
   @override
@@ -394,6 +395,13 @@ class _$HighlightEventTearOff {
       mode,
     );
   }
+
+// ignore: unused_element
+  _ChangeVolumeId changeVolumeId(int volumeId) {
+    return _ChangeVolumeId(
+      volumeId,
+    );
+  }
 }
 
 // ignore: unused_element
@@ -407,6 +415,7 @@ mixin _$HighlightEvent {
         Result add(
             HighlightType type, int color, Reference ref, HighlightMode mode),
     @required Result clear(Reference ref, HighlightMode mode),
+    @required Result changeVolumeId(int volumeId),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
@@ -414,6 +423,7 @@ mixin _$HighlightEvent {
     Result add(
         HighlightType type, int color, Reference ref, HighlightMode mode),
     Result clear(Reference ref, HighlightMode mode),
+    Result changeVolumeId(int volumeId),
     @required Result orElse(),
   });
   @optionalTypeArgs
@@ -421,12 +431,14 @@ mixin _$HighlightEvent {
     @required Result updateFromDb(_UpdateFromDb value),
     @required Result add(_Add value),
     @required Result clear(_Clear value),
+    @required Result changeVolumeId(_ChangeVolumeId value),
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result updateFromDb(_UpdateFromDb value),
     Result add(_Add value),
     Result clear(_Clear value),
+    Result changeVolumeId(_ChangeVolumeId value),
     @required Result orElse(),
   });
 }
@@ -516,10 +528,12 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
         Result add(
             HighlightType type, int color, Reference ref, HighlightMode mode),
     @required Result clear(Reference ref, HighlightMode mode),
+    @required Result changeVolumeId(int volumeId),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
+    assert(changeVolumeId != null);
     return updateFromDb(hls);
   }
 
@@ -530,6 +544,7 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
     Result add(
         HighlightType type, int color, Reference ref, HighlightMode mode),
     Result clear(Reference ref, HighlightMode mode),
+    Result changeVolumeId(int volumeId),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -545,10 +560,12 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
     @required Result updateFromDb(_UpdateFromDb value),
     @required Result add(_Add value),
     @required Result clear(_Clear value),
+    @required Result changeVolumeId(_ChangeVolumeId value),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
+    assert(changeVolumeId != null);
     return updateFromDb(this);
   }
 
@@ -558,6 +575,7 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
     Result updateFromDb(_UpdateFromDb value),
     Result add(_Add value),
     Result clear(_Clear value),
+    Result changeVolumeId(_ChangeVolumeId value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -676,10 +694,12 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
         Result add(
             HighlightType type, int color, Reference ref, HighlightMode mode),
     @required Result clear(Reference ref, HighlightMode mode),
+    @required Result changeVolumeId(int volumeId),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
+    assert(changeVolumeId != null);
     return add(type, color, ref, mode);
   }
 
@@ -690,6 +710,7 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
     Result add(
         HighlightType type, int color, Reference ref, HighlightMode mode),
     Result clear(Reference ref, HighlightMode mode),
+    Result changeVolumeId(int volumeId),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -705,10 +726,12 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
     @required Result updateFromDb(_UpdateFromDb value),
     @required Result add(_Add value),
     @required Result clear(_Clear value),
+    @required Result changeVolumeId(_ChangeVolumeId value),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
+    assert(changeVolumeId != null);
     return add(this);
   }
 
@@ -718,6 +741,7 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
     Result updateFromDb(_UpdateFromDb value),
     Result add(_Add value),
     Result clear(_Clear value),
+    Result changeVolumeId(_ChangeVolumeId value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -820,10 +844,12 @@ class _$_Clear with DiagnosticableTreeMixin implements _Clear {
         Result add(
             HighlightType type, int color, Reference ref, HighlightMode mode),
     @required Result clear(Reference ref, HighlightMode mode),
+    @required Result changeVolumeId(int volumeId),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
+    assert(changeVolumeId != null);
     return clear(ref, mode);
   }
 
@@ -834,6 +860,7 @@ class _$_Clear with DiagnosticableTreeMixin implements _Clear {
     Result add(
         HighlightType type, int color, Reference ref, HighlightMode mode),
     Result clear(Reference ref, HighlightMode mode),
+    Result changeVolumeId(int volumeId),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -849,10 +876,12 @@ class _$_Clear with DiagnosticableTreeMixin implements _Clear {
     @required Result updateFromDb(_UpdateFromDb value),
     @required Result add(_Add value),
     @required Result clear(_Clear value),
+    @required Result changeVolumeId(_ChangeVolumeId value),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(clear != null);
+    assert(changeVolumeId != null);
     return clear(this);
   }
 
@@ -862,6 +891,7 @@ class _$_Clear with DiagnosticableTreeMixin implements _Clear {
     Result updateFromDb(_UpdateFromDb value),
     Result add(_Add value),
     Result clear(_Clear value),
+    Result changeVolumeId(_ChangeVolumeId value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -878,4 +908,142 @@ abstract class _Clear implements HighlightEvent {
   Reference get ref;
   HighlightMode get mode;
   _$ClearCopyWith<_Clear> get copyWith;
+}
+
+abstract class _$ChangeVolumeIdCopyWith<$Res> {
+  factory _$ChangeVolumeIdCopyWith(
+          _ChangeVolumeId value, $Res Function(_ChangeVolumeId) then) =
+      __$ChangeVolumeIdCopyWithImpl<$Res>;
+  $Res call({int volumeId});
+}
+
+class __$ChangeVolumeIdCopyWithImpl<$Res>
+    extends _$HighlightEventCopyWithImpl<$Res>
+    implements _$ChangeVolumeIdCopyWith<$Res> {
+  __$ChangeVolumeIdCopyWithImpl(
+      _ChangeVolumeId _value, $Res Function(_ChangeVolumeId) _then)
+      : super(_value, (v) => _then(v as _ChangeVolumeId));
+
+  @override
+  _ChangeVolumeId get _value => super._value as _ChangeVolumeId;
+
+  @override
+  $Res call({
+    Object volumeId = freezed,
+  }) {
+    return _then(_ChangeVolumeId(
+      volumeId == freezed ? _value.volumeId : volumeId as int,
+    ));
+  }
+}
+
+class _$_ChangeVolumeId
+    with DiagnosticableTreeMixin
+    implements _ChangeVolumeId {
+  const _$_ChangeVolumeId(this.volumeId) : assert(volumeId != null);
+
+  @override
+  final int volumeId;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'HighlightEvent.changeVolumeId(volumeId: $volumeId)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'HighlightEvent.changeVolumeId'))
+      ..add(DiagnosticsProperty('volumeId', volumeId));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _ChangeVolumeId &&
+            (identical(other.volumeId, volumeId) ||
+                const DeepCollectionEquality()
+                    .equals(other.volumeId, volumeId)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^ const DeepCollectionEquality().hash(volumeId);
+
+  @override
+  _$ChangeVolumeIdCopyWith<_ChangeVolumeId> get copyWith =>
+      __$ChangeVolumeIdCopyWithImpl<_ChangeVolumeId>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result updateFromDb(List<Highlight> hls),
+    @required
+        Result add(
+            HighlightType type, int color, Reference ref, HighlightMode mode),
+    @required Result clear(Reference ref, HighlightMode mode),
+    @required Result changeVolumeId(int volumeId),
+  }) {
+    assert(updateFromDb != null);
+    assert(add != null);
+    assert(clear != null);
+    assert(changeVolumeId != null);
+    return changeVolumeId(volumeId);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result updateFromDb(List<Highlight> hls),
+    Result add(
+        HighlightType type, int color, Reference ref, HighlightMode mode),
+    Result clear(Reference ref, HighlightMode mode),
+    Result changeVolumeId(int volumeId),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (changeVolumeId != null) {
+      return changeVolumeId(volumeId);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result updateFromDb(_UpdateFromDb value),
+    @required Result add(_Add value),
+    @required Result clear(_Clear value),
+    @required Result changeVolumeId(_ChangeVolumeId value),
+  }) {
+    assert(updateFromDb != null);
+    assert(add != null);
+    assert(clear != null);
+    assert(changeVolumeId != null);
+    return changeVolumeId(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result updateFromDb(_UpdateFromDb value),
+    Result add(_Add value),
+    Result clear(_Clear value),
+    Result changeVolumeId(_ChangeVolumeId value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (changeVolumeId != null) {
+      return changeVolumeId(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _ChangeVolumeId implements HighlightEvent {
+  const factory _ChangeVolumeId(int volumeId) = _$_ChangeVolumeId;
+
+  int get volumeId;
+  _$ChangeVolumeIdCopyWith<_ChangeVolumeId> get copyWith;
 }

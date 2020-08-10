@@ -367,14 +367,14 @@ class _ChapterViewState extends State<_ChapterView> {
         providers: [
           BlocProvider(
             create: (context) => ChapterMarginNotesBloc(
-              volume: widget.volumeId,
+              volumeId: widget.volumeId,
               book: widget.ref.book,
               chapter: widget.ref.chapter,
             ),
           ),
           BlocProvider(
             create: (context) => ChapterHighlightsBloc(
-              volume: widget.volumeId,
+              volumeId: widget.volumeId,
               book: widget.ref.book,
               chapter: widget.ref.chapter,
             ),
@@ -389,7 +389,22 @@ class _ChapterViewState extends State<_ChapterView> {
                 initialData: AppSettings.shared.contentFontName.value,
                 builder: (c, fontName, error) {
                   assert(fontName != null);
-                  if (highlights.loaded && marginNotes.loaded) {
+                  var userContentValid = true;
+                  if (marginNotes.loaded && marginNotes.volumeId != widget.volumeId) {
+                    context
+                        .bloc<ChapterMarginNotesBloc>()
+                        .add(MarginNotesEvent.changeVolumeId(widget.volumeId));
+                    userContentValid = false;
+                  }
+
+                  if (highlights.loaded && highlights.volumeId != widget.volumeId) {
+                    context
+                        .bloc<ChapterHighlightsBloc>()
+                        .add(HighlightEvent.changeVolumeId(widget.volumeId));
+                    userContentValid = false;
+                  }
+
+                  if (userContentValid && highlights.loaded && marginNotes.loaded) {
                     debugPrint('loading ${widget.ref.chapter}');
 
                     return _BibleHtml(
@@ -526,7 +541,8 @@ class _BibleHtmlState extends State<_BibleHtml> {
                   debugId: debugId,
                   scrollController: _scrollController,
                   baseUrl: widget.baseUrl,
-                  textScaleFactor: 1.0, // HTML is already scaled.
+                  textScaleFactor: 1.0,
+                  // HTML is already scaled.
                   textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
                       ? TextStyle(color: textColor)
                       : GoogleFonts.getFont(widget.fontName, color: textColor)),

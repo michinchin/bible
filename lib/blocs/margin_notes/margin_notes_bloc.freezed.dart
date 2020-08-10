@@ -33,6 +33,13 @@ class _$MarginNotesEventTearOff {
       marginNote,
     );
   }
+
+// ignore: unused_element
+  _ChangeVolumeId changeVolumeId(int volumeId) {
+    return _ChangeVolumeId(
+      volumeId,
+    );
+  }
 }
 
 // ignore: unused_element
@@ -44,12 +51,14 @@ mixin _$MarginNotesEvent {
     @required Result updateFromDb(Map<int, MarginNote> marginNotes),
     @required Result add(String text, Reference ref),
     @required Result delete(MarginNote marginNote),
+    @required Result changeVolumeId(int volumeId),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result updateFromDb(Map<int, MarginNote> marginNotes),
     Result add(String text, Reference ref),
     Result delete(MarginNote marginNote),
+    Result changeVolumeId(int volumeId),
     @required Result orElse(),
   });
   @optionalTypeArgs
@@ -57,12 +66,14 @@ mixin _$MarginNotesEvent {
     @required Result updateFromDb(_UpdateFromDb value),
     @required Result add(_Add value),
     @required Result delete(_Delete value),
+    @required Result changeVolumeId(_ChangeVolumeId value),
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result updateFromDb(_UpdateFromDb value),
     Result add(_Add value),
     Result delete(_Delete value),
+    Result changeVolumeId(_ChangeVolumeId value),
     @required Result orElse(),
   });
 }
@@ -154,10 +165,12 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
     @required Result updateFromDb(Map<int, MarginNote> marginNotes),
     @required Result add(String text, Reference ref),
     @required Result delete(MarginNote marginNote),
+    @required Result changeVolumeId(int volumeId),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(delete != null);
+    assert(changeVolumeId != null);
     return updateFromDb(marginNotes);
   }
 
@@ -167,6 +180,7 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
     Result updateFromDb(Map<int, MarginNote> marginNotes),
     Result add(String text, Reference ref),
     Result delete(MarginNote marginNote),
+    Result changeVolumeId(int volumeId),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -182,10 +196,12 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
     @required Result updateFromDb(_UpdateFromDb value),
     @required Result add(_Add value),
     @required Result delete(_Delete value),
+    @required Result changeVolumeId(_ChangeVolumeId value),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(delete != null);
+    assert(changeVolumeId != null);
     return updateFromDb(this);
   }
 
@@ -195,6 +211,7 @@ class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
     Result updateFromDb(_UpdateFromDb value),
     Result add(_Add value),
     Result delete(_Delete value),
+    Result changeVolumeId(_ChangeVolumeId value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -289,10 +306,12 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
     @required Result updateFromDb(Map<int, MarginNote> marginNotes),
     @required Result add(String text, Reference ref),
     @required Result delete(MarginNote marginNote),
+    @required Result changeVolumeId(int volumeId),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(delete != null);
+    assert(changeVolumeId != null);
     return add(text, ref);
   }
 
@@ -302,6 +321,7 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
     Result updateFromDb(Map<int, MarginNote> marginNotes),
     Result add(String text, Reference ref),
     Result delete(MarginNote marginNote),
+    Result changeVolumeId(int volumeId),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -317,10 +337,12 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
     @required Result updateFromDb(_UpdateFromDb value),
     @required Result add(_Add value),
     @required Result delete(_Delete value),
+    @required Result changeVolumeId(_ChangeVolumeId value),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(delete != null);
+    assert(changeVolumeId != null);
     return add(this);
   }
 
@@ -330,6 +352,7 @@ class _$_Add with DiagnosticableTreeMixin implements _Add {
     Result updateFromDb(_UpdateFromDb value),
     Result add(_Add value),
     Result delete(_Delete value),
+    Result changeVolumeId(_ChangeVolumeId value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -414,10 +437,12 @@ class _$_Delete with DiagnosticableTreeMixin implements _Delete {
     @required Result updateFromDb(Map<int, MarginNote> marginNotes),
     @required Result add(String text, Reference ref),
     @required Result delete(MarginNote marginNote),
+    @required Result changeVolumeId(int volumeId),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(delete != null);
+    assert(changeVolumeId != null);
     return delete(marginNote);
   }
 
@@ -427,6 +452,7 @@ class _$_Delete with DiagnosticableTreeMixin implements _Delete {
     Result updateFromDb(Map<int, MarginNote> marginNotes),
     Result add(String text, Reference ref),
     Result delete(MarginNote marginNote),
+    Result changeVolumeId(int volumeId),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -442,10 +468,12 @@ class _$_Delete with DiagnosticableTreeMixin implements _Delete {
     @required Result updateFromDb(_UpdateFromDb value),
     @required Result add(_Add value),
     @required Result delete(_Delete value),
+    @required Result changeVolumeId(_ChangeVolumeId value),
   }) {
     assert(updateFromDb != null);
     assert(add != null);
     assert(delete != null);
+    assert(changeVolumeId != null);
     return delete(this);
   }
 
@@ -455,6 +483,7 @@ class _$_Delete with DiagnosticableTreeMixin implements _Delete {
     Result updateFromDb(_UpdateFromDb value),
     Result add(_Add value),
     Result delete(_Delete value),
+    Result changeVolumeId(_ChangeVolumeId value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -472,15 +501,150 @@ abstract class _Delete implements MarginNotesEvent {
   _$DeleteCopyWith<_Delete> get copyWith;
 }
 
+abstract class _$ChangeVolumeIdCopyWith<$Res> {
+  factory _$ChangeVolumeIdCopyWith(
+          _ChangeVolumeId value, $Res Function(_ChangeVolumeId) then) =
+      __$ChangeVolumeIdCopyWithImpl<$Res>;
+  $Res call({int volumeId});
+}
+
+class __$ChangeVolumeIdCopyWithImpl<$Res>
+    extends _$MarginNotesEventCopyWithImpl<$Res>
+    implements _$ChangeVolumeIdCopyWith<$Res> {
+  __$ChangeVolumeIdCopyWithImpl(
+      _ChangeVolumeId _value, $Res Function(_ChangeVolumeId) _then)
+      : super(_value, (v) => _then(v as _ChangeVolumeId));
+
+  @override
+  _ChangeVolumeId get _value => super._value as _ChangeVolumeId;
+
+  @override
+  $Res call({
+    Object volumeId = freezed,
+  }) {
+    return _then(_ChangeVolumeId(
+      volumeId == freezed ? _value.volumeId : volumeId as int,
+    ));
+  }
+}
+
+class _$_ChangeVolumeId
+    with DiagnosticableTreeMixin
+    implements _ChangeVolumeId {
+  const _$_ChangeVolumeId(this.volumeId) : assert(volumeId != null);
+
+  @override
+  final int volumeId;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'MarginNotesEvent.changeVolumeId(volumeId: $volumeId)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'MarginNotesEvent.changeVolumeId'))
+      ..add(DiagnosticsProperty('volumeId', volumeId));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _ChangeVolumeId &&
+            (identical(other.volumeId, volumeId) ||
+                const DeepCollectionEquality()
+                    .equals(other.volumeId, volumeId)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^ const DeepCollectionEquality().hash(volumeId);
+
+  @override
+  _$ChangeVolumeIdCopyWith<_ChangeVolumeId> get copyWith =>
+      __$ChangeVolumeIdCopyWithImpl<_ChangeVolumeId>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result updateFromDb(Map<int, MarginNote> marginNotes),
+    @required Result add(String text, Reference ref),
+    @required Result delete(MarginNote marginNote),
+    @required Result changeVolumeId(int volumeId),
+  }) {
+    assert(updateFromDb != null);
+    assert(add != null);
+    assert(delete != null);
+    assert(changeVolumeId != null);
+    return changeVolumeId(volumeId);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result updateFromDb(Map<int, MarginNote> marginNotes),
+    Result add(String text, Reference ref),
+    Result delete(MarginNote marginNote),
+    Result changeVolumeId(int volumeId),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (changeVolumeId != null) {
+      return changeVolumeId(volumeId);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result updateFromDb(_UpdateFromDb value),
+    @required Result add(_Add value),
+    @required Result delete(_Delete value),
+    @required Result changeVolumeId(_ChangeVolumeId value),
+  }) {
+    assert(updateFromDb != null);
+    assert(add != null);
+    assert(delete != null);
+    assert(changeVolumeId != null);
+    return changeVolumeId(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result updateFromDb(_UpdateFromDb value),
+    Result add(_Add value),
+    Result delete(_Delete value),
+    Result changeVolumeId(_ChangeVolumeId value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (changeVolumeId != null) {
+      return changeVolumeId(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _ChangeVolumeId implements MarginNotesEvent {
+  const factory _ChangeVolumeId(int volumeId) = _$_ChangeVolumeId;
+
+  int get volumeId;
+  _$ChangeVolumeIdCopyWith<_ChangeVolumeId> get copyWith;
+}
+
 class _$ChapterMarginNotesTearOff {
   const _$ChapterMarginNotesTearOff();
 
 // ignore: unused_element
   _ChapterMarginNotes call(
-      int volume, int book, int chapter, Map<int, MarginNote> marginNotes,
+      int volumeId, int book, int chapter, Map<int, MarginNote> marginNotes,
       {bool loaded}) {
     return _ChapterMarginNotes(
-      volume,
+      volumeId,
       book,
       chapter,
       marginNotes,
@@ -493,7 +657,7 @@ class _$ChapterMarginNotesTearOff {
 const $ChapterMarginNotes = _$ChapterMarginNotesTearOff();
 
 mixin _$ChapterMarginNotes {
-  int get volume;
+  int get volumeId;
   int get book;
   int get chapter;
   Map<int, MarginNote> get marginNotes;
@@ -507,7 +671,7 @@ abstract class $ChapterMarginNotesCopyWith<$Res> {
           ChapterMarginNotes value, $Res Function(ChapterMarginNotes) then) =
       _$ChapterMarginNotesCopyWithImpl<$Res>;
   $Res call(
-      {int volume,
+      {int volumeId,
       int book,
       int chapter,
       Map<int, MarginNote> marginNotes,
@@ -524,14 +688,14 @@ class _$ChapterMarginNotesCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object volume = freezed,
+    Object volumeId = freezed,
     Object book = freezed,
     Object chapter = freezed,
     Object marginNotes = freezed,
     Object loaded = freezed,
   }) {
     return _then(_value.copyWith(
-      volume: volume == freezed ? _value.volume : volume as int,
+      volumeId: volumeId == freezed ? _value.volumeId : volumeId as int,
       book: book == freezed ? _value.book : book as int,
       chapter: chapter == freezed ? _value.chapter : chapter as int,
       marginNotes: marginNotes == freezed
@@ -549,7 +713,7 @@ abstract class _$ChapterMarginNotesCopyWith<$Res>
       __$ChapterMarginNotesCopyWithImpl<$Res>;
   @override
   $Res call(
-      {int volume,
+      {int volumeId,
       int book,
       int chapter,
       Map<int, MarginNote> marginNotes,
@@ -568,14 +732,14 @@ class __$ChapterMarginNotesCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object volume = freezed,
+    Object volumeId = freezed,
     Object book = freezed,
     Object chapter = freezed,
     Object marginNotes = freezed,
     Object loaded = freezed,
   }) {
     return _then(_ChapterMarginNotes(
-      volume == freezed ? _value.volume : volume as int,
+      volumeId == freezed ? _value.volumeId : volumeId as int,
       book == freezed ? _value.book : book as int,
       chapter == freezed ? _value.chapter : chapter as int,
       marginNotes == freezed
@@ -590,15 +754,15 @@ class _$_ChapterMarginNotes
     with DiagnosticableTreeMixin
     implements _ChapterMarginNotes {
   const _$_ChapterMarginNotes(
-      this.volume, this.book, this.chapter, this.marginNotes,
+      this.volumeId, this.book, this.chapter, this.marginNotes,
       {this.loaded})
-      : assert(volume != null),
+      : assert(volumeId != null),
         assert(book != null),
         assert(chapter != null),
         assert(marginNotes != null);
 
   @override
-  final int volume;
+  final int volumeId;
   @override
   final int book;
   @override
@@ -610,7 +774,7 @@ class _$_ChapterMarginNotes
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'ChapterMarginNotes(volume: $volume, book: $book, chapter: $chapter, marginNotes: $marginNotes, loaded: $loaded)';
+    return 'ChapterMarginNotes(volumeId: $volumeId, book: $book, chapter: $chapter, marginNotes: $marginNotes, loaded: $loaded)';
   }
 
   @override
@@ -618,7 +782,7 @@ class _$_ChapterMarginNotes
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'ChapterMarginNotes'))
-      ..add(DiagnosticsProperty('volume', volume))
+      ..add(DiagnosticsProperty('volumeId', volumeId))
       ..add(DiagnosticsProperty('book', book))
       ..add(DiagnosticsProperty('chapter', chapter))
       ..add(DiagnosticsProperty('marginNotes', marginNotes))
@@ -629,8 +793,9 @@ class _$_ChapterMarginNotes
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other is _ChapterMarginNotes &&
-            (identical(other.volume, volume) ||
-                const DeepCollectionEquality().equals(other.volume, volume)) &&
+            (identical(other.volumeId, volumeId) ||
+                const DeepCollectionEquality()
+                    .equals(other.volumeId, volumeId)) &&
             (identical(other.book, book) ||
                 const DeepCollectionEquality().equals(other.book, book)) &&
             (identical(other.chapter, chapter) ||
@@ -646,7 +811,7 @@ class _$_ChapterMarginNotes
   @override
   int get hashCode =>
       runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(volume) ^
+      const DeepCollectionEquality().hash(volumeId) ^
       const DeepCollectionEquality().hash(book) ^
       const DeepCollectionEquality().hash(chapter) ^
       const DeepCollectionEquality().hash(marginNotes) ^
@@ -659,11 +824,11 @@ class _$_ChapterMarginNotes
 
 abstract class _ChapterMarginNotes implements ChapterMarginNotes {
   const factory _ChapterMarginNotes(
-      int volume, int book, int chapter, Map<int, MarginNote> marginNotes,
+      int volumeId, int book, int chapter, Map<int, MarginNote> marginNotes,
       {bool loaded}) = _$_ChapterMarginNotes;
 
   @override
-  int get volume;
+  int get volumeId;
   @override
   int get book;
   @override

@@ -17,7 +17,7 @@ part 'highlights_bloc.freezed.dart';
 
 @freezed
 abstract class ChapterHighlights with _$ChapterHighlights {
-  const factory ChapterHighlights(int volume, int book, int chapter, List<Highlight> highlights,
+  const factory ChapterHighlights(int volumeId, int book, int chapter, List<Highlight> highlights,
       {bool loaded}) = _ChapterHighlights;
 }
 
@@ -95,25 +95,24 @@ enum HighlightMode { trial, save }
 @freezed
 abstract class HighlightEvent with _$HighlightEvent {
   const factory HighlightEvent.updateFromDb({@required List<Highlight> hls}) = _UpdateFromDb;
-
   const factory HighlightEvent.add(
       {@required HighlightType type,
       @required int color,
       @required Reference ref,
       @required HighlightMode mode}) = _Add;
-
   const factory HighlightEvent.clear(Reference ref, HighlightMode mode) = _Clear;
+  const factory HighlightEvent.changeVolumeId(int volumeId) = _ChangeVolumeId;
 }
 
 class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighlights> {
-  final int volume;
+  int volumeId;
   final int book;
   final int chapter;
   final bool loaded;
   StreamSubscription<UserDbChange> _userDbChangeSubscription;
 
   ChapterHighlightsBloc(
-      {@required this.volume, @required this.book, @required this.chapter, this.loaded = false}) {
+      {@required this.volumeId, @required this.book, @required this.chapter, this.loaded = false}) {
     _initUserContent();
 
     // Start listening for changes to the db.
@@ -133,12 +132,12 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
 
     if (change != null && change.includesItemType(UserItemType.highlight)) {
       if (change.type == UserDbChangeType.itemAdded &&
-          change.after?.volumeId == volume &&
+          change.after?.volumeId == volumeId &&
           change.after?.book == book &&
           change.after?.chapter == chapter) {
         reload = true;
       } else if (change.type == UserDbChangeType.itemDeleted &&
-          change.before?.volumeId == volume &&
+          change.before?.volumeId == volumeId &&
           change.before?.book == book &&
           change.before?.chapter == chapter) {
         reload = true;
@@ -156,7 +155,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
 
   Future<void> _initUserContent() async {
     final uc = await AppSettings.shared.userAccount.userDb
-        .getItemsWithVBC(volume, book, chapter, ofTypes: [UserItemType.highlight]);
+        .getItemsWithVBC(volumeId, book, chapter, ofTypes: [UserItemType.highlight]);
 
     if (uc.isNotEmpty) {
       // We keep the highlights sorted by modified date with most recent at the bottom.
@@ -176,7 +175,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
 
   Future<void> _saveHighlightsToDb(List<int> verses, List<Highlight> hls) async {
     final uc = await AppSettings.shared.userAccount.userDb
-        .getItemsWithVBC(volume, book, chapter, ofTypes: [UserItemType.highlight]);
+        .getItemsWithVBC(volumeId, book, chapter, ofTypes: [UserItemType.highlight]);
 
     // remove any existing hls in this reference range...
     for (final ui in uc) {
@@ -192,7 +191,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
           // create a new UserItem for this hl
           final ui = UserItem(
             type: UserItemType.highlight.index,
-            volumeId: volume,
+            volumeId: volumeId,
             book: book,
             chapter: chapter,
             color: (hl.color & 0xFFFFFF) +
@@ -211,12 +210,12 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
   }
 
   @override
-  ChapterHighlights get initialState => ChapterHighlights(volume, book, chapter, [], loaded: false);
+  ChapterHighlights get initialState => ChapterHighlights(volumeId, book, chapter, [], loaded: false);
 
   @override
   Stream<ChapterHighlights> mapEventToState(HighlightEvent event) async* {
-    final newState = event.when(add: _add, clear: _clear, updateFromDb: _updateFromDb);
-    // tec.dmPrint('Updated to $newState');
+    final newState = event.when(
+        add: _add, clear: _clear, updateFromDb: _updateFromDb, changeVolumeId: _changeVolumeId);
     yield newState;
   }
 
@@ -241,7 +240,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
 //      _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
     }
 
-    return ChapterHighlights(volume, book, chapter, newList, loaded: true);
+    return ChapterHighlights(volumeId, book, chapter, newList, loaded: true);
   }
 
   ChapterHighlights _add(HighlightType type, int color, Reference ref, HighlightMode mode) {
@@ -250,7 +249,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
     if (mode == HighlightMode.save) {
       _saveHighlightsToDb(ref.verses.toList(), newList);
     }
-    return ChapterHighlights(volume, book, chapter, newList, loaded: true);
+    return ChapterHighlights(volumeId, book, chapter, newList, loaded: true);
   }
 
   ChapterHighlights _clear(Reference ref, HighlightMode mode) {
@@ -261,7 +260,13 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
     } else {
       _saveHighlightsToDb(ref.verses.toList(), newList);
     }
-    return ChapterHighlights(volume, book, chapter, newList, loaded: true);
+    return ChapterHighlights(volumeId, book, chapter, newList, loaded: true);
+  }
+
+  ChapterHighlights _changeVolumeId(int volumeId) {
+    this.volumeId = volumeId;
+    _initUserContent();
+    return ChapterHighlights(volumeId, book, chapter, [], loaded: false);
   }
 }
 
