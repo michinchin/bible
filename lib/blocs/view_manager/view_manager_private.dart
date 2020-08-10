@@ -21,8 +21,7 @@ class _VMViewStack extends StatelessWidget {
       // only allow 2 views
       final viewPadding = MediaQuery.of(context).viewPadding;
       _minSize = math.max((maxSize - viewPadding.top - viewPadding.bottom) / 2, 272);
-    }
-    else {
+    } else {
       // larger window or tablet...
       _minSize = 300;
     }
@@ -64,7 +63,7 @@ class _VMViewStack extends StatelessWidget {
 
     return Theme(
       data: Theme.of(context).copyWith(
-        appBarTheme: appBarThemeWithContext(context),
+        // appBarTheme: Theme.of(context).tecAppBarTheme(),
         pageTransitionsTheme: tecPageTransitionsTheme(context),
       ),
       child: Stack(children: children),
@@ -185,8 +184,7 @@ List<List<ViewState>> _buildRows(
       (rows.isNotEmpty &&
           rows.last.width(constraints, size) + _defaultMinWidth(constraints) >
               constraints.maxWidth &&
-          rows.height(constraints, size) + _defaultMinHeight(constraints) >
-              constraints.maxHeight);
+          rows.height(constraints, size) + _defaultMinHeight(constraints) > constraints.maxHeight);
 
   // tec.dmPrint('ViewManagerBloc.isFull == ${bloc?.isFull}');
 

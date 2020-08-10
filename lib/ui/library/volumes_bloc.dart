@@ -95,29 +95,44 @@ Future<List<vol.Volume>> _volumesWith(VolumesFilter filter) async {
 
   final strs = filter.searchFilter.split(' ').map((s) => s.toLowerCase()).toList();
   var ids = vr.volumeIdsWithType(filter.volumeType, location: filter.location);
+
+  for (var i = 0; i < ids.length; i++) {
+    final id = ids[i];
+    if (i > 0 && ids.indexWhere((el) => el == id) < i) {
+      tec.dmPrint('VolumesBloc volume id $id has duplicates!');
+    }
+  }
+
   final owned = filter.ownershipStatus == OwnershipStatus.any
       ? null
       : await AppSettings.shared.userAccount.userDb.fullyLicensedVolumesInList(ids);
+  final ownedSet = owned == null ? <int>{} : owned.toSet();
 
   if (filter.ownershipStatus == OwnershipStatus.owned) {
     ids = owned;
   } else if (filter.ownershipStatus == OwnershipStatus.unowned) {
-    final ownedSet = owned.toSet();
     ids.removeWhere(ownedSet.contains);
   }
 
   final categoryVolumeIds =
       filter.category == 0 ? null : vr.categoryWithId(filter.category)?.volumeIds?.toSet();
 
-  final volumes = ids
-      .map<vol.Volume>(vr.volumeWithId)
-      .where((v) => filter.language.isEmpty || (v.language == filter.language))
-      .where((v) => categoryVolumeIds == null || categoryVolumeIds.contains(v.id))
-      .where((v) =>
-          strs.isEmpty ||
-          (strs.firstWhere((s) => !v.matchesSearchString(s), orElse: () => null) == null))
-      .toList()
-        ..sort((a, b) => a.name.compareTo(b.name));
+  // Local func that returns true if the given volume is a match for the filter.
+  bool _matches(vol.Volume v) =>
+      // Filter out the Voice translation for now, because it crashes _BibleHtml.
+      (v.id != 201) &&
+      // Filter by language, if set.
+      (filter.language.isEmpty || (v.language == filter.language)) &&
+      // Filter by category, if set.
+      (categoryVolumeIds == null || categoryVolumeIds.contains(v.id)) &&
+      // Filter out volumes that are not streamable, not for sale, and not owned.
+      (v.isStreamable || v.onSale || ownedSet.contains(v.id)) &&
+      // Filter by search string, if set.
+      (strs.isEmpty ||
+          (strs.firstWhere((s) => !v.matchesSearchString(s), orElse: () => null) == null));
+
+  final volumes = ids.map<vol.Volume>(vr.volumeWithId).where(_matches).toList()
+    ..sort((a, b) => a.name.compareTo(b.name));
 
   return volumes;
 }
@@ -203,7 +218,7 @@ class VolumesFilter extends Equatable {
             vol.Location.values.length - 1, math.max(0, tec.as<int>(json['location']) ?? 0))],
         ownershipStatus: OwnershipStatus.values[math.min(OwnershipStatus.values.length - 1,
             math.max(0, tec.as<int>(json['ownershipStatus']) ?? 0))],
-        category: 0,
+        category: tec.as<int>(json['category']) ?? 0,
         language: tec.as<String>(json['language']) ?? '',
         searchFilter: tec.as<String>(json['searchFilter']) ?? '',
       );
@@ -216,6 +231,7 @@ class VolumesFilter extends Equatable {
       if (volumeType != vol.VolumeType.anyType) 'volumeType': volumeType.index,
       if (location != vol.Location.any) 'location': location.index,
       if (ownershipStatus != OwnershipStatus.any) 'ownershipStatus': ownershipStatus.index,
+      if (category != 0) 'category': category,
       if (language.isNotEmpty) 'language': language,
       if (searchFilter.isNotEmpty) 'searchFilter': searchFilter,
     };

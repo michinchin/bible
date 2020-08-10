@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'tec_stream_builder.dart';
 
 class TecFutureBuilder<T> extends StatefulWidget {
+  final Future<T> Function() futureBuilder;
   final Future<T> future;
   final T initialData;
   final TecAsyncWidgetBuilder<T> builder;
@@ -12,6 +13,7 @@ class TecFutureBuilder<T> extends StatefulWidget {
   const TecFutureBuilder({
     Key key,
     this.future,
+    this.futureBuilder,
     this.initialData,
     @required this.builder,
   })  : assert(builder != null),
@@ -24,8 +26,9 @@ class TecFutureBuilder<T> extends StatefulWidget {
 /// State for [TecFutureBuilder].
 class _TecFutureBuilderState<T> extends State<TecFutureBuilder<T>> {
   Object _activeCallbackIdentity;
-  T _data;
+  Future<T> _future;
   Object _error;
+  T _data;
 
   @override
   void initState() {
@@ -37,7 +40,7 @@ class _TecFutureBuilderState<T> extends State<TecFutureBuilder<T>> {
   @override
   void didUpdateWidget(TecFutureBuilder<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.future != widget.future) {
+    if (oldWidget.future != widget.future || oldWidget.futureBuilder != widget.futureBuilder) {
       _unsubscribe();
       _subscribe();
     }
@@ -51,9 +54,15 @@ class _TecFutureBuilderState<T> extends State<TecFutureBuilder<T>> {
 
   void _subscribe() {
     if (widget.future != null) {
+      _future = widget.future;
+    } else if (widget.futureBuilder != null) {
+      _future = widget.futureBuilder();
+    }
+
+    if (_future != null) {
       final callbackIdentity = Object();
       _activeCallbackIdentity = callbackIdentity;
-      widget.future.then<void>((data) {
+      _future.then<void>((data) {
         if (_activeCallbackIdentity == callbackIdentity) {
           if (data != _data) {
             setState(() {

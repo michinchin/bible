@@ -51,10 +51,7 @@ class _TecSearchFieldState extends State<TecSearchField> {
                   controller: widget.textEditingController,
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    prefixIcon: IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: () {},
-                    ),
+                    prefixIcon: const Icon(Icons.search),
                     suffixIcon: widget.textEditingController.text.isNotEmpty
                         ? IconButton(
                             splashColor: Colors.transparent,

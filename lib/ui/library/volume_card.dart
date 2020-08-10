@@ -8,31 +8,19 @@ import 'volume_image.dart';
 class VolumeCard extends StatelessWidget {
   final Volume volume;
   final VoidCallback onTap;
-  final Color color;
-  final double elevation;
-  final double padding;
   final bool heroAnimated;
+  final Widget trailing;
 
   const VolumeCard({
     Key key,
     @required this.volume,
     this.onTap,
-    this.color,
-    this.elevation = 0,
-    this.padding,
     this.heroAnimated = true,
+    this.trailing,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => TecCard(
-        builder: builder,
-        color: color,
-        elevation: elevation,
-        padding: padding,
-        onTap: onTap,
-      );
-
-  Widget builder(BuildContext context) {
+  Widget build(BuildContext context) {
     final textScaleFactor = textScaleFactorWith(context);
     final padding = (6.0 * textScaleFactor).roundToDouble();
 
@@ -40,14 +28,15 @@ class VolumeCard extends StatelessWidget {
     final imgHeight = 1.47368 * imgWidth;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      // mainAxisSize: MainAxisSize.max,
+      // crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(left: padding * 2, top: padding, bottom: padding),
-            child: Semantics(
-              container: true,
-              label: 'Select to view volume:',
+          child: GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: EdgeInsets.only(left: padding * 2, top: padding, bottom: padding),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -66,7 +55,8 @@ class VolumeCard extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: Padding(
+                    child: Container(
+                      // color: Colors.red,
                       padding: EdgeInsets.only(left: padding * 2, top: padding, right: padding),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -89,12 +79,13 @@ class VolumeCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
           ),
         ),
+        if (trailing != null) trailing,
       ],
     );
   }

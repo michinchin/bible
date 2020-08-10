@@ -174,53 +174,48 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       return Container();
     }
 
-    return Theme(
-      data: Theme.of(context).copyWith(
-        appBarTheme: appBarThemeWithContext(context),
-        tabBarTheme: tabBarThemeWithContext(context),
-      ),
-      child: BlocConsumer<NavBloc, NavState>(
-          listener: (c, s) {
-            _searchController
-              ..text = s.search
-              ..selection = TextSelection.collapsed(offset: _searchController.text.length);
-            if (s.tabIndex < _tabController.length && s.tabIndex != _tabController.index) {
-              _tabController.animateTo(s.tabIndex);
-            }
-          },
-          builder: (c, s) => Scaffold(
-                appBar: AppBar(
-                  elevation: 2,
-                  title: TextField(
-                      onEditingComplete: _onSubmit,
-                      decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Enter references or keywords',
-                          hintStyle: TextStyle(fontStyle: FontStyle.italic)),
-                      controller: _searchController),
-                  titleSpacing: 0,
-                  leading: s.navViewState == NavViewState.bcvTabs
-                      ? const CloseButton()
-                      : BackButton(
-                          onPressed: () {
-                            c.bloc<NavBloc>()
-                              ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
-                              ..add(const NavEvent.onSearchChange(search: ''));
-                          },
-                        ),
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.history),
-                      onPressed: () => c.bloc<NavBloc>().add(const NavEvent.loadHistory()),
-                    ),
-                    if (s.navViewState == NavViewState.bcvTabs)
-                      IconButton(icon: const Icon(Icons.more_horiz), onPressed: _moreButton),
-                    if (s.navViewState == NavViewState.searchResults)
-                      IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
-                  ],
+    return BlocConsumer<NavBloc, NavState>(
+      listener: (c, s) {
+        _searchController
+          ..text = s.search
+          ..selection = TextSelection.collapsed(offset: _searchController.text.length);
+        if (s.tabIndex < _tabController.length && s.tabIndex != _tabController.index) {
+          _tabController.animateTo(s.tabIndex);
+        }
+      },
+      builder: (c, s) => Scaffold(
+        appBar: AppBar(
+          elevation: 2,
+          title: TextField(
+              onEditingComplete: _onSubmit,
+              decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Enter references or keywords',
+                  hintStyle: TextStyle(fontStyle: FontStyle.italic)),
+              controller: _searchController),
+          titleSpacing: 0,
+          leading: s.navViewState == NavViewState.bcvTabs
+              ? const CloseButton()
+              : BackButton(
+                  onPressed: () {
+                    c.bloc<NavBloc>()
+                      ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
+                      ..add(const NavEvent.onSearchChange(search: ''));
+                  },
                 ),
-                body: body(s.navViewState),
-              )),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.history),
+              onPressed: () => c.bloc<NavBloc>().add(const NavEvent.loadHistory()),
+            ),
+            if (s.navViewState == NavViewState.bcvTabs)
+              IconButton(icon: const Icon(Icons.more_horiz), onPressed: _moreButton),
+            if (s.navViewState == NavViewState.searchResults)
+              IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
+          ],
+        ),
+        body: body(s.navViewState),
+      ),
     );
   }
 }

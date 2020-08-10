@@ -12,6 +12,13 @@ export 'tec_stream_builder.dart';
 export 'tec_tab_indicator.dart';
 
 ///
+/// Shape and border radius to use for bottom sheets.
+///
+const bottomSheetShape = RoundedRectangleBorder(borderRadius: bottomSheetBorderRadius);
+const bottomSheetBorderRadius = BorderRadius.only(topLeft: _sheetRadius, topRight: _sheetRadius);
+const _sheetRadius = Radius.circular(15);
+
+///
 /// Loading indicator with consistent look for the app.
 ///
 class LoadingIndicator extends StatelessWidget {
@@ -28,57 +35,68 @@ class LoadingIndicator extends StatelessWidget {
 }
 
 ///
-/// Returns an [AppBarTheme] appropriate for the lightness or darkness of the given [context].
+/// ThemeData extensions
 ///
-AppBarTheme appBarThemeWithContext(BuildContext context) {
-  final theme = Theme.of(context);
-  final barColor = theme.canvasColor;
-  // final barColor = theme.appBarTheme.color ?? theme.primaryColor;
-  final brightness = ThemeData.estimateBrightnessForColor(barColor);
-  final barTextColor = brightness == Brightness.light ? Colors.grey[700] : Colors.white;
-  return theme.appBarTheme.copyWith(
-    brightness: brightness,
-    color: barColor,
-    elevation: 0,
-    // shadowColor: Colors.transparent,
-    iconTheme: IconThemeData(color: barTextColor),
-    actionsIconTheme: IconThemeData(color: barTextColor),
-    textTheme: theme.copyOfAppBarTextThemeWithColor(barTextColor),
-    centerTitle: true,
-  );
-}
+extension AppExtOnThemeData on ThemeData {
+  ///
+  /// Returns a copy of this theme with app customizations.
+  ///
+  ThemeData copyWithAppTheme() {
+    return copyWith(
+      // primaryColor: brightness == Brightness.light ? primaryColor : primaryColor,
+      accentColor: brightness == Brightness.light ? accentColor : Colors.blue,
+      bottomSheetTheme: bottomSheetTheme.copyWith(elevation: 4, shape: bottomSheetShape),
+      appBarTheme: tecAppBarTheme(),
+      tabBarTheme: tecTabBarTheme(),
+    );
+  }
 
-///
-/// Returns a [TabBarTheme] appropriate for the lightness or darkness of the given [context].
-///
-TabBarTheme tabBarThemeWithContext(BuildContext context) {
-  final theme = Theme.of(context);
-  final barColor = theme.canvasColor;
-  final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
-      ? Colors.grey[700]
-      : Colors.white;
-  return theme.tabBarTheme.copyWith(
-    indicator: const TecTabIndicator(
-        indicatorHeight: 4, indicatorColor: null, indicatorSize: TecTabIndicatorSize.full),
-    indicatorSize: TabBarIndicatorSize.label,
-    labelColor: barTextColor,
-    // labelStyle: const TextStyle(fontWeight: FontWeight.w700),
-    // unselectedLabelColor: Theme.of(context).textColor,
-    // unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
-  );
-}
+  ///
+  /// Returns our special [AppBarTheme].
+  ///
+  AppBarTheme tecAppBarTheme() {
+    final barColor = canvasColor;
+    // final barColor = theme.appBarTheme.color ?? theme.primaryColor;
+    final brightness = ThemeData.estimateBrightnessForColor(barColor);
+    final barTextColor = brightness == Brightness.light ? Colors.grey[700] : Colors.white;
+    return appBarTheme.copyWith(
+      brightness: brightness,
+      color: barColor,
+      elevation: 0,
+      // shadowColor: Colors.transparent,
+      iconTheme: IconThemeData(color: barTextColor),
+      actionsIconTheme: IconThemeData(color: barTextColor),
+      textTheme: copyOfAppBarTextThemeWithColor(barTextColor),
+      centerTitle: true,
+    );
+  }
 
-///
-/// ThemeData extensions.
-///
-extension ExtOnThemeData on ThemeData {
+  ///
+  /// Returns our special [TabBarTheme].
+  ///
+  TabBarTheme tecTabBarTheme() {
+    final barColor = canvasColor;
+    final barTextColor = ThemeData.estimateBrightnessForColor(barColor) == Brightness.light
+        ? Colors.grey[700]
+        : Colors.white;
+    return tabBarTheme.copyWith(
+      indicator: const TecTabIndicator(
+          indicatorHeight: 4, indicatorColor: null, indicatorSize: TecTabIndicatorSize.full),
+      indicatorSize: TabBarIndicatorSize.label,
+      labelColor: barTextColor,
+      // labelStyle: const TextStyle(fontWeight: FontWeight.w700),
+      // unselectedLabelColor: Theme.of(context).textColor,
+      // unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+    );
+  }
+
   ///
   /// Returns a copy of this ThemeData with the appBarTheme.textTheme updated the given [color].
   ///
   TextTheme copyOfAppBarTextThemeWithColor(Color color) =>
       appBarTheme.textTheme?.apply(bodyColor: color) ??
-      primaryTextTheme?.apply(bodyColor: color) ??
-      TextTheme(headline6: TextStyle(color: color));
+      // primaryTextTheme?.apply(bodyColor: color) ??
+      TextTheme(headline6: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w500));
 }
 
 ///
@@ -94,36 +112,6 @@ class MinHeightAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight((appBar ?? AppBar()).preferredSize.height - 16.0);
-}
-
-class PrefSizeWidgetUnderlined extends StatelessWidget implements PreferredSizeWidget {
-  final PreferredSizeWidget child;
-  final double lineHeight;
-  final Color color;
-
-  const PrefSizeWidgetUnderlined({
-    Key key,
-    @required this.child,
-    this.color,
-    this.lineHeight = 1.5,
-  })  : assert(child != null),
-        assert(lineHeight != null),
-        super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final line = Container(
-      //width: double.infinity,
-      height: lineHeight,
-      color: color ?? Theme.of(context).primaryColor,
-    );
-
-    // return Stack(children: [child, Positioned(left: 0, right: 0, bottom: 0, child: line)]);
-    return Column(children: [child, line]);
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(child.preferredSize.height + lineHeight);
 }
 
 class IconWithNumberBadge extends StatelessWidget {

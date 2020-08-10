@@ -10,29 +10,24 @@ import '../../models/app_settings.dart';
 import '../common/common.dart';
 
 void showTextSettingsDialog(BuildContext context) {
-  showTecModalPopup<void>(
+  showModalBottomSheet<void>(
     context: context,
-    alignment: Alignment.bottomCenter,
-    useRootNavigator: true,
-    builder: (context) => SafeArea(child: TecPopupSheet(child: _TextSettings())),
+    barrierColor: Colors.black12,
+    builder: (context) => _TextSettings(),
   );
 }
 
 class _TextSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<_Fonts>(
-      future: _loadFonts(),
-      builder: (context, snapshot) {
-        final fonts = snapshot.hasData ? snapshot.data : null;
+    return TecFutureBuilder<_Fonts>(
+      futureBuilder: _loadFonts,
+      builder: (context, fonts, error) {
         if (fonts != null) {
           return _TextSettingsUI(fonts: fonts);
         } else {
-          final error = snapshot.hasError ? snapshot.error : null;
-          final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-          final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
           return Container(
-            color: backgroundColor,
+            height: 100,
             child: Center(
               child: error == null ? const LoadingIndicator() : Text(error.toString()),
             ),
@@ -117,16 +112,83 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
 
   @override
   Widget build(BuildContext context) {
+    final padding = 16 * textScaleFactorWith(context);
+    final halfPad = (padding / 2.0).roundToDouble();
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.grey[400] : Colors.grey[800];
-    final textScale = textScaleFactorWith(context);
+    final buttonColor = isDarkTheme ? Colors.grey[800] : Colors.grey[200];
+    final textScale = textScaleFactorWith(context, dampingFactor: 0.5, maxScaleFactor: 1);
     const fontSize = 25.0;
-    return Material(
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            StreamBuilder<double>(
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.all(padding),
+            child: Wrap(
+              spacing: padding,
+              runSpacing: padding,
+              children: [
+                TecEZPopupMenuButton(
+                  title: 'Fonts',
+                  padding: 0,
+                  currentValue: _fontType,
+                  onSelectValue: _setFontType,
+                  menuItems: const [
+                    _strRecentlyUsed,
+                    _strSansSerif,
+                    _strSerif,
+                    _strHandwriting,
+                    _strMonospace,
+                    _strDisplay
+                  ],
+                ),
+                TecEZPopupMenuButton(
+                  title: 'Sort',
+                  padding: 0,
+                  currentValue: _sortAlphabetically ? _strAlphabetically : _strByPopularity,
+                  onSelectValue: _setSortType,
+                  menuItems: const [_strByPopularity, _strAlphabetically],
+                ),
+              ],
+            ),
+          ),
+          Container(
+            height: fontSize * textScale * 2,
+            // color: Colors.red,
+            child: ListView.builder(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              itemCount: _fontNames.length,
+              itemBuilder: (context, index) {
+                final name = _fontNames[index];
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(width: padding),
+                    CupertinoButton(
+                      color: buttonColor,
+                      borderRadius: const BorderRadius.all(Radius.circular(50)),
+                      padding: EdgeInsets.symmetric(horizontal: padding),
+                      child: Text(
+                        '$name',
+                        textScaleFactor: textScale,
+                        style: name == _Fonts._systemDefault
+                            ? TextStyle(fontSize: fontSize, color: textColor)
+                            : GoogleFonts.getFont(name, fontSize: fontSize, color: textColor),
+                      ),
+                      onPressed: () => AppSettings.shared.contentFontName
+                          .add(name == _Fonts._systemDefault ? '' : name),
+                    )
+                  ],
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(halfPad, halfPad, halfPad, 0),
+            child: StreamBuilder<double>(
               stream: AppSettings.shared.contentTextScaleFactor.stream,
               builder: (c, snapshot) {
                 final percent = (snapshot.hasData
@@ -134,59 +196,17 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                     : AppSettings.shared.contentTextScaleFactor.value);
                 return IntrinsicHeight(
                   child: Slider.adaptive(
+                    value: percent,
                     min: 0.75,
                     max: 3.0,
                     onChanged: AppSettings.shared.contentTextScaleFactor.add,
-                    value: percent,
+                    activeColor: Theme.of(context).accentColor,
                   ),
                 );
               },
             ),
-            TecEZPopupMenuButton(
-              title: 'Font type',
-              currentValue: _fontType,
-              onSelectValue: _setFontType,
-              menuItems: const [
-                _strRecentlyUsed,
-                _strSansSerif,
-                _strSerif,
-                _strHandwriting,
-                _strMonospace,
-                _strDisplay
-              ],
-            ),
-            TecEZPopupMenuButton(
-              title: 'Sort',
-              currentValue: _sortAlphabetically ? _strAlphabetically : _strByPopularity,
-              onSelectValue: _setSortType,
-              menuItems: const [_strByPopularity, _strAlphabetically],
-            ),
-            Container(
-              height: fontSize * textScale * 2,
-              //color: Colors.red,
-              child: ListView.builder(
-                controller: _scrollController,
-                scrollDirection: Axis.horizontal,
-                itemCount: _fontNames.length,
-                itemBuilder: (context, index) {
-                  final name = _fontNames[index];
-                  return CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    child: Text(
-                      ' $name${index == _fontNames.length - 1 ? '' : ', '}',
-                      textScaleFactor: textScale,
-                      style: name == _Fonts._systemDefault
-                          ? TextStyle(fontSize: fontSize, color: textColor)
-                          : GoogleFonts.getFont(name, fontSize: fontSize, color: textColor),
-                    ),
-                    onPressed: () => AppSettings.shared.contentFontName
-                        .add(name == _Fonts._systemDefault ? '' : name),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -215,7 +235,7 @@ class _Fonts {
   /// Font type to filter by.
   String get fontType => _fontType;
   String _fontType =
-      Prefs.shared.getString('_font_settings_filter_type', defaultValue: _strRecentlyUsed);
+      Prefs.shared.getString('_font_settings_filter_type', defaultValue: _strSansSerif);
 
   /// Alphabetically (== true) or by popularity (== false).
   bool get sortAlphabetically => _alphabetically;
