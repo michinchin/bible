@@ -91,7 +91,7 @@ packages:
       name: build_resolvers
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.10"
+    version: "1.3.11"
   build_runner:
     dependency: "direct dev"
     description:
@@ -370,7 +370,7 @@ packages:
       name: freezed
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.11.4"
+    version: "0.11.5"
   freezed_annotation:
     dependency: "direct main"
     description:
@@ -517,7 +517,7 @@ packages:
       name: json_serializable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.3.0"
+    version: "3.4.0"
   logging:
     dependency: transitive
     description:
@@ -545,7 +545,7 @@ packages:
       name: mime
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.6+3"
+    version: "0.9.7"
   mockito:
     dependency: transitive
     description:
@@ -720,7 +720,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.1"
+    version: "4.3.2"
   pub_semver:
     dependency: transitive
     description:
@@ -956,7 +956,7 @@ packages:
       name: tec_cache
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   tec_crypto:
     dependency: transitive
     description:
@@ -1012,7 +1012,7 @@ packages:
       name: tec_util
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.17"
+    version: "1.2.20"
   tec_volumes:
     dependency: "direct main"
     description:
