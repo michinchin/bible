@@ -30,7 +30,8 @@ Future<Reference> navigate(BuildContext context, Reference ref) {
           width: 500,
           child: MultiBlocProvider(providers: [
             BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
-            BlocProvider<NavBloc>(create: (_) => NavBloc(ref))
+            BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
+            BlocProvider(create: (_) => SearchBloc()),
           ], child: Nav())),
     );
   }
@@ -49,7 +50,8 @@ Future<Reference> navigate(BuildContext context, Reference ref) {
     fullscreenDialog: true,
     builder: (context) => MultiBlocProvider(providers: [
       BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
-      BlocProvider<NavBloc>(create: (_) => NavBloc(ref))
+      BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
+      BlocProvider(create: (_) => SearchBloc()),
     ], child: Nav()),
   ));
 }
@@ -66,6 +68,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   NavBloc navBloc() => context.bloc<NavBloc>();
   PrefItemsBloc prefsBloc() => context.bloc<PrefItemsBloc>();
+  SearchBloc searchBloc() => context.bloc<SearchBloc>();
   List<int> translations() => prefsBloc()
       .state
       .items
@@ -117,12 +120,11 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     });
   }
 
-  void _onSubmit() {
+  void onSubmit({String query}) {
+    final s = query ?? _searchController.text;
     FocusScope.of(context).unfocus();
-    navBloc()
-      ..add(NavEvent.onSearchChange(search: _searchController.text))
-      ..add(const NavEvent.onSearchFinished());
-    // Navigator.of(context).maybePop(navBloc().state.ref);
+    navBloc()..add(NavEvent.onSearchChange(search: s))..add(const NavEvent.onSearchFinished());
+    searchBloc().add(SearchEvent.request(search: s, translations: translations()));
   }
 
   Future<void> _translation() async {
@@ -132,6 +134,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           prefsBloc().state.items.itemWithId(translationsFilter).copyWith(info: volumes.join('|')));
       prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
     }
+    searchBloc().add(SearchEvent.request(search: _searchController.text, translations: volumes));
   }
 
   void _moreButton() {
@@ -181,13 +184,11 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             tabController: _tabController,
           );
         case NavViewState.searchSuggestions:
-          return SearchSuggestionsView();
+          return SearchSuggestionsView(
+            onSubmit: onSubmit,
+          );
         case NavViewState.searchResults:
-          return BlocProvider(
-              create: (_) => SearchBloc()
-                ..add(SearchEvent.request(
-                    search: navBloc().state.search, translations: translations())),
-              child: SearchResultsView());
+          return SearchResultsView();
       }
       return Container();
     }
@@ -205,7 +206,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         appBar: AppBar(
           elevation: 2,
           title: TextField(
-              onEditingComplete: _onSubmit,
+              onEditingComplete: onSubmit,
               decoration: const InputDecoration(
                   border: InputBorder.none,
                   hintText: 'Enter references or keywords',

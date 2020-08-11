@@ -1,3 +1,6 @@
+import 'package:bible/blocs/search/nav_bloc.dart';
+import 'package:bible/blocs/sheet/pref_items_bloc.dart';
+import 'package:bible/models/pref_item.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -66,7 +69,8 @@ class __SearchResultCardState extends State<_SearchResultCard> {
                       ),
                       childrenPadding: EdgeInsets.zero,
                       subtitle: s.contextLoading
-                          ? const Center(child: CupertinoActivityIndicator())
+                          ? Container(
+                              height: 100, width: 100, child: const CupertinoActivityIndicator())
                           : TecText.rich(TextSpan(
                               children: searchResTextSpans(
                                   bloc().currentText, context.bloc<SearchBloc>().state.search))),

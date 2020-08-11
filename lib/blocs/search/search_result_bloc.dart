@@ -5,7 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:share/share.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
-
+import 'package:tec_util/tec_util.dart' as tec;
 import '../../models/search/context.dart';
 import '../../models/search/search_result.dart';
 
@@ -82,12 +82,12 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
         yield state.copyWith(contextError: true, contextLoading: false);
       }
     } else {
-      final newState = event.when(
+      final newState = event.maybeWhen(
           share: _share,
           copy: _copy,
           openInTB: _openInTB,
-          showContext: () => null,
-          onTranslationChange: _onTranslationChange);
+          onTranslationChange: _onTranslationChange,
+          orElse: () => null);
       if (newState != null) {
         yield newState;
       }
@@ -104,14 +104,14 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
 
   SearchResultState _share() {
     Share.share(_textToShare);
-    debugPrint('Sharing verse: ${state.res.href}');
+    tec.dmPrint('Sharing verse: ${state.res.href}');
     return state;
   }
 
   SearchResultState _openInTB(BuildContext context) {
     Navigator.of(context)
         .pop(Reference.fromHref(state.res.href, volume: state.res.verses[state.verseIndex].id));
-    debugPrint('Navigating to verse: ${state.res.href}');
+    tec.dmPrint('Navigating to verse: ${state.res.href}');
     return state;
   }
 
@@ -125,7 +125,7 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
   Future<SearchResultState> _loadContext(int idx) async {
     final cMap = Map<int, Context>.from(state.contextMap);
 
-    debugPrint('Showing context for: ${state.res.href}');
+    tec.dmPrint('Showing context for: ${state.res.href}');
 
     if (!cMap.containsKey(idx)) {
       final context = await Context.fetch(
@@ -141,5 +141,8 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
     return state.copyWith(contextMap: cMap, contextLoading: false, contextError: false);
   }
 
-  SearchResultState _onTranslationChange(int i) => state.copyWith(verseIndex: i);
+  SearchResultState _onTranslationChange(int i) {
+    tec.dmPrint('Switch translation to: ${state.res.verses[i].a}');
+    return state.copyWith(verseIndex: i);
+  }
 }
