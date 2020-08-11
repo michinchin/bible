@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
@@ -41,14 +42,11 @@ class CompareResults {
     return CompareResults(data: d);
   }
 
-  static Future<CompareResults> fetch({
-    int book,
-    int chapter,
-    int verse,
-    // BibleTranslations translations
-  }) async {
-    // translations.formatIds()
-    const translations = '231|78|76|201|227|250|32';
+  static Future<CompareResults> fetch(
+      {@required int book,
+      @required int chapter,
+      @required int verse,
+      @required String translations}) async {
     final _cachedPath = '${book}_${chapter}_${verse}_$translations';
 
     final tecCache = TecCache();

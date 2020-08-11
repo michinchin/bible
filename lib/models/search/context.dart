@@ -29,15 +29,13 @@ class Context {
     if (arr.isNotEmpty) {
       try {
         endVerse = int.parse(arr.last.group(1));
-      }
-      catch (_) {
+      } catch (_) {
         debugPrint('error getting range endVerse');
       }
     }
 
     final json = await TecCache().jsonFromUrl(
-      url:
-          '${tec.streamUrl}/$translation/chapters/${book}_$chapter.json.gz',
+      url: '${tec.streamUrl}/$translation/chapters/${book}_$chapter.json.gz',
     );
     Context context;
     if (json != null) {
@@ -103,5 +101,5 @@ String getString(Context context, int verseId, int endVerseId) {
     context.finalVerse = ++v;
   }
 
-  return before + after;
+  return before.replaceFirst(' ', '') + after;
 }

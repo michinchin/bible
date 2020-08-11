@@ -13,9 +13,10 @@ class _$SearchEventTearOff {
   const _$SearchEventTearOff();
 
 // ignore: unused_element
-  _Requested request({String search}) {
+  _Requested request({String search, List<int> translations}) {
     return _Requested(
       search: search,
+      translations: translations,
     );
   }
 }
@@ -25,14 +26,15 @@ const $SearchEvent = _$SearchEventTearOff();
 
 mixin _$SearchEvent {
   String get search;
+  List<int> get translations;
 
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result request(String search),
+    @required Result request(String search, List<int> translations),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result request(String search),
+    Result request(String search, List<int> translations),
     @required Result orElse(),
   });
   @optionalTypeArgs
@@ -52,7 +54,7 @@ abstract class $SearchEventCopyWith<$Res> {
   factory $SearchEventCopyWith(
           SearchEvent value, $Res Function(SearchEvent) then) =
       _$SearchEventCopyWithImpl<$Res>;
-  $Res call({String search});
+  $Res call({String search, List<int> translations});
 }
 
 class _$SearchEventCopyWithImpl<$Res> implements $SearchEventCopyWith<$Res> {
@@ -65,9 +67,13 @@ class _$SearchEventCopyWithImpl<$Res> implements $SearchEventCopyWith<$Res> {
   @override
   $Res call({
     Object search = freezed,
+    Object translations = freezed,
   }) {
     return _then(_value.copyWith(
       search: search == freezed ? _value.search : search as String,
+      translations: translations == freezed
+          ? _value.translations
+          : translations as List<int>,
     ));
   }
 }
@@ -77,7 +83,7 @@ abstract class _$RequestedCopyWith<$Res> implements $SearchEventCopyWith<$Res> {
           _Requested value, $Res Function(_Requested) then) =
       __$RequestedCopyWithImpl<$Res>;
   @override
-  $Res call({String search});
+  $Res call({String search, List<int> translations});
 }
 
 class __$RequestedCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
@@ -91,22 +97,28 @@ class __$RequestedCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
   @override
   $Res call({
     Object search = freezed,
+    Object translations = freezed,
   }) {
     return _then(_Requested(
       search: search == freezed ? _value.search : search as String,
+      translations: translations == freezed
+          ? _value.translations
+          : translations as List<int>,
     ));
   }
 }
 
 class _$_Requested implements _Requested {
-  const _$_Requested({this.search});
+  const _$_Requested({this.search, this.translations});
 
   @override
   final String search;
+  @override
+  final List<int> translations;
 
   @override
   String toString() {
-    return 'SearchEvent.request(search: $search)';
+    return 'SearchEvent.request(search: $search, translations: $translations)';
   }
 
   @override
@@ -114,12 +126,17 @@ class _$_Requested implements _Requested {
     return identical(this, other) ||
         (other is _Requested &&
             (identical(other.search, search) ||
-                const DeepCollectionEquality().equals(other.search, search)));
+                const DeepCollectionEquality().equals(other.search, search)) &&
+            (identical(other.translations, translations) ||
+                const DeepCollectionEquality()
+                    .equals(other.translations, translations)));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(search);
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(search) ^
+      const DeepCollectionEquality().hash(translations);
 
   @override
   _$RequestedCopyWith<_Requested> get copyWith =>
@@ -128,21 +145,21 @@ class _$_Requested implements _Requested {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
-    @required Result request(String search),
+    @required Result request(String search, List<int> translations),
   }) {
     assert(request != null);
-    return request(search);
+    return request(search, translations);
   }
 
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
-    Result request(String search),
+    Result request(String search, List<int> translations),
     @required Result orElse(),
   }) {
     assert(orElse != null);
     if (request != null) {
-      return request(search);
+      return request(search, translations);
     }
     return orElse();
   }
@@ -171,10 +188,13 @@ class _$_Requested implements _Requested {
 }
 
 abstract class _Requested implements SearchEvent {
-  const factory _Requested({String search}) = _$_Requested;
+  const factory _Requested({String search, List<int> translations}) =
+      _$_Requested;
 
   @override
   String get search;
+  @override
+  List<int> get translations;
   @override
   _$RequestedCopyWith<_Requested> get copyWith;
 }

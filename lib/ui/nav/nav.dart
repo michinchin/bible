@@ -10,6 +10,7 @@ import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
+import '../library/library.dart';
 import 'bcv_tab.dart';
 import 'search_results_view.dart';
 import 'search_suggestions.dart';
@@ -65,6 +66,14 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   NavBloc navBloc() => context.bloc<NavBloc>();
   PrefItemsBloc prefsBloc() => context.bloc<PrefItemsBloc>();
+  List<int> translations() => prefsBloc()
+      .state
+      .items
+      .itemWithId(translationsFilter)
+      .info
+      .split('|')
+      .map(int.parse)
+      .toList();
 
   @override
   void initState() {
@@ -116,7 +125,14 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     // Navigator.of(context).maybePop(navBloc().state.ref);
   }
 
-  void _translation() {}
+  Future<void> _translation() async {
+    final volumes = await selectVolumes(context, selectedVolumes: translations());
+    if (volumes != null) {
+      final prefItem = PrefItem.from(
+          prefsBloc().state.items.itemWithId(translationsFilter).copyWith(info: volumes.join('|')));
+      prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
+    }
+  }
 
   void _moreButton() {
     final prefState = prefsBloc()?.state;
@@ -168,7 +184,9 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           return SearchSuggestionsView();
         case NavViewState.searchResults:
           return BlocProvider(
-              create: (_) => SearchBloc()..add(SearchEvent.request(search: navBloc().state.search)),
+              create: (_) => SearchBloc()
+                ..add(SearchEvent.request(
+                    search: navBloc().state.search, translations: translations())),
               child: SearchResultsView());
       }
       return Container();

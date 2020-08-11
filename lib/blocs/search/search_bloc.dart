@@ -1,13 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../models/search_result.dart';
+import '../../models/search/search_result.dart';
 
 part 'search_bloc.freezed.dart';
 
 @freezed
 abstract class SearchEvent with _$SearchEvent {
-  const factory SearchEvent.request({String search}) = _Requested;
+  const factory SearchEvent.request({String search, List<int> translations}) = _Requested;
 }
 
 @freezed
@@ -31,7 +31,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     if (event is _Requested) {
       yield state.copyWith(loading: true);
       try {
-        final res = await SearchResults.fetch(words: event.search, translationIds: '51');
+        final res = await SearchResults.fetch(
+            words: event.search, translationIds: event.translations.join('|'));
         yield state.copyWith(searchResults: res, loading: false, search: event.search);
       } catch (_) {
         yield state.copyWith(error: true, loading: false, search: event.search);

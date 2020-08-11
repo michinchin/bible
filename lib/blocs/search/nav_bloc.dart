@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../models/autocomplete.dart';
+import '../../models/search/autocomplete.dart';
 
 part 'nav_bloc.freezed.dart';
 

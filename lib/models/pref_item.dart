@@ -16,6 +16,7 @@ const customColor4 = 4;
 const customColors = [customColor1, customColor2, customColor3, customColor4];
 const navLayout = 5; // grid view default (0), scroll view (1)
 const nav2Tap = 6; // 3-tap default (0), 2-tap (1)
+const translationsFilter = 7;
 
 class PrefItem extends tua.UserItem {
   PrefItem({

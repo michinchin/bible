@@ -10,11 +10,13 @@ import 'package:tec_widgets/tec_widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../blocs/selection/selection_bloc.dart';
+import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
-import '../../models/compare_results.dart';
+import '../../models/pref_item.dart';
+import '../../models/search/compare_results.dart';
 import '../../models/shared_types.dart';
 import 'compare_verse.dart';
 import 'snap_sheet.dart';
@@ -166,22 +168,7 @@ class SelectionSheetModel {
       refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
     }
     final ref = refs[0];
-    final compareResults =
-        await CompareResults.fetch(book: ref.book, chapter: ref.chapter, verse: ref.verse);
-
-    await showModalBottomSheet<void>(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        context: c,
-        useRootNavigator: true,
-        isScrollControlled: true,
-        enableDrag: false,
-        builder: (c) => SizedBox(
-              height: 3 * MediaQuery.of(c).size.height / 4,
-              child: CompareVerseScreen(
-                results: compareResults,
-                title: ref.label(),
-              ),
-            ));
+    await showCompareSheet(c, ref);
   }
 
   static List<Reference> _grabRefs(BuildContext c) {
@@ -193,6 +180,28 @@ class SelectionSheetModel {
     }
     return refs;
   }
+}
+
+Future<void> showCompareSheet(BuildContext c, Reference ref) async {
+  final compareResults = await CompareResults.fetch(
+      book: ref.book,
+      chapter: ref.chapter,
+      verse: ref.verse,
+      translations: c.bloc<PrefItemsBloc>().state.items[translationsFilter].info);
+
+  await showModalBottomSheet<void>(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      context: c,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      enableDrag: false,
+      builder: (c) => SizedBox(
+            height: 3 * MediaQuery.of(c).size.height / 4,
+            child: CompareVerseScreen(
+              results: compareResults,
+              title: ref.label(),
+            ),
+          ));
 }
 
 class _DefineWebView extends StatefulWidget {

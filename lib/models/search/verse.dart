@@ -5,16 +5,12 @@ class Verse {
   final int id;
   final String a;
   final String verseContent;
-  String contextText;
-  List<int> verseIdx; /// for when context expanded (i.e. v3-5)
 
   Verse({
     this.title,
     this.id,
     this.a,
     this.verseContent,
-    this.contextText = '',
-    this.verseIdx,
   });
 
   factory Verse.fromJson(Map<String, dynamic> json, String ref) {
@@ -23,7 +19,6 @@ class Verse {
       id: tec.as<int>(json['id']),
       a: tec.as<String>(json['a']),
       verseContent: tec.as<String>(json['text']),
-      verseIdx: [0, 0],
     );
   }
 }

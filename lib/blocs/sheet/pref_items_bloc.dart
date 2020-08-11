@@ -5,6 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_user_account/tec_user_account.dart' as tua;
+import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/app_settings.dart';
 import '../../models/pref_item.dart';
@@ -54,6 +55,13 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
       prefItems
         ..add(PrefItem(prefItemDataType: PrefItemDataType.bool, prefItemId: navLayout, verse: 0))
         ..add(PrefItem(prefItemDataType: PrefItemDataType.bool, prefItemId: nav2Tap, verse: 0));
+    }
+    if (!itemIds.contains(translationsFilter)) {
+      // Translations for search filter pref initialization
+      prefItems.add(PrefItem(
+          prefItemDataType: PrefItemDataType.string,
+          prefItemId: translationsFilter,
+          info: VolumesRepository.shared.volumeIdsWithType(VolumeType.bible).join('|')));
     }
 
     add(PrefItemEvent.updateFromDb(prefItems: prefItems));

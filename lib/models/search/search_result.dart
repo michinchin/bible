@@ -5,7 +5,7 @@ import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
-import 'labels.dart';
+import '../labels.dart';
 import 'verse.dart';
 
 class SearchResult {
@@ -14,12 +14,6 @@ class SearchResult {
   final int chapterId;
   final int verseId;
   final List<Verse> verses;
-  bool contextExpanded;
-  bool compareExpanded;
-  bool isExpanded;
-  bool isSelected;
-  int currentVerseIndex;
-  String fullText;
   final GlobalKey key;
 
   SearchResult({
@@ -28,12 +22,6 @@ class SearchResult {
     this.chapterId,
     this.verseId,
     this.verses,
-    this.contextExpanded = false,
-    this.compareExpanded = true,
-    this.isExpanded = false,
-    this.isSelected = false,
-    this.currentVerseIndex = 0,
-    this.fullText = '',
     this.key,
   });
 
@@ -57,16 +45,10 @@ class SearchResult {
         chapterId: chapterId ?? this.chapterId,
         verseId: verseId ?? this.verseId,
         verses: verses ?? this.verses,
-        contextExpanded: contextExpanded ?? this.contextExpanded,
-        compareExpanded: compareExpanded ?? this.compareExpanded,
-        isExpanded: isExpanded ?? this.isExpanded,
-        isSelected: isSelected ?? this.isSelected,
-        currentVerseIndex: currentVerseIndex ?? this.currentVerseIndex,
-        fullText: fullText ?? this.fullText,
         key: key ?? this.key,
       );
 
-  String get href => '$bookId/$chapterId/$chapterId';
+  String get href => '$bookId/$chapterId/$verseId';
 
   factory SearchResult.fromJson(Map<String, dynamic> json) {
     final ref = tec.as<String>(json['reference']);

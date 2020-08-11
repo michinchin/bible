@@ -25,7 +25,7 @@ class AutoComplete {
 
     if (cleanPhrase.trim().isEmpty) {
       return AutoComplete.fromJson(
-          <String, dynamic>{'words': '', 'parital': '', 'possibles': <String>[]});
+          <String, dynamic>{'words': '', 'partial': '', 'possibles': <String>[]});
     }
 
     // check cloudfront cache

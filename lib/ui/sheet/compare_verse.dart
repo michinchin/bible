@@ -2,7 +2,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
 
-import '../../models/compare_results.dart';
+import '../../models/search/compare_results.dart';
 
 class CompareVerseScreen extends StatelessWidget {
   final String title;
