@@ -86,36 +86,46 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
               initialData: _chapterState.value,
               builder: (context, chapterState, error) {
                 assert(chapterState != null);
+                const minFontSize = 12.0;
+                const buttonPadding = EdgeInsets.only(top: 16.0, bottom: 16.0);
+                final buttonStyle = Theme.of(context)
+                    .textTheme
+                    .headline6
+                    .copyWith(color: Theme.of(context).accentColor);
+
                 return Semantics(
                   label: chapterState.title,
                   child: ExcludeSemantics(
-                    child: TecText.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: chapterState.title,
-                            // children: [DownArrow(25, Theme.of(context).accentColor)],
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () => _onNavigate(chapterState),
+                    child: Row(
+                      children: [
+                        CupertinoButton(
+                          minSize: 0,
+                          padding: buttonPadding,
+                          child: TecAutoSizeText(
+                            chapterState.title,
+                            minFontSize: minFontSize,
+                            maxLines: 1,
+                            style: buttonStyle,
                           ),
-                          TextSpan(
-                              // text: '  ',
-                              text: '・',
-                              style: TextStyle(
-                                  color: Theme.of(context).appBarTheme.textTheme.headline6.color)),
-                          TextSpan(
-                            text: _bible.abbreviation,
-                            style: const TextStyle(fontSize: 19),
-                            // children: [DownArrow(25, Theme.of(context).accentColor)],
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () => _onSelectBible(chapterState),
+                          onPressed: () => _onNavigate(chapterState),
+                        ),
+                        TecAutoSizeText(
+                          '・',
+                          minFontSize: minFontSize,
+                          style: Theme.of(context).textTheme.headline6,
+                        ),
+                        CupertinoButton(
+                          minSize: 0,
+                          padding: buttonPadding,
+                          child: TecAutoSizeText(
+                            _bible.abbreviation,
+                            minFontSize: minFontSize,
+                            maxLines: 1,
+                            style: buttonStyle,
                           ),
-                        ],
-                      ),
-                      style: TextStyle(color: Theme.of(context).accentColor, fontSize: 20),
-                      autoSize: true,
-                      maxLines: 1,
-                      minFontSize: 12,
+                          onPressed: () => _onSelectBible(chapterState),
+                        ),
+                      ],
                     ),
                   ),
                 );

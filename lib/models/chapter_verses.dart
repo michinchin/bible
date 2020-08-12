@@ -40,8 +40,11 @@ class ChapterVerses {
     for (final ref in refs) {
       final label = ref.label();
       buffer.write('$label\n');
+      var firstVerse = true;
       for (final verseNum in ref.verses) {
-        buffer..write('[$verseNum] ')..write(verses[verseNum]);
+        final verseNumString = (firstVerse) ? '' : ' [$verseNum] ';
+        buffer..write(verseNumString)..write(verses[verseNum]);
+        firstVerse = false;
       }
       if (ref != refs.last) {
         buffer.writeln('\n');
