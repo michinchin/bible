@@ -179,6 +179,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
   }
 
   Future<void> _onSelectBible(BibleChapterState chapterState) async {
+    TecAutoScroll.stopAutoscroll();
     final bibleId = await selectVolume(context,
         title: 'Select Bible Translation',
         filter: const VolumesFilter(
@@ -368,7 +369,8 @@ class _ChapterViewState extends State<_ChapterView> {
           ? null
           : useZondervanCss(widget.volumeId) ? 'zondervan' : 'tecarta',
       customStyles: ' .${useZondervanCss(widget.volumeId) ? 'C' : 'cno'} { display: none; } '
-          '.FOOTNO { line-height: inherit; top: inherit; }',
+          '.FOOTNO { line-height: inherit; top: inherit; }'
+          'h5, .SUBA, h1 { font-weight: normal !important; font-style: italic; font-size: 100% !important;}',
     );
 
     return Container(
