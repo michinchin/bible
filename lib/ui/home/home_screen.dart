@@ -1,6 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
@@ -57,6 +61,20 @@ class _HomeScreen extends StatelessWidget {
                     if (size == Size.zero) {
                       return Container();
                     } else {
+                      if (tec.platformIs(tec.Platform.android)) {
+                        final landscape = size.width > size.height;
+                        if (max(size.width, size.height) < 1004) {
+                          // it's a phone...
+                          if (landscape) {
+                            SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+                          }
+                          else {
+                            SystemChrome.setEnabledSystemUIOverlays(
+                                [SystemUiOverlay.top, SystemUiOverlay.bottom]);
+                          }
+                        }
+                      }
+
                       return _BottomSheet(
                         child: ViewManagerWidget(state: state),
                       );

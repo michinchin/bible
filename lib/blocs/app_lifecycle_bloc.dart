@@ -133,9 +133,11 @@ class _AppBindingObserverState extends State<_AppBindingObserver> with WidgetsBi
     // the systemNavigationBarIconBrightness is not set back to what it
     // should be. This code fixes that bug.
     if (state == AppLifecycleState.resumed) {
-      final brightness = ThemeData.estimateBrightnessForColor(Theme.of(context).canvasColor);
-      SystemChrome.setSystemUIOverlayStyle(
-          brightness == Brightness.light ? darkOverlayStyle : lightOverlayStyle);
+      // if the user set the theme - use that setting, otherwise check the system setting
+      var isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
+      isDarkTheme ??=
+          ThemeData.estimateBrightnessForColor(Theme.of(context).canvasColor) == Brightness.dark;
+      SystemChrome.setSystemUIOverlayStyle(isDarkTheme ? lightOverlayStyle : darkOverlayStyle);
     }
 
     context.bloc<AppLifecycleBloc>()?.add(state);
