@@ -433,8 +433,9 @@ extension ViewManagerExtOnState on ViewManagerState {}
 ///
 class ViewManagerWidget extends StatelessWidget {
   final ViewManagerState state;
+  final double statusBarPadding;
 
-  const ViewManagerWidget({Key key, this.state}) : super(key: key);
+  const ViewManagerWidget({Key key, this.state, this.statusBarPadding = 0}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -443,6 +444,7 @@ class ViewManagerWidget extends StatelessWidget {
       builder: (context, constraints) => _VMViewStack(
         vmState: state,
         constraints: constraints,
+        statusBarPadding: statusBarPadding,
       ),
     );
   }

@@ -1,6 +1,3 @@
-import 'package:bible/blocs/search/nav_bloc.dart';
-import 'package:bible/blocs/sheet/pref_items_bloc.dart';
-import 'package:bible/models/pref_item.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

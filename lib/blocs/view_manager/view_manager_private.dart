@@ -6,8 +6,10 @@ part of 'view_manager_bloc.dart';
 class _VMViewStack extends StatelessWidget {
   final BoxConstraints constraints;
   final ViewManagerState vmState;
+  final double statusBarPadding;
 
-  const _VMViewStack({Key key, this.constraints, this.vmState}) : super(key: key);
+  const _VMViewStack({Key key, this.constraints, this.vmState, this.statusBarPadding = 0})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +68,11 @@ class _VMViewStack extends StatelessWidget {
         // appBarTheme: Theme.of(context).tecAppBarTheme(),
         pageTransitionsTheme: tecPageTransitionsTheme(context),
       ),
-      child: Stack(children: children),
+      child: Container(
+        color: Theme.of(context).appBarTheme.color,
+        padding: EdgeInsets.only(top: statusBarPadding),
+        child: Stack(children: children),
+      ),
     );
   }
 }

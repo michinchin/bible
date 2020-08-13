@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/app_theme_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
@@ -35,21 +36,23 @@ class _HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canvasColor = Theme.of(context).canvasColor;
-    final brightness = ThemeData.estimateBrightnessForColor(canvasColor);
+    final isDarkMode = context.bloc<ThemeModeBloc>().state == ThemeMode.dark;
+    final overlayNavigationBar = tec.platformIs(tec.Platform.android) &&
+        MediaQuery.of(context).systemGestureInsets.bottom == 32;
 
     // tec.dmPrint('_HomeScreen build()');
     return Scaffold(
+      resizeToAvoidBottomInset: overlayNavigationBar,
       body: TecSystemUiOverlayWidget(
-        brightness == Brightness.light ? darkOverlayStyle : lightOverlayStyle,
+        isDarkMode ? lightOverlayStyle : darkOverlayStyle,
         child: Container(
-          color: canvasColor, // primaryColor,
+          color: Theme.of(context).canvasColor, // primaryColor,
           child: SafeArea(
             left: false,
             right: false,
             bottom: false,
             child: Container(
-              color: brightness == Brightness.light ? Colors.white : Colors.black,
+              color: isDarkMode ? Colors.black : Colors.white,
               child: SafeArea(
                 bottom: false,
                 child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
@@ -61,6 +64,8 @@ class _HomeScreen extends StatelessWidget {
                     if (size == Size.zero) {
                       return Container();
                     } else {
+                      var statusBarPadding = 0.0;
+
                       if (tec.platformIs(tec.Platform.android)) {
                         final landscape = size.width > size.height;
                         if (max(size.width, size.height) < 1004) {
@@ -69,6 +74,7 @@ class _HomeScreen extends StatelessWidget {
                             SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
                           }
                           else {
+                            statusBarPadding = 24;
                             SystemChrome.setEnabledSystemUIOverlays(
                                 [SystemUiOverlay.top, SystemUiOverlay.bottom]);
                           }
@@ -76,7 +82,7 @@ class _HomeScreen extends StatelessWidget {
                       }
 
                       return _BottomSheet(
-                        child: ViewManagerWidget(state: state),
+                        child: ViewManagerWidget(state: state, statusBarPadding: statusBarPadding),
                       );
                     }
                   },
