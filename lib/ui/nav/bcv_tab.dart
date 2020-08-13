@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:bible/models/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -256,7 +257,7 @@ class _DynamicGrid extends StatelessWidget {
         MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 600;
 
     double extentCalculated() {
-      if (textScaleFactor >= 2.0) {
+      if (textScaleFactor >= 2.0 || AppSettings.shared.contentTextScaleFactor.value >= 2.0) {
         return 100;
       }
       if ((smallWidth && !smallHeight) || isLargeScreen) {
@@ -299,6 +300,7 @@ class _PillButton extends StatelessWidget {
       child: Text(
         text,
         textAlign: TextAlign.center,
+        textScaleFactor: AppSettings.shared.contentTextScaleFactor.value,
         maxLines: 1,
       ),
     );
