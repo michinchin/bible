@@ -54,7 +54,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
       // Nav pref initialization
       prefItems
         ..add(PrefItem(prefItemDataType: PrefItemDataType.bool, prefItemId: navLayout, verse: 0))
-        ..add(PrefItem(prefItemDataType: PrefItemDataType.bool, prefItemId: nav2Tap, verse: 0));
+        ..add(PrefItem(prefItemDataType: PrefItemDataType.bool, prefItemId: nav3Tap, verse: 0));
     }
     if (!itemIds.contains(translationsFilter)) {
       // Translations for search filter pref initialization
@@ -62,6 +62,12 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
           prefItemDataType: PrefItemDataType.string,
           prefItemId: translationsFilter,
           info: VolumesRepository.shared.volumeIdsWithType(VolumeType.bible).join('|')));
+    }
+
+    if (!itemIds.contains(navBookOrder)) {
+      // Navigation book order alphabetical/ot/nt
+      prefItems.add(
+          PrefItem(prefItemDataType: PrefItemDataType.bool, prefItemId: navBookOrder, verse: 0));
     }
 
     add(PrefItemEvent.updateFromDb(prefItems: prefItems));

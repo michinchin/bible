@@ -187,7 +187,7 @@ Future<void> showCompareSheet(BuildContext c, Reference ref) async {
       book: ref.book,
       chapter: ref.chapter,
       verse: ref.verse,
-      translations: c.bloc<PrefItemsBloc>().state.items[translationsFilter].info);
+      translations: c.bloc<PrefItemsBloc>().state.items.itemWithId(translationsFilter).info);
 
   await showModalBottomSheet<void>(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),

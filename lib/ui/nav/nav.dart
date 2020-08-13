@@ -81,8 +81,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   @override
   void initState() {
     _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
-    final nav2TapEnabled = (prefsBloc().state.items?.valueOfItemWithId(nav2Tap) ?? 0) != 0;
-    final tabLength = nav2TapEnabled ? 2 : 3;
+    final nav3TapEnabled = (prefsBloc().state.items?.valueOfItemWithId(nav3Tap) ?? 0) == 0;
+    final tabLength = nav3TapEnabled ? 3 : 2;
     _tabController = TabController(length: tabLength, vsync: this)
       ..addListener(() {
         if (_tabController.index != navBloc().state.tabIndex) {
@@ -108,8 +108,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   void _changeTabController() {
-    final nav2TapEnabled = (prefsBloc().state.items?.valueOfItemWithId(nav2Tap) ?? 0) != 0;
-    final tabLength = nav2TapEnabled ? 2 : 3;
+    final nav3TapEnabled = (prefsBloc().state.items?.valueOfItemWithId(nav3Tap) ?? 0) == 0;
+    final tabLength = nav3TapEnabled ? 3 : 2;
     setState(() {
       _tabController = TabController(length: tabLength, vsync: this)
         ..addListener(() {
@@ -123,32 +123,52 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   void onSubmit({String query}) {
     final s = query ?? _searchController.text;
     FocusScope.of(context).unfocus();
-    navBloc()..add(NavEvent.onSearchChange(search: s))..add(const NavEvent.onSearchFinished());
-    searchBloc().add(SearchEvent.request(search: s, translations: translations()));
+    if (s.isNotEmpty) {
+      navBloc()..add(NavEvent.onSearchChange(search: s))..add(const NavEvent.onSearchFinished());
+      searchBloc().add(SearchEvent.request(search: s, translations: translations()));
+    }
   }
 
   Future<void> _translation() async {
-    final volumes = await selectVolumes(context, selectedVolumes: translations());
+    final volumes = await selectVolumes(context,
+        filter: const VolumesFilter(volumeType: VolumeType.bible), selectedVolumes: translations());
     if (volumes != null) {
       final prefItem = PrefItem.from(
           prefsBloc().state.items.itemWithId(translationsFilter).copyWith(info: volumes.join('|')));
       prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
     }
-    searchBloc().add(SearchEvent.request(search: _searchController.text, translations: volumes));
+    if (_searchController.text.isNotEmpty) {
+      searchBloc().add(SearchEvent.request(search: _searchController.text, translations: volumes));
+    }
   }
 
   void _moreButton() {
     final prefState = prefsBloc()?.state;
     final items = prefState?.items ?? [];
-    final navGridViewEnabled = (items.valueOfItemWithId(navLayout) ?? 0) != 0;
-    final nav2TapEnabled = (items.valueOfItemWithId(nav2Tap) ?? 0) != 0;
+    final navGridViewEnabled = (items.valueOfItemWithId(navLayout) ?? 0) == 0;
+    final nav3TapEnabled = (items.valueOfItemWithId(nav3Tap) ?? 0) == 0;
+    final navCanonical = (items.valueOfItemWithId(navBookOrder) ?? 0) == 0;
     showModalBottomSheet<void>(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        shape: const RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
         context: context,
         builder: (c) => SafeArea(
               child: ListView(
                 shrinkWrap: true,
                 children: [
+                  ListTile(
+                    title: Text(navCanonical
+                        ? 'Show books alphabetically'
+                        : 'Show books in canonical order'),
+                    onTap: () {
+                      prefsBloc().add(PrefItemEvent.update(
+                          prefItem: PrefItem.from(items
+                              .itemWithId(navBookOrder)
+                              .copyWith(verse: navCanonical ? 1 : 0))));
+                      Navigator.of(context).maybePop();
+                    },
+                  ),
                   ListTile(
                     title: Text(
                         navGridViewEnabled ? 'Show full name for books' : 'Show abbreviated books'),
@@ -156,22 +176,27 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                       prefsBloc().add(PrefItemEvent.update(
                           prefItem: PrefItem.from(items
                               .itemWithId(navLayout)
-                              .copyWith(verse: navGridViewEnabled ? 0 : 1))));
+                              .copyWith(verse: navGridViewEnabled ? 1 : 0))));
+
                       Navigator.of(context).maybePop();
                     },
                   ),
                   ListTile(
-                    title: Text(nav2TapEnabled ? 'Show verse tab' : 'Hide verse tab'),
+                    title: Text(
+                        nav3TapEnabled ? 'Show book and chapter' : 'Show book, chapter, and verse'),
                     onTap: () {
                       prefsBloc().add(PrefItemEvent.update(
                           prefItem: PrefItem.from(
-                              items.itemWithId(nav2Tap).copyWith(verse: nav2TapEnabled ? 0 : 1))));
+                              items.itemWithId(nav3Tap).copyWith(verse: nav3TapEnabled ? 1 : 0))));
                       Navigator.of(context).maybePop();
                     },
                   ),
                 ],
               ),
             ));
+    navBloc()
+      ..add(const NavEvent.changeTabIndex(index: 0))
+      ..add(const NavEvent.onSearchChange(search: ''));
   }
 
   @override
@@ -195,16 +220,19 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
     return BlocConsumer<NavBloc, NavState>(
       listener: (c, s) {
-        _searchController
-          ..text = s.search
-          ..selection = TextSelection.collapsed(offset: _searchController.text.length);
+        if (s.search != _searchController.text) {
+          _searchController
+            ..text = s.search
+            ..selection = TextSelection.collapsed(offset: s.search.length);
+        }
         if (s.tabIndex < _tabController.length && s.tabIndex != _tabController.index) {
           _tabController.animateTo(s.tabIndex);
         }
       },
       builder: (c, s) => Scaffold(
         appBar: AppBar(
-          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          elevation: 5,
           title: TextField(
               onEditingComplete: onSubmit,
               decoration: const InputDecoration(
