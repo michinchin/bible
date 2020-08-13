@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:bible/models/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -9,6 +8,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../models/app_settings.dart';
 import '../../models/pref_item.dart';
 import '../common/tec_tab_indicator.dart';
 import 'nav.dart';
@@ -21,10 +21,9 @@ class BCVTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final navBloc = context.bloc<NavBloc>(); // ignore: close_sinks
-    final prefState = context.bloc<PrefItemsBloc>()?.state;
-    final items = prefState?.items ?? [];
-    final navGridViewEnabled = (items.valueOfItemWithId(navLayout) ?? 0) == 0;
-    final nav3TapEnabled = (items.valueOfItemWithId(nav3Tap) ?? 0) == 0;
+    final prefState = context.bloc<PrefItemsBloc>(); // ignore: close_sinks
+    final navGridViewEnabled = prefState.itemBool(PrefItemId.navLayout);
+    final nav3TapEnabled = prefState.itemBool(PrefItemId.nav3Tap);
     return BlocListener<PrefItemsBloc, PrefItems>(
         listener: listener,
         child: SafeArea(
@@ -135,8 +134,7 @@ class _BookView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bible = VolumesRepository.shared.bibleWithId(51);
-    final navCanonical =
-        (context.bloc<PrefItemsBloc>().state.items.valueOfItemWithId(navBookOrder) ?? 0) == 0;
+    final navCanonical = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.navBookOrder);
 
     // ignore: prefer_collection_literals
     final bookNames = LinkedHashMap<int, String>();

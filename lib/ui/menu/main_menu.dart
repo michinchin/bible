@@ -7,8 +7,10 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/app_theme_bloc.dart';
+import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/labels.dart';
+import '../../models/pref_item.dart';
 import '../common/common.dart';
 import '../misc/text_settings.dart';
 import 'menu_model.dart';
@@ -37,6 +39,7 @@ class MainMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final drawerTextColor =
         Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.grey[700];
+    final prefBloc = context.bloc<PrefItemsBloc>(); //ignore: close_sinks
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -67,6 +70,15 @@ class MainMenu extends StatelessWidget {
                         WidgetsBinding.instance.window.platformBrightness == Brightness.dark),
                 title: 'Dark Mode',
                 onTap: () => context.bloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
+              ),
+              MenuListTile(
+                icon: Icons.link,
+                switchValue: () => prefBloc.itemBool(PrefItemId.includeShareLink),
+                title: 'Include Link in Copy/Share',
+                onTap: () {
+                  prefBloc.add(PrefItemEvent.update(
+                      prefItem: prefBloc.toggledPrefItem(PrefItemId.includeShareLink)));
+                },
               ),
               MenuListTile(
                 title: 'Autoscroll',

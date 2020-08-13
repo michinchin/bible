@@ -706,7 +706,8 @@ class _$SearchResultStateTearOff {
       bool contextShown,
       bool contextLoading,
       bool contextError,
-      String label}) {
+      String label,
+      String url}) {
     return _SearchResultState(
       res: res,
       verseIndex: verseIndex,
@@ -716,6 +717,7 @@ class _$SearchResultStateTearOff {
       contextLoading: contextLoading,
       contextError: contextError,
       label: label,
+      url: url,
     );
   }
 }
@@ -732,6 +734,7 @@ mixin _$SearchResultState {
   bool get contextLoading;
   bool get contextError;
   String get label;
+  String get url;
 
   $SearchResultStateCopyWith<SearchResultState> get copyWith;
 }
@@ -748,7 +751,8 @@ abstract class $SearchResultStateCopyWith<$Res> {
       bool contextShown,
       bool contextLoading,
       bool contextError,
-      String label});
+      String label,
+      String url});
 }
 
 class _$SearchResultStateCopyWithImpl<$Res>
@@ -769,6 +773,7 @@ class _$SearchResultStateCopyWithImpl<$Res>
     Object contextLoading = freezed,
     Object contextError = freezed,
     Object label = freezed,
+    Object url = freezed,
   }) {
     return _then(_value.copyWith(
       res: res == freezed ? _value.res : res as SearchResult,
@@ -786,6 +791,7 @@ class _$SearchResultStateCopyWithImpl<$Res>
       contextError:
           contextError == freezed ? _value.contextError : contextError as bool,
       label: label == freezed ? _value.label : label as String,
+      url: url == freezed ? _value.url : url as String,
     ));
   }
 }
@@ -804,7 +810,8 @@ abstract class _$SearchResultStateCopyWith<$Res>
       bool contextShown,
       bool contextLoading,
       bool contextError,
-      String label});
+      String label,
+      String url});
 }
 
 class __$SearchResultStateCopyWithImpl<$Res>
@@ -827,6 +834,7 @@ class __$SearchResultStateCopyWithImpl<$Res>
     Object contextLoading = freezed,
     Object contextError = freezed,
     Object label = freezed,
+    Object url = freezed,
   }) {
     return _then(_SearchResultState(
       res: res == freezed ? _value.res : res as SearchResult,
@@ -844,6 +852,7 @@ class __$SearchResultStateCopyWithImpl<$Res>
       contextError:
           contextError == freezed ? _value.contextError : contextError as bool,
       label: label == freezed ? _value.label : label as String,
+      url: url == freezed ? _value.url : url as String,
     ));
   }
 }
@@ -857,7 +866,8 @@ class _$_SearchResultState implements _SearchResultState {
       this.contextShown,
       this.contextLoading,
       this.contextError,
-      this.label});
+      this.label,
+      this.url});
 
   @override
   final SearchResult res;
@@ -875,10 +885,12 @@ class _$_SearchResultState implements _SearchResultState {
   final bool contextError;
   @override
   final String label;
+  @override
+  final String url;
 
   @override
   String toString() {
-    return 'SearchResultState(res: $res, verseIndex: $verseIndex, contextMap: $contextMap, isSelected: $isSelected, contextShown: $contextShown, contextLoading: $contextLoading, contextError: $contextError, label: $label)';
+    return 'SearchResultState(res: $res, verseIndex: $verseIndex, contextMap: $contextMap, isSelected: $isSelected, contextShown: $contextShown, contextLoading: $contextLoading, contextError: $contextError, label: $label, url: $url)';
   }
 
   @override
@@ -906,7 +918,9 @@ class _$_SearchResultState implements _SearchResultState {
                 const DeepCollectionEquality()
                     .equals(other.contextError, contextError)) &&
             (identical(other.label, label) ||
-                const DeepCollectionEquality().equals(other.label, label)));
+                const DeepCollectionEquality().equals(other.label, label)) &&
+            (identical(other.url, url) ||
+                const DeepCollectionEquality().equals(other.url, url)));
   }
 
   @override
@@ -919,7 +933,8 @@ class _$_SearchResultState implements _SearchResultState {
       const DeepCollectionEquality().hash(contextShown) ^
       const DeepCollectionEquality().hash(contextLoading) ^
       const DeepCollectionEquality().hash(contextError) ^
-      const DeepCollectionEquality().hash(label);
+      const DeepCollectionEquality().hash(label) ^
+      const DeepCollectionEquality().hash(url);
 
   @override
   _$SearchResultStateCopyWith<_SearchResultState> get copyWith =>
@@ -935,7 +950,8 @@ abstract class _SearchResultState implements SearchResultState {
       bool contextShown,
       bool contextLoading,
       bool contextError,
-      String label}) = _$_SearchResultState;
+      String label,
+      String url}) = _$_SearchResultState;
 
   @override
   SearchResult get res;
@@ -953,6 +969,8 @@ abstract class _SearchResultState implements SearchResultState {
   bool get contextError;
   @override
   String get label;
+  @override
+  String get url;
   @override
   _$SearchResultStateCopyWith<_SearchResultState> get copyWith;
 }

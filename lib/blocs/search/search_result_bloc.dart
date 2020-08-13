@@ -1,14 +1,12 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:share/share.dart';
 import 'package:tec_volumes/tec_volumes.dart';
-import 'package:tec_widgets/tec_widgets.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+
 import '../../models/search/context.dart';
 import '../../models/search/search_result.dart';
-
+import '../../models/search/tec_share.dart';
 part 'search_result_bloc.freezed.dart';
 
 @freezed
@@ -31,17 +29,20 @@ abstract class SearchResultState with _$SearchResultState {
     bool contextLoading,
     bool contextError,
     String label,
+    String url,
   }) = _SearchResultState;
 }
 
 class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
   final SearchResult result;
-  SearchResultBloc(this.result);
+  final bool shareUrl;
+  SearchResultBloc(this.result, {this.shareUrl = true});
   @override
   SearchResultState get initialState => SearchResultState(
       res: result,
       verseIndex: 0,
       contextMap: {},
+      url: '',
       isSelected: false,
       contextShown: false,
       contextError: false,
@@ -54,7 +55,6 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
           ' ${state.res.verses[state.verseIndex].a}'
       : '${state.res.ref} ${state.res.verses[state.verseIndex].a}';
 
-  // if text is null on translation change then update context map
   String get currentText => state.contextShown
       ? state.contextMap[state.verseIndex]?.text ?? ''
       : state.res.verses[state.verseIndex].verseContent;
@@ -64,6 +64,7 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
   @override
   Stream<SearchResultState> mapEventToState(SearchResultEvent event) async* {
     if (event is _OnTranslationChange) {
+      // if text is null on translation change then update context map
       if (state.contextShown) {
         yield state.copyWith(contextLoading: true);
         try {
@@ -71,6 +72,14 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
         } catch (_) {
           yield state.copyWith(contextError: true, contextLoading: false);
         }
+      }
+    }
+
+    if (event is _OnTranslationChange || state.url.isEmpty) {
+      if (shareUrl) {
+        final url = await TecShare.loadUrl(
+            Reference.fromHref(state.res.href, volume: state.res.verses[state.verseIndex].id));
+        yield state.copyWith(url: url);
       }
     }
 
@@ -96,15 +105,13 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
   }
 
   SearchResultState _copy(BuildContext context) {
-    Clipboard.setData(ClipboardData(text: _textToShare)).then((x) {
-      TecToast.show(context, 'Successfully Copied!');
-    });
+    TecShare.copy(context, '$_textToShare${state.url}');
     return state;
   }
 
   SearchResultState _share() {
-    Share.share(_textToShare);
-    tec.dmPrint('Sharing verse: ${state.res.href}');
+    TecShare.share('$_textToShare${state.url}');
+    tec.dmPrint('Sharing verse: ${state.res.href} ');
     return state;
   }
 

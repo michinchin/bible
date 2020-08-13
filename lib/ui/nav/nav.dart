@@ -29,7 +29,7 @@ Future<Reference> navigate(BuildContext context, Reference ref) {
           height: 600,
           width: 500,
           child: MultiBlocProvider(providers: [
-            BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
+            // BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
             BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
             BlocProvider(create: (_) => SearchBloc()),
           ], child: Nav())),
@@ -49,7 +49,7 @@ Future<Reference> navigate(BuildContext context, Reference ref) {
   return Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
     fullscreenDialog: true,
     builder: (context) => MultiBlocProvider(providers: [
-      BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
+      // BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
       BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
       BlocProvider(create: (_) => SearchBloc()),
     ], child: Nav()),
@@ -72,7 +72,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   List<int> translations() => prefsBloc()
       .state
       .items
-      .itemWithId(translationsFilter)
+      .itemWithId(PrefItemId.translationsFilter)
       .info
       .split('|')
       .map(int.parse)
@@ -81,7 +81,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   @override
   void initState() {
     _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
-    final nav3TapEnabled = (prefsBloc().state.items?.valueOfItemWithId(nav3Tap) ?? 0) == 0;
+    final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? 3 : 2;
     _tabController = TabController(length: tabLength, vsync: this)
       ..addListener(() {
@@ -108,7 +108,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   void _changeTabController() {
-    final nav3TapEnabled = (prefsBloc().state.items?.valueOfItemWithId(nav3Tap) ?? 0) == 0;
+    final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? 3 : 2;
     setState(() {
       _tabController = TabController(length: tabLength, vsync: this)
@@ -133,8 +133,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     final volumes = await selectVolumes(context,
         filter: const VolumesFilter(volumeType: VolumeType.bible), selectedVolumes: translations());
     if (volumes != null) {
-      final prefItem = PrefItem.from(
-          prefsBloc().state.items.itemWithId(translationsFilter).copyWith(info: volumes.join('|')));
+      final prefItem =
+          prefsBloc().infoChangedPrefItem(PrefItemId.translationsFilter, volumes.join('|'));
       prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
     }
     if (_searchController.text.isNotEmpty) {
@@ -154,9 +154,9 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             bloc: prefsBloc(),
             builder: (context, state) {
               final items = state?.items ?? [];
-              final navGridViewEnabled = (items.valueOfItemWithId(navLayout) ?? 0) == 0;
-              final nav3TapEnabled = (items.valueOfItemWithId(nav3Tap) ?? 0) == 0;
-              final navCanonical = (items.valueOfItemWithId(navBookOrder) ?? 0) == 0;
+              final navGridViewEnabled = items.boolForPrefItem(PrefItemId.navLayout);
+              final nav3TapEnabled = items.boolForPrefItem(PrefItemId.nav3Tap);
+              final navCanonical = items.boolForPrefItem(PrefItemId.navBookOrder);
               return SafeArea(
                 child: ListView(
                   shrinkWrap: true,
@@ -167,9 +167,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                           : 'Show books in canonical order'),
                       onTap: () {
                         prefsBloc().add(PrefItemEvent.update(
-                            prefItem: PrefItem.from(items
-                                .itemWithId(navBookOrder)
-                                .copyWith(verse: navCanonical ? 1 : 0))));
+                            prefItem: prefsBloc().toggledPrefItem(PrefItemId.navBookOrder)));
                       },
                     ),
                     ListTile(
@@ -178,9 +176,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                           : 'Show abbreviated books'),
                       onTap: () {
                         prefsBloc().add(PrefItemEvent.update(
-                            prefItem: PrefItem.from(items
-                                .itemWithId(navLayout)
-                                .copyWith(verse: navGridViewEnabled ? 1 : 0))));
+                            prefItem: prefsBloc().toggledPrefItem(PrefItemId.navLayout)));
                       },
                     ),
                     ListTile(
@@ -189,9 +185,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                           : 'Show book, chapter, and verse'),
                       onTap: () {
                         prefsBloc().add(PrefItemEvent.update(
-                            prefItem: PrefItem.from(items
-                                .itemWithId(nav3Tap)
-                                .copyWith(verse: nav3TapEnabled ? 1 : 0))));
+                            prefItem: prefsBloc().toggledPrefItem(PrefItemId.nav3Tap)));
                       },
                     ),
                   ],

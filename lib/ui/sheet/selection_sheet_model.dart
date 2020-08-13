@@ -2,7 +2,6 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:share/share.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_web_view/tec_web_view.dart';
@@ -17,6 +16,7 @@ import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/compare_results.dart';
+import '../../models/search/tec_share.dart';
 import '../../models/shared_types.dart';
 import 'compare_verse.dart';
 import 'snap_sheet.dart';
@@ -121,12 +121,16 @@ class SelectionSheetModel {
     for (final v in views) {
       refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
     }
-    final first = refs[0];
-    final verses = await ChapterVerses.fetch(refForChapter: first);
-    await tecShowProgressDlg<void>(
-        context: c,
-        title: 'Preparing to share...',
-        future: Share.share(ChapterVerses.formatForShare(refs, verses.data)));
+    final ref = refs[0];
+    final verses = await ChapterVerses.fetch(refForChapter: ref);
+    final shareWithLink = c.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    final verse = ChapterVerses.formatForShare(refs, verses.data);
+    if (shareWithLink) {
+      await tecShowProgressDlg<void>(
+          context: c, title: 'Preparing to share...', future: TecShare.shareWithLink(verse, ref));
+    } else {
+      TecShare.share(verse);
+    }
   }
 
   static Future<void> defineWebSearch(BuildContext c) async {
@@ -187,7 +191,8 @@ Future<void> showCompareSheet(BuildContext c, Reference ref) async {
       book: ref.book,
       chapter: ref.chapter,
       verse: ref.verse,
-      translations: c.bloc<PrefItemsBloc>().state.items.itemWithId(translationsFilter).info);
+      translations:
+          c.bloc<PrefItemsBloc>().state.items.itemWithId(PrefItemId.translationsFilter).info);
 
   await showModalBottomSheet<void>(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
