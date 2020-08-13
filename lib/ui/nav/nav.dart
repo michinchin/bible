@@ -143,57 +143,61 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   void _moreButton() {
-    final prefState = prefsBloc()?.state;
-    final items = prefState?.items ?? [];
-    final navGridViewEnabled = (items.valueOfItemWithId(navLayout) ?? 0) == 0;
-    final nav3TapEnabled = (items.valueOfItemWithId(nav3Tap) ?? 0) == 0;
-    final navCanonical = (items.valueOfItemWithId(navBookOrder) ?? 0) == 0;
     showModalBottomSheet<void>(
+        barrierColor: Colors.black12,
+        elevation: 10,
         shape: const RoundedRectangleBorder(
             borderRadius:
                 BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
         context: context,
-        builder: (c) => SafeArea(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  ListTile(
-                    title: Text(navCanonical
-                        ? 'Show books alphabetically'
-                        : 'Show books in canonical order'),
-                    onTap: () {
-                      prefsBloc().add(PrefItemEvent.update(
-                          prefItem: PrefItem.from(items
-                              .itemWithId(navBookOrder)
-                              .copyWith(verse: navCanonical ? 1 : 0))));
-                      Navigator.of(context).maybePop();
-                    },
-                  ),
-                  ListTile(
-                    title: Text(
-                        navGridViewEnabled ? 'Show full name for books' : 'Show abbreviated books'),
-                    onTap: () {
-                      prefsBloc().add(PrefItemEvent.update(
-                          prefItem: PrefItem.from(items
-                              .itemWithId(navLayout)
-                              .copyWith(verse: navGridViewEnabled ? 1 : 0))));
-
-                      Navigator.of(context).maybePop();
-                    },
-                  ),
-                  ListTile(
-                    title: Text(
-                        nav3TapEnabled ? 'Show book and chapter' : 'Show book, chapter, and verse'),
-                    onTap: () {
-                      prefsBloc().add(PrefItemEvent.update(
-                          prefItem: PrefItem.from(
-                              items.itemWithId(nav3Tap).copyWith(verse: nav3TapEnabled ? 1 : 0))));
-                      Navigator.of(context).maybePop();
-                    },
-                  ),
-                ],
-              ),
-            ));
+        builder: (c) => BlocBuilder<PrefItemsBloc, PrefItems>(
+            bloc: prefsBloc(),
+            builder: (context, state) {
+              final items = state?.items ?? [];
+              final navGridViewEnabled = (items.valueOfItemWithId(navLayout) ?? 0) == 0;
+              final nav3TapEnabled = (items.valueOfItemWithId(nav3Tap) ?? 0) == 0;
+              final navCanonical = (items.valueOfItemWithId(navBookOrder) ?? 0) == 0;
+              return SafeArea(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    ListTile(
+                      title: Text(navCanonical
+                          ? 'Show books alphabetically'
+                          : 'Show books in canonical order'),
+                      onTap: () {
+                        prefsBloc().add(PrefItemEvent.update(
+                            prefItem: PrefItem.from(items
+                                .itemWithId(navBookOrder)
+                                .copyWith(verse: navCanonical ? 1 : 0))));
+                      },
+                    ),
+                    ListTile(
+                      title: Text(navGridViewEnabled
+                          ? 'Show full name for books'
+                          : 'Show abbreviated books'),
+                      onTap: () {
+                        prefsBloc().add(PrefItemEvent.update(
+                            prefItem: PrefItem.from(items
+                                .itemWithId(navLayout)
+                                .copyWith(verse: navGridViewEnabled ? 1 : 0))));
+                      },
+                    ),
+                    ListTile(
+                      title: Text(nav3TapEnabled
+                          ? 'Show book and chapter'
+                          : 'Show book, chapter, and verse'),
+                      onTap: () {
+                        prefsBloc().add(PrefItemEvent.update(
+                            prefItem: PrefItem.from(items
+                                .itemWithId(nav3Tap)
+                                .copyWith(verse: nav3TapEnabled ? 1 : 0))));
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }));
     navBloc()
       ..add(const NavEvent.changeTabIndex(index: 0))
       ..add(const NavEvent.onSearchChange(search: ''));
