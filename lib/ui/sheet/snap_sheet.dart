@@ -200,6 +200,7 @@ class SheetButton extends StatelessWidget {
           label: TecText(
             text,
             autoSize: true,
+            textScaleFactor: 0.8,
             style: TextStyle(
               color: Theme.of(context).textColor.withOpacity(0.8),
             ),
@@ -279,8 +280,9 @@ class SheetIconButton extends StatelessWidget {
           const SizedBox(height: 3),
           TecText(
             text,
+            autoSize: true,
+            textScaleFactor: 0.7,
             style: TextStyle(
-              fontSize: 11,
               color: Theme.of(context).textColor.withOpacity(0.5),
             ),
           ),
