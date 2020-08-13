@@ -220,9 +220,11 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
     return BlocConsumer<NavBloc, NavState>(
       listener: (c, s) {
-        _searchController
-          ..text = s.search
-          ..selection = TextSelection.collapsed(offset: _searchController.text.length);
+        if (s.search != _searchController.text) {
+          _searchController
+            ..text = s.search
+            ..selection = TextSelection.collapsed(offset: s.search.length);
+        }
         if (s.tabIndex < _tabController.length && s.tabIndex != _tabController.index) {
           _tabController.animateTo(s.tabIndex);
         }
