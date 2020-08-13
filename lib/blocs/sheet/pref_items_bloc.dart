@@ -58,10 +58,20 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
     }
     if (!itemIds.contains(translationsFilter)) {
       // Translations for search filter pref initialization
+      final bibleIds = VolumesRepository.shared.volumeIdsWithType(VolumeType.bible);
+      final volumes = VolumesRepository.shared.volumesWithIds(bibleIds);
+      final availableVolumes = <int>[];
+      
+      for (final v in volumes.values) {
+        if (v.onSale || await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(v.id)) {
+          availableVolumes.add(v.id);
+        }
+      }
+
       prefItems.add(PrefItem(
           prefItemDataType: PrefItemDataType.string,
           prefItemId: translationsFilter,
-          info: VolumesRepository.shared.volumeIdsWithType(VolumeType.bible).join('|')));
+          info: availableVolumes.join('|')));
     }
 
     if (!itemIds.contains(navBookOrder)) {

@@ -22,13 +22,13 @@ class SearchResultsView extends StatelessWidget {
       return SafeArea(
         bottom: false,
         child: ListView.builder(
-          itemCount: searchBloc.state.searchResults.length + 1,
+          itemCount: state.searchResults.length + 1,
           itemBuilder: (c, i) {
             if (i == 0) {
-              return _SearchResultsLabel(searchBloc.state.searchResults);
+              return _SearchResultsLabel(state.searchResults);
             }
             i--;
-            final res = searchBloc.state.searchResults[i];
+            final res = state.searchResults[i];
             return BlocProvider(
                 create: (_) => SearchResultBloc(res), child: const _SearchResultCard());
           },
