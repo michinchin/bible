@@ -63,12 +63,12 @@ class VolumeCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           TecText(
-                            '${volume.name}\n',
+                            '${volume.name}',
                             textScaleFactor: textScaleFactor,
                             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                           ),
                           TecText(
-                            volume.publisher,
+                            '\n${volume.publisher}',
                             textScaleFactor: textScaleFactor,
                             style: TextStyle(
                               fontSize: 14,

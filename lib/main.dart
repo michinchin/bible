@@ -14,6 +14,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import 'blocs/app_lifecycle_bloc.dart';
 import 'blocs/app_theme_bloc.dart';
+import 'blocs/downloads/downloads_bloc.dart';
 import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'ui/bible/chapter_view.dart';
@@ -32,7 +33,9 @@ const _appTitle = 'Tecarta Bible';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await FlutterDownloader.initialize(debug: kDebugMode);
+  if (!kIsWeb) {
+    await FlutterDownloader.initialize(debug: kDebugMode);
+  }
 
   await tec.Prefs.shared.load();
 
@@ -102,6 +105,9 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<DownloadsBloc>(
+          create: (context) => DownloadsBloc.create(),
+        ),
         BlocProvider<ViewManagerBloc>(
           create: (context) => ViewManagerBloc(kvStore: tec.Prefs.shared),
         ),

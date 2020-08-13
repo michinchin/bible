@@ -8,6 +8,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
+import '../../blocs/downloads/downloads_bloc.dart';
 import '../../blocs/is_licensed_bloc.dart';
 import '../common/common.dart';
 import 'volume_card.dart';
@@ -362,26 +363,32 @@ class _VolumesListState extends State<_VolumesList> {
               itemCount: bloc.state.volumes.length,
               itemBuilder: (context, index) {
                 final volume = bloc.state.volumes[index];
-                return VolumeCard(
-                  volume: volume,
-                  trailing: !widget.allowMultipleSelections
-                      ? null
-                      : Checkbox(
-                          value: widget.selectedVolumes.contains(volume.id),
-                          onChanged: (checked) => _toggle(volume.id),
-                        ),
-                  onTap: widget.onTapVolume != null || widget.allowMultipleSelections
-                      ? () {
-                          if (widget.allowMultipleSelections) {
-                            _toggle(volume.id);
-                          } else {
-                            widget.onTapVolume(volume.id);
-                          }
-                        }
-                      : () {
-                          Navigator.of(context).push<void>(MaterialPageRoute(
-                              builder: (context) => VolumeDetail(volume: volume)));
-                        },
+                return BlocBuilder<DownloadsBloc, DownloadsState>(
+                  condition: (previous, current) =>
+                      previous.items[volume.id] != current.items[volume.id],
+                  builder: (context, downloads) {
+                    return VolumeCard(
+                      volume: volume,
+                      trailing: !widget.allowMultipleSelections
+                          ? _buildActionForVolume(context, volume)
+                          : Checkbox(
+                              value: widget.selectedVolumes.contains(volume.id),
+                              onChanged: (checked) => _toggle(volume.id),
+                            ),
+                      onTap: widget.onTapVolume != null || widget.allowMultipleSelections
+                          ? () {
+                              if (widget.allowMultipleSelections) {
+                                _toggle(volume.id);
+                              } else {
+                                widget.onTapVolume(volume.id);
+                              }
+                            }
+                          : () {
+                              Navigator.of(context).push<void>(MaterialPageRoute(
+                                  builder: (context) => VolumeDetail(volume: volume)));
+                            },
+                    );
+                  },
                 );
               },
             ),
@@ -389,5 +396,94 @@ class _VolumesListState extends State<_VolumesList> {
         ),
       ],
     );
+  }
+
+  void _onActionTap(DownloadsBloc bloc, DownloadItem item) {
+    assert(item != null);
+    if (item.status == DownloadStatus.undefined ||
+        item.status == DownloadStatus.failed ||
+        item.status == DownloadStatus.canceled) {
+      bloc?.requestDownload(item.volumeId);
+    } else if (item.status == DownloadStatus.running) {
+      bloc?.pauseDownload(item.volumeId);
+    } else if (item.status == DownloadStatus.paused) {
+      bloc?.resumeDownload(item.volumeId);
+      // } else if (item.status == DownloadStatus.complete) {
+      //   bloc?.delete(item);
+      // } else if (item.status == DownloadStatus.failed) {
+      //   bloc?.retryDownload(item);
+    }
+  }
+
+  Widget _buildActionForVolume(BuildContext context, Volume volume) {
+    final bloc = context.bloc<DownloadsBloc>(); // ignore: close_sinks
+    assert(bloc != null);
+    if (bloc == null || !bloc.supportsDownloading) return null;
+
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    final item = bloc.state.items[volume.id];
+    final color = Theme.of(context).accentColor;
+
+    Widget _progressCircle() => Positioned(
+        left: 8,
+        right: 8,
+        top: 8,
+        bottom: 8,
+        child: CircularProgressIndicator(
+          backgroundColor: isDarkTheme ? Colors.grey[800] : Colors.grey[200],
+          value: item?.progress ?? 0.0,
+        ));
+
+    if (item == null ||
+        item.status == DownloadStatus.undefined ||
+        item.status == DownloadStatus.failed ||
+        item.status == DownloadStatus.canceled) {
+      return IconButton(
+          icon: const Icon(Icons.cloud_download),
+          iconSize: 32,
+          color: color,
+          onPressed: () => _onActionTap(bloc, item ?? DownloadItem(volumeId: volume.id, url: '')));
+    } else if (item.status == DownloadStatus.running) {
+      return Stack(
+        children: [
+          _progressCircle(),
+          IconButton(
+              icon: const Icon(Icons.pause), //.cancel),
+              color: color,
+              onPressed: () => _onActionTap(bloc, item)),
+        ],
+      );
+    } else if (item.status == DownloadStatus.paused) {
+      return Stack(
+        children: [
+          _progressCircle(),
+          IconButton(
+              icon: const Icon(Icons.play_arrow),
+              color: color,
+              onPressed: () => _onActionTap(bloc, item)),
+        ],
+      );
+    } else if (item.status == DownloadStatus.complete) {
+      return const Padding(
+        padding: EdgeInsets.all(8),
+        child: Icon(Icons.check_circle, size: 32, color: Colors.green),
+      );
+    } else if (item.status == DownloadStatus.canceled) {
+      return const Text('Canceled', style: TextStyle(color: Colors.red));
+    } else if (item.status == DownloadStatus.failed) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          const Text('Failed', style: TextStyle(color: Colors.red)),
+          IconButton(
+              icon: const Icon(Icons.refresh),
+              color: color,
+              onPressed: () => _onActionTap(bloc, item)),
+        ],
+      );
+    } else {
+      return null;
+    }
   }
 }

@@ -603,7 +603,7 @@ packages:
     source: hosted
     version: "1.9.3"
   path:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path
       url: "https://pub.dartlang.org"
@@ -624,7 +624,7 @@ packages:
     source: hosted
     version: "0.1.4"
   path_provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path_provider
       url: "https://pub.dartlang.org"
@@ -993,7 +993,7 @@ packages:
     source: hosted
     version: "3.0.10"
   tec_platform_util:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: tec_platform_util
       url: "http://noah.tecarta.com:8100"

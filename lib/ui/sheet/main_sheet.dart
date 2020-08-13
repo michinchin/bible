@@ -64,7 +64,11 @@ class _MainSheetState extends State<MainSheet> {
                     for (final key in miniViewIcons.keys)
                       SheetButton(
                         icon: miniViewIcons[key],
-                        onPressed: buttonActions[key] ?? () {},
+                        onPressed: buttonActions[key] ??
+                            () {
+                              tec.dmPrint('Tapped button $key');
+                              if (key == 'Library') showLibrary(context);
+                            },
                         text: key,
                       ),
                   ],
