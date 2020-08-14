@@ -70,7 +70,14 @@ class AppSettings {
 /// Returns the text scale factor for content (e.g. Bible or study content HTML).
 ///
 double contentTextScaleFactorWith(BuildContext context) {
-  return textScaleFactorWith(context) * AppSettings.shared.contentTextScaleFactor.value;
+  final scale = textScaleFactorWith(
+        context,
+        // dampingFactor: 0.5,
+        // maxScaleFactor: 1.0,
+      ) *
+      AppSettings.shared.contentTextScaleFactor.value;
+  // tec.dmPrint('scale: $scale');
+  return scale;
 }
 
 //

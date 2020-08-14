@@ -90,7 +90,7 @@ dependencies:
     hosted:
       name: tec_volumes
       url: http://noah.tecarta.com:8100
-    version: ^1.0.10
+    version: ^1.1.0
   tec_web_view:
     hosted:
       name: tec_web_view
@@ -103,10 +103,10 @@ dependencies:
     version: ^2.0.6
 
 # dependency_overrides:
-#   tec_widgets:
-#     path: ../shared/tec_widgets
-#   tec_html:
-#     path: ../shared/tec_html
+#   # tec_widgets:
+#   #   path: ../shared/tec_widgets
+#   # tec_html:
+#   #   path: ../shared/tec_html
 #   tec_volumes:
 #     path: ../shared/tec_volumes
 

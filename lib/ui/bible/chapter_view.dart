@@ -269,9 +269,8 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
                 // when we get here, html and text scale are actually loaded and ready to go...
                 return _ChapterView(
                   viewUid: widget.viewUid,
-                  volumeId: widget.bible.id,
+                  bible: widget.bible,
                   ref: widget.ref,
-                  baseUrl: widget.bible.baseUrl,
                   html: html,
                   size: widget.size,
                 );
@@ -305,9 +304,8 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
 ///
 class _ChapterView extends StatefulWidget {
   final int viewUid;
-  final int volumeId;
+  final Bible bible;
   final BookChapterVerse ref;
-  final String baseUrl;
   final String html;
   final Size size;
   final List<String> versesToShow;
@@ -315,13 +313,12 @@ class _ChapterView extends StatefulWidget {
   const _ChapterView({
     Key key,
     @required this.viewUid,
-    @required this.volumeId,
+    @required this.bible,
     @required this.ref,
-    @required this.baseUrl,
     @required this.html,
     @required this.size,
     this.versesToShow,
-  })  : assert(volumeId != null && baseUrl != null && html != null),
+  })  : assert(bible != null && html != null),
         super(key: key);
 
   @override
@@ -364,10 +361,8 @@ class _ChapterViewState extends State<_ChapterView> {
       marginRight: '0px',
       marginTop: '0px',
       marginBottom: '60px',
-      vendorFolder: (widget.baseUrl?.startsWith('http') ?? false)
-          ? null
-          : useZondervanCss(widget.volumeId) ? 'zondervan' : 'tecarta',
-      customStyles: ' .${useZondervanCss(widget.volumeId) ? 'C' : 'cno'} { display: none; } '
+      vendorFolder: widget.bible.vendorFolder,
+      customStyles: ' .${widget.bible.useZondervanCss ? 'C' : 'cno'} { display: none; } '
           '.FOOTNO { line-height: inherit; top: inherit; }'
           'h5, .SUBA, h1 { font-weight: normal !important; font-style: italic; font-size: 100% !important;}',
     );
@@ -378,14 +373,14 @@ class _ChapterViewState extends State<_ChapterView> {
         providers: [
           BlocProvider(
             create: (context) => ChapterMarginNotesBloc(
-              volumeId: widget.volumeId,
+              volumeId: widget.bible.id,
               book: widget.ref.book,
               chapter: widget.ref.chapter,
             ),
           ),
           BlocProvider(
             create: (context) => ChapterHighlightsBloc(
-              volumeId: widget.volumeId,
+              volumeId: widget.bible.id,
               book: widget.ref.book,
               chapter: widget.ref.chapter,
             ),
@@ -401,17 +396,17 @@ class _ChapterViewState extends State<_ChapterView> {
                 builder: (c, fontName, error) {
                   assert(fontName != null);
                   var userContentValid = true;
-                  if (marginNotes.loaded && marginNotes.volumeId != widget.volumeId) {
+                  if (marginNotes.loaded && marginNotes.volumeId != widget.bible.id) {
                     context
                         .bloc<ChapterMarginNotesBloc>()
-                        .add(MarginNotesEvent.changeVolumeId(widget.volumeId));
+                        .add(MarginNotesEvent.changeVolumeId(widget.bible.id));
                     userContentValid = false;
                   }
 
-                  if (highlights.loaded && highlights.volumeId != widget.volumeId) {
+                  if (highlights.loaded && highlights.volumeId != widget.bible.id) {
                     context
                         .bloc<ChapterHighlightsBloc>()
-                        .add(HighlightEvent.changeVolumeId(widget.volumeId));
+                        .add(HighlightEvent.changeVolumeId(widget.bible.id));
                     userContentValid = false;
                   }
 
@@ -420,9 +415,9 @@ class _ChapterViewState extends State<_ChapterView> {
 
                     return _BibleHtml(
                       viewUid: widget.viewUid,
-                      volumeId: widget.volumeId,
+                      volumeId: widget.bible.id,
                       ref: widget.ref,
-                      baseUrl: widget.baseUrl,
+                      baseUrl: widget.bible.baseUrl,
                       html: _html,
                       versesToShow: widget.versesToShow ?? [],
                       // ['1', '2', '3']

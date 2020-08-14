@@ -648,7 +648,7 @@ class TecHtmlBuildHelper {
   var _skipSectionTitle = false;
 
   /// Returns a func that returns `true` iff the given element is a section element.
-  TecHtmlCheckElementFunc get _isSectionElement => useZondervanCss(viewModel.volume)
+  TecHtmlCheckElementFunc get _isSectionElement => useZondervanCssWithVolume(viewModel.volume)
       ? (name, attrs, level, isVisible) {
           return name == 'div' && (attrs.className == 'SUBA' || attrs.className == 'PARREF');
         }
@@ -656,15 +656,6 @@ class TecHtmlBuildHelper {
           return name == 'h5';
         };
 }
-
-//
-// UTILITY FUNCTIONS
-//
-
-///
-/// Returns `true` if the Zondervan CSS should be used for the given [volume].
-///
-bool useZondervanCss(int volume) => (volume == 32);
 
 //
 // PRIVATE STUFF
