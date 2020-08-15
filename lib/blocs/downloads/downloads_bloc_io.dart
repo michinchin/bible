@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tec_platform_util/tec_platform_util.dart' as tec;
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_volumes/tec_volumes.dart';
 
 import 'downloads_bloc.dart';
 
@@ -172,6 +173,10 @@ class DownloadsBlocImp extends DownloadsBloc {
       final stopwatch = Stopwatch()..start();
       successful = await tec.unzipFile(zipFile.path, toDir: _unzipDir);
       tec.dmPrint('Unzipping $zipFilename took ${stopwatch.elapsed}');
+
+      if (successful) {
+        await VolumesRepository.shared.updateLocalVolumes();
+      }
     }
     return successful;
   }

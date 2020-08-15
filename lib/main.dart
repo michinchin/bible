@@ -15,6 +15,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import 'blocs/app_lifecycle_bloc.dart';
 import 'blocs/app_theme_bloc.dart';
 import 'blocs/downloads/downloads_bloc.dart';
+import 'blocs/sheet/pref_items_bloc.dart';
 import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'ui/bible/chapter_view.dart';
@@ -47,7 +48,7 @@ Future<void> main() async {
     ],
   );
 
-  await VolumesRepository.shared.loadProducts();
+  await VolumesRepository.shared.loadProducts(updateLocalVolumes: true);
 
   await AppSettings.shared.load(appName: 'Bible', itemsToSync: [
     tua.UserItemType.license,
@@ -114,6 +115,9 @@ class App extends StatelessWidget {
         BlocProvider<ThemeModeBloc>(
           create: (context) => ThemeModeBloc(),
         ),
+        BlocProvider<PrefItemsBloc>(
+          create: (context) => PrefItemsBloc(),
+        )
       ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (context, themeMode) {

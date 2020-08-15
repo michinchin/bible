@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:equatable/equatable.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
-import 'downloads_bloc_io.dart' if (dart.library.html) 'downloads_state_web.dart';
+import 'downloads_bloc_io.dart' if (dart.library.html) 'downloads_bloc_web.dart';
 
 class DownloadsBloc extends tec.SafeBloc<DownloadsState, DownloadsState> {
   DownloadsBloc();

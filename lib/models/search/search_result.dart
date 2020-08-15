@@ -217,7 +217,6 @@ String _formatRefs(String query) {
     final shortRef = arr[0].group(0);
     if (Labels.extraBookNames.containsKey(shortRef)) {
       final bookId = Labels.extraBookNames[shortRef];
-      // TODO(abby): instead of 51 as default bible, use diff value?
       final fullBookName = VolumesRepository.shared.bibleWithId(51).nameOfBook(bookId);
       final fixedQuery = query.replaceAll(shortRef, fullBookName);
 

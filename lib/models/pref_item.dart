@@ -5,23 +5,28 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 enum PrefItemDataType { json, string, bool, int }
 
-const customColor1 = 1;
-const customColor2 = 2;
-const customColor3 = 3;
-const customColor4 = 4;
-const customColors = [customColor1, customColor2, customColor3, customColor4];
+class PrefItemId {
+  static const customColor1 = 1;
+  static const customColor2 = 2;
+  static const customColor3 = 3;
+  static const customColor4 = 4;
+  static const customColors = [customColor1, customColor2, customColor3, customColor4];
 
-/// grid view default (0), scroll view (1)
-const navLayout = 5;
+  /// grid view default (0), scroll view (1)
+  static const navLayout = 5;
 
-/// 3-tap default (0), 2-tap (1)
-const nav3Tap = 6;
+  /// 3-tap default (0), 2-tap (1)
+  static const nav3Tap = 6;
 
-/// volumeIds chosen for search filter
-const translationsFilter = 7;
+  /// volumeIds chosen for search filter
+  static const translationsFilter = 7;
 
-/// show books canonically (0) or alphabetically (1)
-const navBookOrder = 8;
+  /// show books canonically (0) or alphabetically (1)
+  static const navBookOrder = 8;
+
+  /// include the link on copy/share (0), or don't (1)
+  static const includeShareLink = 9;
+}
 
 class PrefItem extends tua.UserItem {
   PrefItem({

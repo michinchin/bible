@@ -439,7 +439,13 @@ class _VolumesListState extends State<_VolumesList> {
           value: item?.progress ?? 0.0,
         ));
 
-    if (item == null ||
+    if (VolumesRepository.shared.isLocalVolume(volume.id) ||
+        (item != null && item.status == DownloadStatus.complete)) {
+      return const Padding(
+        padding: EdgeInsets.all(8),
+        child: Icon(Icons.check_circle, size: 32, color: Colors.green),
+      );
+    } else if (item == null ||
         item.status == DownloadStatus.undefined ||
         item.status == DownloadStatus.failed ||
         item.status == DownloadStatus.canceled) {
@@ -467,11 +473,6 @@ class _VolumesListState extends State<_VolumesList> {
               color: color,
               onPressed: () => _onActionTap(bloc, item)),
         ],
-      );
-    } else if (item.status == DownloadStatus.complete) {
-      return const Padding(
-        padding: EdgeInsets.all(8),
-        child: Icon(Icons.check_circle, size: 32, color: Colors.green),
       );
     } else if (item.status == DownloadStatus.canceled) {
       return const Text('Canceled', style: TextStyle(color: Colors.red));

@@ -30,7 +30,7 @@ Future<Reference> navigate(BuildContext context, Reference ref) {
           height: 600,
           width: 500,
           child: MultiBlocProvider(providers: [
-            BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
+            // BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
             BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
             BlocProvider(create: (_) => SearchBloc()),
           ], child: Nav())),
@@ -50,7 +50,7 @@ Future<Reference> navigate(BuildContext context, Reference ref) {
   return Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
     fullscreenDialog: true,
     builder: (context) => MultiBlocProvider(providers: [
-      BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
+      // BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
       BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
       BlocProvider(create: (_) => SearchBloc()),
     ], child: Nav()),
@@ -76,7 +76,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   List<int> translations() => prefsBloc()
       .state
       .items
-      .itemWithId(translationsFilter)
+      .itemWithId(PrefItemId.translationsFilter)
       .info
       .split('|')
       .map(int.parse)
@@ -85,7 +85,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   @override
   void initState() {
     _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
-    final nav3TapEnabled = (prefsBloc().state.items?.valueOfItemWithId(nav3Tap) ?? 0) == 0;
+    final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? 3 : 2;
     _tabController = TabController(length: tabLength, vsync: this)
       ..addListener(() {
@@ -112,7 +112,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   void _changeTabController() {
-    final nav3TapEnabled = (prefsBloc().state.items?.valueOfItemWithId(nav3Tap) ?? 0) == 0;
+    final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? 3 : 2;
     setState(() {
       _tabController = TabController(length: tabLength, vsync: this)
@@ -137,8 +137,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     final volumes = await selectVolumes(context,
         filter: const VolumesFilter(volumeType: VolumeType.bible), selectedVolumes: translations());
     if (volumes != null) {
-      final prefItem = PrefItem.from(
-          prefsBloc().state.items.itemWithId(translationsFilter).copyWith(info: volumes.join('|')));
+      final prefItem =
+          prefsBloc().infoChangedPrefItem(PrefItemId.translationsFilter, volumes.join('|'));
       prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
     }
     if (_searchController.text.isNotEmpty) {
@@ -147,57 +147,55 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   void _moreButton() {
-    final prefState = prefsBloc()?.state;
-    final items = prefState?.items ?? [];
-    final navGridViewEnabled = (items.valueOfItemWithId(navLayout) ?? 0) == 0;
-    final nav3TapEnabled = (items.valueOfItemWithId(nav3Tap) ?? 0) == 0;
-    final navCanonical = (items.valueOfItemWithId(navBookOrder) ?? 0) == 0;
     showModalBottomSheet<void>(
+        barrierColor: Colors.black12,
+        elevation: 10,
         shape: const RoundedRectangleBorder(
             borderRadius:
                 BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
         context: context,
-        builder: (c) => SafeArea(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  ListTile(
-                    title: Text(navCanonical
-                        ? 'Show books alphabetically'
-                        : 'Show books in canonical order'),
-                    onTap: () {
-                      prefsBloc().add(PrefItemEvent.update(
-                          prefItem: PrefItem.from(items
-                              .itemWithId(navBookOrder)
-                              .copyWith(verse: navCanonical ? 1 : 0))));
-                      Navigator.of(context).maybePop();
-                    },
-                  ),
-                  ListTile(
-                    title: Text(
-                        navGridViewEnabled ? 'Show full name for books' : 'Show abbreviated books'),
-                    onTap: () {
-                      prefsBloc().add(PrefItemEvent.update(
-                          prefItem: PrefItem.from(items
-                              .itemWithId(navLayout)
-                              .copyWith(verse: navGridViewEnabled ? 1 : 0))));
-
-                      Navigator.of(context).maybePop();
-                    },
-                  ),
-                  ListTile(
-                    title: Text(
-                        nav3TapEnabled ? 'Show book and chapter' : 'Show book, chapter, and verse'),
-                    onTap: () {
-                      prefsBloc().add(PrefItemEvent.update(
-                          prefItem: PrefItem.from(
-                              items.itemWithId(nav3Tap).copyWith(verse: nav3TapEnabled ? 1 : 0))));
-                      Navigator.of(context).maybePop();
-                    },
-                  ),
-                ],
-              ),
-            ));
+        builder: (c) => BlocBuilder<PrefItemsBloc, PrefItems>(
+            bloc: prefsBloc(),
+            builder: (context, state) {
+              final items = state?.items ?? [];
+              final navGridViewEnabled = items.boolForPrefItem(PrefItemId.navLayout);
+              final nav3TapEnabled = items.boolForPrefItem(PrefItemId.nav3Tap);
+              final navCanonical = items.boolForPrefItem(PrefItemId.navBookOrder);
+              return SafeArea(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    ListTile(
+                      title: Text(navCanonical
+                          ? 'Show books alphabetically'
+                          : 'Show books in canonical order'),
+                      onTap: () {
+                        prefsBloc().add(PrefItemEvent.update(
+                            prefItem: prefsBloc().toggledPrefItem(PrefItemId.navBookOrder)));
+                      },
+                    ),
+                    ListTile(
+                      title: Text(navGridViewEnabled
+                          ? 'Show full name for books'
+                          : 'Show abbreviated books'),
+                      onTap: () {
+                        prefsBloc().add(PrefItemEvent.update(
+                            prefItem: prefsBloc().toggledPrefItem(PrefItemId.navLayout)));
+                      },
+                    ),
+                    ListTile(
+                      title: Text(nav3TapEnabled
+                          ? 'Show book and chapter'
+                          : 'Show book, chapter, and verse'),
+                      onTap: () {
+                        prefsBloc().add(PrefItemEvent.update(
+                            prefItem: prefsBloc().toggledPrefItem(PrefItemId.nav3Tap)));
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }));
     navBloc()
       ..add(const NavEvent.changeTabIndex(index: 0))
       ..add(const NavEvent.onSearchChange(search: ''));

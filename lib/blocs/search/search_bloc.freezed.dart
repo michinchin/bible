@@ -108,7 +108,7 @@ class __$RequestedCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
   }
 }
 
-class _$_Requested implements _Requested {
+class _$_Requested with DiagnosticableTreeMixin implements _Requested {
   const _$_Requested({this.search, this.translations});
 
   @override
@@ -117,8 +117,17 @@ class _$_Requested implements _Requested {
   final List<int> translations;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'SearchEvent.request(search: $search, translations: $translations)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'SearchEvent.request'))
+      ..add(DiagnosticsProperty('search', search))
+      ..add(DiagnosticsProperty('translations', translations));
   }
 
   @override
@@ -318,7 +327,7 @@ class __$SearchStateCopyWithImpl<$Res> extends _$SearchStateCopyWithImpl<$Res>
   }
 }
 
-class _$_SearchState implements _SearchState {
+class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
   const _$_SearchState(
       {this.search,
       this.searchResults,
@@ -338,8 +347,20 @@ class _$_SearchState implements _SearchState {
   final bool error;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'SearchState(search: $search, searchResults: $searchResults, defaultTranslations: $defaultTranslations, loading: $loading, error: $error)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'SearchState'))
+      ..add(DiagnosticsProperty('search', search))
+      ..add(DiagnosticsProperty('searchResults', searchResults))
+      ..add(DiagnosticsProperty('defaultTranslations', defaultTranslations))
+      ..add(DiagnosticsProperty('loading', loading))
+      ..add(DiagnosticsProperty('error', error));
   }
 
   @override

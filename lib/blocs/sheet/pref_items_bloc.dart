@@ -35,39 +35,71 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
   @override
   PrefItems get initialState => const PrefItems([]);
 
+  // returns verse == 0 for item with id
+  bool itemBool(int id) => state.items.boolForPrefItem(id);
+
+  PrefItem itemWithId(int id) => state.items.itemWithId(id);
+
+  /// gives the pref item updated with opposite bool (used in conjunction with Update event)
+  PrefItem toggledPrefItem(int id) =>
+      PrefItem.from(itemWithId(id).copyWith(verse: itemBool(id) ? 1 : 0));
+
+  /// gives the pref item updated with new info string (used in conjunction with Update event)
+  PrefItem infoChangedPrefItem(int id, String info) =>
+      PrefItem.from(itemWithId(id).copyWith(info: info));
+
   Future<void> _loadFromDb() async {
     final items =
         await AppSettings.shared.userAccount.userDb.getItemsOfTypes([tua.UserItemType.prefItem]);
     final prefItems = items.map<PrefItem>((i) => PrefItem.from(i)).toList();
     final itemIds = prefItems.map((p) => p.id);
 
-    if (!itemIds.contains(customColor1)) {
+    if (!itemIds.contains(PrefItemId.customColor1)) {
       // Custom color initialization
-      for (var i = customColor1; i <= customColors.length; i++) {
+      for (var i = PrefItemId.customColor1; i <= PrefItemId.customColors.length; i++) {
         prefItems.add(PrefItem(
             prefItemDataType: PrefItemDataType.int,
             prefItemId: i,
             verse: unsetHighlightColor.value));
       }
     }
-    if (!itemIds.contains(navLayout)) {
+    if (!itemIds.contains(PrefItemId.navLayout)) {
       // Nav pref initialization
       prefItems
-        ..add(PrefItem(prefItemDataType: PrefItemDataType.bool, prefItemId: navLayout, verse: 0))
-        ..add(PrefItem(prefItemDataType: PrefItemDataType.bool, prefItemId: nav3Tap, verse: 0));
+        ..add(PrefItem(
+            prefItemDataType: PrefItemDataType.bool, prefItemId: PrefItemId.navLayout, verse: 0))
+        ..add(PrefItem(
+            prefItemDataType: PrefItemDataType.bool, prefItemId: PrefItemId.nav3Tap, verse: 0));
     }
-    if (!itemIds.contains(translationsFilter)) {
+    if (!itemIds.contains(PrefItemId.translationsFilter)) {
       // Translations for search filter pref initialization
+      final bibleIds = VolumesRepository.shared.volumeIdsWithType(VolumeType.bible);
+      final volumes = VolumesRepository.shared.volumesWithIds(bibleIds);
+      final availableVolumes = <int>[];
+
+      for (final v in volumes.values) {
+        if (v.onSale || await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(v.id)) {
+          availableVolumes.add(v.id);
+        }
+      }
+
       prefItems.add(PrefItem(
           prefItemDataType: PrefItemDataType.string,
-          prefItemId: translationsFilter,
-          info: VolumesRepository.shared.volumeIdsWithType(VolumeType.bible).join('|')));
+          prefItemId: PrefItemId.translationsFilter,
+          info: availableVolumes.join('|')));
     }
 
-    if (!itemIds.contains(navBookOrder)) {
+    if (!itemIds.contains(PrefItemId.navBookOrder)) {
       // Navigation book order alphabetical/ot/nt
-      prefItems.add(
-          PrefItem(prefItemDataType: PrefItemDataType.bool, prefItemId: navBookOrder, verse: 0));
+      prefItems.add(PrefItem(
+          prefItemDataType: PrefItemDataType.bool, prefItemId: PrefItemId.navBookOrder, verse: 0));
+    }
+
+    if (!itemIds.contains(PrefItemId.includeShareLink)) {
+      prefItems.add(PrefItem(
+          prefItemDataType: PrefItemDataType.bool,
+          prefItemId: PrefItemId.includeShareLink,
+          verse: 0));
     }
 
     add(PrefItemEvent.updateFromDb(prefItems: prefItems));
@@ -118,6 +150,7 @@ extension PrefItemsBlocExtOnListOfPrefItem on List<PrefItem> {
   bool hasItem(PrefItem prefItem) => indexOfItem(prefItem) != -1;
   int valueOfItemWithId(int id) => itemWithId(id)?.verse;
   PrefItem itemWithId(int id) => firstWhere((p) => p.book == id, orElse: () => null);
+  bool boolForPrefItem(int id) => (itemWithId(id)?.verse ?? 0) == 0;
   int indexOfItem(PrefItem prefItem) => indexWhere((p) => p.book == prefItem.book);
   void removeItem(PrefItem prefItem) => removeWhere((p) => p.book == prefItem.book);
 }

@@ -8,13 +8,14 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/search/search_result_bloc.dart';
+import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../models/pref_item.dart';
 import '../../models/search/search_result.dart';
 import '../sheet/selection_sheet_model.dart';
 
 class SearchResultsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final searchBloc = context.bloc<SearchBloc>(); // ignore: close_sinks
     return BlocBuilder<SearchBloc, SearchState>(builder: (context, state) {
       if (state.loading) {
         return const Center(child: CupertinoActivityIndicator());
@@ -22,15 +23,17 @@ class SearchResultsView extends StatelessWidget {
       return SafeArea(
         bottom: false,
         child: ListView.builder(
-          itemCount: searchBloc.state.searchResults.length + 1,
+          itemCount: state.searchResults.length + 1,
           itemBuilder: (c, i) {
             if (i == 0) {
-              return _SearchResultsLabel(searchBloc.state.searchResults);
+              return _SearchResultsLabel(state.searchResults);
             }
             i--;
-            final res = searchBloc.state.searchResults[i];
+            final res = state.searchResults[i];
             return BlocProvider(
-                create: (_) => SearchResultBloc(res), child: const _SearchResultCard());
+                create: (_) => SearchResultBloc(res,
+                    shareUrl: context.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink)),
+                child: const _SearchResultCard());
           },
         ),
       );
