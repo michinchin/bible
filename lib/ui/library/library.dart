@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -11,6 +11,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 import '../../blocs/downloads/downloads_bloc.dart';
 import '../../blocs/is_licensed_bloc.dart';
 import '../common/common.dart';
+import '../common/tec_scaffold_wrapper.dart';
 import 'volume_card.dart';
 import 'volume_detail.dart';
 import 'volumes_bloc.dart';
@@ -101,43 +102,45 @@ class _LibraryScreenState extends State<_LibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: MinHeightAppBar(
-        appBar: AppBar(
-          leading:
-              CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop()),
-          title: tec.isNullOrEmpty(widget.title) ? null : Text(widget.title),
-          actions: !widget.allowMultipleSelections
-              ? null
-              : [
-                  CupertinoButton(
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: Text(
-                      'Done',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline6
-                          .copyWith(color: Theme.of(context).accentColor),
+    return TecScaffoldWrapper(
+      child: Scaffold(
+        appBar: MinHeightAppBar(
+          appBar: AppBar(
+            leading:
+                CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop()),
+            title: tec.isNullOrEmpty(widget.title) ? null : Text(widget.title),
+            actions: !widget.allowMultipleSelections
+                ? null
+                : [
+                    CupertinoButton(
+                      padding: const EdgeInsets.only(right: 16.0),
+                      child: Text(
+                        'Done',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headline6
+                            .copyWith(color: Theme.of(context).accentColor),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context, rootNavigator: true)
+                            .maybePop<List<int>>(_selectedVolumes.toList());
+                      },
                     ),
-                    onPressed: () {
-                      Navigator.of(context, rootNavigator: true)
-                          .maybePop<List<int>>(_selectedVolumes.toList());
-                    },
-                  ),
-                ],
+                  ],
+          ),
         ),
-      ),
-      body: _VolumesView(
-        type: _ViewType.store,
-        filter: widget.filter,
-        selectedVolumes: _selectedVolumes,
-        scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
-        allowMultipleSelections: widget.allowMultipleSelections,
-        onTapVolume: widget.allowMultipleSelections
-            ? null
-            : (id) {
-                Navigator.of(context, rootNavigator: true).maybePop<int>(id);
-              },
+        body: _VolumesView(
+          type: _ViewType.store,
+          filter: widget.filter,
+          selectedVolumes: _selectedVolumes,
+          scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
+          allowMultipleSelections: widget.allowMultipleSelections,
+          onTapVolume: widget.allowMultipleSelections
+              ? null
+              : (id) {
+                  Navigator.of(context, rootNavigator: true).maybePop<int>(id);
+                },
+        ),
       ),
     );
   }
@@ -165,18 +168,20 @@ class _TabbedLibraryScreen extends StatelessWidget {
             if (hasLicensedVolumes) const _VolumesView(type: _ViewType.purchased),
             const _VolumesView(type: _ViewType.store)
           ];
-          return DefaultTabController(
-            length: tabs.length,
-            child: Scaffold(
-              appBar: MinHeightAppBar(
-                appBar: AppBar(
-                  leading: CloseButton(onPressed: closeLibrary),
-                  // leading: BackButton(onPressed: closeLibrary),
-                  title: const Text('Library'),
-                  bottom: TabBar(tabs: tabs),
+          return TecScaffoldWrapper(
+            child: DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                appBar: MinHeightAppBar(
+                  appBar: AppBar(
+                    leading: CloseButton(onPressed: closeLibrary),
+                    // leading: BackButton(onPressed: closeLibrary),
+                    title: const Text('Library'),
+                    bottom: TabBar(tabs: tabs),
+                  ),
                 ),
+                body: TabBarView(children: tabContents),
               ),
-              body: TabBarView(children: tabContents),
             ),
           );
         },

@@ -869,9 +869,9 @@ packages:
   sliding_sheet:
     dependency: "direct main"
     description:
-      name: sliding_sheet
-      url: "http://noah.tecarta.com:8100"
-    source: hosted
+      path: "../sliding_sheet"
+      relative: true
+    source: path
     version: "0.3.9"
   source_gen:
     dependency: transitive
@@ -1026,7 +1026,7 @@ packages:
       name: tec_util
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.20"
+    version: "1.2.21"
   tec_volumes:
     dependency: "direct main"
     description:
@@ -1044,9 +1044,9 @@ packages:
   tec_widgets:
     dependency: "direct main"
     description:
-      name: tec_widgets
-      url: "http://noah.tecarta.com:8100"
-    source: hosted
+      path: "../shared/tec_widgets"
+      relative: true
+    source: path
     version: "2.0.6"
   term_glyph:
     dependency: transitive

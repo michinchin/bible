@@ -1,10 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -433,9 +432,8 @@ extension ViewManagerExtOnState on ViewManagerState {}
 ///
 class ViewManagerWidget extends StatelessWidget {
   final ViewManagerState state;
-  final double statusBarPadding;
 
-  const ViewManagerWidget({Key key, this.state, this.statusBarPadding = 0}) : super(key: key);
+  const ViewManagerWidget({Key key, this.state}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -444,7 +442,6 @@ class ViewManagerWidget extends StatelessWidget {
       builder: (context, constraints) => _VMViewStack(
         vmState: state,
         constraints: constraints,
-        statusBarPadding: statusBarPadding,
       ),
     );
   }

@@ -6,10 +6,8 @@ part of 'view_manager_bloc.dart';
 class _VMViewStack extends StatelessWidget {
   final BoxConstraints constraints;
   final ViewManagerState vmState;
-  final double statusBarPadding;
 
-  const _VMViewStack({Key key, this.constraints, this.vmState, this.statusBarPadding = 0})
-      : super(key: key);
+  const _VMViewStack({Key key, this.constraints, this.vmState}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -68,11 +66,7 @@ class _VMViewStack extends StatelessWidget {
         // appBarTheme: Theme.of(context).tecAppBarTheme(),
         pageTransitionsTheme: tecPageTransitionsTheme(context),
       ),
-      child: Container(
-        color: Theme.of(context).appBarTheme.color,
-        padding: EdgeInsets.only(top: statusBarPadding),
-        child: Stack(children: children),
-      ),
+      child: Stack(children: children),
     );
   }
 }
@@ -89,6 +83,7 @@ abstract class ManagedViewState with _$ManagedViewState {
 
 class ManagedViewBloc extends Bloc<ManagedViewState, ManagedViewState> {
   final ManagedViewState _initialState;
+
   ManagedViewBloc(ManagedViewState initialState) : _initialState = initialState;
 
   @override
@@ -233,10 +228,15 @@ double _defaultMinHeight(BoxConstraints constraints) => math.max(
 ///
 extension _ExtOnViewState on ViewState {
   double minWidth(BoxConstraints c) => _defaultMinWidth(c);
+
   double minHeight(BoxConstraints c) => _defaultMinHeight(c);
+
   double idealWidth(BoxConstraints c) => math.max(preferredWidth ?? 0, minWidth(c));
+
   double idealHeight(BoxConstraints c) => math.max(preferredHeight ?? 0, minHeight(c));
+
   double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
+
   double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
 
   Widget toWidget({
@@ -270,11 +270,17 @@ extension _ExtOnViewState on ViewState {
 ///
 extension _ExtOnListOfViewState on List<ViewState> {
   double minWidth(BoxConstraints c) => fold(0.0, (t, el) => t + el.minWidth(c));
+
   double minHeight(BoxConstraints c) => fold(0.0, (t, el) => math.max(t, el.minHeight(c)));
+
   double idealWidth(BoxConstraints c) => fold(0.0, (t, el) => t + el.idealWidth(c));
+
   double idealHeight(BoxConstraints c) => fold(0.0, (t, el) => math.max(t, el.idealHeight(c)));
+
   double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
+
   double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
+
   String toDebugString() => '[${map<int>((e) => e.uid).join(', ')}]';
 }
 
@@ -285,7 +291,9 @@ extension _ExtOnListOfViewState on List<ViewState> {
 ///
 extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
   double minHeight(BoxConstraints c) => fold(0.0, (t, el) => t + el.minHeight(c));
+
   double idealHeight(BoxConstraints c) => fold(0.0, (t, el) => t + el.idealHeight(c));
+
   double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
 
   int get totalItems => fold(0, (t, el) => t + el.length);

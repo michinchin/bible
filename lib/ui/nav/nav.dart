@@ -10,6 +10,7 @@ import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
+import '../common/tec_scaffold_wrapper.dart';
 import '../library/library.dart';
 import 'bcv_tab.dart';
 import 'search_results_view.dart';
@@ -67,8 +68,11 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   Timer _debounce;
 
   NavBloc navBloc() => context.bloc<NavBloc>();
+
   PrefItemsBloc prefsBloc() => context.bloc<PrefItemsBloc>();
+
   SearchBloc searchBloc() => context.bloc<SearchBloc>();
+
   List<int> translations() => prefsBloc()
       .state
       .items
@@ -229,39 +233,41 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           _tabController.animateTo(s.tabIndex);
         }
       },
-      builder: (c, s) => Scaffold(
-        appBar: AppBar(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          elevation: 5,
-          title: TextField(
-              onEditingComplete: onSubmit,
-              decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'Enter references or keywords',
-                  hintStyle: TextStyle(fontStyle: FontStyle.italic)),
-              controller: _searchController),
-          titleSpacing: 0,
-          leading: s.navViewState == NavViewState.bcvTabs
-              ? const CloseButton()
-              : BackButton(
-                  onPressed: () {
-                    c.bloc<NavBloc>()
-                      ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
-                      ..add(const NavEvent.onSearchChange(search: ''));
-                  },
-                ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.history),
-              onPressed: () => c.bloc<NavBloc>().add(const NavEvent.loadHistory()),
-            ),
-            if (s.navViewState == NavViewState.bcvTabs)
-              IconButton(icon: const Icon(Icons.more_horiz), onPressed: _moreButton),
-            if (s.navViewState == NavViewState.searchResults)
-              IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
-          ],
+      builder: (c, s) => TecScaffoldWrapper(
+        child: Scaffold(
+          appBar: AppBar(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            elevation: 5,
+            title: TextField(
+                onEditingComplete: onSubmit,
+                decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Enter references or keywords',
+                    hintStyle: TextStyle(fontStyle: FontStyle.italic)),
+                controller: _searchController),
+            titleSpacing: 0,
+            leading: s.navViewState == NavViewState.bcvTabs
+                ? const CloseButton()
+                : BackButton(
+                    onPressed: () {
+                      c.bloc<NavBloc>()
+                        ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
+                        ..add(const NavEvent.onSearchChange(search: ''));
+                    },
+                  ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.history),
+                onPressed: () => c.bloc<NavBloc>().add(const NavEvent.loadHistory()),
+              ),
+              if (s.navViewState == NavViewState.bcvTabs)
+                IconButton(icon: const Icon(Icons.more_horiz), onPressed: _moreButton),
+              if (s.navViewState == NavViewState.searchResults)
+                IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
+            ],
+          ),
+          body: body(s.navViewState),
         ),
-        body: body(s.navViewState),
       ),
     );
   }

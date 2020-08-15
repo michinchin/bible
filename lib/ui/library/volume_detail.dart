@@ -2,15 +2,14 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-
 import 'package:http/http.dart' as http;
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
-// import '../../models/iap.dart';
 import '../common/common.dart';
+import '../common/tec_scaffold_wrapper.dart';
 import 'volume_image.dart';
 
 class VolumeDetail extends StatefulWidget {
@@ -36,28 +35,30 @@ class _VolumeDetailState extends State<VolumeDetail> {
     );
     final padding = (16.0 * textScaleFactor).roundToDouble();
 
-    return Scaffold(
-      appBar: MinHeightAppBar(
-        appBar: AppBar(
-            //title: TecText(volume.name, maxLines: 2, textAlign: TextAlign.center),
+    return TecScaffoldWrapper(
+      child: Scaffold(
+        appBar: MinHeightAppBar(
+          appBar: AppBar(
+              //title: TecText(volume.name, maxLines: 2, textAlign: TextAlign.center),
+              ),
+        ),
+        body: ListView(
+          children: [
+            _VolumeCard(
+              volume: widget.volume,
+              isLicensed: false,
+              isDownloaded: false,
+              price: '\$1.99',
+              textScaleFactor: textScaleFactor,
+              padding: padding,
             ),
-      ),
-      body: ListView(
-        children: [
-          _VolumeCard(
-            volume: widget.volume,
-            isLicensed: false,
-            isDownloaded: false,
-            price: '\$1.99',
-            textScaleFactor: textScaleFactor,
-            padding: padding,
-          ),
-          _VolumeDescription(
-            volume: widget.volume,
-            textScaleFactor: textScaleFactor,
-            padding: padding,
-          ),
-        ],
+            _VolumeDescription(
+              volume: widget.volume,
+              textScaleFactor: textScaleFactor,
+              padding: padding,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -80,6 +81,7 @@ class _VolumeCard extends StatelessWidget {
     this.textScaleFactor,
     this.padding,
   });
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(

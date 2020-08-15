@@ -17,6 +17,10 @@ class AppSettings {
   // PUBLIC API
   //
 
+  double androidStatusBarHeight;
+  double androidNavigationBarPadding = 0.0;
+  double androidStatusBarPadding = 0;
+
   tec.DeviceInfo deviceInfo;
   tua.UserAccount userAccount;
 

@@ -74,63 +74,75 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     super.dispose();
   }
 
+  List<Widget> _actions() {
+    final icons = defaultActionsBuilder(context, widget.state, widget.size)
+      ..insert(
+          0,
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: 'Search',
+            onPressed: () => _onNavigate(_chapterState.value),
+          ));
+
+    return icons;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: MinHeightAppBar(
         appBar: AppBar(
-          centerTitle: false,
-          title: TecStreamBuilder<BibleChapterState>(
-              stream: _chapterState.stream,
-              initialData: _chapterState.value,
-              builder: (context, chapterState, error) {
-                assert(chapterState != null);
-                const minFontSize = 12.0;
-                const buttonPadding = EdgeInsets.only(top: 16.0, bottom: 16.0);
-                final buttonStyle = Theme.of(context)
-                    .textTheme
-                    .headline6
-                    .copyWith(color: Theme.of(context).accentColor);
+            centerTitle: false,
+            title: TecStreamBuilder<BibleChapterState>(
+                stream: _chapterState.stream,
+                initialData: _chapterState.value,
+                builder: (context, chapterState, error) {
+                  assert(chapterState != null);
+                  const minFontSize = 12.0;
+                  const buttonPadding = EdgeInsets.only(top: 16.0, bottom: 16.0);
+                  final buttonStyle = Theme.of(context)
+                      .textTheme
+                      .headline6
+                      .copyWith(color: Theme.of(context).accentColor);
 
-                return Semantics(
-                  label: chapterState.title,
-                  child: ExcludeSemantics(
-                    child: Row(
-                      children: [
-                        CupertinoButton(
-                          minSize: 0,
-                          padding: buttonPadding,
-                          child: TecAutoSizeText(
-                            chapterState.title,
-                            minFontSize: minFontSize,
-                            maxLines: 1,
-                            style: buttonStyle,
+                  return Semantics(
+                    label: chapterState.title,
+                    child: ExcludeSemantics(
+                      child: Row(
+                        children: [
+                          CupertinoButton(
+                            minSize: 0,
+                            padding: buttonPadding,
+                            child: TecAutoSizeText(
+                              chapterState.title,
+                              minFontSize: minFontSize,
+                              maxLines: 1,
+                              style: buttonStyle,
+                            ),
+                            onPressed: () => _onNavigate(chapterState),
                           ),
-                          onPressed: () => _onNavigate(chapterState),
-                        ),
-                        TecAutoSizeText(
-                          '・',
-                          minFontSize: minFontSize,
-                          style: Theme.of(context).textTheme.headline6,
-                        ),
-                        CupertinoButton(
-                          minSize: 0,
-                          padding: buttonPadding,
-                          child: TecAutoSizeText(
-                            _bible.abbreviation,
+                          TecAutoSizeText(
+                            '・',
                             minFontSize: minFontSize,
-                            maxLines: 1,
-                            style: buttonStyle,
+                            style: Theme.of(context).textTheme.headline6,
                           ),
-                          onPressed: () => _onSelectBible(chapterState),
-                        ),
-                      ],
+                          CupertinoButton(
+                            minSize: 0,
+                            padding: buttonPadding,
+                            child: TecAutoSizeText(
+                              _bible.abbreviation,
+                              minFontSize: minFontSize,
+                              maxLines: 1,
+                              style: buttonStyle,
+                            ),
+                            onPressed: () => _onSelectBible(chapterState),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }),
-          actions: defaultActionsBuilder(context, widget.state, widget.size),
-        ),
+                  );
+                }),
+            actions: _actions()),
       ),
       body: PageableView(
         key: _pageableViewStateKey,
@@ -537,6 +549,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
           child: TecAutoScroll(
             scrollController: _scrollController,
             allowAutoscroll: () => !context.bloc<SelectionBloc>().state.isTextSelected,
+            navigationBarPadding: () => AppSettings.shared.androidNavigationBarPadding,
             autoscrollActive: (active) {
               if (active) {
                 context.bloc<SheetManagerBloc>().collapse(context);

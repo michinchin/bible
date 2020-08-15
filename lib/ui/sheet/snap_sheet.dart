@@ -5,6 +5,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
+import '../../models/app_settings.dart';
 import 'main_sheet.dart';
 import 'selection_sheet.dart';
 
@@ -26,7 +27,14 @@ class _SnapSheetState extends State<SnapSheet> {
 
   List<double> _calculateHeightSnappings() {
     // figure out dimensions depending on view size
-    final bottomPadding = MediaQuery.of(context).padding.bottom / 2 + 10;
+    var androidExtraPadding = AppSettings.shared.androidNavigationBarPadding;
+
+    if (MediaQuery.of(context).size.width > 500) {
+      // buttons are spread out - reduce the height by 50%
+      androidExtraPadding = androidExtraPadding / 2;
+    }
+
+    final bottomPadding = MediaQuery.of(context).padding.bottom / 2 + 10 + androidExtraPadding;
     final topBarHeight = 50.0 + bottomPadding;
     final secondBarHeight = 170.0 + bottomPadding;
     final height = MediaQuery.of(context).size.height;
@@ -142,6 +150,7 @@ class _SnapSheetState extends State<SnapSheet> {
                   default:
                     child = MainSheet(sheetSize: state.size);
                 }
+
                 return ValueListenableBuilder<double>(
                     valueListenable: onDragValue ??= ValueNotifier<double>(snappings.first),
                     child: Container(height: MediaQuery.of(c).size.height, child: child),
@@ -186,10 +195,12 @@ class SheetButton extends StatelessWidget {
   final String text;
   final IconData icon;
   final VoidCallback onPressed;
+
   const SheetButton({@required this.text, @required this.icon, @required this.onPressed})
       : assert(text != null),
         assert(icon != null),
         assert(onPressed != null);
+
   @override
   Widget build(BuildContext context) {
     return ButtonTheme(
@@ -219,7 +230,9 @@ class GreyCircleButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
   final String title;
+
   const GreyCircleButton({@required this.icon, @required this.onPressed, this.title});
+
   @override
   Widget build(BuildContext context) {
     Widget circleIcon([double radius]) => Container(
@@ -263,30 +276,33 @@ class SheetIconButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String text;
   final IconData icon;
+
   const SheetIconButton({this.onPressed, this.text, this.icon});
+
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      onPressed: onPressed,
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            color: Theme.of(context).textColor.withOpacity(0.5),
-            size: 20,
-          ),
-          const SizedBox(height: 3),
-          TecText(
-            text,
-            autoSize: true,
-            textScaleFactor: 0.7,
-            style: TextStyle(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        child: Column(
+          children: [
+            Icon(
+              icon,
               color: Theme.of(context).textColor.withOpacity(0.5),
+              size: 20,
             ),
-          ),
-        ],
+            const SizedBox(height: 3),
+            TecText(
+              text,
+              autoSize: true,
+              textScaleFactor: 0.7,
+              style: TextStyle(
+                color: Theme.of(context).textColor.withOpacity(0.5),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

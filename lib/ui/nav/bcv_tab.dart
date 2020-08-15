@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:bible/models/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -9,6 +8,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../models/app_settings.dart';
 import '../../models/pref_item.dart';
 import '../common/tec_tab_indicator.dart';
 import 'nav.dart';
