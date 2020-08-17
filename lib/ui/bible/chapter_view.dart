@@ -564,7 +564,9 @@ class _BibleHtmlState extends State<_BibleHtml> {
                   // HTML is already scaled.
                   textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
                       ? TextStyle(color: textColor)
-                      : GoogleFonts.getFont(widget.fontName, color: textColor)),
+                      : widget.fontName.startsWith('embedded_')
+                          ? TextStyle(color: textColor, fontFamily: widget.fontName.substring(9))
+                          : GoogleFonts.getFont(widget.fontName, color: textColor)),
 
                   padding: EdgeInsets.symmetric(
                     horizontal: (widget.size.width * _marginPercent).roundToDouble(),
