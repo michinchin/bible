@@ -171,13 +171,20 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                       color: buttonColor,
                       borderRadius: const BorderRadius.all(Radius.circular(50)),
                       padding: EdgeInsets.symmetric(horizontal: padding),
-                      child: Text(
-                        '$name',
-                        textScaleFactor: textScale,
-                        style: name == _Fonts._systemDefault
-                            ? TextStyle(fontSize: fontSize, color: textColor)
-                            : GoogleFonts.getFont(name, fontSize: fontSize, color: textColor),
-                      ),
+                      child: Builder(builder: (context) {
+                        final embedded = name.startsWith('embedded_');
+                        final showName = (embedded) ? name.substring(9) : name;
+                        return Text(
+                          '$showName',
+                          textScaleFactor: textScale,
+                          style: name == _Fonts._systemDefault
+                              ? TextStyle(fontSize: fontSize, color: textColor)
+                              : embedded
+                                  ? TextStyle(
+                                      fontFamily: showName, fontSize: fontSize, color: textColor)
+                                  : GoogleFonts.getFont(name, fontSize: fontSize, color: textColor),
+                        );
+                      }),
                       onPressed: () => AppSettings.shared.contentFontName
                           .add(name == _Fonts._systemDefault ? '' : name),
                     )
@@ -294,8 +301,20 @@ Future<_Fonts> _loadFonts() async {
     if (text != null) {
       final json = tec.parseJsonSync(text);
       if (json != null) {
-        final items = tec.as<List<dynamic>>(json['items']);
-        for (final item in items) {
+        // add embedded fonts
+        final embeddedFonts = tec.as<List<dynamic>>(json['embedded']);
+        for (final item in embeddedFonts) {
+          if (item is List<dynamic> && item.length == 2) {
+            final name = tec.as<String>(item.first);
+            final type = tec.as<String>(item.last);
+            assert(type?.isNotEmpty ?? false);
+            fonts.add(_Font('embedded_$name', type));
+          }
+        }
+
+        // add google fonts
+        final googleFonts = tec.as<List<dynamic>>(json['google']);
+        for (final item in googleFonts) {
           if (item is List<dynamic> && item.length == 2) {
             final name = tec.as<String>(item.first);
             // Make sure the font is still available in GoogleFonts.
