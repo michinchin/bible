@@ -26,10 +26,11 @@ class _SnapSheetState extends State<SnapSheet> {
 
   List<double> _calculateHeightSnappings() {
     // figure out dimensions depending on view size
-    var androidExtraPadding = AppSettings.shared.androidNavigationBarPadding;
+    // dividing by 2 - they will overlay but looks nicer
+    var androidExtraPadding = AppSettings.shared.navigationBarPadding / 2;
 
     if (MediaQuery.of(context).size.width > 500) {
-      // buttons are spread out - reduce the height by 50%
+      // buttons are spread out - reduce the height by another 50%
       androidExtraPadding = androidExtraPadding / 2;
     }
 

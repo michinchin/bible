@@ -24,31 +24,28 @@ class _TecScaffoldWrapperState extends State<TecScaffoldWrapper> {
       return false;
     }
 
-    if (AppSettings.shared.androidStatusBarHeight is! double) {
-      final overlayNavigationBar = tec.platformIs(tec.Platform.android) &&
-          MediaQuery.of(context).systemGestureInsets.bottom == 32;
-
-      if (overlayNavigationBar) {
-        final statusBarHeight = MediaQuery.of(context).systemGestureInsets.top;
-        AppSettings.shared.androidStatusBarHeight = statusBarHeight;
-        AppSettings.shared.androidStatusBarPadding = statusBarHeight;
-        AppSettings.shared.androidNavigationBarPadding = 8;
-      } else {
-        AppSettings.shared.androidStatusBarHeight = 0;
-        AppSettings.shared.androidStatusBarPadding = 0;
-        AppSettings.shared.androidNavigationBarPadding = 0;
-      }
+    if (AppSettings.shared.androidFullScreen is! bool) {
+      AppSettings.shared.statusBarHeight = MediaQuery
+          .of(context)
+          .systemGestureInsets
+          .top;
+      AppSettings.shared.navigationBarPadding = MediaQuery
+          .of(context)
+          .systemGestureInsets
+          .bottom / 2;
+      AppSettings.shared.androidFullScreen = tec.platformIs(tec.Platform.android) &&
+          AppSettings.shared.navigationBarPadding == 16.0;
     }
 
-    if (AppSettings.shared.androidStatusBarHeight > 0) {
+    if (AppSettings.shared.androidFullScreen) {
       final landscape = size.width > size.height;
       if (math.max(size.width, size.height) < 1004) {
         // it's a phone...
         if (landscape) {
-          AppSettings.shared.androidStatusBarPadding = 0;
+          AppSettings.shared.statusBarPadding = 0;
           SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
         } else {
-          AppSettings.shared.androidStatusBarPadding = AppSettings.shared.androidStatusBarHeight;
+          AppSettings.shared.statusBarPadding = AppSettings.shared.statusBarHeight;
           SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top, SystemUiOverlay.bottom]);
         }
       }
@@ -68,7 +65,7 @@ class _TecScaffoldWrapperState extends State<TecScaffoldWrapper> {
         children: [
           Container(
             color: Theme.of(context).appBarTheme.color,
-            height: AppSettings.shared.androidStatusBarPadding,
+            height: AppSettings.shared.statusBarPadding,
           ),
           Expanded(
             child: widget.child,

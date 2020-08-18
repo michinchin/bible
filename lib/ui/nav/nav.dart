@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bible/ui/common/tec_bottom_sheet_safe_area.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -161,7 +162,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
               final navGridViewEnabled = items.boolForPrefItem(PrefItemId.navLayout);
               final nav3TapEnabled = items.boolForPrefItem(PrefItemId.nav3Tap);
               final navCanonical = items.boolForPrefItem(PrefItemId.navBookOrder);
-              return SafeArea(
+              return TecBottomSheetSafeArea(
                 child: ListView(
                   shrinkWrap: true,
                   children: [

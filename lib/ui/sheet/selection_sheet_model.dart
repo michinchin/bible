@@ -1,3 +1,4 @@
+import 'package:bible/ui/common/tec_bottom_sheet_safe_area.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -155,13 +156,18 @@ class SelectionSheetModel {
     }
 
     await showModalBottomSheet<void>(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        context: c,
-        useRootNavigator: true,
-        isScrollControlled: true,
-        enableDrag: false,
-        builder: (c) =>
-            SizedBox(height: 3 * MediaQuery.of(c).size.height / 4, child: _DefineWebView(words)));
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      context: c,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      enableDrag: false,
+      builder: (c) => TecBottomSheetSafeArea(
+        child: SizedBox(
+          height: 3 * MediaQuery.of(c).size.height / 4,
+          child: _DefineWebView(words),
+        ),
+      ),
+    );
   }
 
   static Future<void> compare(BuildContext c) async {
@@ -195,18 +201,21 @@ Future<void> showCompareSheet(BuildContext c, Reference ref) async {
           c.bloc<PrefItemsBloc>().state.items.itemWithId(PrefItemId.translationsFilter).info);
 
   await showModalBottomSheet<void>(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      context: c,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      enableDrag: false,
-      builder: (c) => SizedBox(
-            height: 3 * MediaQuery.of(c).size.height / 4,
-            child: CompareVerseScreen(
-              results: compareResults,
-              title: ref.label(),
-            ),
-          ));
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+    context: c,
+    useRootNavigator: true,
+    isScrollControlled: true,
+    enableDrag: false,
+    builder: (c) => TecBottomSheetSafeArea(
+      child: SizedBox(
+        height: 3 * MediaQuery.of(c).size.height / 4,
+        child: CompareVerseScreen(
+          results: compareResults,
+          title: ref.label(),
+        ),
+      ),
+    ),
+  );
 }
 
 class _DefineWebView extends StatefulWidget {

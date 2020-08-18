@@ -110,16 +110,18 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                     child: ExcludeSemantics(
                       child: Row(
                         children: [
-                          CupertinoButton(
-                            minSize: 0,
-                            padding: buttonPadding,
-                            child: TecAutoSizeText(
-                              chapterState.title,
-                              minFontSize: minFontSize,
-                              maxLines: 1,
-                              style: buttonStyle,
+                          Flexible(
+                            child: CupertinoButton(
+                              minSize: 0,
+                              padding: buttonPadding,
+                              child: TecAutoSizeText(
+                                chapterState.title,
+                                minFontSize: minFontSize,
+                                maxLines: 1,
+                                style: buttonStyle,
+                              ),
+                              onPressed: () => _onNavigate(chapterState),
                             ),
-                            onPressed: () => _onNavigate(chapterState),
                           ),
                           TecAutoSizeText(
                             '・',
@@ -544,7 +546,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
           child: TecAutoScroll(
             scrollController: _scrollController,
             allowAutoscroll: () => !context.bloc<SelectionBloc>().state.isTextSelected,
-            navigationBarPadding: () => AppSettings.shared.androidNavigationBarPadding,
+            navigationBarPadding: () => AppSettings.shared.navigationBarPadding,
             autoscrollActive: (active) {
               if (active) {
                 context.bloc<SheetManagerBloc>().collapse(context);

@@ -17,9 +17,14 @@ class AppSettings {
   // PUBLIC API
   //
 
-  double androidStatusBarHeight;
-  double androidNavigationBarPadding = 0.0;
-  double androidStatusBarPadding = 0;
+  // info about android full screen overlay mode
+  // statusBarHeight is the actual status bar height
+  // statusBarPadding is the padding to add to a view (in landscape == 0)
+  // navigationBarPadding is the padding to add at the bottom for sheets - etc
+  bool androidFullScreen;
+  double statusBarHeight;
+  double statusBarPadding;
+  double navigationBarPadding;
 
   tec.DeviceInfo deviceInfo;
   tua.UserAccount userAccount;

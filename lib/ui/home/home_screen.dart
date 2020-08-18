@@ -37,9 +37,7 @@ class HomeScreen extends StatelessWidget {
               // this Scaffold is wrapped in a Builder so our parent widget can finish
               // initialization before this Scaffold tries to access the status bar height
               return Scaffold(
-                // there is flutter bug! both true and false act as true - null acts as false
-                resizeToAvoidBottomInset:
-                    (AppSettings.shared.androidStatusBarHeight > 0) ? true : null,
+                resizeToAvoidBottomInset: !AppSettings.shared.androidFullScreen,
                 body: SafeArea(
                   left: false,
                   right: false,

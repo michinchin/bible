@@ -1,3 +1,4 @@
+import 'package:bible/ui/common/tec_bottom_sheet_safe_area.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,7 +36,7 @@ class VolumesFilterSheet extends StatelessWidget {
     const animationDuration = Duration(milliseconds: 300);
     final buttonHeight = 16 + (22 * textScaleFactor).roundToDouble();
 
-    return SafeArea(
+    return TecBottomSheetSafeArea(
       child: Container(
         padding: EdgeInsets.all(padding),
         child: Column(
