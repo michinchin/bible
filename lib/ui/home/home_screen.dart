@@ -16,7 +16,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = context.bloc<ThemeModeBloc>().state == ThemeMode.dark;
+    final isDarkMode = context.bloc<ThemeModeBloc>().state == ThemeMode.dark ||
+        (context.bloc<ThemeModeBloc>().state == ThemeMode.system &&
+            WidgetsBinding.instance.window.platformBrightness == Brightness.dark);
 
     return MultiBlocProvider(
       providers: [
