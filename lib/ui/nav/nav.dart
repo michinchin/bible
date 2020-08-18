@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bible/ui/common/tec_bottom_sheet_safe_area.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,13 +10,14 @@ import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
+import '../common/tec_bottom_sheet_safe_area.dart';
 import '../common/tec_scaffold_wrapper.dart';
 import '../library/library.dart';
 import 'bcv_tab.dart';
 import 'search_results_view.dart';
 import 'search_suggestions.dart';
 
-const tabColors = [Colors.blue, Colors.orange, Colors.green];
+const tabColors = [Colors.red, Colors.blue, Colors.orange, Colors.green];
 
 Future<Reference> navigate(BuildContext context, Reference ref) {
   final isLargeScreen =
@@ -63,6 +63,9 @@ class Nav extends StatefulWidget {
   _NavState createState() => _NavState();
 }
 
+const maxTabsAvailable = 4;
+const minTabsAvailable = 3;
+
 class _NavState extends State<Nav> with TickerProviderStateMixin {
   TabController _tabController;
   TextEditingController _searchController;
@@ -87,8 +90,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   void initState() {
     _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
-    final tabLength = nav3TapEnabled ? 3 : 2;
-    _tabController = TabController(length: tabLength, vsync: this)
+    final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
+    _tabController = TabController(length: tabLength, initialIndex: 1, vsync: this)
       ..addListener(() {
         if (_tabController.index != navBloc().state.tabIndex) {
           navBloc().add(NavEvent.changeTabIndex(index: _tabController.index));
@@ -114,9 +117,9 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   void _changeTabController() {
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
-    final tabLength = nav3TapEnabled ? 3 : 2;
+    final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
     setState(() {
-      _tabController = TabController(length: tabLength, vsync: this)
+      _tabController = TabController(length: tabLength, initialIndex: 1, vsync: this)
         ..addListener(() {
           if (_tabController.index != navBloc().state.tabIndex) {
             navBloc().add(NavEvent.changeTabIndex(index: _tabController.index));
@@ -162,6 +165,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
               final navGridViewEnabled = items.boolForPrefItem(PrefItemId.navLayout);
               final nav3TapEnabled = items.boolForPrefItem(PrefItemId.nav3Tap);
               final navCanonical = items.boolForPrefItem(PrefItemId.navBookOrder);
+              final translationsAbbrev = items.boolForPrefItem(PrefItemId.translationsAbbreviated);
               return TecBottomSheetSafeArea(
                 child: ListView(
                   shrinkWrap: true,
@@ -193,12 +197,22 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                             prefItem: prefsBloc().toggledPrefItem(PrefItemId.nav3Tap)));
                       },
                     ),
+                    ListTile(
+                      title: Text(translationsAbbrev
+                          ? 'Show full name for translations'
+                          : 'Show abbreviated translations'),
+                      onTap: () {
+                        prefsBloc().add(PrefItemEvent.update(
+                            prefItem:
+                                prefsBloc().toggledPrefItem(PrefItemId.translationsAbbreviated)));
+                      },
+                    ),
                   ],
                 ),
               );
             }));
     navBloc()
-      ..add(const NavEvent.changeTabIndex(index: 0))
+      ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
       ..add(const NavEvent.onSearchChange(search: ''));
   }
 
@@ -255,12 +269,26 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                     },
                   ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.history),
-                onPressed: () => c.bloc<NavBloc>().add(const NavEvent.loadHistory()),
-              ),
-              if (s.navViewState == NavViewState.bcvTabs)
-                IconButton(icon: const Icon(Icons.more_horiz), onPressed: _moreButton),
+              if (s.navViewState == NavViewState.bcvTabs) ...[
+                if (s.tabIndex > NavTabs.book.index)
+                  FlatButton(
+                      child: Text(
+                        'GO',
+                        style: TextStyle(color: tabColors[s.tabIndex]),
+                      ),
+                      onPressed: () => Navigator.of(context).maybePop(s.ref))
+                else ...[
+                  IconButton(
+                    icon: const Icon(Icons.history),
+                    onPressed: () => c.bloc<NavBloc>().add(const NavEvent.loadHistory()),
+                  ),
+                  IconButton(icon: const Icon(Icons.more_horiz), onPressed: _moreButton)
+                ]
+              ] else
+                IconButton(
+                  icon: const Icon(Icons.history),
+                  onPressed: () => c.bloc<NavBloc>().add(const NavEvent.loadHistory()),
+                ),
               if (s.navViewState == NavViewState.searchResults)
                 IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
             ],

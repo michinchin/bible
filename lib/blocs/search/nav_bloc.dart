@@ -8,7 +8,7 @@ import '../../models/search/autocomplete.dart';
 part 'nav_bloc.freezed.dart';
 
 enum NavViewState { bcvTabs, searchSuggestions, searchResults }
-enum NavTabs { book, chapter, verse }
+enum NavTabs { translation, book, chapter, verse }
 
 @freezed
 abstract class NavEvent with _$NavEvent {
@@ -42,7 +42,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
   @override
   NavState get initialState => NavState(
       ref: initialRef ?? Reference.fromHref('50/1/1', volume: 51),
-      tabIndex: 0,
+      tabIndex: 1,
       search: '',
       bookSuggestions: [],
       wordSuggestions: [],
@@ -85,7 +85,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
       final check = s.toLowerCase();
 
       switch (state.tabIndex) {
-        case 0: // book tab
+        case 1: // book tab
           final endsWithSpaceDigit = lastChar == ' ';
           final matches = <int, String>{};
           var addCurrentRef = false;
@@ -148,7 +148,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
               navViewState: NavViewState.searchSuggestions);
 
           break;
-        case 1: // chapter tab
+        case 2: // chapter tab
           currState = currState.copyWith(navViewState: NavViewState.bcvTabs);
           if (lastChar == ':' && state.tabIndex == 1) {
             int chapter;
@@ -169,10 +169,10 @@ class NavBloc extends Bloc<NavEvent, NavState> {
               );
             }
           } else if (!s.startsWith(selectedBook) || s.length == selectedBook.length) {
-            currState = currState.copyWith(tabIndex: 0, search: '');
+            currState = currState.copyWith(tabIndex: NavTabs.book.index, search: '');
           }
           break;
-        case 2: //verse tab
+        case 3: //verse tab
           // did the colon get deleted...
           if (!s.startsWith(selectedBook) || s.length <= selectedBook.length) {
             currState = currState.copyWith(tabIndex: 0, navViewState: NavViewState.bcvTabs);
@@ -210,10 +210,10 @@ class NavBloc extends Bloc<NavEvent, NavState> {
   }
 
   NavState _changeTabIndex(int index) {
-    final bible = VolumesRepository.shared.bibleWithId(initialRef.volume);
-    final bookName = bible.nameOfBook(state.ref.book);
     var search = '';
     if (index > NavTabs.book.index) {
+      final bible = VolumesRepository.shared.bibleWithId(initialRef.volume);
+      final bookName = bible.nameOfBook(state.ref.book);
       search += bookName;
       if (index == NavTabs.verse.index) {
         search += ' ${state.ref.chapter}:';
@@ -226,7 +226,11 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
   void selectBook(int bookId, String bookName) {
     // need to set ref before changing tab index or else will cause issues
-    final ref = state.ref.copyWith(book: bookId);
+    var ref = state.ref.copyWith(book: bookId);
+    if (state.ref.book != bookId) {
+      // if changed book, init with first chapter
+      ref = ref.copyWith(chapter: 1);
+    }
     add(NavEvent.changeState(
         state.copyWith(ref: ref, tabIndex: NavTabs.chapter.index, search: bookName)));
   }

@@ -102,6 +102,13 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
           verse: 0));
     }
 
+    if (!itemIds.contains(PrefItemId.translationsAbbreviated)) {
+      prefItems.add(PrefItem(
+          prefItemDataType: PrefItemDataType.bool,
+          prefItemId: PrefItemId.translationsAbbreviated,
+          verse: 0));
+    }
+
     add(PrefItemEvent.updateFromDb(prefItems: prefItems));
   }
 

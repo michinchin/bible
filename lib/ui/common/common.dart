@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tec_widgets/tec_widgets.dart';
 
 import 'tec_tab_indicator.dart';
 
@@ -32,6 +33,25 @@ class LoadingIndicator extends StatelessWidget {
       child: CupertinoActivityIndicator(
         radius: radius,
       ));
+}
+
+///
+/// List label with padding
+///
+class ListLabel extends StatelessWidget {
+  final String label;
+  const ListLabel(this.label);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        child: TecText(
+          label,
+          autoSize: true,
+          style: Theme.of(context).textTheme.caption,
+        ));
+  }
 }
 
 ///

@@ -1,4 +1,3 @@
-import 'package:bible/ui/common/tec_bottom_sheet_safe_area.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +18,8 @@ import '../../models/pref_item.dart';
 import '../../models/search/compare_results.dart';
 import '../../models/search/tec_share.dart';
 import '../../models/shared_types.dart';
+import '../common/common.dart';
+import '../common/tec_bottom_sheet_safe_area.dart';
 import 'compare_verse.dart';
 import 'snap_sheet.dart';
 
@@ -267,7 +268,7 @@ class __DefineWebViewState extends State<_DefineWebView> {
         child: TecWebView(
           onWebCreated: onWebCreated,
           backgroundColor: Theme.of(context).canvasColor,
-          loadingIndicator: const CupertinoActivityIndicator(),
+          loadingIndicator: const LoadingIndicator(),
         ),
       ),
     );

@@ -11,6 +11,7 @@ import '../../blocs/search/search_result_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/search_result.dart';
+import '../common/common.dart';
 import '../sheet/selection_sheet_model.dart';
 
 class SearchResultsView extends StatelessWidget {
@@ -18,7 +19,7 @@ class SearchResultsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SearchBloc, SearchState>(builder: (context, state) {
       if (state.loading) {
-        return const Center(child: CupertinoActivityIndicator());
+        return const LoadingIndicator();
       } else if (state.error) {}
       return SafeArea(
         bottom: false,
@@ -69,8 +70,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
                       ),
                       childrenPadding: EdgeInsets.zero,
                       subtitle: s.contextLoading
-                          ? Container(
-                              height: 100, width: 100, child: const CupertinoActivityIndicator())
+                          ? const LoadingIndicator()
                           : TecText.rich(TextSpan(
                               children: searchResTextSpans(
                                   bloc().currentText, context.bloc<SearchBloc>().state.search))),

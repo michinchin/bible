@@ -26,6 +26,9 @@ class PrefItemId {
 
   /// include the link on copy/share (0), or don't (1)
   static const includeShareLink = 9;
+
+  /// abbreviate translations in nav (0), or don't (1)
+  static const translationsAbbreviated = 10;
 }
 
 class PrefItem extends tua.UserItem {

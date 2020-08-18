@@ -172,7 +172,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     TecAutoScroll.stopAutoscroll();
     final ref = await navigate(
       context,
-      Reference.fromHref(chapterState.bcv.toString(), volume: chapterState.bibleId),
+      Reference.fromHref(chapterState.bcv.toString(), volume: _bible.id),
     );
     if (ref != null) {
       // Small delay to allow the nav popup to clean up...
@@ -187,6 +187,9 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
             pageController.jumpToPage(page);
           }
         }
+        if (chapterState.bibleId != ref.volume) {
+          _changeVolume(bibleId: ref.volume, chapterState: chapterState);
+        }
       });
     }
   }
@@ -200,6 +203,10 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
         ),
         selectedVolume: _bible.id);
 
+    _changeVolume(bibleId: bibleId, chapterState: chapterState);
+  }
+
+  void _changeVolume({@required int bibleId, @required BibleChapterState chapterState}) {
     if (bibleId != null) {
       _bible = VolumesRepository.shared.bibleWithId(bibleId);
       final next = BibleChapterState(bibleId, chapterState.bcv, chapterState.page);
