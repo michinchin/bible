@@ -123,7 +123,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
             if (name == check.trim()) {
               return currState.copyWith(
                   navViewState: NavViewState.bcvTabs,
-                  tabIndex: 1,
+                  tabIndex: NavTabs.chapter.index,
                   ref: state.ref.copyWith(book: book),
                   search: '${bible.nameOfBook(book)} ');
             } else if (name.startsWith(s.toLowerCase())) {
@@ -150,7 +150,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
           break;
         case 2: // chapter tab
           currState = currState.copyWith(navViewState: NavViewState.bcvTabs);
-          if (lastChar == ':' && state.tabIndex == 1) {
+          if (lastChar == ':' && state.tabIndex == NavTabs.chapter.index) {
             int chapter;
             try {
               chapter = int.parse(
@@ -164,7 +164,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
             if (chapter > 0 && s.trim() == '$selectedBook $chapter:') {
               return currState.copyWith(
                 ref: currState.ref.copyWith(chapter: chapter),
-                tabIndex: 2,
+                tabIndex: NavTabs.verse.index,
                 search: s,
               );
             }
@@ -175,10 +175,11 @@ class NavBloc extends Bloc<NavEvent, NavState> {
         case 3: //verse tab
           // did the colon get deleted...
           if (!s.startsWith(selectedBook) || s.length <= selectedBook.length) {
-            currState = currState.copyWith(tabIndex: 0, navViewState: NavViewState.bcvTabs);
+            currState = currState.copyWith(
+                tabIndex: NavTabs.book.index, navViewState: NavViewState.bcvTabs);
           } else if (!s.contains(':')) {
             currState = currState.copyWith(
-                tabIndex: 1,
+                tabIndex: NavTabs.chapter.index,
                 navViewState: NavViewState.bcvTabs,
                 search: '${bible.nameOfBook(currState.ref.book)} ');
           }
