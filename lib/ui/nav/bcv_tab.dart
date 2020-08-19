@@ -43,7 +43,7 @@ class BCVTabView extends StatelessWidget {
                 labelColor: Theme.of(context).textColor.withOpacity(0.7),
                 unselectedLabelColor: Theme.of(context).textColor.withOpacity(0.7),
                 tabs: [
-                  const Tab(text: 'TRANSLATION'),
+                  const Tab(text: 'BIBLES'),
                   const Tab(text: 'BOOK'),
                   const Tab(text: 'CHAPTER'),
                   if (nav3TapEnabled) const Tab(text: 'VERSE')
@@ -171,22 +171,24 @@ class _ChapterView extends StatelessWidget {
     final ref = context.bloc<NavBloc>().state.ref;
     final chapters = bible.chaptersIn(book: ref.book);
 
-    return _DynamicGrid(
-      children: [
-        for (var i = 1; i <= chapters; i++) ...[
-          _PillButton(
-            textColor: ref.chapter == i ? tabColors[2] : textColor,
-            onPressed: () {
-              if (!nav3TapEnabled) {
-                Navigator.of(context).maybePop(ref.copyWith(chapter: i));
-              } else {
-                context.bloc<NavBloc>().selectChapter(ref.book, bible.nameOfBook(ref.book), i);
-              }
-            },
-            text: i.toString(),
-          ),
-        ]
-      ],
+    return SingleChildScrollView(
+      child: _DynamicGrid(
+        children: [
+          for (var i = 1; i <= chapters; i++) ...[
+            _PillButton(
+              textColor: ref.chapter == i ? tabColors[2] : textColor,
+              onPressed: () {
+                if (!nav3TapEnabled) {
+                  Navigator.of(context).maybePop(ref.copyWith(chapter: i));
+                } else {
+                  context.bloc<NavBloc>().selectChapter(ref.book, bible.nameOfBook(ref.book), i);
+                }
+              },
+              text: i.toString(),
+            ),
+          ]
+        ],
+      ),
     );
   }
 }
