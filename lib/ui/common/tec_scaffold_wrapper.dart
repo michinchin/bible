@@ -33,8 +33,8 @@ class _TecScaffoldWrapperState extends State<TecScaffoldWrapper> {
           .of(context)
           .systemGestureInsets
           .bottom / 2;
-      AppSettings.shared.androidFullScreen = tec.platformIs(tec.Platform.android) &&
-          AppSettings.shared.navigationBarPadding == 16.0;
+      AppSettings.shared.androidFullScreen =
+          tec.platformIs(tec.Platform.android) && AppSettings.shared.navigationBarPadding == 16.0;
     }
 
     if (AppSettings.shared.androidFullScreen) {

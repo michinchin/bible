@@ -471,17 +471,20 @@ class BibleChapterViewModel {
 
   void _toggleSelectionForVerse(BuildContext context, int verse) {
     assert(verse != null);
+    TecAutoScroll.stopAutoscroll();
     _updateSelectedVersesInBlock(() {
       if (!_selectedVerses.remove(verse)) _selectedVerses.add(verse);
     }, context);
   }
 
   void _clearAllSelectedVerses(BuildContext context) {
+    TecAutoScroll.stopAutoscroll();
     if (_selectedVerses.isEmpty) return;
     _updateSelectedVersesInBlock(_selectedVerses.clear, context);
   }
 
   void _updateSelectedVersesInBlock(void Function() block, BuildContext context) {
+    TecAutoScroll.stopAutoscroll();
     refreshFunc(block);
     tec.dmPrint('selected verses: $_selectedVerses');
     context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInView(viewUid, _selectionReference, context,
