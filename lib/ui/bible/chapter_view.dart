@@ -99,9 +99,9 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(0),
-                          width: 28.0,
+                          width: 32.0,
                           child: IconButton(
-                            padding: const EdgeInsets.only(top: 12.0, bottom: 12.0, right: 4.0),
+                            padding: const EdgeInsets.only(top: 12.0, bottom: 12.0, right: 8.0),
                             icon: const Icon(Icons.search),
                             tooltip: 'Search',
                             onPressed: () => _onNavigate(_chapterState.value),
