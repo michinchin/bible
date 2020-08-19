@@ -388,10 +388,7 @@ class _VolumesListState extends State<_VolumesList> {
                                 widget.onTapVolume(volume.id);
                               }
                             }
-                          : () {
-                              Navigator.of(context).push<void>(MaterialPageRoute(
-                                  builder: (context) => VolumeDetail(volume: volume)));
-                            },
+                          : () => _pushDetailView(context, volume),
                     );
                   },
                 );
@@ -401,6 +398,11 @@ class _VolumesListState extends State<_VolumesList> {
         ),
       ],
     );
+  }
+
+  void _pushDetailView(BuildContext context, Volume volume) {
+    Navigator.of(context)
+        .push<void>(MaterialPageRoute(builder: (context) => VolumeDetail(volume: volume)));
   }
 
   void _onActionTap(DownloadsBloc bloc, DownloadItem item) {
@@ -441,19 +443,30 @@ class _VolumesListState extends State<_VolumesList> {
 
     if (VolumesRepository.shared.isLocalVolume(volume.id) ||
         (item != null && item.status == DownloadStatus.complete)) {
-      return const Padding(
-        padding: EdgeInsets.all(8),
-        child: Icon(Icons.check_circle, size: 32, color: Colors.green),
-      );
+      return IconButton(
+          icon: const Icon(Icons.check_circle),
+          iconSize: 32,
+          color: Colors.green,
+          onPressed: () => _pushDetailView(context, volume));
     } else if (item == null ||
         item.status == DownloadStatus.undefined ||
         item.status == DownloadStatus.failed ||
         item.status == DownloadStatus.canceled) {
-      return IconButton(
-          icon: const Icon(Icons.cloud_download),
-          iconSize: 32,
-          color: color,
-          onPressed: () => _onActionTap(bloc, item ?? DownloadItem(volumeId: volume.id, url: '')));
+      // If free, or licensed, allow download.
+      if (volume.price == 0.0 || context.bloc<VolumesBloc>().isFullyLicensed(volume.id)) {
+        return IconButton(
+            icon: const Icon(Icons.cloud_download),
+            iconSize: 32,
+            color: color,
+            onPressed: () =>
+                _onActionTap(bloc, item ?? DownloadItem(volumeId: volume.id, url: '')));
+      } else {
+        return IconButton(
+            icon: Icon(platformAwareMoreIcon(context)),
+            iconSize: 32,
+            color: color,
+            onPressed: () => _pushDetailView(context, volume));
+      }
     } else if (item.status == DownloadStatus.running) {
       return Stack(
         children: [

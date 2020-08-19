@@ -46,7 +46,7 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
       await _kvStore.setString(key, tec.toJsonString(event.toJson()));
     }
 
-    final volumes = await _volumesWith(event);
+    final volumes = await _volumesWith(event, cacheLicensedIds: true);
     yield VolumesState(event, volumes);
   }
 
@@ -88,53 +88,61 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
   LinkedHashMap<int, String> get categories => _categories == null
       ? null
       : {for (final c in _categories.values) c.id: c.name} as LinkedHashMap<int, String>;
-}
 
-Future<List<vol.Volume>> _volumesWith(VolumesFilter filter) async {
-  final vr = vol.VolumesRepository.shared;
+  bool isFullyLicensed(int volumeId) => _licensedIds?.contains(volumeId) ?? false;
+  Set<int> _licensedIds;
 
-  final strs = filter.searchFilter.split(' ').map((s) => s.toLowerCase()).toList();
-  var ids = vr.volumeIdsWithType(filter.volumeType, location: filter.location);
+  Future<List<vol.Volume>> _volumesWith(
+    VolumesFilter filter, {
+    bool cacheLicensedIds = false,
+  }) async {
+    final vr = vol.VolumesRepository.shared;
 
-  for (var i = 0; i < ids.length; i++) {
-    final id = ids[i];
-    if (i > 0 && ids.indexWhere((el) => el == id) < i) {
-      tec.dmPrint('VolumesBloc volume id $id has duplicates!');
+    final strs = filter.searchFilter.split(' ').map((s) => s.toLowerCase()).toList();
+    var ids = vr.volumeIdsWithType(filter.volumeType, location: filter.location);
+
+    for (var i = 0; i < ids.length; i++) {
+      final id = ids[i];
+      if (i > 0 && ids.indexWhere((el) => el == id) < i) {
+        tec.dmPrint('VolumesBloc volume id $id has duplicates!');
+      }
     }
+
+    final owned = filter.ownershipStatus == OwnershipStatus.any
+        ? null
+        : await AppSettings.shared.userAccount.userDb.fullyLicensedVolumesInList(ids);
+    final ownedSet = owned == null ? <int>{} : owned.toSet();
+
+    if (cacheLicensedIds) _licensedIds = ownedSet;
+
+    if (filter.ownershipStatus == OwnershipStatus.owned) {
+      ids = owned;
+    } else if (filter.ownershipStatus == OwnershipStatus.unowned) {
+      ids.removeWhere(ownedSet.contains);
+    }
+
+    final categoryVolumeIds =
+        filter.category == 0 ? null : vr.categoryWithId(filter.category)?.volumeIds?.toSet();
+
+    // Local func that returns true if the given volume is a match for the filter.
+    bool _matches(vol.Volume v) =>
+        // Filter out the Voice translation for now, because it crashes _BibleHtml.
+        (v.id != 201) &&
+        // Filter by language, if set.
+        (filter.language.isEmpty || (v.language == filter.language)) &&
+        // Filter by category, if set.
+        (categoryVolumeIds == null || categoryVolumeIds.contains(v.id)) &&
+        // Filter out volumes that are not streamable, not for sale, and not owned.
+        (v.isStreamable || v.onSale || ownedSet.contains(v.id)) &&
+        // Filter by search string, if set.
+        (strs.isEmpty ||
+            (strs.firstWhere((s) => !v.matchesSearchString(s), orElse: () => null) == null));
+
+    final volumes = ids.map<vol.Volume>(vr.volumeWithId).where(_matches).toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
+
+    return volumes;
   }
-
-  final owned = filter.ownershipStatus == OwnershipStatus.any
-      ? null
-      : await AppSettings.shared.userAccount.userDb.fullyLicensedVolumesInList(ids);
-  final ownedSet = owned == null ? <int>{} : owned.toSet();
-
-  if (filter.ownershipStatus == OwnershipStatus.owned) {
-    ids = owned;
-  } else if (filter.ownershipStatus == OwnershipStatus.unowned) {
-    ids.removeWhere(ownedSet.contains);
-  }
-
-  final categoryVolumeIds =
-      filter.category == 0 ? null : vr.categoryWithId(filter.category)?.volumeIds?.toSet();
-
-  // Local func that returns true if the given volume is a match for the filter.
-  bool _matches(vol.Volume v) =>
-      // Filter out the Voice translation for now, because it crashes _BibleHtml.
-      (v.id != 201) &&
-      // Filter by language, if set.
-      (filter.language.isEmpty || (v.language == filter.language)) &&
-      // Filter by category, if set.
-      (categoryVolumeIds == null || categoryVolumeIds.contains(v.id)) &&
-      // Filter out volumes that are not streamable, not for sale, and not owned.
-      (v.isStreamable || v.onSale || ownedSet.contains(v.id)) &&
-      // Filter by search string, if set.
-      (strs.isEmpty ||
-          (strs.firstWhere((s) => !v.matchesSearchString(s), orElse: () => null) == null));
-
-  final volumes = ids.map<vol.Volume>(vr.volumeWithId).where(_matches).toList()
-    ..sort((a, b) => a.name.compareTo(b.name));
-
-  return volumes;
 }
 
 @immutable

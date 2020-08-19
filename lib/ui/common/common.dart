@@ -36,6 +36,19 @@ class LoadingIndicator extends StatelessWidget {
 }
 
 ///
+/// Returns a horizontal more icon for iOS and macOS, a vertical more icon otherwise.
+///
+IconData platformAwareMoreIcon(BuildContext context) {
+  switch (Theme.of(context).platform) {
+    case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
+      return Icons.more_horiz;
+    default:
+      return Icons.more_vert;
+  }
+}
+
+///
 /// List label with padding
 ///
 class ListLabel extends StatelessWidget {
