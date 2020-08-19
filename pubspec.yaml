@@ -107,10 +107,10 @@ dependencies:
 #    path: ../shared/tec_widgets
 #  sliding_sheet:
 #    path: ../sliding_sheet
-#   tec_html:
-#     path: ../shared/tec_html
-#   tec_volumes:
-#     path: ../shared/tec_volumes
+#  tec_html:
+#    path: ../shared/tec_html
+#  tec_volumes:
+#    path: ../shared/tec_volumes
 
 dev_dependencies:
   flutter_test:
