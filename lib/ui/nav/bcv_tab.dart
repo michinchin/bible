@@ -119,7 +119,7 @@ class __TranslationViewState extends State<_TranslationView> {
         builder: (context, snapshot) {
           final translations = snapshot.data ?? <Volume>[];
           if (snapshot.connectionState != ConnectionState.done) {
-            return const LoadingIndicator();
+            return const Center(child: LoadingIndicator());
           }
           final map = mapByLanguage(translations);
           return ListView(shrinkWrap: true, children: [
@@ -404,7 +404,7 @@ class _PillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatButton(
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       shape: const StadiumBorder(),
       color: Colors.grey.withOpacity(0.1),
       textColor: textColor,
