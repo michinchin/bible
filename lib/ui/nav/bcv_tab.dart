@@ -371,7 +371,8 @@ class _DynamicGrid extends StatelessWidget {
       if (textScaleFactor >= 2.0 || AppSettings.shared.contentTextScaleFactor.value >= 2.0) {
         return 100;
       }
-      if ((smallWidth && !smallHeight) || isLargeScreen) {
+      if (((smallWidth && !smallHeight) || isLargeScreen) ||
+          !smallWidth && !smallHeight && !isLargeScreen) {
         return 60;
       } else if (smallWidth) {
         return 50;
@@ -388,7 +389,7 @@ class _DynamicGrid extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             maxCrossAxisExtent: extentCalculated(),
-            childAspectRatio: smallHeight ? 1.8 : 1.3,
+            childAspectRatio: smallHeight ? 1.8 : 1.5,
             crossAxisSpacing: smallHeight ? 5 : 8,
             mainAxisSpacing: smallHeight ? 5 : 8,
             children: children));
