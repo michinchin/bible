@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
@@ -20,11 +22,13 @@ class SnapSheet extends StatefulWidget {
   _SnapSheetState createState() => _SnapSheetState();
 }
 
-// TODO(abby): save sheet size to prefs so open on default sizing
 class _SnapSheetState extends State<SnapSheet> {
   ValueNotifier<double> onDragValue;
+  double mediumSheetHeight;
+  double miniSheetHeight;
+  List<double> snappings;
 
-  List<double> _calculateHeightSnappings() {
+  List<double> _calculateHeightSnappings(SheetType sheetType) {
     // figure out dimensions depending on view size
     // dividing by 2 - they will overlay but looks nicer
     var androidExtraPadding = AppSettings.shared.navigationBarPadding / 2;
@@ -35,42 +39,57 @@ class _SnapSheetState extends State<SnapSheet> {
     }
 
     final bottomPadding = MediaQuery.of(context).padding.bottom / 2 + 10 + androidExtraPadding;
-    final topBarHeight = 50.0 + bottomPadding;
-    final secondBarHeight = 170.0 + bottomPadding;
+
+    if (sheetType == SheetType.main) {
+      miniSheetHeight = 50.0 + bottomPadding;
+      mediumSheetHeight = 155.0 + bottomPadding;
+    } else {
+      miniSheetHeight = 50.0 + bottomPadding;
+      mediumSheetHeight = 240.0 + bottomPadding;
+    }
+
     final height = MediaQuery.of(context).size.height;
-    final ratio = (topBarHeight / height);
-    final ratio2 = (secondBarHeight / height);
+    final ratio = (miniSheetHeight / height);
+    final ratio2 = (mediumSheetHeight / height);
 
     // debugPrint(ratio.toString());
-    return [ratio, ratio + ratio2, 1.0];
+    // removed full screen snap for now...
+    return [ratio, ratio2];
   }
 
   @override
   Widget build(BuildContext context) {
-    final snappings = _calculateHeightSnappings();
+    List<double> _dragOpacityValue(double value) {
+      // as value goes from one snapping point to the next - adjust opacity
+      // first and last 10% - opacity is 0 or 1.  middle 80% linear from 0 to 1
 
-    double _dragOpacityValue(double value, SheetManagerState state) {
-      final size = state.size;
-      // value should always approach 0
-      // when reaches snapping point should be 1
-      bool approxEqual(double a, double b) => (a * 100).round() == (b * 100).round();
+      final opacities = <double>[];
 
-      if (approxEqual(value, snappings[size.index])) {
-        return 1.0;
-      }
-      var opacity = 1.0;
-      if (value < snappings[size.index]) {
-        //decreasing in height
-        if (size.index != 0) {
-          opacity = 1 -
-              (snappings[size.index] - value) / (snappings[size.index] - snappings[size.index - 1]);
-        }
+      final topValue = snappings[1];
+      final bottomValue = snappings[0];
+      final tenPercent = (topValue - bottomValue) * 0.1;
+      final bottomCutOff = bottomValue + tenPercent;
+      final topCutOff = topValue - tenPercent;
+
+      // we're computing opacity of mini, medium would be 1 - mini...
+      // this would need to be tweaked if we add a full screen mode
+      double opacity;
+
+      if (value <= bottomCutOff) {
+        opacity = 1.0;
+      } else if (value >= topCutOff) {
+        opacity = 0.0;
       } else {
-        // increasing in height
-        opacity = 1 -
-            (value - snappings[size.index]) / (snappings[size.index + 1] - snappings[size.index]);
+        opacity = 1 - (value - bottomCutOff) / (topCutOff - bottomCutOff);
       }
-      return opacity <= 0 ? 0 : opacity;
+
+      opacity = math.min(1.0, math.max(opacity, 0.0));
+
+      opacities.add(opacity); // mini sheet
+      // ignore: cascade_invocations
+      opacities.add(1.0 - opacity); // medium sheet
+
+      return opacities;
     }
 
     // current sheet size
@@ -92,95 +111,128 @@ class _SnapSheetState extends State<SnapSheet> {
 
     return SafeArea(
       bottom: false,
-      child: SlidingSheet(
-        margin: margin,
-        elevation: 3,
-        closeOnBackdropTap: s.type == SheetType.windows,
-        cornerRadius: 15,
-        duration: const Duration(milliseconds: 250),
-        addTopViewPaddingOnFullscreen: true,
-        listener: (s) {
-          onDragValue.value = s.extent;
-        },
-        snapSpec: SnapSpec(
-          initialSnap: snappings[s.size.index],
-          snappings: snappings,
-          onSnap: (s, snapPosition) {
-            final sheetSize = _getSheetSize(snapPosition);
-            // only snap to one size up (i.e. can't fling to full from mini)
-            if (sheetSize != null) {
-              final prevSize = context.bloc<SheetManagerBloc>().state.size.index;
-              if (sheetSize.index != prevSize) {
-                // will snap accordingly on one sized down and on drag down
-                if (sheetSize.index - 1 == prevSize || sheetSize.index < prevSize) {
-                  context.bloc<SheetManagerBloc>().changeSize(sheetSize);
-                  // if trying to go from mini to full, then only allow medium
-                } else if (sheetSize.index <= SheetSize.full.index &&
-                    prevSize < SheetSize.full.index) {
-                  context.bloc<SheetManagerBloc>().changeSize(SheetSize.values[prevSize + 1]);
-                }
-              }
-            }
-          },
-          positioning: SnapPositioning.relativeToAvailableSpace,
-        ),
-        color: Theme.of(context).cardColor,
-        builder: (c, s) {
-          Widget child;
-
-          return BlocConsumer<SheetManagerBloc, SheetManagerState>(
-              listenWhen: (previous, current) => previous != current,
-              listener: (context, state) {
-                SheetController.of(context).snapToExtent(snappings[state.size.index]);
-              },
+      child: Stack(
+        children: [
+          BlocBuilder<SheetManagerBloc, SheetManagerState>(
+              condition: (previous, current) => previous.type != current.type,
               builder: (c, state) {
+                Widget miniSheet, mediumSheet;
+
                 switch (state.type) {
-                  case SheetType.main:
-                    child = MainSheet(sheetSize: state.size);
-                    break;
                   case SheetType.selection:
-                    child = SelectionSheet(sheetSize: state.size, onDragValue: onDragValue);
+                    miniSheet = const SelectionSheet(sheetSize: SheetSize.mini);
+                    mediumSheet = const SelectionSheet(sheetSize: SheetSize.medium);
                     break;
-                  // case SheetType.windows:
-                  //   child = WindowManagerSheet(
-                  //       key: ValueKey(state.size.index), sheetSize: state.size);
-                  //   break;
                   default:
-                    child = MainSheet(sheetSize: state.size);
+                    miniSheet = const MainSheet(sheetSize: SheetSize.mini);
+                    mediumSheet = const MainSheet(sheetSize: SheetSize.medium);
                 }
 
-                return ValueListenableBuilder<double>(
-                    valueListenable: onDragValue ??= ValueNotifier<double>(snappings.first),
-                    child: Container(height: MediaQuery.of(c).size.height, child: child),
-                    builder: (_, value, c) =>
-                        Opacity(opacity: _dragOpacityValue(value, state), child: c));
-              });
-        },
-        body: widget.body,
-        headerBuilder: (c, s) {
-          return InkWell(
-            onTap: () => c.bloc<SheetManagerBloc>().changeSize(
-                c.bloc<SheetManagerBloc>().state.size == SheetSize.mini
-                    ? SheetSize.medium
-                    : SheetSize.mini),
-            child: Padding(
-              padding: const EdgeInsets.all(5),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 5,
-                    width: 30,
-                    decoration: ShapeDecoration(
-                        color: Theme.of(c).textColor.withOpacity(0.2),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                snappings = _calculateHeightSnappings(state.type);
+
+                return SlidingSheet(
+                  margin: margin,
+                  elevation: 3,
+                  closeOnBackdropTap: s.type == SheetType.windows,
+                  cornerRadius: 15,
+                  duration: const Duration(milliseconds: 250),
+                  addTopViewPaddingOnFullscreen: true,
+                  listener: (s) {
+                    onDragValue.value = s.extent;
+                  },
+                  snapSpec: SnapSpec(
+                    initialSnap: snappings[s.size.index],
+                    snappings: snappings,
+                    onSnap: (s, snapPosition) {
+                      final sheetSize = _getSheetSize(snapPosition);
+                      if (sheetSize != null) {
+                        final prevSize = context.bloc<SheetManagerBloc>().state.size.index;
+                        if (sheetSize.index != prevSize) {
+                          context.bloc<SheetManagerBloc>().changeSize(sheetSize);
+                        }
+                      }
+                    },
+                    positioning: SnapPositioning.relativeToAvailableSpace,
                   ),
-                ],
+                  color: Theme.of(context).cardColor,
+                  builder: (c, s) {
+                    return BlocBuilder<SheetManagerBloc, SheetManagerState>(
+                        condition: (previous, current) {
+                          // we never want to "rebuild" the sub-tree on state changes, that is
+                          // handled above as we rebuild for each type switch to allow for
+                          // different snap settings for the different sheet types
+
+                          // might need to adjust snap though...
+                          if (onDragValue.value != snappings[current.size.index]) {
+                            SheetController.of(c).snapToExtent(snappings[current.size.index]);
+                          }
+
+                          return false;
+                        },
+                        builder: (c, s) {
+                      return ValueListenableBuilder<double>(
+                          valueListenable: onDragValue ??= ValueNotifier<double>(snappings.first),
+                          builder: (_, value, __) {
+                            final opacities = _dragOpacityValue(value);
+                            return Container(
+                              height: mediumSheetHeight,
+                              child: Stack(
+                                children: [
+                                  if (opacities[0] > 0)
+                                    Opacity(
+                                      opacity: opacities[0],
+                                      child: miniSheet,
+                                    ),
+                                  if (opacities[1] > 0)
+                                    Opacity(
+                                      opacity: opacities[1],
+                                      child: mediumSheet,
+                                    ),
+                                ],
+                              ),
+                            );
+                          });
+                    });
+                  },
+                  body: widget.body,
+                  headerBuilder: (c, s) {
+                    return InkWell(
+                      onTap: () {
+                        final nextSize = c.bloc<SheetManagerBloc>().state.size == SheetSize.mini
+                            ? SheetSize.medium
+                            : SheetSize.mini;
+
+                        c.bloc<SheetManagerBloc>().changeSize(nextSize);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              height: 5,
+                              width: 30,
+                              decoration: ShapeDecoration(
+                                  color: Theme.of(c).textColor.withOpacity(0.2),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15))),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }),
+          if (AppSettings.shared.androidFullScreen)
+            Container(
+              alignment: Alignment.bottomCenter,
+              child: AbsorbPointer(
+                child: Container(height: 14, color: Colors.transparent),
               ),
             ),
-          );
-        },
+        ],
       ),
     );
   }

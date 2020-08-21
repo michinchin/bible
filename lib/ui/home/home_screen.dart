@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/app_theme_bloc.dart';
@@ -28,15 +29,21 @@ class HomeScreen extends StatelessWidget {
           create: (context) => SheetManagerBloc(),
         ),
       ],
-      child: TecSystemUiOverlayWidget(
-        isDarkMode ? lightOverlayStyle : darkOverlayStyle,
-        child: Container(
-          color: Theme.of(context).canvasColor,
-          child: TecScaffoldWrapper(
-            child: Builder(builder: (_) {
-              // this Scaffold is wrapped in a Builder so our parent widget can finish
-              // initialization before this Scaffold tries to access the status bar height
-              return Scaffold(
+      child: TecScaffoldWrapper(
+        // Wrapped in a Builder so we can finish
+        // initialization before variables are accessed
+        child: Builder(builder: (_) {
+          final overlayStyle = isDarkMode
+              ? (tec.platformIs(tec.Platform.android) && !AppSettings.shared.androidFullScreen)
+              ? lightOverlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).cardColor)
+              : lightOverlayStyle
+              : darkOverlayStyle;
+
+          return TecSystemUiOverlayWidget(
+            overlayStyle,
+            child: Container(
+              color: Theme.of(context).canvasColor,
+              child: Scaffold(
                 resizeToAvoidBottomInset: !AppSettings.shared.androidFullScreen,
                 body: SafeArea(
                   left: false,
@@ -51,10 +58,10 @@ class HomeScreen extends StatelessWidget {
                     );
                   }),
                 ),
-              );
-            }),
-          ),
-        ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

@@ -14,10 +14,9 @@ import 'selection_sheet_model.dart';
 
 class SelectionSheet extends StatefulWidget {
   final SheetSize sheetSize;
-  final ValueNotifier<double> onDragValue;
 
   // final bool fullyExpanded;
-  const SelectionSheet({this.sheetSize, this.onDragValue, Key key}) : super(key: key);
+  const SelectionSheet({this.sheetSize, Key key}) : super(key: key);
 
   @override
   _SelectionSheetState createState() => _SelectionSheetState();
