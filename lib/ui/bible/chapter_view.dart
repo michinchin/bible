@@ -383,7 +383,7 @@ class _ChapterViewState extends State<_ChapterView> {
       marginTop: '0px',
       marginBottom: '60px',
       vendorFolder: widget.bible.vendorFolder,
-      customStyles: ' .${widget.bible.useZondervanCss ? 'C' : 'cno'} { display: none; } '
+      customStyles: ' .C, .cno { display: none; } '
           '.FOOTNO { line-height: inherit; top: inherit; }'
           'h5, .SUBA, h1 { font-weight: normal !important; font-style: italic; font-size: 100% !important;}',
     );

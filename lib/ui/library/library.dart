@@ -230,7 +230,7 @@ class _VolumesView extends StatelessWidget {
     return BlocProvider<VolumesBloc>(
       create: (context) => VolumesBloc(
         key: filter != null ? null : '_library$type',
-        kvStore: filter != null ? null : tec.Prefs.shared,
+        kvStore: filter != null ? null : tec.MemoryKVStore.shared, // tec.Prefs.shared,
         defaultFilter: filter ?? _filterForType(type),
       )..refresh(),
       child: BlocBuilder<VolumesBloc, VolumesState>(
