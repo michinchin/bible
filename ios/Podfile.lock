@@ -171,7 +171,7 @@ SPEC CHECKSUMS:
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
-  tec_platform_util: 7dd8310843a8c6118e27624e370bbeacc7a0cd3f
+  tec_platform_util: 2fc2b292ec7eddcc80717ae9d28257498b686f59
   tec_web_view: 1fa4ae0861ce5f49367bfdd85385345d2e4e7688
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   wakelock: 0d4a70faf8950410735e3f61fb15d517c8a6efc4
