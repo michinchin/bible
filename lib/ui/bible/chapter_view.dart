@@ -104,6 +104,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                             padding: const EdgeInsets.only(top: 12.0, bottom: 12.0, right: 8.0),
                             icon: const Icon(Icons.search),
                             tooltip: 'Search',
+                            color: Theme.of(context).textColor.withOpacity(0.5),
                             onPressed: () => _onNavigate(_chapterState.value),
                           ),
                         ),

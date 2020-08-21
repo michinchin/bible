@@ -23,7 +23,6 @@ class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
         {
           ThemeMode newThemeMode;
           final isDark = (WidgetsBinding.instance.window.platformBrightness == Brightness.dark);
-          // tec.dmPrint('platformBrightness: ${isDark ? 'dark' : 'light'}');
           if (state == ThemeMode.system || ((state == ThemeMode.dark) == isDark)) {
             newThemeMode = isDark ? ThemeMode.light : ThemeMode.dark;
             await tec.Prefs.shared.setBool('isDarkTheme', !isDark);
@@ -38,3 +37,4 @@ class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
     }
   }
 }
+

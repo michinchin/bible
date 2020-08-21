@@ -5,7 +5,6 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../models/app_settings.dart';
 
@@ -133,11 +132,7 @@ class _AppBindingObserverState extends State<_AppBindingObserver> with WidgetsBi
     // the systemNavigationBarIconBrightness is not set back to what it
     // should be. This code fixes that bug.
     if (state == AppLifecycleState.resumed) {
-      // if the user set the theme - use that setting, otherwise check the system setting
-      var isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
-      isDarkTheme ??=
-          ThemeData.estimateBrightnessForColor(Theme.of(context).canvasColor) == Brightness.dark;
-      SystemChrome.setSystemUIOverlayStyle(isDarkTheme ? lightOverlayStyle : darkOverlayStyle);
+      SystemChrome.setSystemUIOverlayStyle(AppSettings.shared.overlayStyle(context));
     }
 
     context.bloc<AppLifecycleBloc>()?.add(state);

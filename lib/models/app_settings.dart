@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:tec_user_account/tec_user_account.dart' as tua;
@@ -10,7 +11,9 @@ import 'labels.dart';
 
 class AppSettings {
   static final AppSettings shared = AppSettings._();
+
   factory AppSettings() => shared;
+
   AppSettings._();
 
   //
@@ -38,6 +41,36 @@ class AppSettings {
   /// The font scale factor for content (e.g. Bible or study content HTML).
   ///
   final contentFontName = BehaviorSubject<String>.seeded(''); // ignore: close_sinks
+
+
+  ///
+  /// isDarkTheme
+  ///
+  bool isDarkTheme() {
+    // if it's been set in the app - return that
+    var isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
+
+    // otherwise check system dark mode...
+    isDarkTheme ??= (WidgetsBinding.instance.window.platformBrightness == Brightness.dark);
+
+    return isDarkTheme;
+  }
+
+  ///
+  /// OverlayStyle
+  ///
+  SystemUiOverlayStyle overlayStyle(BuildContext context) {
+    // if the user set the theme - use that setting, otherwise check the system setting
+    final afs = androidFullScreen ?? false;
+
+    final overlayStyle = isDarkTheme()
+        ? (tec.platformIs(tec.Platform.android) && !afs)
+            ? lightOverlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).cardColor)
+            : lightOverlayStyle
+        : darkOverlayStyle;
+
+    return overlayStyle;
+  }
 
   ///
   /// Loads the app settings. This must only be called once.

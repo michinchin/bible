@@ -17,12 +17,14 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
     IconButton(
       icon: const Icon(Icons.photo_size_select_large),
       tooltip: 'Windows',
+      color: Theme.of(context).textColor.withOpacity(0.5),
       onPressed: () => _showMoreMenu(context, state, size),
     ),
     if (topRight)
       IconButton(
         icon: const Icon(Icons.account_circle),
         tooltip: 'Main Menu',
+        color: Theme.of(context).textColor.withOpacity(0.5),
         onPressed: () => showMainMenu(context),
       ),
   ];

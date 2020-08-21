@@ -154,7 +154,7 @@ class _SnapSheetState extends State<SnapSheet> {
                     },
                     positioning: SnapPositioning.relativeToAvailableSpace,
                   ),
-                  color: Theme.of(context).cardColor,
+                  color: Theme.of(context).canvasColor,
                   builder: (c, s) {
                     return BlocBuilder<SheetManagerBloc, SheetManagerState>(
                         condition: (previous, current) {

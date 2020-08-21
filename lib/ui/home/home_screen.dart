@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/app_theme_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
@@ -17,10 +15,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = context.bloc<ThemeModeBloc>().state == ThemeMode.dark ||
-        (context.bloc<ThemeModeBloc>().state == ThemeMode.system &&
-            WidgetsBinding.instance.window.platformBrightness == Brightness.dark);
-
     return MultiBlocProvider(
       providers: [
         BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
@@ -33,14 +27,8 @@ class HomeScreen extends StatelessWidget {
         // Wrapped in a Builder so we can finish
         // initialization before variables are accessed
         child: Builder(builder: (_) {
-          final overlayStyle = isDarkMode
-              ? (tec.platformIs(tec.Platform.android) && !AppSettings.shared.androidFullScreen)
-              ? lightOverlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).cardColor)
-              : lightOverlayStyle
-              : darkOverlayStyle;
-
           return TecSystemUiOverlayWidget(
-            overlayStyle,
+            AppSettings.shared.overlayStyle(context),
             child: Container(
               color: Theme.of(context).canvasColor,
               child: Scaffold(
