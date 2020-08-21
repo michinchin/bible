@@ -19,7 +19,7 @@ class SearchResultsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SearchBloc, SearchState>(builder: (context, state) {
       if (state.loading) {
-        return const LoadingIndicator();
+        return const Center(child: LoadingIndicator());
       } else if (state.error) {}
       return SafeArea(
         bottom: false,
@@ -55,6 +55,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
   Widget build(BuildContext context) {
     return TecCard(
       color: Theme.of(context).cardColor,
+      padding: 10,
       builder: (c) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: Theme(
@@ -81,17 +82,27 @@ class __SearchResultCardState extends State<_SearchResultCard> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               IconButton(
-                                icon: const Icon(FeatherIcons.code),
+                                icon: RotatedBox(
+                                    quarterTurns: 1,
+                                    child: Icon(bloc().state.contextShown
+                                        ? Icons.unfold_less
+                                        : Icons.unfold_more)),
                                 onPressed: () => bloc().add(const SearchResultEvent.showContext()),
                               ),
                               ButtonBar(
                                 children: [
                                   IconButton(
-                                    icon: const Icon(FeatherIcons.copy),
+                                    icon: const Icon(
+                                      FeatherIcons.copy,
+                                      size: 20,
+                                    ),
                                     onPressed: () => bloc().add(SearchResultEvent.copy(context: c)),
                                   ),
                                   IconButton(
-                                    icon: const Icon(FeatherIcons.share),
+                                    icon: const Icon(
+                                      FeatherIcons.share,
+                                      size: 20,
+                                    ),
                                     onPressed: () => bloc().add(const SearchResultEvent.share()),
                                   ),
                                   IconButton(

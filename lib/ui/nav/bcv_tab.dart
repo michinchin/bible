@@ -119,7 +119,7 @@ class __TranslationViewState extends State<_TranslationView> {
         builder: (context, snapshot) {
           final translations = snapshot.data ?? <Volume>[];
           if (snapshot.connectionState != ConnectionState.done) {
-            return const LoadingIndicator();
+            return const Center(child: LoadingIndicator());
           }
           final map = mapByLanguage(translations);
           return ListView(shrinkWrap: true, children: [
@@ -371,7 +371,8 @@ class _DynamicGrid extends StatelessWidget {
       if (textScaleFactor >= 2.0 || AppSettings.shared.contentTextScaleFactor.value >= 2.0) {
         return 100;
       }
-      if ((smallWidth && !smallHeight) || isLargeScreen) {
+      if (((smallWidth && !smallHeight) || isLargeScreen) ||
+          !smallWidth && !smallHeight && !isLargeScreen) {
         return 60;
       } else if (smallWidth) {
         return 50;
@@ -388,7 +389,7 @@ class _DynamicGrid extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             maxCrossAxisExtent: extentCalculated(),
-            childAspectRatio: smallHeight ? 1.8 : 1.3,
+            childAspectRatio: smallHeight ? 1.8 : 1.5,
             crossAxisSpacing: smallHeight ? 5 : 8,
             mainAxisSpacing: smallHeight ? 5 : 8,
             children: children));
@@ -403,7 +404,7 @@ class _PillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatButton(
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       shape: const StadiumBorder(),
       color: Colors.grey.withOpacity(0.1),
       textColor: textColor,
