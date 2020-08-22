@@ -148,7 +148,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
 
     if (reload) {
       // margin notes for this chapter changed, reload...
-      debugPrint('new hls for chapter $chapter');
+      tec.dmPrint('new hls for chapter $chapter');
       _initUserContent();
     }
   }

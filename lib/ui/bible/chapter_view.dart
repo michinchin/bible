@@ -1,8 +1,5 @@
 import 'dart:async';
 
-import 'package:bible/blocs/search/search_bloc.dart';
-import 'package:bible/ui/common/tec_scaffold_wrapper.dart';
-import 'package:bible/ui/nav/search_results_view.dart';
 import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -18,6 +15,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/margin_notes/margin_notes_bloc.dart';
+import '../../blocs/search/search_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
@@ -25,10 +23,12 @@ import '../../models/app_settings.dart';
 import '../../models/bible_chapter_state.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
+import '../common/tec_scaffold_wrapper.dart';
 import '../library/library.dart';
 import '../library/volumes_bloc.dart';
 import '../misc/view_actions.dart';
 import '../nav/nav.dart';
+import '../nav/search_results_view.dart';
 import 'chapter_view_model.dart';
 
 const bibleChapterType = 'BibleChapter';
@@ -159,7 +159,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
         pageBuilder: (context, _, size, index) {
           final ref = _bcvPageZero.advancedBy(chapters: index, bible: _bible);
           if (ref == null) return null;
-          debugPrint('page builder: ${ref.toString()}');
+          tec.dmPrint('page builder: ${ref.toString()}');
           return _BibleChapterView(viewUid: widget.state.uid, size: size, bible: _bible, ref: ref);
         },
         onPageChanged: (context, _, page) async {
@@ -445,7 +445,7 @@ class _ChapterViewState extends State<_ChapterView> {
                   }
 
                   if (userContentValid && highlights.loaded && marginNotes.loaded) {
-                    debugPrint('loading ${widget.ref.chapter}');
+                    tec.dmPrint('loading ${widget.ref.chapter}');
 
                     return _BibleHtml(
                       viewUid: widget.viewUid,

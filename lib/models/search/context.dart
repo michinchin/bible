@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
@@ -30,7 +29,7 @@ class Context {
       try {
         endVerse = int.parse(arr.last.group(1));
       } catch (_) {
-        debugPrint('error getting range endVerse');
+        tec.dmPrint('error getting range endVerse');
       }
     }
 

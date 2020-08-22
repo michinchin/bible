@@ -24,7 +24,7 @@ class MenuModel {
     }
 
     final di = AppSettings.shared.deviceInfo;
-    debugPrint('Running on ${di.productName} with ${di.model} ${di.version}');
+    tec.dmPrint('Running on ${di.productName} with ${di.model} ${di.version}');
     const version = (appVersion == 'DEBUG-VERSION' ? '(debug version)' : 'v$appVersion');
     final subject = 'Feedback regarding TecartaBible $version '
         'on ${di.productName} with ${di.model} ${di.version}';
@@ -40,7 +40,7 @@ class MenuModel {
       final msg = 'Error emailing: ${e.toString()}';
       await Navigator.of(context).maybePop();
       TecToast.show(context, msg);
-      debugPrint(msg);
+      tec.dmPrint(msg);
     }
     await Navigator.of(context).maybePop();
   }

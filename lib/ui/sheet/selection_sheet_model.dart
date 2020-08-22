@@ -247,7 +247,7 @@ class __DefineWebViewState extends State<_DefineWebView> {
       final msg = 'Error launching web search: ${e.toString()}';
       await Navigator.of(context).maybePop();
       TecToast.show(context, msg);
-      debugPrint(msg);
+      tec.dmPrint(msg);
     }
     await Navigator.of(context).maybePop();
   }

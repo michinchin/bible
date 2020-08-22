@@ -81,7 +81,7 @@ class ChapterMarginNotesBloc extends tec.SafeBloc<MarginNotesEvent, ChapterMargi
 
     if (reload) {
       // margin notes for this chapter changed, reload...
-      debugPrint('new margin notes for chapter $chapter');
+      tec.dmPrint('new margin notes for chapter $chapter');
       _initUserContent();
     }
   }

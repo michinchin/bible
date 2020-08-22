@@ -52,7 +52,7 @@ class _SnapSheetState extends State<SnapSheet> {
     final ratio = (miniSheetHeight / height);
     final ratio2 = (mediumSheetHeight / height);
 
-    // debugPrint(ratio.toString());
+    // tec.dmPrint(ratio.toString());
     // removed full screen snap for now...
     return [ratio, ratio2];
   }

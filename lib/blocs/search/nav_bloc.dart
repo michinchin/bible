@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/search/autocomplete.dart';
@@ -64,7 +65,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
           changeTabIndex: _changeTabIndex,
           changeState: _changeState,
           setRef: _setReference);
-      // debugPrint('$newState');
+      // tec.dmPrint('$newState');
       yield newState;
     }
   }
@@ -158,7 +159,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
               );
             } catch (e) {
               chapter = -1;
-              debugPrint(e.toString());
+              tec.dmPrint(e.toString());
             }
 
             if (chapter > 0 && s.trim() == '$selectedBook $chapter:') {
