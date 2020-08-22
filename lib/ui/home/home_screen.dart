@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
@@ -15,6 +16,10 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!TecScaffoldWrapper.mediaQueryReady(context)) {
+      return Container();
+    }
+
     return MultiBlocProvider(
       providers: [
         BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
@@ -23,33 +28,28 @@ class HomeScreen extends StatelessWidget {
           create: (context) => SheetManagerBloc(),
         ),
       ],
-      child: TecScaffoldWrapper(
-        // Wrapped in a Builder so we can finish
-        // initialization before variables are accessed
-        child: Builder(builder: (_) {
-          return TecSystemUiOverlayWidget(
-            AppSettings.shared.overlayStyle(context),
-            child: Container(
-              color: Theme.of(context).canvasColor,
-              child: Scaffold(
-                resizeToAvoidBottomInset: !AppSettings.shared.androidFullScreen,
-                body: SafeArea(
-                  left: false,
-                  right: false,
-                  bottom: false,
-                  child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-                      condition: (previous, current) {
-                    return current.rebuild == ViewManagerStateBuildInfo.build;
-                  }, builder: (context, state) {
-                    return _BottomSheet(
-                      child: ViewManagerWidget(state: state),
-                    );
-                  }),
-                ),
+      child: TecSystemUiOverlayWidget(
+        AppSettings.shared.overlayStyle(context),
+        child: Container(
+          color: Theme.of(context).canvasColor,
+          child: TecScaffoldWrapper(
+            child: Scaffold(
+              resizeToAvoidBottomInset: !AppSettings.shared.androidFullScreen,
+              body: SafeArea(
+                left: false,
+                right: false,
+                bottom: false,
+                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(condition: (previous, current) {
+                  return current.rebuild == ViewManagerStateBuildInfo.build;
+                }, builder: (context, state) {
+                  return _BottomSheet(
+                    child: ViewManagerWidget(state: state),
+                  );
+                }),
               ),
             ),
-          );
-        }),
+          ),
+        ),
       ),
     );
   }

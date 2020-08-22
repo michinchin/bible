@@ -14,28 +14,28 @@ class TecScaffoldWrapper extends StatefulWidget {
 
   @override
   _TecScaffoldWrapperState createState() => _TecScaffoldWrapperState();
-}
 
-class _TecScaffoldWrapperState extends State<TecScaffoldWrapper> {
-  // returns false if MediaQuery isn't ready
-  bool _getStatusBarPadding(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    if (size == Size.zero) {
+  static bool mediaQueryReady(BuildContext context) {
+    if (MediaQuery.of(context).size == Size.zero) {
       return false;
     }
 
     if (AppSettings.shared.androidFullScreen is! bool) {
-      AppSettings.shared.statusBarHeight = MediaQuery
-          .of(context)
-          .systemGestureInsets
-          .top;
-      AppSettings.shared.navigationBarPadding = MediaQuery
-          .of(context)
-          .systemGestureInsets
-          .bottom / 2;
+      AppSettings.shared.statusBarHeight = MediaQuery.of(context).systemGestureInsets.top;
+      AppSettings.shared.navigationBarPadding =
+          MediaQuery.of(context).systemGestureInsets.bottom / 2;
       AppSettings.shared.androidFullScreen =
           tec.platformIs(tec.Platform.android) && AppSettings.shared.navigationBarPadding == 16.0;
     }
+
+    return true;
+  }
+}
+
+class _TecScaffoldWrapperState extends State<TecScaffoldWrapper> {
+  // returns false if MediaQuery isn't ready
+  void _getStatusBarPadding(BuildContext context) {
+    final size = MediaQuery.of(context).size;
 
     if (AppSettings.shared.androidFullScreen) {
       final landscape = size.width > size.height;
@@ -50,16 +50,16 @@ class _TecScaffoldWrapperState extends State<TecScaffoldWrapper> {
         }
       }
     }
-
-    return true;
   }
 
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (context, orientation) {
-      if (!_getStatusBarPadding(context)) {
+      if (!TecScaffoldWrapper.mediaQueryReady(context)) {
         return Container();
       }
+
+      _getStatusBarPadding(context);
 
       return Column(
         children: [

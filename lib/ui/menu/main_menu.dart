@@ -65,7 +65,7 @@ class MainMenu extends StatelessWidget {
               MenuListTile(
                 icon: Icons.lightbulb_outline,
                 switchValue: AppSettings.shared.isDarkTheme,
-                title: 'Dark Mode',
+                title: 'Dark theme',
                 onTap: () => context.bloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
               ),
               MenuListTile(

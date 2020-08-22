@@ -60,14 +60,12 @@ class AppSettings {
   /// OverlayStyle
   ///
   SystemUiOverlayStyle overlayStyle(BuildContext context) {
-    // if the user set the theme - use that setting, otherwise check the system setting
-    final afs = androidFullScreen ?? false;
+    var overlayStyle = isDarkTheme() ? lightOverlayStyle : darkOverlayStyle;
 
-    final overlayStyle = isDarkTheme()
-        ? (tec.platformIs(tec.Platform.android) && !afs)
-            ? lightOverlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).cardColor)
-            : lightOverlayStyle
-        : darkOverlayStyle;
+    if (tec.platformIs(tec.Platform.android) && !(androidFullScreen ?? false)) {
+      overlayStyle =
+          overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).canvasColor);
+    }
 
     return overlayStyle;
   }
