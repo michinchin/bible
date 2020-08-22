@@ -35,6 +35,8 @@ const _appTitle = 'Tecarta Bible';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final stopwatch = Stopwatch()..start();
+
   if (!kIsWeb) {
     await FlutterDownloader.initialize(debug: kDebugMode);
   }
@@ -60,6 +62,9 @@ Future<void> main() async {
   ]);
 
   _registerViewTypes();
+
+  tec.dmPrint('Main initialization took ${stopwatch.elapsed}');
+  stopwatch.stop();
 
   runApp(App());
 }
