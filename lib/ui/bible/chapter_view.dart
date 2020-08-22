@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:bible/blocs/search/search_bloc.dart';
+import 'package:bible/ui/common/tec_scaffold_wrapper.dart';
+import 'package:bible/ui/nav/search_results_view.dart';
 import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -101,12 +104,11 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                           padding: const EdgeInsets.all(0),
                           width: 32.0,
                           child: IconButton(
-                            padding: const EdgeInsets.only(top: 12.0, bottom: 12.0, right: 8.0),
-                            icon: const Icon(Icons.search),
-                            tooltip: 'Search',
-                            color: Theme.of(context).textColor.withOpacity(0.5),
-                            onPressed: () => _onNavigate(_chapterState.value),
-                          ),
+                              padding: const EdgeInsets.only(top: 12.0, bottom: 12.0, right: 8.0),
+                              icon: const Icon(Icons.search),
+                              tooltip: 'Search',
+                              color: Theme.of(context).textColor.withOpacity(0.5),
+                              onPressed: () => _onShowSearch(chapterState)),
                         ),
                         Flexible(
                           child: CupertinoButton(
@@ -168,6 +170,16 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
       ),
     );
   }
+
+  Future<void> _onShowSearch(BibleChapterState chapterState) =>
+      Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
+          fullscreenDialog: true,
+          builder: (context) => TecScaffoldWrapper(
+              child: Scaffold(
+                  appBar: AppBar(
+                    title: Text('${context.bloc<SearchBloc>().state.search}'),
+                  ),
+                  body: SearchResultsView()))));
 
   Future<void> _onNavigate(BibleChapterState chapterState) async {
     TecAutoScroll.stopAutoscroll();

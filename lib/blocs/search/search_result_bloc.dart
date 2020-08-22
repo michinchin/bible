@@ -36,6 +36,7 @@ abstract class SearchResultState with _$SearchResultState {
 class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
   final SearchResult result;
   final bool shareUrl;
+
   SearchResultBloc(this.result, {this.shareUrl = true});
   @override
   SearchResultState get initialState => SearchResultState(

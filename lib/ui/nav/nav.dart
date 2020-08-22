@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -31,9 +32,7 @@ Future<Reference> navigate(BuildContext context, Reference ref) {
           height: 600,
           width: 500,
           child: MultiBlocProvider(providers: [
-            // BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
             BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
-            BlocProvider(create: (_) => SearchBloc()),
           ], child: Nav())),
     );
   }
@@ -51,9 +50,7 @@ Future<Reference> navigate(BuildContext context, Reference ref) {
   return Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
     fullscreenDialog: true,
     builder: (context) => MultiBlocProvider(providers: [
-      // BlocProvider<PrefItemsBloc>(create: (_) => PrefItemsBloc()),
       BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
-      BlocProvider(create: (_) => SearchBloc()),
     ], child: Nav()),
   ));
 }
@@ -248,6 +245,23 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       },
       builder: (c, s) => TecScaffoldWrapper(
         child: Scaffold(
+          bottomSheet: s.navViewState == NavViewState.bcvTabs
+              ? Container(
+                  decoration: ShapeDecoration(
+                      color: Theme.of(c).cardColor,
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(15), topRight: Radius.circular(15)))),
+                  margin: const EdgeInsets.only(bottom: 20),
+                  height: 50,
+                  child: ListTile(
+                      leading: const Icon(Icons.search),
+                      onTap: () => c
+                          .bloc<NavBloc>()
+                          .add(const NavEvent.changeNavView(state: NavViewState.searchResults)),
+                      title: SearchResultsLabel(c.bloc<SearchBloc>().state.searchResults,
+                          navView: true)))
+              : null,
           appBar: AppBar(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
             elevation: 5,

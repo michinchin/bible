@@ -15,6 +15,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import 'blocs/app_lifecycle_bloc.dart';
 import 'blocs/app_theme_bloc.dart';
 import 'blocs/downloads/downloads_bloc.dart';
+import 'blocs/search/search_bloc.dart';
 import 'blocs/sheet/pref_items_bloc.dart';
 import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
@@ -117,7 +118,10 @@ class App extends StatelessWidget {
         ),
         BlocProvider<PrefItemsBloc>(
           create: (context) => PrefItemsBloc(),
-        )
+        ),
+        BlocProvider<SearchBloc>(
+          create: (context) => SearchBloc(),
+        ),
       ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (context, themeMode) {

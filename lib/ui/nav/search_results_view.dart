@@ -20,14 +20,22 @@ class SearchResultsView extends StatelessWidget {
     return BlocBuilder<SearchBloc, SearchState>(builder: (context, state) {
       if (state.loading) {
         return const Center(child: LoadingIndicator());
-      } else if (state.error) {}
+      } else if (state.error) {
+        return const Center(
+          child: Text('Error'),
+        );
+      } else if (state.searchResults.isEmpty) {
+        return const Center(
+          child: Text('No Results'),
+        );
+      }
       return SafeArea(
         bottom: false,
         child: ListView.builder(
           itemCount: state.searchResults.length + 1,
           itemBuilder: (c, i) {
             if (i == 0) {
-              return _SearchResultsLabel(state.searchResults);
+              return SearchResultsLabel(state.searchResults);
             }
             i--;
             final res = state.searchResults[i];
@@ -188,15 +196,16 @@ class _TranslationSelector extends StatelessWidget {
   }
 }
 
-class _SearchResultsLabel extends StatelessWidget {
+class SearchResultsLabel extends StatelessWidget {
   final List<SearchResult> results;
+  final bool navView;
 
-  const _SearchResultsLabel(this.results);
+  const SearchResultsLabel(this.results, {this.navView = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
+        padding: navView ? EdgeInsets.zero : const EdgeInsets.fromLTRB(15, 10, 15, 0),
         child: Align(
           alignment: Alignment.centerLeft,
           child: TecText.rich(
@@ -204,9 +213,8 @@ class _SearchResultsLabel extends StatelessWidget {
               style: Theme.of(context).textTheme.caption,
               children: [
                 TextSpan(
-                  text:
-                      'Showing ${results.length} verse${results.length > 1 ? 's' : ''} containing ',
-                ),
+                    text: '${navView ? '' : 'Showing'}'
+                        ' ${results.length} verse${results.length > 1 ? 's' : ''} containing '),
                 TextSpan(
                     text: '${context.bloc<SearchBloc>().state.search}',
                     style: const TextStyle(fontWeight: FontWeight.bold)),

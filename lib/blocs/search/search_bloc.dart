@@ -1,10 +1,12 @@
+import 'package:bible/blocs/search/search_result_bloc.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-
 import 'package:tec_util/tec_util.dart' as tec;
 
+import '../../models/app_settings.dart';
 import '../../models/search/search_result.dart';
+import '../../models/user_item_helper.dart';
 
 part 'search_bloc.freezed.dart';
 
@@ -25,6 +27,7 @@ abstract class SearchState with _$SearchState {
 }
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
+  
   @override
   SearchState get initialState => const SearchState(
       search: '', searchResults: [], defaultTranslations: [], loading: false, error: false);
@@ -37,6 +40,9 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       try {
         final res = await SearchResults.fetch(
             words: event.search, translationIds: event.translations.join('|'));
+        // if (res.isNotEmpty) {
+        //   await _saveToSearchHistory(event.search);
+        // }
         tec.dmPrint('Completed search "${event.search}" with ${res.length} result(s)');
         yield state.copyWith(
             searchResults: res,
@@ -53,4 +59,10 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       }
     }
   }
+
+  // TODO(abby): save to search history
+  // Future<void> _saveToSearchHistory(String search) async {
+  //   final item = UserItemHelper.searchHistoryItem(search);
+  //   await AppSettings.shared.userAccount.userDb.saveItem(item);
+  // }
 }
