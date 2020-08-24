@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:tec_user_account/tec_user_account.dart' as tua;
@@ -74,12 +75,19 @@ class AppSettings {
 
     final platformPrefix = tec.platformName == 'ANDROID' ? 'PLAY' : tec.platformName;
     final appPrefix = '${platformPrefix}_$appName';
+
+    // we want to open the user db - but don't wait for sync
     userAccount = await tua.UserAccount.init(
       kvStore: _KVStore(),
       deviceUid: deviceInfo.deviceUid,
       appPrefix: appPrefix,
       itemTypesToSync: itemsToSync,
+      startSync: false,
     );
+
+    if (userAccount.user.isSignedIn) {
+      unawaited(userAccount.syncUserDb<void>(itemTypes: userAccount.itemTypesToSync));
+    }
 
     contentTextScaleFactor
       ..add((tec.Prefs.shared.getDouble(Labels.prefContentTextScaleFactor, defaultValue: 1.2)))
