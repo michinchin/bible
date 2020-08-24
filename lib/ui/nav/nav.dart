@@ -140,9 +140,10 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       final prefItem =
           prefsBloc().infoChangedPrefItem(PrefItemId.translationsFilter, volumes.join('|'));
       prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
-    }
-    if (_searchController.text.isNotEmpty) {
-      searchBloc().add(SearchEvent.request(search: _searchController.text, translations: volumes));
+      if (_searchController.text.isNotEmpty) {
+        searchBloc()
+            .add(SearchEvent.request(search: _searchController.text, translations: volumes));
+      }
     }
   }
 
@@ -244,7 +245,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       },
       builder: (c, s) => TecScaffoldWrapper(
         child: Scaffold(
-          bottomSheet: s.navViewState == NavViewState.bcvTabs
+          bottomSheet: s.navViewState == NavViewState.bcvTabs &&
+                  c.bloc<SearchBloc>().state.searchResults.isNotEmpty
               ? Container(
                   decoration: ShapeDecoration(
                       color: Theme.of(c).cardColor,
@@ -254,10 +256,10 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                   margin: const EdgeInsets.only(bottom: 20),
                   height: 50,
                   child: ListTile(
-                      leading: const Icon(Icons.search),
-                      onTap: () => c
-                          .bloc<NavBloc>()
-                          .add(const NavEvent.changeNavView(state: NavViewState.searchResults)),
+                      trailing: const Icon(Icons.keyboard_arrow_up),
+                      onTap: () => c.bloc<NavBloc>()
+                        ..add(NavEvent.onSearchChange(search: c.bloc<SearchBloc>().state.search))
+                        ..add(const NavEvent.changeNavView(state: NavViewState.searchResults)),
                       title: SearchResultsLabel(c.bloc<SearchBloc>().state.searchResults,
                           navView: true)))
               : null,

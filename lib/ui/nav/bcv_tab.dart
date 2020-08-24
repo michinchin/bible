@@ -403,10 +403,10 @@ class _PillButton extends StatelessWidget {
   const _PillButton({@required this.onPressed, @required this.textColor, @required this.text});
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
+    return RaisedButton(
       padding: EdgeInsets.zero,
       shape: const StadiumBorder(),
-      color: Colors.grey.withOpacity(0.1),
+      color: Theme.of(context).cardColor,
       textColor: textColor,
       onPressed: onPressed,
       child: Text(
