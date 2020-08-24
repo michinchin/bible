@@ -1,12 +1,9 @@
-import 'package:bible/blocs/search/search_result_bloc.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
-import '../../models/app_settings.dart';
 import '../../models/search/search_result.dart';
-import '../../models/user_item_helper.dart';
 
 part 'search_bloc.freezed.dart';
 

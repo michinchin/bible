@@ -2,13 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
-import '../common/tec_scaffold_wrapper.dart';
 import '../sheet/snap_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -16,7 +14,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!TecScaffoldWrapper.mediaQueryReady(context)) {
+    // init the scaffold vars before we try to access them...
+    if (!TecScaffoldWrapper.isMediaQueryReady(context)) {
       return Container();
     }
 
@@ -34,7 +33,7 @@ class HomeScreen extends StatelessWidget {
           color: Theme.of(context).canvasColor,
           child: TecScaffoldWrapper(
             child: Scaffold(
-              resizeToAvoidBottomInset: !AppSettings.shared.androidFullScreen,
+              resizeToAvoidBottomInset: !TecScaffoldWrapper.isAndroidFullScreen(),
               body: SafeArea(
                 left: false,
                 right: false,

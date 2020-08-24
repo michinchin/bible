@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import '../../models/app_settings.dart';
+import 'package:tec_widgets/tec_widgets.dart';
 
 class TecBottomSheetSafeArea extends StatefulWidget {
   final Widget child;
@@ -16,7 +15,7 @@ class _TecBottomSheetSafeAreaState extends State<TecBottomSheetSafeArea> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      minimum: EdgeInsets.only(bottom: AppSettings.shared.navigationBarPadding),
+      minimum: EdgeInsets.only(bottom: TecScaffoldWrapper.navigationBarPadding),
       child: widget.child,
     );
   }

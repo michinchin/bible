@@ -7,11 +7,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/downloads/downloads_bloc.dart';
 import '../../blocs/is_licensed_bloc.dart';
 import '../common/common.dart';
-import '../common/tec_scaffold_wrapper.dart';
 import 'volume_card.dart';
 import 'volume_detail.dart';
 import 'volumes_bloc.dart';

@@ -23,7 +23,6 @@ import '../../models/app_settings.dart';
 import '../../models/bible_chapter_state.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
-import '../common/tec_scaffold_wrapper.dart';
 import '../library/library.dart';
 import '../library/volumes_bloc.dart';
 import '../misc/view_actions.dart';
@@ -566,7 +565,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
           child: TecAutoScroll(
             scrollController: _scrollController,
             allowAutoscroll: () => !context.bloc<SelectionBloc>().state.isTextSelected,
-            navigationBarPadding: () => AppSettings.shared.navigationBarPadding,
+            navigationBarPadding: () => TecScaffoldWrapper.navigationBarPadding,
             autoscrollActive: (active) {
               if (active) {
                 context.bloc<SheetManagerBloc>().collapse(context);

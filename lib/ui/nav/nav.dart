@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
@@ -12,7 +12,6 @@ import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
 import '../common/tec_bottom_sheet_safe_area.dart';
-import '../common/tec_scaffold_wrapper.dart';
 import '../library/library.dart';
 import 'bcv_tab.dart';
 import 'search_results_view.dart';

@@ -9,7 +9,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
 import '../common/common.dart';
-import '../common/tec_scaffold_wrapper.dart';
 import 'volume_image.dart';
 
 class VolumeDetail extends StatefulWidget {

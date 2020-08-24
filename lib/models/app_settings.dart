@@ -20,15 +20,6 @@ class AppSettings {
   // PUBLIC API
   //
 
-  // info about android full screen overlay mode
-  // statusBarHeight is the actual status bar height
-  // statusBarPadding is the padding to add to a view (in landscape == 0)
-  // navigationBarPadding is the padding to add at the bottom for sheets - etc
-  bool androidFullScreen;
-  double statusBarHeight;
-  double statusBarPadding;
-  double navigationBarPadding;
-
   tec.DeviceInfo deviceInfo;
   tua.UserAccount userAccount;
 
@@ -41,7 +32,6 @@ class AppSettings {
   /// The font scale factor for content (e.g. Bible or study content HTML).
   ///
   final contentFontName = BehaviorSubject<String>.seeded(''); // ignore: close_sinks
-
 
   ///
   /// isDarkTheme
@@ -62,9 +52,8 @@ class AppSettings {
   SystemUiOverlayStyle overlayStyle(BuildContext context) {
     var overlayStyle = isDarkTheme() ? lightOverlayStyle : darkOverlayStyle;
 
-    if (tec.platformIs(tec.Platform.android) && !(androidFullScreen ?? false)) {
-      overlayStyle =
-          overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).canvasColor);
+    if (tec.platformIs(tec.Platform.android) && !TecScaffoldWrapper.isAndroidFullScreen()) {
+      overlayStyle = overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).canvasColor);
     }
 
     return overlayStyle;

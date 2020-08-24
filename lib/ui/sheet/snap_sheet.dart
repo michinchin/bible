@@ -6,7 +6,6 @@ import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../models/app_settings.dart';
 import 'main_sheet.dart';
 import 'selection_sheet.dart';
 
@@ -31,7 +30,7 @@ class _SnapSheetState extends State<SnapSheet> {
   List<double> _calculateHeightSnappings(SheetType sheetType) {
     // figure out dimensions depending on view size
     // dividing by 2 - they will overlay but looks nicer
-    var androidExtraPadding = AppSettings.shared.navigationBarPadding / 2;
+    var androidExtraPadding = TecScaffoldWrapper.navigationBarPadding / 2;
 
     if (MediaQuery.of(context).size.width > 500) {
       // buttons are spread out - reduce the height by another 50%
@@ -225,7 +224,7 @@ class _SnapSheetState extends State<SnapSheet> {
                   },
                 );
               }),
-          if (AppSettings.shared.androidFullScreen)
+          if (TecScaffoldWrapper.isAndroidFullScreen())
             Container(
               alignment: Alignment.bottomCenter,
               child: AbsorbPointer(
