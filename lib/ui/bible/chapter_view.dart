@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bible/blocs/search/nav_bloc.dart';
 import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -128,16 +129,18 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                         ),
                         Flexible(
                           child: CupertinoButton(
-                            minSize: 0,
-                            padding: buttonPadding,
-                            child: TecAutoSizeText(
-                              _bible.abbreviation,
-                              minFontSize: minFontSize,
-                              maxLines: 1,
-                              style: buttonStyle,
-                            ),
-                            onPressed: () => _onSelectBible(chapterState),
-                          ),
+                              minSize: 0,
+                              padding: buttonPadding,
+                              child: TecAutoSizeText(
+                                _bible.abbreviation,
+                                minFontSize: minFontSize,
+                                maxLines: 1,
+                                style: buttonStyle,
+                              ),
+                              onPressed: () =>
+                                  _onNavigate(chapterState, initialIndex: NavTabs.translation.index)
+                              // onPressed: () => _onSelectBible(chapterState),
+                              ),
                         ),
                       ],
                     ),
@@ -169,12 +172,11 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     );
   }
 
-  Future<void> _onNavigate(BibleChapterState chapterState) async {
+  Future<void> _onNavigate(BibleChapterState chapterState, {int initialIndex = 1}) async {
     TecAutoScroll.stopAutoscroll();
     final ref = await navigate(
-      context,
-      Reference.fromHref(chapterState.bcv.toString(), volume: _bible.id),
-    );
+        context, Reference.fromHref(chapterState.bcv.toString(), volume: _bible.id),
+        initialIndex: initialIndex);
     if (ref != null) {
       // save navigation ref to nav history
       await UserItemHelper.saveNavHistoryItem(ref);

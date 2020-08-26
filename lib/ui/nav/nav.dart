@@ -19,10 +19,7 @@ import 'search_suggestions.dart';
 
 const tabColors = [Colors.red, Colors.blue, Colors.orange, Colors.green];
 
-Future<Reference> navigate(
-  BuildContext context,
-  Reference ref,
-) {
+Future<Reference> navigate(BuildContext context, Reference ref, {int initialIndex = 1}) {
   final isLargeScreen =
       MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 600;
   if (isLargeScreen) {
@@ -35,7 +32,7 @@ Future<Reference> navigate(
           width: 500,
           child: MultiBlocProvider(providers: [
             BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
-          ], child: Nav())),
+          ], child: Nav(initialIndex: initialIndex))),
     );
   }
 
@@ -53,11 +50,14 @@ Future<Reference> navigate(
     fullscreenDialog: true,
     builder: (context) => MultiBlocProvider(providers: [
       BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
-    ], child: Nav()),
+    ], child: Nav(initialIndex: initialIndex)),
   ));
 }
 
 class Nav extends StatefulWidget {
+  final int initialIndex;
+  const Nav({this.initialIndex});
+
   @override
   _NavState createState() => _NavState();
 }
@@ -87,6 +87,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    navBloc().add(NavEvent.changeTabIndex(index: widget.initialIndex));
     _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
