@@ -1349,7 +1349,7 @@ class _$NavStateTearOff {
       String search,
       List<int> bookSuggestions,
       List<String> wordSuggestions,
-      List<String> history}) {
+      List<Reference> history}) {
     return _NavState(
       navViewState: navViewState,
       tabIndex: tabIndex,
@@ -1372,7 +1372,7 @@ mixin _$NavState {
   String get search;
   List<int> get bookSuggestions;
   List<String> get wordSuggestions;
-  List<String> get history;
+  List<Reference> get history;
 
   $NavStateCopyWith<NavState> get copyWith;
 }
@@ -1387,7 +1387,7 @@ abstract class $NavStateCopyWith<$Res> {
       String search,
       List<int> bookSuggestions,
       List<String> wordSuggestions,
-      List<String> history});
+      List<Reference> history});
 }
 
 class _$NavStateCopyWithImpl<$Res> implements $NavStateCopyWith<$Res> {
@@ -1420,7 +1420,7 @@ class _$NavStateCopyWithImpl<$Res> implements $NavStateCopyWith<$Res> {
       wordSuggestions: wordSuggestions == freezed
           ? _value.wordSuggestions
           : wordSuggestions as List<String>,
-      history: history == freezed ? _value.history : history as List<String>,
+      history: history == freezed ? _value.history : history as List<Reference>,
     ));
   }
 }
@@ -1436,7 +1436,7 @@ abstract class _$NavStateCopyWith<$Res> implements $NavStateCopyWith<$Res> {
       String search,
       List<int> bookSuggestions,
       List<String> wordSuggestions,
-      List<String> history});
+      List<Reference> history});
 }
 
 class __$NavStateCopyWithImpl<$Res> extends _$NavStateCopyWithImpl<$Res>
@@ -1470,7 +1470,7 @@ class __$NavStateCopyWithImpl<$Res> extends _$NavStateCopyWithImpl<$Res>
       wordSuggestions: wordSuggestions == freezed
           ? _value.wordSuggestions
           : wordSuggestions as List<String>,
-      history: history == freezed ? _value.history : history as List<String>,
+      history: history == freezed ? _value.history : history as List<Reference>,
     ));
   }
 }
@@ -1498,7 +1498,7 @@ class _$_NavState with DiagnosticableTreeMixin implements _NavState {
   @override
   final List<String> wordSuggestions;
   @override
-  final List<String> history;
+  final List<Reference> history;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -1567,7 +1567,7 @@ abstract class _NavState implements NavState {
       String search,
       List<int> bookSuggestions,
       List<String> wordSuggestions,
-      List<String> history}) = _$_NavState;
+      List<Reference> history}) = _$_NavState;
 
   @override
   NavViewState get navViewState;
@@ -1582,7 +1582,7 @@ abstract class _NavState implements NavState {
   @override
   List<String> get wordSuggestions;
   @override
-  List<String> get history;
+  List<Reference> get history;
   @override
   _$NavStateCopyWith<_NavState> get copyWith;
 }

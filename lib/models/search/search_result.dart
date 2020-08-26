@@ -14,7 +14,6 @@ class SearchResult {
   final int chapterId;
   final int verseId;
   final List<Verse> verses;
-  final GlobalKey key;
 
   SearchResult({
     this.ref,
@@ -22,7 +21,6 @@ class SearchResult {
     this.chapterId,
     this.verseId,
     this.verses,
-    this.key,
   });
 
   SearchResult copyWith({
@@ -37,7 +35,6 @@ class SearchResult {
     bool isSelected,
     int currentVerseIndex,
     String fullText,
-    GlobalKey key,
   }) =>
       SearchResult(
         ref: ref ?? this.ref,
@@ -45,7 +42,6 @@ class SearchResult {
         chapterId: chapterId ?? this.chapterId,
         verseId: verseId ?? this.verseId,
         verses: verses ?? this.verses,
-        key: key ?? this.key,
       );
 
   String get href => '$bookId/$chapterId/$verseId';
@@ -63,12 +59,12 @@ class SearchResult {
       }
     }
     return SearchResult(
-        ref: ref,
-        bookId: tec.as<int>(json['bookId']),
-        chapterId: tec.as<int>(json['chapterId']),
-        verses: v,
-        verseId: tec.as<int>(json['verseId']),
-        key: GlobalKey());
+      ref: ref,
+      bookId: tec.as<int>(json['bookId']),
+      chapterId: tec.as<int>(json['chapterId']),
+      verses: v,
+      verseId: tec.as<int>(json['verseId']),
+    );
   }
 }
 

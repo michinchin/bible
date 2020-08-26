@@ -5,6 +5,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/search/autocomplete.dart';
+import '../../models/user_item_helper.dart';
 
 part 'nav_bloc.freezed.dart';
 
@@ -32,7 +33,7 @@ abstract class NavState with _$NavState {
     String search,
     List<int> bookSuggestions,
     List<String> wordSuggestions,
-    List<String> history,
+    List<Reference> history,
   }) = _NavState;
 }
 
@@ -55,12 +56,16 @@ class NavBloc extends Bloc<NavEvent, NavState> {
     if (event is _LoadWordSuggestions) {
       final suggestions = await _loadWordSuggestions(event.search);
       yield state.copyWith(wordSuggestions: suggestions);
-    } else {
+    } else if (event is _LoadHistory){
+      final history = await UserItemHelper.navHistoryItemsFromDb();
+      tec.dmPrint('Loading nav history');
+      yield state.copyWith(history: history);
+      }else {
       final newState = event.when(
           changeNavView: _changeNavView,
           onSearchChange: _onSearchChange,
           onSearchFinished: _onSearchFinished,
-          loadHistory: _loadHistory,
+          loadHistory: (){},
           loadWordSuggestions: (_) {},
           changeTabIndex: _changeTabIndex,
           changeState: _changeState,
@@ -201,11 +206,6 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
   NavState _changeState(NavState s) => s;
 
-  NavState _loadHistory() {
-    // TODO(abby): implement
-    return state;
-  }
-
   Future<List<String>> _loadWordSuggestions(String s) async {
     final ac = await AutoComplete.fetch(phrase: s, translationIds: '${state.ref.volume}');
     return ac?.possibles;
@@ -213,7 +213,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
   NavState _changeTabIndex(int index) {
     var search = '';
-    if (index > NavTabs.book.index) {
+    if (state.navViewState == NavViewState.bcvTabs && index > NavTabs.book.index) {
       final bible = VolumesRepository.shared.bibleWithId(initialRef.volume);
       final bookName = bible.nameOfBook(state.ref.book);
       search += bookName;

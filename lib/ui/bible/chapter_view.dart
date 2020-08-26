@@ -15,19 +15,18 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/margin_notes/margin_notes_bloc.dart';
-import '../../blocs/search/search_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/bible_chapter_state.dart';
+import '../../models/user_item_helper.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
 import '../library/library.dart';
 import '../library/volumes_bloc.dart';
 import '../misc/view_actions.dart';
 import '../nav/nav.dart';
-import '../nav/search_results_view.dart';
 import 'chapter_view_model.dart';
 
 const bibleChapterType = 'BibleChapter';
@@ -107,7 +106,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                               icon: const Icon(Icons.search),
                               tooltip: 'Search',
                               color: Theme.of(context).textColor.withOpacity(0.5),
-                              onPressed: () => _onShowSearch(chapterState)),
+                              onPressed: () => _onNavigate(chapterState)),
                         ),
                         Flexible(
                           child: CupertinoButton(
@@ -170,16 +169,6 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     );
   }
 
-  Future<void> _onShowSearch(BibleChapterState chapterState) =>
-      Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
-          fullscreenDialog: true,
-          builder: (context) => TecScaffoldWrapper(
-              child: Scaffold(
-                  appBar: AppBar(
-                    title: Text('${context.bloc<SearchBloc>().state.search}'),
-                  ),
-                  body: SearchResultsView()))));
-
   Future<void> _onNavigate(BibleChapterState chapterState) async {
     TecAutoScroll.stopAutoscroll();
     final ref = await navigate(
@@ -187,6 +176,8 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
       Reference.fromHref(chapterState.bcv.toString(), volume: _bible.id),
     );
     if (ref != null) {
+      // save navigation ref to nav history
+      await UserItemHelper.saveNavHistoryItem(ref);
       // Small delay to allow the nav popup to clean up...
       await Future.delayed(const Duration(milliseconds: 350), () {
         final pageController = _pageableViewStateKey.currentState?.pageController;

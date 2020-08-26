@@ -42,6 +42,11 @@ class _$SearchResultEventTearOff {
       idx: idx,
     );
   }
+
+// ignore: unused_element
+  _Select select() {
+    return const _Select();
+  }
 }
 
 // ignore: unused_element
@@ -55,6 +60,7 @@ mixin _$SearchResultEvent {
     @required Result openInTB(BuildContext context),
     @required Result showContext(),
     @required Result onTranslationChange(int idx),
+    @required Result select(),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
@@ -63,6 +69,7 @@ mixin _$SearchResultEvent {
     Result openInTB(BuildContext context),
     Result showContext(),
     Result onTranslationChange(int idx),
+    Result select(),
     @required Result orElse(),
   });
   @optionalTypeArgs
@@ -72,6 +79,7 @@ mixin _$SearchResultEvent {
     @required Result openInTB(_OpenInTb value),
     @required Result showContext(_ShowInContext value),
     @required Result onTranslationChange(_OnTranslationChange value),
+    @required Result select(_Select value),
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
@@ -80,6 +88,7 @@ mixin _$SearchResultEvent {
     Result openInTB(_OpenInTb value),
     Result showContext(_ShowInContext value),
     Result onTranslationChange(_OnTranslationChange value),
+    Result select(_Select value),
     @required Result orElse(),
   });
 }
@@ -137,12 +146,14 @@ class _$_Share implements _Share {
     @required Result openInTB(BuildContext context),
     @required Result showContext(),
     @required Result onTranslationChange(int idx),
+    @required Result select(),
   }) {
     assert(share != null);
     assert(copy != null);
     assert(openInTB != null);
     assert(showContext != null);
     assert(onTranslationChange != null);
+    assert(select != null);
     return share();
   }
 
@@ -154,6 +165,7 @@ class _$_Share implements _Share {
     Result openInTB(BuildContext context),
     Result showContext(),
     Result onTranslationChange(int idx),
+    Result select(),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -171,12 +183,14 @@ class _$_Share implements _Share {
     @required Result openInTB(_OpenInTb value),
     @required Result showContext(_ShowInContext value),
     @required Result onTranslationChange(_OnTranslationChange value),
+    @required Result select(_Select value),
   }) {
     assert(share != null);
     assert(copy != null);
     assert(openInTB != null);
     assert(showContext != null);
     assert(onTranslationChange != null);
+    assert(select != null);
     return share(this);
   }
 
@@ -188,6 +202,7 @@ class _$_Share implements _Share {
     Result openInTB(_OpenInTb value),
     Result showContext(_ShowInContext value),
     Result onTranslationChange(_OnTranslationChange value),
+    Result select(_Select value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -261,12 +276,14 @@ class _$_Copy implements _Copy {
     @required Result openInTB(BuildContext context),
     @required Result showContext(),
     @required Result onTranslationChange(int idx),
+    @required Result select(),
   }) {
     assert(share != null);
     assert(copy != null);
     assert(openInTB != null);
     assert(showContext != null);
     assert(onTranslationChange != null);
+    assert(select != null);
     return copy(context);
   }
 
@@ -278,6 +295,7 @@ class _$_Copy implements _Copy {
     Result openInTB(BuildContext context),
     Result showContext(),
     Result onTranslationChange(int idx),
+    Result select(),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -295,12 +313,14 @@ class _$_Copy implements _Copy {
     @required Result openInTB(_OpenInTb value),
     @required Result showContext(_ShowInContext value),
     @required Result onTranslationChange(_OnTranslationChange value),
+    @required Result select(_Select value),
   }) {
     assert(share != null);
     assert(copy != null);
     assert(openInTB != null);
     assert(showContext != null);
     assert(onTranslationChange != null);
+    assert(select != null);
     return copy(this);
   }
 
@@ -312,6 +332,7 @@ class _$_Copy implements _Copy {
     Result openInTB(_OpenInTb value),
     Result showContext(_ShowInContext value),
     Result onTranslationChange(_OnTranslationChange value),
+    Result select(_Select value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -389,12 +410,14 @@ class _$_OpenInTb implements _OpenInTb {
     @required Result openInTB(BuildContext context),
     @required Result showContext(),
     @required Result onTranslationChange(int idx),
+    @required Result select(),
   }) {
     assert(share != null);
     assert(copy != null);
     assert(openInTB != null);
     assert(showContext != null);
     assert(onTranslationChange != null);
+    assert(select != null);
     return openInTB(context);
   }
 
@@ -406,6 +429,7 @@ class _$_OpenInTb implements _OpenInTb {
     Result openInTB(BuildContext context),
     Result showContext(),
     Result onTranslationChange(int idx),
+    Result select(),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -423,12 +447,14 @@ class _$_OpenInTb implements _OpenInTb {
     @required Result openInTB(_OpenInTb value),
     @required Result showContext(_ShowInContext value),
     @required Result onTranslationChange(_OnTranslationChange value),
+    @required Result select(_Select value),
   }) {
     assert(share != null);
     assert(copy != null);
     assert(openInTB != null);
     assert(showContext != null);
     assert(onTranslationChange != null);
+    assert(select != null);
     return openInTB(this);
   }
 
@@ -440,6 +466,7 @@ class _$_OpenInTb implements _OpenInTb {
     Result openInTB(_OpenInTb value),
     Result showContext(_ShowInContext value),
     Result onTranslationChange(_OnTranslationChange value),
+    Result select(_Select value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -498,12 +525,14 @@ class _$_ShowInContext implements _ShowInContext {
     @required Result openInTB(BuildContext context),
     @required Result showContext(),
     @required Result onTranslationChange(int idx),
+    @required Result select(),
   }) {
     assert(share != null);
     assert(copy != null);
     assert(openInTB != null);
     assert(showContext != null);
     assert(onTranslationChange != null);
+    assert(select != null);
     return showContext();
   }
 
@@ -515,6 +544,7 @@ class _$_ShowInContext implements _ShowInContext {
     Result openInTB(BuildContext context),
     Result showContext(),
     Result onTranslationChange(int idx),
+    Result select(),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -532,12 +562,14 @@ class _$_ShowInContext implements _ShowInContext {
     @required Result openInTB(_OpenInTb value),
     @required Result showContext(_ShowInContext value),
     @required Result onTranslationChange(_OnTranslationChange value),
+    @required Result select(_Select value),
   }) {
     assert(share != null);
     assert(copy != null);
     assert(openInTB != null);
     assert(showContext != null);
     assert(onTranslationChange != null);
+    assert(select != null);
     return showContext(this);
   }
 
@@ -549,6 +581,7 @@ class _$_ShowInContext implements _ShowInContext {
     Result openInTB(_OpenInTb value),
     Result showContext(_ShowInContext value),
     Result onTranslationChange(_OnTranslationChange value),
+    Result select(_Select value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -626,12 +659,14 @@ class _$_OnTranslationChange implements _OnTranslationChange {
     @required Result openInTB(BuildContext context),
     @required Result showContext(),
     @required Result onTranslationChange(int idx),
+    @required Result select(),
   }) {
     assert(share != null);
     assert(copy != null);
     assert(openInTB != null);
     assert(showContext != null);
     assert(onTranslationChange != null);
+    assert(select != null);
     return onTranslationChange(idx);
   }
 
@@ -643,6 +678,7 @@ class _$_OnTranslationChange implements _OnTranslationChange {
     Result openInTB(BuildContext context),
     Result showContext(),
     Result onTranslationChange(int idx),
+    Result select(),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -660,12 +696,14 @@ class _$_OnTranslationChange implements _OnTranslationChange {
     @required Result openInTB(_OpenInTb value),
     @required Result showContext(_ShowInContext value),
     @required Result onTranslationChange(_OnTranslationChange value),
+    @required Result select(_Select value),
   }) {
     assert(share != null);
     assert(copy != null);
     assert(openInTB != null);
     assert(showContext != null);
     assert(onTranslationChange != null);
+    assert(select != null);
     return onTranslationChange(this);
   }
 
@@ -677,6 +715,7 @@ class _$_OnTranslationChange implements _OnTranslationChange {
     Result openInTB(_OpenInTb value),
     Result showContext(_ShowInContext value),
     Result onTranslationChange(_OnTranslationChange value),
+    Result select(_Select value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -694,6 +733,115 @@ abstract class _OnTranslationChange implements SearchResultEvent {
   _$OnTranslationChangeCopyWith<_OnTranslationChange> get copyWith;
 }
 
+abstract class _$SelectCopyWith<$Res> {
+  factory _$SelectCopyWith(_Select value, $Res Function(_Select) then) =
+      __$SelectCopyWithImpl<$Res>;
+}
+
+class __$SelectCopyWithImpl<$Res> extends _$SearchResultEventCopyWithImpl<$Res>
+    implements _$SelectCopyWith<$Res> {
+  __$SelectCopyWithImpl(_Select _value, $Res Function(_Select) _then)
+      : super(_value, (v) => _then(v as _Select));
+
+  @override
+  _Select get _value => super._value as _Select;
+}
+
+class _$_Select implements _Select {
+  const _$_Select();
+
+  @override
+  String toString() {
+    return 'SearchResultEvent.select()';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) || (other is _Select);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result share(),
+    @required Result copy(BuildContext context),
+    @required Result openInTB(BuildContext context),
+    @required Result showContext(),
+    @required Result onTranslationChange(int idx),
+    @required Result select(),
+  }) {
+    assert(share != null);
+    assert(copy != null);
+    assert(openInTB != null);
+    assert(showContext != null);
+    assert(onTranslationChange != null);
+    assert(select != null);
+    return select();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result share(),
+    Result copy(BuildContext context),
+    Result openInTB(BuildContext context),
+    Result showContext(),
+    Result onTranslationChange(int idx),
+    Result select(),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (select != null) {
+      return select();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result share(_Share value),
+    @required Result copy(_Copy value),
+    @required Result openInTB(_OpenInTb value),
+    @required Result showContext(_ShowInContext value),
+    @required Result onTranslationChange(_OnTranslationChange value),
+    @required Result select(_Select value),
+  }) {
+    assert(share != null);
+    assert(copy != null);
+    assert(openInTB != null);
+    assert(showContext != null);
+    assert(onTranslationChange != null);
+    assert(select != null);
+    return select(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result share(_Share value),
+    Result copy(_Copy value),
+    Result openInTB(_OpenInTb value),
+    Result showContext(_ShowInContext value),
+    Result onTranslationChange(_OnTranslationChange value),
+    Result select(_Select value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (select != null) {
+      return select(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _Select implements SearchResultEvent {
+  const factory _Select() = _$_Select;
+}
+
 class _$SearchResultStateTearOff {
   const _$SearchResultStateTearOff();
 
@@ -702,20 +850,20 @@ class _$SearchResultStateTearOff {
       {SearchResult res,
       int verseIndex,
       Map<int, Context> contextMap,
-      bool isSelected,
       bool contextShown,
       bool contextLoading,
       bool contextError,
+      bool selected,
       String label,
       String url}) {
     return _SearchResultState(
       res: res,
       verseIndex: verseIndex,
       contextMap: contextMap,
-      isSelected: isSelected,
       contextShown: contextShown,
       contextLoading: contextLoading,
       contextError: contextError,
+      selected: selected,
       label: label,
       url: url,
     );
@@ -729,10 +877,10 @@ mixin _$SearchResultState {
   SearchResult get res;
   int get verseIndex;
   Map<int, Context> get contextMap;
-  bool get isSelected;
   bool get contextShown;
   bool get contextLoading;
   bool get contextError;
+  bool get selected;
   String get label;
   String get url;
 
@@ -747,10 +895,10 @@ abstract class $SearchResultStateCopyWith<$Res> {
       {SearchResult res,
       int verseIndex,
       Map<int, Context> contextMap,
-      bool isSelected,
       bool contextShown,
       bool contextLoading,
       bool contextError,
+      bool selected,
       String label,
       String url});
 }
@@ -768,10 +916,10 @@ class _$SearchResultStateCopyWithImpl<$Res>
     Object res = freezed,
     Object verseIndex = freezed,
     Object contextMap = freezed,
-    Object isSelected = freezed,
     Object contextShown = freezed,
     Object contextLoading = freezed,
     Object contextError = freezed,
+    Object selected = freezed,
     Object label = freezed,
     Object url = freezed,
   }) {
@@ -781,8 +929,6 @@ class _$SearchResultStateCopyWithImpl<$Res>
       contextMap: contextMap == freezed
           ? _value.contextMap
           : contextMap as Map<int, Context>,
-      isSelected:
-          isSelected == freezed ? _value.isSelected : isSelected as bool,
       contextShown:
           contextShown == freezed ? _value.contextShown : contextShown as bool,
       contextLoading: contextLoading == freezed
@@ -790,6 +936,7 @@ class _$SearchResultStateCopyWithImpl<$Res>
           : contextLoading as bool,
       contextError:
           contextError == freezed ? _value.contextError : contextError as bool,
+      selected: selected == freezed ? _value.selected : selected as bool,
       label: label == freezed ? _value.label : label as String,
       url: url == freezed ? _value.url : url as String,
     ));
@@ -806,10 +953,10 @@ abstract class _$SearchResultStateCopyWith<$Res>
       {SearchResult res,
       int verseIndex,
       Map<int, Context> contextMap,
-      bool isSelected,
       bool contextShown,
       bool contextLoading,
       bool contextError,
+      bool selected,
       String label,
       String url});
 }
@@ -829,10 +976,10 @@ class __$SearchResultStateCopyWithImpl<$Res>
     Object res = freezed,
     Object verseIndex = freezed,
     Object contextMap = freezed,
-    Object isSelected = freezed,
     Object contextShown = freezed,
     Object contextLoading = freezed,
     Object contextError = freezed,
+    Object selected = freezed,
     Object label = freezed,
     Object url = freezed,
   }) {
@@ -842,8 +989,6 @@ class __$SearchResultStateCopyWithImpl<$Res>
       contextMap: contextMap == freezed
           ? _value.contextMap
           : contextMap as Map<int, Context>,
-      isSelected:
-          isSelected == freezed ? _value.isSelected : isSelected as bool,
       contextShown:
           contextShown == freezed ? _value.contextShown : contextShown as bool,
       contextLoading: contextLoading == freezed
@@ -851,6 +996,7 @@ class __$SearchResultStateCopyWithImpl<$Res>
           : contextLoading as bool,
       contextError:
           contextError == freezed ? _value.contextError : contextError as bool,
+      selected: selected == freezed ? _value.selected : selected as bool,
       label: label == freezed ? _value.label : label as String,
       url: url == freezed ? _value.url : url as String,
     ));
@@ -862,10 +1008,10 @@ class _$_SearchResultState implements _SearchResultState {
       {this.res,
       this.verseIndex,
       this.contextMap,
-      this.isSelected,
       this.contextShown,
       this.contextLoading,
       this.contextError,
+      this.selected,
       this.label,
       this.url});
 
@@ -876,13 +1022,13 @@ class _$_SearchResultState implements _SearchResultState {
   @override
   final Map<int, Context> contextMap;
   @override
-  final bool isSelected;
-  @override
   final bool contextShown;
   @override
   final bool contextLoading;
   @override
   final bool contextError;
+  @override
+  final bool selected;
   @override
   final String label;
   @override
@@ -890,7 +1036,7 @@ class _$_SearchResultState implements _SearchResultState {
 
   @override
   String toString() {
-    return 'SearchResultState(res: $res, verseIndex: $verseIndex, contextMap: $contextMap, isSelected: $isSelected, contextShown: $contextShown, contextLoading: $contextLoading, contextError: $contextError, label: $label, url: $url)';
+    return 'SearchResultState(res: $res, verseIndex: $verseIndex, contextMap: $contextMap, contextShown: $contextShown, contextLoading: $contextLoading, contextError: $contextError, selected: $selected, label: $label, url: $url)';
   }
 
   @override
@@ -905,9 +1051,6 @@ class _$_SearchResultState implements _SearchResultState {
             (identical(other.contextMap, contextMap) ||
                 const DeepCollectionEquality()
                     .equals(other.contextMap, contextMap)) &&
-            (identical(other.isSelected, isSelected) ||
-                const DeepCollectionEquality()
-                    .equals(other.isSelected, isSelected)) &&
             (identical(other.contextShown, contextShown) ||
                 const DeepCollectionEquality()
                     .equals(other.contextShown, contextShown)) &&
@@ -917,6 +1060,9 @@ class _$_SearchResultState implements _SearchResultState {
             (identical(other.contextError, contextError) ||
                 const DeepCollectionEquality()
                     .equals(other.contextError, contextError)) &&
+            (identical(other.selected, selected) ||
+                const DeepCollectionEquality()
+                    .equals(other.selected, selected)) &&
             (identical(other.label, label) ||
                 const DeepCollectionEquality().equals(other.label, label)) &&
             (identical(other.url, url) ||
@@ -929,10 +1075,10 @@ class _$_SearchResultState implements _SearchResultState {
       const DeepCollectionEquality().hash(res) ^
       const DeepCollectionEquality().hash(verseIndex) ^
       const DeepCollectionEquality().hash(contextMap) ^
-      const DeepCollectionEquality().hash(isSelected) ^
       const DeepCollectionEquality().hash(contextShown) ^
       const DeepCollectionEquality().hash(contextLoading) ^
       const DeepCollectionEquality().hash(contextError) ^
+      const DeepCollectionEquality().hash(selected) ^
       const DeepCollectionEquality().hash(label) ^
       const DeepCollectionEquality().hash(url);
 
@@ -946,10 +1092,10 @@ abstract class _SearchResultState implements SearchResultState {
       {SearchResult res,
       int verseIndex,
       Map<int, Context> contextMap,
-      bool isSelected,
       bool contextShown,
       bool contextLoading,
       bool contextError,
+      bool selected,
       String label,
       String url}) = _$_SearchResultState;
 
@@ -960,13 +1106,13 @@ abstract class _SearchResultState implements SearchResultState {
   @override
   Map<int, Context> get contextMap;
   @override
-  bool get isSelected;
-  @override
   bool get contextShown;
   @override
   bool get contextLoading;
   @override
   bool get contextError;
+  @override
+  bool get selected;
   @override
   String get label;
   @override

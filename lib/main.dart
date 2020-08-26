@@ -58,7 +58,8 @@ Future<void> main() async {
     tua.UserItemType.highlight,
     tua.UserItemType.marginNote,
     tua.UserItemType.note,
-    tua.UserItemType.prefItem
+    tua.UserItemType.prefItem,
+    tua.UserItemType.bookmark,
   ]);
 
   _registerViewTypes();

@@ -17,7 +17,7 @@ class UserItemHelper {
       AppSettings.shared.userAccount.userDb.saveItem(UserItem(
           type: UserItemType.bookmark.index,
           parentId: navHistoryParentId,
-          info: ref.toJson().toString()));
+          info: ref.toString()));
 
   /// navigation history items from db
   static Future<List<Reference>> navHistoryItemsFromDb() async {

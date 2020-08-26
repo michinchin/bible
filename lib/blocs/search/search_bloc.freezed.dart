@@ -19,42 +19,56 @@ class _$SearchEventTearOff {
       translations: translations,
     );
   }
+
+// ignore: unused_element
+  _SelectionMode selectionModeToggle() {
+    return const _SelectionMode();
+  }
+
+// ignore: unused_element
+  _SelectResult selectResult({SearchResult searchResult}) {
+    return _SelectResult(
+      searchResult: searchResult,
+    );
+  }
 }
 
 // ignore: unused_element
 const $SearchEvent = _$SearchEventTearOff();
 
 mixin _$SearchEvent {
-  String get search;
-  List<int> get translations;
-
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result request(String search, List<int> translations),
+    @required Result selectionModeToggle(),
+    @required Result selectResult(SearchResult searchResult),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result request(String search, List<int> translations),
+    Result selectionModeToggle(),
+    Result selectResult(SearchResult searchResult),
     @required Result orElse(),
   });
   @optionalTypeArgs
   Result map<Result extends Object>({
     @required Result request(_Requested value),
+    @required Result selectionModeToggle(_SelectionMode value),
+    @required Result selectResult(_SelectResult value),
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result request(_Requested value),
+    Result selectionModeToggle(_SelectionMode value),
+    Result selectResult(_SelectResult value),
     @required Result orElse(),
   });
-
-  $SearchEventCopyWith<SearchEvent> get copyWith;
 }
 
 abstract class $SearchEventCopyWith<$Res> {
   factory $SearchEventCopyWith(
           SearchEvent value, $Res Function(SearchEvent) then) =
       _$SearchEventCopyWithImpl<$Res>;
-  $Res call({String search, List<int> translations});
 }
 
 class _$SearchEventCopyWithImpl<$Res> implements $SearchEventCopyWith<$Res> {
@@ -63,26 +77,12 @@ class _$SearchEventCopyWithImpl<$Res> implements $SearchEventCopyWith<$Res> {
   final SearchEvent _value;
   // ignore: unused_field
   final $Res Function(SearchEvent) _then;
-
-  @override
-  $Res call({
-    Object search = freezed,
-    Object translations = freezed,
-  }) {
-    return _then(_value.copyWith(
-      search: search == freezed ? _value.search : search as String,
-      translations: translations == freezed
-          ? _value.translations
-          : translations as List<int>,
-    ));
-  }
 }
 
-abstract class _$RequestedCopyWith<$Res> implements $SearchEventCopyWith<$Res> {
+abstract class _$RequestedCopyWith<$Res> {
   factory _$RequestedCopyWith(
           _Requested value, $Res Function(_Requested) then) =
       __$RequestedCopyWithImpl<$Res>;
-  @override
   $Res call({String search, List<int> translations});
 }
 
@@ -155,8 +155,12 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result request(String search, List<int> translations),
+    @required Result selectionModeToggle(),
+    @required Result selectResult(SearchResult searchResult),
   }) {
     assert(request != null);
+    assert(selectionModeToggle != null);
+    assert(selectResult != null);
     return request(search, translations);
   }
 
@@ -164,6 +168,8 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result request(String search, List<int> translations),
+    Result selectionModeToggle(),
+    Result selectResult(SearchResult searchResult),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -177,8 +183,12 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
   @optionalTypeArgs
   Result map<Result extends Object>({
     @required Result request(_Requested value),
+    @required Result selectionModeToggle(_SelectionMode value),
+    @required Result selectResult(_SelectResult value),
   }) {
     assert(request != null);
+    assert(selectionModeToggle != null);
+    assert(selectResult != null);
     return request(this);
   }
 
@@ -186,6 +196,8 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result request(_Requested value),
+    Result selectionModeToggle(_SelectionMode value),
+    Result selectResult(_SelectResult value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -200,12 +212,237 @@ abstract class _Requested implements SearchEvent {
   const factory _Requested({String search, List<int> translations}) =
       _$_Requested;
 
-  @override
   String get search;
-  @override
   List<int> get translations;
-  @override
   _$RequestedCopyWith<_Requested> get copyWith;
+}
+
+abstract class _$SelectionModeCopyWith<$Res> {
+  factory _$SelectionModeCopyWith(
+          _SelectionMode value, $Res Function(_SelectionMode) then) =
+      __$SelectionModeCopyWithImpl<$Res>;
+}
+
+class __$SelectionModeCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
+    implements _$SelectionModeCopyWith<$Res> {
+  __$SelectionModeCopyWithImpl(
+      _SelectionMode _value, $Res Function(_SelectionMode) _then)
+      : super(_value, (v) => _then(v as _SelectionMode));
+
+  @override
+  _SelectionMode get _value => super._value as _SelectionMode;
+}
+
+class _$_SelectionMode with DiagnosticableTreeMixin implements _SelectionMode {
+  const _$_SelectionMode();
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'SearchEvent.selectionModeToggle()';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'SearchEvent.selectionModeToggle'));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) || (other is _SelectionMode);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result request(String search, List<int> translations),
+    @required Result selectionModeToggle(),
+    @required Result selectResult(SearchResult searchResult),
+  }) {
+    assert(request != null);
+    assert(selectionModeToggle != null);
+    assert(selectResult != null);
+    return selectionModeToggle();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result request(String search, List<int> translations),
+    Result selectionModeToggle(),
+    Result selectResult(SearchResult searchResult),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (selectionModeToggle != null) {
+      return selectionModeToggle();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result request(_Requested value),
+    @required Result selectionModeToggle(_SelectionMode value),
+    @required Result selectResult(_SelectResult value),
+  }) {
+    assert(request != null);
+    assert(selectionModeToggle != null);
+    assert(selectResult != null);
+    return selectionModeToggle(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result request(_Requested value),
+    Result selectionModeToggle(_SelectionMode value),
+    Result selectResult(_SelectResult value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (selectionModeToggle != null) {
+      return selectionModeToggle(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _SelectionMode implements SearchEvent {
+  const factory _SelectionMode() = _$_SelectionMode;
+}
+
+abstract class _$SelectResultCopyWith<$Res> {
+  factory _$SelectResultCopyWith(
+          _SelectResult value, $Res Function(_SelectResult) then) =
+      __$SelectResultCopyWithImpl<$Res>;
+  $Res call({SearchResult searchResult});
+}
+
+class __$SelectResultCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
+    implements _$SelectResultCopyWith<$Res> {
+  __$SelectResultCopyWithImpl(
+      _SelectResult _value, $Res Function(_SelectResult) _then)
+      : super(_value, (v) => _then(v as _SelectResult));
+
+  @override
+  _SelectResult get _value => super._value as _SelectResult;
+
+  @override
+  $Res call({
+    Object searchResult = freezed,
+  }) {
+    return _then(_SelectResult(
+      searchResult: searchResult == freezed
+          ? _value.searchResult
+          : searchResult as SearchResult,
+    ));
+  }
+}
+
+class _$_SelectResult with DiagnosticableTreeMixin implements _SelectResult {
+  const _$_SelectResult({this.searchResult});
+
+  @override
+  final SearchResult searchResult;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'SearchEvent.selectResult(searchResult: $searchResult)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'SearchEvent.selectResult'))
+      ..add(DiagnosticsProperty('searchResult', searchResult));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _SelectResult &&
+            (identical(other.searchResult, searchResult) ||
+                const DeepCollectionEquality()
+                    .equals(other.searchResult, searchResult)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^ const DeepCollectionEquality().hash(searchResult);
+
+  @override
+  _$SelectResultCopyWith<_SelectResult> get copyWith =>
+      __$SelectResultCopyWithImpl<_SelectResult>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result request(String search, List<int> translations),
+    @required Result selectionModeToggle(),
+    @required Result selectResult(SearchResult searchResult),
+  }) {
+    assert(request != null);
+    assert(selectionModeToggle != null);
+    assert(selectResult != null);
+    return selectResult(searchResult);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result request(String search, List<int> translations),
+    Result selectionModeToggle(),
+    Result selectResult(SearchResult searchResult),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (selectResult != null) {
+      return selectResult(searchResult);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result request(_Requested value),
+    @required Result selectionModeToggle(_SelectionMode value),
+    @required Result selectResult(_SelectResult value),
+  }) {
+    assert(request != null);
+    assert(selectionModeToggle != null);
+    assert(selectResult != null);
+    return selectResult(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result request(_Requested value),
+    Result selectionModeToggle(_SelectionMode value),
+    Result selectResult(_SelectResult value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (selectResult != null) {
+      return selectResult(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _SelectResult implements SearchEvent {
+  const factory _SelectResult({SearchResult searchResult}) = _$_SelectResult;
+
+  SearchResult get searchResult;
+  _$SelectResultCopyWith<_SelectResult> get copyWith;
 }
 
 class _$SearchStateTearOff {
@@ -215,15 +452,19 @@ class _$SearchStateTearOff {
   _SearchState call(
       {String search,
       List<SearchResult> searchResults,
+      Map<String, bool> selected,
       List<int> defaultTranslations,
       bool loading,
-      bool error}) {
+      bool error,
+      bool selectionMode}) {
     return _SearchState(
       search: search,
       searchResults: searchResults,
+      selected: selected,
       defaultTranslations: defaultTranslations,
       loading: loading,
       error: error,
+      selectionMode: selectionMode,
     );
   }
 }
@@ -234,9 +475,11 @@ const $SearchState = _$SearchStateTearOff();
 mixin _$SearchState {
   String get search;
   List<SearchResult> get searchResults;
+  Map<String, bool> get selected;
   List<int> get defaultTranslations;
   bool get loading;
   bool get error;
+  bool get selectionMode;
 
   $SearchStateCopyWith<SearchState> get copyWith;
 }
@@ -248,9 +491,11 @@ abstract class $SearchStateCopyWith<$Res> {
   $Res call(
       {String search,
       List<SearchResult> searchResults,
+      Map<String, bool> selected,
       List<int> defaultTranslations,
       bool loading,
-      bool error});
+      bool error,
+      bool selectionMode});
 }
 
 class _$SearchStateCopyWithImpl<$Res> implements $SearchStateCopyWith<$Res> {
@@ -264,20 +509,27 @@ class _$SearchStateCopyWithImpl<$Res> implements $SearchStateCopyWith<$Res> {
   $Res call({
     Object search = freezed,
     Object searchResults = freezed,
+    Object selected = freezed,
     Object defaultTranslations = freezed,
     Object loading = freezed,
     Object error = freezed,
+    Object selectionMode = freezed,
   }) {
     return _then(_value.copyWith(
       search: search == freezed ? _value.search : search as String,
       searchResults: searchResults == freezed
           ? _value.searchResults
           : searchResults as List<SearchResult>,
+      selected:
+          selected == freezed ? _value.selected : selected as Map<String, bool>,
       defaultTranslations: defaultTranslations == freezed
           ? _value.defaultTranslations
           : defaultTranslations as List<int>,
       loading: loading == freezed ? _value.loading : loading as bool,
       error: error == freezed ? _value.error : error as bool,
+      selectionMode: selectionMode == freezed
+          ? _value.selectionMode
+          : selectionMode as bool,
     ));
   }
 }
@@ -291,9 +543,11 @@ abstract class _$SearchStateCopyWith<$Res>
   $Res call(
       {String search,
       List<SearchResult> searchResults,
+      Map<String, bool> selected,
       List<int> defaultTranslations,
       bool loading,
-      bool error});
+      bool error,
+      bool selectionMode});
 }
 
 class __$SearchStateCopyWithImpl<$Res> extends _$SearchStateCopyWithImpl<$Res>
@@ -309,20 +563,27 @@ class __$SearchStateCopyWithImpl<$Res> extends _$SearchStateCopyWithImpl<$Res>
   $Res call({
     Object search = freezed,
     Object searchResults = freezed,
+    Object selected = freezed,
     Object defaultTranslations = freezed,
     Object loading = freezed,
     Object error = freezed,
+    Object selectionMode = freezed,
   }) {
     return _then(_SearchState(
       search: search == freezed ? _value.search : search as String,
       searchResults: searchResults == freezed
           ? _value.searchResults
           : searchResults as List<SearchResult>,
+      selected:
+          selected == freezed ? _value.selected : selected as Map<String, bool>,
       defaultTranslations: defaultTranslations == freezed
           ? _value.defaultTranslations
           : defaultTranslations as List<int>,
       loading: loading == freezed ? _value.loading : loading as bool,
       error: error == freezed ? _value.error : error as bool,
+      selectionMode: selectionMode == freezed
+          ? _value.selectionMode
+          : selectionMode as bool,
     ));
   }
 }
@@ -331,24 +592,30 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
   const _$_SearchState(
       {this.search,
       this.searchResults,
+      this.selected,
       this.defaultTranslations,
       this.loading,
-      this.error});
+      this.error,
+      this.selectionMode});
 
   @override
   final String search;
   @override
   final List<SearchResult> searchResults;
   @override
+  final Map<String, bool> selected;
+  @override
   final List<int> defaultTranslations;
   @override
   final bool loading;
   @override
   final bool error;
+  @override
+  final bool selectionMode;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'SearchState(search: $search, searchResults: $searchResults, defaultTranslations: $defaultTranslations, loading: $loading, error: $error)';
+    return 'SearchState(search: $search, searchResults: $searchResults, selected: $selected, defaultTranslations: $defaultTranslations, loading: $loading, error: $error, selectionMode: $selectionMode)';
   }
 
   @override
@@ -358,9 +625,11 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
       ..add(DiagnosticsProperty('type', 'SearchState'))
       ..add(DiagnosticsProperty('search', search))
       ..add(DiagnosticsProperty('searchResults', searchResults))
+      ..add(DiagnosticsProperty('selected', selected))
       ..add(DiagnosticsProperty('defaultTranslations', defaultTranslations))
       ..add(DiagnosticsProperty('loading', loading))
-      ..add(DiagnosticsProperty('error', error));
+      ..add(DiagnosticsProperty('error', error))
+      ..add(DiagnosticsProperty('selectionMode', selectionMode));
   }
 
   @override
@@ -372,6 +641,9 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
             (identical(other.searchResults, searchResults) ||
                 const DeepCollectionEquality()
                     .equals(other.searchResults, searchResults)) &&
+            (identical(other.selected, selected) ||
+                const DeepCollectionEquality()
+                    .equals(other.selected, selected)) &&
             (identical(other.defaultTranslations, defaultTranslations) ||
                 const DeepCollectionEquality()
                     .equals(other.defaultTranslations, defaultTranslations)) &&
@@ -379,7 +651,10 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
                 const DeepCollectionEquality()
                     .equals(other.loading, loading)) &&
             (identical(other.error, error) ||
-                const DeepCollectionEquality().equals(other.error, error)));
+                const DeepCollectionEquality().equals(other.error, error)) &&
+            (identical(other.selectionMode, selectionMode) ||
+                const DeepCollectionEquality()
+                    .equals(other.selectionMode, selectionMode)));
   }
 
   @override
@@ -387,9 +662,11 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(search) ^
       const DeepCollectionEquality().hash(searchResults) ^
+      const DeepCollectionEquality().hash(selected) ^
       const DeepCollectionEquality().hash(defaultTranslations) ^
       const DeepCollectionEquality().hash(loading) ^
-      const DeepCollectionEquality().hash(error);
+      const DeepCollectionEquality().hash(error) ^
+      const DeepCollectionEquality().hash(selectionMode);
 
   @override
   _$SearchStateCopyWith<_SearchState> get copyWith =>
@@ -400,20 +677,26 @@ abstract class _SearchState implements SearchState {
   const factory _SearchState(
       {String search,
       List<SearchResult> searchResults,
+      Map<String, bool> selected,
       List<int> defaultTranslations,
       bool loading,
-      bool error}) = _$_SearchState;
+      bool error,
+      bool selectionMode}) = _$_SearchState;
 
   @override
   String get search;
   @override
   List<SearchResult> get searchResults;
   @override
+  Map<String, bool> get selected;
+  @override
   List<int> get defaultTranslations;
   @override
   bool get loading;
   @override
   bool get error;
+  @override
+  bool get selectionMode;
   @override
   _$SearchStateCopyWith<_SearchState> get copyWith;
 }

@@ -110,9 +110,9 @@ class __TranslationViewState extends State<_TranslationView> {
     final translationsAbbrev =
         context.bloc<PrefItemsBloc>().itemBool(PrefItemId.translationsAbbreviated);
 
-    void onTap(int id) => context.bloc<NavBloc>()
-      ..add(NavEvent.setRef(ref: ref.copyWith(volume: id)))
-      ..add(const NavEvent.changeTabIndex(index: 1));
+    void onTap(int id) =>
+        context.bloc<NavBloc>().add(NavEvent.setRef(ref: ref.copyWith(volume: id)));
+    // ..add(const NavEvent.changeTabIndex(index: 1));
 
     return FutureBuilder<List<Volume>>(
         future: _futureTranslations,

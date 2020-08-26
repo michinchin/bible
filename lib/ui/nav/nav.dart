@@ -19,7 +19,10 @@ import 'search_suggestions.dart';
 
 const tabColors = [Colors.red, Colors.blue, Colors.orange, Colors.green];
 
-Future<Reference> navigate(BuildContext context, Reference ref) {
+Future<Reference> navigate(
+  BuildContext context,
+  Reference ref,
+) {
   final isLargeScreen =
       MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 600;
   if (isLargeScreen) {
@@ -87,12 +90,18 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
-    _tabController = TabController(length: tabLength, initialIndex: 1, vsync: this)
-      ..addListener(() {
-        if (_tabController.index != navBloc().state.tabIndex) {
-          navBloc().add(NavEvent.changeTabIndex(index: _tabController.index));
-        }
-      });
+    _tabController =
+        TabController(length: tabLength, initialIndex: navBloc().state.tabIndex, vsync: this)
+          ..addListener(() {
+            if (_tabController.index != navBloc().state.tabIndex) {
+              navBloc().add(NavEvent.changeTabIndex(index: _tabController.index));
+            }
+          });
+    // if (widget.searchModeOn) {
+    //   navBloc()
+    //     ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))
+    //     ..add(NavEvent.changeTabIndex(index: SearchAndHistoryTabs.search.index));
+    // }
     super.initState();
   }
 
@@ -115,12 +124,13 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
     setState(() {
-      _tabController = TabController(length: tabLength, initialIndex: 1, vsync: this)
-        ..addListener(() {
-          if (_tabController.index != navBloc().state.tabIndex) {
-            navBloc().add(NavEvent.changeTabIndex(index: _tabController.index));
-          }
-        });
+      _tabController =
+          TabController(length: tabLength, initialIndex: navBloc().state.tabIndex, vsync: this)
+            ..addListener(() {
+              if (_tabController.index != navBloc().state.tabIndex) {
+                navBloc().add(NavEvent.changeTabIndex(index: _tabController.index));
+              }
+            });
     });
   }
 
@@ -128,9 +138,21 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     final s = query ?? _searchController.text;
     FocusScope.of(context).unfocus();
     if (s.isNotEmpty) {
-      navBloc()..add(NavEvent.onSearchChange(search: s))..add(const NavEvent.onSearchFinished());
+      navBloc()
+        ..add(NavEvent.onSearchChange(search: s))
+        ..add(const NavEvent.onSearchFinished())
+        ..add(const NavEvent.loadHistory());
       searchBloc().add(SearchEvent.request(search: s, translations: translations()));
     }
+  }
+
+  void _selectionMode() {
+    TecToast.show(context, 'Coming soon ;)');
+    // final selectionModeOn = !context.bloc<SearchBloc>().state.selectionMode;
+    // if (selectionModeOn) {
+    //   TecToast.show(context, 'Entered Selection Mode');
+    // }
+    // context.bloc<SearchBloc>().add(const SearchEvent.selectionModeToggle());
   }
 
   Future<void> _translation() async {
@@ -172,6 +194,9 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                           ? 'Show books alphabetically'
                           : 'Show books in canonical order'),
                       onTap: () {
+                        navBloc()
+                          ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
+                          ..add(const NavEvent.onSearchChange(search: ''));
                         prefsBloc().add(PrefItemEvent.update(
                             prefItem: prefsBloc().toggledPrefItem(PrefItemId.navBookOrder)));
                       },
@@ -181,6 +206,9 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                           ? 'Show full name for books'
                           : 'Show abbreviated books'),
                       onTap: () {
+                        navBloc()
+                          ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
+                          ..add(const NavEvent.onSearchChange(search: ''));
                         prefsBloc().add(PrefItemEvent.update(
                             prefItem: prefsBloc().toggledPrefItem(PrefItemId.navLayout)));
                       },
@@ -199,6 +227,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                           ? 'Show full name for translations'
                           : 'Show abbreviated translations'),
                       onTap: () {
+                        navBloc().add(NavEvent.changeTabIndex(index: NavTabs.translation.index));
                         prefsBloc().add(PrefItemEvent.update(
                             prefItem:
                                 prefsBloc().toggledPrefItem(PrefItemId.translationsAbbreviated)));
@@ -208,9 +237,6 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                 ),
               );
             }));
-    navBloc()
-      ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
-      ..add(const NavEvent.onSearchChange(search: ''));
   }
 
   @override
@@ -227,9 +253,78 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             onSubmit: onSubmit,
           );
         case NavViewState.searchResults:
-          return SearchResultsView();
+          return SearchAndHistoryView();
       }
       return Container();
+    }
+
+    Widget leadingAppBarIcon(BuildContext c, NavViewState s) {
+      if (s == NavViewState.searchResults && c.bloc<SearchBloc>().state.selectionMode) {
+        return CloseButton(onPressed: _selectionMode);
+      } else if (s == NavViewState.bcvTabs) {
+        return const CloseButton();
+      } else {
+        return BackButton(onPressed: () {
+          c.bloc<NavBloc>()
+            ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
+            ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
+            ..add(const NavEvent.onSearchChange(search: ''));
+        });
+      }
+    }
+
+    Widget titleAppBar(BuildContext c, NavViewState s) {
+      if (s == NavViewState.searchResults && c.bloc<SearchBloc>().state.selectionMode) {
+        return BlocBuilder<SearchBloc, SearchState>(
+            builder: (context, state) => Text('number selected'));
+      } else {
+        return TextField(
+            onEditingComplete: onSubmit,
+            decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Enter references or keywords',
+                hintStyle: TextStyle(fontStyle: FontStyle.italic)),
+            controller: _searchController);
+      }
+    }
+
+    List<Widget> appBarActions(BuildContext c, NavState s) {
+      if (s.navViewState == NavViewState.bcvTabs) {
+        if (s.tabIndex != NavTabs.book.index) {
+          return [
+            FlatButton(
+                child: Text(
+                  'GO',
+                  style: TextStyle(color: tabColors[s.tabIndex]),
+                ),
+                onPressed: () => Navigator.of(context).maybePop(s.ref))
+          ];
+        } else {
+          return [
+            IconButton(
+              icon: const Icon(Icons.youtube_searched_for),
+              onPressed: () => c.bloc<NavBloc>()
+                ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))
+                ..add(NavEvent.changeTabIndex(index: SearchAndHistoryTabs.history.index))
+                ..add(const NavEvent.loadHistory()),
+            ),
+            IconButton(icon: const Icon(Icons.more_vert), onPressed: _moreButton)
+          ];
+        }
+      } else if (s.navViewState == NavViewState.searchResults) {
+        if (c.bloc<SearchBloc>().state.selectionMode) {
+          return [
+            IconButton(icon: const Icon(Icons.content_copy), onPressed: () {}),
+            IconButton(icon: const Icon(Icons.share), onPressed: () {})
+          ];
+        } else {
+          return [
+            IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),
+            IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
+          ];
+        }
+      }
+      return [];
     }
 
     return BlocConsumer<NavBloc, NavState>(
@@ -245,68 +340,18 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       },
       builder: (c, s) => TecScaffoldWrapper(
         child: Scaffold(
-          bottomSheet: s.navViewState == NavViewState.bcvTabs &&
-                  c.bloc<SearchBloc>().state.searchResults.isNotEmpty
-              ? Container(
-                  decoration: ShapeDecoration(
-                      color: Theme.of(c).cardColor,
-                      shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(15), topRight: Radius.circular(15)))),
-                  margin: const EdgeInsets.only(bottom: 20),
-                  height: 50,
-                  child: ListTile(
-                      trailing: const Icon(Icons.keyboard_arrow_up),
-                      onTap: () => c.bloc<NavBloc>()
-                        ..add(NavEvent.onSearchChange(search: c.bloc<SearchBloc>().state.search))
-                        ..add(const NavEvent.changeNavView(state: NavViewState.searchResults)),
-                      title: SearchResultsLabel(c.bloc<SearchBloc>().state.searchResults,
-                          navView: true)))
-              : null,
-          appBar: AppBar(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-            elevation: 5,
-            title: TextField(
-                onEditingComplete: onSubmit,
-                decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Enter references or keywords',
-                    hintStyle: TextStyle(fontStyle: FontStyle.italic)),
-                controller: _searchController),
-            titleSpacing: 0,
-            leading: s.navViewState == NavViewState.bcvTabs
-                ? const CloseButton()
-                : BackButton(
-                    onPressed: () {
-                      c.bloc<NavBloc>()
-                        ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
-                        ..add(const NavEvent.onSearchChange(search: ''));
-                    },
-                  ),
-            actions: [
-              if (s.navViewState == NavViewState.bcvTabs) ...[
-                if (s.tabIndex > NavTabs.book.index)
-                  FlatButton(
-                      child: Text(
-                        'GO',
-                        style: TextStyle(color: tabColors[s.tabIndex]),
-                      ),
-                      onPressed: () => Navigator.of(context).maybePop(s.ref))
-                else ...[
-                  IconButton(
-                    icon: const Icon(Icons.history),
-                    onPressed: () => c.bloc<NavBloc>().add(const NavEvent.loadHistory()),
-                  ),
-                  IconButton(icon: const Icon(Icons.more_horiz), onPressed: _moreButton)
-                ]
-              ] else
-                IconButton(
-                  icon: const Icon(Icons.history),
-                  onPressed: () => c.bloc<NavBloc>().add(const NavEvent.loadHistory()),
-                ),
-              if (s.navViewState == NavViewState.searchResults)
-                IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
-            ],
+          appBar: PreferredSize(
+            preferredSize: AppBar().preferredSize,
+            child: BlocBuilder<SearchBloc, SearchState>(
+              builder: (c, ss) => AppBar(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                elevation: 5,
+                title: titleAppBar(c, s.navViewState),
+                titleSpacing: 0,
+                leading: leadingAppBarIcon(c, s.navViewState),
+                actions: appBarActions(c, s),
+              ),
+            ),
           ),
           body: body(s.navViewState),
         ),

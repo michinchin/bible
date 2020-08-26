@@ -16,6 +16,7 @@ abstract class SearchResultEvent with _$SearchResultEvent {
   const factory SearchResultEvent.openInTB({BuildContext context}) = _OpenInTb;
   const factory SearchResultEvent.showContext() = _ShowInContext;
   const factory SearchResultEvent.onTranslationChange({int idx}) = _OnTranslationChange;
+  const factory SearchResultEvent.select() = _Select;
 }
 
 @freezed
@@ -24,10 +25,10 @@ abstract class SearchResultState with _$SearchResultState {
     SearchResult res,
     int verseIndex, // which of the available translations was chosen
     Map<int, Context> contextMap, // key: verseIndex, value: context text
-    bool isSelected,
     bool contextShown,
     bool contextLoading,
     bool contextError,
+    bool selected,
     String label,
     String url,
   }) = _SearchResultState;
@@ -36,18 +37,19 @@ abstract class SearchResultState with _$SearchResultState {
 class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
   final SearchResult result;
   final bool shareUrl;
+  final bool selected;
 
-  SearchResultBloc(this.result, {this.shareUrl = true});
+  SearchResultBloc(this.result, {this.shareUrl = true, this.selected = false});
   @override
   SearchResultState get initialState => SearchResultState(
       res: result,
       verseIndex: 0,
       contextMap: {},
       url: '',
-      isSelected: false,
       contextShown: false,
       contextError: false,
       contextLoading: false,
+      selected: selected,
       label: '${result.ref} ${result.verses[0].a}');
 
   String get label => state.contextShown
@@ -96,6 +98,7 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
           share: _share,
           copy: _copy,
           openInTB: _openInTB,
+          select: _select,
           onTranslationChange: _onTranslationChange,
           orElse: () => null);
       if (newState != null) {
@@ -105,6 +108,7 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
     yield state.copyWith(label: label);
   }
 
+  SearchResultState _select() => state.copyWith(selected: !state.selected);
   SearchResultState _copy(BuildContext context) {
     TecShare.copy(context, '$_textToShare${state.url}');
     return state;
