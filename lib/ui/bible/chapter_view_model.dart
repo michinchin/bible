@@ -535,21 +535,28 @@ class TecHtmlBuildHelper {
       _isInVerse = _wasInVerse;
     }
 
-    if (_isInFootnote && level <= _footnoteElementLevel) {
-      _isInFootnote = false;
-      _href = null;
-    } else if (!_isInFootnote && attrs.className.contains('FOOTNO')) {
-      _isInFootnote = true;
-      _footnoteElementLevel = level;
-      _href = attrs['href'];
-    }
+    // NOTE: footnotes and xrefs should NOT be nested
 
+    // if we are in an xref - do we need to end it?
     if (_isInXref && level <= _xrefElementLevel) {
       _isInXref = false;
       _href = null;
-    } else if (!_isInXref && attrs.className.contains('xref')) {
+    }
+
+    // if we are in a footnote - do we need to end it?
+    else if (_isInFootnote && level <= _footnoteElementLevel) {
+      _isInFootnote = false;
+      _href = null;
+    }
+
+    // do we need to start an xref or footnote
+    if (!_isInXref && attrs.className.contains('xref')) {
       _isInXref = true;
       _xrefElementLevel = level;
+      _href = attrs['href'];
+    } else if (!_isInFootnote && attrs.className.contains('FOOTNO')) {
+      _isInFootnote = true;
+      _footnoteElementLevel = level;
       _href = attrs['href'];
     }
 
