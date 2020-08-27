@@ -303,7 +303,9 @@ class __MediumFullSheetItemsState extends State<_MediumFullSheetItems> {
 class _MiniView extends StatelessWidget {
   final bool underlineMode;
   final VoidCallback onSwitchToUnderline;
+
   const _MiniView({@required this.underlineMode, @required this.onSwitchToUnderline});
+
   @override
   Widget build(BuildContext context) {
     final smallScreen = MediaQuery.of(context).size.width < 350;

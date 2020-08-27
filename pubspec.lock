@@ -313,7 +313,7 @@ packages:
       name: flutter_facebook_login
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "3.0.0+1"
+    version: "3.0.0+2"
   flutter_keyboard_visibility:
     dependency: "direct main"
     description:

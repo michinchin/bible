@@ -102,7 +102,6 @@ dependencies:
       url: http://noah.tecarta.com:8100
     version: ^2.0.8
 
-#dependency_overrides:
 #  tec_widgets:
 #    path: ../shared/tec_widgets
 #  sliding_sheet:

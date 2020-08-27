@@ -25,6 +25,7 @@ class _SnapSheetState extends State<SnapSheet> {
   ValueNotifier<double> onDragValue;
   double mediumSheetHeight;
   double miniSheetHeight;
+  double bottomPadding;
   List<double> snappings;
 
   List<double> _calculateHeightSnappings(SheetType sheetType) {
@@ -37,7 +38,7 @@ class _SnapSheetState extends State<SnapSheet> {
       androidExtraPadding = androidExtraPadding / 2;
     }
 
-    final bottomPadding = MediaQuery.of(context).padding.bottom / 2 + 10 + androidExtraPadding;
+    bottomPadding = MediaQuery.of(context).padding.bottom / 2 + 10 + androidExtraPadding;
 
     if (sheetType == SheetType.main) {
       miniSheetHeight = 50.0 + bottomPadding;
@@ -139,6 +140,7 @@ class _SnapSheetState extends State<SnapSheet> {
                   listener: (s) {
                     onDragValue.value = s.extent;
                   },
+                  closeOnBackButtonPressed: true,
                   snapSpec: SnapSpec(
                     initialSnap: snappings[s.size.index],
                     snappings: snappings,
@@ -174,7 +176,8 @@ class _SnapSheetState extends State<SnapSheet> {
                           builder: (_, value, __) {
                             final opacities = _dragOpacityValue(value);
                             return Container(
-                              height: mediumSheetHeight,
+                              // mediumSheetHeight - bottomPadding - top bar height (padding + size)
+                              height: mediumSheetHeight - bottomPadding - 15,
                               child: Stack(
                                 children: [
                                   if (opacities[0] > 0)
