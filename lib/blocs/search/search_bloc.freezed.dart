@@ -452,7 +452,7 @@ class _$SearchStateTearOff {
   _SearchState call(
       {String search,
       List<SearchResult> searchResults,
-      Map<String, bool> selected,
+      List<SearchResultInfo> selected,
       List<int> defaultTranslations,
       bool loading,
       bool error,
@@ -475,7 +475,7 @@ const $SearchState = _$SearchStateTearOff();
 mixin _$SearchState {
   String get search;
   List<SearchResult> get searchResults;
-  Map<String, bool> get selected;
+  List<SearchResultInfo> get selected;
   List<int> get defaultTranslations;
   bool get loading;
   bool get error;
@@ -491,7 +491,7 @@ abstract class $SearchStateCopyWith<$Res> {
   $Res call(
       {String search,
       List<SearchResult> searchResults,
-      Map<String, bool> selected,
+      List<SearchResultInfo> selected,
       List<int> defaultTranslations,
       bool loading,
       bool error,
@@ -520,8 +520,9 @@ class _$SearchStateCopyWithImpl<$Res> implements $SearchStateCopyWith<$Res> {
       searchResults: searchResults == freezed
           ? _value.searchResults
           : searchResults as List<SearchResult>,
-      selected:
-          selected == freezed ? _value.selected : selected as Map<String, bool>,
+      selected: selected == freezed
+          ? _value.selected
+          : selected as List<SearchResultInfo>,
       defaultTranslations: defaultTranslations == freezed
           ? _value.defaultTranslations
           : defaultTranslations as List<int>,
@@ -543,7 +544,7 @@ abstract class _$SearchStateCopyWith<$Res>
   $Res call(
       {String search,
       List<SearchResult> searchResults,
-      Map<String, bool> selected,
+      List<SearchResultInfo> selected,
       List<int> defaultTranslations,
       bool loading,
       bool error,
@@ -574,8 +575,9 @@ class __$SearchStateCopyWithImpl<$Res> extends _$SearchStateCopyWithImpl<$Res>
       searchResults: searchResults == freezed
           ? _value.searchResults
           : searchResults as List<SearchResult>,
-      selected:
-          selected == freezed ? _value.selected : selected as Map<String, bool>,
+      selected: selected == freezed
+          ? _value.selected
+          : selected as List<SearchResultInfo>,
       defaultTranslations: defaultTranslations == freezed
           ? _value.defaultTranslations
           : defaultTranslations as List<int>,
@@ -603,7 +605,7 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
   @override
   final List<SearchResult> searchResults;
   @override
-  final Map<String, bool> selected;
+  final List<SearchResultInfo> selected;
   @override
   final List<int> defaultTranslations;
   @override
@@ -677,7 +679,7 @@ abstract class _SearchState implements SearchState {
   const factory _SearchState(
       {String search,
       List<SearchResult> searchResults,
-      Map<String, bool> selected,
+      List<SearchResultInfo> selected,
       List<int> defaultTranslations,
       bool loading,
       bool error,
@@ -688,7 +690,7 @@ abstract class _SearchState implements SearchState {
   @override
   List<SearchResult> get searchResults;
   @override
-  Map<String, bool> get selected;
+  List<SearchResultInfo> get selected;
   @override
   List<int> get defaultTranslations;
   @override

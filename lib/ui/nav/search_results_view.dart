@@ -1,3 +1,4 @@
+import 'package:bible/models/search/context.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
-import '../../blocs/search/search_result_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/search_result.dart';
@@ -68,7 +68,23 @@ class HistoryView extends StatelessWidget {
   }
 }
 
-class SearchResultsView extends StatelessWidget {
+class SearchResultsView extends StatefulWidget {
+  @override
+  _SearchResultsViewState createState() => _SearchResultsViewState();
+}
+
+class _SearchResultsViewState extends State<SearchResultsView> {
+  // void onSelected(SearchResult searchResult, {bool selected}) {
+  //   final includeShareLink = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+  //   if (selected) {
+  //     context.bloc<SearchBloc>().addSelected();
+  //   } else {
+  //     context.bloc<SearchBloc>().removeSelected;
+  //   }
+
+  //   updateSelected
+  // }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SearchBloc, SearchState>(builder: (context, state) {
@@ -86,22 +102,22 @@ class SearchResultsView extends StatelessWidget {
       return SafeArea(
         bottom: false,
         child: Scaffold(
-          body: ListView.builder(
-            addAutomaticKeepAlives: false,
+          body: ListView.separated(
             itemCount: state.searchResults.length + 1,
+            separatorBuilder: (c, i) {
+              if (i == 0) {
+                return const SizedBox(height: 0);
+              }
+              i--;
+              return const Divider(height: 5);
+            },
             itemBuilder: (c, i) {
               if (i == 0) {
                 return SearchResultsLabel(state.searchResults);
               }
               i--;
               final res = state.searchResults[i];
-              return BlocProvider(
-                  create: (_) => SearchResultBloc(
-                        res,
-                        shareUrl:
-                            context.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink),
-                      ),
-                  child: const _SearchResultCard());
+              return _SearchResultCard(res);
             },
           ),
         ),
@@ -111,145 +127,230 @@ class SearchResultsView extends StatelessWidget {
 }
 
 class _SearchResultCard extends StatefulWidget {
-  const _SearchResultCard();
+  final SearchResult res;
+  const _SearchResultCard(this.res);
 
   @override
   __SearchResultCardState createState() => __SearchResultCardState();
 }
 
 class __SearchResultCardState extends State<_SearchResultCard> {
+  bool _expanded;
+  bool _contextShown;
+  bool _selected;
+  int _verseIndex;
+  // Map<int, Context> _contextMap;
+  // Future<Context> _contextFuture;
+
+  @override
+  void initState() {
+    _expanded = false;
+    _contextShown = false;
+    _selected = false;
+    _verseIndex = 0;
+    super.initState();
+  }
+
+  void _changeTranslation(int verseIndex) {
+    setState(() {
+      _verseIndex = verseIndex;
+    });
+  }
+
+  void _onContext() async {
+    // _contextFuture ??= Context.fetch(
+    //   translation: widget.res.verses[_verseIndex].id,
+    //   book: widget.res.bookId,
+    //   chapter: widget.res.chapterId,
+    //   verse: widget.res.verseId,
+    //   content: widget.res.verses[_verseIndex].verseContent,
+    // );
+    TecToast.show(context, 'in progress');
+    setState(() {
+      _contextShown = !_contextShown;
+    });
+  }
+
+  void _onExpanded() {
+    setState(() {
+      _expanded = !_expanded;
+    });
+  }
+
+  void _onShare() {
+    TecToast.show(context, 'in progress');
+  }
+
+  void _onCopy() {
+    TecToast.show(context, 'in progress');
+  }
+
+  void _openInTB() {
+    Navigator.of(context)
+        .pop(Reference.fromHref(widget.res.href, volume: widget.res.verses[_verseIndex].id));
+    tec.dmPrint('Navigating to verse: ${widget.res.href}');
+  }
+
+  void _onListTileTap() {
+    final selectionMode = context.bloc<SearchBloc>().state.selectionMode;
+    if (selectionMode) {
+      setState(() {
+        _selected = !_selected;
+      });
+    } else {
+      _onExpanded();
+    }
+  }
+
+  String get _label =>
+      //  _contextShown && _context != null
+      // ? '${widget.res.ref.split(':')[0]}:'
+      // '${_context.initialVerse}-${_context.finalVerse}'
+      // ' ${widget.res.verses[_verseIndex].a}'
+      // :
+      '${widget.res.ref} ${widget.res.verses[_verseIndex].a}';
+  String get _currentText =>
+      // _contextShown && _context != null
+      // ? _context.text
+      // :
+      widget.res.verses[_verseIndex].verseContent;
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SearchResultBloc, SearchResultState>(
-      builder: (c, s) => TecCard(
-        color: Theme.of(context).cardColor,
-        padding: 10,
-        builder: (c) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Theme(
-              data: Theme.of(c).copyWith(
-                  dividerColor: Colors.transparent,
-                  accentColor: Theme.of(c).textColor,
-                  iconTheme: Theme.of(c).iconTheme.copyWith(color: Theme.of(c).textColor)),
-              child: ExpansionTile(
-                  // leading: selectionMode
-                  //     ? IconButton(
-                  //         icon: s.selected
-                  //             ? Icon(
-                  //                 Icons.check_circle_outline,
-                  //                 color: Theme.of(c).accentColor,
-                  //               )
-                  //             : Icon(Icons.panorama_fish_eye),
-                  //         onPressed: () {
-                  //           c.bloc<SearchResultBloc>().add(const SearchResultEvent.select());
-                  //           c.bloc<SearchBloc>().add(SearchEvent.selectResult(searchResult: s.res));
-                  //         })
-                  //     : null,
-                  title: Text(
-                    s?.label ?? '',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  childrenPadding: EdgeInsets.zero,
-                  subtitle: s.contextLoading
-                      ? const LoadingIndicator()
-                      : TecText.rich(TextSpan(
-                          children: searchResTextSpans(c.bloc<SearchResultBloc>().currentText,
-                              c.bloc<SearchBloc>().state.search))),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            icon: RotatedBox(
-                                quarterTurns: 1,
-                                child:
-                                    Icon(s.contextShown ? Icons.unfold_less : Icons.unfold_more)),
-                            onPressed: () => c
-                                .bloc<SearchResultBloc>()
-                                .add(const SearchResultEvent.showContext()),
-                          ),
-                          ButtonBar(
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  FeatherIcons.copy,
-                                  size: 20,
-                                ),
-                                onPressed: () => c
-                                    .bloc<SearchResultBloc>()
-                                    .add(SearchResultEvent.copy(context: c)),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  FeatherIcons.share,
-                                  size: 20,
-                                ),
-                                onPressed: () =>
-                                    c.bloc<SearchResultBloc>().add(const SearchResultEvent.share()),
-                              ),
-                              IconButton(
-                                icon: const Icon(TecIcons.tbOutlineLogo),
-                                onPressed: () => c
-                                    .bloc<SearchResultBloc>()
-                                    .add(SearchResultEvent.openInTB(context: c)),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _TranslationSelector(),
-                        ]),
-                  ])),
+    final textColor = _selected ? Theme.of(context).accentColor : Theme.of(context).textColor;
+    Widget content() => Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: TecText.rich(
+          TextSpan(
+              children: searchResTextSpans(
+                _currentText,
+                context.bloc<SearchBloc>().state.search,
+              ),
+              style: TextStyle(color: textColor)),
+        ));
+    Widget label() => Padding(
+        padding: const EdgeInsets.only(top: 10.0, bottom: 5),
+        child: Text(_label, style: TextStyle(color: textColor, fontWeight: FontWeight.w500)));
+
+    if (!_expanded) {
+      return ListTile(
+        title: label(),
+        subtitle: content(),
+        onTap: _onListTileTap,
+        trailing: IconButton(
+          tooltip: 'Expand Card',
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          alignment: Alignment.bottomRight,
+          padding: const EdgeInsets.all(0),
+          icon: const Icon(Icons.expand_more),
+          onPressed: _onExpanded,
         ),
-      ),
-    );
+      );
+    } else {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: label(),
+            subtitle: content(),
+            onTap: _onListTileTap,
+            trailing: IconButton(
+              tooltip: 'Collapse Card',
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              alignment: Alignment.bottomRight,
+              padding: const EdgeInsets.all(0),
+              icon: const Icon(Icons.expand_less),
+              onPressed: _onExpanded,
+            ),
+          ),
+          Stack(children: [
+            ButtonBar(alignment: MainAxisAlignment.start, children: [
+              FlatButton(
+                child: Text('Context',
+                    semanticsLabel: _contextShown ? 'Collapse Context' : 'Expand Context'),
+                onPressed: _onContext,
+              ),
+            ]),
+            ButtonBar(
+              children: <Widget>[
+                IconButton(
+                    tooltip: 'Copy',
+                    icon: const Icon(Icons.content_copy, size: 20),
+                    onPressed: _onCopy),
+                IconButton(
+                    tooltip: 'Share',
+                    icon: const Icon(FeatherIcons.share2, size: 20),
+                    onPressed: _onShare),
+                IconButton(
+                    tooltip: 'Open in TecartaBible',
+                    icon: const Icon(TecIcons.tbOutlineLogo),
+                    onPressed: _openInTB),
+              ],
+            ),
+          ]),
+          _TranslationSelector(widget.res, _changeTranslation)
+        ],
+      );
+    }
   }
 }
 
-class _TranslationSelector extends StatelessWidget {
+class _TranslationSelector extends StatefulWidget {
+  final SearchResult res;
+  final Function(int) changeTranslation;
+  const _TranslationSelector(this.res, this.changeTranslation);
+  @override
+  __TranslationSelectorState createState() => __TranslationSelectorState();
+}
+
+class __TranslationSelectorState extends State<_TranslationSelector> {
+  int verseIndex;
+  @override
+  void initState() {
+    verseIndex = 0;
+    super.initState();
+  }
+
+  void _changeTranslation(int i) {
+    widget.changeTranslation(i);
+    setState(() {
+      verseIndex = i;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // ignore: close_sinks
-    final bloc = context.bloc<SearchResultBloc>();
-    final textColor = Theme.of(context).textColor;
     final selectedTextColor =
         Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black;
-    final isSelected = context.bloc<SearchBloc>().isSelected(bloc.state.res);
     final allButton = ButtonTheme(
         minWidth: 50,
         child: Semantics(
           container: true,
           label: 'View all translations',
           child: FlatButton(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
             child: const Text('ALL'),
-            onPressed: () => showCompareSheet(context, Reference.fromHref(bloc.state.res.href)),
-            textColor: isSelected ? textColor : selectedTextColor,
-            splashColor: isSelected ? Colors.transparent : Theme.of(context).accentColor,
+            onPressed: () => showCompareSheet(context, Reference.fromHref(widget.res.href)),
+            textColor: selectedTextColor,
+            splashColor: Theme.of(context).accentColor,
           ),
         ));
 
     final buttons = <ButtonTheme>[];
-    final verses = bloc.state.res.verses;
+    final verses = widget.res.verses;
     for (var i = 0; i < verses.length; i++) {
       final each = verses[i];
       Color buttonColor;
       Color textColor;
-      final curr = bloc.state.res.verses[bloc.state.verseIndex].id;
-      if (isSelected) {
-        buttonColor = curr == each.id ? Theme.of(context).cardColor : Theme.of(context).accentColor;
-        textColor = curr == each.id ? textColor : selectedTextColor;
-      } else {
-        buttonColor = curr == each.id ? Theme.of(context).accentColor : Colors.transparent;
-        textColor = curr == each.id ? Theme.of(context).cardColor : selectedTextColor;
-      }
+      final curr = widget.res.verses[verseIndex].id;
+
+      buttonColor = curr == each.id ? Theme.of(context).accentColor : Colors.transparent;
+      textColor = curr == each.id ? Theme.of(context).cardColor : selectedTextColor;
 
       buttons.add(ButtonTheme(
         minWidth: 50,
@@ -257,19 +358,23 @@ class _TranslationSelector extends StatelessWidget {
           container: true,
           label: curr == each.id ? '${each.a} selected' : 'Select ${each.a}',
           child: FlatButton(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
             child: Text(each.a),
             textColor: textColor,
             color: buttonColor, //currently chosen, pass tag
-            onPressed: () => bloc.add(SearchResultEvent.onTranslationChange(idx: i)),
+            onPressed: () => _changeTranslation(i),
           ),
         ),
       ));
     }
 
     return Padding(
-      padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-      child: Wrap(alignment: WrapAlignment.spaceAround, children: buttons..add(allButton)),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        children: buttons..add(allButton),
+      ),
     );
   }
 }

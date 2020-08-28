@@ -11,7 +11,7 @@ part 'search_bloc.freezed.dart';
 abstract class SearchEvent with _$SearchEvent {
   const factory SearchEvent.request({String search, List<int> translations}) = _Requested;
   const factory SearchEvent.selectionModeToggle() = _SelectionMode;
-  const factory SearchEvent.selectResult({SearchResult searchResult}) = _SelectResult;
+  // const factory SearchEvent.selectResult({SearchResult searchResult}) = _SelectResult;
 }
 
 @freezed
@@ -19,7 +19,7 @@ abstract class SearchState with _$SearchState {
   const factory SearchState({
     String search,
     List<SearchResult> searchResults,
-    Map<String, bool> selected,
+    // List<int> selected,
     List<int> defaultTranslations,
     bool loading,
     bool error,
@@ -32,13 +32,11 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   SearchState get initialState => const SearchState(
       search: '',
       searchResults: [],
-      selected: {},
+      // selected: [],
       defaultTranslations: [],
       loading: false,
       error: false,
       selectionMode: false);
-
-  bool isSelected(SearchResult res) => state.selected[res.ref] ?? false;
 
   @override
   Stream<SearchState> mapEventToState(SearchEvent event) async* {
@@ -67,20 +65,20 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       }
     } else if (event is _SelectResult) {
       final ref = event.searchResult.ref;
-      final selected = Map<String, bool>.from(state.selected);
-      if (selected.containsKey(ref)) {
-        selected[ref] = !selected[ref];
-      } else {
-        selected[ref] = true;
-      }
-      tec.dmPrint('${(selected[ref] ? 'Selected' : 'Deselected')}' ' $ref');
-      yield state.copyWith(selected: selected);
+      // final selected = Map<String, bool>.from(state.selected);
+      // if (selected.containsKey(ref)) {
+      //   selected[ref] = !selected[ref];
+      // } else {
+      //   selected[ref] = true;
+      // }
+      // tec.dmPrint('${(selected[ref] ? 'Selected' : 'Deselected')}' ' $ref');
+      // yield state.copyWith(selected: selected);
     } else if (event is _SelectionMode) {
       tec.dmPrint('Selection Mode in search: ${!state.selectionMode ? 'ON' : 'OFF'}');
       if (!state.selectionMode) {
         yield state.copyWith(selectionMode: !state.selectionMode);
       } else {
-        yield state.copyWith(selectionMode: !state.selectionMode, selected: {});
+        yield state.copyWith(selectionMode: !state.selectionMode, selected: []);
       }
     }
   }
@@ -90,4 +88,10 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   //   final item = UserItemHelper.searchHistoryItem(search);
   //   await AppSettings.shared.userAccount.userDb.saveItem(item);
   // }
+}
+
+class SearchResultInfo {
+  final bool contextExpanded;
+  final int currentVerseIndex;
+  const SearchResultInfo({this.contextExpanded, this.currentVerseIndex});
 }

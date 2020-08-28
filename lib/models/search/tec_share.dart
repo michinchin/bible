@@ -21,7 +21,7 @@ class TecShare {
 
     shortUrl = await tec.shortenUrl(url);
 
-    tec.dmPrint('Share url: $url\nShort url: $shortUrl');
+    // tec.dmPrint('Share url: $url\nShort url: $shortUrl');
     return shortUrl.isNotEmpty ? '\n$shortUrl' : '';
   }
 

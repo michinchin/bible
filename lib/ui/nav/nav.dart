@@ -148,12 +148,11 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   void _selectionMode() {
-    TecToast.show(context, 'Coming soon ;)');
-    // final selectionModeOn = !context.bloc<SearchBloc>().state.selectionMode;
-    // if (selectionModeOn) {
-    //   TecToast.show(context, 'Entered Selection Mode');
-    // }
-    // context.bloc<SearchBloc>().add(const SearchEvent.selectionModeToggle());
+    final selectionModeOn = !context.bloc<SearchBloc>().state.selectionMode;
+    if (selectionModeOn) {
+      TecToast.show(context, 'Entered Selection Mode');
+    }
+    context.bloc<SearchBloc>().add(const SearchEvent.selectionModeToggle());
   }
 
   Future<void> _translation() async {
@@ -274,10 +273,15 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       }
     }
 
-    Widget titleAppBar(BuildContext c, NavViewState s) {
+    Widget titleAppBar(BuildContext c, NavViewState s, SearchState ss) {
       if (s == NavViewState.searchResults && c.bloc<SearchBloc>().state.selectionMode) {
-        return BlocBuilder<SearchBloc, SearchState>(
-            builder: (context, state) => Text('number selected'));
+        final length = ss.selected.length;
+        return Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '$length',
+              style: Theme.of(context).textTheme.bodyText1,
+            ));
       } else {
         return TextField(
             onEditingComplete: onSubmit,
@@ -320,7 +324,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           ];
         } else {
           return [
-            IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),
+            // IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),
             IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
           ];
         }
@@ -347,7 +351,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
               builder: (c, ss) => AppBar(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                 elevation: 5,
-                title: titleAppBar(c, s.navViewState),
+                backgroundColor: Theme.of(context).cardColor,
+                title: titleAppBar(c, s.navViewState, ss),
                 titleSpacing: 0,
                 leading: leadingAppBarIcon(c, s.navViewState),
                 actions: appBarActions(c, s),
