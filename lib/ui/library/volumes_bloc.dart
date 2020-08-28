@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:pedantic/pedantic.dart';
+import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart' as vol;
 
@@ -18,7 +19,25 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
   final tec.KeyValueStore _kvStore;
   final VolumesFilter defaultFilter;
 
-  VolumesBloc({this.defaultFilter, this.key, tec.KeyValueStore kvStore}) : _kvStore = kvStore;
+  StreamSubscription<UserDbChange> _userDbChangeSubscription;
+
+  VolumesBloc({this.defaultFilter, this.key, tec.KeyValueStore kvStore}) : _kvStore = kvStore {
+    _userDbChangeSubscription =
+        AppSettings.shared.userAccount.userDbChangeStream.listen(_userDbChangeListener);
+  }
+
+  Future<void> _userDbChangeListener(UserDbChange change) async {
+    if (change.includesItemType(UserItemType.license)) {
+      unawaited(refresh());
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _userDbChangeSubscription?.cancel();
+    _userDbChangeSubscription = null;
+    return super.close();
+  }
 
   @override
   VolumesState get initialState {
@@ -108,7 +127,7 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
       }
     }
 
-    final owned = filter.ownershipStatus == OwnershipStatus.any
+    final owned = !cacheLicensedIds && filter.ownershipStatus == OwnershipStatus.any
         ? null
         : await AppSettings.shared.userAccount.userDb.fullyLicensedVolumesInList(ids);
     final ownedSet = owned == null ? <int>{} : owned.toSet();

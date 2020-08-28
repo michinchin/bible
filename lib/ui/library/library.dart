@@ -334,8 +334,8 @@ class _VolumesListState extends State<_VolumesList> {
     );
   }
 
-  void _refresh(VoidCallback fn) {
-    if (mounted) setState(fn);
+  void _refresh([VoidCallback fn]) {
+    if (mounted) setState(fn ?? () {});
   }
 
   void _toggle(int id) {
@@ -375,7 +375,7 @@ class _VolumesListState extends State<_VolumesList> {
                     return VolumeCard(
                       volume: volume,
                       trailing: !widget.allowMultipleSelections
-                          ? _buildActionForVolume(context, volume)
+                          ? _VolumeActionButton(volume: volume)
                           : Checkbox(
                               value: widget.selectedVolumes.contains(volume.id),
                               onChanged: (checked) => _toggle(volume.id),
@@ -399,33 +399,23 @@ class _VolumesListState extends State<_VolumesList> {
       ],
     );
   }
+}
 
-  void _pushDetailView(BuildContext context, Volume volume) {
-    Navigator.of(context)
-        .push<void>(MaterialPageRoute(builder: (context) => VolumeDetail(volume: volume)));
-  }
+void _pushDetailView(BuildContext context, Volume volume) {
+  Navigator.of(context)
+      .push<void>(MaterialPageRoute(builder: (context) => VolumeDetail(volume: volume)));
+}
 
-  void _onActionTap(DownloadsBloc bloc, DownloadItem item) {
-    assert(item != null);
-    if (item.status == DownloadStatus.undefined ||
-        item.status == DownloadStatus.failed ||
-        item.status == DownloadStatus.canceled) {
-      bloc?.requestDownload(item.volumeId);
-    } else if (item.status == DownloadStatus.running) {
-      bloc?.pauseDownload(item.volumeId);
-    } else if (item.status == DownloadStatus.paused) {
-      bloc?.resumeDownload(item.volumeId);
-      // } else if (item.status == DownloadStatus.complete) {
-      //   bloc?.delete(item);
-      // } else if (item.status == DownloadStatus.failed) {
-      //   bloc?.retryDownload(item);
-    }
-  }
+class _VolumeActionButton extends StatelessWidget {
+  final Volume volume;
 
-  Widget _buildActionForVolume(BuildContext context, Volume volume) {
+  const _VolumeActionButton({Key key, this.volume}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     final bloc = context.bloc<DownloadsBloc>(); // ignore: close_sinks
     assert(bloc != null);
-    if (bloc == null || !bloc.supportsDownloading) return null;
+    if (bloc == null || !bloc.supportsDownloading) return Container();
 
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final item = bloc.state.items[volume.id];
@@ -502,7 +492,24 @@ class _VolumesListState extends State<_VolumesList> {
         ],
       );
     } else {
-      return null;
+      return Container();
+    }
+  }
+
+  void _onActionTap(DownloadsBloc bloc, DownloadItem item) {
+    assert(item != null);
+    if (item.status == DownloadStatus.undefined ||
+        item.status == DownloadStatus.failed ||
+        item.status == DownloadStatus.canceled) {
+      bloc?.requestDownload(item.volumeId);
+    } else if (item.status == DownloadStatus.running) {
+      bloc?.pauseDownload(item.volumeId);
+    } else if (item.status == DownloadStatus.paused) {
+      bloc?.resumeDownload(item.volumeId);
+      // } else if (item.status == DownloadStatus.complete) {
+      //   bloc?.delete(item);
+      // } else if (item.status == DownloadStatus.failed) {
+      //   bloc?.retryDownload(item);
     }
   }
 }

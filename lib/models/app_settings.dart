@@ -135,3 +135,7 @@ class _KVStore with tua.UserAccountKVStore {
     return tec.Prefs.shared.setString(key, value);
   }
 }
+
+extension TecDeviceInfoExt on tec.DeviceInfo {
+  bool get isSimulator => productName.contains('Simulator');
+}

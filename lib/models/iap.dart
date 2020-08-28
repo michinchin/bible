@@ -1,220 +1,253 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-// import '../screens/choose_plan_screen.dart';
-// import 'app_bloc.dart';
+export 'package:in_app_purchase/in_app_purchase.dart' show IAPError, ProductDetails;
+
+typedef InAppPurchaseHandler = Future<void> Function(
+    String inAppId, bool isRestoration, IAPError error);
 
 class InAppPurchases {
+  static InAppPurchases get shared => _iap;
   static InAppPurchases _iap;
-  StreamSubscription<List<PurchaseDetails>> _subscription;
-  Future<void> Function(String inAppId, bool restoration) _purchaseHandler;
-  BuildContext _context;
-  PurchaseDetails _pendingPurchase;
-  BehaviorSubject<int> _inappUpdate;
 
-  static void init(BuildContext context,
-      Future<void> Function(String inAppId, bool restoration) purchaseHandler) {
-    _iap ??= InAppPurchases(purchaseHandler);
-    _iap._inappUpdate = BehaviorSubject<int>.seeded(0);
-    _iap._context = context;
+  static void init() {
+    _iap ??= InAppPurchases._();
   }
 
-  static void restorePurchases() {
-    if (_iap != null) {
-      _iap._restorePurchases();
-    }
-  }
-
-  static void purchase(String productId,
-      {bool consumable = true}) {
-    if (_iap != null) {
-      _iap._purchase(productId, consumable);
-    }
-  }
-
-  static Stream<int> inAppUpdateStream() {
-    if (_iap != null) {
-      return _iap._inappUpdate.stream;
-    }
-
-    return null;
-  }
-
-  Future<void> _purchase(String productId,
-      bool consumable) async {
-    final available = await InAppPurchaseConnection.instance.isAvailable();
-
-    if (available) {
-      //ignore: prefer_collection_literals
-      final ids = <String>[productId].toSet();
-
-      final response =
-          await InAppPurchaseConnection.instance.queryProductDetails(ids);
-
-      if (response.notFoundIDs.isNotEmpty) {
-        tec.dmPrint('Could not retrieve products');
-        return;
+  InAppPurchases._() {
+    InAppPurchaseConnection.enablePendingPurchases();
+    _subscription =
+        InAppPurchaseConnection.instance.purchaseUpdatedStream.listen(_handlePurchaseUpdates);
+    InAppPurchaseConnection.instance.isAvailable().then((available) {
+      if (!available) {
+        tec.dmPrint('WARNING: Unable to initialize in-app purchases.');
       }
-
-      final purchaseParam = PurchaseParam(
-          productDetails: response.productDetails.first,
-          sandboxTesting: false);
-
-      try {
-        if (consumable) {
-          await InAppPurchaseConnection.instance
-              .buyConsumable(purchaseParam: purchaseParam);
-        } else {
-          await InAppPurchaseConnection.instance
-              .buyNonConsumable(purchaseParam: purchaseParam);
-        }
-      }
-      catch (e) {
-        if (e.code == 'storekit_duplicate_product_object') {
-          await tecShowSimpleAlertDialog<bool>(
-            context: _context,
-            title: 'In-app Purchase',
-            content: 'There is a duplicate inapp purchase with the current account :(',
-            useRootNavigator: false,
-            actions: <Widget>[
-              TecDialogButton(
-                child: const Text('Ok'),
-                onPressed: () => Navigator.of(_context).pop(false),
-              ),
-            ],
-          );
-        }
-      }
-    }
+    });
   }
 
   void dispose() {
     _subscription?.cancel();
     _subscription = null;
-
     _inappUpdate?.close();
     _inappUpdate = null;
   }
 
-  InAppPurchases(
-      Future<void> Function(String inAppId, bool restoration) purchaseHandler) {
-    _purchaseHandler = purchaseHandler;
-    InAppPurchaseConnection.enablePendingPurchases();
+  BehaviorSubject<int> _inappUpdate = BehaviorSubject<int>.seeded(0);
+  StreamSubscription<List<PurchaseDetails>> _subscription;
 
-    final purchaseUpdates =
-        InAppPurchaseConnection.instance.purchaseUpdatedStream;
-    _subscription = purchaseUpdates.listen(_handlePurchaseUpdates);
-
-    InAppPurchaseConnection.instance.isAvailable().then((available) {
-      if (!available) {
-        tec.dmPrint('Unable to initialize in-apps...');
-        return;
-      }
-    });
+  Future<ProductDetails> detailsWithProduct(String productId) async {
+    final response = await InAppPurchaseConnection.instance.queryProductDetails({productId});
+    return (response?.productDetails?.isEmpty ?? true) ? null : response.productDetails.first;
   }
 
-  Future<void> _restorePurchases() async {
-    if (!await InAppPurchaseConnection.instance.isAvailable()) {
-      return;
+  Future<void> purchase(
+    BuildContext context,
+    InAppPurchaseHandler purchaseHandler,
+    String productId, {
+    bool consumable = false,
+    bool simulatePurchase = false,
+  }) async {
+    assert(context != null && purchaseHandler != null && tec.isNotNullOrEmpty(productId));
+
+    if (!(await InAppPurchaseConnection.instance.isAvailable())) {
+      tec.dmPrint('WARNING: Cannot purchase $productId, the in-app purchase lib is not available.');
+      unawaited(purchaseHandler?.call(
+          productId,
+          false,
+          IAPError(
+              source: null, code: null, message: 'In-app purchase connection is unavailable.')));
+      return; //------------------------------------------------------------>
+    }
+
+    final ids = {productId};
+    final response = await InAppPurchaseConnection.instance.queryProductDetails(ids);
+    if (response.notFoundIDs.isNotEmpty) {
+      tec.dmPrint('ERROR: InAppPurchases queryProductDetails($productId) failed.');
+      unawaited(purchaseHandler?.call(
+          productId,
+          false,
+          IAPError(
+              source: null,
+              code: null,
+              message: 'In-app purchase for $productId does not exist.')));
+      return; //------------------------------------------------------------>
+    }
+
+    final purchaseParam =
+        PurchaseParam(productDetails: response.productDetails.first, sandboxTesting: kDebugMode);
+
+    if (simulatePurchase) {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      unawaited(purchaseHandler?.call(productId, false, null));
+      return; //------------------------------------------------------------>
+    }
+
+    _purchaseHandler = purchaseHandler;
+
+    try {
+      if (consumable) {
+        await InAppPurchaseConnection.instance.buyConsumable(purchaseParam: purchaseParam);
+      } else {
+        await InAppPurchaseConnection.instance.buyNonConsumable(purchaseParam: purchaseParam);
+      }
+    } catch (e) {
+      if (e.code == 'storekit_duplicate_product_object') {
+        await tecShowSimpleAlertDialog<bool>(
+          context: context,
+          title: 'In-app Purchase',
+          content: 'There is a duplicate in-app purchase with the current account :(',
+          useRootNavigator: false,
+          actions: <Widget>[
+            TecDialogButton(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+          ],
+        );
+      }
+
+      unawaited(_purchaseHandler?.call(
+          productId,
+          false,
+          IAPError(
+              source: null,
+              code: null,
+              message: 'In-app purchase for $productId failed with error: $e')));
+      _purchaseHandler = null;
+    }
+  }
+
+  Future<void> restorePurchases(
+    BuildContext context,
+    InAppPurchaseHandler purchaseHandler,
+  ) async {
+    assert(context != null && purchaseHandler != null);
+
+    if (!(await InAppPurchaseConnection.instance.isAvailable())) {
+      tec.dmPrint('WARNING: Cannot restore purchases, the in-app purchase lib is not available.');
+      unawaited(purchaseHandler?.call(
+          null,
+          true,
+          IAPError(
+              source: null, code: null, message: 'In-app purchase connection is unavailable.')));
+      return; //------------------------------------------------------------>
     }
 
     final response = await InAppPurchaseConnection.instance.queryPastPurchases();
-
     if (response.error != null) {
-      if (Platform.isIOS) {
-        final message =
-            response.error.details['NSLocalizedDescription'].toString();
-
+      if (tec.platformIs(tec.Platform.iOS)) {
+        final message = response.error.details['NSLocalizedDescription'].toString();
         await tecShowSimpleAlertDialog<bool>(
-          context: _context,
+          context: context,
           content: message,
           useRootNavigator: false,
           actions: <Widget>[
             TecDialogButton(
-              child: const Text('Ok'),
-              onPressed: () => Navigator.of(_context).pop(false),
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(false),
             ),
           ],
         );
       } else {
-        tec.dmPrint('Unable to restore purchases...');
+        tec.dmPrint('ERROR restoring purchases: ${response.error}');
       }
-    } else {
-      await _handlePurchaseUpdates(response.pastPurchases, restoration: true);
 
-      if (Platform.isIOS) {
+      unawaited(purchaseHandler?.call(null, true, response.error));
+    } else {
+      _purchaseHandler = purchaseHandler;
+      await _handlePurchaseUpdates(response.pastPurchases, isRestoration: true);
+      _purchaseHandler = null;
+
+      if (tec.platformIs(tec.Platform.iOS)) {
         if (response.pastPurchases.isEmpty) {
           await tecShowSimpleAlertDialog<bool>(
-            context: _context,
-            content: 'The App Store didn\'t find any purchases to restore.',
+            context: context,
+            content: 'The App Store did not find any purchases to restore.',
             useRootNavigator: false,
             actions: <Widget>[
               TecDialogButton(
-                child: const Text('Ok'),
-                onPressed: () => Navigator.of(_context).pop(false),
+                child: const Text('OK'),
+                onPressed: () => Navigator.of(context).pop(false),
               ),
             ],
           );
-        } else {
-          // TODO(ron): ...
-          // await navigatorPush(_context, (context) => const ChoosePlanScreen(),
-          //     rootNavigator: true, arguments: ChoosePlanScreen.booksTab);
         }
       }
     }
   }
 
-  Future<void> _handlePurchaseUpdates(List<PurchaseDetails> purchaseDetails,
-      {bool restoration = false}) async  {
-    var updateListeners = false;
+  InAppPurchaseHandler _purchaseHandler;
+  PurchaseDetails _pendingPurchase;
 
+  Future<void> _handlePurchaseUpdates(
+    List<PurchaseDetails> purchaseDetails, {
+    bool isRestoration = false,
+  }) async {
+    var clearPurchaseHandler = false;
     for (final details in purchaseDetails) {
-      if (restoration) {
-        // restoring purchases
-        if (_purchaseHandler != null) {
-          await _purchaseHandler(details.productID, restoration);
+      final productId = details.productID;
+      if (isRestoration) {
+        if (details.status == PurchaseStatus.purchased) {
+          clearPurchaseHandler = true;
+          if (_purchaseHandler != null) {
+            await _purchaseHandler(productId, isRestoration, null);
+          } else {
+            tec.dmPrint('ERROR: While restoring $productId, _purchaseHandler is null!');
+          }
         }
-      }
-      else {
+      } else {
         switch (details.status) {
           case PurchaseStatus.pending:
-            // possibly show busy cursor here
             _pendingPurchase = details;
             break;
 
           case PurchaseStatus.purchased:
-            updateListeners = true;
-
-            if (_purchaseHandler != null) {
-              await _purchaseHandler(details.productID,
-                  Platform.isIOS && _pendingPurchase == null);
-            }
+            clearPurchaseHandler = true;
 
             if (details.pendingCompletePurchase) {
               await InAppPurchaseConnection.instance.completePurchase(details);
             }
+
+            if (_purchaseHandler != null) {
+              await _purchaseHandler(
+                  productId, tec.platformIs(tec.Platform.iOS) && _pendingPurchase == null, null);
+            } else {
+              tec.dmPrint('ERROR: While purchasing $productId, _purchaseHandler is null!');
+            }
+
             _pendingPurchase = null;
+            _inappUpdate.add(_inappUpdate.value + 1);
             break;
 
           case PurchaseStatus.error:
+            clearPurchaseHandler = true;
+
             if (details.pendingCompletePurchase) {
               await InAppPurchaseConnection.instance.completePurchase(details);
             }
+
+            tec.dmPrint('ERROR purchasing $productId: ${details.error}');
+
+            if (_purchaseHandler != null) {
+              await _purchaseHandler(productId,
+                  tec.platformIs(tec.Platform.iOS) && _pendingPurchase == null, details.error);
+            } else {
+              tec.dmPrint('ERROR: While purchasing $productId, _purchaseHandler is null!');
+            }
+
             _pendingPurchase = null;
             break;
         }
       }
     }
 
-    if (updateListeners) {
-      _inappUpdate.add(_inappUpdate.value + 1);
-    }
+    if (clearPurchaseHandler) _purchaseHandler = null;
   }
 }
