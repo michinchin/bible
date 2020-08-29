@@ -38,7 +38,7 @@ class HomeScreen extends StatelessWidget {
                 left: false,
                 right: false,
                 bottom: false,
-                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(condition: (previous, current) {
+                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(buildWhen: (previous, current) {
                   return current.rebuild == ViewManagerStateBuildInfo.build;
                 }, builder: (context, state) {
                   return _BottomSheet(
@@ -62,7 +62,7 @@ class _BottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<SelectionBloc, SelectionState>(
-      bloc: context.bloc<SelectionBloc>(),
+      cubit: context.bloc<SelectionBloc>(),
       // condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
       listener: (context, state) {
         if (state.isTextSelected) {

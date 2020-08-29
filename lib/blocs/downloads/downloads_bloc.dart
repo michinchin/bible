@@ -6,14 +6,11 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'downloads_bloc_io.dart' if (dart.library.html) 'downloads_bloc_web.dart';
 
 class DownloadsBloc extends tec.SafeBloc<DownloadsState, DownloadsState> {
-  DownloadsBloc();
+  DownloadsBloc() : super(const DownloadsState(isLoading: true, items: {}));
 
   factory DownloadsBloc.create() => DownloadsBlocImp();
 
   bool get supportsDownloading => false;
-
-  @override
-  DownloadsState get initialState => const DownloadsState(isLoading: true, items: {});
 
   @override
   Stream<DownloadsState> mapEventToState(DownloadsState event) async* {

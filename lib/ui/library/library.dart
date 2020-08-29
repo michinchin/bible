@@ -369,7 +369,7 @@ class _VolumesListState extends State<_VolumesList> {
               itemBuilder: (context, index) {
                 final volume = bloc.state.volumes[index];
                 return BlocBuilder<DownloadsBloc, DownloadsState>(
-                  condition: (previous, current) =>
+                  buildWhen: (previous, current) =>
                       previous.items[volume.id] != current.items[volume.id],
                   builder: (context, downloads) {
                     return VolumeCard(

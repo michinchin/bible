@@ -82,12 +82,7 @@ abstract class ManagedViewState with _$ManagedViewState {
 }
 
 class ManagedViewBloc extends Bloc<ManagedViewState, ManagedViewState> {
-  final ManagedViewState _initialState;
-
-  ManagedViewBloc(ManagedViewState initialState) : _initialState = initialState;
-
-  @override
-  ManagedViewState get initialState => _initialState;
+  ManagedViewBloc(ManagedViewState initialState) : super(initialState);
 
   @override
   Stream<ManagedViewState> mapEventToState(ManagedViewState event) async* {

@@ -13,7 +13,7 @@ Future<void> showVolumesFilterSheet(BuildContext context) async {
     context: context,
     barrierColor: Colors.black12,
     builder: (context) => BlocBuilder<VolumesBloc, VolumesState>(
-      bloc: bloc,
+      cubit: bloc,
       builder: (context, state) => VolumesFilterSheet(volumesBloc: bloc),
     ),
   );

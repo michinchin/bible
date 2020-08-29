@@ -39,33 +39,32 @@ abstract class NavState with _$NavState {
 
 class NavBloc extends Bloc<NavEvent, NavState> {
   final Reference initialRef;
-  NavBloc(this.initialRef);
-
-  @override
-  NavState get initialState => NavState(
-      ref: initialRef ?? Reference.fromHref('50/1/1', volume: 51),
-      tabIndex: 1,
-      search: '',
-      bookSuggestions: [],
-      wordSuggestions: [],
-      history: [],
-      navViewState: NavViewState.bcvTabs);
+  NavBloc(this.initialRef)
+      : super(NavState(
+          ref: initialRef ?? Reference.fromHref('50/1/1', volume: 51),
+          tabIndex: 1,
+          search: '',
+          bookSuggestions: [],
+          wordSuggestions: [],
+          history: [],
+          navViewState: NavViewState.bcvTabs,
+        ));
 
   @override
   Stream<NavState> mapEventToState(NavEvent event) async* {
     if (event is _LoadWordSuggestions) {
       final suggestions = await _loadWordSuggestions(event.search);
       yield state.copyWith(wordSuggestions: suggestions);
-    } else if (event is _LoadHistory){
+    } else if (event is _LoadHistory) {
       final history = await UserItemHelper.navHistoryItemsFromDb();
       tec.dmPrint('Loading nav history');
       yield state.copyWith(history: history);
-      }else {
+    } else {
       final newState = event.when(
           changeNavView: _changeNavView,
           onSearchChange: _onSearchChange,
           onSearchFinished: _onSearchFinished,
-          loadHistory: (){},
+          loadHistory: () {},
           loadWordSuggestions: (_) {},
           changeTabIndex: _changeTabIndex,
           changeState: _changeState,

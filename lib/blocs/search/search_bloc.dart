@@ -30,15 +30,16 @@ abstract class SearchState with _$SearchState {
 }
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
-  @override
-  SearchState get initialState => const SearchState(
-      search: '',
-      searchResults: [],
-      filteredBooks: [],
-      filteredTranslations: [],
-      loading: false,
-      error: false,
-      selectionMode: false);
+  SearchBloc()
+      : super(const SearchState(
+          search: '',
+          searchResults: [],
+          filteredBooks: [],
+          filteredTranslations: [],
+          loading: false,
+          error: false,
+          selectionMode: false,
+        ));
 
   @override
   Stream<SearchState> mapEventToState(SearchEvent event) async* {

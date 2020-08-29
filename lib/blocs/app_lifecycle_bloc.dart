@@ -9,6 +9,8 @@ import 'package:tec_util/tec_util.dart' as tec;
 import '../models/app_settings.dart';
 
 class AppLifecycleBloc extends Bloc<AppLifecycleState, AppLifecycleState> {
+  AppLifecycleBloc() : super(AppLifecycleState.resumed);
+
   ///
   /// The running count of times the app has been resumed (resets on app boot).
   ///
@@ -22,9 +24,6 @@ class AppLifecycleBloc extends Bloc<AppLifecycleState, AppLifecycleState> {
   ///
   Duration get pausedDuration => _pausedStopwatch.elapsed;
   final _pausedStopwatch = Stopwatch();
-
-  @override
-  AppLifecycleState get initialState => AppLifecycleState.resumed;
 
   @override
   Stream<AppLifecycleState> mapEventToState(AppLifecycleState event) async* {

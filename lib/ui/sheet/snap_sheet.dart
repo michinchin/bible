@@ -114,7 +114,7 @@ class _SnapSheetState extends State<SnapSheet> {
       child: Stack(
         children: [
           BlocBuilder<SheetManagerBloc, SheetManagerState>(
-              condition: (previous, current) => previous.type != current.type,
+              buildWhen: (previous, current) => previous.type != current.type,
               builder: (c, state) {
                 Widget miniSheet, mediumSheet;
 
@@ -158,7 +158,7 @@ class _SnapSheetState extends State<SnapSheet> {
                   color: Theme.of(context).canvasColor,
                   builder: (c, s) {
                     return BlocBuilder<SheetManagerBloc, SheetManagerState>(
-                        condition: (previous, current) {
+                        buildWhen: (previous, current) {
                           // we never want to "rebuild" the sub-tree on state changes, that is
                           // handled above as we rebuild for each type switch to allow for
                           // different snap settings for the different sheet types

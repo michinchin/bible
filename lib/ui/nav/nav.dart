@@ -193,7 +193,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                 BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
         context: context,
         builder: (c) => BlocBuilder<PrefItemsBloc, PrefItems>(
-            bloc: prefsBloc(),
+            cubit: prefsBloc(),
             builder: (context, state) {
               final items = state?.items ?? [];
               final navGridViewEnabled = items.boolForPrefItem(PrefItemId.navLayout);

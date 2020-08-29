@@ -44,8 +44,12 @@ class ChapterMarginNotesBloc extends tec.SafeBloc<MarginNotesEvent, ChapterMargi
   final bool loaded;
   StreamSubscription<UserDbChange> _userDbChangeSubscription;
 
-  ChapterMarginNotesBloc(
-      {@required this.volumeId, @required this.book, @required this.chapter, this.loaded = false}) {
+  ChapterMarginNotesBloc({
+    @required this.volumeId,
+    @required this.book,
+    @required this.chapter,
+    this.loaded = false,
+  }) : super(ChapterMarginNotes(volumeId, book, chapter, <int, MarginNote>{}, loaded: false)) {
     _initUserContent();
 
     // Start listening for changes to the db.
@@ -85,10 +89,6 @@ class ChapterMarginNotesBloc extends tec.SafeBloc<MarginNotesEvent, ChapterMargi
       _initUserContent();
     }
   }
-
-  @override
-  ChapterMarginNotes get initialState =>
-      ChapterMarginNotes(volumeId, book, chapter, <int, MarginNote>{}, loaded: false);
 
   @override
   Stream<ChapterMarginNotes> mapEventToState(MarginNotesEvent event) async* {
