@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
+import '../../models/search/context.dart';
 import '../../models/search/search_result.dart';
 
 part 'search_bloc.freezed.dart';
@@ -11,16 +12,17 @@ part 'search_bloc.freezed.dart';
 abstract class SearchEvent with _$SearchEvent {
   const factory SearchEvent.request({String search, List<int> translations}) = _Requested;
   const factory SearchEvent.selectionModeToggle() = _SelectionMode;
-  // const factory SearchEvent.selectResult({SearchResult searchResult}) = _SelectResult;
+  const factory SearchEvent.modifySearchResult({SearchResultInfo searchResult}) =
+      _ModifySearchResult;
 }
 
 @freezed
 abstract class SearchState with _$SearchState {
   const factory SearchState({
     String search,
-    List<SearchResult> searchResults,
-    // List<int> selected,
-    List<int> defaultTranslations,
+    List<SearchResultInfo> searchResults,
+    List<int> filteredTranslations,
+    List<int> filteredBooks,
     bool loading,
     bool error,
     bool selectionMode,
@@ -32,8 +34,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   SearchState get initialState => const SearchState(
       search: '',
       searchResults: [],
-      // selected: [],
-      defaultTranslations: [],
+      filteredBooks: [],
+      filteredTranslations: [],
       loading: false,
       error: false,
       selectionMode: false);
@@ -51,36 +53,40 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         // }
         tec.dmPrint('Completed search "${event.search}" with ${res.length} result(s)');
         yield state.copyWith(
-            searchResults: res,
+            searchResults: res.map((r) => SearchResultInfo(r)).toList(),
             loading: false,
             search: event.search,
-            defaultTranslations: event.translations);
+            filteredTranslations: event.translations);
       } catch (_) {
         tec.dmPrint('Error with search "${event.search}"');
         yield state.copyWith(
             error: true,
             loading: false,
             search: event.search,
-            defaultTranslations: event.translations);
+            filteredTranslations: event.translations);
       }
-    } else if (event is _SelectResult) {
-      final ref = event.searchResult.ref;
-      // final selected = Map<String, bool>.from(state.selected);
-      // if (selected.containsKey(ref)) {
-      //   selected[ref] = !selected[ref];
-      // } else {
-      //   selected[ref] = true;
-      // }
-      // tec.dmPrint('${(selected[ref] ? 'Selected' : 'Deselected')}' ' $ref');
-      // yield state.copyWith(selected: selected);
+    } else if (event is _ModifySearchResult) {
+      yield _modifySearchResult(event.searchResult);
     } else if (event is _SelectionMode) {
       tec.dmPrint('Selection Mode in search: ${!state.selectionMode ? 'ON' : 'OFF'}');
       if (!state.selectionMode) {
         yield state.copyWith(selectionMode: !state.selectionMode);
       } else {
-        yield state.copyWith(selectionMode: !state.selectionMode, selected: []);
+        // clear selected
+        final results = state.searchResults.map((r) => r.copyWith(selected: false)).toList();
+        yield state.copyWith(selectionMode: !state.selectionMode, searchResults: results);
       }
     }
+  }
+
+  SearchState _modifySearchResult(SearchResultInfo info) {
+    final res = List<SearchResultInfo>.from(state.searchResults);
+    final index = res.indexWhere((i) => i.searchResult == info.searchResult);
+    if (index != -1) {
+      res[index] = info;
+      return state.copyWith(searchResults: res);
+    }
+    return state;
   }
 
   // TODO(abby): save to search history
@@ -90,8 +96,23 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   // }
 }
 
-class SearchResultInfo {
-  final bool contextExpanded;
-  final int currentVerseIndex;
-  const SearchResultInfo({this.contextExpanded, this.currentVerseIndex});
+@freezed
+abstract class SearchResultInfo with _$SearchResultInfo {
+  const factory SearchResultInfo(SearchResult searchResult,
+      {@Default(false) bool contextExpanded,
+      @Default(0) int currentVerseIndex,
+      @Default(false) bool selected,
+      @Default(false) bool expanded,
+      @Default(<int, Context>{}) Map<int, Context> contextMap}) = _SearchResultInfo;
+  const SearchResultInfo._();
+
+  String get shareText => '$label\n$currentText';
+  String get label => contextExpanded && contextMap[currentVerseIndex] != null
+      ? '${searchResult.ref.split(':')[0]}:'
+          '${contextMap[currentVerseIndex].initialVerse}-${contextMap[currentVerseIndex].finalVerse}'
+          ' ${searchResult.verses[currentVerseIndex].a}'
+      : '${searchResult.ref} ${searchResult.verses[currentVerseIndex].a}';
+  String get currentText => contextExpanded && contextMap[currentVerseIndex] != null
+      ? contextMap[currentVerseIndex].text
+      : searchResult.verses[currentVerseIndex].verseContent;
 }

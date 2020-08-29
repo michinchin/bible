@@ -1,9 +1,9 @@
-import 'package:bible/models/search/context.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -12,7 +12,9 @@ import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
+import '../../models/search/context.dart';
 import '../../models/search/search_result.dart';
+import '../../models/search/tec_share.dart';
 import '../common/common.dart';
 import '../sheet/selection_sheet_model.dart';
 
@@ -74,60 +76,66 @@ class SearchResultsView extends StatefulWidget {
 }
 
 class _SearchResultsViewState extends State<SearchResultsView> {
-  // void onSelected(SearchResult searchResult, {bool selected}) {
-  //   final includeShareLink = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
-  //   if (selected) {
-  //     context.bloc<SearchBloc>().addSelected();
-  //   } else {
-  //     context.bloc<SearchBloc>().removeSelected;
-  //   }
-
-  //   updateSelected
-  // }
+  ItemScrollController scrollController;
+  ItemPositionsListener positionListener;
+  @override
+  void initState() {
+    positionListener = ItemPositionsListener.create();
+    scrollController = ItemScrollController();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SearchBloc, SearchState>(builder: (context, state) {
-      if (state.loading) {
-        return const Center(child: LoadingIndicator());
-      } else if (state.error) {
-        return const Center(
-          child: Text('Error'),
-        );
-      } else if (state.searchResults.isEmpty) {
-        return const Center(
-          child: Text('No Results'),
-        );
-      }
-      return SafeArea(
-        bottom: false,
-        child: Scaffold(
-          body: ListView.separated(
-            itemCount: state.searchResults.length + 1,
-            separatorBuilder: (c, i) {
-              if (i == 0) {
-                return const SizedBox(height: 0);
-              }
-              i--;
-              return const Divider(height: 5);
-            },
-            itemBuilder: (c, i) {
-              if (i == 0) {
-                return SearchResultsLabel(state.searchResults);
-              }
-              i--;
-              final res = state.searchResults[i];
-              return _SearchResultCard(res);
-            },
-          ),
-        ),
-      );
-    });
+    return BlocConsumer<SearchBloc, SearchState>(
+        listener: (c, s) {
+          // TODO(abby): save search and scroll position
+        },
+        listenWhen: (s1, s2) => s1.search != s2.search,
+        builder: (context, state) {
+          if (state.loading) {
+            return const Center(child: LoadingIndicator());
+          } else if (state.error) {
+            return const Center(
+              child: Text('Error'),
+            );
+          } else if (state.searchResults.isEmpty) {
+            return const Center(
+              child: Text('No Results'),
+            );
+          }
+          return SafeArea(
+            bottom: false,
+            child: Scaffold(
+              body: ScrollablePositionedList.separated(
+                itemCount: state.searchResults.length + 1,
+                separatorBuilder: (c, i) {
+                  if (i == 0) {
+                    // if sized box has height: 0, causes errors in scrollable list
+                    // see: https://stackoverflow.com/questions/63352010/failed-assertion-line-556-pos-15-scrolloffsetcorrection-0-0-is-not-true
+                    return const SizedBox(height: 1);
+                  }
+                  i--;
+                  return const Divider(height: 5);
+                },
+                itemBuilder: (c, i) {
+                  if (i == 0) {
+                    return SearchResultsLabel(
+                        state.searchResults.map((r) => r.searchResult).toList());
+                  }
+                  i--;
+                  final res = state.searchResults[i];
+                  return _SearchResultCard(res);
+                },
+              ),
+            ),
+          );
+        });
   }
 }
 
 class _SearchResultCard extends StatefulWidget {
-  final SearchResult res;
+  final SearchResultInfo res;
   const _SearchResultCard(this.res);
 
   @override
@@ -135,104 +143,114 @@ class _SearchResultCard extends StatefulWidget {
 }
 
 class __SearchResultCardState extends State<_SearchResultCard> {
-  bool _expanded;
-  bool _contextShown;
-  bool _selected;
-  int _verseIndex;
-  // Map<int, Context> _contextMap;
-  // Future<Context> _contextFuture;
+  bool _includeShareLink;
 
   @override
   void initState() {
-    _expanded = false;
-    _contextShown = false;
-    _selected = false;
-    _verseIndex = 0;
+    _includeShareLink = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
     super.initState();
   }
 
-  void _changeTranslation(int verseIndex) {
-    setState(() {
-      _verseIndex = verseIndex;
-    });
+  Future<void> _changeTranslation(int verseIndex) async {
+    final c = widget.res.contextMap[verseIndex];
+    if (c == null && widget.res.contextExpanded) {
+      final newC = await Context.fetch(
+        translation: widget.res.searchResult.verses[verseIndex].id,
+        book: widget.res.searchResult.bookId,
+        chapter: widget.res.searchResult.chapterId,
+        verse: widget.res.searchResult.verseId,
+        content: widget.res.searchResult.verses[verseIndex].verseContent,
+      );
+      final map = Map<int, Context>.from(widget.res.contextMap);
+      map[verseIndex] = newC;
+      context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+          searchResult: widget.res.copyWith(contextMap: map, currentVerseIndex: verseIndex)));
+    } else {
+      context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+          searchResult: widget.res.copyWith(currentVerseIndex: verseIndex)));
+    }
   }
 
-  void _onContext() async {
-    // _contextFuture ??= Context.fetch(
-    //   translation: widget.res.verses[_verseIndex].id,
-    //   book: widget.res.bookId,
-    //   chapter: widget.res.chapterId,
-    //   verse: widget.res.verseId,
-    //   content: widget.res.verses[_verseIndex].verseContent,
-    // );
-    TecToast.show(context, 'in progress');
-    setState(() {
-      _contextShown = !_contextShown;
-    });
+  Future<void> _onContext() async {
+    final c = widget.res.contextMap[widget.res.currentVerseIndex];
+    if (c == null) {
+      final newC = await Context.fetch(
+        translation: widget.res.searchResult.verses[widget.res.currentVerseIndex].id,
+        book: widget.res.searchResult.bookId,
+        chapter: widget.res.searchResult.chapterId,
+        verse: widget.res.searchResult.verseId,
+        content: widget.res.searchResult.verses[widget.res.currentVerseIndex].verseContent,
+      );
+      final map = Map<int, Context>.from(widget.res.contextMap);
+      map[widget.res.currentVerseIndex] = newC;
+      context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+          searchResult:
+              widget.res.copyWith(contextMap: map, contextExpanded: !widget.res.contextExpanded)));
+    } else {
+      context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+          searchResult: widget.res.copyWith(contextExpanded: !widget.res.contextExpanded)));
+    }
   }
 
   void _onExpanded() {
-    setState(() {
-      _expanded = !_expanded;
-    });
+    context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+        searchResult: widget.res.copyWith(expanded: !widget.res.expanded)));
   }
 
   void _onShare() {
-    TecToast.show(context, 'in progress');
+    if (_includeShareLink) {
+      TecShare.shareWithLink(
+          widget.res.shareText, Reference.fromHref(widget.res.searchResult.href));
+    } else {
+      TecShare.share(widget.res.shareText);
+    }
   }
 
   void _onCopy() {
-    TecToast.show(context, 'in progress');
+    if (_includeShareLink) {
+      TecShare.copyWithLink(
+          context, widget.res.shareText, Reference.fromHref(widget.res.searchResult.href));
+    } else {
+      TecShare.copy(context, widget.res.shareText);
+    }
   }
 
   void _openInTB() {
-    Navigator.of(context)
-        .pop(Reference.fromHref(widget.res.href, volume: widget.res.verses[_verseIndex].id));
-    tec.dmPrint('Navigating to verse: ${widget.res.href}');
+    Navigator.of(context).pop(Reference.fromHref(widget.res.searchResult.href,
+        volume: widget.res.searchResult.verses[widget.res.currentVerseIndex].id));
+    tec.dmPrint('Navigating to verse: ${widget.res.searchResult.href}');
   }
 
   void _onListTileTap() {
     final selectionMode = context.bloc<SearchBloc>().state.selectionMode;
     if (selectionMode) {
-      setState(() {
-        _selected = !_selected;
-      });
+      context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+          searchResult: widget.res.copyWith(selected: !widget.res.selected)));
     } else {
       _onExpanded();
     }
   }
 
-  String get _label =>
-      //  _contextShown && _context != null
-      // ? '${widget.res.ref.split(':')[0]}:'
-      // '${_context.initialVerse}-${_context.finalVerse}'
-      // ' ${widget.res.verses[_verseIndex].a}'
-      // :
-      '${widget.res.ref} ${widget.res.verses[_verseIndex].a}';
-  String get _currentText =>
-      // _contextShown && _context != null
-      // ? _context.text
-      // :
-      widget.res.verses[_verseIndex].verseContent;
-
   @override
   Widget build(BuildContext context) {
-    final textColor = _selected ? Theme.of(context).accentColor : Theme.of(context).textColor;
+    final textColor =
+        widget.res.selected ? Theme.of(context).accentColor : Theme.of(context).textColor;
     Widget content() => Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: TecText.rich(
           TextSpan(
               children: searchResTextSpans(
-                _currentText,
+                widget.res.currentText,
                 context.bloc<SearchBloc>().state.search,
               ),
               style: TextStyle(color: textColor)),
         ));
     Widget label() => Padding(
         padding: const EdgeInsets.only(top: 10.0, bottom: 5),
-        child: Text(_label, style: TextStyle(color: textColor, fontWeight: FontWeight.w500)));
+        child: Text(widget.res.label,
+            style: TextStyle(color: textColor, fontWeight: FontWeight.w500)));
 
-    if (!_expanded) {
+    if (!widget.res.expanded) {
       return ListTile(
         title: label(),
         subtitle: content(),
@@ -269,8 +287,13 @@ class __SearchResultCardState extends State<_SearchResultCard> {
           Stack(children: [
             ButtonBar(alignment: MainAxisAlignment.start, children: [
               FlatButton(
+                // icon: RotatedBox(
+                //   quarterTurns: 1,
+                //   child: Icon(widget.res.contextExpanded ? Icons.unfold_less : Icons.unfold_more),
+                // ),
                 child: Text('Context',
-                    semanticsLabel: _contextShown ? 'Collapse Context' : 'Expand Context'),
+                    semanticsLabel:
+                        widget.res.contextExpanded ? 'Collapse Context' : 'Expand Context'),
                 onPressed: _onContext,
               ),
             ]),
@@ -299,7 +322,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
 }
 
 class _TranslationSelector extends StatefulWidget {
-  final SearchResult res;
+  final SearchResultInfo res;
   final Function(int) changeTranslation;
   const _TranslationSelector(this.res, this.changeTranslation);
   @override
@@ -307,18 +330,13 @@ class _TranslationSelector extends StatefulWidget {
 }
 
 class __TranslationSelectorState extends State<_TranslationSelector> {
-  int verseIndex;
   @override
   void initState() {
-    verseIndex = 0;
     super.initState();
   }
 
   void _changeTranslation(int i) {
     widget.changeTranslation(i);
-    setState(() {
-      verseIndex = i;
-    });
   }
 
   @override
@@ -335,19 +353,20 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
             child: const Text('ALL'),
-            onPressed: () => showCompareSheet(context, Reference.fromHref(widget.res.href)),
+            onPressed: () =>
+                showCompareSheet(context, Reference.fromHref(widget.res.searchResult.href)),
             textColor: selectedTextColor,
             splashColor: Theme.of(context).accentColor,
           ),
         ));
 
     final buttons = <ButtonTheme>[];
-    final verses = widget.res.verses;
+    final verses = widget.res.searchResult.verses;
     for (var i = 0; i < verses.length; i++) {
       final each = verses[i];
       Color buttonColor;
       Color textColor;
-      final curr = widget.res.verses[verseIndex].id;
+      final curr = widget.res.searchResult.verses[widget.res.currentVerseIndex].id;
 
       buttonColor = curr == each.id ? Theme.of(context).accentColor : Colors.transparent;
       textColor = curr == each.id ? Theme.of(context).cardColor : selectedTextColor;

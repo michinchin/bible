@@ -10,6 +10,7 @@ import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
+import '../../models/search/tec_share.dart';
 import '../common/common.dart';
 import '../common/tec_bottom_sheet_safe_area.dart';
 import '../library/library.dart';
@@ -155,6 +156,20 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     context.bloc<SearchBloc>().add(const SearchEvent.selectionModeToggle());
   }
 
+  void _onSelectionCopied() {
+    final verses = context.bloc<SearchBloc>().state.searchResults.where((s) => s.selected);
+    if (verses.isNotEmpty) {
+      TecShare.copy(context, verses.map((v) => v.shareText).join('\n\n'));
+    }
+  }
+
+  void _onSelectionShared() {
+    final verses = context.bloc<SearchBloc>().state.searchResults.where((s) => s.selected);
+    if (verses.isNotEmpty) {
+      TecShare.share(verses.map((v) => v.shareText).join('\n\n'));
+    }
+  }
+
   Future<void> _translation() async {
     final volumes = await selectVolumes(context,
         filter: const VolumesFilter(volumeType: VolumeType.bible), selectedVolumes: translations());
@@ -275,7 +290,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
     Widget titleAppBar(BuildContext c, NavViewState s, SearchState ss) {
       if (s == NavViewState.searchResults && c.bloc<SearchBloc>().state.selectionMode) {
-        final length = ss.selected.length;
+        final length = c.bloc<SearchBloc>().state.searchResults.where((s) => s.selected).length;
         return Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -319,12 +334,12 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       } else if (s.navViewState == NavViewState.searchResults) {
         if (c.bloc<SearchBloc>().state.selectionMode) {
           return [
-            IconButton(icon: const Icon(Icons.content_copy), onPressed: () {}),
-            IconButton(icon: const Icon(Icons.share), onPressed: () {})
+            IconButton(icon: const Icon(Icons.content_copy), onPressed: _onSelectionCopied),
+            IconButton(icon: const Icon(Icons.share), onPressed: _onSelectionShared)
           ];
         } else {
           return [
-            // IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),
+            IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),
             IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
           ];
         }
