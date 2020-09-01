@@ -246,7 +246,7 @@ extension _ExtOnViewState on ViewState {
     return AnimatedPositionedDirectional(
       // We need a key so when views are removed or reordered the element tree stays in sync.
       key: ValueKey(uid),
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 300),
       start: x,
       top: y,
       width: width,
@@ -354,7 +354,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     // Cannot have both a maximizedView and a viewWithKeyboardFocus.
     assert(maximizedView == null || viewWithKeyboardFocus == null);
 
-    final views = <Widget>[];
+    var views = <Widget>[];
 
     var i = 0;
     var y = 0.0;
@@ -402,7 +402,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           viewWithKeyboardFocusIsVisible = true;
         }
 
-        // This is always created with the view's no-maximized rect. Should it be?
+        // This is always created with the view's un-maximized rect. Should it be?
         rects.add(ViewRect(
             uid: state.uid,
             isVisible: noViewIsMaximized || thisViewIsMaximized,
@@ -432,24 +432,27 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
       y += height;
     }
 
-    var maximizeView = maximizedView;
+    // Reverse the view list so first views are on top of the stack.
+    views = views.reversed.toList();
+
+    var maxedView = maximizedView;
 
     // If the view with keyboard focus isn't visible, auto-maximize it!
     if (viewWithKeyboardFocus != null && !viewWithKeyboardFocusIsVisible) {
-      assert(maximizeView == null);
-      maximizeView = viewWithKeyboardFocus;
+      assert(maxedView == null);
+      maxedView = viewWithKeyboardFocus;
     }
 
     // It is possible that the maximized view doesn't fit on the screen when not maximized...
-    if (maximizeView != null && maximizedViewWidget == null) {
+    if (maxedView != null && maximizedViewWidget == null) {
       rects.add(ViewRect(
-          uid: maximizeView.uid,
+          uid: maxedView.uid,
           isVisible: true,
           row: 0,
           column: 0,
           rect: Rect.fromLTWH(0, 0, constraints.maxWidth, constraints.maxHeight)));
 
-      maximizedViewWidget = maximizeView.toWidget(
+      maximizedViewWidget = maxedView.toWidget(
           constraints: constraints,
           x: 0,
           y: 0,
@@ -458,7 +461,8 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           index: i);
     }
 
-    if (maximizeView != null) views.add(maximizedViewWidget);
+    // The maximized view needs to be the last view in the stack so it is always on top.
+    if (maxedView != null) views.add(maximizedViewWidget);
 
     return views;
   }
