@@ -121,30 +121,32 @@ class WindowManager extends StatelessWidget {
     final bloc = context.bloc<ViewManagerBloc>();
     final vm = ViewManager.shared;
     final items = <Widget>[];
-    for (final each in bloc.state.views) {
-      if (!bloc.isViewVisible(each.uid)) {
+    for (final view in bloc.state.views) {
+      if (!bloc.isViewVisible(view.uid)) {
         String title;
         Map<String, dynamic> data;
 
-        if (each.data != null) {
-          data = jsonDecode(each.data) as Map<String, dynamic>;
+        if (view.data != null) {
+          data = jsonDecode(view.data) as Map<String, dynamic>;
         }
 
         if (data != null && data.containsKey('title')) {
           title = data['title'] as String;
         } else {
-          title = vm.titleForType(each.type);
+          title = vm.titleForType(view.type);
         }
 
-        items.add(_menuItem(context, vm.iconForType(each.type), '$title', () {
+        items.add(_menuItem(context, vm.iconForType(view.type), '$title', () {
           if (bloc.state.maximizedViewUid == viewUid) {
-            bloc?.add(
-                ViewManagerEvent.move(fromPosition: bloc.indexOfView(each.uid), toPosition: 0));
-            bloc?.add(ViewManagerEvent.maximize(each.uid));
+            bloc?.add(ViewManagerEvent.maximize(view.uid));
             Navigator.of(context).maybePop();
           } else {
-            bloc?.add(
-                ViewManagerEvent.move(fromPosition: bloc.indexOfView(each.uid), toPosition: 0));
+            final thisViewPos = bloc.indexOfView(viewUid);
+            final hiddenViewPos = bloc.indexOfView(view.uid);
+            bloc?.add(ViewManagerEvent.move(
+                fromPosition: bloc.indexOfView(view.uid), toPosition: bloc.indexOfView(viewUid)));
+            bloc?.add(ViewManagerEvent.move(
+                fromPosition: thisViewPos + 1, toPosition: hiddenViewPos));
             Navigator.of(context).maybePop();
           }
         }));
