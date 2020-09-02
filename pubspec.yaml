@@ -27,6 +27,7 @@ dependencies:
   flutter_downloader: ^1.5.0
   flutter_keyboard_visibility: ^3.2.1
   flutter_local_notifications: ^1.4.4
+  flutter_sfsymbols: ^1.0.0
   flutter_svg: ^0.18.0
   freezed_annotation: ^0.11.0+1
   google_fonts: ^1.1.0
@@ -136,6 +137,10 @@ flutter:
         - asset: assets/fonts/OpenDyslexic-BoldItalic.otf
           style: italic
           weight: 700
+    - family: sficonsets
+      fonts:
+        - asset: packages/flutter_sfsymbols/fonts/sficonsets.ttf
+
 
   assets:
     - assets/0.sqlite
