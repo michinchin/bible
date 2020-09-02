@@ -51,20 +51,55 @@ class HistoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NavBloc, NavState>(builder: (c, s) {
-      final history = s.history..sort((a, b) => b.modified.compareTo(a.modified));
-      return ListView.separated(
-        itemCount: history.length,
-        separatorBuilder: (c, i) => const Divider(height: 5),
-        itemBuilder: (c, i) => ListTile(
-          dense: true,
-          leading: const Icon(Icons.history),
-          title: Text(history[i].label()),
-          subtitle: Text(
-              '${tec.shortDate(history[i].modified)}, ${history[i].modified.hour}:${history[i].modified.minute}'),
-          onTap: () {
-            Navigator.of(context).maybePop<Reference>(history[i]);
-          },
-        ),
+      final navHistory = s.navHistory..sort((a, b) => b.modified.compareTo(a.modified));
+      final searchHistory = s.searchHistory..sort((a, b) => b.modified.compareTo(a.modified));
+      return Column(
+        children: [
+          const ListLabel('Navigation History'),
+          Flexible(
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: navHistory.length,
+              separatorBuilder: (c, i) => const Divider(height: 5),
+              itemBuilder: (c, i) => ListTile(
+                dense: true,
+                leading: const Icon(Icons.history),
+                title: Text(navHistory[i].label()),
+                subtitle: Text(
+                    '${tec.shortDate(navHistory[i].modified)}, ${navHistory[i].modified.hour}:${navHistory[i].modified.minute}'),
+                onTap: () {
+                  Navigator.of(context).maybePop<Reference>(navHistory[i]);
+                },
+              ),
+            ),
+          ),
+          const ListLabel('Search History'),
+          Flexible(
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: searchHistory.length,
+              separatorBuilder: (c, i) => const Divider(height: 5),
+              itemBuilder: (c, i) => ListTile(
+                dense: true,
+                leading: const Icon(Icons.search),
+                title: Text(searchHistory[i].search),
+                subtitle: Text(
+                    '${tec.shortDate(searchHistory[i].modified)}, ${searchHistory[i].modified.hour}:${searchHistory[i].modified.minute}'),
+                onTap: () {
+                  c.bloc<SearchBloc>()
+                    ..scrollIndex = searchHistory[i].index
+                    ..add(SearchEvent.request(
+                        search: searchHistory[i].search,
+                        translations:
+                            searchHistory[i].volumesFiltered.split('|').map(int.parse).toList()));
+                  c.bloc<NavBloc>()
+                    ..add(NavEvent.onSearchChange(search: searchHistory[i].search))
+                    ..add(const NavEvent.onSearchFinished());
+                },
+              ),
+            ),
+          ),
+        ],
       );
     });
   }
@@ -78,59 +113,65 @@ class SearchResultsView extends StatefulWidget {
 class _SearchResultsViewState extends State<SearchResultsView> {
   ItemScrollController scrollController;
   ItemPositionsListener positionListener;
+
   @override
   void initState() {
+    final scrollIndex = context.bloc<SearchBloc>().scrollIndex;
     positionListener = ItemPositionsListener.create();
+    positionListener.itemPositions.addListener(() {
+      if (positionListener.itemPositions.value.isNotEmpty) {
+        context.bloc<SearchBloc>().scrollIndex = positionListener.itemPositions.value.first.index;
+      }
+    });
     scrollController = ItemScrollController();
+    if (scrollIndex != 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scrollController.scrollTo(index: scrollIndex, duration: const Duration(milliseconds: 250));
+      });
+    }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<SearchBloc, SearchState>(
-        listener: (c, s) {
-          // TODO(abby): save search and scroll position
-        },
-        listenWhen: (s1, s2) => s1.search != s2.search,
-        builder: (context, state) {
-          if (state.loading) {
-            return const Center(child: LoadingIndicator());
-          } else if (state.error) {
-            return const Center(
-              child: Text('Error'),
-            );
-          } else if (state.searchResults.isEmpty) {
-            return const Center(
-              child: Text('No Results'),
-            );
-          }
-          return SafeArea(
-            bottom: false,
-            child: Scaffold(
-              body: ScrollablePositionedList.separated(
-                itemCount: state.searchResults.length + 1,
-                separatorBuilder: (c, i) {
-                  if (i == 0) {
-                    // if sized box has height: 0, causes errors in scrollable list
-                    // see: https://stackoverflow.com/questions/63352010/failed-assertion-line-556-pos-15-scrolloffsetcorrection-0-0-is-not-true
-                    return const SizedBox(height: 1);
-                  }
-                  i--;
-                  return const Divider(height: 5);
-                },
-                itemBuilder: (c, i) {
-                  if (i == 0) {
-                    return SearchResultsLabel(
-                        state.searchResults.map((r) => r.searchResult).toList());
-                  }
-                  i--;
-                  final res = state.searchResults[i];
-                  return _SearchResultCard(res);
-                },
-              ),
-            ),
-          );
-        });
+    return BlocBuilder<SearchBloc, SearchState>(builder: (context, state) {
+      if (state.loading) {
+        return const Center(child: LoadingIndicator());
+      } else if (state.error) {
+        return const Center(
+          child: Text('Error'),
+        );
+      } else if (state.searchResults.isEmpty) {
+        return const Center(
+          child: Text('No Results'),
+        );
+      }
+      return SafeArea(
+        bottom: false,
+        child: Scaffold(
+          body: ScrollablePositionedList.separated(
+            itemCount: state.searchResults.length + 1,
+            separatorBuilder: (c, i) {
+              if (i == 0) {
+                // if sized box has height: 0, causes errors in scrollable list
+                // see: https://stackoverflow.com/questions/63352010/failed-assertion-line-556-pos-15-scrolloffsetcorrection-0-0-is-not-true
+                return const SizedBox(height: 1);
+              }
+              i--;
+              return const Divider(height: 5);
+            },
+            itemBuilder: (c, i) {
+              if (i == 0) {
+                return SearchResultsLabel(state.searchResults.map((r) => r.searchResult).toList());
+              }
+              i--;
+              final res = state.searchResults[i];
+              return _SearchResultCard(res);
+            },
+          ),
+        ),
+      );
+    });
   }
 }
 

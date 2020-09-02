@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -81,6 +82,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     return Scaffold(
       appBar: MinHeightAppBar(
         appBar: AppBar(
+          elevation: 5.0,
           centerTitle: false,
           title: TecStreamBuilder<BibleChapterState>(
               stream: _chapterState.stream,
@@ -92,7 +94,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                 final buttonStyle = Theme.of(context)
                     .textTheme
                     .headline6
-                    .copyWith(color: Theme.of(context).accentColor);
+                    .copyWith(color: Theme.of(context).textColor.withOpacity(0.5));
 
                 return Semantics(
                   label: chapterState.title,
@@ -104,12 +106,13 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                           width: 32.0,
                           child: IconButton(
                               padding: const EdgeInsets.only(top: 12.0, bottom: 12.0, right: 8.0),
-                              icon: const Icon(Icons.search),
+                              icon: const Icon(FeatherIcons.search, size: 20),
                               tooltip: 'Search',
                               color: Theme.of(context).textColor.withOpacity(0.5),
                               onPressed: () => _onNavigate(chapterState)),
                         ),
                         Flexible(
+                          flex: 3,
                           child: CupertinoButton(
                             minSize: 0,
                             padding: buttonPadding,
@@ -123,9 +126,12 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                           ),
                         ),
                         TecAutoSizeText(
-                          '・',
+                          ' | ',
                           minFontSize: minFontSize,
-                          style: Theme.of(context).textTheme.headline6,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline6
+                              .copyWith(color: Theme.of(context).textColor.withOpacity(0.5)),
                         ),
                         Flexible(
                           child: CupertinoButton(

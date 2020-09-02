@@ -32,8 +32,9 @@ Future<Reference> navigate(BuildContext context, Reference ref, {int initialInde
           height: 600,
           width: 500,
           child: MultiBlocProvider(providers: [
-            BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
-          ], child: Nav(initialIndex: initialIndex))),
+            BlocProvider<NavBloc>(
+                create: (_) => NavBloc(ref)..add(NavEvent.changeTabIndex(index: initialIndex))),
+          ], child: Nav())),
     );
   }
 
@@ -50,15 +51,13 @@ Future<Reference> navigate(BuildContext context, Reference ref, {int initialInde
   return Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
     fullscreenDialog: true,
     builder: (context) => MultiBlocProvider(providers: [
-      BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
-    ], child: Nav(initialIndex: initialIndex)),
+      BlocProvider<NavBloc>(
+          create: (_) => NavBloc(ref)..add(NavEvent.changeTabIndex(index: initialIndex))),
+    ], child: Nav()),
   ));
 }
 
 class Nav extends StatefulWidget {
-  final int initialIndex;
-  const Nav({this.initialIndex});
-
   @override
   _NavState createState() => _NavState();
 }
@@ -88,7 +87,6 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    navBloc().add(NavEvent.changeTabIndex(index: widget.initialIndex));
     _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
@@ -115,7 +113,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   void _searchControllerListener() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
-    _debounce = Timer(const Duration(milliseconds: 600), () {
+    _debounce = Timer(const Duration(milliseconds: 250), () {
       if (navBloc().state.search != _searchController.text) {
         navBloc().add(NavEvent.onSearchChange(search: _searchController.text));
       }
@@ -358,6 +356,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           _tabController.animateTo(s.tabIndex);
         }
       },
+      listenWhen: (p,c)=> c.tabIndex != p.tabIndex || c.search != p.search,
       builder: (c, s) => TecScaffoldWrapper(
         child: Scaffold(
           appBar: PreferredSize(

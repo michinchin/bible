@@ -202,7 +202,9 @@ Future<void> showCompareSheet(BuildContext c, Reference ref) async {
           c.bloc<PrefItemsBloc>().state.items.itemWithId(PrefItemId.translationsFilter).info);
 
   await showModalBottomSheet<void>(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+    shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
     context: c,
     useRootNavigator: true,
     isScrollControlled: true,
