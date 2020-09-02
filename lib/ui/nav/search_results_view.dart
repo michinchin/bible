@@ -1,3 +1,4 @@
+import 'package:bible/models/search/search_history_item.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class SearchAndHistoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(abby): if no search results currently, do most recent search or focus on textfield
     return DefaultTabController(
-      initialIndex: context.bloc<NavBloc>().state.tabIndex,
+      initialIndex: 1,
       length: 2,
       child: Scaffold(
         appBar: AppBar(
@@ -47,35 +48,93 @@ class SearchAndHistoryView extends StatelessWidget {
 }
 
 class HistoryView extends StatelessWidget {
-  // only showing nav history currently
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NavBloc, NavState>(builder: (c, s) {
       final navHistory = s.navHistory..sort((a, b) => b.modified.compareTo(a.modified));
       final searchHistory = s.searchHistory..sort((a, b) => b.modified.compareTo(a.modified));
-      return Column(
-        children: [
-          const ListLabel('Navigation History'),
-          Flexible(
-            child: ListView.separated(
-              shrinkWrap: true,
-              itemCount: navHistory.length,
-              separatorBuilder: (c, i) => const Divider(height: 5),
-              itemBuilder: (c, i) => ListTile(
-                dense: true,
-                leading: const Icon(Icons.history),
-                title: Text(navHistory[i].label()),
-                subtitle: Text(
-                    '${tec.shortDate(navHistory[i].modified)}, ${navHistory[i].modified.hour}:${navHistory[i].modified.minute}'),
-                onTap: () {
-                  Navigator.of(context).maybePop<Reference>(navHistory[i]);
-                },
+      return searchHistory.isEmpty && navHistory.isEmpty
+          ? const Center(child: Text('Search or navigate to view history'))
+          : Column(children: [
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                const ListLabel('Navigation History'),
+                IconButton(
+                    icon:
+                        Icon(Icons.chevron_right, color: Theme.of(context).textTheme.caption.color),
+                    onPressed: () => Navigator.of(c)
+                        .push(MaterialPageRoute<void>(builder: (c) => _NavHistoryView(navHistory))))
+              ]),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: navHistory.length,
+                  separatorBuilder: (c, i) => const Divider(height: 5),
+                  itemBuilder: (c, i) => ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.history),
+                    title: Text(navHistory[i].label()),
+                    onTap: () {
+                      Navigator.of(context).maybePop<Reference>(navHistory[i]);
+                    },
+                  ),
+                ),
               ),
-            ),
-          ),
-          const ListLabel('Search History'),
-          Flexible(
-            child: ListView.separated(
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                const ListLabel('Search History'),
+                IconButton(
+                    icon:
+                        Icon(Icons.chevron_right, color: Theme.of(context).textTheme.caption.color),
+                    onPressed: () => Navigator.of(c).push(MaterialPageRoute<void>(
+                        builder: (c) => _SearchHistoryView(searchHistory)))),
+              ]),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: searchHistory.length,
+                  physics: const NeverScrollableScrollPhysics(),
+                  separatorBuilder: (c, i) => const Divider(height: 5),
+                  itemBuilder: (c, i) => ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.search),
+                    title: Text(searchHistory[i].search),
+                    onTap: () {
+                      c.bloc<SearchBloc>()
+                        ..scrollIndex = searchHistory[i].index
+                        ..add(SearchEvent.request(
+                            search: searchHistory[i].search,
+                            translations: searchHistory[i]
+                                .volumesFiltered
+                                .split('|')
+                                .map(int.parse)
+                                .toList()));
+                      c.bloc<NavBloc>()
+                        ..add(NavEvent.onSearchChange(search: searchHistory[i].search))
+                        ..add(const NavEvent.onSearchFinished())
+                        ..add(const NavEvent.changeTabIndex(index: 1));
+                    },
+                  ),
+                ),
+              ),
+            ]);
+    });
+  }
+}
+
+class _SearchHistoryView extends StatelessWidget {
+  final List<SearchHistoryItem> searchHistory;
+  const _SearchHistoryView(this.searchHistory);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Search History'),
+      ),
+      body: searchHistory.isEmpty
+          ? const Center(
+              child: Text('No search history to show yet'),
+            )
+          : ListView.separated(
               shrinkWrap: true,
               itemCount: searchHistory.length,
               separatorBuilder: (c, i) => const Divider(height: 5),
@@ -94,14 +153,44 @@ class HistoryView extends StatelessWidget {
                             searchHistory[i].volumesFiltered.split('|').map(int.parse).toList()));
                   c.bloc<NavBloc>()
                     ..add(NavEvent.onSearchChange(search: searchHistory[i].search))
-                    ..add(const NavEvent.onSearchFinished());
+                    ..add(const NavEvent.onSearchFinished())
+                    ..add(const NavEvent.changeTabIndex(index: 1));
                 },
               ),
             ),
-          ),
-        ],
-      );
-    });
+    );
+  }
+}
+
+class _NavHistoryView extends StatelessWidget {
+  final List<Reference> navHistory;
+  const _NavHistoryView(this.navHistory);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Navigation History'),
+      ),
+      body: navHistory.isEmpty
+          ? const Center(
+              child: Text('No navigation history to show yet'),
+            )
+          : ListView.separated(
+              shrinkWrap: true,
+              itemCount: navHistory.length,
+              separatorBuilder: (c, i) => const Divider(height: 5),
+              itemBuilder: (c, i) => ListTile(
+                dense: true,
+                leading: const Icon(Icons.history),
+                title: Text(navHistory[i].label()),
+                subtitle: Text(
+                    '${tec.shortDate(navHistory[i].modified)}, ${navHistory[i].modified.hour}:${navHistory[i].modified.minute}'),
+                onTap: () {
+                  Navigator.of(context).maybePop<Reference>(navHistory[i]);
+                },
+              ),
+            ),
+    );
   }
 }
 

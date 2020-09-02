@@ -5,6 +5,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -40,7 +41,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
 
   return [
     IconButton(
-      icon: const Icon(FeatherIcons.layers),
+      icon: const Icon(SFSymbols.square_stack, size: 20),
       tooltip: 'Windows',
       color: Theme.of(context).textColor.withOpacity(0.5),
       onPressed: () {
@@ -50,7 +51,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
     ),
     if (topRight)
       IconButton(
-        icon: const Icon(Icons.account_circle_outlined),
+        icon: const Icon(Icons.more_vert),
         tooltip: 'Main Menu',
         color: Theme.of(context).textColor.withOpacity(0.5),
         onPressed: () => showMainMenu(context),
