@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../common/common.dart';
-import '../common/tec_bottom_sheet_safe_area.dart';
 import 'volumes_bloc.dart';
 
 Future<void> showVolumesFilterSheet(BuildContext context) async {
@@ -36,7 +35,7 @@ class VolumesFilterSheet extends StatelessWidget {
     const animationDuration = Duration(milliseconds: 300);
     final buttonHeight = 16 + (22 * textScaleFactor).roundToDouble();
 
-    return TecBottomSheetSafeArea(
+    return SafeArea(
       child: Container(
         padding: EdgeInsets.all(padding),
         child: Column(
