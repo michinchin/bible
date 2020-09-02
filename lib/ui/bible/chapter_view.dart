@@ -121,13 +121,13 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                       onPressed: () => _onNavigate(chapterState),
                     ),
                   ),
-                  TecAutoSizeText(
-                    '・',
-                    minFontSize: minFontSize,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline6
-                        .copyWith(color: Theme.of(context).textColor.withOpacity(0.5)),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                    child: Container(
+                      color: Theme.of(context).textColor.withOpacity(0.2),
+                      width: 1,
+                      height: 22 * textScaleFactorWith(context),
+                    ),
                   ),
                   Flexible(
                     child: CupertinoButton(
