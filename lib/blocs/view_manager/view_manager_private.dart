@@ -11,18 +11,20 @@ class _VMViewStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // If the maxWidth is less then the bottom sheet maxWidth, subtract the sheet
+    // height from maxHeight so views have equal visible area, i.e. so the views
+    // don't extend under the bottom sheet.
     final adjustedConstraints = constraints.maxWidth <= 460.0
         ? constraints.copyWith(maxHeight: constraints.maxHeight - 55.0)
         : constraints;
 
-    if (math.max(constraints.maxWidth, constraints.maxHeight) < 1000.0) {
-      // This is a phone or small app window. Only allow 2 views.
-      final viewPadding = MediaQuery.of(context).viewPadding;
+    final portraitHeight = math.max(constraints.maxWidth, constraints.maxHeight);
+    final portraitWidth = math.min(constraints.maxWidth, constraints.maxHeight);
+    if (portraitHeight < 950.0 && portraitWidth < 500) {
+      // This is a phone or small app window, so only allow 2 views.
       _minSize = math.max(
-          (math.max(adjustedConstraints.maxWidth, adjustedConstraints.maxHeight) -
-                  viewPadding.top -
-                  viewPadding.bottom) /
-              2,
+          ((math.max(adjustedConstraints.maxWidth, adjustedConstraints.maxHeight)) / 2.0)
+              .floorToDouble(),
           244);
     } else {
       // This is a larger window or tablet.
