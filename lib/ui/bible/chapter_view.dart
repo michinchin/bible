@@ -126,7 +126,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                           ),
                         ),
                         TecAutoSizeText(
-                          ' | ',
+                          '・',
                           minFontSize: minFontSize,
                           style: Theme.of(context)
                               .textTheme
