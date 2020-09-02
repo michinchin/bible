@@ -13,7 +13,7 @@ class BibleChapterState {
       : title = title ??
             VolumesRepository.shared
                 .bibleWithId(bibleId)
-                .titleWithBookAndChapter(bcv.book, bcv.chapter, includeAbbreviation: false);
+                .titleWithBookAndChapter(bcv.book, bcv.chapter, includeAbbreviation: true);
 
   static BookChapterVerse initialBCV() {
     return const BookChapterVerse(50, 1, 1);
@@ -37,6 +37,9 @@ class BibleChapterState {
     return BibleChapterState(bibleId, bcv, page);
   }
 
+  String get bookNameAndChapter =>
+      VolumesRepository.shared.bibleWithId(bibleId).titleWithBookAndChapter(bcv.book, bcv.chapter);
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{'vid': bibleId, 'bcv': bcv, 'page': page, 'title': title};
   }
@@ -48,9 +51,9 @@ class BibleChapterState {
 }
 
 extension on Bible {
-  String titleWithBookAndChapter(int book, int chapter, {bool includeAbbreviation = true}) {
+  String titleWithBookAndChapter(int book, int chapter, {bool includeAbbreviation = false}) {
     if (includeAbbreviation) {
-      return '${nameOfBook(book)} chapter, $abbreviation';
+      return '${nameOfBook(book)} $chapter, $abbreviation';
     }
     return '${nameOfBook(book)} $chapter';
   }

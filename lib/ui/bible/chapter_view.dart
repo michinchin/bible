@@ -114,7 +114,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                             minSize: 0,
                             padding: buttonPadding,
                             child: TecAutoSizeText(
-                              chapterState.title,
+                              chapterState.bookNameAndChapter,
                               minFontSize: minFontSize,
                               maxLines: 1,
                               style: buttonStyle,
