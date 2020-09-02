@@ -53,7 +53,7 @@ class AppSettings {
   SystemUiOverlayStyle overlayStyle(BuildContext context) {
     var overlayStyle = isDarkTheme() ? lightOverlayStyle : darkOverlayStyle;
 
-    if (tec.platformIs(tec.Platform.android) && !TecScaffoldWrapper.isAndroidFullScreen()) {
+    if (tec.platformIs(tec.Platform.android)) {
       overlayStyle = overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).canvasColor);
     }
 

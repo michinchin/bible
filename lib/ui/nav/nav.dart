@@ -12,7 +12,6 @@ import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/tec_share.dart';
 import '../common/common.dart';
-import '../common/tec_bottom_sheet_safe_area.dart';
 import '../library/library.dart';
 import 'bcv_tab.dart';
 import 'search_results_view.dart';
@@ -198,7 +197,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
               final nav3TapEnabled = items.boolForPrefItem(PrefItemId.nav3Tap);
               final navCanonical = items.boolForPrefItem(PrefItemId.navBookOrder);
               final translationsAbbrev = items.boolForPrefItem(PrefItemId.translationsAbbreviated);
-              return TecBottomSheetSafeArea(
+              return SafeArea(
                 child: ListView(
                   shrinkWrap: true,
                   children: [

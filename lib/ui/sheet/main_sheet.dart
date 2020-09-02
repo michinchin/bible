@@ -8,7 +8,9 @@ import '../library/library.dart';
 
 class MainSheet extends StatefulWidget {
   final SheetSize sheetSize;
+
   const MainSheet({this.sheetSize, Key key}) : super(key: key);
+
   @override
   _MainSheetState createState() => _MainSheetState();
 }
@@ -25,56 +27,48 @@ class _MainSheetState extends State<MainSheet> {
 
   @override
   Widget build(BuildContext context) {
+    Widget child;
     final landscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
-    return Padding(
-        padding: const EdgeInsets.only(left: 15, right: 15),
-        child: Column(
-          children: [
-            if (widget.sheetSize == SheetSize.mini)
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 4,
-                  childAspectRatio: landscape ? 2.0 : 1.0,
-                  // padding: const EdgeInsets.only(top: 0),
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    for (final key in miniViewIcons.keys)
-                      SheetIconButton(
-                        text: key,
-                        icon: miniViewIcons[key],
-                        onPressed: () {
-                          tec.dmPrint('Tapped button $key');
-                          if (key == 'Library') showLibrary(context);
-                        },
-                      )
-                  ],
-                ),
-              )
-            else
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  childAspectRatio: landscape ? 4.0 : 3.0,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  padding: const EdgeInsets.only(top: 0),
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    for (final key in miniViewIcons.keys)
-                      SheetButton(
-                        icon: miniViewIcons[key],
-                        onPressed: buttonActions[key] ??
-                            () {
-                              tec.dmPrint('Tapped button $key');
-                              if (key == 'Library') showLibrary(context);
-                            },
-                        text: key,
-                      ),
-                  ],
-                ),
-              ),
-          ],
-        ));
+    if (widget.sheetSize == SheetSize.mini) {
+      child = Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          for (final key in miniViewIcons.keys)
+            SheetIconButton(
+              text: key,
+              icon: miniViewIcons[key],
+              onPressed: () {
+                tec.dmPrint('Tapped button $key');
+                if (key == 'Library') showLibrary(context);
+              },
+            )
+        ],
+      );
+    } else {
+      child = GridView.count(
+        shrinkWrap: true,
+        crossAxisCount: 2,
+        childAspectRatio: landscape ? 5.0 : 3.0,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        padding: const EdgeInsets.only(top: 0),
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          for (final key in miniViewIcons.keys)
+            SheetButton(
+              icon: miniViewIcons[key],
+              onPressed: buttonActions[key] ??
+                  () {
+                    tec.dmPrint('Tapped button $key');
+                    if (key == 'Library') showLibrary(context);
+                  },
+              text: key,
+            ),
+        ],
+      );
+    }
+
+    return Padding(padding: const EdgeInsets.only(left: 15, right: 15), child: child);
   }
 }

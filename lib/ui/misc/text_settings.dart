@@ -8,7 +8,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
 import '../common/common.dart';
-import '../common/tec_bottom_sheet_safe_area.dart';
 
 void showTextSettingsDialog(BuildContext context) {
   showModalBottomSheet<void>(
@@ -120,7 +119,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
     final buttonColor = isDarkTheme ? Colors.grey[800] : Colors.grey[200];
     final textScale = textScaleFactorWith(context, dampingFactor: 0.5, maxScaleFactor: 1);
     const fontSize = 25.0;
-    return TecBottomSheetSafeArea(
+    return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

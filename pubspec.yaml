@@ -42,7 +42,6 @@ dependencies:
   rxdart: ^0.24.1
   scrollable_positioned_list: ^0.1.7
   share: ^0.6.5
-  # sliding_sheet: ^0.3.5
   tuple: ^1.0.3
   url_launcher: ^5.5.1
   zefyr:
@@ -101,7 +100,7 @@ dependencies:
     hosted:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
-    version: ^2.0.8
+    version: ^2.0.9
 
 # dependency_overrides:
   # tec_util:

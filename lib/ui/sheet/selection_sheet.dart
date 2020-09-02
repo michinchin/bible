@@ -56,49 +56,53 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 15, right: 15),
-      child: Column(children: [
-        if (widget.sheetSize == SheetSize.mini)
-          Expanded(
-              child: _MiniView(
-            underlineMode: underlineMode,
-            onSwitchToUnderline: onSwitchToUnderline,
-          ))
-        else if (widget.sheetSize == SheetSize.medium) ...[
-          _MediumFullSheetItems(
-            isMediumView: true,
-            showColorPicker: showColorPicker,
-            onShowColorPicker: onShowColorPicker,
-            onSwitchToUnderline: onSwitchToUnderline,
-            underlineMode: underlineMode,
-          ),
-        ] else if (widget.sheetSize == SheetSize.full) ...[
-          _MediumFullSheetItems(
-            isMediumView: false,
-            showColorPicker: showColorPicker,
-            onShowColorPicker: onShowColorPicker,
-            onSwitchToUnderline: onSwitchToUnderline,
-            underlineMode: underlineMode,
-          ),
-          const Divider(color: Colors.transparent),
-          Expanded(
-            child: GridView.count(
-                crossAxisCount: 4,
-                padding: const EdgeInsets.only(top: 0),
-                children: [
-                  for (final each in SelectionSheetModel.buttons.keys) ...[
-                    GreyCircleButton(
-                      icon: SelectionSheetModel.buttons[each],
-                      onPressed: () {},
-                      title: each,
-                    ),
-                  ],
-                ]),
-          ),
-        ]
-      ]),
-    );
+    Widget child;
+
+    if (widget.sheetSize == SheetSize.mini) {
+      child = _MiniView(
+        underlineMode: underlineMode,
+        onSwitchToUnderline: onSwitchToUnderline,
+      );
+    } else if (widget.sheetSize == SheetSize.medium) {
+      child = _MediumFullSheetItems(
+        isMediumView: true,
+        showColorPicker: showColorPicker,
+        onShowColorPicker: onShowColorPicker,
+        onSwitchToUnderline: onSwitchToUnderline,
+        underlineMode: underlineMode,
+      );
+    }
+
+    return Padding(padding: const EdgeInsets.only(left: 15, right: 15), child: child);
+
+    // Column(children: [
+
+    //     ] else if (widget.sheetSize == SheetSize.full) ...[
+    //       _MediumFullSheetItems(
+    //         isMediumView: false,
+    //         showColorPicker: showColorPicker,
+    //         onShowColorPicker: onShowColorPicker,
+    //         onSwitchToUnderline: onSwitchToUnderline,
+    //         underlineMode: underlineMode,
+    //       ),
+    //       const Divider(color: Colors.transparent),
+    //       Expanded(
+    //         child: GridView.count(
+    //             crossAxisCount: 4,
+    //             padding: const EdgeInsets.only(top: 0),
+    //             children: [
+    //               for (final each in SelectionSheetModel.buttons.keys) ...[
+    //                 GreyCircleButton(
+    //                   icon: SelectionSheetModel.buttons[each],
+    //                   onPressed: () {},
+    //                   title: each,
+    //                 ),
+    //               ],
+    //             ]),
+    //       ),
+    //     ]
+    //   ]),
+    // );
   }
 }
 
@@ -332,7 +336,7 @@ class _MiniView extends StatelessWidget {
     ];
     return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           for (final child in miniChildren)
             Expanded(

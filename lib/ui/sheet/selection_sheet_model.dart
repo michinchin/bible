@@ -19,7 +19,6 @@ import '../../models/search/compare_results.dart';
 import '../../models/search/tec_share.dart';
 import '../../models/shared_types.dart';
 import '../common/common.dart';
-import '../common/tec_bottom_sheet_safe_area.dart';
 import 'compare_verse.dart';
 import 'snap_sheet.dart';
 
@@ -162,11 +161,9 @@ class SelectionSheetModel {
       useRootNavigator: true,
       isScrollControlled: true,
       enableDrag: false,
-      builder: (c) => TecBottomSheetSafeArea(
-        child: SizedBox(
-          height: 3 * MediaQuery.of(c).size.height / 4,
-          child: _DefineWebView(words),
-        ),
+      builder: (c) => SizedBox(
+        height: 3 * MediaQuery.of(c).size.height / 4,
+        child: _DefineWebView(words),
       ),
     );
   }
@@ -209,13 +206,11 @@ Future<void> showCompareSheet(BuildContext c, Reference ref) async {
     useRootNavigator: true,
     isScrollControlled: true,
     enableDrag: false,
-    builder: (c) => TecBottomSheetSafeArea(
-      child: SizedBox(
-        height: 3 * MediaQuery.of(c).size.height / 4,
-        child: CompareVerseScreen(
-          results: compareResults,
-          title: ref.label(),
-        ),
+    builder: (c) => SizedBox(
+      height: 3 * MediaQuery.of(c).size.height / 4,
+      child: CompareVerseScreen(
+        results: compareResults,
+        title: ref.label(),
       ),
     ),
   );
@@ -223,13 +218,16 @@ Future<void> showCompareSheet(BuildContext c, Reference ref) async {
 
 class _DefineWebView extends StatefulWidget {
   final String words;
+
   const _DefineWebView(this.words);
+
   @override
   __DefineWebViewState createState() => __DefineWebViewState();
 }
 
 class __DefineWebViewState extends State<_DefineWebView> {
   String url;
+
   @override
   void initState() {
     url = Uri.https('google.com', '/search', {'q': 'define:${widget.words}'}).toString();

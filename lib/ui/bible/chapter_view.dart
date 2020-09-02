@@ -25,8 +25,6 @@ import '../../models/bible_chapter_state.dart';
 import '../../models/user_item_helper.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
-import '../library/library.dart';
-import '../library/volumes_bloc.dart';
 import '../misc/view_actions.dart';
 import '../nav/nav.dart';
 import 'chapter_view_model.dart';
@@ -123,13 +121,13 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                       onPressed: () => _onNavigate(chapterState),
                     ),
                   ),
-                  TecAutoSizeText(
-                    '・',
-                    minFontSize: minFontSize,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline6
-                        .copyWith(color: Theme.of(context).textColor.withOpacity(0.5)),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                    child: Container(
+                      color: Theme.of(context).textColor.withOpacity(0.2),
+                      width: 1,
+                      height: const MinHeightAppBar().preferredSize.height * .55,// 22 * textScaleFactorWith(context),
+                    ),
                   ),
                   Flexible(
                     child: CupertinoButton(
@@ -203,17 +201,17 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     }
   }
 
-  Future<void> _onSelectBible(BibleChapterState chapterState) async {
-    TecAutoScroll.stopAutoscroll();
-    final bibleId = await selectVolume(context,
-        title: 'Select Bible Translation',
-        filter: const VolumesFilter(
-          volumeType: VolumeType.bible,
-        ),
-        selectedVolume: _bible.id);
-
-    _changeVolume(bibleId: bibleId, chapterState: chapterState);
-  }
+  // Future<void> _onSelectBible(BibleChapterState chapterState) async {
+  //   TecAutoScroll.stopAutoscroll();
+  //   final bibleId = await selectVolume(context,
+  //       title: 'Select Bible Translation',
+  //       filter: const VolumesFilter(
+  //         volumeType: VolumeType.bible,
+  //       ),
+  //       selectedVolume: _bible.id);
+  //
+  //   _changeVolume(bibleId: bibleId, chapterState: chapterState);
+  // }
 
   void _changeVolume({@required int bibleId, @required BibleChapterState chapterState}) {
     if (bibleId != null) {
