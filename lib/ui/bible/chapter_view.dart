@@ -80,7 +80,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     return Scaffold(
       appBar: MinHeightAppBar(
         appBar: AppBar(
-          elevation: 5.0,
+          elevation: 3.0,
           centerTitle: false,
           title: TecStreamBuilder<BibleChapterState>(
             stream: _chapterState.stream,

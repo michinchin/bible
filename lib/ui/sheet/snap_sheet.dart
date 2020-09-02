@@ -82,7 +82,7 @@ class _SnapSheetState extends State<SnapSheet> {
     double maxWidth;
 
     // for phones max width is portrait width
-    if (math.max(size.width, size.height) < 1004) {
+    if (math.max(size.width, size.height) < 1000) {
       maxWidth = math.min(size.width, 450);
     }
     // for bigger devices max width is 460

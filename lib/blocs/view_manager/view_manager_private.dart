@@ -11,30 +11,34 @@ class _VMViewStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // at this point orientation variable is correct, however, the size
-    // may not have been adjusted yet..
-    final maxSize = math.max(constraints.maxWidth, constraints.maxHeight);
+    final adjustedConstraints = constraints.maxWidth <= 460.0
+        ? constraints.copyWith(maxHeight: constraints.maxHeight - 55.0)
+        : constraints;
 
-    // maxSize includes status bar use 1004 instead of 1024
-    if (maxSize < 1004.0) {
-      // this is a phone or small app window...
-      // only allow 2 views
+    if (math.max(constraints.maxWidth, constraints.maxHeight) < 1000.0) {
+      // This is a phone or small app window. Only allow 2 views.
       final viewPadding = MediaQuery.of(context).viewPadding;
-      _minSize = math.max((maxSize - viewPadding.top - viewPadding.bottom) / 2, 272);
+      _minSize = math.max(
+          (math.max(adjustedConstraints.maxWidth, adjustedConstraints.maxHeight) -
+                  viewPadding.top -
+                  viewPadding.bottom) /
+              2,
+          244);
     } else {
-      // larger window or tablet...
+      // This is a larger window or tablet.
       _minSize = 300;
     }
 
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     assert(bloc != null);
 
-    bloc?._size = Size(constraints.maxWidth, constraints.maxHeight);
+    bloc?._size = Size(adjustedConstraints.maxWidth, adjustedConstraints.maxHeight);
 
     final wasVisibleTextSelected = (bloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
 
     // Build and update the rows.
-    final rows = _buildRows(bloc, _Size.ideal, vmState, constraints)..balance(constraints);
+    final rows = _buildRows(bloc, _Size.ideal, vmState, adjustedConstraints)
+      ..balance(adjustedConstraints);
     bloc?._rows = rows;
 
     // Is there a maximized view?
@@ -53,7 +57,8 @@ class _VMViewStack extends StatelessWidget {
 
     // Build children and save the view rects.
     final viewRects = <ViewRect>[];
-    final children = rows.toViewList(constraints, maximizedView, viewWithKeyboardFocus, viewRects);
+    final children =
+        rows.toViewList(adjustedConstraints, maximizedView, viewWithKeyboardFocus, viewRects);
     bloc?._viewRects = viewRects;
 
     // If the state of visible selected text changed, call _updateSelectionBloc after the build.
