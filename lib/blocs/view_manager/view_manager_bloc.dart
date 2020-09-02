@@ -53,6 +53,12 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   List<List<ViewState>> _rows = []; // ignore: prefer_final_fields
 
   ///
+  /// Returns the size of the view manager rectangle.
+  /// 
+  Size get size => _size;
+  var _size = Size.zero; // ignore: prefer_final_fields
+
+  ///
   /// Is the view manager full of views? True, if another view cannot fit on the screen,
   /// false otherwise. Note, this can change if the screen orientation changes, or, as
   /// in the case with iPad multitasking, the app window size changes.

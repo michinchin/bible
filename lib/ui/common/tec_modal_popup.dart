@@ -45,6 +45,7 @@ Future<T> showTecModalPopup<T>({
   bool useRootNavigator = true,
   bool semanticsDismissible,
   Alignment alignment = Alignment.bottomCenter,
+  EdgeInsetsGeometry edgeInsets = const EdgeInsets.all(0),
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
@@ -53,6 +54,7 @@ Future<T> showTecModalPopup<T>({
       barrierLabel: 'Dismiss',
       builder: builder,
       alignment: alignment ?? Alignment.bottomCenter,
+      edgeInsets: edgeInsets,
       filter: filter,
       semanticsDismissible: semanticsDismissible,
     ),
@@ -186,6 +188,7 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
     this.barrierLabel,
     this.builder,
     this.alignment,
+    this.edgeInsets = const EdgeInsets.all(0),
     bool semanticsDismissible,
     ImageFilter filter,
     RouteSettings settings,
@@ -200,6 +203,8 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
   bool _semanticsDismissible;
 
   final Alignment alignment;
+
+  final EdgeInsetsGeometry edgeInsets;
 
   @override
   final String barrierLabel;
@@ -245,9 +250,15 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation, Widget child) {
-    return Align(
-      alignment: alignment,
-      child: FractionalTranslation(translation: _offsetTween.evaluate(_animation), child: child),
+    return Container(
+      padding: edgeInsets,
+      child: ClipRect(
+        child: Align(
+          alignment: alignment,
+          child:
+              FractionalTranslation(translation: _offsetTween.evaluate(_animation), child: child),
+        ),
+      ),
     );
   }
 }

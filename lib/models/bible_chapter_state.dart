@@ -13,7 +13,7 @@ class BibleChapterState {
       : title = title ??
             VolumesRepository.shared
                 .bibleWithId(bibleId)
-                .titleWithHref('${bcv.book}/${bcv.chapter}');
+                .titleWithBookAndChapter(bcv.book, bcv.chapter, includeAbbreviation: false);
 
   static BookChapterVerse initialBCV() {
     return const BookChapterVerse(50, 1, 1);
@@ -44,5 +44,14 @@ class BibleChapterState {
   @override
   String toString() {
     return tec.toJsonString(toJson());
+  }
+}
+
+extension on Bible {
+  String titleWithBookAndChapter(int book, int chapter, {bool includeAbbreviation = true}) {
+    if (includeAbbreviation) {
+      return '${nameOfBook(book)} chapter, $abbreviation';
+    }
+    return '${nameOfBook(book)} $chapter';
   }
 }

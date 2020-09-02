@@ -29,6 +29,8 @@ class _VMViewStack extends StatelessWidget {
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     assert(bloc != null);
 
+    bloc?._size = Size(constraints.maxWidth, constraints.maxHeight);
+
     final wasVisibleTextSelected = (bloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
 
     // Build and update the rows.
@@ -367,6 +369,31 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
     var viewWithKeyboardFocusIsVisible = false;
 
+    // Local func that adds to [rects] and [views].
+    void addViewWithIndex(
+        int index, ViewState state, int r, int c, double x, double y, double width, double height,
+        {bool isVisible = true, bool isMaximized = false}) {
+      final _x = isMaximized ? 0.0 : x;
+      final _y = isMaximized ? 0.0 : y;
+      final _width = isMaximized ? constraints.maxWidth : width;
+      final _height = isMaximized ? constraints.maxHeight : height;
+
+      rects.add(ViewRect(
+          uid: state.uid,
+          isVisible: isVisible,
+          row: r,
+          column: c,
+          rect: Rect.fromLTWH(_x, _y, _width, _height)));
+
+      final widget = state.toWidget(
+          constraints: constraints, x: _x, y: _y, width: _width, height: _height, index: index);
+      if (isMaximized) {
+        maximizedViewWidget = widget;
+      } else {
+        views.add(widget);
+      }
+    }
+
     var r = 0;
     for (final row in this) {
       var x = 0.0;
@@ -396,32 +423,14 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           width = state.minWidth(constraints) + xDelta;
         }
 
-        final thisViewIsMaximized = (maximizedView?.uid == state.uid);
-
         if (viewWithKeyboardFocus?.uid == state.uid) {
           viewWithKeyboardFocusIsVisible = true;
         }
 
-        // This is always created with the view's un-maximized rect. Should it be?
-        rects.add(ViewRect(
-            uid: state.uid,
-            isVisible: noViewIsMaximized || thisViewIsMaximized,
-            row: r,
-            column: c,
-            rect: Rect.fromLTWH(x, y, width, height)));
+        final isMaximized = (maximizedView?.uid == state.uid);
 
-        if (thisViewIsMaximized) {
-          maximizedViewWidget = state.toWidget(
-              constraints: constraints,
-              x: 0,
-              y: 0,
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              index: i);
-        } else {
-          views.add(state.toWidget(
-              constraints: constraints, x: x, y: y, width: width, height: height, index: i));
-        }
+        addViewWithIndex(i, state, r, c, x, y, width, height,
+            isVisible: noViewIsMaximized || isMaximized, isMaximized: isMaximized);
 
         i++;
         c++;
@@ -445,20 +454,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
     // It is possible that the maximized view doesn't fit on the screen when not maximized...
     if (maxedView != null && maximizedViewWidget == null) {
-      rects.add(ViewRect(
-          uid: maxedView.uid,
-          isVisible: true,
-          row: 0,
-          column: 0,
-          rect: Rect.fromLTWH(0, 0, constraints.maxWidth, constraints.maxHeight)));
-
-      maximizedViewWidget = maxedView.toWidget(
-          constraints: constraints,
-          x: 0,
-          y: 0,
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          index: i);
+      addViewWithIndex(i, maxedView, 0, 0, 0, 0, 0, 0, isMaximized: true);
     }
 
     // The maximized view needs to be the last view in the stack so it is always on top.
