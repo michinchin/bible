@@ -1,5 +1,6 @@
 import 'dart:ui' show ImageFilter;
 
+import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -223,11 +224,13 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
 
   Animation<double> _animation;
 
-  Tween<Offset> _offsetTween;
+  // Tween<Offset> _offsetTween;
 
   @override
   Animation<double> createAnimation() {
     assert(_animation == null);
+    _animation = super.createAnimation();
+    /*
     _animation = CurvedAnimation(
         parent: super.createAnimation(),
         curve: Curves.linearToEaseOut,
@@ -235,6 +238,7 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
     final beginX = (alignment.x < 0.0 ? -1.0 : alignment.x > 0.0 ? 1.0 : 0.0);
     final beginY = (alignment.y < 0.0 ? -1.0 : alignment.y > 0.0 ? 1.0 : 0.0);
     _offsetTween = Tween<Offset>(begin: Offset(beginX, beginY), end: const Offset(0.0, 0.0));
+    */
     return _animation;
   }
 
@@ -248,15 +252,20 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     return Container(
       padding: edgeInsets,
       child: ClipRect(
         child: Align(
           alignment: alignment,
           child:
-              FractionalTranslation(translation: _offsetTween.evaluate(_animation), child: child),
+              // FractionalTranslation(translation: _offsetTween.evaluate(_animation), child: child),
+              FadeScaleTransition(animation: _animation, child: child),
         ),
       ),
     );
