@@ -59,24 +59,8 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
 }
 
 Future<void> _showViewMenu({BuildContext context, ViewState state, EdgeInsetsGeometry insets}) {
-  //  return showDialog<void>(
-  //   context: context,
-  //   barrierDismissible: true,
-  //   builder: (c) => Dialog(
-  //       // this property has been removed in flutter 1.20
-  //       // useMaterialBorderRadius: true,
-  //       backgroundColor: Colors.transparent,
-  //       child: Container(
-  //           decoration: BoxDecoration(
-  //             color: Theme.of(context).canvasColor,
-  //             borderRadius: BorderRadius.circular(15),
-  //           ),
-  //           padding: const EdgeInsets.all(15),
-  //           child: _MenuItems(state: state))));
-
   return showTecModalPopup<void>(
     useRootNavigator: true,
-    // barrierColor: Colors.transparent,
     context: context,
     alignment: Alignment.topRight,
     edgeInsets: insets,
@@ -99,11 +83,6 @@ class _MenuItems extends StatelessWidget {
     final bloc = context.bloc<ViewManagerBloc>();
     final isMaximized = bloc?.state?.maximizedViewUid != 0;
 
-    // return Stack(
-    //   alignment: Alignment.topRight,
-    //   children: [
-    //     ListView(
-    //       shrinkWrap: true,
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -237,38 +216,29 @@ Widget _titleDivider(BuildContext context, String title) {
   );
 }
 
-// Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onPressed) {
-//   return ListTile(
-//     dense: true,
-//     onTap: onPressed,
-//     leading: Icon(
-//       icon,
-//       color: Theme.of(context).textColor.withOpacity(0.5),
-//     ),
-//     title: TecText(title),
-//   );
-// }
+Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onTap) {
+  final textScaleFactor = scaleFactorWith(context, maxScaleFactor: 1.2);
+  final textColor = Theme.of(context).textColor.withOpacity(onTap == null ? 0.2 : 0.5);
+  final iconSize = 24.0 * textScaleFactor;
 
-Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onPressed) {
-  final textColor = Theme.of(context).textColor.withOpacity(0.5);
-  const iconSize = 24.0;
   return CupertinoButton(
     padding: const EdgeInsets.only(top: 8, bottom: 8), // EdgeInsets.zero,
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (icon == null)
-          const SizedBox(width: iconSize)
+          SizedBox(width: iconSize)
         else
           Icon(icon, color: textColor, size: iconSize),
         const SizedBox(width: 10),
-        Text(
+        TecText(
           title,
+          textScaleFactor: textScaleFactor,
           style: TextStyle(color: textColor),
         ),
       ],
     ),
     borderRadius: null,
-    onPressed: onPressed,
+    onPressed: onTap,
   );
 }

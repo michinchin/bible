@@ -314,7 +314,7 @@ const TextStyle _kPopupSheetContentStyle = TextStyle(
 // as the sheet's background color.
 const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFFDFDFD), // originally Color(0xC7F9F9F9),
-  darkColor: Color(0xC7252525),
+  darkColor: Color(0xFF1E1E1E), // originally Color(0xC7252525)
 );
 
 // The gray color used for text that appears in the content area.
