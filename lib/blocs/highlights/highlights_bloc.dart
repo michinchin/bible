@@ -111,8 +111,12 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
   final bool loaded;
   StreamSubscription<UserDbChange> _userDbChangeSubscription;
 
-  ChapterHighlightsBloc(
-      {@required this.volumeId, @required this.book, @required this.chapter, this.loaded = false}) {
+  ChapterHighlightsBloc({
+    @required this.volumeId,
+    @required this.book,
+    @required this.chapter,
+    this.loaded = false,
+  }) : super(ChapterHighlights(volumeId, book, chapter, [], loaded: false)) {
     _initUserContent();
 
     // Start listening for changes to the db.
@@ -208,9 +212,6 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
       }
     }
   }
-
-  @override
-  ChapterHighlights get initialState => ChapterHighlights(volumeId, book, chapter, [], loaded: false);
 
   @override
   Stream<ChapterHighlights> mapEventToState(HighlightEvent event) async* {

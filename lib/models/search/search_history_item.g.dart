@@ -13,7 +13,10 @@ _$_SearchHistoryItem _$_$_SearchHistoryItemFromJson(Map<String, dynamic> json) {
     search: json['search'] as String,
     volumesFiltered: json['volumesFiltered'] as String,
     booksFiltered: json['booksFiltered'] as String,
-    modified: json['modified'] as int,
+    index: json['index'] as int,
+    modified: json['modified'] == null
+        ? null
+        : DateTime.parse(json['modified'] as String),
   );
 }
 
@@ -23,5 +26,6 @@ Map<String, dynamic> _$_$_SearchHistoryItemToJson(
       'search': instance.search,
       'volumesFiltered': instance.volumesFiltered,
       'booksFiltered': instance.booksFiltered,
-      'modified': instance.modified,
+      'index': instance.index,
+      'modified': instance.modified?.toIso8601String(),
     };

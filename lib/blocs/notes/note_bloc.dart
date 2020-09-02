@@ -22,7 +22,7 @@ const notesPref = 'tec_notesPref';
 class NoteBloc extends Bloc<NoteEvent, Note> {
   final int id;
 
-  NoteBloc(this.id) {
+  NoteBloc(this.id) : super(Note(id: id, doc: NotusDocument.fromDelta(Delta()..insert('\n')))) {
     _nListener = NoteManagerBloc.shared.listen(_noteListener);
   }
 
@@ -40,13 +40,6 @@ class NoteBloc extends Bloc<NoteEvent, Note> {
   Future<void> close() {
     _nListener.cancel();
     return super.close();
-  }
-
-  @override
-  Note get initialState {
-    final delta = Delta()..insert('\n');
-    final doc = NotusDocument.fromDelta(delta);
-    return Note(id: id, doc: doc);
   }
 
   @override
@@ -136,18 +129,10 @@ abstract class NoteEvent with _$NoteEvent {
 ///
 
 class NoteManagerBloc extends Bloc<NoteManagerEvent, NoteManagerState> {
-  static final shared = NoteManagerBloc._shared();
-  factory NoteManagerBloc() => shared ?? NoteManagerBloc();
-  NoteManagerBloc._shared();
+  NoteManagerBloc._() : super(NoteManagerState([]));
 
-  @override
-  NoteManagerState get initialState => NoteManagerState([]);
-
-  @override
-  Future<void> close() {
-    shared.close();
-    return super.close();
-  }
+  // ignore: close_sinks
+  static final NoteManagerBloc shared = NoteManagerBloc._();
 
   @override
   Stream<NoteManagerState> mapEventToState(NoteManagerEvent event) async* {

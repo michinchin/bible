@@ -54,7 +54,7 @@ class __NoteScreenState extends State<_NoteScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NoteBloc, Note>(
-        bloc: bloc(),
+        cubit: bloc(),
         builder: (context, state) {
           final doc = state.doc;
           _controller = ZefyrController(doc);

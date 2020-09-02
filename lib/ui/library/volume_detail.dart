@@ -90,7 +90,6 @@ class _VolumeCard extends StatelessWidget {
           padding: EdgeInsets.only(right: padding, left: padding),
           child: Container(
             height: cardHeight,
-            //width: MediaQuery.of(context).size.width - padding * 2,
             child: Stack(
               alignment: Alignment.topLeft,
               children: [

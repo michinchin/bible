@@ -10,6 +10,7 @@ import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
+import '../../models/search/tec_share.dart';
 import '../common/common.dart';
 import '../library/library.dart';
 import 'bcv_tab.dart';
@@ -30,8 +31,9 @@ Future<Reference> navigate(BuildContext context, Reference ref, {int initialInde
           height: 600,
           width: 500,
           child: MultiBlocProvider(providers: [
-            BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
-          ], child: Nav(initialIndex: initialIndex))),
+            BlocProvider<NavBloc>(
+                create: (_) => NavBloc(ref)..add(NavEvent.changeTabIndex(index: initialIndex))),
+          ], child: Nav())),
     );
   }
 
@@ -48,15 +50,13 @@ Future<Reference> navigate(BuildContext context, Reference ref, {int initialInde
   return Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
     fullscreenDialog: true,
     builder: (context) => MultiBlocProvider(providers: [
-      BlocProvider<NavBloc>(create: (_) => NavBloc(ref)),
-    ], child: Nav(initialIndex: initialIndex)),
+      BlocProvider<NavBloc>(
+          create: (_) => NavBloc(ref)..add(NavEvent.changeTabIndex(index: initialIndex))),
+    ], child: Nav()),
   ));
 }
 
 class Nav extends StatefulWidget {
-  final int initialIndex;
-  const Nav({this.initialIndex});
-
   @override
   _NavState createState() => _NavState();
 }
@@ -86,7 +86,6 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    navBloc().add(NavEvent.changeTabIndex(index: widget.initialIndex));
     _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
@@ -113,7 +112,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   void _searchControllerListener() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
-    _debounce = Timer(const Duration(milliseconds: 600), () {
+    _debounce = Timer(const Duration(milliseconds: 250), () {
       if (navBloc().state.search != _searchController.text) {
         navBloc().add(NavEvent.onSearchChange(search: _searchController.text));
       }
@@ -154,6 +153,20 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     context.bloc<SearchBloc>().add(const SearchEvent.selectionModeToggle());
   }
 
+  void _onSelectionCopied() {
+    final verses = context.bloc<SearchBloc>().state.searchResults.where((s) => s.selected);
+    if (verses.isNotEmpty) {
+      TecShare.copy(context, verses.map((v) => v.shareText).join('\n\n'));
+    }
+  }
+
+  void _onSelectionShared() {
+    final verses = context.bloc<SearchBloc>().state.searchResults.where((s) => s.selected);
+    if (verses.isNotEmpty) {
+      TecShare.share(verses.map((v) => v.shareText).join('\n\n'));
+    }
+  }
+
   Future<void> _translation() async {
     final volumes = await selectVolumes(context,
         filter: const VolumesFilter(volumeType: VolumeType.bible), selectedVolumes: translations());
@@ -177,7 +190,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                 BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
         context: context,
         builder: (c) => BlocBuilder<PrefItemsBloc, PrefItems>(
-            bloc: prefsBloc(),
+            cubit: prefsBloc(),
             builder: (context, state) {
               final items = state?.items ?? [];
               final navGridViewEnabled = items.boolForPrefItem(PrefItemId.navLayout);
@@ -274,7 +287,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
     Widget titleAppBar(BuildContext c, NavViewState s, SearchState ss) {
       if (s == NavViewState.searchResults && c.bloc<SearchBloc>().state.selectionMode) {
-        final length = ss.selected.length;
+        final length = c.bloc<SearchBloc>().state.searchResults.where((s) => s.selected).length;
         return Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -318,12 +331,12 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       } else if (s.navViewState == NavViewState.searchResults) {
         if (c.bloc<SearchBloc>().state.selectionMode) {
           return [
-            IconButton(icon: const Icon(Icons.content_copy), onPressed: () {}),
-            IconButton(icon: const Icon(Icons.share), onPressed: () {})
+            IconButton(icon: const Icon(Icons.content_copy), onPressed: _onSelectionCopied),
+            IconButton(icon: const Icon(Icons.share), onPressed: _onSelectionShared)
           ];
         } else {
           return [
-            // IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),
+            IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),
             IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
           ];
         }
@@ -342,6 +355,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           _tabController.animateTo(s.tabIndex);
         }
       },
+      listenWhen: (p,c)=> c.tabIndex != p.tabIndex || c.search != p.search,
       builder: (c, s) => TecScaffoldWrapper(
         child: Scaffold(
           appBar: PreferredSize(

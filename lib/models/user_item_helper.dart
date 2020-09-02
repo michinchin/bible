@@ -15,9 +15,7 @@ class UserItemHelper {
     Reference ref,
   ) =>
       AppSettings.shared.userAccount.userDb.saveItem(UserItem(
-          type: UserItemType.bookmark.index,
-          parentId: navHistoryParentId,
-          info: ref.toString()));
+          type: UserItemType.bookmark.index, parentId: navHistoryParentId, info: ref.toString()));
 
   /// navigation history items from db
   static Future<List<Reference>> navHistoryItemsFromDb() async {
@@ -48,5 +46,5 @@ class UserItemHelper {
       AppSettings.shared.userAccount.userDb.saveItem(UserItem(
           type: UserItemType.note.index,
           parentId: searchHistoryParentId,
-          info: item.toJson().toString()));
+          info: tec.toJsonString(item.toJson())));
 }

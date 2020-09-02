@@ -43,7 +43,7 @@ class __NotesScreenState extends State<_NotesScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NoteManagerBloc, NoteManagerState>(
-        bloc: bloc,
+        cubit: bloc,
         builder: (context, state) {
           final notes = state.notes;
           return ListView.separated(

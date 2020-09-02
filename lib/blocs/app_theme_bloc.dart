@@ -6,8 +6,9 @@ import 'package:tec_util/tec_util.dart' as tec;
 enum ThemeModeEvent { toggle }
 
 class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
-  @override
-  ThemeMode get initialState {
+  ThemeModeBloc() : super(initialState);
+
+  static ThemeMode get initialState {
     final isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
     if (isDarkTheme == null) {
       return ThemeMode.system;
@@ -37,4 +38,3 @@ class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
     }
   }
 }
-

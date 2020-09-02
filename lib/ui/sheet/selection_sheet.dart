@@ -161,7 +161,7 @@ class __MediumFullSheetItemsState extends State<_MediumFullSheetItems> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PrefItemsBloc, PrefItems>(
-        bloc: context.bloc<PrefItemsBloc>(),
+        cubit: context.bloc<PrefItemsBloc>(),
         builder: (context, state) {
           final prefItems = state?.items?.where((i) => i.book >= 1 && i.book <= 4)?.toList() ?? [];
           final customColors = [for (final color in prefItems) Color(color.verse)];

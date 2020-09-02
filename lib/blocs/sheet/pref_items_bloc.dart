@@ -28,12 +28,9 @@ abstract class PrefItems with _$PrefItems {
 }
 
 class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
-  PrefItemsBloc() {
+  PrefItemsBloc() : super(const PrefItems([])) {
     _loadFromDb();
   }
-
-  @override
-  PrefItems get initialState => const PrefItems([]);
 
   // returns verse == 0 for item with id
   bool itemBool(int id) => state.items.boolForPrefItem(id);

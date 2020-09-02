@@ -1349,7 +1349,8 @@ class _$NavStateTearOff {
       String search,
       List<int> bookSuggestions,
       List<String> wordSuggestions,
-      List<Reference> history}) {
+      List<Reference> navHistory,
+      List<SearchHistoryItem> searchHistory}) {
     return _NavState(
       navViewState: navViewState,
       tabIndex: tabIndex,
@@ -1357,7 +1358,8 @@ class _$NavStateTearOff {
       search: search,
       bookSuggestions: bookSuggestions,
       wordSuggestions: wordSuggestions,
-      history: history,
+      navHistory: navHistory,
+      searchHistory: searchHistory,
     );
   }
 }
@@ -1372,7 +1374,8 @@ mixin _$NavState {
   String get search;
   List<int> get bookSuggestions;
   List<String> get wordSuggestions;
-  List<Reference> get history;
+  List<Reference> get navHistory;
+  List<SearchHistoryItem> get searchHistory;
 
   $NavStateCopyWith<NavState> get copyWith;
 }
@@ -1387,7 +1390,8 @@ abstract class $NavStateCopyWith<$Res> {
       String search,
       List<int> bookSuggestions,
       List<String> wordSuggestions,
-      List<Reference> history});
+      List<Reference> navHistory,
+      List<SearchHistoryItem> searchHistory});
 }
 
 class _$NavStateCopyWithImpl<$Res> implements $NavStateCopyWith<$Res> {
@@ -1405,7 +1409,8 @@ class _$NavStateCopyWithImpl<$Res> implements $NavStateCopyWith<$Res> {
     Object search = freezed,
     Object bookSuggestions = freezed,
     Object wordSuggestions = freezed,
-    Object history = freezed,
+    Object navHistory = freezed,
+    Object searchHistory = freezed,
   }) {
     return _then(_value.copyWith(
       navViewState: navViewState == freezed
@@ -1420,7 +1425,12 @@ class _$NavStateCopyWithImpl<$Res> implements $NavStateCopyWith<$Res> {
       wordSuggestions: wordSuggestions == freezed
           ? _value.wordSuggestions
           : wordSuggestions as List<String>,
-      history: history == freezed ? _value.history : history as List<Reference>,
+      navHistory: navHistory == freezed
+          ? _value.navHistory
+          : navHistory as List<Reference>,
+      searchHistory: searchHistory == freezed
+          ? _value.searchHistory
+          : searchHistory as List<SearchHistoryItem>,
     ));
   }
 }
@@ -1436,7 +1446,8 @@ abstract class _$NavStateCopyWith<$Res> implements $NavStateCopyWith<$Res> {
       String search,
       List<int> bookSuggestions,
       List<String> wordSuggestions,
-      List<Reference> history});
+      List<Reference> navHistory,
+      List<SearchHistoryItem> searchHistory});
 }
 
 class __$NavStateCopyWithImpl<$Res> extends _$NavStateCopyWithImpl<$Res>
@@ -1455,7 +1466,8 @@ class __$NavStateCopyWithImpl<$Res> extends _$NavStateCopyWithImpl<$Res>
     Object search = freezed,
     Object bookSuggestions = freezed,
     Object wordSuggestions = freezed,
-    Object history = freezed,
+    Object navHistory = freezed,
+    Object searchHistory = freezed,
   }) {
     return _then(_NavState(
       navViewState: navViewState == freezed
@@ -1470,7 +1482,12 @@ class __$NavStateCopyWithImpl<$Res> extends _$NavStateCopyWithImpl<$Res>
       wordSuggestions: wordSuggestions == freezed
           ? _value.wordSuggestions
           : wordSuggestions as List<String>,
-      history: history == freezed ? _value.history : history as List<Reference>,
+      navHistory: navHistory == freezed
+          ? _value.navHistory
+          : navHistory as List<Reference>,
+      searchHistory: searchHistory == freezed
+          ? _value.searchHistory
+          : searchHistory as List<SearchHistoryItem>,
     ));
   }
 }
@@ -1483,7 +1500,8 @@ class _$_NavState with DiagnosticableTreeMixin implements _NavState {
       this.search,
       this.bookSuggestions,
       this.wordSuggestions,
-      this.history});
+      this.navHistory,
+      this.searchHistory});
 
   @override
   final NavViewState navViewState;
@@ -1498,11 +1516,13 @@ class _$_NavState with DiagnosticableTreeMixin implements _NavState {
   @override
   final List<String> wordSuggestions;
   @override
-  final List<Reference> history;
+  final List<Reference> navHistory;
+  @override
+  final List<SearchHistoryItem> searchHistory;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'NavState(navViewState: $navViewState, tabIndex: $tabIndex, ref: $ref, search: $search, bookSuggestions: $bookSuggestions, wordSuggestions: $wordSuggestions, history: $history)';
+    return 'NavState(navViewState: $navViewState, tabIndex: $tabIndex, ref: $ref, search: $search, bookSuggestions: $bookSuggestions, wordSuggestions: $wordSuggestions, navHistory: $navHistory, searchHistory: $searchHistory)';
   }
 
   @override
@@ -1516,7 +1536,8 @@ class _$_NavState with DiagnosticableTreeMixin implements _NavState {
       ..add(DiagnosticsProperty('search', search))
       ..add(DiagnosticsProperty('bookSuggestions', bookSuggestions))
       ..add(DiagnosticsProperty('wordSuggestions', wordSuggestions))
-      ..add(DiagnosticsProperty('history', history));
+      ..add(DiagnosticsProperty('navHistory', navHistory))
+      ..add(DiagnosticsProperty('searchHistory', searchHistory));
   }
 
   @override
@@ -1539,8 +1560,12 @@ class _$_NavState with DiagnosticableTreeMixin implements _NavState {
             (identical(other.wordSuggestions, wordSuggestions) ||
                 const DeepCollectionEquality()
                     .equals(other.wordSuggestions, wordSuggestions)) &&
-            (identical(other.history, history) ||
-                const DeepCollectionEquality().equals(other.history, history)));
+            (identical(other.navHistory, navHistory) ||
+                const DeepCollectionEquality()
+                    .equals(other.navHistory, navHistory)) &&
+            (identical(other.searchHistory, searchHistory) ||
+                const DeepCollectionEquality()
+                    .equals(other.searchHistory, searchHistory)));
   }
 
   @override
@@ -1552,7 +1577,8 @@ class _$_NavState with DiagnosticableTreeMixin implements _NavState {
       const DeepCollectionEquality().hash(search) ^
       const DeepCollectionEquality().hash(bookSuggestions) ^
       const DeepCollectionEquality().hash(wordSuggestions) ^
-      const DeepCollectionEquality().hash(history);
+      const DeepCollectionEquality().hash(navHistory) ^
+      const DeepCollectionEquality().hash(searchHistory);
 
   @override
   _$NavStateCopyWith<_NavState> get copyWith =>
@@ -1567,7 +1593,8 @@ abstract class _NavState implements NavState {
       String search,
       List<int> bookSuggestions,
       List<String> wordSuggestions,
-      List<Reference> history}) = _$_NavState;
+      List<Reference> navHistory,
+      List<SearchHistoryItem> searchHistory}) = _$_NavState;
 
   @override
   NavViewState get navViewState;
@@ -1582,7 +1609,9 @@ abstract class _NavState implements NavState {
   @override
   List<String> get wordSuggestions;
   @override
-  List<Reference> get history;
+  List<Reference> get navHistory;
+  @override
+  List<SearchHistoryItem> get searchHistory;
   @override
   _$NavStateCopyWith<_NavState> get copyWith;
 }

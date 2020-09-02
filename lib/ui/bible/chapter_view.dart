@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -24,8 +25,6 @@ import '../../models/bible_chapter_state.dart';
 import '../../models/user_item_helper.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
-import '../library/library.dart';
-import '../library/volumes_bloc.dart';
 import '../misc/view_actions.dart';
 import '../nav/nav.dart';
 import 'chapter_view_model.dart';
@@ -81,72 +80,75 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     return Scaffold(
       appBar: MinHeightAppBar(
         appBar: AppBar(
+          elevation: 5.0,
           centerTitle: false,
           title: TecStreamBuilder<BibleChapterState>(
-              stream: _chapterState.stream,
-              initialData: _chapterState.value,
-              builder: (context, chapterState, error) {
-                assert(chapterState != null);
-                const minFontSize = 12.0;
-                const buttonPadding = EdgeInsets.only(top: 16.0, bottom: 16.0);
-                final buttonStyle = Theme.of(context)
-                    .textTheme
-                    .headline6
-                    .copyWith(color: Theme.of(context).accentColor);
-
-                return Semantics(
-                  label: chapterState.title,
-                  child: ExcludeSemantics(
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(0),
-                          width: 32.0,
-                          child: IconButton(
-                              padding: const EdgeInsets.only(top: 12.0, bottom: 12.0, right: 8.0),
-                              icon: const Icon(Icons.search),
-                              tooltip: 'Search',
-                              color: Theme.of(context).textColor.withOpacity(0.5),
-                              onPressed: () => _onNavigate(chapterState)),
-                        ),
-                        Flexible(
-                          child: CupertinoButton(
-                            minSize: 0,
-                            padding: buttonPadding,
-                            child: TecAutoSizeText(
-                              chapterState.title,
-                              minFontSize: minFontSize,
-                              maxLines: 1,
-                              style: buttonStyle,
-                            ),
-                            onPressed: () => _onNavigate(chapterState),
-                          ),
-                        ),
-                        TecAutoSizeText(
-                          '・',
-                          minFontSize: minFontSize,
-                          style: Theme.of(context).textTheme.headline6,
-                        ),
-                        Flexible(
-                          child: CupertinoButton(
-                              minSize: 0,
-                              padding: buttonPadding,
-                              child: TecAutoSizeText(
-                                _bible.abbreviation,
-                                minFontSize: minFontSize,
-                                maxLines: 1,
-                                style: buttonStyle,
-                              ),
-                              onPressed: () =>
-                                  _onNavigate(chapterState, initialIndex: NavTabs.translation.index)
-                              // onPressed: () => _onSelectBible(chapterState),
-                              ),
-                        ),
-                      ],
+            stream: _chapterState.stream,
+            initialData: _chapterState.value,
+            builder: (context, chapterState, error) {
+              assert(chapterState != null);
+              const minFontSize = 10.0;
+              const buttonPadding = EdgeInsets.only(top: 16.0, bottom: 16.0);
+              final buttonStyle = Theme.of(context)
+                  .textTheme
+                  .headline6
+                  .copyWith(color: Theme.of(context).textColor.withOpacity(0.5));
+              final autosizeGroup = TecAutoSizeGroup();
+              return Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(0),
+                    width: 32.0,
+                    child: IconButton(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        icon: const Icon(FeatherIcons.search, size: 20),
+                        tooltip: 'Search',
+                        color: Theme.of(context).textColor.withOpacity(0.5),
+                        onPressed: () => _onNavigate(chapterState)),
+                  ),
+                  Flexible(
+                    flex: 3,
+                    child: CupertinoButton(
+                      minSize: 0,
+                      padding: buttonPadding,
+                      child: TecAutoSizeText(
+                        chapterState.bookNameAndChapter,
+                        minFontSize: minFontSize,
+                        maxLines: 1,
+                        group: autosizeGroup,
+                        style: buttonStyle,
+                      ),
+                      onPressed: () => _onNavigate(chapterState),
                     ),
                   ),
-                );
-              }),
+                  TecAutoSizeText(
+                    '・',
+                    minFontSize: minFontSize,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline6
+                        .copyWith(color: Theme.of(context).textColor.withOpacity(0.5)),
+                  ),
+                  Flexible(
+                    child: CupertinoButton(
+                        minSize: 0,
+                        padding: buttonPadding,
+                        child: TecAutoSizeText(
+                          _bible.abbreviation,
+                          minFontSize: minFontSize,
+                          group: autosizeGroup,
+                          maxLines: 1,
+                          style: buttonStyle,
+                        ),
+                        onPressed: () =>
+                            _onNavigate(chapterState, initialIndex: NavTabs.translation.index)
+                        // onPressed: () => _onSelectBible(chapterState),
+                        ),
+                  ),
+                ],
+              );
+            },
+          ),
           actions: defaultActionsBuilder(context, widget.state, widget.size),
         ),
       ),
@@ -199,17 +201,17 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     }
   }
 
-  Future<void> _onSelectBible(BibleChapterState chapterState) async {
-    TecAutoScroll.stopAutoscroll();
-    final bibleId = await selectVolume(context,
-        title: 'Select Bible Translation',
-        filter: const VolumesFilter(
-          volumeType: VolumeType.bible,
-        ),
-        selectedVolume: _bible.id);
-
-    _changeVolume(bibleId: bibleId, chapterState: chapterState);
-  }
+  // Future<void> _onSelectBible(BibleChapterState chapterState) async {
+  //   TecAutoScroll.stopAutoscroll();
+  //   final bibleId = await selectVolume(context,
+  //       title: 'Select Bible Translation',
+  //       filter: const VolumesFilter(
+  //         volumeType: VolumeType.bible,
+  //       ),
+  //       selectedVolume: _bible.id);
+  //
+  //   _changeVolume(bibleId: bibleId, chapterState: chapterState);
+  // }
 
   void _changeVolume({@required int bibleId, @required BibleChapterState chapterState}) {
     if (bibleId != null) {

@@ -1,3 +1,4 @@
+import 'package:async/async.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -5,6 +6,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/search/autocomplete.dart';
+import '../../models/search/search_history_item.dart';
 import '../../models/user_item_helper.dart';
 
 part 'nav_bloc.freezed.dart';
@@ -33,39 +35,44 @@ abstract class NavState with _$NavState {
     String search,
     List<int> bookSuggestions,
     List<String> wordSuggestions,
-    List<Reference> history,
+    List<Reference> navHistory,
+    List<SearchHistoryItem> searchHistory,
   }) = _NavState;
 }
 
 class NavBloc extends Bloc<NavEvent, NavState> {
   final Reference initialRef;
-  NavBloc(this.initialRef);
+  CancelableOperation<AutoComplete> autoCompleteOperation;
 
-  @override
-  NavState get initialState => NavState(
-      ref: initialRef ?? Reference.fromHref('50/1/1', volume: 51),
-      tabIndex: 1,
-      search: '',
-      bookSuggestions: [],
-      wordSuggestions: [],
-      history: [],
-      navViewState: NavViewState.bcvTabs);
+  NavBloc(this.initialRef)
+      : super(NavState(
+          ref: initialRef ?? Reference.fromHref('50/1/1', volume: 51),
+          tabIndex: 1,
+          search: '',
+          bookSuggestions: [],
+          wordSuggestions: [],
+          navHistory: [],
+          searchHistory: [],
+          navViewState: NavViewState.bcvTabs,
+        ));
 
   @override
   Stream<NavState> mapEventToState(NavEvent event) async* {
     if (event is _LoadWordSuggestions) {
       final suggestions = await _loadWordSuggestions(event.search);
       yield state.copyWith(wordSuggestions: suggestions);
-    } else if (event is _LoadHistory){
-      final history = await UserItemHelper.navHistoryItemsFromDb();
-      tec.dmPrint('Loading nav history');
-      yield state.copyWith(history: history);
-      }else {
+    } else if (event is _LoadHistory) {
+      final navHistory = await UserItemHelper.navHistoryItemsFromDb();
+      final searchHistory = await UserItemHelper.searchHistoryItemsFromDb();
+      tec.dmPrint('Loading history');
+      yield state.copyWith(navHistory: navHistory, searchHistory: searchHistory);
+    }
+     else {
       final newState = event.when(
           changeNavView: _changeNavView,
           onSearchChange: _onSearchChange,
           onSearchFinished: _onSearchFinished,
-          loadHistory: (){},
+          loadHistory: () {},
           loadWordSuggestions: (_) {},
           changeTabIndex: _changeTabIndex,
           changeState: _changeState,
@@ -207,8 +214,12 @@ class NavBloc extends Bloc<NavEvent, NavState> {
   NavState _changeState(NavState s) => s;
 
   Future<List<String>> _loadWordSuggestions(String s) async {
-    final ac = await AutoComplete.fetch(phrase: s, translationIds: '${state.ref.volume}');
-    return ac?.possibles;
+    await autoCompleteOperation?.cancel();
+
+    final ac = AutoComplete.fetch(phrase: s, translationIds: '${state.ref.volume}');
+    autoCompleteOperation = CancelableOperation<AutoComplete>.fromFuture(ac,
+        onCancel: () => tec.dmPrint('Canceled Autocomplete for "$s"'));
+    return (await autoCompleteOperation.value).possibles;
   }
 
   NavState _changeTabIndex(int index) {

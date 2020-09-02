@@ -13,10 +13,10 @@ enum IsLicensedOpt { any, all }
 ///
 /// Given a set of volume ids, this Bloc's state will be `true` iff `any` (or optionally `all`)
 /// of the given volumes are fully licensed.
-/// 
+///
 /// This Bloc listens for license changes in the TecUserAccount UserDb, and auto-updates if
 /// there are changes.
-/// 
+///
 class IsLicensedBloc extends tec.SafeBloc<bool, bool> {
   final Set<int> _setOfIds;
   final IsLicensedOpt option;
@@ -31,7 +31,8 @@ class IsLicensedBloc extends tec.SafeBloc<bool, bool> {
     this.checkUnlimited = true,
   })  : assert(volumeIds != null && volumeIds.isNotEmpty),
         assert(option != null && checkPremium != null && checkUnlimited != null),
-        _setOfIds = volumeIds?.toSet() ?? {} {
+        _setOfIds = volumeIds?.toSet() ?? {},
+        super(false) {
     _userDbChangeSubscription =
         AppSettings.shared.userAccount.userDbChangeStream.listen(_userDbChangeListener);
     _refresh();
@@ -43,9 +44,6 @@ class IsLicensedBloc extends tec.SafeBloc<bool, bool> {
     _userDbChangeSubscription = null;
     return super.close();
   }
-
-  @override
-  bool get initialState => false;
 
   @override
   Stream<bool> mapEventToState(bool event) async* {

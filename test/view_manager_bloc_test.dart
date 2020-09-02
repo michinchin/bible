@@ -22,12 +22,12 @@ void main() {
     });
 
     test('initial state is empty list', () {
-      expect(bloc.initialState, ViewManagerState([bcv], 0, 2, ViewManagerStateBuildInfo.build));
+      expect(bloc.state, ViewManagerState([bcv], 0, 2, ViewManagerStateBuildInfo.build));
     });
 
-    blocTest<ViewManagerBloc, ViewManagerEvent, ViewManagerState>(
+    blocTest<ViewManagerBloc, ViewManagerState>(
       'emits correct states when various events are added',
-      build: () async => bloc,
+      build: () => bloc,
       act: (bloc) {
         bloc
           ..add(add('1'))
@@ -36,7 +36,6 @@ void main() {
           ..add(move(1, 2))
           ..add(remove(2))
           ..add(remove(3));
-        return Future.value();
       },
       expect: <dynamic>[
         ViewManagerState([bcv, view(2, '1')], 0, 3, ViewManagerStateBuildInfo.build),

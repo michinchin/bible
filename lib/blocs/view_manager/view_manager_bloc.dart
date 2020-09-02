@@ -30,12 +30,33 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   ///
   ViewManagerBloc({@required tec.KeyValueStore kvStore})
       : assert(kvStore != null),
-        _kvStore = kvStore;
+        _kvStore = kvStore,
+        super(initialState(kvStore));
+
+  static ViewManagerState initialState(tec.KeyValueStore kvStore) {
+    final jsonStr = kvStore?.getString(_key);
+    ViewManagerState state;
+    if (tec.isNotNullOrEmpty(jsonStr)) {
+      // tec.dmPrint('loaded ViewManagerState: $jsonStr');
+      final json = tec.parseJsonSync(jsonStr);
+      if (json != null) state = ViewManagerState.fromJson(json);
+    }
+    if (state == null || state.views.isEmpty) {
+      state = _defaultViewManagerState;
+    }
+    return state;
+  }
 
   final tec.KeyValueStore _kvStore;
 
   var _viewRects = <ViewRect>[]; // ignore: prefer_final_fields
   List<List<ViewState>> _rows = []; // ignore: prefer_final_fields
+
+  ///
+  /// Returns the size of the view manager rectangle.
+  /// 
+  Size get size => _size;
+  var _size = Size.zero; // ignore: prefer_final_fields
 
   ///
   /// Is the view manager full of views? True, if another view cannot fit on the screen,
@@ -187,24 +208,6 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     //   tec.dmPrint(selectionObjectWithViewUid(uid));
     // }
     // tec.dmPrint('');
-  }
-
-  ///
-  /// Initial state
-  ///
-  @override
-  ViewManagerState get initialState {
-    final jsonStr = _kvStore.getString(_key);
-    ViewManagerState state;
-    if (tec.isNotNullOrEmpty(jsonStr)) {
-      // tec.dmPrint('loaded ViewManagerState: $jsonStr');
-      final json = tec.parseJsonSync(jsonStr);
-      if (json != null) state = ViewManagerState.fromJson(json);
-    }
-    if (state == null || state.views.isEmpty) {
-      state = _defaultViewManagerState;
-    }
-    return state;
   }
 
   @override

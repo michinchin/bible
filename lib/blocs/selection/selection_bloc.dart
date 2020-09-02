@@ -13,8 +13,7 @@ abstract class SelectionState with _$SelectionState {
 }
 
 class SelectionBloc extends Bloc<SelectionState, SelectionState> {
-  @override
-  SelectionState get initialState => const SelectionState(isTextSelected: false);
+  SelectionBloc() : super(const SelectionState(isTextSelected: false));
 
   @override
   Stream<SelectionState> mapEventToState(SelectionState event) async* {
@@ -34,8 +33,7 @@ abstract class SelectionStyle with _$SelectionStyle {
 }
 
 class SelectionStyleBloc extends Bloc<SelectionStyle, SelectionStyle> {
-  @override
-  SelectionStyle get initialState => const SelectionStyle();
+  SelectionStyleBloc() : super(const SelectionStyle());
 
   @override
   Stream<SelectionStyle> mapEventToState(SelectionStyle event) async* {

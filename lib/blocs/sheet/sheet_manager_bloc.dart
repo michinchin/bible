@@ -26,9 +26,7 @@ abstract class SheetEvent with _$SheetEvent {
 }
 
 class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
-  @override
-  SheetManagerState get initialState =>
-      const SheetManagerState(type: SheetType.main, size: SheetSize.mini);
+  SheetManagerBloc() : super(const SheetManagerState(type: SheetType.main, size: SheetSize.mini));
 
   @override
   Stream<SheetManagerState> mapEventToState(SheetEvent event) async* {
@@ -58,8 +56,7 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
     if (state.type != SheetType.main && state.size != SheetSize.mini) {
       // update both type and size
       changeTypeSize(SheetType.main, SheetSize.mini);
-    }
-    else if (state.type != SheetType.main) {
+    } else if (state.type != SheetType.main) {
       // update the type
       changeType(SheetType.main);
     } else if (state.size != SheetSize.mini) {
