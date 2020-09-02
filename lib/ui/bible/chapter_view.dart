@@ -126,7 +126,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                     child: Container(
                       color: Theme.of(context).textColor.withOpacity(0.2),
                       width: 1,
-                      height: 22 * textScaleFactorWith(context),
+                      height: const MinHeightAppBar().preferredSize.height * .55,// 22 * textScaleFactorWith(context),
                     ),
                   ),
                   Flexible(
