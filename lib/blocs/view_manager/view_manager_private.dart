@@ -14,7 +14,7 @@ class _VMViewStack extends StatelessWidget {
     // If the maxWidth is less then the bottom sheet maxWidth, subtract the sheet
     // height from maxHeight so views have equal visible area, i.e. so the views
     // don't extend under the bottom sheet.
-    const bottomSheetHeight = 56.0; // + (MediaQuery.of(context)?.padding?.bottom ?? 0.0);
+    const bottomSheetHeight = 0.0; // 56.0; // + (MediaQuery.of(context)?.padding?.bottom ?? 0.0);
     final adjustedConstraints = constraints.maxWidth <= 460.0
         ? constraints.copyWith(maxHeight: constraints.maxHeight - bottomSheetHeight)
         : constraints;
