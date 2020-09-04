@@ -948,13 +948,13 @@ class _$_SearchResultInfo extends _SearchResultInfo
 }
 
 abstract class _SearchResultInfo extends SearchResultInfo {
+  const _SearchResultInfo._() : super._();
   const factory _SearchResultInfo(SearchResult searchResult,
       {bool contextExpanded,
       int currentVerseIndex,
       bool selected,
       bool expanded,
       Map<int, Context> contextMap}) = _$_SearchResultInfo;
-  const _SearchResultInfo._() : super._();
 
   @override
   SearchResult get searchResult;

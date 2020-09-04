@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -67,7 +68,7 @@ const minTabsAvailable = 3;
 class _NavState extends State<Nav> with TickerProviderStateMixin {
   TabController _tabController;
   TextEditingController _searchController;
-  Timer _debounce;
+  final _searchOnChange = BehaviorSubject<String>();
 
   NavBloc navBloc() => context.bloc<NavBloc>();
 
@@ -89,6 +90,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
+
+    // tab controller that updates position based on navbloc
     _tabController =
         TabController(length: tabLength, initialIndex: navBloc().state.tabIndex, vsync: this)
           ..addListener(() {
@@ -96,27 +99,26 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
               navBloc().add(NavEvent.changeTabIndex(index: _tabController.index));
             }
           });
-    // if (widget.searchModeOn) {
-    //   navBloc()
-    //     ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))
-    //     ..add(NavEvent.changeTabIndex(index: SearchAndHistoryTabs.search.index));
-    // }
+
+    // stream for changes to text field and only update when changes
+    _searchOnChange.debounceTime(const Duration(milliseconds: 250)).listen((s) {
+      if (navBloc().state.search != s) {
+        navBloc().add(NavEvent.onSearchChange(search: s));
+      }
+    });
     super.initState();
   }
 
   @override
   void dispose() {
-    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _searchOnChange.close();
     super.dispose();
   }
 
   void _searchControllerListener() {
-    if (_debounce?.isActive ?? false) _debounce.cancel();
-    _debounce = Timer(const Duration(milliseconds: 250), () {
-      if (navBloc().state.search != _searchController.text) {
-        navBloc().add(NavEvent.onSearchChange(search: _searchController.text));
-      }
-    });
+    if (navBloc().state.search != _searchController.text) {
+      _searchOnChange.add(_searchController.text);
+    }
   }
 
   void _changeTabController() {
@@ -137,10 +139,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     final s = query ?? _searchController.text;
     FocusScope.of(context).unfocus();
     if (s.isNotEmpty) {
-      navBloc()
-        ..add(NavEvent.onSearchChange(search: s))
-        ..add(const NavEvent.onSearchFinished())
-        ..add(const NavEvent.loadHistory());
+      navBloc()..add(NavEvent.onSearchFinished(search: s))..add(const NavEvent.loadHistory());
       searchBloc().add(SearchEvent.request(search: s, translations: translations()));
     }
   }
@@ -262,6 +261,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           );
         case NavViewState.searchSuggestions:
           return SearchSuggestionsView(
+            searchController: _searchController,
             onSubmit: onSubmit,
           );
         case NavViewState.searchResults:
@@ -296,7 +296,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             ));
       } else {
         return TextField(
-            onEditingComplete: onSubmit,
+            onSubmitted: (s) => onSubmit(query: s),
             decoration: const InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Enter references or keywords',
@@ -346,23 +346,18 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
     return BlocConsumer<NavBloc, NavState>(
       listener: (c, s) {
-        if (s.search != _searchController.text) {
-          _searchController
-            ..text = s.search
-            ..selection = TextSelection.collapsed(offset: s.search.length);
-        }
+        // tec.dmPrint(
+        //     'Change from listener:\nstate search:${s.search}\nsearchController:${_searchController.text}');
         if (s.tabIndex < _tabController.length && s.tabIndex != _tabController.index) {
           _tabController.animateTo(s.tabIndex);
         }
       },
-      listenWhen: (p,c)=> c.tabIndex != p.tabIndex || c.search != p.search,
       builder: (c, s) => TecScaffoldWrapper(
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: AppBar().preferredSize,
             child: BlocBuilder<SearchBloc, SearchState>(
               builder: (c, ss) => AppBar(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                 elevation: 5,
                 backgroundColor: Theme.of(context).cardColor,
                 title: titleAppBar(c, s.navViewState, ss),

@@ -1,4 +1,3 @@
-import 'package:bible/models/search/search_history_item.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +13,7 @@ import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/context.dart';
+import '../../models/search/search_history_item.dart';
 import '../../models/search/search_result.dart';
 import '../../models/search/tec_share.dart';
 import '../common/common.dart';
@@ -109,8 +109,7 @@ class HistoryView extends StatelessWidget {
                                 .map(int.parse)
                                 .toList()));
                       c.bloc<NavBloc>()
-                        ..add(NavEvent.onSearchChange(search: searchHistory[i].search))
-                        ..add(const NavEvent.onSearchFinished())
+                        ..add(NavEvent.onSearchFinished(search: searchHistory[i].search))
                         ..add(const NavEvent.changeTabIndex(index: 1));
                     },
                   ),
@@ -152,8 +151,7 @@ class _SearchHistoryView extends StatelessWidget {
                         translations:
                             searchHistory[i].volumesFiltered.split('|').map(int.parse).toList()));
                   c.bloc<NavBloc>()
-                    ..add(NavEvent.onSearchChange(search: searchHistory[i].search))
-                    ..add(const NavEvent.onSearchFinished())
+                    ..add(NavEvent.onSearchFinished(search: searchHistory[i].search))
                     ..add(const NavEvent.changeTabIndex(index: 1));
                 },
               ),
