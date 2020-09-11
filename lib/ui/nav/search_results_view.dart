@@ -22,6 +22,8 @@ import '../sheet/selection_sheet_model.dart';
 enum SearchAndHistoryTabs { history, search }
 
 class SearchAndHistoryView extends StatelessWidget {
+  final TextEditingController searchController;
+  const SearchAndHistoryView(this.searchController);
   @override
   Widget build(BuildContext context) {
     // TODO(abby): if no search results currently, do most recent search or focus on textfield
@@ -41,13 +43,34 @@ class SearchAndHistoryView extends StatelessWidget {
                 tabs: const [Tab(child: Text('HISTORY')), Tab(child: Text('SEARCH RESULTS'))]),
           ),
         ),
-        body: TabBarView(children: [HistoryView(), SearchResultsView()]),
+        body: TabBarView(children: [HistoryView(searchController), SearchResultsView()]),
       ),
     );
   }
 }
 
-class HistoryView extends StatelessWidget {
+class HistoryView extends StatefulWidget {
+  final TextEditingController searchController;
+  const HistoryView(this.searchController);
+
+  @override
+  _HistoryViewState createState() => _HistoryViewState();
+}
+
+class _HistoryViewState extends State<HistoryView> {
+  void _onSearchTap(BuildContext c, SearchHistoryItem searchHistoryItem) {
+    c.bloc<SearchBloc>()
+      ..add(SearchEvent.request(
+          search: searchHistoryItem.search,
+          translations: searchHistoryItem.volumesFiltered.split('|').map(int.parse).toList()));
+    // ..scrollIndex = searchHistoryItem?.index ?? 0;
+    c.bloc<NavBloc>()..add(NavEvent.onSearchFinished(search: searchHistoryItem.search));
+    widget.searchController
+      ..text = searchHistoryItem.search
+      ..selection = TextSelection.collapsed(offset: searchHistoryItem.search.length);
+    DefaultTabController.of(c).animateTo(1);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NavBloc, NavState>(builder: (c, s) {
@@ -75,7 +98,7 @@ class HistoryView extends StatelessWidget {
                     leading: const Icon(Icons.history),
                     title: Text(navHistory[i].label()),
                     onTap: () {
-                      Navigator.of(context).maybePop<Reference>(navHistory[i]);
+                      Navigator.of(c).maybePop<Reference>(navHistory[i]);
                     },
                   ),
                 ),
@@ -83,10 +106,15 @@ class HistoryView extends StatelessWidget {
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 const ListLabel('Search History'),
                 IconButton(
-                    icon:
-                        Icon(Icons.chevron_right, color: Theme.of(context).textTheme.caption.color),
-                    onPressed: () => Navigator.of(c).push(MaterialPageRoute<void>(
-                        builder: (c) => _SearchHistoryView(searchHistory)))),
+                    icon: Icon(Icons.chevron_right, color: Theme.of(c).textTheme.caption.color),
+                    onPressed: () async {
+                      final searchChosen = await Navigator.of(c).push(
+                          MaterialPageRoute<SearchHistoryItem>(
+                              builder: (c) => _SearchHistoryView(searchHistory)));
+                      if (searchChosen != null) {
+                        _onSearchTap(c, searchChosen);
+                      }
+                    }),
               ]),
               Flexible(
                 child: ListView.separated(
@@ -98,20 +126,7 @@ class HistoryView extends StatelessWidget {
                     dense: true,
                     leading: const Icon(Icons.search),
                     title: Text(searchHistory[i].search),
-                    onTap: () {
-                      c.bloc<SearchBloc>()
-                        ..scrollIndex = searchHistory[i].index
-                        ..add(SearchEvent.request(
-                            search: searchHistory[i].search,
-                            translations: searchHistory[i]
-                                .volumesFiltered
-                                .split('|')
-                                .map(int.parse)
-                                .toList()));
-                      c.bloc<NavBloc>()
-                        ..add(NavEvent.onSearchFinished(search: searchHistory[i].search))
-                        ..add(const NavEvent.changeTabIndex(index: 1));
-                    },
+                    onTap: () => _onSearchTap(c, searchHistory[i]),
                   ),
                 ),
               ),
@@ -143,17 +158,7 @@ class _SearchHistoryView extends StatelessWidget {
                 title: Text(searchHistory[i].search),
                 subtitle: Text(
                     '${tec.shortDate(searchHistory[i].modified)}, ${searchHistory[i].modified.hour}:${searchHistory[i].modified.minute}'),
-                onTap: () {
-                  c.bloc<SearchBloc>()
-                    ..scrollIndex = searchHistory[i].index
-                    ..add(SearchEvent.request(
-                        search: searchHistory[i].search,
-                        translations:
-                            searchHistory[i].volumesFiltered.split('|').map(int.parse).toList()));
-                  c.bloc<NavBloc>()
-                    ..add(NavEvent.onSearchFinished(search: searchHistory[i].search))
-                    ..add(const NavEvent.changeTabIndex(index: 1));
-                },
+                onTap: () => Navigator.of(c).pop<SearchHistoryItem>(searchHistory[i]),
               ),
             ),
     );
@@ -197,31 +202,40 @@ class SearchResultsView extends StatefulWidget {
   _SearchResultsViewState createState() => _SearchResultsViewState();
 }
 
-class _SearchResultsViewState extends State<SearchResultsView> {
-  ItemScrollController scrollController;
-  ItemPositionsListener positionListener;
+class _SearchResultsViewState extends State<SearchResultsView> with AutomaticKeepAliveClientMixin {
+  // ItemScrollController scrollController;
+  // ItemPositionsListener positionListener;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
-    final scrollIndex = context.bloc<SearchBloc>().scrollIndex;
-    positionListener = ItemPositionsListener.create();
-    positionListener.itemPositions.addListener(() {
-      if (positionListener.itemPositions.value.isNotEmpty) {
-        context.bloc<SearchBloc>().scrollIndex = positionListener.itemPositions.value.first.index;
-      }
-    });
-    scrollController = ItemScrollController();
-    if (scrollIndex != 0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        scrollController.scrollTo(index: scrollIndex, duration: const Duration(milliseconds: 250));
-      });
-    }
+    // positionListener = ItemPositionsListener.create();
+    // positionListener.itemPositions.addListener(() {
+    //   if (positionListener.itemPositions.value.isNotEmpty) {
+    //     context.bloc<SearchBloc>().scrollIndex = positionListener.itemPositions.value.first.index;
+    //   }
+    // });
+    // scrollController = ItemScrollController();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SearchBloc, SearchState>(builder: (context, state) {
+    super.build(context);
+    return BlocBuilder<SearchBloc, SearchState>(
+        // listener: (c, s) {
+        // final scrollIndex = context.bloc<SearchBloc>().scrollIndex;
+        // if (scrollIndex != 0) {
+        //   WidgetsBinding.instance.addPostFrameCallback((_) {
+        //     scrollController.scrollTo(
+        //         index: scrollIndex, duration: const Duration(milliseconds: 250));
+        //   });
+        // }
+        // },
+        // listenWhen: (p, c) => p.search != c.search,
+        builder: (context, state) {
       if (state.loading) {
         return const Center(child: LoadingIndicator());
       } else if (state.error) {
@@ -238,6 +252,8 @@ class _SearchResultsViewState extends State<SearchResultsView> {
         child: Scaffold(
           body: ScrollablePositionedList.separated(
             itemCount: state.searchResults.length + 1,
+            // itemScrollController: scrollController,
+            // itemPositionsListener: positionListener,
             separatorBuilder: (c, i) {
               if (i == 0) {
                 // if sized box has height: 0, causes errors in scrollable list

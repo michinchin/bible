@@ -14,8 +14,16 @@ class UserItemHelper {
   static Future<UserItem> saveNavHistoryItem(
     Reference ref,
   ) =>
-      AppSettings.shared.userAccount.userDb.saveItem(UserItem(
-          type: UserItemType.bookmark.index, parentId: navHistoryParentId, info: ref.toString()));
+      AppSettings.shared.userAccount.userDb.saveItem(
+          createBookmark(ref).copyWith(parentId: navHistoryParentId, created: DateTime.now()));
+
+  static UserItem createBookmark(Reference ref) => UserItem(
+        type: UserItemType.bookmark.index,
+        book: ref.book,
+        chapter: ref.chapter,
+        verse: ref.verse,
+        volumeId: ref.volume,
+      );
 
   /// navigation history items from db
   static Future<List<Reference>> navHistoryItemsFromDb() async {
@@ -23,7 +31,12 @@ class UserItemHelper {
         .getItemsWithParent(navHistoryParentId, ofTypes: [UserItemType.bookmark]);
     final refs = <Reference>[];
     for (final i in items) {
-      final ref = Reference.fromJson(i.info).copyWith(modified: tec.dateTimeFromDbInt(i.modified));
+      final ref = Reference(
+        book: i.book,
+        chapter: i.chapter,
+        verse: i.verse,
+        volume: i.volumeId,
+      ).copyWith(modified: tec.dateTimeFromDbInt(i.modified));
       refs.add(ref);
     }
     return refs;
@@ -44,6 +57,7 @@ class UserItemHelper {
   /// save search history item to db
   static Future<UserItem> saveSearchHistoryItem(SearchHistoryItem item) =>
       AppSettings.shared.userAccount.userDb.saveItem(UserItem(
+          created: tec.dbIntFromDateTime(DateTime.now()),
           type: UserItemType.note.index,
           parentId: searchHistoryParentId,
           info: tec.toJsonString(item.toJson())));

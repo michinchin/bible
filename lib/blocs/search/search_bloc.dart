@@ -36,7 +36,7 @@ abstract class SearchState with _$SearchState {
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   CancelableOperation<List<SearchResult>> searchOperation;
-  int scrollIndex = 0;
+  // int scrollIndex = 0;
 
   SearchBloc()
       : super(const SearchState(
@@ -54,16 +54,22 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     if (event is _Requested) {
       // make sure any still-pending prior request never gets processed
       await searchOperation?.cancel();
+
       yield state.copyWith(loading: true);
       tec.dmPrint('Loading search: ${event.search}');
+
       try {
         final translations = event.translations.join('|');
         final futureRes = SearchResults.fetch(words: event.search, translationIds: translations);
-        searchOperation = CancelableOperation<List<SearchResult>>.fromFuture(futureRes,
-            onCancel: () => tec.dmPrint('Cancelled search query'));
+        searchOperation = CancelableOperation<List<SearchResult>>.fromFuture(futureRes);
         final res = await searchOperation.value;
         tec.dmPrint('Completed search "${event.search}" with ${res.length} result(s)');
-        await _saveToSearchHistory(event.search, translations);
+
+        // save search 
+        if (res.isNotEmpty) {
+          await _saveToSearchHistory(event.search, translations);
+        }
+
         yield state.copyWith(
             searchResults: res.map((r) => SearchResultInfo(r)).toList(),
             loading: false,
@@ -102,15 +108,17 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     return state;
   }
 
+  /// save search when navigating away or entering new search
   Future<void> _saveToSearchHistory(String search, String translations) async {
     // check to make sure u haven't saved it already
     final s = SearchHistoryItem(
         search: search,
         volumesFiltered: translations,
         booksFiltered: state.filteredBooks.join('|'),
-        index: scrollIndex,
+        // index: scrollIndex,
         modified: DateTime.now());
     await UserItemHelper.saveSearchHistoryItem(s);
+    // scrollIndex = 0;
   }
 }
 

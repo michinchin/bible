@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bible/ui/nav/search_filter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -167,6 +168,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   Future<void> _translation() async {
+    // TODO(abby): WIP
+    // await showFilter(context, filter: const VolumesFilter(volumeType: VolumeType.bible));
     final volumes = await selectVolumes(context,
         filter: const VolumesFilter(volumeType: VolumeType.bible), selectedVolumes: translations());
     if (volumes != null) {
@@ -265,7 +268,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             onSubmit: onSubmit,
           );
         case NavViewState.searchResults:
-          return SearchAndHistoryView();
+          return SearchAndHistoryView(_searchController);
       }
       return Container();
     }
