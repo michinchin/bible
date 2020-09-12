@@ -166,7 +166,7 @@ class _ChapterView extends StatelessWidget {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor =
         isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
-    final bible = VolumesRepository.shared.bibleWithId(51);
+    final bible = VolumesRepository.shared.bibleWithId(9);
 
     final ref = context.bloc<NavBloc>().state.ref;
     final chapters = bible.chaptersIn(book: ref.book);
@@ -199,7 +199,7 @@ class _VerseView extends StatelessWidget {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor =
         isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
-    final bible = VolumesRepository.shared.bibleWithId(51);
+    final bible = VolumesRepository.shared.bibleWithId(9);
 
     final ref = context.bloc<NavBloc>().state.ref;
     final book = ref.book;
@@ -231,7 +231,7 @@ class _BookView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bible = VolumesRepository.shared.bibleWithId(51);
+    final bible = VolumesRepository.shared.bibleWithId(9);
     final navCanonical = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.navBookOrder);
 
     // ignore: prefer_collection_literals
@@ -426,7 +426,7 @@ class _PillButton extends StatelessWidget {
 //       // tec.dmPrint('Nav constraints: $constraints');
 //       final area = constraints.maxHeight * constraints.minHeight;
 
-//       final bible = VolumesRepository.shared.bibleWithId(51);
+//       final bible = VolumesRepository.shared.bibleWithId(9);
 
 //       // ignore: prefer_collection_literals
 //       final bookNames = LinkedHashMap<int, String>();

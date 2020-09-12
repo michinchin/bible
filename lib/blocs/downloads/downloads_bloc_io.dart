@@ -248,28 +248,20 @@ class DownloadsBlocImp extends DownloadsBloc {
     if (item == null || tec.isNullOrEmpty(item.url)) return false;
 
     final zipFilename = path.basename(item.url);
+    final zipFilepath = path.join(_downloadsDir, zipFilename);
+
+    final volumeId = _volumeIdFromUrl(zipFilepath);
+    if (volumeId <= 0) return false;
+
     var successful = false;
-    final zipFilePath = path.join(_downloadsDir, zipFilename);
-    final zipFile = File(zipFilePath);
-    if (zipFile.existsSync()) {
-      final stopwatch = Stopwatch()..start();
-      successful = await tec.unzipFile(zipFile.path, toDir: _unzipDir);
-      tec.dmPrint('Unzipping $zipFilename took ${stopwatch.elapsed}');
-
+    if (File(zipFilepath).existsSync()) {
+      successful = await VolumesRepository.shared.unzipVolumeFromFile(volumeId, zipFilepath);
       if (successful) {
-        final volumeId = _volumeIdFromUrl(zipFilePath);
-        if (volumeId > 0) {
-          // It should be a local volume now...
-          await VolumesRepository.shared.updateLocalVolumes();
-          if (!VolumesRepository.shared.isLocalVolume(volumeId)) {
-            tec.dmPrint('Unzipping $zipFilename succeeded, but it is not a local volume!?');
-          }
-        }
-
         // Delete the download task and zip file.
         await FlutterDownloader.remove(taskId: item.taskId, shouldDeleteContent: true);
       }
     }
+
     return successful;
   }
 }

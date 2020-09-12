@@ -46,7 +46,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
   NavBloc(this.initialRef)
       : super(NavState(
-          ref: initialRef ?? Reference.fromHref('50/1/1', volume: 51),
+          ref: initialRef ?? Reference.fromHref('50/1/1', volume: 9),
           tabIndex: 1,
           search: '',
           bookSuggestions: [],

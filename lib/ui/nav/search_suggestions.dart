@@ -14,7 +14,7 @@ class SearchSuggestionsView extends StatelessWidget {
   Widget build(BuildContext context) {
     // ignore: close_sinks
     final bloc = context.bloc<NavBloc>();
-    final bible = VolumesRepository.shared.bibleWithId(51);
+    final bible = VolumesRepository.shared.bibleWithId(9);
     final wordSuggestions = bloc.state.wordSuggestions ?? [];
     final bookSuggestions = bloc.state.bookSuggestions ?? [];
     void updateSearch(String s) => searchController
