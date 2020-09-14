@@ -332,7 +332,7 @@ List<TextSpan> searchResTextSpans(
         // add the bold text...
         content.add(TextSpan(
             text: verse.substring(where, where + bold[where]),
-            style: const TextStyle(fontWeight: FontWeight.bold)));
+            style: const TextStyle(fontWeight: FontWeight.w900)));
 
         lastEnd = where + bold[where];
       }

@@ -1,6 +1,8 @@
+import 'package:bible/models/app_settings.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/search/compare_results.dart';
 
@@ -16,14 +18,23 @@ class CompareVerseScreen extends StatelessWidget {
         elevation: 0,
         textTheme: Theme.of(context).textTheme,
         iconTheme: Theme.of(context).iconTheme,
-        title: Text(title),
+        title: Text(
+          title,
+          textScaleFactor: contentTextScaleFactorWith(context),
+        ),
         backgroundColor: Colors.transparent,
       ),
       body: ListView.builder(
           itemCount: results.data.length,
           itemBuilder: (c, i) => ListTile(
-                title: Text(results.data[i].a),
-                subtitle: Text(results.data[i].text),
+                title: Text(
+                  results.data[i].a,
+                  textScaleFactor: contentTextScaleFactorWith(context),
+                ),
+                subtitle: Text(
+                  results.data[i].text,
+                  textScaleFactor: contentTextScaleFactorWith(context),
+                ),
                 trailing: IconButton(
                   iconSize: 20,
                   icon: const Icon(FeatherIcons.share2),

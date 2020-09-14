@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:bible/models/app_settings.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -387,16 +388,21 @@ class __SearchResultCardState extends State<_SearchResultCard> {
         padding: const EdgeInsets.only(bottom: 10),
         child: TecText.rich(
           TextSpan(
-              children: searchResTextSpans(
-                widget.res.currentText,
-                context.bloc<SearchBloc>().state.search,
-              ),
-              style: TextStyle(color: textColor)),
+            children: searchResTextSpans(
+              widget.res.currentText,
+              context.bloc<SearchBloc>().state.search,
+            ),
+            style: TextStyle(color: textColor),
+          ),
+          textScaleFactor: contentTextScaleFactorWith(context),
         ));
     Widget label() => Padding(
         padding: const EdgeInsets.only(top: 10.0, bottom: 5),
-        child: Text(widget.res.label,
-            style: TextStyle(color: textColor, fontWeight: FontWeight.w500)));
+        child: Text(
+          widget.res.label,
+          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+          textScaleFactor: contentTextScaleFactorWith(context),
+        ));
 
     if (!widget.res.expanded) {
       return ListTile(
@@ -439,9 +445,12 @@ class __SearchResultCardState extends State<_SearchResultCard> {
                 //   quarterTurns: 1,
                 //   child: Icon(widget.res.contextExpanded ? Icons.unfold_less : Icons.unfold_more),
                 // ),
-                child: Text('Context',
-                    semanticsLabel:
-                        widget.res.contextExpanded ? 'Collapse Context' : 'Expand Context'),
+                child: Text(
+                  'Context',
+                  semanticsLabel:
+                      widget.res.contextExpanded ? 'Collapse Context' : 'Expand Context',
+                  textScaleFactor: contentTextScaleFactorWith(context),
+                ),
                 onPressed: _onContext,
               ),
             ]),
@@ -500,7 +509,10 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
           child: FlatButton(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-            child: const Text('ALL'),
+            child: Text(
+              'ALL',
+              textScaleFactor: contentTextScaleFactorWith(context),
+            ),
             onPressed: () =>
                 showCompareSheet(context, Reference.fromHref(widget.res.searchResult.href)),
             textColor: selectedTextColor,
@@ -527,7 +539,10 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
           child: FlatButton(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-            child: Text(each.a),
+            child: Text(
+              each.a,
+              textScaleFactor: contentTextScaleFactorWith(context),
+            ),
             textColor: textColor,
             color: buttonColor, //currently chosen, pass tag
             onPressed: () => _changeTranslation(i),
@@ -618,6 +633,7 @@ class SearchResultsLabel extends StatelessWidget {
                     const TextSpan(text: ' in current filter')
               ],
             ),
+            textScaleFactor: contentTextScaleFactorWith(context),
           ),
         ));
   }
