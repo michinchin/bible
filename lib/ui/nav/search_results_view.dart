@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../models/labels.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/context.dart';
 import '../../models/search/search_history_item.dart';
@@ -242,7 +245,7 @@ class _SearchResultsViewState extends State<SearchResultsView> with AutomaticKee
         return const Center(
           child: Text('Error'),
         );
-      } else if (state.searchResults.isEmpty) {
+      } else if (state.filteredResults.isEmpty) {
         return const Center(
           child: Text('No Results'),
         );
@@ -251,7 +254,7 @@ class _SearchResultsViewState extends State<SearchResultsView> with AutomaticKee
         bottom: false,
         child: Scaffold(
           body: ScrollablePositionedList.separated(
-            itemCount: state.searchResults.length + 1,
+            itemCount: state.filteredResults.length + 1,
             // itemScrollController: scrollController,
             // itemPositionsListener: positionListener,
             separatorBuilder: (c, i) {
@@ -265,10 +268,11 @@ class _SearchResultsViewState extends State<SearchResultsView> with AutomaticKee
             },
             itemBuilder: (c, i) {
               if (i == 0) {
-                return SearchResultsLabel(state.searchResults.map((r) => r.searchResult).toList());
+                return SearchResultsLabel(
+                    state.filteredResults.map((r) => r.searchResult).toList());
               }
               i--;
-              final res = state.searchResults[i];
+              final res = state.filteredResults[i];
               return _SearchResultCard(res);
             },
           ),
@@ -550,6 +554,43 @@ class SearchResultsLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final searchBlocState = context.bloc<SearchBloc>().state;
+    final bible = VolumesRepository.shared.bibleWithId(Labels.defaultBible);
+    var book = bible.firstBook;
+    // ignore: prefer_collection_literals
+    final booksSelected = LinkedHashMap<int, String>();
+    // ignore: prefer_collection_literals
+    final books = LinkedHashMap<int, String>();
+
+    while (book != 0) {
+      books[book] = bible.nameOfBook(book);
+      if (!searchBlocState.excludedBooks.contains(book)) {
+        booksSelected[book] = bible.nameOfBook(book);
+      }
+      final nextBook = bible.bookAfter(book);
+      book = (nextBook == book ? 0 : nextBook);
+    }
+
+    var showOTLabel = true;
+    var showNTLabel = true;
+    final ot = books.keys.where(bible.isOTBook).toList();
+    for (final o in ot) {
+      if (searchBlocState.excludedBooks.contains(o)) {
+        showOTLabel = false;
+      }
+    }
+    final nt = books.keys.where(bible.isNTBook).toList();
+    for (final n in nt) {
+      if (searchBlocState.excludedBooks.contains(n)) {
+        showNTLabel = false;
+      }
+    }
+
+    if (showNTLabel && showOTLabel) {
+      showNTLabel = false;
+      showOTLabel = false;
+    }
+
     return Container(
         padding: navView ? EdgeInsets.zero : const EdgeInsets.fromLTRB(15, 10, 15, 0),
         child: Align(
@@ -564,19 +605,17 @@ class SearchResultsLabel extends StatelessWidget {
                 TextSpan(
                     text: '${context.bloc<SearchBloc>().state.search}',
                     style: const TextStyle(fontWeight: FontWeight.bold)),
-                // if (vm.filterOn)
-                //   if (vm.showOTLabel)
-                //     const TextSpan(text: ' in the Old Testament')
-                //   else if (vm.showNTLabel)
-                //     const TextSpan(text: ' in the New Testament')
-                //   else if (vm.booksSelected.length <= 5)
-                //     TextSpan(
-                //       text: ' in ${vm.booksSelected.map((b) {
-                //         return b.name;
-                //       }).join(', ')}',
-                //     )
-                //   else
-                //     const TextSpan(text: ' in current filter')
+                if (searchBlocState.excludedBooks.isNotEmpty)
+                  if (showOTLabel)
+                    const TextSpan(text: ' in the Old Testament')
+                  else if (showNTLabel)
+                    const TextSpan(text: ' in the New Testament')
+                  else if (booksSelected.length <= 5)
+                    TextSpan(
+                      text: ' in ${booksSelected.values.join(', ')}',
+                    )
+                  else
+                    const TextSpan(text: ' in current filter')
               ],
             ),
           ),

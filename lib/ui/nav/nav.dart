@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bible/ui/nav/search_filter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,6 +15,7 @@ import '../../models/search/tec_share.dart';
 import '../common/common.dart';
 import '../library/library.dart';
 import 'bcv_tab.dart';
+import 'search_filter.dart';
 import 'search_results_view.dart';
 import 'search_suggestions.dart';
 
@@ -154,33 +154,43 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   void _onSelectionCopied() {
-    final verses = context.bloc<SearchBloc>().state.searchResults.where((s) => s.selected);
+    final verses = context.bloc<SearchBloc>().state.filteredResults.where((s) => s.selected);
     if (verses.isNotEmpty) {
       TecShare.copy(context, verses.map((v) => v.shareText).join('\n\n'));
     }
   }
 
   void _onSelectionShared() {
-    final verses = context.bloc<SearchBloc>().state.searchResults.where((s) => s.selected);
+    final verses = context.bloc<SearchBloc>().state.filteredResults.where((s) => s.selected);
     if (verses.isNotEmpty) {
       TecShare.share(verses.map((v) => v.shareText).join('\n\n'));
     }
   }
 
   Future<void> _translation() async {
-    // TODO(abby): WIP
-    // await showFilter(context, filter: const VolumesFilter(volumeType: VolumeType.bible));
-    final volumes = await selectVolumes(context,
-        filter: const VolumesFilter(volumeType: VolumeType.bible), selectedVolumes: translations());
-    if (volumes != null) {
-      final prefItem =
-          prefsBloc().infoChangedPrefItem(PrefItemId.translationsFilter, volumes.join('|'));
-      prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
-      if (_searchController.text.isNotEmpty) {
-        searchBloc()
-            .add(SearchEvent.request(search: _searchController.text, translations: volumes));
+    final bv = await showFilter(context,
+        filter: const VolumesFilter(volumeType: VolumeType.bible),
+        selectedVolumes: translations(),
+        filteredBooks: searchBloc().state.excludedBooks);
+    if (bv != null) {
+      final books = bv[0];
+      final volumes = bv[1];
+      if (volumes != null) {
+        final prefItem =
+            prefsBloc().infoChangedPrefItem(PrefItemId.translationsFilter, volumes.join('|'));
+        prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
+        if (_searchController.text.isNotEmpty) {
+          searchBloc()
+              .add(SearchEvent.request(search: _searchController.text, translations: volumes));
+        }
+      }
+      if (books != null) {
+        // excluded books
+        searchBloc().add(SearchEvent.filterBooks(books));
       }
     }
+    // final volumes = await selectVolumes(context,
+    //     filter: const VolumesFilter(volumeType: VolumeType.bible), selectedVolumes: translations());
   }
 
   void _moreButton() {
@@ -290,7 +300,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
     Widget titleAppBar(BuildContext c, NavViewState s, SearchState ss) {
       if (s == NavViewState.searchResults && c.bloc<SearchBloc>().state.selectionMode) {
-        final length = c.bloc<SearchBloc>().state.searchResults.where((s) => s.selected).length;
+        final length = c.bloc<SearchBloc>().state.filteredResults.where((s) => s.selected).length;
         return Align(
             alignment: Alignment.centerLeft,
             child: Text(

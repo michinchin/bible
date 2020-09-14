@@ -10,6 +10,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/app_settings.dart';
+import '../../models/labels.dart';
 import '../../models/language_utils.dart' as l;
 import '../../models/pref_item.dart';
 import '../common/common.dart';
@@ -231,7 +232,7 @@ class _BookView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bible = VolumesRepository.shared.bibleWithId(9);
+    final bible = VolumesRepository.shared.bibleWithId(Labels.defaultBible);
     final navCanonical = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.navBookOrder);
 
     // ignore: prefer_collection_literals
