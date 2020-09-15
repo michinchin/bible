@@ -105,6 +105,18 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
           prefItemId: PrefItemId.translationsAbbreviated,
           verse: 0));
     }
+    if (!itemIds.contains(PrefItemId.searchFilterBookGridView) ||
+        !itemIds.contains(PrefItemId.searchFilterTranslationGridView)) {
+      prefItems
+        ..add(PrefItem(
+            prefItemDataType: PrefItemDataType.bool,
+            prefItemId: PrefItemId.searchFilterBookGridView,
+            verse: 0))
+        ..add(PrefItem(
+            prefItemDataType: PrefItemDataType.bool,
+            prefItemId: PrefItemId.searchFilterTranslationGridView,
+            verse: 0));
+    }
 
     add(PrefItemEvent.updateFromDb(prefItems: prefItems));
   }

@@ -8,8 +8,10 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/search_bloc.dart';
+import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/labels.dart';
 import '../../models/language_utils.dart' as l;
+import '../../models/pref_item.dart';
 import '../common/common.dart';
 import '../library/volumes_bloc.dart';
 
@@ -42,14 +44,31 @@ class _SearchFilterView extends StatefulWidget {
 class __SearchFilterViewState extends State<_SearchFilterView> {
   Set<int> _selectedVolumes;
   Set<int> _filteredBooks;
-  bool _gridView;
+  bool _booksInGridView;
+  bool _volumesInGridView;
+
+  PrefItemsBloc prefsBloc() => context.bloc<PrefItemsBloc>();
 
   @override
   void initState() {
-    _gridView = true;
+    _booksInGridView = prefsBloc().itemBool(PrefItemId.searchFilterBookGridView);
+    _volumesInGridView = prefsBloc().itemBool(PrefItemId.searchFilterTranslationGridView);
     _selectedVolumes = widget.selectedVolumes?.toSet();
     _filteredBooks = widget.selectedBooks?.toSet();
     super.initState();
+  }
+
+  @override
+  void deactivate() {
+    if (_booksInGridView != prefsBloc().itemBool(PrefItemId.searchFilterBookGridView)) {
+      prefsBloc().add(PrefItemEvent.update(
+          prefItem: prefsBloc().toggledPrefItem(PrefItemId.searchFilterBookGridView)));
+    }
+    if (_volumesInGridView != prefsBloc().itemBool(PrefItemId.searchFilterTranslationGridView)) {
+      prefsBloc().add(PrefItemEvent.update(
+          prefItem: prefsBloc().toggledPrefItem(PrefItemId.searchFilterTranslationGridView)));
+    }
+    super.deactivate();
   }
 
   String _currFilter = 'Book';
@@ -62,9 +81,13 @@ class __SearchFilterViewState extends State<_SearchFilterView> {
 
   void _gridViewToggle() {
     setState(() {
-      _gridView = !_gridView;
+      _currFilter == 'Book'
+          ? _booksInGridView = !_booksInGridView
+          : _volumesInGridView = !_volumesInGridView;
     });
   }
+
+  bool get _gridView => _currFilter == 'Book' ? _booksInGridView : _volumesInGridView;
 
   @override
   Widget build(BuildContext context) {

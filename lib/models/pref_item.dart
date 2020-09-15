@@ -6,6 +6,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 enum PrefItemDataType { json, string, bool, int }
 
 class PrefItemId {
+  /// highlight/underline colors
   static const customColor1 = 1;
   static const customColor2 = 2;
   static const customColor3 = 3;
@@ -29,6 +30,10 @@ class PrefItemId {
 
   /// abbreviate translations in nav (0), or don't (1)
   static const translationsAbbreviated = 10;
+
+  /// what format to keep the search filter page (grid view or list view)
+  static const searchFilterBookGridView = 11;
+  static const searchFilterTranslationGridView = 12;
 }
 
 class PrefItem extends tua.UserItem {
