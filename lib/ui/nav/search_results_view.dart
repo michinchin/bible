@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:bible/models/app_settings.dart';
+import 'package:bible/ui/sheet/compare_verse.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +14,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../models/app_settings.dart';
 import '../../models/labels.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/context.dart';
@@ -21,7 +22,6 @@ import '../../models/search/search_history_item.dart';
 import '../../models/search/search_result.dart';
 import '../../models/search/tec_share.dart';
 import '../common/common.dart';
-import '../sheet/selection_sheet_model.dart';
 
 enum SearchAndHistoryTabs { history, search }
 
@@ -513,8 +513,14 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
               'ALL',
               textScaleFactor: contentTextScaleFactorWith(context),
             ),
-            onPressed: () =>
-                showCompareSheet(context, Reference.fromHref(widget.res.searchResult.href)),
+            onPressed: () async {
+              final volumeId =
+                  await showCompareSheet(context, Reference.fromHref(widget.res.searchResult.href));
+              if (volumeId != null) {
+                Navigator.of(context).pop(
+                    Reference.fromHref(widget.res.searchResult.href).copyWith(volume: volumeId));
+              }
+            },
             textColor: selectedTextColor,
             splashColor: Theme.of(context).accentColor,
           ),

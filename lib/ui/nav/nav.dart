@@ -33,8 +33,7 @@ Future<Reference> navigate(BuildContext context, Reference ref, {int initialInde
           height: 600,
           width: 500,
           child: MultiBlocProvider(providers: [
-            BlocProvider<NavBloc>(
-                create: (_) => NavBloc(ref)..add(NavEvent.changeTabIndex(index: initialIndex))),
+            BlocProvider<NavBloc>(create: (_) => NavBloc(ref, initialTabIndex: initialIndex)),
           ], child: Nav())),
     );
   }
@@ -52,8 +51,7 @@ Future<Reference> navigate(BuildContext context, Reference ref, {int initialInde
   return Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
     fullscreenDialog: true,
     builder: (context) => MultiBlocProvider(providers: [
-      BlocProvider<NavBloc>(
-          create: (_) => NavBloc(ref)..add(NavEvent.changeTabIndex(index: initialIndex))),
+      BlocProvider<NavBloc>(create: (_) => NavBloc(ref, initialTabIndex: initialIndex)),
     ], child: Nav()),
   ));
 }
@@ -320,7 +318,10 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
     List<Widget> appBarActions(BuildContext c, NavState s) {
       if (s.navViewState == NavViewState.bcvTabs) {
-        if (s.tabIndex != NavTabs.book.index) {
+        if ((s.tabIndex != NavTabs.book.index &&
+                navBloc().initialTabIndex != NavTabs.translation.index) ||
+            (s.tabIndex >= NavTabs.book.index &&
+                navBloc().initialTabIndex == NavTabs.translation.index)) {
           return [
             FlatButton(
                 child: Text(

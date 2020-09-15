@@ -42,12 +42,13 @@ abstract class NavState with _$NavState {
 
 class NavBloc extends Bloc<NavEvent, NavState> {
   final Reference initialRef;
+  final int initialTabIndex;
   CancelableOperation<AutoComplete> autoCompleteOperation;
 
-  NavBloc(this.initialRef)
+  NavBloc(this.initialRef, {this.initialTabIndex = 1})
       : super(NavState(
           ref: initialRef ?? Reference.fromHref('50/1/1', volume: 9),
-          tabIndex: 1,
+          tabIndex: initialTabIndex,
           search: '',
           bookSuggestions: [],
           wordSuggestions: [],
