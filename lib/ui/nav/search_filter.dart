@@ -22,11 +22,12 @@ Future<List<List<int>>> showFilter(BuildContext context,
         context: context,
         useRootNavigator: true,
         isScrollControlled: true,
-        enableDrag: true,
+        //TODO(abby): on drag down, modal bottom sheet does not detect willpopscope
         builder: (c) => SizedBox(
-            height: MediaQuery.of(c).size.height / 2,
-            child: _SearchFilterView(
-                filter: filter, selectedVolumes: selectedVolumes, selectedBooks: filteredBooks)));
+              height: MediaQuery.of(c).size.height / 2,
+              child: _SearchFilterView(
+                  filter: filter, selectedVolumes: selectedVolumes, selectedBooks: filteredBooks),
+            ));
 
 class _SearchFilterView extends StatefulWidget {
   final VolumesFilter filter;

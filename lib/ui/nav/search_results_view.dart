@@ -595,16 +595,25 @@ class SearchResultsLabel extends StatelessWidget {
     var showOTLabel = true;
     var showNTLabel = true;
     final ot = books.keys.where(bible.isOTBook).toList();
+    final nt = books.keys.where(bible.isNTBook).toList();
     for (final o in ot) {
       if (searchBlocState.excludedBooks.contains(o)) {
         showOTLabel = false;
       }
     }
-    final nt = books.keys.where(bible.isNTBook).toList();
+
     for (final n in nt) {
       if (searchBlocState.excludedBooks.contains(n)) {
         showNTLabel = false;
       }
+    }
+
+    if (showNTLabel && booksSelected.keys.any(bible.isOTBook)) {
+      showNTLabel = false;
+    }
+
+    if (showOTLabel && booksSelected.keys.any(bible.isNTBook)) {
+      showOTLabel = false;
     }
 
     if (showNTLabel && showOTLabel) {
