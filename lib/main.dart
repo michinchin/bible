@@ -27,6 +27,7 @@ import 'ui/misc/view_actions.dart';
 import 'ui/note/margin_note_view.dart';
 import 'ui/note/note_view.dart';
 import 'ui/note/notes_view.dart';
+import 'ui/study/study_view.dart';
 
 const _appTitle = 'Tecarta Bible';
 
@@ -85,6 +86,13 @@ void _registerViewTypes() {
       scaffoldBuilder: bibleChapterViewBuilder,
       icon: FeatherIcons.book,
       defaultDataBuilder: bibleChapterDefaultData,
+    )
+    ..register(
+      studyViewType,
+      title: 'Study',
+      scaffoldBuilder: studyViewBuilder,
+      icon: FeatherIcons.bookOpen,
+      // defaultDataBuilder: studyViewDefaultData,
     )
     ..register(
       noteViewType,

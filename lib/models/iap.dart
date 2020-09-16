@@ -66,6 +66,12 @@ class InAppPurchases {
       return; //------------------------------------------------------------>
     }
 
+    if (simulatePurchase) {
+      await Future<void>.delayed(const Duration(seconds: 1));
+      unawaited(purchaseHandler?.call(productId, false, null));
+      return; //------------------------------------------------------------>
+    }
+
     final ids = {productId};
     final response = await InAppPurchaseConnection.instance.queryProductDetails(ids);
     if (response.notFoundIDs.isNotEmpty) {
@@ -82,12 +88,6 @@ class InAppPurchases {
 
     final purchaseParam =
         PurchaseParam(productDetails: response.productDetails.first, sandboxTesting: kDebugMode);
-
-    if (simulatePurchase) {
-      await Future<void>.delayed(const Duration(seconds: 2));
-      unawaited(purchaseHandler?.call(productId, false, null));
-      return; //------------------------------------------------------------>
-    }
 
     _purchaseHandler = purchaseHandler;
 

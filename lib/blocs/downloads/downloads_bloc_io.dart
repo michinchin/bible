@@ -136,7 +136,7 @@ class DownloadsBlocImp extends DownloadsBloc {
     }
     _port.listen((dynamic data) {
       if (isDebugMode) {
-        tec.dmPrint('UI Isolate Callback: $data');
+        // tec.dmPrint('UI Isolate Callback: $data');
       }
       if (!isClosed && data is List<dynamic>) {
         final taskId = tec.as<String>(data[0]);
