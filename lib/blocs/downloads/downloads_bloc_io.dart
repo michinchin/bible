@@ -207,7 +207,7 @@ class DownloadsBlocImp extends DownloadsBloc {
     }
 
     // Check permissions...
-    final permissionReady = await _checkPermission();
+    final permissionReady = true; // await _checkPermission();
 
     // Create the `downloads` dir if needed...
     _unzipDir = await _findLocalPath();
@@ -227,22 +227,22 @@ class DownloadsBlocImp extends DownloadsBloc {
     return directory.path;
   }
 
-  Future<bool> _checkPermission() async {
-    if (tec.platformIs(tec.Platform.android)) {
-      final status = await Permission.storage.status;
-      if (status != PermissionStatus.granted) {
-        final result = await Permission.storage.request();
-        if (result == PermissionStatus.granted) {
-          return true;
-        }
-      } else {
-        return true;
-      }
-    } else {
-      return true;
-    }
-    return false;
-  }
+  // Future<bool> _checkPermission() async {
+  //   if (tec.platformIs(tec.Platform.android)) {
+  //     final status = await Permission.storage.status;
+  //     if (status != PermissionStatus.granted) {
+  //       final result = await Permission.storage.request();
+  //       if (result == PermissionStatus.granted) {
+  //         return true;
+  //       }
+  //     } else {
+  //       return true;
+  //     }
+  //   } else {
+  //     return true;
+  //   }
+  //   return false;
+  // }
 
   Future<bool> _unzipItem(DownloadItem item) async {
     if (item == null || tec.isNullOrEmpty(item.url)) return false;
