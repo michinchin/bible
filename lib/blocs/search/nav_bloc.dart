@@ -84,7 +84,6 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
   NavState _changeNavView(NavViewState vs) => state.copyWith(navViewState: vs);
 
-  // TODO(abby): if the search entered is wrong (Micah 10) then will not show view correctly
   NavState _onSearchChange(String s) {
     // tec.dmPrint('SEARCH CHANGE: $s');
     var currState = state;

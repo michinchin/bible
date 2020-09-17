@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:bible/ui/sheet/compare_verse.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +21,7 @@ import '../../models/search/search_history_item.dart';
 import '../../models/search/search_result.dart';
 import '../../models/search/tec_share.dart';
 import '../common/common.dart';
+import '../sheet/compare_verse.dart';
 
 enum SearchAndHistoryTabs { history, search }
 

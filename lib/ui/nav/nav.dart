@@ -109,9 +109,10 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   @override
-  void dispose() {
+  void deactivate() {
     _searchOnChange.close();
-    super.dispose();
+    _tabController.dispose();
+    super.deactivate();
   }
 
   void _searchControllerListener() {
@@ -269,6 +270,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           return BCVTabView(
             listener: (c, s) => _changeTabController(),
             tabController: _tabController,
+            searchController: _searchController,
           );
         case NavViewState.searchSuggestions:
           return SearchSuggestionsView(

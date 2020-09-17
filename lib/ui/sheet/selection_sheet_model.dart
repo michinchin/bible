@@ -177,7 +177,7 @@ class SelectionSheetModel {
     final ref = refs[0];
     final bibleId = await showCompareSheet(c, ref);
     if (bibleId != null) {
-      // TODO (abby): change chapter view ref to this translation
+      // TODO(abby): change chapter view ref to this translation
     }
   }
 

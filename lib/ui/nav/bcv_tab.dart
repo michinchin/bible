@@ -20,7 +20,9 @@ import 'nav.dart';
 class BCVTabView extends StatelessWidget {
   final Function(BuildContext, PrefItems) listener;
   final TabController tabController;
-  const BCVTabView({this.listener, this.tabController});
+  final TextEditingController searchController;
+  const BCVTabView(
+      {@required this.listener, @required this.tabController, @required this.searchController});
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +55,14 @@ class BCVTabView extends StatelessWidget {
               Expanded(
                 child: TabBarView(controller: tabController, children: [
                   _TranslationView(),
-                  _BookView(navGridViewEnabled: navGridViewEnabled),
-                  _ChapterView(nav3TapEnabled: nav3TapEnabled),
+                  _BookView(
+                    navGridViewEnabled: navGridViewEnabled,
+                    searchController: searchController,
+                  ),
+                  _ChapterView(
+                    nav3TapEnabled: nav3TapEnabled,
+                    searchController: searchController,
+                  ),
                   if (nav3TapEnabled) _VerseView(),
                 ]),
               ),
@@ -164,7 +172,8 @@ class __TranslationViewState extends State<_TranslationView> {
 
 class _ChapterView extends StatelessWidget {
   final bool nav3TapEnabled;
-  const _ChapterView({this.nav3TapEnabled});
+  final TextEditingController searchController;
+  const _ChapterView({@required this.nav3TapEnabled, @required this.searchController});
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +185,10 @@ class _ChapterView extends StatelessWidget {
     final ref = context.bloc<NavBloc>().state.ref;
     final chapters = bible.chaptersIn(book: ref.book);
 
+    void updateSearch(String s) => searchController
+      ..text = s
+      ..selection = TextSelection.collapsed(offset: s.length);
+
     return SingleChildScrollView(
       child: _DynamicGrid(
         children: [
@@ -186,6 +199,7 @@ class _ChapterView extends StatelessWidget {
                 if (!nav3TapEnabled) {
                   Navigator.of(context).maybePop(ref.copyWith(chapter: i));
                 } else {
+                  updateSearch('${bible.nameOfBook(ref.book)} $i:');
                   context.bloc<NavBloc>().selectChapter(ref.book, bible.nameOfBook(ref.book), i);
                 }
               },
@@ -232,12 +246,16 @@ class _VerseView extends StatelessWidget {
 
 class _BookView extends StatelessWidget {
   final bool navGridViewEnabled;
-  const _BookView({this.navGridViewEnabled});
+  final TextEditingController searchController;
+  const _BookView({@required this.navGridViewEnabled, @required this.searchController});
 
   @override
   Widget build(BuildContext context) {
     final bible = VolumesRepository.shared.bibleWithId(Labels.defaultBible);
     final navCanonical = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.navBookOrder);
+    void updateSearch(String s) => searchController
+      ..text = s
+      ..selection = TextSelection.collapsed(offset: s.length);
 
     // ignore: prefer_collection_literals
     final bookNames = LinkedHashMap<int, String>();
@@ -273,13 +291,17 @@ class _BookView extends StatelessWidget {
       // if book only has one chapter, special case
       if (bible.chaptersIn(book: book) == 1) {
         if (context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap)) {
+          final nameOfBook = bible.nameOfBook(book);
+          updateSearch(nameOfBook);
           bloc
-            ..selectBook(book, bible.nameOfBook(book))
+            ..selectBook(book, nameOfBook)
             ..add(NavEvent.changeTabIndex(index: NavTabs.verse.index));
         } else {
           Navigator.of(context).maybePop(bloc.state.ref.copyWith(book: book));
         }
       } else {
+        final nameOfBook = bible.nameOfBook(book);
+        updateSearch(nameOfBook);
         bloc.selectBook(book, bible.nameOfBook(book));
       }
     }
