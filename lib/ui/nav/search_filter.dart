@@ -24,6 +24,7 @@ Future<List<List<int>>> showFilter(BuildContext context,
         context: context,
         useRootNavigator: true,
         isScrollControlled: true,
+        enableDrag: false,
         // TODO(abby): on drag down, modal bottom sheet does not detect willpopscope
         builder: (c) => SizedBox(
               height: MediaQuery.of(c).size.height / 2,

@@ -23,39 +23,38 @@ import '../../models/search/tec_share.dart';
 import '../common/common.dart';
 import '../sheet/compare_verse.dart';
 
-enum SearchAndHistoryTabs { history, search }
-
 class SearchAndHistoryView extends StatelessWidget {
   final TextEditingController searchController;
-  const SearchAndHistoryView(this.searchController);
+  final TabController tabController;
+  const SearchAndHistoryView(this.searchController, this.tabController);
   @override
   Widget build(BuildContext context) {
     // TODO(abby): if no search results currently, do most recent search or focus on textfield
-    return DefaultTabController(
-      initialIndex: 1,
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          leading: Container(),
-          flexibleSpace: Center(
-            child: TabBar(
-                isScrollable: true,
-                indicatorSize: TabBarIndicatorSize.label,
-                indicator: BubbleTabIndicator(color: Colors.blue.withOpacity(0.5)),
-                labelColor: Theme.of(context).textColor.withOpacity(0.7),
-                unselectedLabelColor: Theme.of(context).textColor.withOpacity(0.7),
-                tabs: const [Tab(child: Text('HISTORY')), Tab(child: Text('SEARCH RESULTS'))]),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        leading: Container(),
+        flexibleSpace: Center(
+          child: TabBar(
+              controller: tabController,
+              isScrollable: true,
+              indicatorSize: TabBarIndicatorSize.label,
+              indicator: BubbleTabIndicator(color: Colors.blue.withOpacity(0.5)),
+              labelColor: Theme.of(context).textColor.withOpacity(0.7),
+              unselectedLabelColor: Theme.of(context).textColor.withOpacity(0.7),
+              tabs: const [Tab(child: Text('HISTORY')), Tab(child: Text('SEARCH RESULTS'))]),
         ),
-        body: TabBarView(children: [HistoryView(searchController), SearchResultsView()]),
       ),
+      body: TabBarView(
+          controller: tabController,
+          children: [HistoryView(searchController, tabController), SearchResultsView()]),
     );
   }
 }
 
 class HistoryView extends StatefulWidget {
   final TextEditingController searchController;
-  const HistoryView(this.searchController);
+  final TabController tabController;
+  const HistoryView(this.searchController, this.tabController);
 
   @override
   _HistoryViewState createState() => _HistoryViewState();
@@ -68,11 +67,11 @@ class _HistoryViewState extends State<HistoryView> {
           search: searchHistoryItem.search,
           translations: searchHistoryItem.volumesFiltered.split('|').map(int.parse).toList()));
     // ..scrollIndex = searchHistoryItem?.index ?? 0;
-    c.bloc<NavBloc>()..add(NavEvent.onSearchFinished(search: searchHistoryItem.search));
+    c.bloc<NavBloc>().add(NavEvent.onSearchFinished(search: searchHistoryItem.search));
     widget.searchController
       ..text = searchHistoryItem.search
       ..selection = TextSelection.collapsed(offset: searchHistoryItem.search.length);
-    DefaultTabController.of(c).animateTo(1);
+    widget.tabController.animateTo(1);
   }
 
   @override
@@ -88,8 +87,11 @@ class _HistoryViewState extends State<HistoryView> {
                 IconButton(
                     icon:
                         Icon(Icons.chevron_right, color: Theme.of(context).textTheme.caption.color),
-                    onPressed: () => Navigator.of(c)
-                        .push(MaterialPageRoute<void>(builder: (c) => _NavHistoryView(navHistory))))
+                    onPressed: () async {
+                      final ref = await Navigator.of(c).push(MaterialPageRoute<Reference>(
+                          builder: (c) => _NavHistoryView(navHistory)));
+                      await Navigator.of(c).maybePop<Reference>(ref);
+                    })
               ]),
               Flexible(
                 child: ListView.separated(

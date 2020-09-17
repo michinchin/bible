@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -66,6 +67,7 @@ const minTabsAvailable = 3;
 
 class _NavState extends State<Nav> with TickerProviderStateMixin {
   TabController _tabController;
+  TabController _searchResultsTabController;
   TextEditingController _searchController;
   final _searchOnChange = BehaviorSubject<String>();
 
@@ -89,6 +91,14 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
+
+    _searchResultsTabController = TabController(length: 2, initialIndex: 1, vsync: this)
+      ..addListener(() {
+        if (_searchResultsTabController.index == 0 && searchBloc().state.selectionMode) {
+          searchBloc().add(const SearchEvent.selectionModeToggle());
+        }
+        setState(() {});
+      });
 
     // tab controller that updates position based on navbloc
     _tabController =
@@ -137,6 +147,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   void onSubmit({String query}) {
     final s = query ?? _searchController.text;
+    _searchResultsTabController.animateTo(1);
     FocusScope.of(context).unfocus();
     if (s.isNotEmpty) {
       navBloc()..add(NavEvent.onSearchFinished(search: s))..add(const NavEvent.loadHistory());
@@ -278,13 +289,15 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             onSubmit: onSubmit,
           );
         case NavViewState.searchResults:
-          return SearchAndHistoryView(_searchController);
+          return SearchAndHistoryView(_searchController, _searchResultsTabController);
       }
       return Container();
     }
 
-    Widget leadingAppBarIcon(BuildContext c, NavViewState s) {
-      if (s == NavViewState.searchResults && c.bloc<SearchBloc>().state.selectionMode) {
+    Widget leadingAppBarIcon(BuildContext c, NavViewState s, SearchState ss) {
+      if (s == NavViewState.searchResults &&
+          ss.selectionMode &&
+          _searchResultsTabController.index == 1) {
         return CloseButton(onPressed: _selectionMode);
       } else if (s == NavViewState.bcvTabs) {
         return const CloseButton();
@@ -299,14 +312,16 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     }
 
     Widget titleAppBar(BuildContext c, NavViewState s, SearchState ss) {
-      if (s == NavViewState.searchResults && c.bloc<SearchBloc>().state.selectionMode) {
-        final length = c.bloc<SearchBloc>().state.filteredResults.where((s) => s.selected).length;
+      if (s == NavViewState.searchResults && ss.selectionMode) {
+        final length = ss.filteredResults.where((s) => s.selected).length;
         return Align(
             alignment: Alignment.centerLeft,
             child: Text(
               '$length',
               style: Theme.of(context).textTheme.bodyText1,
             ));
+      } else if (s == NavViewState.searchResults && _searchResultsTabController.index == 0) {
+        return Container();
       } else {
         return TextField(
             onSubmitted: (s) => onSubmit(query: s),
@@ -318,7 +333,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       }
     }
 
-    List<Widget> appBarActions(BuildContext c, NavState s) {
+    List<Widget> appBarActions(BuildContext c, NavState s, SearchState ss) {
       if (s.navViewState == NavViewState.bcvTabs) {
         if ((s.tabIndex != NavTabs.book.index &&
                 navBloc().initialTabIndex != NavTabs.translation.index) ||
@@ -335,24 +350,27 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         } else {
           return [
             IconButton(
-              icon: const Icon(Icons.youtube_searched_for),
-              onPressed: () => c.bloc<NavBloc>()
-                ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))
-                ..add(NavEvent.changeTabIndex(index: SearchAndHistoryTabs.history.index))
-                ..add(const NavEvent.loadHistory()),
-            ),
+                icon: const Icon(Icons.youtube_searched_for),
+                onPressed: () {
+                  c.bloc<NavBloc>()
+                    ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))
+                    ..add(const NavEvent.loadHistory());
+                  _searchResultsTabController.animateTo(0);
+                }),
             IconButton(icon: const Icon(Icons.more_vert), onPressed: _moreButton)
           ];
         }
       } else if (s.navViewState == NavViewState.searchResults) {
-        if (c.bloc<SearchBloc>().state.selectionMode) {
+        if (ss.selectionMode) {
           return [
-            IconButton(icon: const Icon(Icons.content_copy), onPressed: _onSelectionCopied),
-            IconButton(icon: const Icon(Icons.share), onPressed: _onSelectionShared)
+            IconButton(icon: const Icon(Icons.copy, size: 20), onPressed: _onSelectionCopied),
+            IconButton(
+                icon: const Icon(FeatherIcons.share2, size: 20), onPressed: _onSelectionShared)
           ];
-        } else {
+        } else if (_searchResultsTabController.index == 1) {
           return [
-            IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),
+            if (ss.filteredResults.isNotEmpty)
+              IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),
             IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
           ];
         }
@@ -369,21 +387,17 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         }
       },
       builder: (c, s) => TecScaffoldWrapper(
-        child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: AppBar().preferredSize,
-            child: BlocBuilder<SearchBloc, SearchState>(
-              builder: (c, ss) => AppBar(
+        child: BlocBuilder<SearchBloc, SearchState>(
+          builder: (c, ss) => Scaffold(
+              appBar: AppBar(
                 elevation: 5,
                 backgroundColor: Theme.of(context).cardColor,
                 title: titleAppBar(c, s.navViewState, ss),
                 titleSpacing: 0,
-                leading: leadingAppBarIcon(c, s.navViewState),
-                actions: appBarActions(c, s),
+                leading: leadingAppBarIcon(c, s.navViewState, ss),
+                actions: appBarActions(c, s, ss),
               ),
-            ),
-          ),
-          body: body(s.navViewState),
+              body: body(s.navViewState)),
         ),
       ),
     );
