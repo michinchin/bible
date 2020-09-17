@@ -94,8 +94,12 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
     _searchResultsTabController = TabController(length: 2, initialIndex: 1, vsync: this)
       ..addListener(() {
-        if (_searchResultsTabController.index == 0 && searchBloc().state.selectionMode) {
-          searchBloc().add(const SearchEvent.selectionModeToggle());
+        if (_searchResultsTabController.index == 0) {
+          // TODO(abby): why is history loading twice?
+          navBloc().add(const NavEvent.loadHistory());
+          if (searchBloc().state.selectionMode) {
+            searchBloc().add(const SearchEvent.selectionModeToggle());
+          }
         }
         setState(() {});
       });
@@ -150,7 +154,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     _searchResultsTabController.animateTo(1);
     FocusScope.of(context).unfocus();
     if (s.isNotEmpty) {
-      navBloc()..add(NavEvent.onSearchFinished(search: s))..add(const NavEvent.loadHistory());
+      navBloc().add(NavEvent.onSearchFinished(search: s));
       searchBloc().add(SearchEvent.request(search: s, translations: translations()));
     }
   }
@@ -321,7 +325,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
               style: Theme.of(context).textTheme.bodyText1,
             ));
       } else if (s == NavViewState.searchResults && _searchResultsTabController.index == 0) {
-        return Container();
+        return const Text('History');
       } else {
         return TextField(
             onSubmitted: (s) => onSubmit(query: s),
@@ -352,9 +356,9 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             IconButton(
                 icon: const Icon(Icons.youtube_searched_for),
                 onPressed: () {
-                  c.bloc<NavBloc>()
-                    ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))
-                    ..add(const NavEvent.loadHistory());
+                  c
+                      .bloc<NavBloc>()
+                      .add(const NavEvent.changeNavView(state: NavViewState.searchResults));
                   _searchResultsTabController.animateTo(0);
                 }),
             IconButton(icon: const Icon(Icons.more_vert), onPressed: _moreButton)

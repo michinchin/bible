@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tec_env/tec_env.dart';
 import 'package:tec_html/tec_html.dart';
@@ -182,7 +183,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
         initialIndex: initialIndex);
     if (ref != null) {
       // save navigation ref to nav history
-      await UserItemHelper.saveNavHistoryItem(ref);
+      unawaited(UserItemHelper.saveNavHistoryItem(ref));
       // Small delay to allow the nav popup to clean up...
       await Future.delayed(const Duration(milliseconds: 350), () {
         final pageController = _pageableViewStateKey.currentState?.pageController;
