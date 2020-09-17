@@ -17,7 +17,6 @@ import '../common/common.dart';
 import '../library/library.dart';
 import '../menu/main_menu.dart';
 import '../note/note_view.dart';
-import '../study/study_view.dart';
 
 const _menuWidth = 175.0;
 

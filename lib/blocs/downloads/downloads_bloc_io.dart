@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:tec_platform_util/tec_platform_util.dart' as tec;
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
@@ -206,9 +205,6 @@ class DownloadsBlocImp extends DownloadsBloc {
           );
     }
 
-    // Check permissions...
-    final permissionReady = true; // await _checkPermission();
-
     // Create the `downloads` dir if needed...
     _unzipDir = await _findLocalPath();
     _downloadsDir = '$_unzipDir${Platform.pathSeparator}downloads';
@@ -217,7 +213,7 @@ class DownloadsBlocImp extends DownloadsBloc {
       await dir.create();
     }
 
-    add(state.copyWith(isLoading: false, permissionReady: permissionReady, items: newItems));
+    add(state.copyWith(isLoading: false, permissionReady: true, items: newItems));
   }
 
   Future<String> _findLocalPath() async {
@@ -226,23 +222,6 @@ class DownloadsBlocImp extends DownloadsBloc {
         : await getApplicationDocumentsDirectory();
     return directory.path;
   }
-
-  // Future<bool> _checkPermission() async {
-  //   if (tec.platformIs(tec.Platform.android)) {
-  //     final status = await Permission.storage.status;
-  //     if (status != PermissionStatus.granted) {
-  //       final result = await Permission.storage.request();
-  //       if (result == PermissionStatus.granted) {
-  //         return true;
-  //       }
-  //     } else {
-  //       return true;
-  //     }
-  //   } else {
-  //     return true;
-  //   }
-  //   return false;
-  // }
 
   Future<bool> _unzipItem(DownloadItem item) async {
     if (item == null || tec.isNullOrEmpty(item.url)) return false;
