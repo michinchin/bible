@@ -26,5 +26,5 @@ flutter build ios --release --build-name $VERSION --build-number $BUILD_NUMBER
 cd ios
 xcodebuild -workspace Runner.xcworkspace -scheme "Runner" -sdk iphoneos -configuration "Release" archive -archivePath Runner.xcarchive -allowProvisioningUpdates
 xcodebuild -project Runner.xcodeproj -exportArchive -archivePath Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath . -allowProvisioningUpdates
-xcrun altool --upload-app -f Runner.ipa -t ios -u mike@tecarta.com -p nzqk-uoya-lzei-gjmn
+xcrun altool --upload-app -f "Tecarta Bible.ipa" -t ios -u mike@tecarta.com -p nzqk-uoya-lzei-gjmn
 cd ..
