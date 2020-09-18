@@ -22,7 +22,7 @@ abstract class NavEvent with _$NavEvent {
   const factory NavEvent.loadHistory() = _LoadHistory;
   const factory NavEvent.loadWordSuggestions({String search}) = _LoadWordSuggestions;
   const factory NavEvent.changeNavView({NavViewState state}) = _ChangeNavView;
-  const factory NavEvent.onSearchFinished() = _OnSearchFinished;
+  const factory NavEvent.onSearchFinished({String search}) = _OnSearchFinished;
   const factory NavEvent.changeState(NavState state) = _ChangeNavState;
 }
 
@@ -42,12 +42,13 @@ abstract class NavState with _$NavState {
 
 class NavBloc extends Bloc<NavEvent, NavState> {
   final Reference initialRef;
+  final int initialTabIndex;
   CancelableOperation<AutoComplete> autoCompleteOperation;
 
-  NavBloc(this.initialRef)
+  NavBloc(this.initialRef, {this.initialTabIndex = 1})
       : super(NavState(
-          ref: initialRef ?? Reference.fromHref('50/1/1', volume: 51),
-          tabIndex: 1,
+          ref: initialRef ?? Reference.fromHref('50/1/1', volume: 9),
+          tabIndex: initialTabIndex,
           search: '',
           bookSuggestions: [],
           wordSuggestions: [],
@@ -66,8 +67,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
       final searchHistory = await UserItemHelper.searchHistoryItemsFromDb();
       tec.dmPrint('Loading history');
       yield state.copyWith(navHistory: navHistory, searchHistory: searchHistory);
-    }
-     else {
+    } else {
       final newState = event.when(
           changeNavView: _changeNavView,
           onSearchChange: _onSearchChange,
@@ -85,118 +85,118 @@ class NavBloc extends Bloc<NavEvent, NavState> {
   NavState _changeNavView(NavViewState vs) => state.copyWith(navViewState: vs);
 
   NavState _onSearchChange(String s) {
-    final bible = VolumesRepository.shared.bibleWithId(state.ref.volume);
-    final lastChar = s.isNotEmpty ? s[s.length - 1] : null;
-    final selectedBook = bible.nameOfBook(state.ref.book);
-
-    // TODO(abby): if the search entered is wrong (Micah 10) then will not show view correctly
-    // for books with just 1 chapter, skip chapter view
-
+    // tec.dmPrint('SEARCH CHANGE: $s');
     var currState = state;
 
     if (s.isNotEmpty && s != null) {
+      final bible = VolumesRepository.shared.bibleWithId(state.ref.volume);
+      final lastChar = s.isNotEmpty ? s[s.length - 1] : null;
+      final selectedBook = bible.nameOfBook(state.ref.book);
+
       final check = s.toLowerCase();
 
-      switch (state.tabIndex) {
-        case 1: // book tab
-          final endsWithSpaceDigit = lastChar == ' ';
-          final matches = <int, String>{};
-          var addCurrentRef = false;
+      if (currState.tabIndex == NavTabs.book.index ||
+          currState.tabIndex == NavTabs.translation.index) {
+        // book tab
+        final endsWithSpaceDigit = lastChar == ' ';
+        final matches = <int, String>{};
+        var addCurrentRef = false;
 
-          final m = RegExp('([0-9]+):?([0-9]+)?').firstMatch(check);
+        final m = RegExp('([0-9]+):?([0-9]+)?').firstMatch(check);
 
-          final ref = state.ref;
+        final ref = state.ref;
 
-          if (m != null) {
-            // the entry is a # or a #: or a #:#?
-            final chapter = int.parse(m.group(1));
-            if (chapter > 0 && chapter <= bible.chaptersIn(book: ref.book)) {
-              var refOk = true;
+        if (m != null) {
+          // the entry is a # or a #: or a #:#?
+          final chapter = int.parse(m.group(1));
+          if (chapter > 0 && chapter <= bible.chaptersIn(book: ref.book)) {
+            var refOk = true;
 
-              // chapter is ok...
-              if (m.group(2) != null) {
-                // check verse
-                final verse = int.parse(m.group(2));
-                if (verse < 0 || verse > bible.versesIn(book: ref.book, chapter: chapter)) {
-                  refOk = false;
-                }
-              }
-
-              if (refOk) {
-                final b = '${bible.nameOfBook(ref.book)} $check';
-                matches[ref.book] = b;
-                addCurrentRef = true;
+            // chapter is ok...
+            if (m.group(2) != null) {
+              // check verse
+              final verse = int.parse(m.group(2));
+              if (verse < 0 || verse > bible.versesIn(book: ref.book, chapter: chapter)) {
+                refOk = false;
               }
             }
-          }
 
-          var book = bible.firstBook;
-          while (book != 0) {
-            final name = bible.nameOfBook(book).toLowerCase();
-            if (name == check.trim()) {
-              return currState.copyWith(
-                  navViewState: NavViewState.bcvTabs,
-                  tabIndex: NavTabs.chapter.index,
-                  ref: state.ref.copyWith(book: book),
-                  search: '${bible.nameOfBook(book)} ');
-            } else if (name.startsWith(s.toLowerCase())) {
-              matches[book] = bible.nameOfBook(book);
-            }
-            final nextBook = bible.bookAfter(book);
-            book = (nextBook == book ? 0 : nextBook);
-          }
-
-          if (matches.length == 1 && !addCurrentRef) {
-            if (endsWithSpaceDigit) {
-              return currState.copyWith(
-                  ref: state.ref.copyWith(book: matches.keys.first),
-                  search: '${matches.values.first} ');
+            if (refOk) {
+              final b = '${bible.nameOfBook(ref.book)} $check';
+              matches[ref.book] = b;
+              addCurrentRef = true;
             }
           }
-          add(NavEvent.loadWordSuggestions(search: s));
+        }
 
-          currState = currState.copyWith(
-              search: s,
-              bookSuggestions: matches.keys.toList(),
-              navViewState: NavViewState.searchSuggestions);
-
-          break;
-        case 2: // chapter tab
-          currState = currState.copyWith(navViewState: NavViewState.bcvTabs);
-          if (lastChar == ':' && state.tabIndex == NavTabs.chapter.index) {
-            int chapter;
-            try {
-              chapter = int.parse(
-                s.trim().substring(selectedBook.length).replaceAll(':', '').trim(),
-              );
-            } catch (e) {
-              chapter = -1;
-              tec.dmPrint(e.toString());
-            }
-
-            if (chapter > 0 && s.trim() == '$selectedBook $chapter:') {
-              return currState.copyWith(
-                ref: currState.ref.copyWith(chapter: chapter),
-                tabIndex: NavTabs.verse.index,
-                search: s,
-              );
-            }
-          } else if (!s.startsWith(selectedBook) || s.length == selectedBook.length) {
-            currState = currState.copyWith(tabIndex: NavTabs.book.index, search: '');
-          }
-          break;
-        case 3: //verse tab
-          // did the colon get deleted...
-          if (!s.startsWith(selectedBook) || s.length <= selectedBook.length) {
-            currState = currState.copyWith(
-                tabIndex: NavTabs.book.index, navViewState: NavViewState.bcvTabs);
-          } else if (!s.contains(':')) {
-            currState = currState.copyWith(
-                tabIndex: NavTabs.chapter.index,
+        var book = bible.firstBook;
+        while (book != 0) {
+          final name = bible.nameOfBook(book).toLowerCase();
+          if (name == check.trim()) {
+            return currState.copyWith(
                 navViewState: NavViewState.bcvTabs,
-                search: '${bible.nameOfBook(currState.ref.book)} ');
+                tabIndex: NavTabs.chapter.index,
+                ref: state.ref.copyWith(book: book),
+                search: '${bible.nameOfBook(book)} ');
+          } else if (name.startsWith(s.toLowerCase())) {
+            matches[book] = bible.nameOfBook(book);
           }
-          break;
+          final nextBook = bible.bookAfter(book);
+          book = (nextBook == book ? 0 : nextBook);
+        }
+
+        if (matches.length == 1 && !addCurrentRef) {
+          if (endsWithSpaceDigit) {
+            return currState.copyWith(
+                ref: state.ref.copyWith(book: matches.keys.first),
+                search: '${matches.values.first} ');
+          }
+        }
+        add(NavEvent.loadWordSuggestions(search: s));
+
+        currState = currState.copyWith(
+            search: s,
+            bookSuggestions: matches.keys.toList(),
+            navViewState: NavViewState.searchSuggestions);
+      } else if (currState.tabIndex == NavTabs.chapter.index) {
+        // chapter tab
+        currState = currState.copyWith(navViewState: NavViewState.bcvTabs);
+        if (lastChar == ':') {
+          int chapter;
+          try {
+            chapter = int.parse(
+              s.trim().substring(selectedBook.length).replaceAll(':', '').trim(),
+            );
+          } catch (e) {
+            chapter = -1;
+            tec.dmPrint(e.toString());
+          }
+
+          if (chapter > 0 && s.trim() == '$selectedBook $chapter:') {
+            return currState.copyWith(
+              ref: currState.ref.copyWith(chapter: chapter),
+              tabIndex: NavTabs.verse.index,
+              search: s,
+            );
+          }
+        } else if (!s.startsWith(selectedBook) || s.length == selectedBook.length) {
+          currState = currState.copyWith(tabIndex: NavTabs.book.index, search: '');
+        } else {
+          add(NavEvent.loadWordSuggestions(search: s));
+          currState = currState.copyWith(search: s, navViewState: NavViewState.searchSuggestions);
+        }
+      } else if (currState.tabIndex == NavTabs.verse.index) {
+        //verse tab
+        // did the colon get deleted...
+        if (!s.startsWith(selectedBook) || s.length <= selectedBook.length) {
+          currState =
+              currState.copyWith(tabIndex: NavTabs.book.index, navViewState: NavViewState.bcvTabs);
+        } else if (!s.contains(':')) {
+          currState = currState.copyWith(
+              tabIndex: NavTabs.chapter.index,
+              navViewState: NavViewState.bcvTabs,
+              search: '${bible.nameOfBook(currState.ref.book)} ');
+        }
       }
     } else {
       currState = currState.copyWith(navViewState: NavViewState.bcvTabs, search: '');
@@ -204,21 +204,15 @@ class NavBloc extends Bloc<NavEvent, NavState> {
     return currState;
   }
 
-  NavState _onSearchFinished() {
-    // TODO(abby): on submit typing 'judges 3' will not go to correct place...
-    // check to see if bible ref and ask to navigate appropriately
-    //
-    return state.copyWith(navViewState: NavViewState.searchResults);
-  }
+  NavState _onSearchFinished(String s) =>
+      state.copyWith(search: s, navViewState: NavViewState.searchResults);
 
   NavState _changeState(NavState s) => s;
 
   Future<List<String>> _loadWordSuggestions(String s) async {
     await autoCompleteOperation?.cancel();
-
     final ac = AutoComplete.fetch(phrase: s, translationIds: '${state.ref.volume}');
-    autoCompleteOperation = CancelableOperation<AutoComplete>.fromFuture(ac,
-        onCancel: () => tec.dmPrint('Canceled Autocomplete for "$s"'));
+    autoCompleteOperation = CancelableOperation<AutoComplete>.fromFuture(ac);
     return (await autoCompleteOperation.value).possibles;
   }
 

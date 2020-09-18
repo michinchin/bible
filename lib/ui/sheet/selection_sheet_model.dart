@@ -15,7 +15,6 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
 import '../../models/pref_item.dart';
-import '../../models/search/compare_results.dart';
 import '../../models/search/tec_share.dart';
 import '../../models/shared_types.dart';
 import '../common/common.dart';
@@ -176,7 +175,10 @@ class SelectionSheetModel {
       refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
     }
     final ref = refs[0];
-    await showCompareSheet(c, ref);
+    final bibleId = await showCompareSheet(c, ref);
+    if (bibleId != null) {
+      // TODO(abby): change chapter view ref to this translation
+    }
   }
 
   static List<Reference> _grabRefs(BuildContext c) {
@@ -188,32 +190,6 @@ class SelectionSheetModel {
     }
     return refs;
   }
-}
-
-Future<void> showCompareSheet(BuildContext c, Reference ref) async {
-  final compareResults = await CompareResults.fetch(
-      book: ref.book,
-      chapter: ref.chapter,
-      verse: ref.verse,
-      translations:
-          c.bloc<PrefItemsBloc>().state.items.itemWithId(PrefItemId.translationsFilter).info);
-
-  await showModalBottomSheet<void>(
-    shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
-    context: c,
-    useRootNavigator: true,
-    isScrollControlled: true,
-    enableDrag: false,
-    builder: (c) => SizedBox(
-      height: 3 * MediaQuery.of(c).size.height / 4,
-      child: CompareVerseScreen(
-        results: compareResults,
-        title: ref.label(),
-      ),
-    ),
-  );
 }
 
 class _DefineWebView extends StatefulWidget {

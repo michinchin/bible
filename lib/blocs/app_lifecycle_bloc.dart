@@ -42,30 +42,7 @@ class AppLifecycleBloc extends Bloc<AppLifecycleState, AppLifecycleState> {
     }
     yield event ?? state;
   }
-}
 
-///
-/// Provides an [AppLifecycleBloc] to the app.
-///
-class AppLifecycleWrapper extends StatelessWidget {
-  final Widget child;
-
-  const AppLifecycleWrapper({Key key, this.child}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider<AppLifecycleBloc>(
-      create: (context) => AppLifecycleBloc(),
-      child: _AppBindingObserver(child: child),
-    );
-  }
-}
-
-//
-// PRIVATE STUFF
-//
-
-extension on AppLifecycleBloc {
   void _handleResume() {
     if (state == AppLifecycleState.resumed) return;
 
@@ -95,6 +72,27 @@ extension on AppLifecycleBloc {
     }
   }
 }
+
+///
+/// Provides an [AppLifecycleBloc] to the app.
+///
+class AppLifecycleWrapper extends StatelessWidget {
+  final Widget child;
+
+  const AppLifecycleWrapper({Key key, this.child}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<AppLifecycleBloc>(
+      create: (context) => AppLifecycleBloc(),
+      child: _AppBindingObserver(child: child),
+    );
+  }
+}
+
+//
+// PRIVATE STUFF
+//
 
 /// This widget is just for observing app events
 class _AppBindingObserver extends StatefulWidget {

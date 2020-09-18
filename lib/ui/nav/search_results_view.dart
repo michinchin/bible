@@ -1,4 +1,5 @@
-import 'package:bible/models/search/search_history_item.dart';
+import 'dart:collection';
+
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,42 +13,67 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../models/app_settings.dart';
+import '../../models/labels.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/context.dart';
+import '../../models/search/search_history_item.dart';
 import '../../models/search/search_result.dart';
 import '../../models/search/tec_share.dart';
 import '../common/common.dart';
-import '../sheet/selection_sheet_model.dart';
-
-enum SearchAndHistoryTabs { history, search }
+import '../sheet/compare_verse.dart';
 
 class SearchAndHistoryView extends StatelessWidget {
+  final TextEditingController searchController;
+  final TabController tabController;
+  const SearchAndHistoryView(this.searchController, this.tabController);
   @override
   Widget build(BuildContext context) {
     // TODO(abby): if no search results currently, do most recent search or focus on textfield
-    return DefaultTabController(
-      initialIndex: 1,
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          leading: Container(),
-          flexibleSpace: Center(
-            child: TabBar(
-                isScrollable: true,
-                indicatorSize: TabBarIndicatorSize.label,
-                indicator: BubbleTabIndicator(color: Colors.blue.withOpacity(0.5)),
-                labelColor: Theme.of(context).textColor.withOpacity(0.7),
-                unselectedLabelColor: Theme.of(context).textColor.withOpacity(0.7),
-                tabs: const [Tab(child: Text('HISTORY')), Tab(child: Text('SEARCH RESULTS'))]),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        leading: Container(),
+        flexibleSpace: Center(
+          child: TabBar(
+              controller: tabController,
+              isScrollable: true,
+              indicatorSize: TabBarIndicatorSize.label,
+              indicator: BubbleTabIndicator(color: Colors.blue.withOpacity(0.5)),
+              labelColor: Theme.of(context).textColor.withOpacity(0.7),
+              unselectedLabelColor: Theme.of(context).textColor.withOpacity(0.7),
+              tabs: const [Tab(child: Text('HISTORY')), Tab(child: Text('SEARCH RESULTS'))]),
         ),
-        body: TabBarView(children: [HistoryView(), SearchResultsView()]),
       ),
+      body: TabBarView(
+          controller: tabController,
+          children: [HistoryView(searchController, tabController), SearchResultsView()]),
     );
   }
 }
 
-class HistoryView extends StatelessWidget {
+class HistoryView extends StatefulWidget {
+  final TextEditingController searchController;
+  final TabController tabController;
+  const HistoryView(this.searchController, this.tabController);
+
+  @override
+  _HistoryViewState createState() => _HistoryViewState();
+}
+
+class _HistoryViewState extends State<HistoryView> {
+  void _onSearchTap(BuildContext c, SearchHistoryItem searchHistoryItem) {
+    c.bloc<SearchBloc>()
+      ..add(SearchEvent.request(
+          search: searchHistoryItem.search,
+          translations: searchHistoryItem.volumesFiltered.split('|').map(int.parse).toList()));
+    // ..scrollIndex = searchHistoryItem?.index ?? 0;
+    c.bloc<NavBloc>().add(NavEvent.onSearchFinished(search: searchHistoryItem.search));
+    widget.searchController
+      ..text = searchHistoryItem.search
+      ..selection = TextSelection.collapsed(offset: searchHistoryItem.search.length);
+    widget.tabController.animateTo(1);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NavBloc, NavState>(builder: (c, s) {
@@ -61,8 +87,11 @@ class HistoryView extends StatelessWidget {
                 IconButton(
                     icon:
                         Icon(Icons.chevron_right, color: Theme.of(context).textTheme.caption.color),
-                    onPressed: () => Navigator.of(c)
-                        .push(MaterialPageRoute<void>(builder: (c) => _NavHistoryView(navHistory))))
+                    onPressed: () async {
+                      final ref = await Navigator.of(c).push(MaterialPageRoute<Reference>(
+                          builder: (c) => _NavHistoryView(navHistory)));
+                      await Navigator.of(c).maybePop<Reference>(ref);
+                    })
               ]),
               Flexible(
                 child: ListView.separated(
@@ -75,7 +104,7 @@ class HistoryView extends StatelessWidget {
                     leading: const Icon(Icons.history),
                     title: Text(navHistory[i].label()),
                     onTap: () {
-                      Navigator.of(context).maybePop<Reference>(navHistory[i]);
+                      Navigator.of(c).maybePop<Reference>(navHistory[i]);
                     },
                   ),
                 ),
@@ -83,10 +112,15 @@ class HistoryView extends StatelessWidget {
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 const ListLabel('Search History'),
                 IconButton(
-                    icon:
-                        Icon(Icons.chevron_right, color: Theme.of(context).textTheme.caption.color),
-                    onPressed: () => Navigator.of(c).push(MaterialPageRoute<void>(
-                        builder: (c) => _SearchHistoryView(searchHistory)))),
+                    icon: Icon(Icons.chevron_right, color: Theme.of(c).textTheme.caption.color),
+                    onPressed: () async {
+                      final searchChosen = await Navigator.of(c).push(
+                          MaterialPageRoute<SearchHistoryItem>(
+                              builder: (c) => _SearchHistoryView(searchHistory)));
+                      if (searchChosen != null) {
+                        _onSearchTap(c, searchChosen);
+                      }
+                    }),
               ]),
               Flexible(
                 child: ListView.separated(
@@ -98,21 +132,7 @@ class HistoryView extends StatelessWidget {
                     dense: true,
                     leading: const Icon(Icons.search),
                     title: Text(searchHistory[i].search),
-                    onTap: () {
-                      c.bloc<SearchBloc>()
-                        ..scrollIndex = searchHistory[i].index
-                        ..add(SearchEvent.request(
-                            search: searchHistory[i].search,
-                            translations: searchHistory[i]
-                                .volumesFiltered
-                                .split('|')
-                                .map(int.parse)
-                                .toList()));
-                      c.bloc<NavBloc>()
-                        ..add(NavEvent.onSearchChange(search: searchHistory[i].search))
-                        ..add(const NavEvent.onSearchFinished())
-                        ..add(const NavEvent.changeTabIndex(index: 1));
-                    },
+                    onTap: () => _onSearchTap(c, searchHistory[i]),
                   ),
                 ),
               ),
@@ -144,18 +164,7 @@ class _SearchHistoryView extends StatelessWidget {
                 title: Text(searchHistory[i].search),
                 subtitle: Text(
                     '${tec.shortDate(searchHistory[i].modified)}, ${searchHistory[i].modified.hour}:${searchHistory[i].modified.minute}'),
-                onTap: () {
-                  c.bloc<SearchBloc>()
-                    ..scrollIndex = searchHistory[i].index
-                    ..add(SearchEvent.request(
-                        search: searchHistory[i].search,
-                        translations:
-                            searchHistory[i].volumesFiltered.split('|').map(int.parse).toList()));
-                  c.bloc<NavBloc>()
-                    ..add(NavEvent.onSearchChange(search: searchHistory[i].search))
-                    ..add(const NavEvent.onSearchFinished())
-                    ..add(const NavEvent.changeTabIndex(index: 1));
-                },
+                onTap: () => Navigator.of(c).pop<SearchHistoryItem>(searchHistory[i]),
               ),
             ),
     );
@@ -199,38 +208,47 @@ class SearchResultsView extends StatefulWidget {
   _SearchResultsViewState createState() => _SearchResultsViewState();
 }
 
-class _SearchResultsViewState extends State<SearchResultsView> {
-  ItemScrollController scrollController;
-  ItemPositionsListener positionListener;
+class _SearchResultsViewState extends State<SearchResultsView> with AutomaticKeepAliveClientMixin {
+  // ItemScrollController scrollController;
+  // ItemPositionsListener positionListener;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
-    final scrollIndex = context.bloc<SearchBloc>().scrollIndex;
-    positionListener = ItemPositionsListener.create();
-    positionListener.itemPositions.addListener(() {
-      if (positionListener.itemPositions.value.isNotEmpty) {
-        context.bloc<SearchBloc>().scrollIndex = positionListener.itemPositions.value.first.index;
-      }
-    });
-    scrollController = ItemScrollController();
-    if (scrollIndex != 0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        scrollController.scrollTo(index: scrollIndex, duration: const Duration(milliseconds: 250));
-      });
-    }
+    // positionListener = ItemPositionsListener.create();
+    // positionListener.itemPositions.addListener(() {
+    //   if (positionListener.itemPositions.value.isNotEmpty) {
+    //     context.bloc<SearchBloc>().scrollIndex = positionListener.itemPositions.value.first.index;
+    //   }
+    // });
+    // scrollController = ItemScrollController();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SearchBloc, SearchState>(builder: (context, state) {
+    super.build(context);
+    return BlocBuilder<SearchBloc, SearchState>(
+        // listener: (c, s) {
+        // final scrollIndex = context.bloc<SearchBloc>().scrollIndex;
+        // if (scrollIndex != 0) {
+        //   WidgetsBinding.instance.addPostFrameCallback((_) {
+        //     scrollController.scrollTo(
+        //         index: scrollIndex, duration: const Duration(milliseconds: 250));
+        //   });
+        // }
+        // },
+        // listenWhen: (p, c) => p.search != c.search,
+        builder: (context, state) {
       if (state.loading) {
         return const Center(child: LoadingIndicator());
       } else if (state.error) {
         return const Center(
           child: Text('Error'),
         );
-      } else if (state.searchResults.isEmpty) {
+      } else if (state.filteredResults.isEmpty) {
         return const Center(
           child: Text('No Results'),
         );
@@ -239,7 +257,9 @@ class _SearchResultsViewState extends State<SearchResultsView> {
         bottom: false,
         child: Scaffold(
           body: ScrollablePositionedList.separated(
-            itemCount: state.searchResults.length + 1,
+            itemCount: state.filteredResults.length + 1,
+            // itemScrollController: scrollController,
+            // itemPositionsListener: positionListener,
             separatorBuilder: (c, i) {
               if (i == 0) {
                 // if sized box has height: 0, causes errors in scrollable list
@@ -251,10 +271,11 @@ class _SearchResultsViewState extends State<SearchResultsView> {
             },
             itemBuilder: (c, i) {
               if (i == 0) {
-                return SearchResultsLabel(state.searchResults.map((r) => r.searchResult).toList());
+                return SearchResultsLabel(
+                    state.filteredResults.map((r) => r.searchResult).toList());
               }
               i--;
-              final res = state.searchResults[i];
+              final res = state.filteredResults[i];
               return _SearchResultCard(res);
             },
           ),
@@ -369,16 +390,21 @@ class __SearchResultCardState extends State<_SearchResultCard> {
         padding: const EdgeInsets.only(bottom: 10),
         child: TecText.rich(
           TextSpan(
-              children: searchResTextSpans(
-                widget.res.currentText,
-                context.bloc<SearchBloc>().state.search,
-              ),
-              style: TextStyle(color: textColor)),
+            children: searchResTextSpans(
+              widget.res.currentText,
+              context.bloc<SearchBloc>().state.search,
+            ),
+            style: TextStyle(color: textColor),
+          ),
+          textScaleFactor: contentTextScaleFactorWith(context),
         ));
     Widget label() => Padding(
         padding: const EdgeInsets.only(top: 10.0, bottom: 5),
-        child: Text(widget.res.label,
-            style: TextStyle(color: textColor, fontWeight: FontWeight.w500)));
+        child: Text(
+          widget.res.label,
+          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+          textScaleFactor: contentTextScaleFactorWith(context),
+        ));
 
     if (!widget.res.expanded) {
       return ListTile(
@@ -421,9 +447,12 @@ class __SearchResultCardState extends State<_SearchResultCard> {
                 //   quarterTurns: 1,
                 //   child: Icon(widget.res.contextExpanded ? Icons.unfold_less : Icons.unfold_more),
                 // ),
-                child: Text('Context',
-                    semanticsLabel:
-                        widget.res.contextExpanded ? 'Collapse Context' : 'Expand Context'),
+                child: Text(
+                  'Context',
+                  semanticsLabel:
+                      widget.res.contextExpanded ? 'Collapse Context' : 'Expand Context',
+                  textScaleFactor: contentTextScaleFactorWith(context),
+                ),
                 onPressed: _onContext,
               ),
             ]),
@@ -482,9 +511,18 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
           child: FlatButton(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-            child: const Text('ALL'),
-            onPressed: () =>
-                showCompareSheet(context, Reference.fromHref(widget.res.searchResult.href)),
+            child: Text(
+              'ALL',
+              textScaleFactor: contentTextScaleFactorWith(context),
+            ),
+            onPressed: () async {
+              final volumeId =
+                  await showCompareSheet(context, Reference.fromHref(widget.res.searchResult.href));
+              if (volumeId != null) {
+                Navigator.of(context).pop(
+                    Reference.fromHref(widget.res.searchResult.href).copyWith(volume: volumeId));
+              }
+            },
             textColor: selectedTextColor,
             splashColor: Theme.of(context).accentColor,
           ),
@@ -509,7 +547,10 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
           child: FlatButton(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-            child: Text(each.a),
+            child: Text(
+              each.a,
+              textScaleFactor: contentTextScaleFactorWith(context),
+            ),
             textColor: textColor,
             color: buttonColor, //currently chosen, pass tag
             onPressed: () => _changeTranslation(i),
@@ -536,6 +577,52 @@ class SearchResultsLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final searchBlocState = context.bloc<SearchBloc>().state;
+    final bible = VolumesRepository.shared.bibleWithId(Labels.defaultBible);
+    var book = bible.firstBook;
+    // ignore: prefer_collection_literals
+    final booksSelected = LinkedHashMap<int, String>();
+    // ignore: prefer_collection_literals
+    final books = LinkedHashMap<int, String>();
+
+    while (book != 0) {
+      books[book] = bible.nameOfBook(book);
+      if (!searchBlocState.excludedBooks.contains(book)) {
+        booksSelected[book] = bible.nameOfBook(book);
+      }
+      final nextBook = bible.bookAfter(book);
+      book = (nextBook == book ? 0 : nextBook);
+    }
+
+    var showOTLabel = true;
+    var showNTLabel = true;
+    final ot = books.keys.where(bible.isOTBook).toList();
+    final nt = books.keys.where(bible.isNTBook).toList();
+    for (final o in ot) {
+      if (searchBlocState.excludedBooks.contains(o)) {
+        showOTLabel = false;
+      }
+    }
+
+    for (final n in nt) {
+      if (searchBlocState.excludedBooks.contains(n)) {
+        showNTLabel = false;
+      }
+    }
+
+    if (showNTLabel && booksSelected.keys.any(bible.isOTBook)) {
+      showNTLabel = false;
+    }
+
+    if (showOTLabel && booksSelected.keys.any(bible.isNTBook)) {
+      showOTLabel = false;
+    }
+
+    if (showNTLabel && showOTLabel) {
+      showNTLabel = false;
+      showOTLabel = false;
+    }
+
     return Container(
         padding: navView ? EdgeInsets.zero : const EdgeInsets.fromLTRB(15, 10, 15, 0),
         child: Align(
@@ -550,21 +637,20 @@ class SearchResultsLabel extends StatelessWidget {
                 TextSpan(
                     text: '${context.bloc<SearchBloc>().state.search}',
                     style: const TextStyle(fontWeight: FontWeight.bold)),
-                // if (vm.filterOn)
-                //   if (vm.showOTLabel)
-                //     const TextSpan(text: ' in the Old Testament')
-                //   else if (vm.showNTLabel)
-                //     const TextSpan(text: ' in the New Testament')
-                //   else if (vm.booksSelected.length <= 5)
-                //     TextSpan(
-                //       text: ' in ${vm.booksSelected.map((b) {
-                //         return b.name;
-                //       }).join(', ')}',
-                //     )
-                //   else
-                //     const TextSpan(text: ' in current filter')
+                if (searchBlocState.excludedBooks.isNotEmpty)
+                  if (showOTLabel)
+                    const TextSpan(text: ' in the Old Testament')
+                  else if (showNTLabel)
+                    const TextSpan(text: ' in the New Testament')
+                  else if (booksSelected.length <= 5)
+                    TextSpan(
+                      text: ' in ${booksSelected.values.join(', ')}',
+                    )
+                  else
+                    const TextSpan(text: ' in current filter')
               ],
             ),
+            textScaleFactor: contentTextScaleFactorWith(context),
           ),
         ));
   }

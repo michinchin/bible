@@ -9,13 +9,48 @@ import 'search/search_history_item.dart';
 class UserItemHelper {
   static const searchHistoryParentId = 3; // using note user item type
   static const navHistoryParentId = 4; // using book user item type
+  /// only allow 50 items to save at a time
+  static const maxHistoryLength = 50;
 
   /// save navigation history item from reference
-  static Future<UserItem> saveNavHistoryItem(
+  static Future<void> saveNavHistoryItem(
     Reference ref,
-  ) =>
-      AppSettings.shared.userAccount.userDb.saveItem(UserItem(
-          type: UserItemType.bookmark.index, parentId: navHistoryParentId, info: ref.toString()));
+  ) async {
+    final items = await AppSettings.shared.userAccount.userDb
+        .getItemsWithParent(navHistoryParentId, ofTypes: [UserItemType.bookmark]);
+
+    // trim list to be 50
+    if (items.length > maxHistoryLength) {
+      for (var i = maxHistoryLength; i < items.length; i++) {
+        items[i] = items[i].copyWith(deleted: 1);
+        await AppSettings.shared.userAccount.userDb.saveItem(items[i]);
+      }
+    }
+
+    final index = items.indexWhere((i) =>
+        i.book == ref.book &&
+        i.chapter == ref.chapter &&
+        i.verse == ref.verse &&
+        i.volumeId == ref.volume);
+
+    UserItem item;
+    if (index != -1) {
+      item = items[index].copyWith(modified: DateTime.now(), deleted: 0);
+    } else {
+      item = createBookmark(ref).copyWith(parentId: navHistoryParentId);
+    }
+
+    await AppSettings.shared.userAccount.userDb.saveItem(item);
+  }
+
+  static UserItem createBookmark(Reference ref) => UserItem(
+        created: tec.dbIntFromDateTime(DateTime.now()),
+        type: UserItemType.bookmark.index,
+        book: ref.book,
+        chapter: ref.chapter,
+        verse: ref.verse,
+        volumeId: ref.volume,
+      );
 
   /// navigation history items from db
   static Future<List<Reference>> navHistoryItemsFromDb() async {
@@ -23,7 +58,12 @@ class UserItemHelper {
         .getItemsWithParent(navHistoryParentId, ofTypes: [UserItemType.bookmark]);
     final refs = <Reference>[];
     for (final i in items) {
-      final ref = Reference.fromJson(i.info).copyWith(modified: tec.dateTimeFromDbInt(i.modified));
+      final ref = Reference(
+        book: i.book,
+        chapter: i.chapter,
+        verse: i.verse,
+        volume: i.volumeId,
+      ).copyWith(modified: tec.dateTimeFromDbInt(i.modified));
       refs.add(ref);
     }
     return refs;
@@ -41,10 +81,38 @@ class UserItemHelper {
     return searchItems;
   }
 
+  /// create user item from search history item
+  static UserItem createSearchHistoryUserItem(SearchHistoryItem item) => UserItem(
+      created: tec.dbIntFromDateTime(DateTime.now()),
+      type: UserItemType.note.index,
+      parentId: searchHistoryParentId,
+      info: tec.toJsonString(item.toJson()));
+
   /// save search history item to db
-  static Future<UserItem> saveSearchHistoryItem(SearchHistoryItem item) =>
-      AppSettings.shared.userAccount.userDb.saveItem(UserItem(
-          type: UserItemType.note.index,
-          parentId: searchHistoryParentId,
-          info: tec.toJsonString(item.toJson())));
+  static Future<void> saveSearchHistoryItem(SearchHistoryItem searchHistoryItem) async {
+    final items = await AppSettings.shared.userAccount.userDb
+        .getItemsWithParent(searchHistoryParentId, ofTypes: [UserItemType.note]);
+
+    // trim list to be 50 items
+    if (items.length > maxHistoryLength) {
+      for (var i = maxHistoryLength; i < items.length; i++) {
+        items[i] = items[i].copyWith(deleted: 1);
+        await AppSettings.shared.userAccount.userDb.saveItem(items[i]);
+      }
+    }
+
+    // if item is already in list, move to top
+    final index = items.indexWhere((i) =>
+        SearchHistoryItem.fromJson(tec.parseJsonSync(i.info)).search.toLowerCase().trim() ==
+        searchHistoryItem.search.toLowerCase().trim());
+
+    UserItem item;
+    if (index != -1) {
+      item = items[index].copyWith(
+          modified: DateTime.now(), info: tec.toJsonString(searchHistoryItem.toJson()), deleted: 0);
+    } else {
+      item = createSearchHistoryUserItem(searchHistoryItem);
+    }
+    await AppSettings.shared.userAccount.userDb.saveItem(item);
+  }
 }

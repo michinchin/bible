@@ -10,6 +10,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/app_settings.dart';
+import '../../models/labels.dart';
 import '../../models/language_utils.dart' as l;
 import '../../models/pref_item.dart';
 import '../common/common.dart';
@@ -19,7 +20,9 @@ import 'nav.dart';
 class BCVTabView extends StatelessWidget {
   final Function(BuildContext, PrefItems) listener;
   final TabController tabController;
-  const BCVTabView({this.listener, this.tabController});
+  final TextEditingController searchController;
+  const BCVTabView(
+      {@required this.listener, @required this.tabController, @required this.searchController});
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +55,14 @@ class BCVTabView extends StatelessWidget {
               Expanded(
                 child: TabBarView(controller: tabController, children: [
                   _TranslationView(),
-                  _BookView(navGridViewEnabled: navGridViewEnabled),
-                  _ChapterView(nav3TapEnabled: nav3TapEnabled),
+                  _BookView(
+                    navGridViewEnabled: navGridViewEnabled,
+                    searchController: searchController,
+                  ),
+                  _ChapterView(
+                    nav3TapEnabled: nav3TapEnabled,
+                    searchController: searchController,
+                  ),
                   if (nav3TapEnabled) _VerseView(),
                 ]),
               ),
@@ -110,9 +119,13 @@ class __TranslationViewState extends State<_TranslationView> {
     final translationsAbbrev =
         context.bloc<PrefItemsBloc>().itemBool(PrefItemId.translationsAbbreviated);
 
-    void onTap(int id) =>
-        context.bloc<NavBloc>().add(NavEvent.setRef(ref: ref.copyWith(volume: id)));
-    // ..add(const NavEvent.changeTabIndex(index: 1));
+    void onTap(int id) {
+      // ignore: close_sinks
+      final navBloc = context.bloc<NavBloc>()..add(NavEvent.setRef(ref: ref.copyWith(volume: id)));
+      if (navBloc.initialTabIndex == NavTabs.translation.index) {
+        navBloc.add(const NavEvent.changeTabIndex(index: 1));
+      }
+    }
 
     return FutureBuilder<List<Volume>>(
         future: _futureTranslations,
@@ -159,17 +172,22 @@ class __TranslationViewState extends State<_TranslationView> {
 
 class _ChapterView extends StatelessWidget {
   final bool nav3TapEnabled;
-  const _ChapterView({this.nav3TapEnabled});
+  final TextEditingController searchController;
+  const _ChapterView({@required this.nav3TapEnabled, @required this.searchController});
 
   @override
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor =
         isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
-    final bible = VolumesRepository.shared.bibleWithId(51);
+    final bible = VolumesRepository.shared.bibleWithId(9);
 
     final ref = context.bloc<NavBloc>().state.ref;
     final chapters = bible.chaptersIn(book: ref.book);
+
+    void updateSearch(String s) => searchController
+      ..text = s
+      ..selection = TextSelection.collapsed(offset: s.length);
 
     return SingleChildScrollView(
       child: _DynamicGrid(
@@ -181,6 +199,7 @@ class _ChapterView extends StatelessWidget {
                 if (!nav3TapEnabled) {
                   Navigator.of(context).maybePop(ref.copyWith(chapter: i));
                 } else {
+                  updateSearch('${bible.nameOfBook(ref.book)} $i:');
                   context.bloc<NavBloc>().selectChapter(ref.book, bible.nameOfBook(ref.book), i);
                 }
               },
@@ -199,7 +218,7 @@ class _VerseView extends StatelessWidget {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor =
         isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
-    final bible = VolumesRepository.shared.bibleWithId(51);
+    final bible = VolumesRepository.shared.bibleWithId(9);
 
     final ref = context.bloc<NavBloc>().state.ref;
     final book = ref.book;
@@ -227,12 +246,16 @@ class _VerseView extends StatelessWidget {
 
 class _BookView extends StatelessWidget {
   final bool navGridViewEnabled;
-  const _BookView({this.navGridViewEnabled});
+  final TextEditingController searchController;
+  const _BookView({@required this.navGridViewEnabled, @required this.searchController});
 
   @override
   Widget build(BuildContext context) {
-    final bible = VolumesRepository.shared.bibleWithId(51);
+    final bible = VolumesRepository.shared.bibleWithId(Labels.defaultBible);
     final navCanonical = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.navBookOrder);
+    void updateSearch(String s) => searchController
+      ..text = s
+      ..selection = TextSelection.collapsed(offset: s.length);
 
     // ignore: prefer_collection_literals
     final bookNames = LinkedHashMap<int, String>();
@@ -268,13 +291,17 @@ class _BookView extends StatelessWidget {
       // if book only has one chapter, special case
       if (bible.chaptersIn(book: book) == 1) {
         if (context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap)) {
+          final nameOfBook = bible.nameOfBook(book);
+          updateSearch(nameOfBook);
           bloc
-            ..selectBook(book, bible.nameOfBook(book))
+            ..selectBook(book, nameOfBook)
             ..add(NavEvent.changeTabIndex(index: NavTabs.verse.index));
         } else {
           Navigator.of(context).maybePop(bloc.state.ref.copyWith(book: book));
         }
       } else {
+        final nameOfBook = bible.nameOfBook(book);
+        updateSearch(nameOfBook);
         bloc.selectBook(book, bible.nameOfBook(book));
       }
     }
@@ -358,8 +385,8 @@ class _DynamicGrid extends StatelessWidget {
   const _DynamicGrid({@required this.children}) : assert(children != null);
   @override
   Widget build(BuildContext context) {
-    // tec.dmPrint(
-    //     'width: ${MediaQuery.of(context).size.width}\nheight: ${MediaQuery.of(context).size.height}');
+    debugPrint(
+        'width: ${MediaQuery.of(context).size.width}\nheight: ${MediaQuery.of(context).size.height}');
     final smallHeight =
         MediaQuery.of(context).size.height <= 685; // pixel 2 height, iphonex height = 812
     final smallWidth = MediaQuery.of(context).size.width <= 375;
@@ -426,7 +453,7 @@ class _PillButton extends StatelessWidget {
 //       // tec.dmPrint('Nav constraints: $constraints');
 //       final area = constraints.maxHeight * constraints.minHeight;
 
-//       final bible = VolumesRepository.shared.bibleWithId(51);
+//       final bible = VolumesRepository.shared.bibleWithId(9);
 
 //       // ignore: prefer_collection_literals
 //       final bookNames = LinkedHashMap<int, String>();

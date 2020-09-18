@@ -96,12 +96,12 @@ class _MenuItems extends StatelessWidget {
                 : ViewManagerEvent.maximize(state.uid));
           }),
         if (((bloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
-          _titleDivider(context, isMaximized ? 'Switch' : 'Open'),
+          _titleDivider(context, isMaximized ? 'Switch To' : 'Switch With'),
           ..._generateOffScreenItems(context, state.uid)
         ],
-        _titleDivider(context, 'New'),
+        _titleDivider(context, 'Open New'),
         //...generateAddMenuItems(context, state.uid),
-        _menuItem(context, FeatherIcons.book, 'Bible', () async {
+        _menuItemForType(bibleChapterType, context: context, viewUid: state.uid, onTap: () async {
           final bibleId = await selectVolume(context,
               title: 'Select Bible Translation',
               filter: const VolumesFilter(
@@ -121,6 +121,27 @@ class _MenuItems extends StatelessWidget {
 
           await Navigator.of(context).maybePop();
         }),
+        // _menuItemForType(studyViewType, context: context, viewUid: state.uid, onTap: () async {
+        //   final volumeId = await selectVolume(context,
+        //       title: 'Select Study Content',
+        //       filter: const VolumesFilter(
+        //         volumeType: VolumeType.studyContent,
+        //       ));
+        //   tec.dmPrint('selected $volumeId');
+
+        //   if (volumeId != null) {
+        //     // TODO(ron): ...
+        //     // final previous = BibleChapterState.fromJson(state.data);
+        //     // if (previous != null) {
+        //     //   final current = BibleChapterState(bibleId, previous.bcv, previous.page);
+        //     //   // following line is approximate if we wanted to change translation in save view
+        //     //   //bloc?.add(ViewManagerEvent.setData(uid: state.uid, data: current.toString()));
+        //          bloc?.add(const ViewManagerEvent.add(type: studyViewType, data: '{}'));
+        //     // }
+        //   }
+
+        //   await Navigator.of(context).maybePop();
+        // }),
         _menuItemForType(noteViewType, context: context, viewUid: state.uid),
         if ((bloc?.state?.views?.length ?? 0) > 1) ...[
           const SizedBox(width: _menuWidth, child: Divider()),
@@ -189,16 +210,24 @@ class _MenuItems extends StatelessWidget {
     String type, {
     @required BuildContext context,
     @required int viewUid,
+    void Function() onTap,
   }) {
     assert(tec.isNotNullOrEmpty(type) && context != null && viewUid != null);
     final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     final vm = ViewManager.shared;
-    return _menuItem(context, vm.iconForType(type), '${vm.titleForType(type)}', () {
-      Navigator.of(context).maybePop();
-      final position = bloc?.indexOfView(viewUid) ?? -1;
-      bloc?.add(ViewManagerEvent.add(
-          type: type, data: vm.dataForType(type), position: position == -1 ? null : position + 1));
-    });
+    return _menuItem(
+        context,
+        vm.iconForType(type),
+        '${vm.titleForType(type)}',
+        onTap ??
+            () {
+              Navigator.of(context).maybePop();
+              final position = bloc?.indexOfView(viewUid) ?? -1;
+              bloc?.add(ViewManagerEvent.add(
+                  type: type,
+                  data: vm.dataForType(type),
+                  position: position == -1 ? null : position + 1));
+            });
   }
 }
 

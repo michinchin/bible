@@ -31,6 +31,13 @@ class _$SearchEventTearOff {
       searchResult: searchResult,
     );
   }
+
+// ignore: unused_element
+  _FilterBooks filterBooks(List<int> excludedBooks) {
+    return _FilterBooks(
+      excludedBooks,
+    );
+  }
 }
 
 // ignore: unused_element
@@ -42,12 +49,14 @@ mixin _$SearchEvent {
     @required Result request(String search, List<int> translations),
     @required Result selectionModeToggle(),
     @required Result modifySearchResult(SearchResultInfo searchResult),
+    @required Result filterBooks(List<int> excludedBooks),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result request(String search, List<int> translations),
     Result selectionModeToggle(),
     Result modifySearchResult(SearchResultInfo searchResult),
+    Result filterBooks(List<int> excludedBooks),
     @required Result orElse(),
   });
   @optionalTypeArgs
@@ -55,12 +64,14 @@ mixin _$SearchEvent {
     @required Result request(_Requested value),
     @required Result selectionModeToggle(_SelectionMode value),
     @required Result modifySearchResult(_ModifySearchResult value),
+    @required Result filterBooks(_FilterBooks value),
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result request(_Requested value),
     Result selectionModeToggle(_SelectionMode value),
     Result modifySearchResult(_ModifySearchResult value),
+    Result filterBooks(_FilterBooks value),
     @required Result orElse(),
   });
 }
@@ -157,10 +168,12 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
     @required Result request(String search, List<int> translations),
     @required Result selectionModeToggle(),
     @required Result modifySearchResult(SearchResultInfo searchResult),
+    @required Result filterBooks(List<int> excludedBooks),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
+    assert(filterBooks != null);
     return request(search, translations);
   }
 
@@ -170,6 +183,7 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
     Result request(String search, List<int> translations),
     Result selectionModeToggle(),
     Result modifySearchResult(SearchResultInfo searchResult),
+    Result filterBooks(List<int> excludedBooks),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -185,10 +199,12 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
     @required Result request(_Requested value),
     @required Result selectionModeToggle(_SelectionMode value),
     @required Result modifySearchResult(_ModifySearchResult value),
+    @required Result filterBooks(_FilterBooks value),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
+    assert(filterBooks != null);
     return request(this);
   }
 
@@ -198,6 +214,7 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
     Result request(_Requested value),
     Result selectionModeToggle(_SelectionMode value),
     Result modifySearchResult(_ModifySearchResult value),
+    Result filterBooks(_FilterBooks value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -262,10 +279,12 @@ class _$_SelectionMode with DiagnosticableTreeMixin implements _SelectionMode {
     @required Result request(String search, List<int> translations),
     @required Result selectionModeToggle(),
     @required Result modifySearchResult(SearchResultInfo searchResult),
+    @required Result filterBooks(List<int> excludedBooks),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
+    assert(filterBooks != null);
     return selectionModeToggle();
   }
 
@@ -275,6 +294,7 @@ class _$_SelectionMode with DiagnosticableTreeMixin implements _SelectionMode {
     Result request(String search, List<int> translations),
     Result selectionModeToggle(),
     Result modifySearchResult(SearchResultInfo searchResult),
+    Result filterBooks(List<int> excludedBooks),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -290,10 +310,12 @@ class _$_SelectionMode with DiagnosticableTreeMixin implements _SelectionMode {
     @required Result request(_Requested value),
     @required Result selectionModeToggle(_SelectionMode value),
     @required Result modifySearchResult(_ModifySearchResult value),
+    @required Result filterBooks(_FilterBooks value),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
+    assert(filterBooks != null);
     return selectionModeToggle(this);
   }
 
@@ -303,6 +325,7 @@ class _$_SelectionMode with DiagnosticableTreeMixin implements _SelectionMode {
     Result request(_Requested value),
     Result selectionModeToggle(_SelectionMode value),
     Result modifySearchResult(_ModifySearchResult value),
+    Result filterBooks(_FilterBooks value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -402,10 +425,12 @@ class _$_ModifySearchResult
     @required Result request(String search, List<int> translations),
     @required Result selectionModeToggle(),
     @required Result modifySearchResult(SearchResultInfo searchResult),
+    @required Result filterBooks(List<int> excludedBooks),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
+    assert(filterBooks != null);
     return modifySearchResult(searchResult);
   }
 
@@ -415,6 +440,7 @@ class _$_ModifySearchResult
     Result request(String search, List<int> translations),
     Result selectionModeToggle(),
     Result modifySearchResult(SearchResultInfo searchResult),
+    Result filterBooks(List<int> excludedBooks),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -430,10 +456,12 @@ class _$_ModifySearchResult
     @required Result request(_Requested value),
     @required Result selectionModeToggle(_SelectionMode value),
     @required Result modifySearchResult(_ModifySearchResult value),
+    @required Result filterBooks(_FilterBooks value),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
+    assert(filterBooks != null);
     return modifySearchResult(this);
   }
 
@@ -443,6 +471,7 @@ class _$_ModifySearchResult
     Result request(_Requested value),
     Result selectionModeToggle(_SelectionMode value),
     Result modifySearchResult(_ModifySearchResult value),
+    Result filterBooks(_FilterBooks value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -461,6 +490,140 @@ abstract class _ModifySearchResult implements SearchEvent {
   _$ModifySearchResultCopyWith<_ModifySearchResult> get copyWith;
 }
 
+abstract class _$FilterBooksCopyWith<$Res> {
+  factory _$FilterBooksCopyWith(
+          _FilterBooks value, $Res Function(_FilterBooks) then) =
+      __$FilterBooksCopyWithImpl<$Res>;
+  $Res call({List<int> excludedBooks});
+}
+
+class __$FilterBooksCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
+    implements _$FilterBooksCopyWith<$Res> {
+  __$FilterBooksCopyWithImpl(
+      _FilterBooks _value, $Res Function(_FilterBooks) _then)
+      : super(_value, (v) => _then(v as _FilterBooks));
+
+  @override
+  _FilterBooks get _value => super._value as _FilterBooks;
+
+  @override
+  $Res call({
+    Object excludedBooks = freezed,
+  }) {
+    return _then(_FilterBooks(
+      excludedBooks == freezed
+          ? _value.excludedBooks
+          : excludedBooks as List<int>,
+    ));
+  }
+}
+
+class _$_FilterBooks with DiagnosticableTreeMixin implements _FilterBooks {
+  const _$_FilterBooks(this.excludedBooks) : assert(excludedBooks != null);
+
+  @override
+  final List<int> excludedBooks;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'SearchEvent.filterBooks(excludedBooks: $excludedBooks)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'SearchEvent.filterBooks'))
+      ..add(DiagnosticsProperty('excludedBooks', excludedBooks));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _FilterBooks &&
+            (identical(other.excludedBooks, excludedBooks) ||
+                const DeepCollectionEquality()
+                    .equals(other.excludedBooks, excludedBooks)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^ const DeepCollectionEquality().hash(excludedBooks);
+
+  @override
+  _$FilterBooksCopyWith<_FilterBooks> get copyWith =>
+      __$FilterBooksCopyWithImpl<_FilterBooks>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result request(String search, List<int> translations),
+    @required Result selectionModeToggle(),
+    @required Result modifySearchResult(SearchResultInfo searchResult),
+    @required Result filterBooks(List<int> excludedBooks),
+  }) {
+    assert(request != null);
+    assert(selectionModeToggle != null);
+    assert(modifySearchResult != null);
+    assert(filterBooks != null);
+    return filterBooks(excludedBooks);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result request(String search, List<int> translations),
+    Result selectionModeToggle(),
+    Result modifySearchResult(SearchResultInfo searchResult),
+    Result filterBooks(List<int> excludedBooks),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (filterBooks != null) {
+      return filterBooks(excludedBooks);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result request(_Requested value),
+    @required Result selectionModeToggle(_SelectionMode value),
+    @required Result modifySearchResult(_ModifySearchResult value),
+    @required Result filterBooks(_FilterBooks value),
+  }) {
+    assert(request != null);
+    assert(selectionModeToggle != null);
+    assert(modifySearchResult != null);
+    assert(filterBooks != null);
+    return filterBooks(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result request(_Requested value),
+    Result selectionModeToggle(_SelectionMode value),
+    Result modifySearchResult(_ModifySearchResult value),
+    Result filterBooks(_FilterBooks value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (filterBooks != null) {
+      return filterBooks(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _FilterBooks implements SearchEvent {
+  const factory _FilterBooks(List<int> excludedBooks) = _$_FilterBooks;
+
+  List<int> get excludedBooks;
+  _$FilterBooksCopyWith<_FilterBooks> get copyWith;
+}
+
 class _$SearchStateTearOff {
   const _$SearchStateTearOff();
 
@@ -468,16 +631,18 @@ class _$SearchStateTearOff {
   _SearchState call(
       {String search,
       List<SearchResultInfo> searchResults,
+      List<SearchResultInfo> filteredResults,
       List<int> filteredTranslations,
-      List<int> filteredBooks,
+      List<int> excludedBooks,
       bool loading,
       bool error,
       bool selectionMode}) {
     return _SearchState(
       search: search,
       searchResults: searchResults,
+      filteredResults: filteredResults,
       filteredTranslations: filteredTranslations,
-      filteredBooks: filteredBooks,
+      excludedBooks: excludedBooks,
       loading: loading,
       error: error,
       selectionMode: selectionMode,
@@ -491,8 +656,9 @@ const $SearchState = _$SearchStateTearOff();
 mixin _$SearchState {
   String get search;
   List<SearchResultInfo> get searchResults;
+  List<SearchResultInfo> get filteredResults;
   List<int> get filteredTranslations;
-  List<int> get filteredBooks;
+  List<int> get excludedBooks;
   bool get loading;
   bool get error;
   bool get selectionMode;
@@ -507,8 +673,9 @@ abstract class $SearchStateCopyWith<$Res> {
   $Res call(
       {String search,
       List<SearchResultInfo> searchResults,
+      List<SearchResultInfo> filteredResults,
       List<int> filteredTranslations,
-      List<int> filteredBooks,
+      List<int> excludedBooks,
       bool loading,
       bool error,
       bool selectionMode});
@@ -525,8 +692,9 @@ class _$SearchStateCopyWithImpl<$Res> implements $SearchStateCopyWith<$Res> {
   $Res call({
     Object search = freezed,
     Object searchResults = freezed,
+    Object filteredResults = freezed,
     Object filteredTranslations = freezed,
-    Object filteredBooks = freezed,
+    Object excludedBooks = freezed,
     Object loading = freezed,
     Object error = freezed,
     Object selectionMode = freezed,
@@ -536,12 +704,15 @@ class _$SearchStateCopyWithImpl<$Res> implements $SearchStateCopyWith<$Res> {
       searchResults: searchResults == freezed
           ? _value.searchResults
           : searchResults as List<SearchResultInfo>,
+      filteredResults: filteredResults == freezed
+          ? _value.filteredResults
+          : filteredResults as List<SearchResultInfo>,
       filteredTranslations: filteredTranslations == freezed
           ? _value.filteredTranslations
           : filteredTranslations as List<int>,
-      filteredBooks: filteredBooks == freezed
-          ? _value.filteredBooks
-          : filteredBooks as List<int>,
+      excludedBooks: excludedBooks == freezed
+          ? _value.excludedBooks
+          : excludedBooks as List<int>,
       loading: loading == freezed ? _value.loading : loading as bool,
       error: error == freezed ? _value.error : error as bool,
       selectionMode: selectionMode == freezed
@@ -560,8 +731,9 @@ abstract class _$SearchStateCopyWith<$Res>
   $Res call(
       {String search,
       List<SearchResultInfo> searchResults,
+      List<SearchResultInfo> filteredResults,
       List<int> filteredTranslations,
-      List<int> filteredBooks,
+      List<int> excludedBooks,
       bool loading,
       bool error,
       bool selectionMode});
@@ -580,8 +752,9 @@ class __$SearchStateCopyWithImpl<$Res> extends _$SearchStateCopyWithImpl<$Res>
   $Res call({
     Object search = freezed,
     Object searchResults = freezed,
+    Object filteredResults = freezed,
     Object filteredTranslations = freezed,
-    Object filteredBooks = freezed,
+    Object excludedBooks = freezed,
     Object loading = freezed,
     Object error = freezed,
     Object selectionMode = freezed,
@@ -591,12 +764,15 @@ class __$SearchStateCopyWithImpl<$Res> extends _$SearchStateCopyWithImpl<$Res>
       searchResults: searchResults == freezed
           ? _value.searchResults
           : searchResults as List<SearchResultInfo>,
+      filteredResults: filteredResults == freezed
+          ? _value.filteredResults
+          : filteredResults as List<SearchResultInfo>,
       filteredTranslations: filteredTranslations == freezed
           ? _value.filteredTranslations
           : filteredTranslations as List<int>,
-      filteredBooks: filteredBooks == freezed
-          ? _value.filteredBooks
-          : filteredBooks as List<int>,
+      excludedBooks: excludedBooks == freezed
+          ? _value.excludedBooks
+          : excludedBooks as List<int>,
       loading: loading == freezed ? _value.loading : loading as bool,
       error: error == freezed ? _value.error : error as bool,
       selectionMode: selectionMode == freezed
@@ -610,8 +786,9 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
   const _$_SearchState(
       {this.search,
       this.searchResults,
+      this.filteredResults,
       this.filteredTranslations,
-      this.filteredBooks,
+      this.excludedBooks,
       this.loading,
       this.error,
       this.selectionMode});
@@ -621,9 +798,11 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
   @override
   final List<SearchResultInfo> searchResults;
   @override
+  final List<SearchResultInfo> filteredResults;
+  @override
   final List<int> filteredTranslations;
   @override
-  final List<int> filteredBooks;
+  final List<int> excludedBooks;
   @override
   final bool loading;
   @override
@@ -633,7 +812,7 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'SearchState(search: $search, searchResults: $searchResults, filteredTranslations: $filteredTranslations, filteredBooks: $filteredBooks, loading: $loading, error: $error, selectionMode: $selectionMode)';
+    return 'SearchState(search: $search, searchResults: $searchResults, filteredResults: $filteredResults, filteredTranslations: $filteredTranslations, excludedBooks: $excludedBooks, loading: $loading, error: $error, selectionMode: $selectionMode)';
   }
 
   @override
@@ -643,8 +822,9 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
       ..add(DiagnosticsProperty('type', 'SearchState'))
       ..add(DiagnosticsProperty('search', search))
       ..add(DiagnosticsProperty('searchResults', searchResults))
+      ..add(DiagnosticsProperty('filteredResults', filteredResults))
       ..add(DiagnosticsProperty('filteredTranslations', filteredTranslations))
-      ..add(DiagnosticsProperty('filteredBooks', filteredBooks))
+      ..add(DiagnosticsProperty('excludedBooks', excludedBooks))
       ..add(DiagnosticsProperty('loading', loading))
       ..add(DiagnosticsProperty('error', error))
       ..add(DiagnosticsProperty('selectionMode', selectionMode));
@@ -659,12 +839,15 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
             (identical(other.searchResults, searchResults) ||
                 const DeepCollectionEquality()
                     .equals(other.searchResults, searchResults)) &&
+            (identical(other.filteredResults, filteredResults) ||
+                const DeepCollectionEquality()
+                    .equals(other.filteredResults, filteredResults)) &&
             (identical(other.filteredTranslations, filteredTranslations) ||
                 const DeepCollectionEquality().equals(
                     other.filteredTranslations, filteredTranslations)) &&
-            (identical(other.filteredBooks, filteredBooks) ||
+            (identical(other.excludedBooks, excludedBooks) ||
                 const DeepCollectionEquality()
-                    .equals(other.filteredBooks, filteredBooks)) &&
+                    .equals(other.excludedBooks, excludedBooks)) &&
             (identical(other.loading, loading) ||
                 const DeepCollectionEquality()
                     .equals(other.loading, loading)) &&
@@ -680,8 +863,9 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(search) ^
       const DeepCollectionEquality().hash(searchResults) ^
+      const DeepCollectionEquality().hash(filteredResults) ^
       const DeepCollectionEquality().hash(filteredTranslations) ^
-      const DeepCollectionEquality().hash(filteredBooks) ^
+      const DeepCollectionEquality().hash(excludedBooks) ^
       const DeepCollectionEquality().hash(loading) ^
       const DeepCollectionEquality().hash(error) ^
       const DeepCollectionEquality().hash(selectionMode);
@@ -695,8 +879,9 @@ abstract class _SearchState implements SearchState {
   const factory _SearchState(
       {String search,
       List<SearchResultInfo> searchResults,
+      List<SearchResultInfo> filteredResults,
       List<int> filteredTranslations,
-      List<int> filteredBooks,
+      List<int> excludedBooks,
       bool loading,
       bool error,
       bool selectionMode}) = _$_SearchState;
@@ -706,9 +891,11 @@ abstract class _SearchState implements SearchState {
   @override
   List<SearchResultInfo> get searchResults;
   @override
+  List<SearchResultInfo> get filteredResults;
+  @override
   List<int> get filteredTranslations;
   @override
-  List<int> get filteredBooks;
+  List<int> get excludedBooks;
   @override
   bool get loading;
   @override
@@ -948,13 +1135,13 @@ class _$_SearchResultInfo extends _SearchResultInfo
 }
 
 abstract class _SearchResultInfo extends SearchResultInfo {
+  const _SearchResultInfo._() : super._();
   const factory _SearchResultInfo(SearchResult searchResult,
       {bool contextExpanded,
       int currentVerseIndex,
       bool selected,
       bool expanded,
       Map<int, Context> contextMap}) = _$_SearchResultInfo;
-  const _SearchResultInfo._() : super._();
 
   @override
   SearchResult get searchResult;

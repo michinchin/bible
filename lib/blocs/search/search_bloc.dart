@@ -19,6 +19,7 @@ abstract class SearchEvent with _$SearchEvent {
   const factory SearchEvent.selectionModeToggle() = _SelectionMode;
   const factory SearchEvent.modifySearchResult({SearchResultInfo searchResult}) =
       _ModifySearchResult;
+  const factory SearchEvent.filterBooks(List<int> excludedBooks) = _FilterBooks;
 }
 
 @freezed
@@ -26,8 +27,9 @@ abstract class SearchState with _$SearchState {
   const factory SearchState({
     String search,
     List<SearchResultInfo> searchResults,
+    List<SearchResultInfo> filteredResults,
     List<int> filteredTranslations,
-    List<int> filteredBooks,
+    List<int> excludedBooks,
     bool loading,
     bool error,
     bool selectionMode,
@@ -35,14 +37,15 @@ abstract class SearchState with _$SearchState {
 }
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
-  CancelableOperation<List<SearchResult>> searchOperation;
-  int scrollIndex = 0;
+  CancelableOperation<List<SearchResult>> _searchOperation;
+  // int scrollIndex = 0;
 
   SearchBloc()
       : super(const SearchState(
           search: '',
           searchResults: [],
-          filteredBooks: [],
+          filteredResults: [],
+          excludedBooks: [],
           filteredTranslations: [],
           loading: false,
           error: false,
@@ -53,19 +56,29 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   Stream<SearchState> mapEventToState(SearchEvent event) async* {
     if (event is _Requested) {
       // make sure any still-pending prior request never gets processed
-      await searchOperation?.cancel();
+      await _searchOperation?.cancel();
+
       yield state.copyWith(loading: true);
       tec.dmPrint('Loading search: ${event.search}');
+
       try {
         final translations = event.translations.join('|');
         final futureRes = SearchResults.fetch(words: event.search, translationIds: translations);
-        searchOperation = CancelableOperation<List<SearchResult>>.fromFuture(futureRes,
-            onCancel: () => tec.dmPrint('Cancelled search query'));
-        final res = await searchOperation.value;
+        _searchOperation = CancelableOperation<List<SearchResult>>.fromFuture(futureRes);
+        final res = await _searchOperation.value;
         tec.dmPrint('Completed search "${event.search}" with ${res.length} result(s)');
-        await _saveToSearchHistory(event.search, translations);
+
+        // save search
+        if (res.isNotEmpty) {
+          await _saveToSearchHistory(event.search, translations);
+        }
+
         yield state.copyWith(
             searchResults: res.map((r) => SearchResultInfo(r)).toList(),
+            filteredResults: res
+                .map((r) => SearchResultInfo(r))
+                .where((s) => !state.excludedBooks.contains(s.searchResult.bookId))
+                .toList(),
             loading: false,
             error: false,
             search: event.search,
@@ -86,31 +99,41 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         yield state.copyWith(selectionMode: !state.selectionMode);
       } else {
         // clear selected
-        final results = state.searchResults.map((r) => r.copyWith(selected: false)).toList();
-        yield state.copyWith(selectionMode: !state.selectionMode, searchResults: results);
+        final results = state.filteredResults.map((r) => r.copyWith(selected: false)).toList();
+        yield state.copyWith(selectionMode: !state.selectionMode, filteredResults: results);
       }
+    } else if (event is _FilterBooks) {
+      yield _filterBooks(event.excludedBooks);
     }
   }
 
+  SearchState _filterBooks(List<int> excludedBooks) {
+    final filteredResults =
+        state.searchResults.where((s) => !excludedBooks.contains(s.searchResult.bookId)).toList();
+    return state.copyWith(filteredResults: filteredResults, excludedBooks: excludedBooks);
+  }
+
   SearchState _modifySearchResult(SearchResultInfo info) {
-    final res = List<SearchResultInfo>.from(state.searchResults);
+    final res = List<SearchResultInfo>.from(state.filteredResults);
     final index = res.indexWhere((i) => i.searchResult == info.searchResult);
     if (index != -1) {
       res[index] = info;
-      return state.copyWith(searchResults: res);
+      return state.copyWith(filteredResults: res);
     }
     return state;
   }
 
+  /// save search when navigating away or entering new search
   Future<void> _saveToSearchHistory(String search, String translations) async {
     // check to make sure u haven't saved it already
     final s = SearchHistoryItem(
         search: search,
         volumesFiltered: translations,
-        booksFiltered: state.filteredBooks.join('|'),
-        index: scrollIndex,
+        booksFiltered: state.excludedBooks.join('|'),
+        // index: scrollIndex,
         modified: DateTime.now());
     await UserItemHelper.saveSearchHistoryItem(s);
+    // scrollIndex = 0;
   }
 }
 

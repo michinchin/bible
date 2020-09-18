@@ -20,7 +20,7 @@ class BibleChapterState {
   }
 
   factory BibleChapterState.initial() {
-    return BibleChapterState(51, initialBCV(), 0);
+    return BibleChapterState(9, initialBCV(), 0);
   }
 
   factory BibleChapterState.fromJson(Object o) {

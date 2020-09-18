@@ -7,15 +7,20 @@ import '../../blocs/search/nav_bloc.dart';
 
 class SearchSuggestionsView extends StatelessWidget {
   final Function({String query}) onSubmit;
-  const SearchSuggestionsView({this.onSubmit});
+  final TextEditingController searchController;
+  const SearchSuggestionsView({@required this.onSubmit, @required this.searchController});
 
   @override
   Widget build(BuildContext context) {
     // ignore: close_sinks
     final bloc = context.bloc<NavBloc>();
-    final bible = VolumesRepository.shared.bibleWithId(51);
+    final bible = VolumesRepository.shared.bibleWithId(9);
     final wordSuggestions = bloc.state.wordSuggestions ?? [];
     final bookSuggestions = bloc.state.bookSuggestions ?? [];
+    void updateSearch(String s) => searchController
+      ..text = s
+      ..selection = TextSelection.collapsed(offset: s.length);
+      
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -24,7 +29,9 @@ class SearchSuggestionsView extends StatelessWidget {
                 leading: const Icon(FeatherIcons.bookOpen),
                 title: Text(bible.nameOfBook(book)),
                 onTap: () {
-                  bloc.add(NavEvent.onSearchChange(search: bible.nameOfBook(book)));
+                  final search = bible.nameOfBook(book);
+                  updateSearch(search);
+                  bloc.add(NavEvent.onSearchChange(search: search));
                 }),
           for (final word in wordSuggestions)
             ListTile(
@@ -36,10 +43,12 @@ class SearchSuggestionsView extends StatelessWidget {
                 if (' '.allMatches(query).length < 4 &&
                     query.substring(query.length - 1, query.length) == ' ') {
                   query += '$a ';
+                  updateSearch(query);
                   bloc.add(NavEvent.onSearchChange(search: query));
                 } else {
                   final words = query.split(' ')..last = a;
                   query = words.join(' ');
+                  updateSearch(query);
                   onSubmit(query: query);
                 }
               },

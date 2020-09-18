@@ -213,7 +213,7 @@ String _formatRefs(String query) {
     final shortRef = arr[0].group(0);
     if (Labels.extraBookNames.containsKey(shortRef)) {
       final bookId = Labels.extraBookNames[shortRef];
-      final fullBookName = VolumesRepository.shared.bibleWithId(51).nameOfBook(bookId);
+      final fullBookName = VolumesRepository.shared.bibleWithId(9).nameOfBook(bookId);
       final fixedQuery = query.replaceAll(shortRef, fullBookName);
 
       return fixedQuery;
@@ -332,7 +332,7 @@ List<TextSpan> searchResTextSpans(
         // add the bold text...
         content.add(TextSpan(
             text: verse.substring(where, where + bold[where]),
-            style: const TextStyle(fontWeight: FontWeight.bold)));
+            style: const TextStyle(fontWeight: FontWeight.w900)));
 
         lastEnd = where + bold[where];
       }

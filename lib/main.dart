@@ -27,6 +27,7 @@ import 'ui/misc/view_actions.dart';
 import 'ui/note/margin_note_view.dart';
 import 'ui/note/note_view.dart';
 import 'ui/note/notes_view.dart';
+import 'ui/study/study_view.dart';
 
 const _appTitle = 'Tecarta Bible';
 
@@ -48,7 +49,7 @@ Future<void> main() async {
     productsUrl: null,
     productsBundleKey: null,
     bundledProducts: [
-      BundledProduct([8, 9, 32, 47, 49, 50, 51, 78, 218, 231, 250], 'assets'),
+      BundledProduct([9], 'assets'),
     ],
   );
 
@@ -85,6 +86,13 @@ void _registerViewTypes() {
       scaffoldBuilder: bibleChapterViewBuilder,
       icon: FeatherIcons.book,
       defaultDataBuilder: bibleChapterDefaultData,
+    )
+    ..register(
+      studyViewType,
+      title: 'Study',
+      scaffoldBuilder: studyViewBuilder,
+      icon: FeatherIcons.bookOpen,
+      // defaultDataBuilder: studyViewDefaultData,
     )
     ..register(
       noteViewType,

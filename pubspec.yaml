@@ -15,16 +15,16 @@ dependencies:
   # Localization related dependencies
   flutter_localizations:
     sdk: flutter
-  i18n_extension: ^1.4.0
+  i18n_extension: ^1.4.3
 
   # External dependencies
   animations: ^1.1.2
-  bloc: ^6.0.2
-  cached_network_image: ^2.3.1
+  bloc: ^6.0.3
+  cached_network_image: ^2.3.2+1
   combos: ^1.2.0
   equatable: ^1.2.3
   feather_icons_flutter: ^4.7.4
-  flutter_bloc: ^6.0.2
+  flutter_bloc: ^6.0.5
   flutter_downloader: ^1.5.0
   flutter_keyboard_visibility: ^3.2.1
   flutter_local_notifications: ^1.4.4
@@ -33,19 +33,18 @@ dependencies:
   freezed_annotation: ^0.11.0+1
   google_fonts: ^1.1.0
   image_picker: ^0.6.7+2
-  in_app_purchase: ^0.3.4+3
+  in_app_purchase: ^0.3.4+8
   json_annotation: ^3.0.1
   path: ^1.7.0
   path_provider: ^1.6.11
   pedantic: ^1.9.2
-  permission_handler: ^5.0.1+1
-  provider: ^4.1.3
+  provider: ^4.3.2+2
   quill_delta: ^1.0.2
   rxdart: ^0.24.1
   scrollable_positioned_list: ^0.1.7
   share: ^0.6.5
   tuple: ^1.0.3
-  url_launcher: ^5.5.1
+  url_launcher: ^5.5.3
   zefyr:
     git:
       url: git://github.com/memspace/zefyr
@@ -62,7 +61,7 @@ dependencies:
     hosted:
       name: tec_cache
       url: http://noah.tecarta.com:8100
-    version: ^1.0.0
+    version: ^1.0.2
   tec_env:
     hosted:
       name: tec_env
@@ -77,22 +76,22 @@ dependencies:
     hosted:
       name: tec_platform_util
       url: http://noah.tecarta.com:8100
-    version: ^1.0.0
+    version: ^1.0.2
+  tec_user_account:
+    hosted:
+      name: tec_user_account
+      url: http://noah.tecarta.com:8100
+    version: ^2.0.7
   tec_util:
     hosted:
       name: tec_util
       url: http://noah.tecarta.com:8100
     version: ^1.2.22
-  tec_user_account:
-    hosted:
-      name: tec_user_account
-      url: http://noah.tecarta.com:8100
-    version: ^2.0.6
   tec_volumes:
     hosted:
       name: tec_volumes
       url: http://noah.tecarta.com:8100
-    version: ^1.1.2
+    version: ^1.2.1
   tec_web_view:
     hosted:
       name: tec_web_view
@@ -120,7 +119,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  bloc_test: ^7.0.3
+  bloc_test: ^7.0.4
   build_runner: ^1.10.2
   freezed: ^0.11.4
   json_serializable: ^3.3.0
@@ -142,10 +141,9 @@ flutter:
       fonts:
         - asset: packages/flutter_sfsymbols/fonts/sficonsets.ttf
 
-
   assets:
-    - assets/0.sqlite
-    - assets/0.zip
+    - assets/9.sqlite
+    - assets/9.zip
     - assets/fonts.json
     - assets/footnote.svg
     - assets/marginNote.svg

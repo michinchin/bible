@@ -20,13 +20,11 @@ class _$SearchHistoryItemTearOff {
       {@required String search,
       @required String volumesFiltered,
       @required String booksFiltered,
-      @required int index,
       @required DateTime modified}) {
     return _SearchHistoryItem(
       search: search,
       volumesFiltered: volumesFiltered,
       booksFiltered: booksFiltered,
-      index: index,
       modified: modified,
     );
   }
@@ -39,7 +37,6 @@ mixin _$SearchHistoryItem {
   String get search;
   String get volumesFiltered;
   String get booksFiltered;
-  int get index;
   DateTime get modified;
 
   Map<String, dynamic> toJson();
@@ -54,7 +51,6 @@ abstract class $SearchHistoryItemCopyWith<$Res> {
       {String search,
       String volumesFiltered,
       String booksFiltered,
-      int index,
       DateTime modified});
 }
 
@@ -71,7 +67,6 @@ class _$SearchHistoryItemCopyWithImpl<$Res>
     Object search = freezed,
     Object volumesFiltered = freezed,
     Object booksFiltered = freezed,
-    Object index = freezed,
     Object modified = freezed,
   }) {
     return _then(_value.copyWith(
@@ -82,7 +77,6 @@ class _$SearchHistoryItemCopyWithImpl<$Res>
       booksFiltered: booksFiltered == freezed
           ? _value.booksFiltered
           : booksFiltered as String,
-      index: index == freezed ? _value.index : index as int,
       modified: modified == freezed ? _value.modified : modified as DateTime,
     ));
   }
@@ -98,7 +92,6 @@ abstract class _$SearchHistoryItemCopyWith<$Res>
       {String search,
       String volumesFiltered,
       String booksFiltered,
-      int index,
       DateTime modified});
 }
 
@@ -117,7 +110,6 @@ class __$SearchHistoryItemCopyWithImpl<$Res>
     Object search = freezed,
     Object volumesFiltered = freezed,
     Object booksFiltered = freezed,
-    Object index = freezed,
     Object modified = freezed,
   }) {
     return _then(_SearchHistoryItem(
@@ -128,7 +120,6 @@ class __$SearchHistoryItemCopyWithImpl<$Res>
       booksFiltered: booksFiltered == freezed
           ? _value.booksFiltered
           : booksFiltered as String,
-      index: index == freezed ? _value.index : index as int,
       modified: modified == freezed ? _value.modified : modified as DateTime,
     ));
   }
@@ -140,12 +131,10 @@ class _$_SearchHistoryItem implements _SearchHistoryItem {
       {@required this.search,
       @required this.volumesFiltered,
       @required this.booksFiltered,
-      @required this.index,
       @required this.modified})
       : assert(search != null),
         assert(volumesFiltered != null),
         assert(booksFiltered != null),
-        assert(index != null),
         assert(modified != null);
 
   factory _$_SearchHistoryItem.fromJson(Map<String, dynamic> json) =>
@@ -158,13 +147,11 @@ class _$_SearchHistoryItem implements _SearchHistoryItem {
   @override
   final String booksFiltered;
   @override
-  final int index;
-  @override
   final DateTime modified;
 
   @override
   String toString() {
-    return 'SearchHistoryItem(search: $search, volumesFiltered: $volumesFiltered, booksFiltered: $booksFiltered, index: $index, modified: $modified)';
+    return 'SearchHistoryItem(search: $search, volumesFiltered: $volumesFiltered, booksFiltered: $booksFiltered, modified: $modified)';
   }
 
   @override
@@ -179,8 +166,6 @@ class _$_SearchHistoryItem implements _SearchHistoryItem {
             (identical(other.booksFiltered, booksFiltered) ||
                 const DeepCollectionEquality()
                     .equals(other.booksFiltered, booksFiltered)) &&
-            (identical(other.index, index) ||
-                const DeepCollectionEquality().equals(other.index, index)) &&
             (identical(other.modified, modified) ||
                 const DeepCollectionEquality()
                     .equals(other.modified, modified)));
@@ -192,7 +177,6 @@ class _$_SearchHistoryItem implements _SearchHistoryItem {
       const DeepCollectionEquality().hash(search) ^
       const DeepCollectionEquality().hash(volumesFiltered) ^
       const DeepCollectionEquality().hash(booksFiltered) ^
-      const DeepCollectionEquality().hash(index) ^
       const DeepCollectionEquality().hash(modified);
 
   @override
@@ -210,7 +194,6 @@ abstract class _SearchHistoryItem implements SearchHistoryItem {
       {@required String search,
       @required String volumesFiltered,
       @required String booksFiltered,
-      @required int index,
       @required DateTime modified}) = _$_SearchHistoryItem;
 
   factory _SearchHistoryItem.fromJson(Map<String, dynamic> json) =
@@ -222,8 +205,6 @@ abstract class _SearchHistoryItem implements SearchHistoryItem {
   String get volumesFiltered;
   @override
   String get booksFiltered;
-  @override
-  int get index;
   @override
   DateTime get modified;
   @override

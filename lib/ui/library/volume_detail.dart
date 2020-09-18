@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pedantic/pedantic.dart';
@@ -223,6 +224,12 @@ class _ButtonsState extends State<_Buttons> {
       final details = await InAppPurchases.shared.detailsWithProduct(widget.volume.appStoreId);
       if (!mounted) return;
       _priceStr = details?.price;
+
+      // `detailsWithProduct` may fail on the simulator, but we still want to be able to test
+      // purchasing, so set `_priceStr` to an empty string.
+      if (_priceStr == null && AppSettings.shared.deviceInfo.isSimulator) {
+        _priceStr = '';
+      }
     }
 
     if (!mounted) return;
