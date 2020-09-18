@@ -50,7 +50,7 @@ dependencies:
     git:
       url: git://github.com/memspace/zefyr
       path: packages/zefyr
-      commit: 0d69499
+      commit: 6951cba
 
   # Internal dependencies
   sliding_sheet:
