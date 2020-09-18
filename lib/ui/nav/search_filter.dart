@@ -16,7 +16,10 @@ import '../common/common.dart';
 import '../library/volumes_bloc.dart';
 
 Future<List<List<int>>> showFilter(BuildContext context,
-        {VolumesFilter filter, Iterable<int> selectedVolumes, Iterable<int> filteredBooks}) =>
+        {VolumesFilter filter,
+        Iterable<int> selectedVolumes,
+        Iterable<int> filteredBooks,
+        TextEditingController searchController}) =>
     showModalBottomSheet<List<List<int>>>(
         shape: const RoundedRectangleBorder(
             borderRadius:
@@ -24,34 +27,46 @@ Future<List<List<int>>> showFilter(BuildContext context,
         context: context,
         useRootNavigator: true,
         isScrollControlled: true,
-        enableDrag: false,
-        // TODO(abby): on drag down, modal bottom sheet does not detect willpopscope
         builder: (c) => SizedBox(
               height: MediaQuery.of(c).size.height / 2,
               child: _SearchFilterView(
-                  filter: filter, selectedVolumes: selectedVolumes, selectedBooks: filteredBooks),
+                  filter: filter,
+                  selectedVolumes: selectedVolumes,
+                  selectedBooks: filteredBooks,
+                  searchController: searchController),
             ));
 
 class _SearchFilterView extends StatefulWidget {
   final VolumesFilter filter;
   final Iterable<int> selectedVolumes;
   final Iterable<int> selectedBooks;
-  const _SearchFilterView({this.filter, this.selectedVolumes, this.selectedBooks});
+  final TextEditingController searchController;
+  const _SearchFilterView(
+      {this.filter, this.selectedVolumes, this.selectedBooks, this.searchController});
 
   @override
   __SearchFilterViewState createState() => __SearchFilterViewState();
 }
 
-class __SearchFilterViewState extends State<_SearchFilterView> {
+class __SearchFilterViewState extends State<_SearchFilterView> with SingleTickerProviderStateMixin {
   Set<int> _selectedVolumes;
   Set<int> _filteredBooks;
   bool _booksInGridView;
   bool _volumesInGridView;
+  TabController _tabController;
 
   PrefItemsBloc prefsBloc() => context.bloc<PrefItemsBloc>();
 
   @override
   void initState() {
+    _tabController = TabController(initialIndex: 0, vsync: this, length: 2)
+      ..addListener(() {
+        if (_tabController.previousIndex != _tabController.index) {
+          setState(() {
+            _currFilter = _tabController.index == 1 ? 'Translation' : 'Book';
+          });
+        }
+      });
     _booksInGridView = prefsBloc().itemBool(PrefItemId.searchFilterBookGridView);
     _volumesInGridView = prefsBloc().itemBool(PrefItemId.searchFilterTranslationGridView);
     _selectedVolumes = widget.selectedVolumes?.toSet();
@@ -69,7 +84,28 @@ class __SearchFilterViewState extends State<_SearchFilterView> {
       prefsBloc().add(PrefItemEvent.update(
           prefItem: prefsBloc().toggledPrefItem(PrefItemId.searchFilterTranslationGridView)));
     }
+
+    _updateSearch();
     super.deactivate();
+  }
+
+  void _updateSearch() {
+    final books = _filteredBooks.toList();
+    final volumes = _selectedVolumes.toList();
+    if (volumes != null) {
+      final prefItem =
+          prefsBloc().infoChangedPrefItem(PrefItemId.translationsFilter, volumes.join('|'));
+      prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
+      if (widget.searchController.text.isNotEmpty) {
+        context
+            .bloc<SearchBloc>()
+            .add(SearchEvent.request(search: widget.searchController.text, translations: volumes));
+      }
+    }
+    if (books != null) {
+      // excluded books
+      context.bloc<SearchBloc>().add(SearchEvent.filterBooks(books));
+    }
   }
 
   String _currFilter = 'Book';
@@ -78,6 +114,8 @@ class __SearchFilterViewState extends State<_SearchFilterView> {
     setState(() {
       _currFilter = s;
     });
+
+    _tabController.animateTo(_currFilter == 'Book' ? 0 : 1);
   }
 
   void _gridViewToggle() {
@@ -94,80 +132,73 @@ class __SearchFilterViewState extends State<_SearchFilterView> {
   Widget build(BuildContext context) {
     return TecScaffoldWrapper(
       child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
           backgroundColor: Colors.transparent,
-          leadingWidth: 0,
-          automaticallyImplyLeading: false,
-          flexibleSpace: Column(children: [
-            Container(
-              margin: const EdgeInsets.only(top: 10),
-              height: 5,
-              width: 50,
-              decoration: ShapeDecoration(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                color: Colors.grey.withOpacity(0.5),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('$_currFilter filter'),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            _gridView ? Icons.format_list_bulleted : FeatherIcons.grid,
-                            color: Theme.of(context).textColor.withOpacity(0.5),
-                          ),
-                          onPressed: _gridViewToggle,
-                        ),
-                        Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                            decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Theme.of(context).textColor.withOpacity(0.5)),
-                                color: Theme.of(context).canvasColor,
-                                borderRadius: BorderRadius.circular(5)),
-                            child: DropdownButton<String>(
-                                isDense: true,
-                                value: _currFilter,
-                                underline: const SizedBox(),
-                                iconSize: 15,
-                                style: Theme.of(context).textTheme.caption,
-                                icon: const Icon(Icons.expand_more),
-                                items: <String>[
-                                  'Book',
-                                  'Translation',
-                                ].map((value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                                onChanged: _changeFilter)),
-                      ],
-                    ),
-                  ],
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            leadingWidth: 0,
+            automaticallyImplyLeading: false,
+            flexibleSpace: Column(children: [
+              Container(
+                margin: const EdgeInsets.only(top: 10),
+                height: 5,
+                width: 50,
+                decoration: ShapeDecoration(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                  color: Colors.grey.withOpacity(0.5),
                 ),
               ),
-            ),
-          ]),
-        ),
-        body: WillPopScope(
-          onWillPop: () async {
-            Navigator.of(context)
-                .pop([_filteredBooks?.toList() ?? [], _selectedVolumes?.toList() ?? []]);
-            return false;
-          },
-          child: _currFilter == 'Book'
-              ? _BookFilter(_filteredBooks ?? {}, gridView: _gridView)
-              : _VolumeFilter(widget.filter, _selectedVolumes ?? {}, gridView: _gridView),
-        ),
-      ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('$_currFilter filter'),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              _gridView ? Icons.format_list_bulleted : FeatherIcons.grid,
+                              color: Theme.of(context).textColor.withOpacity(0.5),
+                            ),
+                            onPressed: _gridViewToggle,
+                          ),
+                          Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Theme.of(context).textColor.withOpacity(0.5)),
+                                  color: Theme.of(context).canvasColor,
+                                  borderRadius: BorderRadius.circular(5)),
+                              child: DropdownButton<String>(
+                                  isDense: true,
+                                  value: _currFilter,
+                                  underline: const SizedBox(),
+                                  iconSize: 15,
+                                  style: Theme.of(context).textTheme.caption,
+                                  icon: const Icon(Icons.expand_more),
+                                  items: <String>[
+                                    'Book',
+                                    'Translation',
+                                  ].map((value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  onChanged: _changeFilter)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ]),
+          ),
+          body: TabBarView(controller: _tabController, children: [
+            _BookFilter(_filteredBooks ?? {}, gridView: _gridView),
+            _VolumeFilter(widget.filter, _selectedVolumes ?? {}, gridView: _gridView),
+          ])),
     );
   }
 }

@@ -181,101 +181,77 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _translation() async {
-    final bv = await showFilter(context,
-        filter: const VolumesFilter(volumeType: VolumeType.bible),
-        selectedVolumes: translations(),
-        filteredBooks: searchBloc().state.excludedBooks);
-    if (bv != null) {
-      final books = bv[0];
-      final volumes = bv[1];
-      if (volumes != null) {
-        final prefItem =
-            prefsBloc().infoChangedPrefItem(PrefItemId.translationsFilter, volumes.join('|'));
-        prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
-        if (_searchController.text.isNotEmpty) {
-          searchBloc()
-              .add(SearchEvent.request(search: _searchController.text, translations: volumes));
-        }
-      }
-      if (books != null) {
-        // excluded books
-        searchBloc().add(SearchEvent.filterBooks(books));
-      }
-    }
-    // final volumes = await selectVolumes(context,
-    //     filter: const VolumesFilter(volumeType: VolumeType.bible), selectedVolumes: translations());
-  }
+  Future<void> _filter() => showFilter(context,
+      filter: const VolumesFilter(volumeType: VolumeType.bible),
+      selectedVolumes: translations(),
+      filteredBooks: searchBloc().state.excludedBooks,
+      searchController: _searchController);
 
-  void _moreButton() {
-    showModalBottomSheet<void>(
-        barrierColor: Colors.black12,
-        elevation: 10,
-        shape: const RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
-        context: context,
-        builder: (c) => BlocBuilder<PrefItemsBloc, PrefItems>(
-            cubit: prefsBloc(),
-            builder: (context, state) {
-              final items = state?.items ?? [];
-              final navGridViewEnabled = items.boolForPrefItem(PrefItemId.navLayout);
-              final nav3TapEnabled = items.boolForPrefItem(PrefItemId.nav3Tap);
-              final navCanonical = items.boolForPrefItem(PrefItemId.navBookOrder);
-              final translationsAbbrev = items.boolForPrefItem(PrefItemId.translationsAbbreviated);
-              return SafeArea(
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    ListTile(
-                      title: Text(navCanonical
-                          ? 'Show books alphabetically'
-                          : 'Show books in canonical order'),
-                      onTap: () {
-                        navBloc()
-                          ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
-                          ..add(const NavEvent.onSearchChange(search: ''));
-                        prefsBloc().add(PrefItemEvent.update(
-                            prefItem: prefsBloc().toggledPrefItem(PrefItemId.navBookOrder)));
-                      },
-                    ),
-                    ListTile(
-                      title: Text(navGridViewEnabled
-                          ? 'Show full name for books'
-                          : 'Show abbreviated books'),
-                      onTap: () {
-                        navBloc()
-                          ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
-                          ..add(const NavEvent.onSearchChange(search: ''));
-                        prefsBloc().add(PrefItemEvent.update(
-                            prefItem: prefsBloc().toggledPrefItem(PrefItemId.navLayout)));
-                      },
-                    ),
-                    ListTile(
-                      title: Text(nav3TapEnabled
-                          ? 'Show book and chapter'
-                          : 'Show book, chapter, and verse'),
-                      onTap: () {
-                        prefsBloc().add(PrefItemEvent.update(
-                            prefItem: prefsBloc().toggledPrefItem(PrefItemId.nav3Tap)));
-                      },
-                    ),
-                    ListTile(
-                      title: Text(translationsAbbrev
-                          ? 'Show full name for translations'
-                          : 'Show abbreviated translations'),
-                      onTap: () {
-                        navBloc().add(NavEvent.changeTabIndex(index: NavTabs.translation.index));
-                        prefsBloc().add(PrefItemEvent.update(
-                            prefItem:
-                                prefsBloc().toggledPrefItem(PrefItemId.translationsAbbreviated)));
-                      },
-                    ),
-                  ],
-                ),
-              );
-            }));
-  }
+  void _moreButton() => showModalBottomSheet<void>(
+      barrierColor: Colors.black12,
+      elevation: 10,
+      shape: const RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
+      context: context,
+      builder: (c) => BlocBuilder<PrefItemsBloc, PrefItems>(
+          cubit: prefsBloc(),
+          builder: (context, state) {
+            final items = state?.items ?? [];
+            final navGridViewEnabled = items.boolForPrefItem(PrefItemId.navLayout);
+            final nav3TapEnabled = items.boolForPrefItem(PrefItemId.nav3Tap);
+            final navCanonical = items.boolForPrefItem(PrefItemId.navBookOrder);
+            final translationsAbbrev = items.boolForPrefItem(PrefItemId.translationsAbbreviated);
+            return SafeArea(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  ListTile(
+                    title: Text(navCanonical
+                        ? 'Show books alphabetically'
+                        : 'Show books in canonical order'),
+                    onTap: () {
+                      navBloc()
+                        ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
+                        ..add(const NavEvent.onSearchChange(search: ''));
+                      prefsBloc().add(PrefItemEvent.update(
+                          prefItem: prefsBloc().toggledPrefItem(PrefItemId.navBookOrder)));
+                    },
+                  ),
+                  ListTile(
+                    title: Text(
+                        navGridViewEnabled ? 'Show full name for books' : 'Show abbreviated books'),
+                    onTap: () {
+                      navBloc()
+                        ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
+                        ..add(const NavEvent.onSearchChange(search: ''));
+                      prefsBloc().add(PrefItemEvent.update(
+                          prefItem: prefsBloc().toggledPrefItem(PrefItemId.navLayout)));
+                    },
+                  ),
+                  ListTile(
+                    title: Text(
+                        nav3TapEnabled ? 'Show book and chapter' : 'Show book, chapter, and verse'),
+                    onTap: () {
+                      prefsBloc().add(PrefItemEvent.update(
+                          prefItem: prefsBloc().toggledPrefItem(PrefItemId.nav3Tap)));
+                    },
+                  ),
+                  ListTile(
+                    title: Text(translationsAbbrev
+                        ? 'Show full name for translations'
+                        : 'Show abbreviated translations'),
+                    onTap: () {
+                      navBloc().add(NavEvent.changeTabIndex(index: NavTabs.translation.index));
+                      prefsBloc().add(PrefItemEvent.update(
+                          prefItem:
+                              prefsBloc().toggledPrefItem(PrefItemId.translationsAbbreviated)));
+                    },
+                  ),
+                ],
+              ),
+            );
+          }));
 
   @override
   Widget build(BuildContext context) {
@@ -375,7 +351,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           return [
             if (ss.filteredResults.isNotEmpty)
               IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),
-            IconButton(icon: const Icon(Icons.filter_list), onPressed: _translation)
+            IconButton(icon: const Icon(Icons.filter_list), onPressed: _filter)
           ];
         }
       }
