@@ -53,8 +53,8 @@ class AppLifecycleBloc extends Bloc<AppLifecycleState, AppLifecycleState> {
       tec.dmPrint('App resumed after being paused for $pausedDuration');
     }
 
-    // If a user is signed in, initiate a sync.
-    if (AppSettings.shared.userAccount.isSignedIn) {
+    // If paused for more than 10 seconds and a user is signed in, initiate a sync.
+    if (pausedDuration > const Duration(seconds: 10) && AppSettings.shared.userAccount.isSignedIn) {
       AppSettings.shared.userAccount.syncUserDb<void>();
     }
   }

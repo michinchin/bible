@@ -1,5 +1,10 @@
 part of 'view_manager_bloc.dart';
 
+const bool _showViewPadding = true;
+const _viewPaddingSize = .5;
+const _viewPaddingColorLight = Color(0xffdddddd);
+const _viewPaddingColorDark = Color(0xff222222);
+
 ///
 /// Stack of managed views.
 ///
@@ -88,6 +93,11 @@ abstract class ManagedViewState with _$ManagedViewState {
     ViewState viewState,
     Size viewSize,
     int viewIndex,
+    int row,
+    int col,
+    int rowCount,
+    int colCount,
+    bool isMaximized, // ignore: avoid_positional_boolean_parameters
   ) = _ManagedViewState;
 }
 
@@ -96,8 +106,8 @@ class ManagedViewBloc extends Bloc<ManagedViewState, ManagedViewState> {
 
   @override
   Stream<ManagedViewState> mapEventToState(ManagedViewState event) async* {
-    yield ManagedViewState(
-        event.parentConstraints, event.viewState, event.viewSize, event.viewIndex);
+    yield ManagedViewState(event.parentConstraints, event.viewState, event.viewSize,
+        event.viewIndex, event.row, event.col, event.rowCount, event.colCount, event.isMaximized);
   }
 }
 
@@ -127,14 +137,31 @@ class _ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: Navigator(
-        onGenerateRoute: (settings) => TecPageRoute<dynamic>(
-          settings: settings,
-          builder: _routeBuilder,
-        ),
-      ),
-    );
+    final s = widget.managedViewState;
+
+    Widget _navigator() => ClipRect(
+          child: Navigator(
+            onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+              settings: settings,
+              builder: _routeBuilder,
+            ),
+          ),
+        );
+
+    return !_showViewPadding || s.isMaximized || (s.rowCount == 1 && s.colCount == 1)
+        ? _navigator()
+        : Container(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? _viewPaddingColorDark
+                : _viewPaddingColorLight,
+            padding: EdgeInsets.only(
+              left: s.col == 0 ? 0 : _viewPaddingSize,
+              right: s.col == s.colCount - 1 ? 0 : _viewPaddingSize,
+              top: s.row == 0 ? 0 : _viewPaddingSize,
+              bottom: s.row == s.rowCount - 1 ? 0 : _viewPaddingSize,
+            ),
+            child: _navigator(),
+          );
   }
 }
 
@@ -246,21 +273,38 @@ extension _ExtOnViewState on ViewState {
 
   Widget toWidget({
     @required BoxConstraints constraints,
-    @required double x,
-    @required double y,
-    @required double width,
-    @required double height,
+    @required Rect rect,
+    @required int row,
+    @required int col,
+    @required int rowCount,
+    @required int colCount,
     @required int index,
+    @required bool isMaximized,
   }) {
-    final mvs = ManagedViewState(constraints, this, Size(width, height), index);
+    /// Given the position of a view in a row or column, and the total number of rows or columns,
+    /// returns the total padding size.
+    double _totalPaddingSize(int pos, int count) => !_showViewPadding || isMaximized || count == 1
+        ? 0.0
+        : pos == 0 || pos == count - 1
+            ? _viewPaddingSize
+            : _viewPaddingSize + _viewPaddingSize;
+
+    final viewSize = Size(
+      rect.width - _totalPaddingSize(col, colCount),
+      rect.height - _totalPaddingSize(row, rowCount),
+    );
+
+    final mvs = ManagedViewState(
+        constraints, this, viewSize, index, row, col, rowCount, colCount, isMaximized);
+
     return AnimatedPositionedDirectional(
       // We need a key so when views are removed or reordered the element tree stays in sync.
       key: ValueKey(uid),
       duration: const Duration(milliseconds: 300),
-      start: x,
-      top: y,
-      width: width,
-      height: height,
+      start: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
       // child: _ManagedViewScaffold(mvs),
       child: BlocProvider(
         create: (context) => ManagedViewBloc(mvs),
@@ -378,23 +422,34 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     var viewWithKeyboardFocusIsVisible = false;
 
     // Local func that adds to [rects] and [views].
-    void addViewWithIndex(
-        int index, ViewState state, int r, int c, double x, double y, double width, double height,
-        {bool isVisible = true, bool isMaximized = false}) {
-      final _x = isMaximized ? 0.0 : x;
-      final _y = isMaximized ? 0.0 : y;
-      final _width = isMaximized ? constraints.maxWidth : width;
-      final _height = isMaximized ? constraints.maxHeight : height;
+    void _addViewWithIndex(
+      int index,
+      ViewState state,
+      int row,
+      int col,
+      int colCount,
+      double x,
+      double y,
+      double width,
+      double height, {
+      bool isVisible = true,
+      bool isMaximized = false,
+    }) {
+      final rect = Rect.fromLTWH(isMaximized ? 0.0 : x, isMaximized ? 0.0 : y,
+          isMaximized ? constraints.maxWidth : width, isMaximized ? constraints.maxHeight : height);
 
-      rects.add(ViewRect(
-          uid: state.uid,
-          isVisible: isVisible,
-          row: r,
-          column: c,
-          rect: Rect.fromLTWH(_x, _y, _width, _height)));
+      rects.add(ViewRect(uid: state.uid, isVisible: isVisible, row: row, column: col, rect: rect));
 
       final widget = state.toWidget(
-          constraints: constraints, x: _x, y: _y, width: _width, height: _height, index: index);
+        constraints: constraints,
+        rect: rect,
+        row: row,
+        col: col,
+        rowCount: length,
+        colCount: colCount,
+        index: index,
+        isMaximized: isMaximized,
+      );
       if (isMaximized) {
         maximizedViewWidget = widget;
       } else {
@@ -437,7 +492,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
         final isMaximized = (maximizedView?.uid == state.uid);
 
-        addViewWithIndex(i, state, r, c, x, y, width, height,
+        _addViewWithIndex(i, state, r, c, row.length, x, y, width, height,
             isVisible: noViewIsMaximized || isMaximized, isMaximized: isMaximized);
 
         i++;
@@ -462,7 +517,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
     // It is possible that the maximized view doesn't fit on the screen when not maximized...
     if (maxedView != null && maximizedViewWidget == null) {
-      addViewWithIndex(i, maxedView, 0, 0, 0, 0, 0, 0, isMaximized: true);
+      _addViewWithIndex(i, maxedView, 0, 0, 1, 0, 0, 0, 0, isMaximized: true);
     }
 
     // The maximized view needs to be the last view in the stack so it is always on top.

@@ -98,7 +98,7 @@ class _VolumeCard extends StatelessWidget {
                   padding: EdgeInsets.only(top: padding),
                   child: TecCard(
                     padding: 0,
-                    elevation: 4,
+                    elevation: defaultElevation,
                     color: Theme.of(context).cardColor,
                     builder: (c) => Container(),
                   ),
@@ -116,7 +116,7 @@ class _VolumeCard extends StatelessWidget {
                               child: TecCard(
                                 color: Colors.transparent,
                                 padding: 0,
-                                elevation: 4,
+                                elevation: defaultElevation,
                                 cornerRadius: 8,
                                 builder: (context) => VolumeImage(
                                   volume: volume,

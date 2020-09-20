@@ -290,7 +290,6 @@ class _Font {
   _Font(this.name, this.type);
 }
 
-/// Given a model (e.g. 'iPhone11,8'), returns the name (e.g. 'iPhone XR').
 Future<_Fonts> _loadFonts() async {
   final fontNames = GoogleFonts.asMap().keys.toSet();
 

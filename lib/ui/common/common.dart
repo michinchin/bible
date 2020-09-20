@@ -12,6 +12,8 @@ export 'tec_search_field.dart';
 export 'tec_stream_builder.dart';
 export 'tec_tab_indicator.dart';
 
+const defaultElevation = 3.0;
+
 ///
 /// Shape and border radius to use for bottom sheets.
 ///
@@ -78,7 +80,8 @@ extension AppExtOnThemeData on ThemeData {
     return copyWith(
       // primaryColor: brightness == Brightness.light ? primaryColor : primaryColor,
       accentColor: brightness == Brightness.light ? accentColor : Colors.blue,
-      bottomSheetTheme: bottomSheetTheme.copyWith(elevation: 4, shape: bottomSheetShape),
+      bottomSheetTheme:
+          bottomSheetTheme.copyWith(elevation: defaultElevation, shape: bottomSheetShape),
       appBarTheme: tecAppBarTheme(),
       tabBarTheme: tecTabBarTheme(),
     );
@@ -95,7 +98,7 @@ extension AppExtOnThemeData on ThemeData {
     return appBarTheme.copyWith(
       brightness: brightness,
       color: barColor,
-      elevation: 0,
+      elevation: defaultElevation,
       // shadowColor: Colors.transparent,
       iconTheme: IconThemeData(color: barTextColor),
       actionsIconTheme: IconThemeData(color: barTextColor),
