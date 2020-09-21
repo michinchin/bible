@@ -204,8 +204,10 @@ class NavBloc extends Bloc<NavEvent, NavState> {
     return currState;
   }
 
-  NavState _onSearchFinished(String s) =>
-      state.copyWith(search: s, navViewState: NavViewState.searchResults);
+  NavState _onSearchFinished(String s) {
+    tec.dmPrint('Search Submitted: $s');
+    return state.copyWith(search: s, navViewState: NavViewState.searchResults);
+  }
 
   NavState _changeState(NavState s) => s;
 
