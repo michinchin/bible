@@ -332,7 +332,7 @@ class _MiniView extends StatelessWidget {
           onPressed: () => SelectionSheetModel.buttonAction(context, button),
         ),
       ],
-      SelectionSheetModel.expandButton(context),
+      SelectionSheetModel.deselectButton(context),
     ];
     return Row(
         crossAxisAlignment: CrossAxisAlignment.start,

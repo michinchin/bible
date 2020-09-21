@@ -154,8 +154,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     _searchResultsTabController.animateTo(1);
     FocusScope.of(context).unfocus();
     if (s.isNotEmpty) {
-      navBloc().add(NavEvent.onSearchFinished(search: s));
       searchBloc().add(SearchEvent.request(search: s, translations: translations()));
+      navBloc().add(NavEvent.onSearchFinished(search: s));
     }
   }
 

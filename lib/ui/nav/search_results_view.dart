@@ -74,6 +74,9 @@ class _HistoryViewState extends State<HistoryView> {
     widget.tabController.animateTo(1);
   }
 
+  void _onNavHistoryTap(BuildContext c, Reference ref, int volume) =>
+      Navigator.of(c).maybePop<Reference>(ref.copyWith(volume: volume));
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NavBloc, NavState>(builder: (c, s) {
@@ -90,7 +93,7 @@ class _HistoryViewState extends State<HistoryView> {
                     onPressed: () async {
                       final ref = await Navigator.of(c).push(MaterialPageRoute<Reference>(
                           builder: (c) => _NavHistoryView(navHistory)));
-                      await Navigator.of(c).maybePop<Reference>(ref);
+                      _onNavHistoryTap(c, ref, s.ref.volume);
                     })
               ]),
               Flexible(
@@ -103,9 +106,7 @@ class _HistoryViewState extends State<HistoryView> {
                     dense: true,
                     leading: const Icon(Icons.history),
                     title: Text(navHistory[i].label()),
-                    onTap: () {
-                      Navigator.of(c).maybePop<Reference>(navHistory[i]);
-                    },
+                    onTap: () => _onNavHistoryTap(c, navHistory[i], s.ref.volume),
                   ),
                 ),
               ),
