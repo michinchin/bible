@@ -211,7 +211,7 @@ class SearchResultsView extends StatefulWidget {
 }
 
 class _SearchResultsViewState extends State<SearchResultsView> with AutomaticKeepAliveClientMixin {
-  // ItemScrollController scrollController;
+  ItemScrollController scrollController;
   // ItemPositionsListener positionListener;
 
   @override
@@ -225,65 +225,61 @@ class _SearchResultsViewState extends State<SearchResultsView> with AutomaticKee
     //     context.bloc<SearchBloc>().scrollIndex = positionListener.itemPositions.value.first.index;
     //   }
     // });
-    // scrollController = ItemScrollController();
+    scrollController = ItemScrollController();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return BlocBuilder<SearchBloc, SearchState>(
-        // listener: (c, s) {
-        // final scrollIndex = context.bloc<SearchBloc>().scrollIndex;
-        // if (scrollIndex != 0) {
-        //   WidgetsBinding.instance.addPostFrameCallback((_) {
-        //     scrollController.scrollTo(
-        //         index: scrollIndex, duration: const Duration(milliseconds: 250));
-        //   });
-        // }
-        // },
-        // listenWhen: (p, c) => p.search != c.search,
+    return BlocConsumer<SearchBloc, SearchState>(
+        listener: (c, s) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            scrollController.scrollTo(index: 0, duration: const Duration(milliseconds: 250));
+          });
+        },
+        listenWhen: (p, c) => !tec.areEqualLists(p.excludedBooks, c.excludedBooks),
         builder: (context, state) {
-      if (state.loading) {
-        return const Center(child: LoadingIndicator());
-      } else if (state.error) {
-        return const Center(
-          child: Text('Error'),
-        );
-      } else if (state.filteredResults.isEmpty) {
-        return const Center(
-          child: Text('No Results'),
-        );
-      }
-      return SafeArea(
-        bottom: false,
-        child: Scaffold(
-          body: ScrollablePositionedList.separated(
-            itemCount: state.filteredResults.length + 1,
-            // itemScrollController: scrollController,
-            // itemPositionsListener: positionListener,
-            separatorBuilder: (c, i) {
-              if (i == 0) {
-                // if sized box has height: 0, causes errors in scrollable list
-                // see: https://stackoverflow.com/questions/63352010/failed-assertion-line-556-pos-15-scrolloffsetcorrection-0-0-is-not-true
-                return const SizedBox(height: 1);
-              }
-              i--;
-              return const Divider(height: 5);
-            },
-            itemBuilder: (c, i) {
-              if (i == 0) {
-                return SearchResultsLabel(
-                    state.filteredResults.map((r) => r.searchResult).toList());
-              }
-              i--;
-              final res = state.filteredResults[i];
-              return _SearchResultCard(res);
-            },
-          ),
-        ),
-      );
-    });
+          if (state.loading) {
+            return const Center(child: LoadingIndicator());
+          } else if (state.error) {
+            return const Center(
+              child: Text('Error'),
+            );
+          } else if (state.filteredResults.isEmpty) {
+            return const Center(
+              child: Text('No Results'),
+            );
+          }
+          return SafeArea(
+            bottom: false,
+            child: Scaffold(
+              body: ScrollablePositionedList.separated(
+                itemCount: state.filteredResults.length + 1,
+                itemScrollController: scrollController,
+                // itemPositionsListener: positionListener,
+                separatorBuilder: (c, i) {
+                  if (i == 0) {
+                    // if sized box has height: 0, causes errors in scrollable list
+                    // see: https://stackoverflow.com/questions/63352010/failed-assertion-line-556-pos-15-scrolloffsetcorrection-0-0-is-not-true
+                    return const SizedBox(height: 1);
+                  }
+                  i--;
+                  return const Divider(height: 5);
+                },
+                itemBuilder: (c, i) {
+                  if (i == 0) {
+                    return SearchResultsLabel(
+                        state.filteredResults.map((r) => r.searchResult).toList());
+                  }
+                  i--;
+                  final res = state.filteredResults[i];
+                  return _SearchResultCard(res);
+                },
+              ),
+            ),
+          );
+        });
   }
 }
 
@@ -450,7 +446,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
                 //   child: Icon(widget.res.contextExpanded ? Icons.unfold_less : Icons.unfold_more),
                 // ),
                 child: Text(
-                  'Context',
+                  widget.res.contextExpanded ? 'Hide Context' : 'Context',
                   semanticsLabel:
                       widget.res.contextExpanded ? 'Collapse Context' : 'Expand Context',
                   textScaleFactor: contentTextScaleFactorWith(context),

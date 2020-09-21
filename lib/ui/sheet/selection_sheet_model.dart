@@ -151,7 +151,8 @@ class SelectionSheetModel {
         words = verseArray.getRange(ref.word - 1, ref.endWord).join(' ');
       }
     } else {
-      words = ref.label();
+      final reference = ref.label().split(' ').take(2);
+      words = reference.join(' ');
     }
 
     await showModalBottomSheet<void>(

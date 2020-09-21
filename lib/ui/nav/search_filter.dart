@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
@@ -92,7 +93,8 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
   void _updateSearch() {
     final books = _filteredBooks.toList();
     final volumes = _selectedVolumes.toList();
-    if (volumes != null) {
+
+    if (volumes != null && !tec.areEqualSets(_selectedVolumes, widget.selectedVolumes.toSet())) {
       final prefItem =
           prefsBloc().infoChangedPrefItem(PrefItemId.translationsFilter, volumes.join('|'));
       prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
@@ -102,7 +104,7 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
             .add(SearchEvent.request(search: widget.searchController.text, translations: volumes));
       }
     }
-    if (books != null) {
+    if (books != null && !tec.areEqualSets(_filteredBooks, widget.selectedBooks.toSet())) {
       // excluded books
       context.bloc<SearchBloc>().add(SearchEvent.filterBooks(books));
     }
