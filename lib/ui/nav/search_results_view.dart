@@ -32,7 +32,8 @@ class SearchAndHistoryView extends StatelessWidget {
     // TODO(abby): if no search results currently, do most recent search or focus on textfield
     return Scaffold(
       appBar: AppBar(
-        leading: Container(),
+        elevation: 0,
+        automaticallyImplyLeading: false,
         flexibleSpace: Center(
           child: TabBar(
               controller: tabController,

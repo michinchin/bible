@@ -20,7 +20,7 @@ class SearchSuggestionsView extends StatelessWidget {
     void updateSearch(String s) => searchController
       ..text = s
       ..selection = TextSelection.collapsed(offset: s.length);
-      
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -29,7 +29,7 @@ class SearchSuggestionsView extends StatelessWidget {
                 leading: const Icon(FeatherIcons.bookOpen),
                 title: Text(bible.nameOfBook(book)),
                 onTap: () {
-                  final search = bible.nameOfBook(book);
+                  final search = '${bible.nameOfBook(book)} ';
                   updateSearch(search);
                   bloc.add(NavEvent.onSearchChange(search: search));
                 }),

@@ -134,6 +134,7 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
       child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
+            elevation: 0,
             backgroundColor: Colors.transparent,
             leadingWidth: 0,
             automaticallyImplyLeading: false,
