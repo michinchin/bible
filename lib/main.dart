@@ -19,7 +19,7 @@ import 'blocs/search/search_bloc.dart';
 import 'blocs/sheet/pref_items_bloc.dart';
 import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
-import 'models/iap.dart';
+import 'models/iap/iap.dart';
 import 'ui/bible/chapter_view.dart';
 import 'ui/common/common.dart';
 import 'ui/home/home_screen.dart';

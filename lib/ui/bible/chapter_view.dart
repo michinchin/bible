@@ -169,7 +169,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
         onPageChanged: (context, _, page) async {
           tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
           final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
-          if (bcv != null) updateLocation(bcv, page);
+          if (bcv != null) _updateLocation(bcv, page);
         },
       ),
     );
@@ -224,7 +224,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     }
   }
 
-  void updateLocation(BookChapterVerse bcv, int page) {
+  void _updateLocation(BookChapterVerse bcv, int page) {
     final nextViewState = BibleChapterState(_bible.id, bcv, page);
     _chapterState.add(nextViewState);
 

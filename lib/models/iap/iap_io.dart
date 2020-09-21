@@ -37,6 +37,7 @@ class InAppPurchases {
     _subscription = null;
     _inappUpdate?.close();
     _inappUpdate = null;
+    if (identical(this, _iap)) _iap = null;
   }
 
   BehaviorSubject<int> _inappUpdate = BehaviorSubject<int>.seeded(0);

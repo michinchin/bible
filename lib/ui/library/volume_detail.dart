@@ -10,7 +10,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
-import '../../models/iap.dart';
+import '../../models/iap/iap.dart';
 import '../common/common.dart';
 import 'volume_image.dart';
 

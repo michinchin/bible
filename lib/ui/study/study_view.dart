@@ -36,7 +36,7 @@ Widget studyViewBuilder(BuildContext context, ViewState state, Size size) {
             floating: true,
             snap: true,
             expandedHeight: kTextTabBarHeight,
-            title: TabBar(tabs: tabs),
+            title: TabBar(tabs: tabs, isScrollable: true),
           ),
           SliverFillRemaining(
             child: TabBarView(children: tabContents),

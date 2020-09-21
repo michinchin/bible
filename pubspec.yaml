@@ -91,7 +91,7 @@ dependencies:
     hosted:
       name: tec_volumes
       url: http://noah.tecarta.com:8100
-    version: ^1.2.1
+    version: ^1.2.2
   tec_web_view:
     hosted:
       name: tec_web_view

@@ -17,6 +17,7 @@ import '../common/common.dart';
 import '../library/library.dart';
 import '../menu/main_menu.dart';
 import '../note/note_view.dart';
+import '../study/study_view.dart';
 
 const _menuWidth = 175.0;
 
@@ -121,27 +122,27 @@ class _MenuItems extends StatelessWidget {
 
           await Navigator.of(context).maybePop();
         }),
-        // _menuItemForType(studyViewType, context: context, viewUid: state.uid, onTap: () async {
-        //   final volumeId = await selectVolume(context,
-        //       title: 'Select Study Content',
-        //       filter: const VolumesFilter(
-        //         volumeType: VolumeType.studyContent,
-        //       ));
-        //   tec.dmPrint('selected $volumeId');
+        _menuItemForType(studyViewType, context: context, viewUid: state.uid, onTap: () async {
+          final volumeId = await selectVolume(context,
+              title: 'Select Study Content',
+              filter: const VolumesFilter(
+                volumeType: VolumeType.studyContent,
+              ));
+          tec.dmPrint('selected $volumeId');
 
-        //   if (volumeId != null) {
-        //     // TODO(ron): ...
-        //     // final previous = BibleChapterState.fromJson(state.data);
-        //     // if (previous != null) {
-        //     //   final current = BibleChapterState(bibleId, previous.bcv, previous.page);
-        //     //   // following line is approximate if we wanted to change translation in save view
-        //     //   //bloc?.add(ViewManagerEvent.setData(uid: state.uid, data: current.toString()));
-        //          bloc?.add(const ViewManagerEvent.add(type: studyViewType, data: '{}'));
-        //     // }
-        //   }
+          if (volumeId != null) {
+            // TODO(ron): ...
+            // final previous = BibleChapterState.fromJson(state.data);
+            // if (previous != null) {
+            //   final current = BibleChapterState(bibleId, previous.bcv, previous.page);
+            //   // following line is approximate if we wanted to change translation in save view
+            //   //bloc?.add(ViewManagerEvent.setData(uid: state.uid, data: current.toString()));
+            bloc?.add(const ViewManagerEvent.add(type: studyViewType, data: '{}'));
+            // }
+          }
 
-        //   await Navigator.of(context).maybePop();
-        // }),
+          await Navigator.of(context).maybePop();
+        }),
         _menuItemForType(noteViewType, context: context, viewUid: state.uid),
         if ((bloc?.state?.views?.length ?? 0) > 1) ...[
           const SizedBox(width: _menuWidth, child: Divider()),

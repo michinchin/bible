@@ -31,9 +31,9 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   ViewManagerBloc({@required tec.KeyValueStore kvStore})
       : assert(kvStore != null),
         _kvStore = kvStore,
-        super(initialState(kvStore));
+        super(_initialState(kvStore));
 
-  static ViewManagerState initialState(tec.KeyValueStore kvStore) {
+  static ViewManagerState _initialState(tec.KeyValueStore kvStore) {
     final jsonStr = kvStore?.getString(_key);
     ViewManagerState state;
     if (tec.isNotNullOrEmpty(jsonStr)) {
