@@ -10,7 +10,6 @@ import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
-import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
@@ -72,10 +71,11 @@ class SelectionSheetModel {
             )),
       );
 
-  static Widget expandButton(BuildContext context) => GreyCircleButton(
-        icon: Icons.keyboard_arrow_up,
-        onPressed: () => context.bloc<SheetManagerBloc>().changeSize(SheetSize.medium),
-      );
+  static Widget deselectButton(BuildContext context) => GreyCircleButton(
+      icon: Icons.clear,
+      onPressed: () => context
+          .bloc<SelectionStyleBloc>()
+          ?.add(const SelectionStyle(type: HighlightType.clear, isTrialMode: true)));
 
   static Widget defineButton(BuildContext c) {
     final refs = _grabRefs(c);
