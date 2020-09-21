@@ -22,7 +22,7 @@ void main() {
     });
 
     test('initial state is empty list', () {
-      expect(bloc.state, ViewManagerState([bcv], 0, 2, ViewManagerStateBuildInfo.build));
+      expect(bloc.state, ViewManagerState([bcv], 0, 2));
     });
 
     blocTest<ViewManagerBloc, ViewManagerState>(
@@ -38,12 +38,12 @@ void main() {
           ..add(remove(3));
       },
       expect: <dynamic>[
-        ViewManagerState([bcv, view(2, '1')], 0, 3, ViewManagerStateBuildInfo.build),
-        ViewManagerState([bcv, view(2, '1'), view(3, '2')], 0, 4, ViewManagerStateBuildInfo.build),
-        ViewManagerState([bcv, view(3, '2'), view(2, '1')], 0, 4, ViewManagerStateBuildInfo.build),
-        ViewManagerState([bcv, view(2, '1'), view(3, '2')], 0, 4, ViewManagerStateBuildInfo.build),
-        ViewManagerState([bcv, view(3, '2')], 0, 4, ViewManagerStateBuildInfo.build),
-        ViewManagerState([bcv], 0, 4, ViewManagerStateBuildInfo.build),
+        ViewManagerState([bcv, view(2)], 0, 3),
+        ViewManagerState([bcv, view(2), view(3)], 0, 4),
+        ViewManagerState([bcv, view(3), view(2)], 0, 4),
+        ViewManagerState([bcv, view(2), view(3)], 0, 4),
+        ViewManagerState([bcv, view(3)], 0, 4),
+        ViewManagerState([bcv], 0, 4),
       ],
     );
   });
@@ -62,4 +62,4 @@ ViewManagerEvent move(int from, int to) =>
 
 ViewManagerEvent remove(int position) => ViewManagerEvent.remove(position);
 
-ViewState view(int uid, String data) => ViewState(uid: uid, type: 'test', data: data);
+ViewState view(int uid) => ViewState(uid: uid, type: 'test');

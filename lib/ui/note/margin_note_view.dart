@@ -111,7 +111,8 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   static const oldAppPrefix = 'You\'re using an old app.';
 
   Future<void> load() async {
-    final mnData = jsonDecode(widget.state.data) as Map<String, dynamic>;
+    final data = viewManagerBloc?.dataWithView(widget.state?.uid);
+    final mnData = jsonDecode(data) as Map<String, dynamic>;
     _title = mnData['title'] as String;
     _item = await AppSettings.shared.userAccount.userDb.getItem(mnData['id'] as int);
 

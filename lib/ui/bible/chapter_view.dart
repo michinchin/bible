@@ -62,9 +62,9 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
   void initState() {
     super.initState();
 
-    final chapterState = BibleChapterState.fromJson(widget.state.data);
-    // we're putting title in a stream so we can update outside of setState - as that
-    // rebuilds the PageableView :(
+    assert(widget.state?.uid != null);
+    final data = context.bloc<ViewManagerBloc>()?.dataWithView(widget.state?.uid);
+    final chapterState = BibleChapterState.fromJson(data);
     _chapterState.add(chapterState);
     _bible = VolumesRepository.shared.bibleWithId(chapterState.bibleId);
     _bcvPageZero = chapterState.bcv;
@@ -218,9 +218,8 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     if (bibleId != null) {
       _bible = VolumesRepository.shared.bibleWithId(bibleId);
       final next = BibleChapterState(bibleId, chapterState.bcv, chapterState.page);
-      context
-          .bloc<ViewManagerBloc>()
-          ?.add(ViewManagerEvent.setData(uid: widget.state.uid, data: next.toString()));
+      context.bloc<ViewManagerBloc>()?.updateDataWithView(widget.state.uid, next.toString());
+      setState(() {});
     }
   }
 
@@ -229,10 +228,9 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     _chapterState.add(nextViewState);
 
     // Update the view manager state.
-    context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.updateData(
-          uid: widget.state.uid,
-          data: tec.toJsonString(nextViewState),
-        ));
+    context
+        .bloc<ViewManagerBloc>()
+        ?.updateDataWithView(widget.state.uid, tec.toJsonString(nextViewState));
   }
 }
 

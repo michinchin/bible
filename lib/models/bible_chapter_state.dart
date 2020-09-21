@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
+const _defaultBibleId = 9;
+const _defaultBCV = BookChapterVerse(50, 1, 1);
+
 @immutable
 class BibleChapterState {
   final int bibleId;
@@ -10,31 +13,33 @@ class BibleChapterState {
   final String title;
 
   BibleChapterState(this.bibleId, this.bcv, this.page, {String title})
-      : title = title ??
+      : assert(bibleId != null && bcv != null && page != null),
+        title = title ??
             VolumesRepository.shared
                 .bibleWithId(bibleId)
                 .titleWithBookAndChapter(bcv.book, bcv.chapter, includeAbbreviation: true);
 
-  static BookChapterVerse initialBCV() {
-    return const BookChapterVerse(50, 1, 1);
-  }
-
   factory BibleChapterState.initial() {
-    return BibleChapterState(9, initialBCV(), 0);
+    return BibleChapterState(_defaultBibleId, _defaultBCV, 0);
   }
 
   factory BibleChapterState.fromJson(Object o) {
+    int bibleId;
     BookChapterVerse bcv;
-    int page, bibleId;
+    int page;
 
     final json = (o is String) ? tec.parseJsonSync(o) : o;
     if (json is Map<String, dynamic>) {
-      bibleId = tec.as<int>(json['vid']) ?? 50;
-      bcv = BookChapterVerse.fromJson(json['bcv']) ?? initialBCV();
-      page = tec.as<int>(json['page']) ?? 0;
+      bibleId = tec.as<int>(json['vid']);
+      bcv = BookChapterVerse.fromJson(json['bcv']);
+      page = tec.as<int>(json['page']);
     }
 
-    return BibleChapterState(bibleId, bcv, page);
+    return BibleChapterState(
+      bibleId ?? _defaultBibleId,
+      bcv ?? _defaultBCV,
+      page ?? 0,
+    );
   }
 
   String get bookNameAndChapter =>

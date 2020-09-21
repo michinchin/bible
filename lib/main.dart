@@ -78,7 +78,7 @@ Future<void> main() async {
 /// Registers the view types used in the app.
 ///
 void _registerViewTypes() {
-  ViewManagerState.setDefaults(bibleChapterType, bibleChapterDefaultData());
+  ViewManagerState.setDefaultViewType(bibleChapterType);
   ViewManager.shared
     ..register(
       bibleChapterType,

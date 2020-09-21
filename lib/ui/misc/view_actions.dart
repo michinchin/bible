@@ -111,7 +111,8 @@ class _MenuItems extends StatelessWidget {
           tec.dmPrint('selected $bibleId');
 
           if (bibleId != null) {
-            final previous = BibleChapterState.fromJson(state.data);
+            final viewData = bloc.dataWithView(state.uid);
+            final previous = BibleChapterState.fromJson(viewData);
             if (previous != null) {
               final current = BibleChapterState(bibleId, previous.bcv, previous.page);
               // following line is approximate if we wanted to change translation in save view
@@ -132,7 +133,8 @@ class _MenuItems extends StatelessWidget {
 
           if (volumeId != null) {
             // TODO(ron): ...
-            // final previous = BibleChapterState.fromJson(state.data);
+            // final viewData = bloc.dataWithView(state.uid);
+            // final previous = BibleChapterState.fromJson(viewData);
             // if (previous != null) {
             //   final current = BibleChapterState(bibleId, previous.bcv, previous.page);
             //   // following line is approximate if we wanted to change translation in save view
@@ -160,17 +162,18 @@ class _MenuItems extends StatelessWidget {
     final bloc = context.bloc<ViewManagerBloc>();
     final vm = ViewManager.shared;
     final items = <Widget>[];
-    for (final view in bloc.state.views) {
+    for (final view in bloc?.state?.views) {
       if (!bloc.isViewVisible(view.uid)) {
         String title;
-        Map<String, dynamic> data;
+        Map<String, dynamic> json;
 
-        if (view.data != null) {
-          data = jsonDecode(view.data) as Map<String, dynamic>;
+        final viewData = bloc.dataWithView(view.uid);
+        if (viewData != null) {
+          json = jsonDecode(viewData) as Map<String, dynamic>;
         }
 
-        if (data != null && data.containsKey('title')) {
-          title = data['title'] as String;
+        if (json != null && json.containsKey('title')) {
+          title = json['title'] as String;
         } else {
           title = vm.titleForType(view.type);
         }

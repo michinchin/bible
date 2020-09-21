@@ -38,9 +38,7 @@ class HomeScreen extends StatelessWidget {
                 left: false,
                 right: false,
                 bottom: false,
-                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(buildWhen: (previous, current) {
-                  return current.rebuild == ViewManagerStateBuildInfo.build;
-                }, builder: (context, state) {
+                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(builder: (context, state) {
                   return _BottomSheet(
                     child: ViewManagerWidget(state: state),
                   );
