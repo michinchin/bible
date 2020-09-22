@@ -32,13 +32,9 @@ import 'chapter_view_model.dart';
 
 const bibleChapterType = 'BibleChapter';
 
-Widget bibleChapterViewBuilder(BuildContext context, ViewState state, Size size) {
+Widget bibleBuilder(BuildContext context, ViewState state, Size size) {
   // tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
   return _PageableBibleView(state: state, size: size);
-}
-
-String bibleChapterDefaultData() {
-  return tec.toJsonString(BibleChapterState.initial());
 }
 
 class _PageableBibleView extends StatefulWidget {

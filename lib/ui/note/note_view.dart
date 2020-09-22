@@ -8,8 +8,6 @@ import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../common/common.dart';
 import 'tec_image_delegate.dart';
 
-const noteViewType = 'NoteView';
-
 Widget noteViewBuilder(BuildContext context, int id) => NoteView(id);
 
 class NoteView extends StatelessWidget {

@@ -20,7 +20,7 @@ import 'tec_image_delegate.dart';
 
 const marginNoteViewType = 'MarginNoteView';
 
-Widget marginNoteScaffoldBuilder(BuildContext context, ViewState state, Size size) =>
+Widget marginNoteBuilder(BuildContext context, ViewState state, Size size) =>
     _MarginNoteView(state: state, size: size);
 
 class _MarginNoteView extends StatefulWidget {

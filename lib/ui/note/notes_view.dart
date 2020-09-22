@@ -5,9 +5,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/notes/note_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../common/common.dart';
+import '../misc/view_actions.dart';
 import 'note_view.dart';
 
-const notesViewTypeName = 'NotesView';
+const notesViewType = 'NotesView';
+
+Widget notesBuilder(BuildContext context, ViewState state, Size size) => Scaffold(
+      appBar: MinHeightAppBar(
+        appBar: AppBar(
+          title: Text(ViewManager.shared.titleForType(notesViewType)),
+          actions: defaultActionsBuilder(context, state, size),
+        ),
+      ),
+      body: notesViewBuilder(context, state, size),
+    );
 
 Widget notesViewBuilder(BuildContext context, ViewState viewState, Size size) =>
     NotesView(viewState: viewState);

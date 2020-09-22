@@ -23,9 +23,7 @@ import 'models/iap/iap.dart';
 import 'ui/bible/chapter_view.dart';
 import 'ui/common/common.dart';
 import 'ui/home/home_screen.dart';
-import 'ui/misc/view_actions.dart';
 import 'ui/note/margin_note_view.dart';
-import 'ui/note/note_view.dart';
 import 'ui/note/notes_view.dart';
 import 'ui/study/study_view.dart';
 
@@ -80,40 +78,11 @@ Future<void> main() async {
 void _registerViewTypes() {
   ViewManagerState.setDefaultViewType(bibleChapterType);
   ViewManager.shared
-    ..register(
-      bibleChapterType,
-      title: 'Bible',
-      scaffoldBuilder: bibleChapterViewBuilder,
-      icon: FeatherIcons.book,
-      defaultDataBuilder: bibleChapterDefaultData,
-    )
-    ..register(
-      studyViewType,
-      title: 'Study',
-      scaffoldBuilder: studyViewBuilder,
-      icon: FeatherIcons.bookOpen,
-      // defaultDataBuilder: studyViewDefaultData,
-    )
-    ..register(
-      noteViewType,
-      title: 'Note',
-      bodyBuilder: notesViewBuilder,
-      actionsBuilder: defaultActionsBuilder,
-      icon: FeatherIcons.edit,
-    )
-    ..register(
-      marginNoteViewType,
-      title: null,
-      scaffoldBuilder: marginNoteScaffoldBuilder,
-      icon: TecIcons.marginNoteOutline,
-    );
-//    ..register(
-//      testViewType,
-//      title: 'Test View',
-//      bodyBuilder: testViewBuilder,
-//      actionsBuilder: defaultActionsBuilder,
-//      icon: FeatherIcons.plusSquare,
-//    );
+    ..register(bibleChapterType, title: 'Bible', builder: bibleBuilder, icon: FeatherIcons.book)
+    ..register(studyViewType, title: 'Study', builder: studyBuilder, icon: FeatherIcons.bookOpen)
+    ..register(notesViewType, title: 'Note', builder: notesBuilder, icon: FeatherIcons.edit)
+    ..register(marginNoteViewType,
+        title: null, builder: marginNoteBuilder, icon: TecIcons.marginNoteOutline);
 }
 
 ///

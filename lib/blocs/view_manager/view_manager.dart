@@ -1,33 +1,6 @@
 part of 'view_manager_bloc.dart';
 
 ///
-/// Signature of a function that creates a widget for a given view state.
-///
-typedef BuilderWithViewState = Widget Function(BuildContext context, ViewState state, Size size);
-
-///
-/// Signature of a function that returns the default data for a new view.
-///
-typedef DefaultDataBuilder = String Function();
-
-///
-/// Signature of a function that creates a list of "action" widgets for a given view state.
-///
-typedef ActionsBuilderWithViewState = List<Widget> Function(
-    BuildContext context, ViewState state, Size size);
-
-///
-/// Signature of a function that creates a widget for a given view state and index.
-///
-typedef IndexedBuilderWithViewState = Widget Function(
-    BuildContext context, ViewState state, Size size, int index);
-
-///
-/// Signature of a function that returns a view size value based on constraints.
-///
-typedef ViewSizeFunc = double Function(BoxConstraints constraints);
-
-///
 /// Manages view types.
 ///
 /// Use the [register] function to register a view type. For example:
@@ -47,24 +20,12 @@ class ViewManager {
   void register(
     String key, {
     @required String title,
-    BuilderWithViewState scaffoldBuilder,
-    BuilderWithViewState bodyBuilder,
-    BuilderWithViewState titleBuilder,
-    ActionsBuilderWithViewState actionsBuilder,
-    DefaultDataBuilder defaultDataBuilder,
+    @required BuilderWithViewState builder,
     IconData icon,
   }) {
-    assert(tec.isNotNullOrEmpty(key) && (scaffoldBuilder != null || bodyBuilder != null));
+    assert(tec.isNotNullOrEmpty(key) && builder != null);
     assert(!_types.containsKey(key));
-    _types[key] = _ViewTypeAPI(
-      title,
-      scaffoldBuilder,
-      bodyBuilder,
-      titleBuilder,
-      actionsBuilder,
-      defaultDataBuilder,
-      icon,
-    );
+    _types[key] = _ViewTypeAPI(title, builder, icon);
   }
 
   List<String> get types => _types.keys.toList();
@@ -73,26 +34,32 @@ class ViewManager {
 
   String titleForType(String type) => _types[type]?.title;
 
-  String dataForType(String type) {
-    final ddb = _types[type]?.defaultDataBuilder;
-    return (ddb == null) ? '{}' : ddb();
-  }
-
   Widget _buildScaffold(BuildContext context, ViewState state, Size size) =>
-      (_types[state.type]?.scaffoldBuilder ?? _defaultScaffoldBuilder)(context, state, size);
+      (_types[state.type]?.builder ?? _defaultScaffoldBuilder)(context, state, size);
 
   Widget _buildViewBody(BuildContext context, ViewState state, Size size) =>
-      (_types[state.type]?.bodyBuilder ?? _defaultBodyBuilder)(context, state, size);
+      _defaultBodyBuilder(context, state, size);
 
   Widget _buildViewTitle(BuildContext context, ViewState state, Size size) =>
-      (_types[state.type]?.titleBuilder ?? _defaultTitleBuilder)(context, state, size);
+      _defaultTitleBuilder(context, state, size);
 
   Widget _defaultTitleBuilder(BuildContext context, ViewState state, Size size) =>
       Text(_types[state.type]?.title ?? state.uid.toString());
 
   List<Widget> _buildViewActions(BuildContext context, ViewState state, Size size) =>
-      (_types[state.type]?.actionsBuilder ?? _defaultActionsBuilder)(context, state, size);
+      _defaultActionsBuilder(context, state, size);
 }
+
+///
+/// Signature of a function that creates a widget for a given view state.
+///
+typedef BuilderWithViewState = Widget Function(BuildContext context, ViewState state, Size size);
+
+///
+/// Signature of a function that creates a widget for a given view state and index.
+///
+typedef IndexedBuilderWithViewState = Widget Function(
+    BuildContext context, ViewState state, Size size, int index);
 
 //
 // PRIVATE STUFF
@@ -100,22 +67,10 @@ class ViewManager {
 
 class _ViewTypeAPI {
   final String title;
-  final BuilderWithViewState scaffoldBuilder;
-  final BuilderWithViewState bodyBuilder;
-  final BuilderWithViewState titleBuilder;
-  final ActionsBuilderWithViewState actionsBuilder;
-  final DefaultDataBuilder defaultDataBuilder;
+  final BuilderWithViewState builder;
   final IconData icon;
 
-  const _ViewTypeAPI(
-    this.title,
-    this.scaffoldBuilder,
-    this.bodyBuilder,
-    this.titleBuilder,
-    this.actionsBuilder,
-    this.defaultDataBuilder,
-    this.icon,
-  );
+  const _ViewTypeAPI(this.title, this.builder, this.icon);
 }
 
 Widget _defaultScaffoldBuilder(BuildContext context, ViewState state, Size size) => Scaffold(
@@ -176,8 +131,7 @@ Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
       Navigator.of(context).maybePop();
       final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
       final position = bloc?.indexOfView(viewUid) ?? -1;
-      bloc?.add(ViewManagerEvent.add(
-          type: type, data: vm.dataForType(type), position: position == -1 ? null : position + 1));
+      bloc?.add(ViewManagerEvent.add(type: type, position: position == -1 ? null : position + 1));
     }),
   );
 }

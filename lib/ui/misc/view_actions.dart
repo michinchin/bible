@@ -16,7 +16,7 @@ import '../bible/chapter_view.dart';
 import '../common/common.dart';
 import '../library/library.dart';
 import '../menu/main_menu.dart';
-import '../note/note_view.dart';
+import '../note/notes_view.dart';
 import '../study/study_view.dart';
 
 const _menuWidth = 175.0;
@@ -145,7 +145,7 @@ class _MenuItems extends StatelessWidget {
 
           await Navigator.of(context).maybePop();
         }),
-        _menuItemForType(noteViewType, context: context, viewUid: state.uid),
+        _menuItemForType(notesViewType, context: context, viewUid: state.uid),
         if ((bloc?.state?.views?.length ?? 0) > 1) ...[
           const SizedBox(width: _menuWidth, child: Divider()),
           _menuItem(context, Icons.close, 'Close View', () {
@@ -229,7 +229,6 @@ class _MenuItems extends StatelessWidget {
               final position = bloc?.indexOfView(viewUid) ?? -1;
               bloc?.add(ViewManagerEvent.add(
                   type: type,
-                  data: vm.dataForType(type),
                   position: position == -1 ? null : position + 1));
             });
   }

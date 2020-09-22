@@ -6,13 +6,7 @@ import '../misc/view_actions.dart';
 
 const studyViewType = 'StudyView';
 
-String studyViewDefaultData() {
-  return '';
-}
-
-Widget studyViewBuilder(BuildContext context, ViewState state, Size size) {
-  // tec.dmPrint('bibleChapterViewBuilder for uid: ${state.uid}');
-
+Widget studyBuilder(BuildContext context, ViewState state, Size size) {
   final textStyle = Theme.of(context).textTheme.headline2;
   Widget childForTab(String title) => Center(child: Text(title, style: textStyle));
 
