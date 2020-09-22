@@ -8,7 +8,7 @@ abstract class SearchHistoryItem with _$SearchHistoryItem {
     @required String search,
     @required String volumesFiltered,
     @required String booksFiltered,
-    // @required int index,
+    @required int index,
     @required DateTime modified
   }) = _SearchHistoryItem;
 

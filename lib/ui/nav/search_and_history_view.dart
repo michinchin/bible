@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:bible/models/user_item_helper.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,8 @@ import '../sheet/compare_verse.dart';
 class SearchAndHistoryView extends StatelessWidget {
   final TextEditingController searchController;
   final TabController tabController;
-  const SearchAndHistoryView(this.searchController, this.tabController);
+  SearchAndHistoryView(this.searchController, this.tabController);
+
   @override
   Widget build(BuildContext context) {
     // TODO(abby): if no search results currently, do most recent search or focus on textfield
@@ -65,9 +67,16 @@ class _HistoryViewState extends State<HistoryView> {
   void _onSearchTap(BuildContext c, SearchHistoryItem searchHistoryItem) {
     c.bloc<SearchBloc>()
       ..add(SearchEvent.request(
-          search: searchHistoryItem.search,
-          translations: searchHistoryItem.volumesFiltered.split('|').map(int.parse).toList()));
-    // ..scrollIndex = searchHistoryItem?.index ?? 0;
+        search: searchHistoryItem.search,
+        translations: searchHistoryItem.volumesFiltered.isNotEmpty
+            ? searchHistoryItem.volumesFiltered.split('|').map(int.parse).toList()
+            : [],
+      ))
+      ..add(SearchEvent.filterBooks(searchHistoryItem.booksFiltered.isNotEmpty
+          ? searchHistoryItem.booksFiltered.split('|').map(int.parse).toList()
+          : []))
+      ..add(SearchEvent.setScrollIndex(searchHistoryItem?.index ?? 0));
+
     c.bloc<NavBloc>().add(NavEvent.onSearchFinished(search: searchHistoryItem.search));
     widget.searchController
       ..text = searchHistoryItem.search
@@ -76,70 +85,89 @@ class _HistoryViewState extends State<HistoryView> {
   }
 
   void _onNavHistoryTap(BuildContext c, Reference ref, int volume) =>
-      Navigator.of(c).maybePop<Reference>(ref.copyWith(volume: volume));
+      Navigator.of(c).maybePop<Reference>(ref?.copyWith(volume: volume));
+
+  Future<List<dynamic>> _future() => Future.wait<List<dynamic>>(
+      [UserItemHelper.navHistoryItemsFromDb(), UserItemHelper.searchHistoryItemsFromDb()]);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<NavBloc, NavState>(builder: (c, s) {
-      final navHistory = s.navHistory..sort((a, b) => b.modified.compareTo(a.modified));
-      final searchHistory = s.searchHistory..sort((a, b) => b.modified.compareTo(a.modified));
-      return searchHistory.isEmpty && navHistory.isEmpty
-          ? const Center(child: Text('Search or navigate to view history'))
-          : Column(children: [
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                const ListLabel('Navigation History'),
-                IconButton(
-                    icon:
-                        Icon(Icons.chevron_right, color: Theme.of(context).textTheme.caption.color),
-                    onPressed: () async {
-                      final ref = await Navigator.of(c).push(MaterialPageRoute<Reference>(
-                          builder: (c) => _NavHistoryView(navHistory)));
-                      _onNavHistoryTap(c, ref, s.ref.volume);
-                    })
-              ]),
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: navHistory.length,
-                  separatorBuilder: (c, i) => const Divider(height: 5),
-                  itemBuilder: (c, i) => ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.history),
-                    title: Text(navHistory[i].label()),
-                    onTap: () => _onNavHistoryTap(c, navHistory[i], s.ref.volume),
-                  ),
-                ),
-              ),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                const ListLabel('Search History'),
-                IconButton(
-                    icon: Icon(Icons.chevron_right, color: Theme.of(c).textTheme.caption.color),
-                    onPressed: () async {
-                      final searchChosen = await Navigator.of(c).push(
-                          MaterialPageRoute<SearchHistoryItem>(
-                              builder: (c) => _SearchHistoryView(searchHistory)));
-                      if (searchChosen != null) {
-                        _onSearchTap(c, searchChosen);
-                      }
-                    }),
-              ]),
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: searchHistory.length,
-                  physics: const NeverScrollableScrollPhysics(),
-                  separatorBuilder: (c, i) => const Divider(height: 5),
-                  itemBuilder: (c, i) => ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.search),
-                    title: Text(searchHistory[i].search),
-                    onTap: () => _onSearchTap(c, searchHistory[i]),
-                  ),
-                ),
-              ),
-            ]);
-    });
+    return FutureBuilder<List<dynamic>>(
+        future: _future(),
+        builder: (c, s) {
+          if (s.connectionState != ConnectionState.done) {
+            return const LoadingIndicator();
+          }
+          if (s.hasError) {
+            return const Center(child: Text('Error'));
+          }
+          if (s.hasData) {
+            final navHistory = tec.as<List<Reference>>(s.data[0])
+              ..sort((a, b) => b.modified.compareTo(a.modified));
+            final searchHistory = tec.as<List<SearchHistoryItem>>(s.data[1])
+              ..sort((a, b) => b.modified.compareTo(a.modified));
+            return searchHistory.isEmpty && navHistory.isEmpty
+                ? const Center(child: Text('Search or navigate to view history'))
+                : Column(children: [
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      const ListLabel('Navigation History'),
+                      IconButton(
+                          icon: Icon(Icons.chevron_right,
+                              color: Theme.of(context).textTheme.caption.color),
+                          onPressed: () async {
+                            final ref = await Navigator.of(c).push(MaterialPageRoute<Reference>(
+                                builder: (c) => _NavHistoryView(navHistory)));
+                            if (ref != null) {
+                              _onNavHistoryTap(c, ref, context.bloc<NavBloc>().state.ref.volume);
+                            }
+                          })
+                    ]),
+                    Flexible(
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: navHistory.length,
+                        separatorBuilder: (c, i) => const Divider(height: 5),
+                        itemBuilder: (c, i) => ListTile(
+                          dense: true,
+                          leading: const Icon(Icons.history),
+                          title: Text(navHistory[i].label()),
+                          onTap: () => _onNavHistoryTap(
+                              c, navHistory[i], context.bloc<NavBloc>().state.ref.volume),
+                        ),
+                      ),
+                    ),
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      const ListLabel('Search History'),
+                      IconButton(
+                          icon:
+                              Icon(Icons.chevron_right, color: Theme.of(c).textTheme.caption.color),
+                          onPressed: () async {
+                            final searchChosen = await Navigator.of(c).push(
+                                MaterialPageRoute<SearchHistoryItem>(
+                                    builder: (c) => _SearchHistoryView(searchHistory)));
+                            if (searchChosen != null) {
+                              _onSearchTap(c, searchChosen);
+                            }
+                          }),
+                    ]),
+                    Flexible(
+                        child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: searchHistory.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      separatorBuilder: (c, i) => const Divider(height: 5),
+                      itemBuilder: (c, i) => ListTile(
+                        dense: true,
+                        leading: const Icon(Icons.search),
+                        title: Text(searchHistory[i].search),
+                        onTap: () => _onSearchTap(c, searchHistory[i]),
+                      ),
+                    )),
+                  ]);
+          }
+          return const Center(child: Text('Unable to load currently'));
+        });
   }
 }
 
@@ -210,28 +238,47 @@ class SearchResultsView extends StatefulWidget {
   _SearchResultsViewState createState() => _SearchResultsViewState();
 }
 
-class _SearchResultsViewState extends State<SearchResultsView> with AutomaticKeepAliveClientMixin {
+class _SearchResultsViewState extends State<SearchResultsView> {
   ItemScrollController scrollController;
-  // ItemPositionsListener positionListener;
-
-  @override
-  bool get wantKeepAlive => true;
+  ItemPositionsListener positionListener;
 
   @override
   void initState() {
-    // positionListener = ItemPositionsListener.create();
-    // positionListener.itemPositions.addListener(() {
-    //   if (positionListener.itemPositions.value.isNotEmpty) {
-    //     context.bloc<SearchBloc>().scrollIndex = positionListener.itemPositions.value.first.index;
-    //   }
-    // });
+    final s = context.bloc<SearchBloc>().state;
     scrollController = ItemScrollController();
+    if (s.scrollIndex > 1) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (scrollController.isAttached) {
+          scrollController.scrollTo(
+              index: s.scrollIndex, duration: const Duration(milliseconds: 250));
+          TecToast.show(context, 'Scrolled to last saved place');
+        }
+      });
+    }
+    positionListener = ItemPositionsListener.create();
     super.initState();
   }
 
   @override
+  void deactivate() {
+    _saveSearch(context.bloc<SearchBloc>().state);
+    super.deactivate();
+  }
+
+  Future<void> _saveSearch(SearchState s) async {
+    if (positionListener.itemPositions.value.isNotEmpty) {
+      if (s.filteredResults.isNotEmpty) {
+        // this is where we save the search result...once user exits page
+        await context.bloc<SearchBloc>().saveToSearchHistory(s.search,
+            translations: s.filteredTranslations.join('|'),
+            booksExcluded: s.excludedBooks.join('|'),
+            scrollIndex: positionListener.itemPositions.value.first.index);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    super.build(context);
     return BlocConsumer<SearchBloc, SearchState>(
         listener: (c, s) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -257,7 +304,7 @@ class _SearchResultsViewState extends State<SearchResultsView> with AutomaticKee
               body: ScrollablePositionedList.separated(
                 itemCount: state.filteredResults.length + 1,
                 itemScrollController: scrollController,
-                // itemPositionsListener: positionListener,
+                itemPositionsListener: positionListener,
                 separatorBuilder: (c, i) {
                   if (i == 0) {
                     // if sized box has height: 0, causes errors in scrollable list

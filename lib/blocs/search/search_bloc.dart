@@ -20,6 +20,7 @@ abstract class SearchEvent with _$SearchEvent {
   const factory SearchEvent.modifySearchResult({SearchResultInfo searchResult}) =
       _ModifySearchResult;
   const factory SearchEvent.filterBooks(List<int> excludedBooks) = _FilterBooks;
+  const factory SearchEvent.setScrollIndex(int scrollIndex) = _SetScrollIndex;
 }
 
 @freezed
@@ -30,6 +31,7 @@ abstract class SearchState with _$SearchState {
     List<SearchResultInfo> filteredResults,
     List<int> filteredTranslations,
     List<int> excludedBooks,
+    int scrollIndex,
     bool loading,
     bool error,
     bool selectionMode,
@@ -38,7 +40,6 @@ abstract class SearchState with _$SearchState {
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   CancelableOperation<List<SearchResult>> _searchOperation;
-  // int scrollIndex = 0;
 
   SearchBloc()
       : super(const SearchState(
@@ -47,6 +48,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
           filteredResults: [],
           excludedBooks: [],
           filteredTranslations: [],
+          scrollIndex: 0,
           loading: false,
           error: false,
           selectionMode: false,
@@ -62,16 +64,11 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       tec.dmPrint('Loading search: ${event.search}');
 
       try {
-        final translations = event.translations.join('|');
+        final translations = event.translations?.join('|') ?? '';
         final futureRes = SearchResults.fetch(words: event.search, translationIds: translations);
         _searchOperation = CancelableOperation<List<SearchResult>>.fromFuture(futureRes);
         final res = await _searchOperation.value;
         tec.dmPrint('Completed search "${event.search}" with ${res.length} result(s)');
-
-        // save search
-        if (res.isNotEmpty) {
-          await _saveToSearchHistory(event.search, translations);
-        }
 
         yield state.copyWith(
             searchResults: res.map((r) => SearchResultInfo(r)).toList(),
@@ -104,8 +101,12 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       }
     } else if (event is _FilterBooks) {
       yield _filterBooks(event.excludedBooks);
+    } else if (event is _SetScrollIndex) {
+      yield _setScrollIndex(event.scrollIndex);
     }
   }
+
+  SearchState _setScrollIndex(int index) => state.copyWith(scrollIndex: index);
 
   SearchState _filterBooks(List<int> excludedBooks) {
     final filteredResults =
@@ -124,16 +125,15 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   /// save search when navigating away or entering new search
-  Future<void> _saveToSearchHistory(String search, String translations) async {
-    // check to make sure u haven't saved it already
+  Future<void> saveToSearchHistory(String search,
+      {String translations, String booksExcluded, int scrollIndex}) async {
     final s = SearchHistoryItem(
         search: search,
         volumesFiltered: translations,
-        booksFiltered: state.excludedBooks.join('|'),
-        // index: scrollIndex,
+        booksFiltered: booksExcluded,
+        index: scrollIndex,
         modified: DateTime.now());
     await UserItemHelper.saveSearchHistoryItem(s);
-    // scrollIndex = 0;
   }
 }
 

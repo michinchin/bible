@@ -38,6 +38,13 @@ class _$SearchEventTearOff {
       excludedBooks,
     );
   }
+
+// ignore: unused_element
+  _SetScrollIndex setScrollIndex(int scrollIndex) {
+    return _SetScrollIndex(
+      scrollIndex,
+    );
+  }
 }
 
 // ignore: unused_element
@@ -50,6 +57,7 @@ mixin _$SearchEvent {
     @required Result selectionModeToggle(),
     @required Result modifySearchResult(SearchResultInfo searchResult),
     @required Result filterBooks(List<int> excludedBooks),
+    @required Result setScrollIndex(int scrollIndex),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
@@ -57,6 +65,7 @@ mixin _$SearchEvent {
     Result selectionModeToggle(),
     Result modifySearchResult(SearchResultInfo searchResult),
     Result filterBooks(List<int> excludedBooks),
+    Result setScrollIndex(int scrollIndex),
     @required Result orElse(),
   });
   @optionalTypeArgs
@@ -65,6 +74,7 @@ mixin _$SearchEvent {
     @required Result selectionModeToggle(_SelectionMode value),
     @required Result modifySearchResult(_ModifySearchResult value),
     @required Result filterBooks(_FilterBooks value),
+    @required Result setScrollIndex(_SetScrollIndex value),
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
@@ -72,6 +82,7 @@ mixin _$SearchEvent {
     Result selectionModeToggle(_SelectionMode value),
     Result modifySearchResult(_ModifySearchResult value),
     Result filterBooks(_FilterBooks value),
+    Result setScrollIndex(_SetScrollIndex value),
     @required Result orElse(),
   });
 }
@@ -169,11 +180,13 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
     @required Result selectionModeToggle(),
     @required Result modifySearchResult(SearchResultInfo searchResult),
     @required Result filterBooks(List<int> excludedBooks),
+    @required Result setScrollIndex(int scrollIndex),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
     assert(filterBooks != null);
+    assert(setScrollIndex != null);
     return request(search, translations);
   }
 
@@ -184,6 +197,7 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
     Result selectionModeToggle(),
     Result modifySearchResult(SearchResultInfo searchResult),
     Result filterBooks(List<int> excludedBooks),
+    Result setScrollIndex(int scrollIndex),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -200,11 +214,13 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
     @required Result selectionModeToggle(_SelectionMode value),
     @required Result modifySearchResult(_ModifySearchResult value),
     @required Result filterBooks(_FilterBooks value),
+    @required Result setScrollIndex(_SetScrollIndex value),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
     assert(filterBooks != null);
+    assert(setScrollIndex != null);
     return request(this);
   }
 
@@ -215,6 +231,7 @@ class _$_Requested with DiagnosticableTreeMixin implements _Requested {
     Result selectionModeToggle(_SelectionMode value),
     Result modifySearchResult(_ModifySearchResult value),
     Result filterBooks(_FilterBooks value),
+    Result setScrollIndex(_SetScrollIndex value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -280,11 +297,13 @@ class _$_SelectionMode with DiagnosticableTreeMixin implements _SelectionMode {
     @required Result selectionModeToggle(),
     @required Result modifySearchResult(SearchResultInfo searchResult),
     @required Result filterBooks(List<int> excludedBooks),
+    @required Result setScrollIndex(int scrollIndex),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
     assert(filterBooks != null);
+    assert(setScrollIndex != null);
     return selectionModeToggle();
   }
 
@@ -295,6 +314,7 @@ class _$_SelectionMode with DiagnosticableTreeMixin implements _SelectionMode {
     Result selectionModeToggle(),
     Result modifySearchResult(SearchResultInfo searchResult),
     Result filterBooks(List<int> excludedBooks),
+    Result setScrollIndex(int scrollIndex),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -311,11 +331,13 @@ class _$_SelectionMode with DiagnosticableTreeMixin implements _SelectionMode {
     @required Result selectionModeToggle(_SelectionMode value),
     @required Result modifySearchResult(_ModifySearchResult value),
     @required Result filterBooks(_FilterBooks value),
+    @required Result setScrollIndex(_SetScrollIndex value),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
     assert(filterBooks != null);
+    assert(setScrollIndex != null);
     return selectionModeToggle(this);
   }
 
@@ -326,6 +348,7 @@ class _$_SelectionMode with DiagnosticableTreeMixin implements _SelectionMode {
     Result selectionModeToggle(_SelectionMode value),
     Result modifySearchResult(_ModifySearchResult value),
     Result filterBooks(_FilterBooks value),
+    Result setScrollIndex(_SetScrollIndex value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -426,11 +449,13 @@ class _$_ModifySearchResult
     @required Result selectionModeToggle(),
     @required Result modifySearchResult(SearchResultInfo searchResult),
     @required Result filterBooks(List<int> excludedBooks),
+    @required Result setScrollIndex(int scrollIndex),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
     assert(filterBooks != null);
+    assert(setScrollIndex != null);
     return modifySearchResult(searchResult);
   }
 
@@ -441,6 +466,7 @@ class _$_ModifySearchResult
     Result selectionModeToggle(),
     Result modifySearchResult(SearchResultInfo searchResult),
     Result filterBooks(List<int> excludedBooks),
+    Result setScrollIndex(int scrollIndex),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -457,11 +483,13 @@ class _$_ModifySearchResult
     @required Result selectionModeToggle(_SelectionMode value),
     @required Result modifySearchResult(_ModifySearchResult value),
     @required Result filterBooks(_FilterBooks value),
+    @required Result setScrollIndex(_SetScrollIndex value),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
     assert(filterBooks != null);
+    assert(setScrollIndex != null);
     return modifySearchResult(this);
   }
 
@@ -472,6 +500,7 @@ class _$_ModifySearchResult
     Result selectionModeToggle(_SelectionMode value),
     Result modifySearchResult(_ModifySearchResult value),
     Result filterBooks(_FilterBooks value),
+    Result setScrollIndex(_SetScrollIndex value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -561,11 +590,13 @@ class _$_FilterBooks with DiagnosticableTreeMixin implements _FilterBooks {
     @required Result selectionModeToggle(),
     @required Result modifySearchResult(SearchResultInfo searchResult),
     @required Result filterBooks(List<int> excludedBooks),
+    @required Result setScrollIndex(int scrollIndex),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
     assert(filterBooks != null);
+    assert(setScrollIndex != null);
     return filterBooks(excludedBooks);
   }
 
@@ -576,6 +607,7 @@ class _$_FilterBooks with DiagnosticableTreeMixin implements _FilterBooks {
     Result selectionModeToggle(),
     Result modifySearchResult(SearchResultInfo searchResult),
     Result filterBooks(List<int> excludedBooks),
+    Result setScrollIndex(int scrollIndex),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -592,11 +624,13 @@ class _$_FilterBooks with DiagnosticableTreeMixin implements _FilterBooks {
     @required Result selectionModeToggle(_SelectionMode value),
     @required Result modifySearchResult(_ModifySearchResult value),
     @required Result filterBooks(_FilterBooks value),
+    @required Result setScrollIndex(_SetScrollIndex value),
   }) {
     assert(request != null);
     assert(selectionModeToggle != null);
     assert(modifySearchResult != null);
     assert(filterBooks != null);
+    assert(setScrollIndex != null);
     return filterBooks(this);
   }
 
@@ -607,6 +641,7 @@ class _$_FilterBooks with DiagnosticableTreeMixin implements _FilterBooks {
     Result selectionModeToggle(_SelectionMode value),
     Result modifySearchResult(_ModifySearchResult value),
     Result filterBooks(_FilterBooks value),
+    Result setScrollIndex(_SetScrollIndex value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -624,6 +659,147 @@ abstract class _FilterBooks implements SearchEvent {
   _$FilterBooksCopyWith<_FilterBooks> get copyWith;
 }
 
+abstract class _$SetScrollIndexCopyWith<$Res> {
+  factory _$SetScrollIndexCopyWith(
+          _SetScrollIndex value, $Res Function(_SetScrollIndex) then) =
+      __$SetScrollIndexCopyWithImpl<$Res>;
+  $Res call({int scrollIndex});
+}
+
+class __$SetScrollIndexCopyWithImpl<$Res>
+    extends _$SearchEventCopyWithImpl<$Res>
+    implements _$SetScrollIndexCopyWith<$Res> {
+  __$SetScrollIndexCopyWithImpl(
+      _SetScrollIndex _value, $Res Function(_SetScrollIndex) _then)
+      : super(_value, (v) => _then(v as _SetScrollIndex));
+
+  @override
+  _SetScrollIndex get _value => super._value as _SetScrollIndex;
+
+  @override
+  $Res call({
+    Object scrollIndex = freezed,
+  }) {
+    return _then(_SetScrollIndex(
+      scrollIndex == freezed ? _value.scrollIndex : scrollIndex as int,
+    ));
+  }
+}
+
+class _$_SetScrollIndex
+    with DiagnosticableTreeMixin
+    implements _SetScrollIndex {
+  const _$_SetScrollIndex(this.scrollIndex) : assert(scrollIndex != null);
+
+  @override
+  final int scrollIndex;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'SearchEvent.setScrollIndex(scrollIndex: $scrollIndex)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'SearchEvent.setScrollIndex'))
+      ..add(DiagnosticsProperty('scrollIndex', scrollIndex));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _SetScrollIndex &&
+            (identical(other.scrollIndex, scrollIndex) ||
+                const DeepCollectionEquality()
+                    .equals(other.scrollIndex, scrollIndex)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^ const DeepCollectionEquality().hash(scrollIndex);
+
+  @override
+  _$SetScrollIndexCopyWith<_SetScrollIndex> get copyWith =>
+      __$SetScrollIndexCopyWithImpl<_SetScrollIndex>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result request(String search, List<int> translations),
+    @required Result selectionModeToggle(),
+    @required Result modifySearchResult(SearchResultInfo searchResult),
+    @required Result filterBooks(List<int> excludedBooks),
+    @required Result setScrollIndex(int scrollIndex),
+  }) {
+    assert(request != null);
+    assert(selectionModeToggle != null);
+    assert(modifySearchResult != null);
+    assert(filterBooks != null);
+    assert(setScrollIndex != null);
+    return setScrollIndex(scrollIndex);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result request(String search, List<int> translations),
+    Result selectionModeToggle(),
+    Result modifySearchResult(SearchResultInfo searchResult),
+    Result filterBooks(List<int> excludedBooks),
+    Result setScrollIndex(int scrollIndex),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (setScrollIndex != null) {
+      return setScrollIndex(scrollIndex);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result request(_Requested value),
+    @required Result selectionModeToggle(_SelectionMode value),
+    @required Result modifySearchResult(_ModifySearchResult value),
+    @required Result filterBooks(_FilterBooks value),
+    @required Result setScrollIndex(_SetScrollIndex value),
+  }) {
+    assert(request != null);
+    assert(selectionModeToggle != null);
+    assert(modifySearchResult != null);
+    assert(filterBooks != null);
+    assert(setScrollIndex != null);
+    return setScrollIndex(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result request(_Requested value),
+    Result selectionModeToggle(_SelectionMode value),
+    Result modifySearchResult(_ModifySearchResult value),
+    Result filterBooks(_FilterBooks value),
+    Result setScrollIndex(_SetScrollIndex value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (setScrollIndex != null) {
+      return setScrollIndex(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _SetScrollIndex implements SearchEvent {
+  const factory _SetScrollIndex(int scrollIndex) = _$_SetScrollIndex;
+
+  int get scrollIndex;
+  _$SetScrollIndexCopyWith<_SetScrollIndex> get copyWith;
+}
+
 class _$SearchStateTearOff {
   const _$SearchStateTearOff();
 
@@ -634,6 +810,7 @@ class _$SearchStateTearOff {
       List<SearchResultInfo> filteredResults,
       List<int> filteredTranslations,
       List<int> excludedBooks,
+      int scrollIndex,
       bool loading,
       bool error,
       bool selectionMode}) {
@@ -643,6 +820,7 @@ class _$SearchStateTearOff {
       filteredResults: filteredResults,
       filteredTranslations: filteredTranslations,
       excludedBooks: excludedBooks,
+      scrollIndex: scrollIndex,
       loading: loading,
       error: error,
       selectionMode: selectionMode,
@@ -659,6 +837,7 @@ mixin _$SearchState {
   List<SearchResultInfo> get filteredResults;
   List<int> get filteredTranslations;
   List<int> get excludedBooks;
+  int get scrollIndex;
   bool get loading;
   bool get error;
   bool get selectionMode;
@@ -676,6 +855,7 @@ abstract class $SearchStateCopyWith<$Res> {
       List<SearchResultInfo> filteredResults,
       List<int> filteredTranslations,
       List<int> excludedBooks,
+      int scrollIndex,
       bool loading,
       bool error,
       bool selectionMode});
@@ -695,6 +875,7 @@ class _$SearchStateCopyWithImpl<$Res> implements $SearchStateCopyWith<$Res> {
     Object filteredResults = freezed,
     Object filteredTranslations = freezed,
     Object excludedBooks = freezed,
+    Object scrollIndex = freezed,
     Object loading = freezed,
     Object error = freezed,
     Object selectionMode = freezed,
@@ -713,6 +894,8 @@ class _$SearchStateCopyWithImpl<$Res> implements $SearchStateCopyWith<$Res> {
       excludedBooks: excludedBooks == freezed
           ? _value.excludedBooks
           : excludedBooks as List<int>,
+      scrollIndex:
+          scrollIndex == freezed ? _value.scrollIndex : scrollIndex as int,
       loading: loading == freezed ? _value.loading : loading as bool,
       error: error == freezed ? _value.error : error as bool,
       selectionMode: selectionMode == freezed
@@ -734,6 +917,7 @@ abstract class _$SearchStateCopyWith<$Res>
       List<SearchResultInfo> filteredResults,
       List<int> filteredTranslations,
       List<int> excludedBooks,
+      int scrollIndex,
       bool loading,
       bool error,
       bool selectionMode});
@@ -755,6 +939,7 @@ class __$SearchStateCopyWithImpl<$Res> extends _$SearchStateCopyWithImpl<$Res>
     Object filteredResults = freezed,
     Object filteredTranslations = freezed,
     Object excludedBooks = freezed,
+    Object scrollIndex = freezed,
     Object loading = freezed,
     Object error = freezed,
     Object selectionMode = freezed,
@@ -773,6 +958,8 @@ class __$SearchStateCopyWithImpl<$Res> extends _$SearchStateCopyWithImpl<$Res>
       excludedBooks: excludedBooks == freezed
           ? _value.excludedBooks
           : excludedBooks as List<int>,
+      scrollIndex:
+          scrollIndex == freezed ? _value.scrollIndex : scrollIndex as int,
       loading: loading == freezed ? _value.loading : loading as bool,
       error: error == freezed ? _value.error : error as bool,
       selectionMode: selectionMode == freezed
@@ -789,6 +976,7 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
       this.filteredResults,
       this.filteredTranslations,
       this.excludedBooks,
+      this.scrollIndex,
       this.loading,
       this.error,
       this.selectionMode});
@@ -804,6 +992,8 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
   @override
   final List<int> excludedBooks;
   @override
+  final int scrollIndex;
+  @override
   final bool loading;
   @override
   final bool error;
@@ -812,7 +1002,7 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'SearchState(search: $search, searchResults: $searchResults, filteredResults: $filteredResults, filteredTranslations: $filteredTranslations, excludedBooks: $excludedBooks, loading: $loading, error: $error, selectionMode: $selectionMode)';
+    return 'SearchState(search: $search, searchResults: $searchResults, filteredResults: $filteredResults, filteredTranslations: $filteredTranslations, excludedBooks: $excludedBooks, scrollIndex: $scrollIndex, loading: $loading, error: $error, selectionMode: $selectionMode)';
   }
 
   @override
@@ -825,6 +1015,7 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
       ..add(DiagnosticsProperty('filteredResults', filteredResults))
       ..add(DiagnosticsProperty('filteredTranslations', filteredTranslations))
       ..add(DiagnosticsProperty('excludedBooks', excludedBooks))
+      ..add(DiagnosticsProperty('scrollIndex', scrollIndex))
       ..add(DiagnosticsProperty('loading', loading))
       ..add(DiagnosticsProperty('error', error))
       ..add(DiagnosticsProperty('selectionMode', selectionMode));
@@ -848,6 +1039,9 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
             (identical(other.excludedBooks, excludedBooks) ||
                 const DeepCollectionEquality()
                     .equals(other.excludedBooks, excludedBooks)) &&
+            (identical(other.scrollIndex, scrollIndex) ||
+                const DeepCollectionEquality()
+                    .equals(other.scrollIndex, scrollIndex)) &&
             (identical(other.loading, loading) ||
                 const DeepCollectionEquality()
                     .equals(other.loading, loading)) &&
@@ -866,6 +1060,7 @@ class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
       const DeepCollectionEquality().hash(filteredResults) ^
       const DeepCollectionEquality().hash(filteredTranslations) ^
       const DeepCollectionEquality().hash(excludedBooks) ^
+      const DeepCollectionEquality().hash(scrollIndex) ^
       const DeepCollectionEquality().hash(loading) ^
       const DeepCollectionEquality().hash(error) ^
       const DeepCollectionEquality().hash(selectionMode);
@@ -882,6 +1077,7 @@ abstract class _SearchState implements SearchState {
       List<SearchResultInfo> filteredResults,
       List<int> filteredTranslations,
       List<int> excludedBooks,
+      int scrollIndex,
       bool loading,
       bool error,
       bool selectionMode}) = _$_SearchState;
@@ -896,6 +1092,8 @@ abstract class _SearchState implements SearchState {
   List<int> get filteredTranslations;
   @override
   List<int> get excludedBooks;
+  @override
+  int get scrollIndex;
   @override
   bool get loading;
   @override

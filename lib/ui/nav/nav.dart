@@ -16,8 +16,8 @@ import '../../models/search/tec_share.dart';
 import '../common/common.dart';
 import '../library/library.dart';
 import 'bcv_tab.dart';
+import 'search_and_history_view.dart';
 import 'search_filter.dart';
-import 'search_results_view.dart';
 import 'search_suggestions.dart';
 
 const tabColors = [Colors.red, Colors.blue, Colors.orange, Colors.green];
@@ -95,8 +95,6 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     _searchResultsTabController = TabController(length: 2, initialIndex: 1, vsync: this)
       ..addListener(() {
         if (_searchResultsTabController.index == 0) {
-          // TODO(abby): why is history loading twice?
-          navBloc().add(const NavEvent.loadHistory());
           if (searchBloc().state.selectionMode) {
             searchBloc().add(const SearchEvent.selectionModeToggle());
           }
@@ -154,7 +152,9 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     _searchResultsTabController.animateTo(1);
     FocusScope.of(context).unfocus();
     if (s.isNotEmpty) {
-      searchBloc().add(SearchEvent.request(search: s, translations: translations()));
+      searchBloc()
+        ..add(SearchEvent.request(search: s, translations: translations()))
+        ..add(const SearchEvent.setScrollIndex(0));
       navBloc().add(NavEvent.onSearchFinished(search: s));
     }
   }

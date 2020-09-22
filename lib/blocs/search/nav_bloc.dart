@@ -6,8 +6,6 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/search/autocomplete.dart';
-import '../../models/search/search_history_item.dart';
-import '../../models/user_item_helper.dart';
 
 part 'nav_bloc.freezed.dart';
 
@@ -19,7 +17,6 @@ abstract class NavEvent with _$NavEvent {
   const factory NavEvent.changeTabIndex({int index}) = _ChangeIndex;
   const factory NavEvent.setRef({Reference ref}) = _SetRef;
   const factory NavEvent.onSearchChange({String search}) = _OnSearchChange;
-  const factory NavEvent.loadHistory() = _LoadHistory;
   const factory NavEvent.loadWordSuggestions({String search}) = _LoadWordSuggestions;
   const factory NavEvent.changeNavView({NavViewState state}) = _ChangeNavView;
   const factory NavEvent.onSearchFinished({String search}) = _OnSearchFinished;
@@ -35,8 +32,6 @@ abstract class NavState with _$NavState {
     String search,
     List<int> bookSuggestions,
     List<String> wordSuggestions,
-    List<Reference> navHistory,
-    List<SearchHistoryItem> searchHistory,
   }) = _NavState;
 }
 
@@ -52,8 +47,6 @@ class NavBloc extends Bloc<NavEvent, NavState> {
           search: '',
           bookSuggestions: [],
           wordSuggestions: [],
-          navHistory: [],
-          searchHistory: [],
           navViewState: NavViewState.bcvTabs,
         ));
 
@@ -62,17 +55,11 @@ class NavBloc extends Bloc<NavEvent, NavState> {
     if (event is _LoadWordSuggestions) {
       final suggestions = await _loadWordSuggestions(event.search);
       yield state.copyWith(wordSuggestions: suggestions);
-    } else if (event is _LoadHistory) {
-      final navHistory = await UserItemHelper.navHistoryItemsFromDb();
-      final searchHistory = await UserItemHelper.searchHistoryItemsFromDb();
-      tec.dmPrint('Loading history');
-      yield state.copyWith(navHistory: navHistory, searchHistory: searchHistory);
     } else {
       final newState = event.when(
           changeNavView: _changeNavView,
           onSearchChange: _onSearchChange,
           onSearchFinished: _onSearchFinished,
-          loadHistory: () {},
           loadWordSuggestions: (_) {},
           changeTabIndex: _changeTabIndex,
           changeState: _changeState,
