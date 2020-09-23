@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import 'tec_tab_indicator.dart';
@@ -148,6 +150,21 @@ class MinHeightAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight((appBar ?? AppBar()).preferredSize.height - 16.0);
+}
+
+///
+/// Icon that can be embedded inline within text.
+///
+class IconSpan extends FixedWidthWidgetSpan {
+  final double size;
+  final Color color;
+
+  IconSpan(IconData icon, this.size, this.color)
+      : super(
+          alignment: PlaceholderAlignment.middle,
+          childWidth: size,
+          child: Icon(icon, size: size, color: color),
+        );
 }
 
 class IconWithNumberBadge extends StatelessWidget {

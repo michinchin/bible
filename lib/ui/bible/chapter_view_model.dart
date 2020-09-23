@@ -125,11 +125,11 @@ class BibleChapterViewModel {
 
     void _onPress() {
       if (_selectedVerses.isEmpty) {
-        final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-        final position = bloc?.indexOfView(viewUid) ?? -1;
+        final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+        final position = vmBloc?.indexOfView(viewUid) ?? -1;
         final mn = marginNotes().marginNoteForVerse(tag.verse);
 
-        bloc?.add(ViewManagerEvent.add(
+        vmBloc?.add(ViewManagerEvent.add(
             type: marginNoteViewType,
             data: tec.toJsonString(mn.stateJson()),
             position: position == -1 ? null : position + 1));

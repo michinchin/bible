@@ -11,7 +11,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../../models/bible_chapter_state.dart';
+import '../../models/bible_view_data.dart';
 import '../bible/chapter_view.dart';
 import '../common/common.dart';
 import '../library/library.dart';
@@ -23,13 +23,13 @@ const _menuWidth = 175.0;
 
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   // ignore: close_sinks
-  final vm = context.bloc<ViewManagerBloc>();
-  final topRight = vm.state.maximizedViewUid == state.uid ||
-      (vm.columnsInRow(0) - 1) == vm.indexOfView(state.uid);
+  final vmBloc = context.bloc<ViewManagerBloc>();
+  final topRight = vmBloc.state.maximizedViewUid == state.uid ||
+      (vmBloc.columnsInRow(0) - 1) == vmBloc.indexOfView(state.uid);
 
   var insets = const EdgeInsets.all(0);
-  final rect = vm.rectOfView(state.uid)?.rect;
-  final vmSize = vm.size;
+  final rect = vmBloc.rectOfView(state.uid)?.rect;
+  final vmSize = vmBloc.size;
   if (rect != null && vmSize != null) {
     final mq = MediaQuery.of(context);
     insets = EdgeInsets.fromLTRB(
@@ -82,21 +82,21 @@ class _MenuItems extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // ignore: close_sinks
-    final bloc = context.bloc<ViewManagerBloc>();
-    final isMaximized = bloc?.state?.maximizedViewUid != 0;
+    final vmBloc = context.bloc<ViewManagerBloc>();
+    final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if ((bloc?.state?.views?.length ?? 0) > 1)
+        if ((vmBloc?.state?.views?.length ?? 0) > 1)
           _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
               isMaximized ? 'Restore' : 'Maximize', () {
             Navigator.of(context).maybePop();
-            bloc?.add(isMaximized
+            vmBloc?.add(isMaximized
                 ? const ViewManagerEvent.restore()
                 : ViewManagerEvent.maximize(state.uid));
           }),
-        if (((bloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
+        if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
           _titleDivider(context, isMaximized ? 'Switch To' : 'Switch With'),
           ..._generateOffScreenItems(context, state.uid)
         ],
@@ -111,13 +111,10 @@ class _MenuItems extends StatelessWidget {
           tec.dmPrint('selected $bibleId');
 
           if (bibleId != null) {
-            final viewData = bloc.dataWithView(state.uid);
-            final previous = BibleChapterState.fromJson(viewData);
+            final previous = BibleViewData.fromJson(vmBloc.dataWithView(state.uid));
             if (previous != null) {
-              final current = BibleChapterState(bibleId, previous.bcv, previous.page);
-              // following line is approximate if we wanted to change translation in save view
-              //bloc?.add(ViewManagerEvent.setData(uid: state.uid, data: current.toString()));
-              bloc?.add(ViewManagerEvent.add(type: bibleChapterType, data: current.toString()));
+              final current = BibleViewData(bibleId, previous.bcv, previous.page);
+              vmBloc?.add(ViewManagerEvent.add(type: bibleChapterType, data: current.toString()));
             }
           }
 
@@ -133,24 +130,24 @@ class _MenuItems extends StatelessWidget {
 
           if (volumeId != null) {
             // TODO(ron): ...
-            // final viewData = bloc.dataWithView(state.uid);
+            // final viewData = vmBloc.dataWithView(state.uid);
             // final previous = BibleChapterState.fromJson(viewData);
             // if (previous != null) {
             //   final current = BibleChapterState(bibleId, previous.bcv, previous.page);
             //   // following line is approximate if we wanted to change translation in save view
-            //   //bloc?.add(ViewManagerEvent.setData(uid: state.uid, data: current.toString()));
-            bloc?.add(const ViewManagerEvent.add(type: studyViewType, data: '{}'));
+            //   //vmBloc?.add(ViewManagerEvent.setData(uid: state.uid, data: current.toString()));
+            vmBloc?.add(const ViewManagerEvent.add(type: studyViewType, data: '{}'));
             // }
           }
 
           await Navigator.of(context).maybePop();
         }),
         _menuItemForType(notesViewType, context: context, viewUid: state.uid),
-        if ((bloc?.state?.views?.length ?? 0) > 1) ...[
+        if ((vmBloc?.state?.views?.length ?? 0) > 1) ...[
           const SizedBox(width: _menuWidth, child: Divider()),
           _menuItem(context, Icons.close, 'Close View', () {
             Navigator.of(context).maybePop();
-            bloc?.add(ViewManagerEvent.remove(state.uid));
+            vmBloc?.add(ViewManagerEvent.remove(state.uid));
           }),
         ],
       ],
@@ -159,15 +156,15 @@ class _MenuItems extends StatelessWidget {
 
   Iterable<Widget> _generateOffScreenItems(BuildContext context, int viewUid) {
     // ignore: close_sinks
-    final bloc = context.bloc<ViewManagerBloc>();
+    final vmBloc = context.bloc<ViewManagerBloc>();
     final vm = ViewManager.shared;
     final items = <Widget>[];
-    for (final view in bloc?.state?.views) {
-      if (!bloc.isViewVisible(view.uid)) {
+    for (final view in vmBloc?.state?.views) {
+      if (!vmBloc.isViewVisible(view.uid)) {
         String title;
         Map<String, dynamic> json;
 
-        final viewData = bloc.dataWithView(view.uid);
+        final viewData = vmBloc.dataWithView(view.uid);
         if (viewData != null) {
           json = jsonDecode(viewData) as Map<String, dynamic>;
         }
@@ -179,15 +176,15 @@ class _MenuItems extends StatelessWidget {
         }
 
         items.add(_menuItem(context, vm.iconForType(view.type), '$title', () {
-          if (bloc.state.maximizedViewUid == viewUid) {
-            bloc?.add(ViewManagerEvent.maximize(view.uid));
+          if (vmBloc.state.maximizedViewUid == viewUid) {
+            vmBloc?.add(ViewManagerEvent.maximize(view.uid));
             Navigator.of(context).maybePop();
           } else {
-            final thisViewPos = bloc.indexOfView(viewUid);
-            final hiddenViewPos = bloc.indexOfView(view.uid);
-            bloc?.add(ViewManagerEvent.move(
-                fromPosition: bloc.indexOfView(view.uid), toPosition: bloc.indexOfView(viewUid)));
-            bloc?.add(
+            final thisViewPos = vmBloc.indexOfView(viewUid);
+            final hiddenViewPos = vmBloc.indexOfView(view.uid);
+            vmBloc?.add(ViewManagerEvent.move(
+                fromPosition: vmBloc.indexOfView(view.uid), toPosition: vmBloc.indexOfView(viewUid)));
+            vmBloc?.add(
                 ViewManagerEvent.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos));
             Navigator.of(context).maybePop();
           }
@@ -217,7 +214,7 @@ class _MenuItems extends StatelessWidget {
     void Function() onTap,
   }) {
     assert(tec.isNotNullOrEmpty(type) && context != null && viewUid != null);
-    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+    final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     final vm = ViewManager.shared;
     return _menuItem(
         context,
@@ -226,8 +223,8 @@ class _MenuItems extends StatelessWidget {
         onTap ??
             () {
               Navigator.of(context).maybePop();
-              final position = bloc?.indexOfView(viewUid) ?? -1;
-              bloc?.add(ViewManagerEvent.add(
+              final position = vmBloc?.indexOfView(viewUid) ?? -1;
+              vmBloc?.add(ViewManagerEvent.add(
                   type: type,
                   position: position == -1 ? null : position + 1));
             });
