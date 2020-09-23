@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +14,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/margin_notes/margin_notes_bloc.dart';
-import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_data/view_data.dart';
@@ -23,9 +21,9 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/bible_view_data.dart';
 import '../../models/user_item_helper.dart';
+import '../common/bible_chapter_title.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
-import '../library/library.dart';
 import '../misc/view_actions.dart';
 import '../nav/nav.dart';
 import 'chapter_view_model.dart';
@@ -65,76 +63,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
         appBar: MinHeightAppBar(
           appBar: AppBar(
             centerTitle: false,
-            title: BlocBuilder<ViewDataCubit, ViewData>(
-              builder: (context, viewData) {
-                tec.dmPrint('rebuilding PageableBibleView title with $viewData');
-                if (viewData is BibleViewData) {
-                  const minFontSize = 10.0;
-                  const buttonPadding = EdgeInsets.only(top: 16.0, bottom: 16.0);
-                  final buttonStyle = Theme.of(context)
-                      .textTheme
-                      .headline6
-                      .copyWith(color: Theme.of(context).textColor.withOpacity(0.5));
-                  final autosizeGroup = TecAutoSizeGroup();
-                  return Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(0),
-                        width: 32.0,
-                        child: IconButton(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            icon: const Icon(FeatherIcons.search, size: 20),
-                            tooltip: 'Search',
-                            color: Theme.of(context).textColor.withOpacity(0.5),
-                            onPressed: () => _onNavigate(context, viewData)),
-                      ),
-                      Flexible(
-                        flex: 3,
-                        child: CupertinoButton(
-                          minSize: 0,
-                          padding: buttonPadding,
-                          child: TecAutoSizeText(
-                            viewData.bookNameAndChapter,
-                            minFontSize: minFontSize,
-                            maxLines: 1,
-                            group: autosizeGroup,
-                            style: buttonStyle,
-                          ),
-                          onPressed: () => _onNavigate(context, viewData),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                        child: Container(
-                          color: Theme.of(context).textColor.withOpacity(0.2),
-                          width: 1,
-                          height: const MinHeightAppBar().preferredSize.height *
-                              .55, // 22 * textScaleFactorWith(context),
-                        ),
-                      ),
-                      Flexible(
-                        child: CupertinoButton(
-                          minSize: 0,
-                          padding: buttonPadding,
-                          child: TecAutoSizeText(
-                            _bible.abbreviation,
-                            minFontSize: minFontSize,
-                            group: autosizeGroup,
-                            maxLines: 1,
-                            style: buttonStyle,
-                          ),
-                          onPressed: () => _onNavigate(context, viewData,
-                              initialIndex: NavTabs.translation.index),
-                          // onPressed: () => _onSelectBible(context, viewData),
-                        ),
-                      ),
-                    ],
-                  );
-                } else {
-                  throw UnsupportedError('_PageableBibleView must use BibleViewData');
-                }
-              },
-            ),
+            title: BibleChapterTitle(onNavigate: _onNavigate),
             actions: defaultActionsBuilder(context, widget.state, widget.size),
           ),
         ),
@@ -199,17 +128,17 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     }
   }
 
-  Future<void> _onSelectBible(BuildContext context, BibleViewData viewData) async {
-    TecAutoScroll.stopAutoscroll();
-    final bibleId = await selectVolume(context,
-        title: 'Select Bible Translation',
-        filter: const VolumesFilter(
-          volumeType: VolumeType.bible,
-        ),
-        selectedVolume: _bible.id);
+  // Future<void> _onSelectBible(BuildContext context, BibleViewData viewData) async {
+  //   TecAutoScroll.stopAutoscroll();
+  //   final bibleId = await selectVolume(context,
+  //       title: 'Select Bible Translation',
+  //       filter: const VolumesFilter(
+  //         volumeType: VolumeType.bible,
+  //       ),
+  //       selectedVolume: _bible.id);
 
-    _updateWith(context, bibleId, viewData.bcv, viewData);
-  }
+  //   _updateWith(context, bibleId, viewData.bcv, viewData);
+  // }
 
   void _updateWith(
       BuildContext context, int newBibleId, BookChapterVerse newBcv, BibleViewData viewData) {
