@@ -6,11 +6,11 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 import '../view_manager/view_manager_bloc.dart';
 
-class ViewDataCubit extends Cubit<ViewData> {
+class ViewDataBloc extends Cubit<ViewData> {
   final ViewManagerBloc vmBloc;
   final int viewUid;
 
-  ViewDataCubit(this.vmBloc, this.viewUid, ViewData data)
+  ViewDataBloc(this.vmBloc, this.viewUid, ViewData data)
       : assert(vmBloc != null && viewUid != null && data != null),
         super(data);
 

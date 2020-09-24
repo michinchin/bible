@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:tec_env/tec_env.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -16,16 +15,13 @@ import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/view_data/view_data.dart';
+import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
-import '../../models/bible_view_data.dart';
-import '../../models/user_item_helper.dart';
 import '../common/bible_chapter_title.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
 import '../misc/view_actions.dart';
-import '../nav/nav.dart';
 import 'chapter_view_model.dart';
 
 const bibleChapterType = 'BibleChapter';
@@ -54,16 +50,16 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     return BlocProvider(
       create: (context) {
         final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-        final viewData = BibleViewData.fromJson(vmBloc.dataWithView(widget.state.uid));
+        final viewData = ChapterViewData.fromJson(vmBloc.dataWithView(widget.state.uid));
         _bible = VolumesRepository.shared.bibleWithId(viewData.bibleId);
         _bcvPageZero = viewData.bcv;
-        return ViewDataCubit(vmBloc, widget.state.uid, viewData);
+        return ViewDataBloc(vmBloc, widget.state.uid, viewData);
       },
       child: Scaffold(
         appBar: MinHeightAppBar(
           appBar: AppBar(
             centerTitle: false,
-            title: BibleChapterTitle(onNavigate: _onNavigate),
+            title: BibleChapterTitle(volumeType: VolumeType.bible, onUpdate: _onUpdate),
             actions: defaultActionsBuilder(context, widget.state, widget.size),
           ),
         ),
@@ -77,11 +73,11 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
           pageBuilder: (context, _, size, index) {
             final ref = _bcvPageZero.advancedBy(chapters: index, bible: _bible);
             if (ref == null) return null;
-            return BlocBuilder<ViewDataCubit, ViewData>(
+            return BlocBuilder<ViewDataBloc, ViewData>(
               buildWhen: (before, after) =>
-                  (before as BibleViewData).bibleId != (after as BibleViewData).bibleId,
+                  (before as ChapterViewData).bibleId != (after as ChapterViewData).bibleId,
               builder: (context, viewData) {
-                if (viewData is BibleViewData) {
+                if (viewData is ChapterViewData) {
                   final bible = VolumesRepository.shared.bibleWithId(viewData.bibleId);
                   final ref = _bcvPageZero.advancedBy(chapters: index, bible: bible);
                   if (ref == null) return Container();
@@ -89,7 +85,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                   return _BibleChapterView(
                       viewUid: widget.state.uid, size: size, bible: bible, ref: ref);
                 } else {
-                  throw UnsupportedError('_PageableBibleView must use BibleViewData');
+                  throw UnsupportedError('_PageableBibleView must use ChapterViewData');
                 }
               },
             );
@@ -98,9 +94,9 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
             tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
             final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
             if (bcv != null) {
-              final viewData = BibleViewData(_bible.id, bcv, page);
+              final viewData = ChapterViewData(_bible.id, bcv, page);
               tec.dmPrint('_PageableBibleView updating with new data: $viewData');
-              context.bloc<ViewDataCubit>().update(viewData);
+              context.bloc<ViewDataBloc>().update(viewData);
             }
           },
         ),
@@ -108,45 +104,13 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
     );
   }
 
-  Future<void> _onNavigate(BuildContext context, BibleViewData viewData,
-      {int initialIndex = 1}) async {
-    TecAutoScroll.stopAutoscroll();
-
-    final ref = await navigate(
-        context, Reference.fromHref(viewData.bcv.toString(), volume: viewData.bibleId),
-        initialIndex: initialIndex);
-    if (!mounted) return;
-
-    if (ref != null) {
-      // Save navigation ref to nav history.
-      unawaited(UserItemHelper.saveNavHistoryItem(ref));
-
-      // Small delay to allow the nav popup to clean up...
-      await Future.delayed(const Duration(milliseconds: 350), () {
-        _updateWith(context, ref.volume, BookChapterVerse.fromRef(ref), viewData);
-      });
-    }
-  }
-
-  // Future<void> _onSelectBible(BuildContext context, BibleViewData viewData) async {
-  //   TecAutoScroll.stopAutoscroll();
-  //   final bibleId = await selectVolume(context,
-  //       title: 'Select Bible Translation',
-  //       filter: const VolumesFilter(
-  //         volumeType: VolumeType.bible,
-  //       ),
-  //       selectedVolume: _bible.id);
-
-  //   _updateWith(context, bibleId, viewData.bcv, viewData);
-  // }
-
-  void _updateWith(
-      BuildContext context, int newBibleId, BookChapterVerse newBcv, BibleViewData viewData) {
+  void _onUpdate(
+      BuildContext context, int newBibleId, BookChapterVerse newBcv, VolumeViewData viewData) {
     if (!mounted || newBibleId == null || newBcv == null) return;
 
     var bibleChanged = false;
     var bible = _bible;
-    if (newBibleId != viewData.bibleId) {
+    if (newBibleId != viewData.volumeId) {
       bibleChanged = true;
       bible = VolumesRepository.shared.bibleWithId(newBibleId);
       if (bible == null) return; // ---------------------------------------->
@@ -160,7 +124,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
 
     if (bibleChanged) {
       _bible = bible;
-      context.bloc<ViewDataCubit>()?.update(BibleViewData(bible.id, newBcv, page));
+      context.bloc<ViewDataBloc>()?.update(ChapterViewData(bible.id, newBcv, page));
     } else if (newBcv != viewData.bcv) {
       _pageController?.jumpToPage(page);
     }

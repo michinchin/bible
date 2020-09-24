@@ -10,8 +10,8 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../../models/bible_view_data.dart';
 import '../bible/chapter_view.dart';
 import '../common/common.dart';
 import '../library/library.dart';
@@ -111,9 +111,9 @@ class _MenuItems extends StatelessWidget {
           tec.dmPrint('selected $bibleId');
 
           if (bibleId != null) {
-            final previous = BibleViewData.fromJson(vmBloc.dataWithView(state.uid));
+            final previous = ChapterViewData.fromJson(vmBloc.dataWithView(state.uid));
             if (previous != null) {
-              final current = BibleViewData(bibleId, previous.bcv, previous.page);
+              final current = ChapterViewData(bibleId, previous.bcv, previous.page);
               vmBloc?.add(ViewManagerEvent.add(type: bibleChapterType, data: current.toString()));
             }
           }
@@ -129,15 +129,11 @@ class _MenuItems extends StatelessWidget {
           tec.dmPrint('selected $volumeId');
 
           if (volumeId != null) {
-            // TODO(ron): ...
-            // final viewData = vmBloc.dataWithView(state.uid);
-            // final previous = BibleChapterState.fromJson(viewData);
-            // if (previous != null) {
-            //   final current = BibleChapterState(bibleId, previous.bcv, previous.page);
-            //   // following line is approximate if we wanted to change translation in save view
-            //   //vmBloc?.add(ViewManagerEvent.setData(uid: state.uid, data: current.toString()));
-            vmBloc?.add(const ViewManagerEvent.add(type: studyViewType, data: '{}'));
-            // }
+            final previous = VolumeViewData.fromJson(vmBloc.dataWithView(state.uid));
+            if (previous != null) {
+              final current = VolumeViewData(volumeId, previous.bcv);
+              vmBloc?.add(ViewManagerEvent.add(type: studyViewType, data: current.toString()));
+            }
           }
 
           await Navigator.of(context).maybePop();
