@@ -48,60 +48,55 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) {
-        final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-        final viewData = ChapterViewData.fromJson(vmBloc.dataWithView(widget.state.uid));
-        _bible = VolumesRepository.shared.bibleWithId(viewData.bibleId);
-        _bcvPageZero = viewData.bcv;
-        return ViewDataBloc(vmBloc, widget.state.uid, viewData);
-      },
-      child: Scaffold(
-        appBar: MinHeightAppBar(
-          appBar: AppBar(
-            centerTitle: false,
-            title: BibleChapterTitle(volumeType: VolumeType.bible, onUpdate: _onUpdate),
-            actions: defaultActionsBuilder(context, widget.state, widget.size),
+        create: (context) {
+          final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+          final viewData = ChapterViewData.fromJson(vmBloc.dataWithView(widget.state.uid));
+          _bible = VolumesRepository.shared.bibleWithId(viewData.bibleId);
+          _bcvPageZero = viewData.bcv;
+          return ViewDataBloc(vmBloc, widget.state.uid, viewData);
+        },
+        child: Scaffold(
+          appBar: MinHeightAppBar(
+              appBar: ChapterViewAppBar(
+                  viewState: widget.state, size: widget.size, onUpdate: _onUpdate)),
+          body: PageableView(
+            state: widget.state,
+            size: widget.size,
+            controllerBuilder: () {
+              _pageController = TecPageController(initialPage: 0);
+              return _pageController;
+            },
+            pageBuilder: (context, _, size, index) {
+              final ref = _bcvPageZero.advancedBy(chapters: index, bible: _bible);
+              if (ref == null) return null;
+              return BlocBuilder<ViewDataBloc, ViewData>(
+                buildWhen: (before, after) =>
+                    (before as ChapterViewData).bibleId != (after as ChapterViewData).bibleId,
+                builder: (context, viewData) {
+                  if (viewData is ChapterViewData) {
+                    final bible = VolumesRepository.shared.bibleWithId(viewData.bibleId);
+                    final ref = _bcvPageZero.advancedBy(chapters: index, bible: bible);
+                    if (ref == null) return Container();
+                    tec.dmPrint('page builder: ${ref.toString()}');
+                    return _BibleChapterView(
+                        viewUid: widget.state.uid, size: size, bible: bible, ref: ref);
+                  } else {
+                    throw UnsupportedError('_PageableBibleView must use ChapterViewData');
+                  }
+                },
+              );
+            },
+            onPageChanged: (context, _, page) async {
+              tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
+              final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
+              if (bcv != null) {
+                final viewData = ChapterViewData(_bible.id, bcv, page);
+                tec.dmPrint('_PageableBibleView updating with new data: $viewData');
+                context.bloc<ViewDataBloc>().update(viewData);
+              }
+            },
           ),
-        ),
-        body: PageableView(
-          state: widget.state,
-          size: widget.size,
-          controllerBuilder: () {
-            _pageController = TecPageController(initialPage: 0);
-            return _pageController;
-          },
-          pageBuilder: (context, _, size, index) {
-            final ref = _bcvPageZero.advancedBy(chapters: index, bible: _bible);
-            if (ref == null) return null;
-            return BlocBuilder<ViewDataBloc, ViewData>(
-              buildWhen: (before, after) =>
-                  (before as ChapterViewData).bibleId != (after as ChapterViewData).bibleId,
-              builder: (context, viewData) {
-                if (viewData is ChapterViewData) {
-                  final bible = VolumesRepository.shared.bibleWithId(viewData.bibleId);
-                  final ref = _bcvPageZero.advancedBy(chapters: index, bible: bible);
-                  if (ref == null) return Container();
-                  tec.dmPrint('page builder: ${ref.toString()}');
-                  return _BibleChapterView(
-                      viewUid: widget.state.uid, size: size, bible: bible, ref: ref);
-                } else {
-                  throw UnsupportedError('_PageableBibleView must use ChapterViewData');
-                }
-              },
-            );
-          },
-          onPageChanged: (context, _, page) async {
-            tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
-            final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
-            if (bcv != null) {
-              final viewData = ChapterViewData(_bible.id, bcv, page);
-              tec.dmPrint('_PageableBibleView updating with new data: $viewData');
-              context.bloc<ViewDataBloc>().update(viewData);
-            }
-          },
-        ),
-      ),
-    );
+        ));
   }
 
   void _onUpdate(

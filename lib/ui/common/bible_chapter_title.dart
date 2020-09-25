@@ -1,3 +1,6 @@
+import 'package:bible/blocs/selection/selection_bloc.dart';
+import 'package:bible/blocs/view_manager/view_manager_bloc.dart';
+import 'package:bible/ui/sheet/selection_sheet_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -126,14 +129,52 @@ class BibleChapterTitle extends StatelessWidget {
     TecAutoScroll.stopAutoscroll();
     final volumeTypeName = volumeType == VolumeType.bible
         ? 'Bible'
-        : volumeType == VolumeType.studyContent
-            ? 'Study Content'
-            : 'Something';
+        : volumeType == VolumeType.studyContent ? 'Study Content' : 'Something';
     final bibleId = await selectVolume(context,
         title: 'Select $volumeTypeName',
         filter: VolumesFilter(volumeType: volumeType),
         selectedVolume: viewData.volumeId);
 
     onUpdate(context, bibleId, viewData.bcv, viewData);
+  }
+}
+
+class SelectionModeBibleChapterTitle extends StatelessWidget {
+  final int uid;
+  const SelectionModeBibleChapterTitle(this.uid);
+  @override
+  Widget build(BuildContext context) {
+    const minFontSize = 10.0;
+    final autosizeGroup = TecAutoSizeGroup();
+    final buttonStyle = Theme.of(context)
+        .textTheme
+        .headline6
+        .copyWith(color: Theme.of(context).textColor.withOpacity(0.5));
+
+    // ignore: close_sinks
+    final vmBloc = context.bloc<ViewManagerBloc>();
+
+    final ref = tec.as<Reference>(vmBloc.selectionObjectWithViewUid(uid));
+    return Row(children: [
+      Container(
+        padding: const EdgeInsets.all(0),
+        width: 32.0,
+        child: IconButton(
+            padding: const EdgeInsets.only(right: 8.0),
+            icon: const Icon(Icons.close),
+            tooltip: 'Search',
+            color: Theme.of(context).textColor.withOpacity(0.5),
+            onPressed: () => SelectionSheetModel.deselect(context)),
+      ),
+      Expanded(
+        child: TecAutoSizeText(
+          ref.label(),
+          minFontSize: minFontSize,
+          group: autosizeGroup,
+          maxLines: 1,
+          style: buttonStyle,
+        ),
+      ),
+    ]);
   }
 }

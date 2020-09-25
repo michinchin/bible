@@ -141,7 +141,7 @@ extension AppExtOnThemeData on ThemeData {
 /// Removes the eight pixel padding from the top and bottom of the default AppBar.
 ///
 class MinHeightAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final AppBar appBar;
+  final PreferredSizeWidget appBar;
 
   const MinHeightAppBar({Key key, this.appBar}) : super(key: key);
 
