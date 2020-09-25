@@ -27,11 +27,13 @@ class ViewManager {
     // await Navigator.of(context).maybePop();
     final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
     assert(vmBloc != null);
-    final position = vmBloc?.indexOfView(currentViewId);
+    var position = vmBloc?.indexOfView(currentViewId);
+    if (position != null && (!vmBloc.isFull || position < vmBloc.countOfVisibleViews - 1)) {
+      position += 1;
+    }
     final viewData =
         await _types[type]?.dataForNewView(context: context, currentViewId: currentViewId);
-    vmBloc?.add(ViewManagerEvent.add(
-        type: type, position: math.max(position, 1), data: viewData?.toString()));
+    vmBloc?.add(ViewManagerEvent.add(type: type, position: position, data: viewData?.toString()));
   }
 
   String menuTitleWith({String type, BuildContext context, ViewState state}) {
