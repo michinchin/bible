@@ -395,8 +395,13 @@ class __SearchResultCardState extends State<_SearchResultCard> {
 
   void _onShare() {
     if (_includeShareLink) {
-      TecShare.shareWithLink(
-          widget.res.shareText, Reference.fromHref(widget.res.searchResult.href));
+      final volume = widget.res.searchResult.verses[widget.res.currentVerseIndex].id;
+      var ref = Reference.fromHref(widget.res.searchResult.href, volume: volume);
+      final c = widget.res.contextMap[widget.res.currentVerseIndex];
+      if (c != null) {
+        ref = ref.copyWith(verse: c.initialVerse, endVerse: c.finalVerse);
+      }
+      TecShare.shareWithLink(widget.res.shareText, ref);
     } else {
       TecShare.share(widget.res.shareText);
     }
@@ -404,8 +409,13 @@ class __SearchResultCardState extends State<_SearchResultCard> {
 
   void _onCopy() {
     if (_includeShareLink) {
-      TecShare.copyWithLink(
-          context, widget.res.shareText, Reference.fromHref(widget.res.searchResult.href));
+      final volume = widget.res.searchResult.verses[widget.res.currentVerseIndex].id;
+      var ref = Reference.fromHref(widget.res.searchResult.href, volume: volume);
+      final c = widget.res.contextMap[widget.res.currentVerseIndex];
+      if (c != null) {
+        ref = ref.copyWith(verse: c.initialVerse, endVerse: c.finalVerse);
+      }
+      TecShare.copyWithLink(context, widget.res.shareText, ref);
     } else {
       TecShare.copy(context, widget.res.shareText);
     }

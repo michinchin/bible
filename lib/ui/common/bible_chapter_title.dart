@@ -105,7 +105,7 @@ class BibleChapterTitle extends StatelessWidget {
   }
 
   Future<void> _onNavigate(BuildContext context, VolumeViewData viewData,
-      {int initialIndex = 1}) async {
+      {int initialIndex = 0}) async {
     TecAutoScroll.stopAutoscroll();
 
     final ref = await navigate(

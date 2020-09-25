@@ -10,7 +10,7 @@ import '../../models/search/autocomplete.dart';
 part 'nav_bloc.freezed.dart';
 
 enum NavViewState { bcvTabs, searchSuggestions, searchResults }
-enum NavTabs { translation, book, chapter, verse }
+enum NavTabs { book, chapter, verse }
 
 @freezed
 abstract class NavEvent with _$NavEvent {
@@ -82,8 +82,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
       final check = s.toLowerCase();
 
-      if (currState.tabIndex == NavTabs.book.index ||
-          currState.tabIndex == NavTabs.translation.index) {
+      if (currState.tabIndex == NavTabs.book.index) {
         // book tab
         final endsWithSpaceDigit = lastChar == ' ';
         final matches = <int, String>{};

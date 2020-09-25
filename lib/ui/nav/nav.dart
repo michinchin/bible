@@ -20,9 +20,9 @@ import 'search_and_history_view.dart';
 import 'search_filter.dart';
 import 'search_suggestions.dart';
 
-const tabColors = [Colors.red, Colors.blue, Colors.orange, Colors.green];
+const tabColors = [Colors.blue, Colors.orange, Colors.green];
 
-Future<Reference> navigate(BuildContext context, Reference ref, {int initialIndex = 1}) {
+Future<Reference> navigate(BuildContext context, Reference ref, {int initialIndex = 0}) {
   final isLargeScreen =
       MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 600;
   if (isLargeScreen) {
@@ -62,8 +62,8 @@ class Nav extends StatefulWidget {
   _NavState createState() => _NavState();
 }
 
-const maxTabsAvailable = 4;
-const minTabsAvailable = 3;
+const maxTabsAvailable = 3;
+const minTabsAvailable = 2;
 
 class _NavState extends State<Nav> with TickerProviderStateMixin {
   TabController _tabController;
@@ -92,7 +92,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
 
-    _searchResultsTabController = TabController(length: 2, initialIndex: 1, vsync: this)
+    _searchResultsTabController = TabController(length: 2, initialIndex: 0, vsync: this)
       ..addListener(() {
         if (_searchResultsTabController.index == 0) {
           if (searchBloc().state.selectionMode) {
@@ -201,7 +201,6 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             final navGridViewEnabled = items.boolForPrefItem(PrefItemId.navLayout);
             final nav3TapEnabled = items.boolForPrefItem(PrefItemId.nav3Tap);
             final navCanonical = items.boolForPrefItem(PrefItemId.navBookOrder);
-            final translationsAbbrev = items.boolForPrefItem(PrefItemId.translationsAbbreviated);
             return SafeArea(
               child: ListView(
                 shrinkWrap: true,
@@ -235,17 +234,6 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                     onTap: () {
                       prefsBloc().add(PrefItemEvent.update(
                           prefItem: prefsBloc().toggledPrefItem(PrefItemId.nav3Tap)));
-                    },
-                  ),
-                  ListTile(
-                    title: Text(translationsAbbrev
-                        ? 'Show full name for translations'
-                        : 'Show abbreviated translations'),
-                    onTap: () {
-                      navBloc().add(NavEvent.changeTabIndex(index: NavTabs.translation.index));
-                      prefsBloc().add(PrefItemEvent.update(
-                          prefItem:
-                              prefsBloc().toggledPrefItem(PrefItemId.translationsAbbreviated)));
                     },
                   ),
                 ],
@@ -315,10 +303,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
     List<Widget> appBarActions(BuildContext c, NavState s, SearchState ss) {
       if (s.navViewState == NavViewState.bcvTabs) {
-        if ((s.tabIndex != NavTabs.book.index &&
-                navBloc().initialTabIndex != NavTabs.translation.index) ||
-            (s.tabIndex >= NavTabs.book.index &&
-                navBloc().initialTabIndex == NavTabs.translation.index)) {
+        if (s.tabIndex != NavTabs.book.index) {
           return [
             FlatButton(
                 child: Text(

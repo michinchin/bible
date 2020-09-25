@@ -11,7 +11,6 @@ import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/labels.dart';
-import '../../models/language_utils.dart' as l;
 import '../../models/pref_item.dart';
 import '../common/common.dart';
 import '../common/tec_tab_indicator.dart';
@@ -46,7 +45,6 @@ class BCVTabView extends StatelessWidget {
                 labelColor: Theme.of(context).textColor.withOpacity(0.7),
                 unselectedLabelColor: Theme.of(context).textColor.withOpacity(0.7),
                 tabs: [
-                  const Tab(text: 'BIBLES'),
                   const Tab(text: 'BOOK'),
                   const Tab(text: 'CHAPTER'),
                   if (nav3TapEnabled) const Tab(text: 'VERSE')
@@ -54,7 +52,6 @@ class BCVTabView extends StatelessWidget {
               ),
               Expanded(
                 child: TabBarView(controller: tabController, children: [
-                  _TranslationView(),
                   _BookView(
                     navGridViewEnabled: navGridViewEnabled,
                     searchController: searchController,
@@ -69,104 +66,6 @@ class BCVTabView extends StatelessWidget {
             ],
           ),
         ));
-  }
-}
-
-class _TranslationView extends StatefulWidget {
-  @override
-  __TranslationViewState createState() => __TranslationViewState();
-}
-
-class __TranslationViewState extends State<_TranslationView> {
-  Future<List<Volume>> _futureTranslations;
-
-  @override
-  void initState() {
-    _futureTranslations = _loadTranslations();
-    super.initState();
-  }
-
-  Future<List<Volume>> _loadTranslations() async {
-    final bibleIds = VolumesRepository.shared.volumeIdsWithType(VolumeType.bible);
-    final volumes = VolumesRepository.shared.volumesWithIds(bibleIds);
-    final availableVolumes = <Volume>[];
-
-    for (final v in volumes.values) {
-      if (v.onSale || await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(v.id)) {
-        availableVolumes.add(v);
-      }
-    }
-
-    return availableVolumes;
-  }
-
-  Map<String, List<Volume>> mapByLanguage(List<Volume> volumes) {
-    final map = <String, List<Volume>>{};
-
-    for (final volume in volumes) {
-      map[volume.language] = map[volume.language] ?? []
-        ..add(volume);
-    }
-    return map;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final textColor =
-        isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
-    final ref = context.bloc<NavBloc>().state.ref;
-    final translationsAbbrev =
-        context.bloc<PrefItemsBloc>().itemBool(PrefItemId.translationsAbbreviated);
-
-    void onTap(int id) {
-      // ignore: close_sinks
-      final navBloc = context.bloc<NavBloc>()..add(NavEvent.setRef(ref: ref.copyWith(volume: id)));
-      if (navBloc.initialTabIndex == NavTabs.translation.index) {
-        navBloc.add(const NavEvent.changeTabIndex(index: 1));
-      }
-    }
-
-    return FutureBuilder<List<Volume>>(
-        future: _futureTranslations,
-        builder: (context, snapshot) {
-          final translations = snapshot.data ?? <Volume>[];
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: LoadingIndicator());
-          }
-          final map = mapByLanguage(translations);
-          return ListView(shrinkWrap: true, children: [
-            for (final lang in map.keys) ...[
-              ListLabel(l.languageNameFromCode(lang)),
-              if (translationsAbbrev)
-                _DynamicGrid(
-                  children: [
-                    for (final t in map[lang]) ...[
-                      _PillButton(
-                        textColor: ref.volume == t.id ? tabColors[0] : textColor,
-                        onPressed: () => onTap(t.id),
-                        text: t.abbreviation.toLowerCase(),
-                      ),
-                    ]
-                  ],
-                )
-              else
-                for (final t in map[lang]) ...[
-                  const Divider(height: 1),
-                  ListTile(
-                    onTap: () => onTap(t.id),
-                    title: Text(
-                      t.name,
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        color: ref.volume == t.id ? tabColors[0] : textColor,
-                      ),
-                    ),
-                  )
-                ]
-            ]
-          ]);
-        });
   }
 }
 
@@ -194,7 +93,7 @@ class _ChapterView extends StatelessWidget {
         children: [
           for (var i = 1; i <= chapters; i++) ...[
             _PillButton(
-              textColor: ref.chapter == i ? tabColors[2] : textColor,
+              textColor: ref.chapter == i ? tabColors[NavTabs.chapter.index] : textColor,
               onPressed: () {
                 if (!nav3TapEnabled) {
                   Navigator.of(context).maybePop(ref.copyWith(chapter: i));
@@ -235,7 +134,7 @@ class _VerseView extends StatelessWidget {
               context.bloc<NavBloc>().add(NavEvent.setRef(ref: updatedRef));
               Navigator.of(context).maybePop(updatedRef);
             },
-            textColor: ref.verse == i ? tabColors[3] : textColor,
+            textColor: ref.verse == i ? tabColors[NavTabs.verse.index] : textColor,
             text: i.toString(),
           )
         ]
@@ -312,7 +211,7 @@ class _BookView extends StatelessWidget {
               _PillButton(
                 text: bookNames[book],
                 onPressed: () => onTap(book),
-                textColor: ref.book == book ? tabColors[1] : textColor,
+                textColor: ref.book == book ? tabColors[NavTabs.book.index] : textColor,
               ),
             ]
           ],
