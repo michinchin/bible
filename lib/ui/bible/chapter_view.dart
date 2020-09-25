@@ -21,13 +21,43 @@ import '../../models/app_settings.dart';
 import '../common/bible_chapter_title.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
+import '../library/library.dart';
 import '../misc/view_actions.dart';
 import 'chapter_view_model.dart';
 
-const bibleChapterType = 'BibleChapter';
+class ViewableBibleChapter extends Viewable {
+  ViewableBibleChapter(String typeName, IconData icon) : super(typeName, icon);
 
-Widget bibleBuilder(BuildContext context, ViewState state, Size size) {
-  return _PageableBibleView(state: state, size: size);
+  @override
+  Widget builder(BuildContext context, ViewState state, Size size) {
+    return _PageableBibleView(state: state, size: size);
+  }
+
+  @override
+  String menuTitle({BuildContext context, ViewState state}) {
+    return state?.uid == null
+        ? 'Bible'
+        : VolumeViewData.fromContext(context, state.uid).bookNameChapterAndAbbr;
+  }
+
+  @override
+  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) async {
+    final bibleId = await selectVolume(context,
+        title: 'Select Bible Translation',
+        filter: const VolumesFilter(
+          volumeType: VolumeType.bible,
+        ));
+    // tec.dmPrint('selected $bibleId');
+
+    if (bibleId != null) {
+      final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+      final previous = ChapterViewData.fromJson(vmBloc?.dataWithView(currentViewId));
+      assert(previous != null);
+      return ChapterViewData(bibleId, previous.bcv, previous.page);
+    }
+
+    return null;
+  }
 }
 
 class _PageableBibleView extends StatefulWidget {

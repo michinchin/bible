@@ -1,23 +1,17 @@
-import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../bible/chapter_view.dart';
 import '../common/common.dart';
-import '../library/library.dart';
 import '../menu/main_menu.dart';
-import '../note/notes_view.dart';
-import '../study/study_view.dart';
 
 const _menuWidth = 175.0;
 
@@ -101,44 +95,7 @@ class _MenuItems extends StatelessWidget {
           ..._generateOffScreenItems(context, state.uid)
         ],
         _titleDivider(context, 'Open New'),
-        //...generateAddMenuItems(context, state.uid),
-        _menuItemForType(bibleChapterType, context: context, viewUid: state.uid, onTap: () async {
-          final bibleId = await selectVolume(context,
-              title: 'Select Bible Translation',
-              filter: const VolumesFilter(
-                volumeType: VolumeType.bible,
-              ));
-          tec.dmPrint('selected $bibleId');
-
-          if (bibleId != null) {
-            final previous = ChapterViewData.fromJson(vmBloc.dataWithView(state.uid));
-            if (previous != null) {
-              final current = ChapterViewData(bibleId, previous.bcv, previous.page);
-              vmBloc?.add(ViewManagerEvent.add(type: bibleChapterType, data: current.toString()));
-            }
-          }
-
-          await Navigator.of(context).maybePop();
-        }),
-        _menuItemForType(studyViewType, context: context, viewUid: state.uid, onTap: () async {
-          final volumeId = await selectVolume(context,
-              title: 'Select Study Content',
-              filter: const VolumesFilter(
-                volumeType: VolumeType.studyContent,
-              ));
-          tec.dmPrint('selected $volumeId');
-
-          if (volumeId != null) {
-            final previous = VolumeViewData.fromJson(vmBloc.dataWithView(state.uid));
-            if (previous != null) {
-              final current = VolumeViewData(volumeId, previous.bcv);
-              vmBloc?.add(ViewManagerEvent.add(type: studyViewType, data: current.toString()));
-            }
-          }
-
-          await Navigator.of(context).maybePop();
-        }),
-        _menuItemForType(notesViewType, context: context, viewUid: state.uid),
+        ...generateAddMenuItems(context, state.uid),
         if ((vmBloc?.state?.views?.length ?? 0) > 1) ...[
           const SizedBox(width: _menuWidth, child: Divider()),
           _menuItem(context, Icons.close, 'Close View', () {
@@ -157,21 +114,8 @@ class _MenuItems extends StatelessWidget {
     final items = <Widget>[];
     for (final view in vmBloc?.state?.views) {
       if (!vmBloc.isViewVisible(view.uid)) {
-        String title;
-        Map<String, dynamic> json;
-
-        final viewData = vmBloc.dataWithView(view.uid);
-        if (viewData != null) {
-          json = jsonDecode(viewData) as Map<String, dynamic>;
-        }
-
-        if (json != null && json.containsKey('title')) {
-          title = json['title'] as String;
-        } else {
-          title = vm.titleForType(view.type);
-        }
-
-        items.add(_menuItem(context, vm.iconForType(view.type), '$title', () {
+        final title = vm.menuTitleWith(context: context, state: view);
+        items.add(_menuItem(context, vm.iconWithType(view.type), '$title', () {
           if (vmBloc.state.maximizedViewUid == viewUid) {
             vmBloc?.add(ViewManagerEvent.maximize(view.uid));
             Navigator.of(context).maybePop();
@@ -179,7 +123,8 @@ class _MenuItems extends StatelessWidget {
             final thisViewPos = vmBloc.indexOfView(viewUid);
             final hiddenViewPos = vmBloc.indexOfView(view.uid);
             vmBloc?.add(ViewManagerEvent.move(
-                fromPosition: vmBloc.indexOfView(view.uid), toPosition: vmBloc.indexOfView(viewUid)));
+                fromPosition: vmBloc.indexOfView(view.uid),
+                toPosition: vmBloc.indexOfView(viewUid)));
             vmBloc?.add(
                 ViewManagerEvent.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos));
             Navigator.of(context).maybePop();
@@ -191,39 +136,18 @@ class _MenuItems extends StatelessWidget {
   }
 
   Iterable<Widget> generateAddMenuItems(BuildContext context, int viewUid) {
-    // ignore: close_sinks
+    assert(context != null && viewUid != null);
     final vm = ViewManager.shared;
     return vm.types.map<Widget>((type) {
-      final title = vm.titleForType(type);
-      if (title == null) {
-        // null titles are views that cannot be created from the menu
-        return Container();
-      }
-      return _menuItemForType(type, context: context, viewUid: viewUid);
+      final title = vm.menuTitleWith(type: type);
+      // Types that cannot be created from the menu return `null` for the menu title.
+      if (title == null) return Container(width: _menuWidth);
+      return _menuItem(context, vm.iconWithType(type), '$title', () async {
+        tec.dmPrint('Adding new view of type $type.');
+        await vm.onAddView(context, type, currentViewId: viewUid);
+        await Navigator.of(context).maybePop();
+      });
     });
-  }
-
-  Widget _menuItemForType(
-    String type, {
-    @required BuildContext context,
-    @required int viewUid,
-    void Function() onTap,
-  }) {
-    assert(tec.isNotNullOrEmpty(type) && context != null && viewUid != null);
-    final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-    final vm = ViewManager.shared;
-    return _menuItem(
-        context,
-        vm.iconForType(type),
-        '${vm.titleForType(type)}',
-        onTap ??
-            () {
-              Navigator.of(context).maybePop();
-              final position = vmBloc?.indexOfView(viewUid) ?? -1;
-              vmBloc?.add(ViewManagerEvent.add(
-                  type: type,
-                  position: position == -1 ? null : position + 1));
-            });
   }
 }
 

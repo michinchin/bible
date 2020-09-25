@@ -35,6 +35,13 @@ const _appTitle = 'Tecarta Bible';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  ViewManagerState.defaultViewType = 'BibleChapter';
+  ViewManager.shared
+    ..register(ViewableBibleChapter('BibleChapter', FeatherIcons.book))
+    ..register(ViewableStudyContent('StudyView', FeatherIcons.bookOpen))
+    ..register(ViewableNotes('NotesView', FeatherIcons.edit))
+    ..register(ViewableMarginNote(marginNoteViewType, TecIcons.marginNoteOutline));
+
   final stopwatch = Stopwatch()..start();
 
   if (!kIsWeb) {
@@ -62,27 +69,12 @@ Future<void> main() async {
     tua.UserItemType.bookmark,
   ]);
 
-  _registerViewTypes();
-
   InAppPurchases.init();
 
   tec.dmPrint('Main initialization took ${stopwatch.elapsed}');
   stopwatch.stop();
 
   runApp(App());
-}
-
-///
-/// Registers the view types used in the app.
-///
-void _registerViewTypes() {
-  ViewManagerState.setDefaultViewType(bibleChapterType);
-  ViewManager.shared
-    ..register(bibleChapterType, title: 'Bible', builder: bibleBuilder, icon: FeatherIcons.book)
-    ..register(studyViewType, title: 'Study', builder: studyBuilder, icon: FeatherIcons.bookOpen)
-    ..register(notesViewType, title: 'Note', builder: notesBuilder, icon: FeatherIcons.edit)
-    ..register(marginNoteViewType,
-        title: null, builder: marginNoteBuilder, icon: TecIcons.marginNoteOutline);
 }
 
 ///

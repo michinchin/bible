@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
@@ -6,12 +7,40 @@ import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../common/bible_chapter_title.dart';
 import '../common/common.dart';
+import '../library/library.dart';
 import '../misc/view_actions.dart';
 
-const studyViewType = 'StudyView';
+class ViewableStudyContent extends Viewable {
+  ViewableStudyContent(String typeName, IconData icon) : super(typeName, icon);
 
-Widget studyBuilder(BuildContext context, ViewState state, Size size) {
-  return _StudyView(state: state, size: size);
+  @override
+  Widget builder(BuildContext context, ViewState state, Size size) {
+    return _StudyView(state: state, size: size);
+  }
+
+  @override
+  String menuTitle({BuildContext context, ViewState state}) {
+    return state?.uid == null
+        ? 'Study'
+        : VolumeViewData.fromContext(context, state.uid).bookNameChapterAndAbbr;
+  }
+
+  @override
+  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) async {
+    final volumeId = await selectVolume(context,
+        title: 'Select Study Content',
+        filter: const VolumesFilter(volumeType: VolumeType.studyContent));
+    // tec.dmPrint('selected $bibleId');
+
+    if (volumeId != null) {
+      final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+      final previous = VolumeViewData.fromJson(vmBloc?.dataWithView(currentViewId));
+      assert(previous != null);
+      return VolumeViewData(volumeId, previous.bcv);
+    }
+
+    return null;
+  }
 }
 
 class _StudyView extends StatelessWidget {

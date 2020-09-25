@@ -20,8 +20,19 @@ import 'tec_image_delegate.dart';
 
 const marginNoteViewType = 'MarginNoteView';
 
-Widget marginNoteBuilder(BuildContext context, ViewState state, Size size) =>
-    _MarginNoteView(state: state, size: size);
+class ViewableMarginNote extends Viewable {
+  ViewableMarginNote(String typeName, IconData icon) : super(typeName, icon);
+
+  @override
+  Widget builder(BuildContext context, ViewState state, Size size) =>
+      _MarginNoteView(state: state, size: size);
+
+  @override
+  String menuTitle({BuildContext context, ViewState state}) => null;
+
+  @override
+  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) => Future.value(null);
+}
 
 class _MarginNoteView extends StatefulWidget {
   final ViewState state;

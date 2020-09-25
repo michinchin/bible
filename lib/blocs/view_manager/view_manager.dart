@@ -3,36 +3,42 @@ part of 'view_manager_bloc.dart';
 ///
 /// Manages view types.
 ///
-/// Use the [register] function to register a view type. For example:
-///
-/// ```dart
-/// register('MyType', builder: (context, state, size) => Container());
-/// ```
+/// Use the [register] function to register a [Viewable] class.
 ///
 class ViewManager {
   static final ViewManager shared = ViewManager();
 
-  final _types = <String, _ViewTypeAPI>{};
+  final _types = <String, Viewable>{};
 
   ///
   /// Registers a new view type.
   ///
-  void register(
-    String key, {
-    @required String title,
-    @required BuilderWithViewState builder,
-    IconData icon,
-  }) {
-    assert(tec.isNotNullOrEmpty(key) && builder != null);
-    assert(!_types.containsKey(key));
-    _types[key] = _ViewTypeAPI(title, builder, icon);
+  void register(Viewable viewable) {
+    assert(tec.isNotNullOrEmpty(viewable?.typeName));
+    assert(!_types.containsKey(viewable?.typeName));
+    _types[viewable?.typeName] = viewable;
   }
 
   List<String> get types => _types.keys.toList();
 
-  IconData iconForType(String type) => _types[type]?.icon;
+  IconData iconWithType(String type) => _types[type]?.icon;
 
-  String titleForType(String type) => _types[type]?.title;
+  Future<void> onAddView(BuildContext context, String type, {int currentViewId}) async {
+    // await Navigator.of(context).maybePop();
+    final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+    assert(vmBloc != null);
+    final position = vmBloc?.indexOfView(currentViewId);
+    final viewData =
+        await _types[type]?.dataForNewView(context: context, currentViewId: currentViewId);
+    vmBloc?.add(ViewManagerEvent.add(
+        type: type, position: math.max(position, 1), data: viewData?.toString()));
+  }
+
+  String menuTitleWith({String type, BuildContext context, ViewState state}) {
+    assert(tec.isNotNullOrEmpty(type) || (tec.isNotNullOrEmpty(state?.type) && context != null));
+    final viewType = type ?? state?.type;
+    return _types[viewType]?.menuTitle?.call(context: context, state: state);
+  }
 
   Widget _buildScaffold(BuildContext context, ViewState state, Size size) =>
       (_types[state.type]?.builder ?? _defaultScaffoldBuilder)(context, state, size);
@@ -40,43 +46,46 @@ class ViewManager {
   Widget _buildViewBody(BuildContext context, ViewState state, Size size) =>
       _defaultBodyBuilder(context, state, size);
 
-  Widget _buildViewTitle(BuildContext context, ViewState state, Size size) =>
-      _defaultTitleBuilder(context, state, size);
-
-  Widget _defaultTitleBuilder(BuildContext context, ViewState state, Size size) =>
-      Text(_types[state.type]?.title ?? state.uid.toString());
-
   List<Widget> _buildViewActions(BuildContext context, ViewState state, Size size) =>
       _defaultActionsBuilder(context, state, size);
 }
 
 ///
-/// Signature of a function that creates a widget for a given view state.
+/// Viewable
 ///
-typedef BuilderWithViewState = Widget Function(BuildContext context, ViewState state, Size size);
+abstract class Viewable {
+  final String typeName;
+  final IconData icon;
 
-///
-/// Signature of a function that creates a widget for a given view state and index.
-///
-typedef IndexedBuilderWithViewState = Widget Function(
-    BuildContext context, ViewState state, Size size, int index);
+  Viewable(this.typeName, this.icon);
+
+  ///
+  /// Builds and returns the [Scaffold] for the view.
+  ///
+  Widget builder(BuildContext context, ViewState state, Size size);
+
+  ///
+  /// Returns the menu title for the view. If [context] and [state] are null, returns
+  /// the title that should be used for creating new views of this type.
+  ///
+  String menuTitle({BuildContext context, ViewState state});
+
+  ///
+  /// Returns the view data for new views of this type. Can return `null` to just
+  /// use defaults. If [context] and [currentViewId] are not null, [currentViewId]
+  /// is the id of the view the 'Add <this-type>' menu was selected in.
+  ///
+  Future<ViewData> dataForNewView({BuildContext context, int currentViewId});
+}
 
 //
 // PRIVATE STUFF
 //
 
-class _ViewTypeAPI {
-  final String title;
-  final BuilderWithViewState builder;
-  final IconData icon;
-
-  const _ViewTypeAPI(this.title, this.builder, this.icon);
-}
-
 Widget _defaultScaffoldBuilder(BuildContext context, ViewState state, Size size) => Scaffold(
       appBar: MinHeightAppBar(
         appBar: AppBar(
-          title: ViewManager.shared._buildViewTitle(context, state, size),
+          title: Text(ViewManager.shared.menuTitleWith(context: context, state: state)),
           // leading: widget.state.viewIndex > 0
           //     ? null
           //     : IconButton(
@@ -127,11 +136,12 @@ Future<void> _showMoreMenu(BuildContext context, ViewState state, Size size) {
 Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
   final vm = ViewManager.shared;
   return vm.types.map<Widget>(
-    (type) => _menuItem(context, Icons.add, 'Add ${vm.titleForType(type)}', () {
+    (type) =>
+        _menuItem(context, Icons.add, 'Add ${vm.menuTitleWith(context: context, type: type)}', () {
       Navigator.of(context).maybePop();
-      final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-      final position = bloc?.indexOfView(viewUid) ?? -1;
-      bloc?.add(ViewManagerEvent.add(type: type, position: position == -1 ? null : position + 1));
+      final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+      final position = vmBloc?.indexOfView(viewUid) ?? -1;
+      vmBloc?.add(ViewManagerEvent.add(type: type, position: position == -1 ? null : position + 1));
     }),
   );
 }
@@ -149,10 +159,7 @@ Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback
         else
           Icon(icon, color: Theme.of(context).textColor, size: iconSize),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(color: textColor),
-        ),
+        Text(title, style: TextStyle(color: textColor)),
       ],
     ),
     borderRadius: null,
@@ -172,12 +179,12 @@ IconData _moreIcon(BuildContext context) {
 
 // List<Widget> _testActionsForAdjustingSize(
 //     BuildContext context, ViewState state, Size size) {
-//   final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+//   final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
 //   return <Widget>[
 //     IconButton(
 //       icon: const Icon(Icons.border_outer),
 //       onPressed: () {
-//         bloc?
+//         vmBloc?
 //           ..add(ViewManagerEvent.setWidth(position: widget.state.viewIndex, width: null))
 //           ..add(ViewManagerEvent.setHeight(position: widget.state.viewIndex, height: null));
 //       },
@@ -190,7 +197,7 @@ IconData _moreIcon(BuildContext context) {
 //                 ._minWidthForType(widget.state.viewState.type, widget.state.parentConstraints);
 //         final event =
 //             ViewManagerEvent.setWidth(position: widget.state.viewIndex, width: idealWidth + 20.0);
-//         bloc?.add(event);
+//         vmBloc?.add(event);
 //       },
 //     ),
 //     IconButton(
@@ -201,7 +208,7 @@ IconData _moreIcon(BuildContext context) {
 //                 ._minHeightForType(widget.state.viewState.type, widget.state.parentConstraints);
 //         final event = ViewManagerEvent.setHeight(
 //             position: widget.state.viewIndex, height: idealHeight + 20.0);
-//         bloc?.add(event);
+//         vmBloc?.add(event);
 //       },
 //     ),
 //   ];

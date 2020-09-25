@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
+import '../view_manager/view_manager_bloc.dart';
 import 'view_data.dart';
 
 export 'view_data.dart';
@@ -21,9 +24,21 @@ class VolumeViewData extends ViewData {
       : assert(volumeId > 0 && bcv != null),
         super();
 
+  factory VolumeViewData.fromContext(BuildContext context, int viewUid) {
+    return VolumeViewData.fromJson(context.bloc<ViewManagerBloc>()?.dataWithView(viewUid));
+  }
+
   String get bookNameAndChapter =>
       (VolumesRepository.shared.bibleWithId(volumeId) ?? VolumesRepository.shared.bibleWithId(9))
           .titleWithBookAndChapter(bcv.book, bcv.chapter);
+
+  String get bookNameChapterAndAbbr {
+    final volume = VolumesRepository.shared.volumeWithId(volumeId);
+    assert(volume != null);
+    final bible = volume is Bible ? volume : VolumesRepository.shared.bibleWithId(9);
+    assert(bible != null && (volume.type != VolumeType.bible || identical(volume, bible)));
+    return '${bible.titleWithBookAndChapter(bcv.book, bcv.chapter)}, ${volume.abbreviation}';
+  }
 
   @override
   List<Object> get props => super.props..addAll([volumeId, bcv]);
@@ -57,6 +72,10 @@ class ChapterViewData extends VolumeViewData {
   const ChapterViewData(int volumeId, BookChapterVerse bcv, this.page)
       : assert(page != null),
         super(volumeId, bcv);
+
+  factory ChapterViewData.fromContext(BuildContext context, int viewUid) {
+    return ChapterViewData.fromJson(context.bloc<ViewManagerBloc>()?.dataWithView(viewUid));
+  }
 
   int get bibleId => volumeId;
 

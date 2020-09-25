@@ -12,6 +12,9 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../ui/common/common.dart';
 import '../../ui/common/tec_page_view.dart';
 import '../selection/selection_bloc.dart';
+import '../view_data/view_data.dart';
+
+export '../view_data/view_data.dart';
 
 part 'view_manager.dart';
 part 'view_manager_bloc.freezed.dart';
@@ -42,7 +45,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       if (json != null) state = ViewManagerState.fromJson(json);
     }
     if (state == null || state.views.isEmpty) {
-      state = _defaultViewManagerState;
+      return _defaultState();
     }
     return state;
   }
@@ -273,7 +276,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     updateDataWithView(uid, null); // Clear its data, if any.
     final newViews = List.of(state.views) // shallow copy
       ..removeAt(position);
-    if (newViews.isEmpty) return _defaultViewManagerState;
+    if (newViews.isEmpty) return _defaultState();
     return ViewManagerState(
       newViews,
       state.maximizedViewUid == uid ? 0 : state.maximizedViewUid,
@@ -374,10 +377,11 @@ class ViewRect {
 ///
 /// ViewManagerState
 ///
-var _defaultViewType = 'BibleChapter';
 
 @freezed
 abstract class ViewManagerState with _$ViewManagerState {
+  static String defaultViewType;
+
   factory ViewManagerState(List<ViewState> views, int maximizedViewUid, int nextUid) = _Views;
 
   /// fromJson
@@ -386,16 +390,14 @@ abstract class ViewManagerState with _$ViewManagerState {
     try {
       state = _$ViewManagerStateFromJson(json);
     } catch (_) {}
-    return state ?? _defaultViewManagerState;
-  }
-
-  static void setDefaultViewType(String defaultViewType) {
-    _defaultViewType = defaultViewType;
+    return state ?? _defaultState();
   }
 }
 
-final _defaultViewManagerState =
-    ViewManagerState([ViewState(uid: 1, type: _defaultViewType)], 0, 2);
+ViewManagerState _defaultState() {
+  assert(tec.isNotNullOrEmpty(ViewManagerState.defaultViewType));
+  return ViewManagerState([ViewState(uid: 1, type: ViewManagerState.defaultViewType)], 0, 2);
+}
 
 extension ViewManagerExtOnState on ViewManagerState {}
 
@@ -418,6 +420,13 @@ class ViewManagerWidget extends StatelessWidget {
     );
   }
 }
+
+///
+/// Signature of a function that creates a widget for a given view state and index.
+///
+typedef IndexedBuilderWithViewState = Widget Function(
+    BuildContext context, ViewState state, Size size, int index);
+
 
 ///
 /// View that uses a [TecPageView] for paging.

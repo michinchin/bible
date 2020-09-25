@@ -8,17 +8,28 @@ import '../common/common.dart';
 import '../misc/view_actions.dart';
 import 'note_view.dart';
 
-const notesViewType = 'NotesView';
+class ViewableNotes extends Viewable {
+  ViewableNotes(String typeName, IconData icon) : super(typeName, icon);
 
-Widget notesBuilder(BuildContext context, ViewState state, Size size) => Scaffold(
+  @override
+  Widget builder(BuildContext context, ViewState state, Size size) {
+    return Scaffold(
       appBar: MinHeightAppBar(
         appBar: AppBar(
-          title: Text(ViewManager.shared.titleForType(notesViewType)),
+          title: const Text('Notes'),
           actions: defaultActionsBuilder(context, state, size),
         ),
       ),
       body: notesViewBuilder(context, state, size),
     );
+  }
+
+  @override
+  String menuTitle({BuildContext context, ViewState state}) => 'Notes';
+
+  @override
+  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) => Future.value(null);
+}
 
 Widget notesViewBuilder(BuildContext context, ViewState viewState, Size size) =>
     NotesView(viewState: viewState);

@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 import '../view_manager/view_manager_bloc.dart';
@@ -24,6 +26,10 @@ class ViewDataBloc extends Cubit<ViewData> {
 @immutable
 class ViewData extends Equatable {
   const ViewData();
+
+  factory ViewData.fromContext(BuildContext context, int viewUid) {
+    return ViewData.fromJson(context.bloc<ViewManagerBloc>()?.dataWithView(viewUid));
+  }
 
   @override
   List<Object> get props => [];

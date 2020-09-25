@@ -6,14 +6,29 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 import 'package:bible/blocs/view_manager/view_manager_bloc.dart';
 
+class ViewableTest extends Viewable {
+  ViewableTest(String typeName, IconData icon) : super(typeName, icon);
+
+  @override
+  Widget builder(BuildContext context, ViewState state, Size size) {
+    return Container();
+  }
+
+  @override
+  String menuTitle({BuildContext context, ViewState state}) => 'test';
+
+  @override
+  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) => Future.value(null);
+}
+
 void main() {
   group('ViewManagerBloc', () {
     tec.KeyValueStore kvStore;
     ViewManagerBloc bloc; // ignore: close_sinks
 
     setUpAll(() {
-      ViewManager.shared
-          .register('test', title: 'test', builder: (context, state, size) => Container());
+      ViewManagerState.defaultViewType = 'test';
+      ViewManager.shared.register(ViewableTest('test', null));
     });
 
     setUp(() {
@@ -53,7 +68,7 @@ void main() {
 // UTILITY FUNCTIONS
 //
 
-final bcv = ViewState(uid: 1, type: 'BibleChapter');
+final bcv = ViewState(uid: 1, type: 'test');
 
 ViewManagerEvent add(String data) => ViewManagerEvent.add(type: 'test', data: data);
 
