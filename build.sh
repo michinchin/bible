@@ -2,10 +2,60 @@
 VERSION=10.0
 HTDOCS=/Users/builder/htdocs
 
+
+function invalidate {
+    label=$(date +"%Y-%m-%d-%H:%M:%S")
+
+    batch='
+        {
+            "Paths": {
+                "Quantity": '1',
+                "Items": [ "/index.html" ]
+            },
+            "CallerReference": "'$label'"
+        }';
+
+    eval aws cloudfront create-invalidation --distribution-id E7OQ1EA5XKM4X --invalidation-batch "'"$batch"'"
+}
+
 flutter pub get
 flutter clean
 
-# sed -i '' "s/DEBUG-VERSION/$VERSION-$BUILD_NUMBER/g" lib/version.dart
+sed -i '' "s/DEBUG-VERSION/$VERSION-$BUILD_NUMBER/g" lib/version.dart
+
+if [ -e build ]; then
+    rm -rf build
+fi
+
+# web
+echo "building website..."
+# flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true
+flutter build web 
+
+sed -i '' "s/main.dart./main.dart.${BUILD_NUMBER}./g" build/web/index.html
+sed -i '' "s/flutter_service_worker./flutter_service_worker.${BUILD_NUMBER}./g" build/web/index.html
+sed -i '' "s/sourceMappingURL=main.dart./sourceMappingURL=main.dart.${BUILD_NUMBER}./g" build/web/main.dart.js
+
+mv build/web/main.dart.js build/web/main.dart.$BUILD_NUMBER.js
+mv build/web/main.dart.js.map build/web/main.dart.$BUILD_NUMBER.js.map
+mv build/web/flutter_service_worker.js build/web/flutter_service_worker.$BUILD_NUMBER.js
+
+pushd build/web
+
+for entry in *
+do
+   if [[ -d  $entry ]]; then
+      echo "copying $entry"
+      aws s3 cp --recursive --cache-control="max-age=2592000" --acl="public-read" "./$entry" "s3://tecarta-tb10-tecarta-com/$entry/"
+   elif [[ "$entry" == "index.html" ]]; then
+      aws s3 cp --cache-control="max-age=300" --acl="public-read" "./$entry" s3://tecarta-tb10-tecarta-com/
+      aws s3 cp --cache-control="max-age=300" --acl="public-read" "./$entry" s3://tecarta-tb10-tecarta-com/index-${BUILD_NUMBER}.html
+   else
+      aws s3 cp --cache-control="max-age=2592000" --acl="public-read" "./$entry" s3://tecarta-tb10-tecarta-com/
+   fi
+done
+
+popd
 
 # APK
 flutter build apk --release --build-name $VERSION --build-number $BUILD_NUMBER
