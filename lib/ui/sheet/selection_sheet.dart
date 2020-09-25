@@ -57,11 +57,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
   Widget build(BuildContext context) {
     Widget child() {
       if (widget.sheetSize == SheetSize.mini) {
-        return _MiniView(
-          onShowColorPicker: onShowColorPicker,
-          underlineMode: underlineMode,
-          onSwitchToUnderline: onSwitchToUnderline,
-        );
+        return _MiniView();
       } else if (widget.sheetSize == SheetSize.medium) {
         return _MediumFullSheetItems(
           isMediumView: true,
@@ -195,23 +191,6 @@ class __MediumFullSheetItemsState extends State<_MediumFullSheetItems> {
           ];
 
           final sheetButtons = [
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   children: [
-            //     Expanded(
-            //       child: SheetButton(
-            //         text: SelectionSheetModel.medButtons.keys.first,
-            //         icon: SelectionSheetModel.medButtons.values.first,
-            //         onPressed: () => SelectionSheetModel.buttonAction(
-            //             context, SelectionSheetModel.medButtons.keys.first),
-            //       ),
-            //     ),
-            //     const SizedBox(width: 10),
-            //     Expanded(
-            //       child: SelectionSheetModel.defineButton(context),
-            //     ),
-            //   ],
-            // ),
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -348,49 +327,10 @@ class __MediumFullSheetItemsState extends State<_MediumFullSheetItems> {
   }
 }
 
-class _MiniView extends StatefulWidget {
-  final bool underlineMode;
-
-  final VoidCallback onSwitchToUnderline;
-  final VoidCallback onShowColorPicker;
-
-  const _MiniView({
-    @required this.underlineMode,
-    @required this.onSwitchToUnderline,
-    @required this.onShowColorPicker,
-  });
-
-  @override
-  __MiniViewState createState() => __MiniViewState();
-}
-
-class __MiniViewState extends State<_MiniView> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void _onEditColor(int colorIndex) {
-    context.bloc<SheetManagerBloc>().add(const SheetEvent.changeSize(SheetSize.medium));
-  }
-
+class _MiniView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final smallScreen = MediaQuery.of(context).size.width < 350;
-    final miniViewColors =
-        smallScreen ? SelectionSheetModel.defaultColors.take(2) : SelectionSheetModel.defaultColors;
-
     final miniChildren = [
-      // SelectionSheetModel.noColorButton(context),
-
-      SelectionSheetModel.squareUnderlineButton(
-          underlineMode: widget.underlineMode, onSwitchToUnderline: widget.onSwitchToUnderline),
-      // for (final color in miniViewColors) ...[
-      //   _ColorPickerButton(
-      //     isForUnderline: underlineMode,
-      //     color: color,
-      //   ),
-      // ],
       for (final button in SelectionSheetModel.miniButtons.keys) ...[
         SquareSheetButton(
           icon: SelectionSheetModel.miniButtons[button],
@@ -399,51 +339,18 @@ class __MiniViewState extends State<_MiniView> {
         ),
       ],
     ];
-    return BlocBuilder<PrefItemsBloc, PrefItems>(
-        cubit: context.bloc<PrefItemsBloc>(),
-        builder: (context, state) {
-          final prefItems = state?.items?.where((i) => i.book >= 1 && i.book <= 4)?.toList() ?? [];
-          final customColors = [for (final color in prefItems) Color(color.verse)];
-          return Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      for (final child in miniChildren)
-                        Expanded(
-                          child: child,
-                        ),
-                    ]),
-                const SizedBox(height: 5),
-                Row(children: [
-                  for (final color in SelectionSheetModel.defaultColors) ...[
-                    Expanded(
-                      child: _ColorPickerButton(
-                        isForUnderline: widget.underlineMode,
-                        color: color,
-                      ),
-                    ),
-                  ],
-                  if (tec.isNotNullOrEmpty(customColors))
-                    for (var i = 0; i < 4; i++) ...[
-                      Expanded(
-                        child: _ColorPickerButton(
-                          isForUnderline: widget.underlineMode,
-                          editMode: customColors[i] == unsetHighlightColor,
-                          onEdit: () => _onEditColor(i),
-                          color: customColors[i],
-                        ),
-                      ),
-                    ],
-                ]),
-              ],
-            ),
-          );
-        });
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            for (final child in miniChildren)
+              Expanded(
+                child: child,
+              ),
+          ]),
+    );
   }
 }
 

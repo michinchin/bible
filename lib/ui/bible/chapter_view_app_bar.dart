@@ -38,14 +38,14 @@ class ChapterViewAppBar extends StatelessWidget implements PreferredSizeWidget {
                     iconSize: 20,
                     onPressed: () {},
                   ),
-                  IconButton(
-                      icon: const Icon(FeatherIcons.copy),
-                      iconSize: 20,
-                      onPressed: () => SelectionSheetModel.copy(context, viewState.uid)),
-                  IconButton(
-                      icon: const Icon(FeatherIcons.share),
-                      iconSize: 20,
-                      onPressed: () => SelectionSheetModel.share(context, viewState.uid)),
+                  // IconButton(
+                  //     icon: const Icon(FeatherIcons.copy),
+                  //     iconSize: 20,
+                  //     onPressed: () => SelectionSheetModel.copy(context)),
+                  // IconButton(
+                  //     icon: const Icon(FeatherIcons.share),
+                  //     iconSize: 20,
+                  //     onPressed: () => SelectionSheetModel.share(context)),
                 ],
               );
             }
