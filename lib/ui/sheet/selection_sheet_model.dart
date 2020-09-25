@@ -1,3 +1,4 @@
+import 'package:bible/ui/sheet/selection_sheet.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,31 +24,35 @@ import 'snap_sheet.dart';
 //ignore: avoid_classes_with_only_static_members
 class SelectionSheetModel {
   static const buttons = <String, IconData>{
-    'Learn': Icons.lightbulb_outline,
-    'Explore': FeatherIcons.compass,
+    // 'Explore': FeatherIcons.compass,
     'Compare': Icons.compare_arrows,
-    'Define': FeatherIcons.bookOpen,
+    // 'Define': FeatherIcons.bookOpen,
+    'Note': FeatherIcons.edit,
+    'Learn': Icons.lightbulb_outline
     // 'Copy': FeatherIcons.copy,
     // 'Note': FeatherIcons.edit2,
-    'Audio': FeatherIcons.play,
-    'Save': FeatherIcons.bookmark,
-    'Print': FeatherIcons.printer,
-    'Text': FeatherIcons.messageCircle,
-    'Email': FeatherIcons.mail,
-    'Facebook': FeatherIcons.facebook,
-    'Twitter': FeatherIcons.twitter
+    // 'Audio': FeatherIcons.play,
+    // 'Save': FeatherIcons.bookmark,
+    // 'Print': FeatherIcons.printer,
+    // 'Text': FeatherIcons.messageCircle,
+    // 'Email': FeatherIcons.mail,
+    // 'Facebook': FeatherIcons.facebook,
+    // 'Twitter': FeatherIcons.twitter
   };
 
-  static const medButtons = <String, IconData>{
+  static const miniButtons = <String, IconData>{
+    'No Color': Icons.format_color_reset,
     'Compare': Icons.compare_arrows,
-    'Define': FeatherIcons.bookOpen,
+    'Note': FeatherIcons.edit2,
+    'Learn': Icons.lightbulb_outline
   };
 
-  static const keyButtons = <String, IconData>{
-    'Note': FeatherIcons.edit,
-    'Share': FeatherIcons.share,
-    // 'Learn': Icons.lightbulb_outline,
-    // 'Compare': FeatherIcons.compass
+  static const buttonSubtitles = <String, String>{
+    'Web Search': 'Search the web for more insight on scriptures',
+    'Define': 'Find word definitions on google',
+    'Compare': 'View other translations',
+    'Note': 'Make margin note',
+    'Learn': 'View helpful study materials'
   };
 
   static final defaultColors = <Color>[
@@ -57,25 +62,28 @@ class SelectionSheetModel {
     Color(defaultColorIntForIndex(4)),
   ];
 
-  static Widget underlineButton(
+  static Widget squareUnderlineButton(
           {@required bool underlineMode, @required VoidCallback onSwitchToUnderline}) =>
-      GreyCircleButton(
+      SquareSheetButton(
         icon: underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
         onPressed: onSwitchToUnderline,
+        title: underlineMode ? 'Highlight' : 'Underline',
+      );
+  static Widget circleUnderlineButton(BuildContext context,
+          {@required bool underlineMode, @required VoidCallback onSwitchToUnderline}) =>
+      CircleButton(
+        icon: Icon(
+          underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
+          size: 20,
+          color: Colors.grey,
+        ),
+        onPressed: onSwitchToUnderline,
+        color: Colors.transparent,
+        borderColor: Colors.grey.withOpacity(0.5),
       );
 
-  static Widget noColorButton(BuildContext context) => GreyCircleButton(
-        icon: Icons.format_color_reset,
-        onPressed: () => context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
-              type: HighlightType.clear,
-            )),
-      );
-
-  static Widget deselectButton(BuildContext context) => GreyCircleButton(
-      icon: Icons.clear,
-      onPressed: () => context
-          .bloc<SelectionStyleBloc>()
-          ?.add(const SelectionStyle(type: HighlightType.clear, isTrialMode: true)));
+  static void noColor(BuildContext context) =>
+      context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(type: HighlightType.clear));
 
   static Widget defineButton(BuildContext c) {
     final refs = _grabRefs(c);
@@ -95,41 +103,87 @@ class SelectionSheetModel {
         }
       }
     }
-    return SheetButton(text: title, icon: icon, onPressed: onPressed);
+    return ListTile(
+      dense: true,
+      title: Text(title),
+      leading: Icon(icon),
+      onTap: onPressed,
+      subtitle: Text(SelectionSheetModel.buttonSubtitles[title]),
+    );
   }
 
   static void buttonAction(BuildContext context, String type) {
     switch (type) {
-      case 'Share':
-        share(context);
-        break;
       case 'Define':
         defineWebSearch(context);
         break;
       case 'Compare':
         compare(context);
         break;
+      case 'No Color':
+        noColor(context);
+        break;
+      case 'Deselect':
+        deselect(context);
+        break;
+      case 'Learn':
+        break;
       default:
         break;
     }
   }
 
-  static Future<void> share(BuildContext c) async {
+  static void deselect(BuildContext c) => c
+      .bloc<SelectionStyleBloc>()
+      ?.add(const SelectionStyle(type: HighlightType.clear, isTrialMode: true));
+
+  static Future<void> copy(BuildContext c, int uid) async {
+    final copyWithLink = c.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    if (copyWithLink) {
+      final text = await tecShowProgressDlg<String>(
+        context: c,
+        title: 'Copying to clipboard...',
+        future: _shareText(c, uid),
+      );
+      TecShare.copy(c, text.value);
+    } else {
+      TecShare.copy(c, await _shareText(c, uid));
+    }
+  }
+
+  static Future<String> _shareText(BuildContext c, int uid) async {
     final bloc = c.bloc<ViewManagerBloc>(); //ignore: close_sinks
     final views = bloc.visibleViewsWithSelections.toList();
-    final refs = <Reference>[];
-    for (final v in views) {
-      refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
+    final verses = <String, ChapterVerses>{};
+    final buffer = StringBuffer('');
+
+    final ref = tec.as<Reference>(bloc.selectionObjectWithViewUid(uid));
+    final key = '${ref.book} ${ref.chapter}';
+    if (verses[key] == null) {
+      verses[key] = await ChapterVerses.fetch(refForChapter: ref);
     }
-    final ref = refs[0];
-    final verses = await ChapterVerses.fetch(refForChapter: ref);
-    final shareWithLink = c.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
-    final verse = ChapterVerses.formatForShare(refs, verses.data);
-    if (shareWithLink) {
-      await tecShowProgressDlg<void>(
-          context: c, title: 'Preparing to share...', future: TecShare.shareWithLink(verse, ref));
+    final copyWithLink = c.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    final verse = ChapterVerses.formatForShare([ref], verses[key].data);
+    buffer.write(verse);
+    if (copyWithLink) {
+      buffer..writeln(await TecShare.shareLink(ref));
+    }
+
+    tec.dmPrint('SHARE TEXT: ${buffer.toString()}');
+    return buffer.toString();
+  }
+
+  static Future<void> share(BuildContext c, int uid) async {
+    final copyWithLink = c.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    if (copyWithLink) {
+      final text = await tecShowProgressDlg<String>(
+        context: c,
+        title: 'Preparing to share...',
+        future: _shareText(c, uid),
+      );
+      TecShare.share(text.value);
     } else {
-      TecShare.share(verse);
+      TecShare.share(await _shareText(c, uid));
     }
   }
 

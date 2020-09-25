@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:bible/blocs/highlights/highlights_bloc.dart';
+import 'package:bible/blocs/selection/selection_bloc.dart';
+import 'package:bible/ui/common/bible_chapter_title.dart';
+import 'package:bible/ui/sheet/selection_sheet_model.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +24,59 @@ import '../note/notes_view.dart';
 import '../study/study_view.dart';
 
 const _menuWidth = 175.0;
+
+class ChapterViewAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final ViewState viewState;
+  final Size size;
+  final SelectionState selectionState;
+  final void Function(
+          BuildContext context, int newBibleId, BookChapterVerse newBcv, VolumeViewData viewData)
+      onUpdate;
+  const ChapterViewAppBar({Key key, this.viewState, this.size, this.selectionState, this.onUpdate})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SelectionInViewsCubit, Iterable<int>>(
+        cubit: context.bloc<SelectionInViewsCubit>(),
+        builder: (context, state) {
+          final visibleViewsWithSelections = state;
+          return BlocBuilder<SelectionBloc, SelectionState>(builder: (context, s) {
+            if (s.isTextSelected && visibleViewsWithSelections.contains(viewState.uid)) {
+              return AppBar(
+                centerTitle: false,
+                title: SelectionModeBibleChapterTitle(viewState.uid),
+                actions: [
+                  IconButton(
+                    icon: const Icon(FeatherIcons.play),
+                    iconSize: 20,
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                      icon: const Icon(FeatherIcons.copy),
+                      iconSize: 20,
+                      onPressed: () => SelectionSheetModel.copy(context, viewState.uid)),
+                  IconButton(
+                      icon: const Icon(FeatherIcons.share),
+                      iconSize: 20,
+                      onPressed: () => SelectionSheetModel.share(context, viewState.uid)),
+                ],
+              );
+            }
+
+            return AppBar(
+              automaticallyImplyLeading: false,
+              centerTitle: false,
+              title: BibleChapterTitle(volumeType: VolumeType.bible, onUpdate: onUpdate),
+              actions: defaultActionsBuilder(context, viewState, size),
+            );
+          });
+        });
+  }
+
+  @override
+  Size get preferredSize => AppBar().preferredSize;
+}
 
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   // ignore: close_sinks
@@ -179,7 +236,8 @@ class _MenuItems extends StatelessWidget {
             final thisViewPos = vmBloc.indexOfView(viewUid);
             final hiddenViewPos = vmBloc.indexOfView(view.uid);
             vmBloc?.add(ViewManagerEvent.move(
-                fromPosition: vmBloc.indexOfView(view.uid), toPosition: vmBloc.indexOfView(viewUid)));
+                fromPosition: vmBloc.indexOfView(view.uid),
+                toPosition: vmBloc.indexOfView(viewUid)));
             vmBloc?.add(
                 ViewManagerEvent.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos));
             Navigator.of(context).maybePop();
@@ -220,9 +278,8 @@ class _MenuItems extends StatelessWidget {
             () {
               Navigator.of(context).maybePop();
               final position = vmBloc?.indexOfView(viewUid) ?? -1;
-              vmBloc?.add(ViewManagerEvent.add(
-                  type: type,
-                  position: position == -1 ? null : position + 1));
+              vmBloc?.add(
+                  ViewManagerEvent.add(type: type, position: position == -1 ? null : position + 1));
             });
   }
 }
