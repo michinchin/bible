@@ -195,7 +195,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     for (final uid in List.of(_viewsWithSelections.keys)) {
       if (indexOfView(uid) == -1) _viewsWithSelections.remove(uid);
     }
-
+    context.bloc<SelectionInViewsCubit>().notifyChange(visibleViewsWithSelections);
     _updateSelectionBloc(context);
   }
 
@@ -352,6 +352,12 @@ abstract class ViewState with _$ViewState {
 
   /// fromJson
   factory ViewState.fromJson(Map<String, dynamic> json) => _$ViewStateFromJson(json);
+}
+
+class SelectionInViewsCubit extends Cubit<Iterable<int>> {
+  SelectionInViewsCubit() : super([]);
+
+  void notifyChange(Iterable<int> viewsWithSelections) => emit(viewsWithSelections);
 }
 
 ///

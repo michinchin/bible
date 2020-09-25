@@ -6,13 +6,14 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 class TecShare {
-  static Future<String> loadUrl(Reference ref) async {
+  static Future<String> shareLink(Reference ref) async {
     var shortUrl = '';
     final bookName = ref.label().split(' ')[0];
 
     final params = <String, dynamic>{
       'volume': '${ref.volume}',
-      'resid': '$bookName+${ref.book}:${ref.verse}',
+      'resid':
+          '$bookName+${ref.chapter}:${ref.verse == ref.endVerse ? '${ref.verse}' : '${ref.verse}-${ref.endVerse}'}',
     };
 
     final url =
@@ -34,8 +35,8 @@ class TecShare {
   static void share(String text) => Share.share(text);
 
   static Future<void> shareWithLink(String text, Reference ref) async =>
-      Share.share('$text${await loadUrl(ref)}');
+      Share.share('$text${await shareLink(ref)}');
 
   static Future<void> copyWithLink(BuildContext context, String text, Reference ref) async =>
-      copy(context, '$text${await loadUrl(ref)}');
+      copy(context, '$text${await shareLink(ref)}');
 }

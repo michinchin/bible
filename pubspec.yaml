@@ -101,7 +101,7 @@ dependencies:
     hosted:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
-    version: ^2.0.9
+    version: ^2.0.10
 
 # dependency_overrides:
   # tec_util:

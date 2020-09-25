@@ -295,49 +295,43 @@ class SheetButton extends StatelessWidget {
   }
 }
 
-class GreyCircleButton extends StatelessWidget {
+class SquareSheetButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
   final String title;
 
-  const GreyCircleButton({@required this.icon, @required this.onPressed, this.title});
+  const SquareSheetButton({@required this.icon, @required this.onPressed, this.title});
 
   @override
   Widget build(BuildContext context) {
-    Widget circleIcon([double radius]) => Container(
-        child: InkWell(
-            onTap: onPressed,
-            child: CircleAvatar(
-                radius: radius,
-                backgroundColor: Colors.transparent,
-                child: icon != null
-                    ? Icon(
-                        icon,
-                        color: Colors.grey,
-                        size: 20,
-                      )
-                    : null)),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.grey.withOpacity(0.2),
-            width: 5,
-          ),
-        ));
+    Widget squareIcon([double radius]) => InkWell(
+        onTap: onPressed,
+        child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Icon(
+              icon,
+              color: Colors.grey,
+              size: 15,
+            ),
+            decoration: ShapeDecoration(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    side: const BorderSide(color: Colors.grey)))));
     return (title != null)
-        ? Column(children: [
-            Expanded(flex: 2, child: circleIcon(20)),
-            Expanded(
-                child: TecText(
+        ? Column(mainAxisSize: MainAxisSize.min, children: [
+            squareIcon(15),
+            const SizedBox(height: 5),
+            TecText(
               title,
               autoSize: true,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).textColor.withOpacity(0.5),
-              ),
-            )),
+              textScaleFactor: 0.9,
+              style: Theme.of(context).textTheme.caption.copyWith(
+                    color: Theme.of(context).textColor.withOpacity(0.5),
+                  ),
+            ),
           ])
-        : circleIcon(15);
+        : squareIcon(10);
   }
 }
 

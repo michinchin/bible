@@ -8,11 +8,12 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/view_data/view_data.dart';
 import '../../blocs/view_data/volume_view_data.dart';
+import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/user_item_helper.dart';
 import '../library/library.dart';
 import '../nav/nav.dart';
+import '../sheet/selection_sheet_model.dart';
 import 'common.dart';
 
 class BibleChapterTitle extends StatelessWidget {
@@ -135,5 +136,45 @@ class BibleChapterTitle extends StatelessWidget {
         selectedVolume: viewData.volumeId);
 
     onUpdate(context, bibleId, viewData.bcv, viewData);
+  }
+}
+
+class SelectionModeBibleChapterTitle extends StatelessWidget {
+  final int uid;
+  const SelectionModeBibleChapterTitle(this.uid);
+  @override
+  Widget build(BuildContext context) {
+    const minFontSize = 10.0;
+    final autosizeGroup = TecAutoSizeGroup();
+    final buttonStyle = Theme.of(context)
+        .textTheme
+        .headline6
+        .copyWith(color: Theme.of(context).textColor.withOpacity(0.5));
+
+    // ignore: close_sinks
+    final vmBloc = context.bloc<ViewManagerBloc>();
+
+    final ref = tec.as<Reference>(vmBloc.selectionObjectWithViewUid(uid));
+    return Row(children: [
+      Container(
+        padding: const EdgeInsets.all(0),
+        width: 32.0,
+        child: IconButton(
+            padding: const EdgeInsets.only(right: 8.0),
+            icon: const Icon(Icons.close),
+            tooltip: 'Search',
+            color: Theme.of(context).textColor.withOpacity(0.5),
+            onPressed: () => SelectionSheetModel.deselect(context)),
+      ),
+      Expanded(
+        child: TecAutoSizeText(
+          ref.label(),
+          minFontSize: minFontSize,
+          group: autosizeGroup,
+          maxLines: 1,
+          style: buttonStyle,
+        ),
+      ),
+    ]);
   }
 }
