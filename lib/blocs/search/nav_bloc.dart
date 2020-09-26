@@ -1,7 +1,8 @@
-import 'package:async/async.dart';
+import 'package:bible/blocs/search/search_bloc.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
@@ -38,7 +39,6 @@ abstract class NavState with _$NavState {
 class NavBloc extends Bloc<NavEvent, NavState> {
   final Reference initialRef;
   final int initialTabIndex;
-  CancelableOperation<AutoComplete> autoCompleteOperation;
 
   NavBloc(this.initialRef, {this.initialTabIndex = 1})
       : super(NavState(
@@ -49,6 +49,25 @@ class NavBloc extends Bloc<NavEvent, NavState> {
           wordSuggestions: [],
           navViewState: NavViewState.bcvTabs,
         ));
+
+  @override
+  Stream<Transition<NavEvent, NavState>> transformEvents(Stream<NavEvent> events, transitionFn) {
+    final nonDebounceStream = events.where((event) {
+      return (event is! _OnSearchChange);
+    });
+
+    final debounceStream = events.where((event) {
+      return (event is _OnSearchChange);
+    }).debounceTime(const Duration(milliseconds: 250));
+
+    return super.transformEvents(nonDebounceStream.mergeWith([debounceStream]), transitionFn);
+  }
+
+  @override
+  void onTransition(Transition<NavEvent, NavState> transition) {
+    // tec.dmPrint(transition);
+    super.onTransition(transition);
+  }
 
   @override
   Stream<NavState> mapEventToState(NavEvent event) async* {
@@ -197,12 +216,8 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
   NavState _changeState(NavState s) => s;
 
-  Future<List<String>> _loadWordSuggestions(String s) async {
-    await autoCompleteOperation?.cancel();
-    final ac = AutoComplete.fetch(phrase: s, translationIds: '${state.ref.volume}');
-    autoCompleteOperation = CancelableOperation<AutoComplete>.fromFuture(ac);
-    return (await autoCompleteOperation.value).possibles;
-  }
+  Future<List<String>> _loadWordSuggestions(String s) async =>
+      (await AutoComplete.fetch(phrase: s, translationIds: '${state.ref.volume}')).possibles;
 
   NavState _changeTabIndex(int index) {
     var search = '';

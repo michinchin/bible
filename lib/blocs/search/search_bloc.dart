@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:async/async.dart';
 import 'package:bloc/bloc.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -39,8 +39,6 @@ abstract class SearchState with _$SearchState {
 }
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
-  CancelableOperation<List<SearchResult>> _searchOperation;
-
   SearchBloc()
       : super(const SearchState(
           search: '',
@@ -55,19 +53,28 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         ));
 
   @override
+  Stream<Transition<SearchEvent, SearchState>> transformEvents(Stream<SearchEvent> events,
+      Stream<Transition<SearchEvent, SearchState>> Function(SearchEvent) transitionFn) {
+    final nonDebounceStream = events.where((event) {
+      return (event is! _Requested);
+    });
+
+    final debounceStream = events.where((event) {
+      return (event is _Requested);
+    }).debounceTime(const Duration(milliseconds: 250));
+
+    return super.transformEvents(nonDebounceStream.mergeWith([debounceStream]), transitionFn);
+  }
+
+  @override
   Stream<SearchState> mapEventToState(SearchEvent event) async* {
     if (event is _Requested) {
-      // make sure any still-pending prior request never gets processed
-      await _searchOperation?.cancel();
-
       yield state.copyWith(loading: true);
       tec.dmPrint('Loading search: ${event.search}');
 
       try {
         final translations = event.translations?.join('|') ?? '';
-        final futureRes = SearchResults.fetch(words: event.search, translationIds: translations);
-        _searchOperation = CancelableOperation<List<SearchResult>>.fromFuture(futureRes);
-        final res = await _searchOperation.value;
+        final res = await SearchResults.fetch(words: event.search, translationIds: translations);
         tec.dmPrint('Completed search "${event.search}" with ${res.length} result(s)');
 
         yield state.copyWith(

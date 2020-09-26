@@ -1,5 +1,3 @@
-import 'package:bible/blocs/sheet/sheet_manager_bloc.dart';
-import 'package:bible/ui/sheet/selection_sheet.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
@@ -20,6 +19,7 @@ import '../../models/search/tec_share.dart';
 import '../../models/shared_types.dart';
 import '../common/common.dart';
 import 'compare_verse.dart';
+import 'selection_sheet.dart';
 import 'snap_sheet.dart';
 
 //ignore: avoid_classes_with_only_static_members

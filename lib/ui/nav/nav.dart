@@ -69,7 +69,6 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   TabController _tabController;
   TabController _searchResultsTabController;
   TextEditingController _searchController;
-  final _searchOnChange = BehaviorSubject<String>();
 
   NavBloc navBloc() => context.bloc<NavBloc>();
 
@@ -88,7 +87,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    _searchController = TextEditingController(text: '')..addListener(_searchControllerListener);
+    _searchController = TextEditingController(text: '');
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
 
@@ -110,27 +109,13 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
               navBloc().add(NavEvent.changeTabIndex(index: _tabController.index));
             }
           });
-
-    // stream for changes to text field and only update when changes
-    _searchOnChange.debounceTime(const Duration(milliseconds: 250)).listen((s) {
-      if (navBloc().state.search != s) {
-        navBloc().add(NavEvent.onSearchChange(search: s));
-      }
-    });
     super.initState();
   }
 
   @override
   void deactivate() {
-    _searchOnChange.close();
     _tabController.dispose();
     super.deactivate();
-  }
-
-  void _searchControllerListener() {
-    if (navBloc().state.search != _searchController.text) {
-      _searchOnChange.add(_searchController.text);
-    }
   }
 
   void _changeTabController() {
@@ -149,14 +134,14 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   void onSubmit({String query}) {
     final s = query ?? _searchController.text;
-    _searchResultsTabController.animateTo(1);
+    navBloc().add(NavEvent.onSearchFinished(search: s));
     FocusScope.of(context).unfocus();
     if (s.isNotEmpty) {
       searchBloc()
         ..add(SearchEvent.request(search: s, translations: translations()))
         ..add(const SearchEvent.setScrollIndex(0));
-      navBloc().add(NavEvent.onSearchFinished(search: s));
     }
+    _searchResultsTabController.animateTo(1);
   }
 
   void _selectionMode() {
@@ -292,6 +277,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         return const Text('History');
       } else {
         return TextField(
+            onChanged: (s) => navBloc().add(NavEvent.onSearchChange(search: s)),
             onSubmitted: (s) => onSubmit(query: s),
             decoration: const InputDecoration(
                 border: InputBorder.none,
