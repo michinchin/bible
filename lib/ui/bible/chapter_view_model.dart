@@ -376,6 +376,12 @@ class BibleChapterViewModel {
     _clearAllSelectedVerses(context);
   }
 
+  void notifyOfSelections(BuildContext context) {
+    // Notify the view manager, if there is one.
+    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInView(viewUid, _selectionReference, context,
+        hasSelections: hasSelection);
+  }
+
   ///
   /// Handles the `TecSelectableController` `onSelectionChanged` callback.
   ///
@@ -405,9 +411,7 @@ class BibleChapterViewModel {
       // tec.dmPrint('No words selected.');
     }
 
-    // Notify the view manager, if there is one.
-    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInView(viewUid, _selectionReference, context,
-        hasSelections: hasSelection);
+    notifyOfSelections(context);
   }
 
   /// Returns the current selection reference, or null if nothing is selected.
@@ -487,8 +491,7 @@ class BibleChapterViewModel {
     TecAutoScroll.stopAutoscroll();
     refreshFunc(block);
     tec.dmPrint('selected verses: $_selectedVerses');
-    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInView(viewUid, _selectionReference, context,
-        hasSelections: hasSelection);
+    notifyOfSelections(context);
   }
 }
 
@@ -674,7 +677,11 @@ class TecHtmlBuildHelper {
 ///
 /// Returns the merged result of two [TextStyle]s, and either, or both, can be `null`.
 ///
-TextStyle _merge(TextStyle s1, TextStyle s2) => s1 == null ? s2 : s2 == null ? s1 : s1.merge(s2);
+TextStyle _merge(TextStyle s1, TextStyle s2) => s1 == null
+    ? s2
+    : s2 == null
+        ? s1
+        : s1.merge(s2);
 
 ///
 /// Returns a new [Reference] from the given set of [verses] and other optional parameters.

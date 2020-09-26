@@ -41,8 +41,9 @@ class _VolumeDetailState extends State<VolumeDetail> {
       child: Scaffold(
         appBar: MinHeightAppBar(
           appBar: AppBar(
-              //title: TecText(volume.name, maxLines: 2, textAlign: TextAlign.center),
-              ),
+            elevation: 0,
+            //title: TecText(volume.name, maxLines: 2, textAlign: TextAlign.center),
+          ),
         ),
         body: ListView(
           children: [

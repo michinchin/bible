@@ -9,7 +9,10 @@ part 'selection_bloc.freezed.dart';
 
 @freezed
 abstract class SelectionState with _$SelectionState {
-  const factory SelectionState({bool isTextSelected}) = _SelectionState;
+  const factory SelectionState({
+    bool isTextSelected,
+    List<int> viewsWithSelections,
+  }) = _SelectionState;
 }
 
 class SelectionBloc extends Bloc<SelectionState, SelectionState> {

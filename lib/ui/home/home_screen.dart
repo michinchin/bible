@@ -61,7 +61,7 @@ class _BottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<SelectionBloc, SelectionState>(
       cubit: context.bloc<SelectionBloc>(),
-      // condition: (previous, current) => previous.isTextSelected != current.isTextSelected,
+      listenWhen: (previous, current) => previous.isTextSelected != current.isTextSelected,
       listener: (context, state) {
         if (state.isTextSelected) {
           context.bloc<SheetManagerBloc>()..changeTypeSize(SheetType.selection, SheetSize.mini);

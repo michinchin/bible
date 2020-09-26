@@ -10,6 +10,7 @@ class VolumeCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool heroAnimated;
   final Widget trailing;
+  final bool isCompact;
 
   const VolumeCard({
     Key key,
@@ -17,6 +18,7 @@ class VolumeCard extends StatelessWidget {
     this.onTap,
     this.heroAnimated = true,
     this.trailing,
+    this.isCompact = true,
   }) : super(key: key);
 
   @override
@@ -24,8 +26,9 @@ class VolumeCard extends StatelessWidget {
     final textScaleFactor = textScaleFactorWith(context);
     final padding = (6.0 * textScaleFactor).roundToDouble();
 
-    final imgWidth = 60.0 * textScaleFactor;
+    final imgWidth = (isCompact ? 25.0 : 50.0) * textScaleFactor;
     final imgHeight = 1.47368 * imgWidth;
+    final borderRadius = imgWidth / 7.0;
 
     return Row(
       // mainAxisSize: MainAxisSize.max,
@@ -43,7 +46,7 @@ class VolumeCard extends StatelessWidget {
                   Material(
                     elevation: 0,
                     child: ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(padding)),
+                      borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
                       child: VolumeImage(
                         key: key,
                         volume: volume,
@@ -67,15 +70,16 @@ class VolumeCard extends StatelessWidget {
                             textScaleFactor: textScaleFactor,
                             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                           ),
-                          TecText(
-                            '\n${volume.publisher}',
-                            textScaleFactor: textScaleFactor,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Theme.of(context).textColor,
+                          if (!isCompact)
+                            TecText(
+                              '\n${volume.publisher}',
+                              textScaleFactor: textScaleFactor,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Theme.of(context).textColor,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),

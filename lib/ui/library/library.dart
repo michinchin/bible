@@ -348,9 +348,14 @@ class _VolumesListState extends State<_VolumesList> {
   Widget build(BuildContext context) {
     final bloc = context.bloc<VolumesBloc>(); // ignore: close_sinks
     final showFilter = (bloc.languages?.length ?? 0) > 1 || (bloc.categories?.length ?? 0) > 1;
+
+    final textScaleFactor = textScaleFactorWith(context);
+    final padding = (12.0 * textScaleFactor).roundToDouble();
+
     return Column(
       children: [
         TecSearchField(
+          padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
           textEditingController: _textEditingController,
           onSubmit: (s) => _searchListener(),
           suffixIcon: showFilter
@@ -373,6 +378,7 @@ class _VolumesListState extends State<_VolumesList> {
                       previous.items[volume.id] != current.items[volume.id],
                   builder: (context, downloads) {
                     return VolumeCard(
+                      isCompact: widget.onTapVolume != null || widget.allowMultipleSelections,
                       volume: volume,
                       trailing: !widget.allowMultipleSelections
                           ? _VolumeActionButton(volume: volume)

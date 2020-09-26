@@ -88,9 +88,6 @@ class App extends StatelessWidget {
         BlocProvider<DownloadsBloc>(
           create: (context) => DownloadsBloc.create(),
         ),
-        BlocProvider<SelectionInViewsCubit>(
-          create: (context) => SelectionInViewsCubit(),
-        ),
         BlocProvider<ViewManagerBloc>(
           create: (context) => ViewManagerBloc(kvStore: tec.Prefs.shared),
         ),

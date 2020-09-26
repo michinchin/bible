@@ -13,9 +13,10 @@ class _$SelectionStateTearOff {
   const _$SelectionStateTearOff();
 
 // ignore: unused_element
-  _SelectionState call({bool isTextSelected}) {
+  _SelectionState call({bool isTextSelected, List<int> viewsWithSelections}) {
     return _SelectionState(
       isTextSelected: isTextSelected,
+      viewsWithSelections: viewsWithSelections,
     );
   }
 }
@@ -25,6 +26,7 @@ const $SelectionState = _$SelectionStateTearOff();
 
 mixin _$SelectionState {
   bool get isTextSelected;
+  List<int> get viewsWithSelections;
 
   $SelectionStateCopyWith<SelectionState> get copyWith;
 }
@@ -33,7 +35,7 @@ abstract class $SelectionStateCopyWith<$Res> {
   factory $SelectionStateCopyWith(
           SelectionState value, $Res Function(SelectionState) then) =
       _$SelectionStateCopyWithImpl<$Res>;
-  $Res call({bool isTextSelected});
+  $Res call({bool isTextSelected, List<int> viewsWithSelections});
 }
 
 class _$SelectionStateCopyWithImpl<$Res>
@@ -47,11 +49,15 @@ class _$SelectionStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object isTextSelected = freezed,
+    Object viewsWithSelections = freezed,
   }) {
     return _then(_value.copyWith(
       isTextSelected: isTextSelected == freezed
           ? _value.isTextSelected
           : isTextSelected as bool,
+      viewsWithSelections: viewsWithSelections == freezed
+          ? _value.viewsWithSelections
+          : viewsWithSelections as List<int>,
     ));
   }
 }
@@ -62,7 +68,7 @@ abstract class _$SelectionStateCopyWith<$Res>
           _SelectionState value, $Res Function(_SelectionState) then) =
       __$SelectionStateCopyWithImpl<$Res>;
   @override
-  $Res call({bool isTextSelected});
+  $Res call({bool isTextSelected, List<int> viewsWithSelections});
 }
 
 class __$SelectionStateCopyWithImpl<$Res>
@@ -78,24 +84,30 @@ class __$SelectionStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object isTextSelected = freezed,
+    Object viewsWithSelections = freezed,
   }) {
     return _then(_SelectionState(
       isTextSelected: isTextSelected == freezed
           ? _value.isTextSelected
           : isTextSelected as bool,
+      viewsWithSelections: viewsWithSelections == freezed
+          ? _value.viewsWithSelections
+          : viewsWithSelections as List<int>,
     ));
   }
 }
 
 class _$_SelectionState implements _SelectionState {
-  const _$_SelectionState({this.isTextSelected});
+  const _$_SelectionState({this.isTextSelected, this.viewsWithSelections});
 
   @override
   final bool isTextSelected;
+  @override
+  final List<int> viewsWithSelections;
 
   @override
   String toString() {
-    return 'SelectionState(isTextSelected: $isTextSelected)';
+    return 'SelectionState(isTextSelected: $isTextSelected, viewsWithSelections: $viewsWithSelections)';
   }
 
   @override
@@ -104,13 +116,17 @@ class _$_SelectionState implements _SelectionState {
         (other is _SelectionState &&
             (identical(other.isTextSelected, isTextSelected) ||
                 const DeepCollectionEquality()
-                    .equals(other.isTextSelected, isTextSelected)));
+                    .equals(other.isTextSelected, isTextSelected)) &&
+            (identical(other.viewsWithSelections, viewsWithSelections) ||
+                const DeepCollectionEquality()
+                    .equals(other.viewsWithSelections, viewsWithSelections)));
   }
 
   @override
   int get hashCode =>
       runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(isTextSelected);
+      const DeepCollectionEquality().hash(isTextSelected) ^
+      const DeepCollectionEquality().hash(viewsWithSelections);
 
   @override
   _$SelectionStateCopyWith<_SelectionState> get copyWith =>
@@ -118,10 +134,13 @@ class _$_SelectionState implements _SelectionState {
 }
 
 abstract class _SelectionState implements SelectionState {
-  const factory _SelectionState({bool isTextSelected}) = _$_SelectionState;
+  const factory _SelectionState(
+      {bool isTextSelected, List<int> viewsWithSelections}) = _$_SelectionState;
 
   @override
   bool get isTextSelected;
+  @override
+  List<int> get viewsWithSelections;
   @override
   _$SelectionStateCopyWith<_SelectionState> get copyWith;
 }

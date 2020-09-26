@@ -195,7 +195,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     for (final uid in List.of(_viewsWithSelections.keys)) {
       if (indexOfView(uid) == -1) _viewsWithSelections.remove(uid);
     }
-    context.bloc<SelectionInViewsCubit>().notifyChange(visibleViewsWithSelections);
+
     _updateSelectionBloc(context);
   }
 
@@ -215,10 +215,10 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   /// views with selections.
   ///
   void _updateSelectionBloc(BuildContext context) {
-    final isTextSelected = visibleViewsWithSelections.isNotEmpty;
+    final views = visibleViewsWithSelections.toList();
     final bloc = context.bloc<SelectionBloc>(); // ignore: close_sinks
     assert(bloc != null);
-    bloc?.add(SelectionState(isTextSelected: isTextSelected));
+    bloc?.add(SelectionState(isTextSelected: views.isNotEmpty, viewsWithSelections: views));
 
     // tec.dmPrint('');
     // tec.dmPrint('SELECTED REFERENCES:');
@@ -352,12 +352,6 @@ abstract class ViewState with _$ViewState {
 
   /// fromJson
   factory ViewState.fromJson(Map<String, dynamic> json) => _$ViewStateFromJson(json);
-}
-
-class SelectionInViewsCubit extends Cubit<Iterable<int>> {
-  SelectionInViewsCubit() : super([]);
-
-  void notifyChange(Iterable<int> viewsWithSelections) => emit(viewsWithSelections);
 }
 
 ///
