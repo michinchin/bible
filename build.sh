@@ -23,10 +23,6 @@ flutter clean
 
 sed -i '' "s/DEBUG-VERSION/$VERSION-$BUILD_NUMBER/g" lib/version.dart
 
-if [ -e build ]; then
-    rm -rf build
-fi
-
 # web
 echo "building website..."
 # flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true
