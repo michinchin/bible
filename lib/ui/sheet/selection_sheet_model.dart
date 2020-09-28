@@ -43,12 +43,12 @@ class SelectionSheetModel {
 
   static const miniButtons = <String, IconData>{
     // 'No Color': Icons.format_color_reset,
-    'Note': FeatherIcons.edit2,
+    // 'Note': FeatherIcons.edit2,
     'Learn': Icons.lightbulb_outline,
     'Compare': Icons.compare_arrows,
     'Copy': FeatherIcons.copy,
     'Share': FeatherIcons.share,
-    'More': FeatherIcons.chevronUp
+    // 'More': FeatherIcons.chevronUp
   };
 
   static const buttonSubtitles = <String, String>{
@@ -134,7 +134,7 @@ class SelectionSheetModel {
         share(context);
         break;
       case 'More':
-        _more(context);
+        more(context);
         break;
       default:
         break;
@@ -144,7 +144,7 @@ class SelectionSheetModel {
   static void _noColor(BuildContext context) =>
       context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(type: HighlightType.clear));
 
-  static void _more(BuildContext context) =>
+  static void more(BuildContext context) =>
       context.bloc<SheetManagerBloc>()?.add(const SheetEvent.changeSize(SheetSize.medium));
 
   static void deselect(BuildContext c) => c

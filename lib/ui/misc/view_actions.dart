@@ -46,7 +46,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
     ),
     if (topRight)
       IconButton(
-        icon: const Icon(Icons.more_vert),
+        icon: const Icon(Icons.account_circle_outlined),
         tooltip: 'Main Menu',
         color: Theme.of(context).textColor.withOpacity(0.5),
         onPressed: () => showMainMenu(context),

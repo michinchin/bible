@@ -1,3 +1,4 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -70,7 +71,8 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
       return Container();
     }
 
-    return Padding(padding: const EdgeInsets.only(left: 15, right: 15), child: child());
+    return Material(
+        child: Padding(padding: const EdgeInsets.only(left: 15, right: 15), child: child()));
 
     // Column(children: [
 
@@ -331,6 +333,7 @@ class _MiniView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final miniChildren = [
+      IconButton(icon: Icon(Icons.close), onPressed: () => SelectionSheetModel.deselect(context)),
       for (final button in SelectionSheetModel.miniButtons.keys) ...[
         SquareSheetButton(
           icon: SelectionSheetModel.miniButtons[button],
@@ -338,6 +341,8 @@ class _MiniView extends StatelessWidget {
           title: button,
         ),
       ],
+      IconButton(
+          icon: Icon(FeatherIcons.chevronUp), onPressed: () => SelectionSheetModel.more(context)),
     ];
     return Padding(
       padding: const EdgeInsets.only(top: 10),
@@ -437,19 +442,18 @@ class CircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipOval(
-      child: Material(
-        type: MaterialType.button,
-        shape: CircleBorder(side: BorderSide(color: borderColor, width: 3)),
-        color: color ?? Theme.of(context).buttonColor,
-        child: InkWell(
-          splashColor: Theme.of(context).splashColor,
-          child: Padding(
-            padding: padding,
-            child: icon,
-          ),
-          onTap: onPressed,
+    return Material(
+      type: MaterialType.button,
+      shape: CircleBorder(side: BorderSide(color: borderColor, width: 3)),
+      color: color ?? Theme.of(context).buttonColor,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        splashColor: Theme.of(context).splashColor,
+        child: Padding(
+          padding: padding,
+          child: icon,
         ),
+        onTap: onPressed,
       ),
     );
   }

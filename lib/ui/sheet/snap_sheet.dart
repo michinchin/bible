@@ -305,18 +305,19 @@ class SquareSheetButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget squareIcon([double radius]) => InkWell(
-        onTap: onPressed,
-        child: Container(
-            padding: const EdgeInsets.all(10),
-            child: Icon(
-              icon,
-              color: Colors.grey,
-              size: 15,
-            ),
-            decoration: ShapeDecoration(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                    side: const BorderSide(color: Colors.grey)))));
+          onTap: onPressed,
+          child: Container(
+              padding: const EdgeInsets.all(10),
+              child: Icon(
+                icon,
+                color: Colors.grey,
+                size: 15,
+              ),
+              decoration: ShapeDecoration(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      side: const BorderSide(color: Colors.grey)))),
+        );
     return (title != null)
         ? Column(mainAxisSize: MainAxisSize.min, children: [
             squareIcon(15),

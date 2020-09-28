@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+// import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
@@ -22,38 +22,30 @@ class ChapterViewAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SelectionBloc, SelectionState>(
-      builder: (context, state) {
-        if (state.viewsWithSelections?.contains(viewState.uid) ?? false) {
-          return AppBar(
-            centerTitle: false,
-            title: SelectionModeBibleChapterTitle(viewState.uid),
-            actions: [
-              IconButton(
-                icon: const Icon(FeatherIcons.play),
-                iconSize: 20,
-                onPressed: () {},
-              ),
-              // IconButton(
-              //     icon: const Icon(FeatherIcons.copy),
-              //     iconSize: 20,
-              //     onPressed: () => SelectionSheetModel.copy(context)),
-              // IconButton(
-              //     icon: const Icon(FeatherIcons.share),
-              //     iconSize: 20,
-              //     onPressed: () => SelectionSheetModel.share(context)),
-            ],
-          );
-        }
+    // return BlocBuilder<SelectionBloc, SelectionState>(
+    // builder: (context, state) {
+    //   if (state.viewsWithSelections?.contains(viewState.uid) ?? false) {
+    //     return AppBar(
+    //       centerTitle: false,
+    //       title: SelectionModeBibleChapterTitle(viewState.uid),
+    //       actions: [
+    //         IconButton(
+    //           icon: const Icon(FeatherIcons.play),
+    //           iconSize: 20,
+    //           onPressed: () {},
+    //         ),
+    //       ],
+    //     );
+    //   }
 
-        return AppBar(
-          automaticallyImplyLeading: false,
-          centerTitle: false,
-          title: BibleChapterTitle(volumeType: VolumeType.bible, onUpdate: onUpdate),
-          actions: defaultActionsBuilder(context, viewState, size),
-        );
-      },
+    return AppBar(
+      automaticallyImplyLeading: false,
+      centerTitle: false,
+      title: BibleChapterTitle(volumeType: VolumeType.bible, onUpdate: onUpdate),
+      actions: defaultActionsBuilder(context, viewState, size),
     );
+    // },
+    // );
   }
 
   @override

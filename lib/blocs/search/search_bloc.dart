@@ -58,7 +58,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     final nonDebounceStream = events.where((event) {
       return (event is! _Requested);
     });
-
+    // debounce request streams
     final debounceStream = events.where((event) {
       return (event is _Requested);
     }).debounceTime(const Duration(milliseconds: 250));

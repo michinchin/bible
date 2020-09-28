@@ -55,7 +55,8 @@ class NavBloc extends Bloc<NavEvent, NavState> {
     final nonDebounceStream = events.where((event) {
       return (event is! _OnSearchChange);
     });
-
+    
+    // debounce request streams
     final debounceStream = events.where((event) {
       return (event is _OnSearchChange);
     }).debounceTime(const Duration(milliseconds: 250));
