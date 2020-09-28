@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -156,11 +157,18 @@ class BibleChapterViewModel {
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.only(top: 3.0),
-                child: SvgPicture.asset('assets/marginNote.svg',
-                    width: iconWidth,
-                    height: iconWidth,
-                    color: color,
-                    semanticsLabel: 'Margin Note'),
+                child: kIsWeb
+                    ? Icon(
+                        FeatherIcons.fileText,
+                        size: iconWidth,
+                        color: color,
+                        semanticLabel: 'Margin Note',
+                      )
+                    : SvgPicture.asset('assets/marginNote.svg',
+                        width: iconWidth,
+                        height: iconWidth,
+                        color: color,
+                        semanticsLabel: 'Margin Note'),
               ),
             ),
           ),
@@ -200,11 +208,18 @@ class BibleChapterViewModel {
             alignment: Alignment.topLeft,
             child: Padding(
                 padding: const EdgeInsets.only(top: 3.0),
-                child: SvgPicture.asset('assets/footnote.svg',
-                    width: iconWidth,
-                    height: iconWidth,
-                    color: Theme.of(context).accentColor,
-                    semanticsLabel: 'Footnote')),
+                child: kIsWeb
+                    ? Icon(
+                        Icons.ac_unit,
+                        size: iconWidth,
+                        color: Theme.of(context).accentColor,
+                        semanticLabel: 'Footnote',
+                      )
+                    : SvgPicture.asset('assets/footnote.svg',
+                        width: iconWidth,
+                        height: iconWidth,
+                        color: Theme.of(context).accentColor,
+                        semanticsLabel: 'Footnote')),
           ),
         ),
         onTap: _onPress,

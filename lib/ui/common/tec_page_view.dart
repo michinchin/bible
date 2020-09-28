@@ -258,13 +258,11 @@ class TecPageController implements PageController {
         assert(false);
       } else {
         _minPage = actualPage;
-        tec.dmPrint(
-            'TecPageController updated minPage to ${_fauxPageFromActualPage(actualPage.toDouble())}');
+        // tec.dmPrint('TecPageController updated minPage to ${_fauxPageFromActualPage(actualPage.toDouble())}');
       }
     } else if (actualPage > _maxPage) {
       _maxPage = actualPage;
-      tec.dmPrint(
-          'TecPageController updated maxPage to ${_fauxPageFromActualPage(actualPage.toDouble())}');
+      // tec.dmPrint('TecPageController updated maxPage to ${_fauxPageFromActualPage(actualPage.toDouble())}');
     }
   }
 

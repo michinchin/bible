@@ -31,7 +31,7 @@ class BibleChapterTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ViewDataBloc, ViewData>(
       builder: (context, viewData) {
-        tec.dmPrint('rebuilding PageableBibleView title with $viewData');
+        // tec.dmPrint('rebuilding PageableBibleView title with $viewData');
         if (viewData is VolumeViewData) {
           const minFontSize = 10.0;
           const buttonPadding = EdgeInsets.only(top: 16.0, bottom: 16.0);

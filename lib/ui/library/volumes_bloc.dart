@@ -23,7 +23,7 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
 
   VolumesBloc({this.defaultFilter, this.key, tec.KeyValueStore kvStore})
       : _kvStore = kvStore,
-        super(initialState(defaultFilter, key, kvStore)) {
+        super(_initialState(defaultFilter, key, kvStore)) {
     _userDbChangeSubscription =
         AppSettings.shared.userAccount.userDbChangeStream.listen(_userDbChangeListener);
   }
@@ -41,7 +41,7 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
     return super.close();
   }
 
-  static VolumesState initialState(
+  static VolumesState _initialState(
       VolumesFilter defaultFilter, String key, tec.KeyValueStore kvStore) {
     if (tec.isNotNullOrEmpty(key) && kvStore != null) {
       final jsonStr = kvStore.getString(key);

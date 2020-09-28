@@ -106,7 +106,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                   final bible = VolumesRepository.shared.bibleWithId(viewData.bibleId);
                   final ref = _bcvPageZero.advancedBy(chapters: index, bible: bible);
                   if (ref == null) return Container();
-                  tec.dmPrint('page builder: ${ref.toString()}');
+                  // tec.dmPrint('page builder: ${ref.toString()}');
                   return _BibleChapterView(
                       viewUid: widget.state.uid, size: size, bible: bible, ref: ref);
                 } else {
@@ -116,11 +116,11 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
             );
           },
           onPageChanged: (context, _, page) async {
-            tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
+            // tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
             final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
             if (bcv != null) {
               final viewData = ChapterViewData(_bible.id, bcv, page);
-              tec.dmPrint('_PageableBibleView updating with new data: $viewData');
+              // tec.dmPrint('_PageableBibleView updating with new data: $viewData');
               context.bloc<ViewDataBloc>().update(viewData);
             }
           },
@@ -217,7 +217,7 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
             },
           );
         } else {
-          tec.dmPrint('VIEW ${widget.viewUid} waiting for HTML to load...');
+          // tec.dmPrint('VIEW ${widget.viewUid} waiting for HTML to load...');
           return _blankContainer(context, error ?? data?.error);
         }
       },
@@ -348,7 +348,7 @@ class _ChapterViewState extends State<_ChapterView> {
                   }
 
                   if (userContentValid && highlights.loaded && marginNotes.loaded) {
-                    tec.dmPrint('loading ${widget.ref.chapter}');
+                    // tec.dmPrint('loading ${widget.ref.chapter}');
 
                     return _BibleHtml(
                       viewUid: widget.viewUid,
@@ -364,7 +364,7 @@ class _ChapterViewState extends State<_ChapterView> {
                       marginNotes: marginNotes,
                     );
                   } else {
-                    tec.dmPrint('VIEW ${widget.viewUid} waiting for highlights and margin notes');
+                    // tec.dmPrint('VIEW ${widget.viewUid} waiting for highlights and margin notes');
                     return Container();
                   }
                 },
@@ -415,8 +415,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
   void initState() {
     super.initState();
 
-    tec.dmPrint(
-        'New BibleChapterViewModel for ${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}');
+    // tec.dmPrint('New BibleChapterViewModel for ${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}');
     _viewModel = BibleChapterViewModel(
       viewUid: widget.viewUid,
       volume: widget.volumeId,
@@ -448,7 +447,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
   @override
   Widget build(BuildContext context) {
     final debugId = '${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}';
-    tec.dmPrint('_BibleHtml building TecHtml for $debugId ${widget.size}');
+    // tec.dmPrint('_BibleHtml building TecHtml for $debugId ${widget.size}');
 
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
@@ -468,10 +467,10 @@ class _BibleHtmlState extends State<_BibleHtml> {
         BlocListener<ViewDataBloc, ViewData>(
           listener: (context, viewData) {
             if ((viewData as ChapterViewData).bcv == widget.ref) {
-              tec.dmPrint('Notifying of selections for ${widget.ref}');
+              // tec.dmPrint('Notifying of selections for ${widget.ref}');
               _viewModel.notifyOfSelections(context);
             } else {
-              tec.dmPrint('Ignoring selections in ${widget.ref}');
+              // tec.dmPrint('Ignoring selections in ${widget.ref}');
             }
           },
         )
@@ -497,6 +496,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
                 TecHtml(
                   widget.html,
                   debugId: debugId,
+                  avoidUsingWidgetSpans: false,
                   scrollController: _scrollController,
                   baseUrl: widget.baseUrl,
                   textScaleFactor: 1.0,
@@ -520,7 +520,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
                       isDarkTheme: isDarkTheme),
 
                   // Word range selection related:
-                  selectable: !kIsWeb && !_viewModel.hasVersesSelected,
+                  selectable: !_viewModel.hasVersesSelected,
                   selectionColor: selectionColor,
                   showSelection: !_viewModel.isSelectionTrialMode,
                   showSelectionPopup: false,
