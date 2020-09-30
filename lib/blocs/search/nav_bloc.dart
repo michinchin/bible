@@ -50,6 +50,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
         ));
 
   @override
+  // ignore: type_annotate_public_apis
   Stream<Transition<NavEvent, NavState>> transformEvents(Stream<NavEvent> events, transitionFn) {
     final nonDebounceStream = events.where((event) {
       return (event is! _OnSearchChange);

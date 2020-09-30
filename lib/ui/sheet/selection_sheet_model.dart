@@ -19,7 +19,6 @@ import '../../models/search/tec_share.dart';
 import '../../models/shared_types.dart';
 import '../common/common.dart';
 import 'compare_verse.dart';
-import 'selection_sheet.dart';
 import 'snap_sheet.dart';
 
 //ignore: avoid_classes_with_only_static_members
@@ -76,22 +75,28 @@ class SelectionSheetModel {
         onPressed: onSwitchToUnderline,
       );
 
-  static Widget noColorButton(BuildContext context, double width) => InkWell(
-        customBorder: const CircleBorder(),
-        onTap: () => _noColor(context),
-        child: Container(
-          height: width,
-          width: width,
-          decoration:
-              const ShapeDecoration(shape: CircleBorder(side: BorderSide(color: Colors.grey))),
-          child: Transform.rotate(
-              angle: 10,
-              child: VerticalDivider(
-                color: Colors.grey,
-                thickness: 1,
-                width: width,
-              )),
+  static Widget noColorButton(BuildContext context, {double radius = 20}) => SizedBox.fromSize(
+        size: Size.fromRadius(radius),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: () => _noColor(context),
+          child: Container(
+            decoration:
+                const ShapeDecoration(shape: CircleBorder(side: BorderSide(color: Colors.grey))),
+            child: Transform.rotate(
+                angle: 10,
+                child: const VerticalDivider(
+                  color: Colors.grey,
+                  thickness: 1,
+                )),
+          ),
         ),
+      );
+
+  static Widget pickColorButton({@required bool editMode, @required VoidCallback onEditMode}) =>
+      SelectionSheetButton(
+        icon: editMode ? Icons.close : Icons.colorize_outlined,
+        onPressed: onEditMode,
       );
 
   static Widget defineButton(BuildContext c) {

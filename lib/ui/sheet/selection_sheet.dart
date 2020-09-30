@@ -1,10 +1,5 @@
-import 'package:animations/animations.dart';
-import 'package:bible/ui/common/common.dart';
-import 'package:bible/ui/sheet/main_sheet.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -14,6 +9,7 @@ import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../models/pref_item.dart';
 import '../../ui/sheet/snap_sheet.dart';
 import '../misc/color_picker.dart';
+import 'main_sheet.dart';
 import 'selection_sheet_model.dart';
 
 class SelectionSheet extends StatefulWidget {
@@ -27,39 +23,10 @@ class SelectionSheet extends StatefulWidget {
 }
 
 class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProviderStateMixin {
-  // bool showColorPicker;
-  bool underlineMode;
-
-  @override
-  void initState() {
-    // showColorPicker = false;
-    underlineMode = false;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  ///
-  /// CHANGE MODES FOR SHEET
-  ///
-
-  void onSwitchToUnderline() {
-    setState(() {
-      underlineMode = !underlineMode;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.sheetSize == SheetSize.medium) {
-      return Material(
-          child: _MiniView(
-        onSwitchToUnderline: onSwitchToUnderline,
-        underlineMode: underlineMode,
-      ));
+      return Material(child: _MiniView());
     }
     return const MainSheet(sheetSize: SheetSize.mini);
 
@@ -95,16 +62,41 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
 }
 
 class _MiniView extends StatefulWidget {
-  final bool underlineMode;
-  final VoidCallback onSwitchToUnderline;
-
-  const _MiniView({this.underlineMode, this.onSwitchToUnderline});
-
   @override
   __MiniViewState createState() => __MiniViewState();
 }
 
 class __MiniViewState extends State<_MiniView> {
+  bool editMode;
+  bool underlineMode;
+
+  @override
+  void initState() {
+    editMode = false;
+    underlineMode = false;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  ///
+  /// CHANGE MODES FOR SHEET
+  ///
+  void _onEditMode() {
+    setState(() {
+      editMode = !editMode;
+    });
+  }
+
+  void _onSwitchToUnderline() {
+    setState(() {
+      underlineMode = !underlineMode;
+    });
+  }
+
   Future<void> onShowColorPicker(
       BuildContext context, List<PrefItem> prefItems, int colorIndex) async {
     final colorChosen = await showModalBottomSheet<int>(
@@ -119,12 +111,12 @@ class __MiniViewState extends State<_MiniView> {
               child: _ColorSelectionView(
                 prefItems: prefItems,
                 colorIndex: colorIndex,
-                underlineMode: widget.underlineMode,
+                underlineMode: underlineMode,
               ),
             ));
     if (colorChosen != null) {
       context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-          type: widget.underlineMode ? HighlightType.underline : HighlightType.highlight,
+          type: underlineMode ? HighlightType.underline : HighlightType.highlight,
           color: colorChosen));
       context.bloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
           prefItem: PrefItem.from(prefItems.itemWithId(colorIndex).copyWith(verse: colorChosen))));
@@ -156,13 +148,12 @@ class __MiniViewState extends State<_MiniView> {
               [];
           final customColors = [for (final color in prefItems) Color(color.verse)];
           final colors = [
-            SelectionSheetModel.noColorButton(context, 40),
+            SelectionSheetModel.noColorButton(context),
             SelectionSheetModel.underlineButton(
-                underlineMode: widget.underlineMode,
-                onSwitchToUnderline: widget.onSwitchToUnderline),
+                underlineMode: underlineMode, onSwitchToUnderline: _onSwitchToUnderline),
             for (final color in SelectionSheetModel.defaultColors) ...[
               _ColorPickerButton(
-                isForUnderline: widget.underlineMode,
+                isForUnderline: underlineMode,
                 color: color,
                 onEdit: () => TecToast.show(context, 'Cannot edit default colors'),
               ),
@@ -170,11 +161,14 @@ class __MiniViewState extends State<_MiniView> {
             if (tec.isNotNullOrEmpty(customColors))
               for (var i = 0; i < customColors.length; i++) ...[
                 _ColorPickerButton(
-                  isForUnderline: widget.underlineMode,
+                  editMode: editMode,
+                  switchToEditMode: _onEditMode,
+                  isForUnderline: underlineMode,
                   color: customColors[i],
                   onEdit: () => onShowColorPicker(context, prefItems, i + 1),
                 ),
               ],
+            SelectionSheetModel.pickColorButton(editMode: editMode, onEditMode: _onEditMode),
             const SizedBox(width: 5)
           ];
           return Column(
@@ -192,9 +186,8 @@ class __MiniViewState extends State<_MiniView> {
                     separatorBuilder: (c, i) =>
                         const VerticalDivider(color: Colors.transparent, width: 10),
                   )),
-              const SizedBox(height: 10),
               Padding(
-                  padding: const EdgeInsets.only(top: 5, left: 8, right: 8),
+                  padding: const EdgeInsets.all(10),
                   child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -278,18 +271,28 @@ class _ColorPickerButton extends StatelessWidget {
   final bool isForUnderline;
   final Color color;
   final VoidCallback onEdit;
+  final bool editMode;
+  final VoidCallback switchToEditMode;
 
   const _ColorPickerButton(
-      {@required this.color, this.isForUnderline = false, @required this.onEdit})
+      {@required this.color,
+      this.isForUnderline = false,
+      @required this.onEdit,
+      this.editMode = false,
+      this.switchToEditMode})
       : assert(color != null);
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       customBorder: const CircleBorder(),
-      onLongPress: onEdit,
+      onLongPress: () {
+        if (!editMode && switchToEditMode != null) {
+          switchToEditMode();
+        }
+      },
       onTap: () {
-        if (color == unsetHighlightColor) {
+        if (color == unsetHighlightColor || editMode) {
           onEdit();
         } else {
           context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
@@ -317,10 +320,11 @@ class _ColorPickerButton extends StatelessWidget {
                   : null,
             ),
           ),
-          if (color == unsetHighlightColor)
+          if (color == unsetHighlightColor || editMode)
             const Icon(
               Icons.colorize,
               color: Colors.white,
+              size: 15,
             )
         ],
       ),

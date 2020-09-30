@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:bible/ui/sheet/selection_sheet_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +9,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import 'main_sheet.dart';
 import 'selection_sheet.dart';
+import 'selection_sheet_model.dart';
 
 // must have SheetManagerBloc provided
 class SnapSheet extends StatefulWidget {
@@ -316,7 +316,7 @@ class SelectionSheetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget iconButton([double radius]) => InkWell(
+    Widget iconButton() => InkWell(
           onTap: onPressed,
           customBorder: const CircleBorder(),
           child: Container(
@@ -331,7 +331,7 @@ class SelectionSheetButton extends StatelessWidget {
         );
     return (title != null)
         ? Column(mainAxisSize: MainAxisSize.min, children: [
-            iconButton(20),
+            iconButton(),
             const SizedBox(height: 5),
             TecText(
               title,
@@ -343,7 +343,7 @@ class SelectionSheetButton extends StatelessWidget {
                   ),
             ),
           ])
-        : iconButton(15);
+        : iconButton();
   }
 }
 
