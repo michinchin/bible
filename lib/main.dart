@@ -14,6 +14,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import 'blocs/app_lifecycle_bloc.dart';
 import 'blocs/app_theme_bloc.dart';
+import 'blocs/content_settings.dart';
 import 'blocs/downloads/downloads_bloc.dart';
 import 'blocs/search/search_bloc.dart';
 import 'blocs/sheet/pref_items_bloc.dart';
@@ -85,21 +86,12 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<DownloadsBloc>(
-          create: (context) => DownloadsBloc.create(),
-        ),
-        BlocProvider<ViewManagerBloc>(
-          create: (context) => ViewManagerBloc(kvStore: tec.Prefs.shared),
-        ),
-        BlocProvider<ThemeModeBloc>(
-          create: (context) => ThemeModeBloc(),
-        ),
-        BlocProvider<PrefItemsBloc>(
-          create: (context) => PrefItemsBloc(),
-        ),
-        BlocProvider<SearchBloc>(
-          create: (context) => SearchBloc(),
-        ),
+        BlocProvider(create: (context) => DownloadsBloc.create()),
+        BlocProvider(create: (context) => ViewManagerBloc(kvStore: tec.Prefs.shared)),
+        BlocProvider(create: (context) => ThemeModeBloc()),
+        BlocProvider(create: (context) => ContentSettingsBloc()),
+        BlocProvider(create: (context) => PrefItemsBloc()),
+        BlocProvider(create: (context) => SearchBloc()),
       ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (context, themeMode) {

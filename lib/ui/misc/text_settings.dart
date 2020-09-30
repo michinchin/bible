@@ -1,12 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../models/app_settings.dart';
+import '../../blocs/content_settings.dart';
+import '../../models/labels.dart';
 import '../common/common.dart';
 
 void showTextSettingsDialog(BuildContext context) {
@@ -65,19 +68,16 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
   @override
   void dispose() {
     // Update the recent fonts list in prefs.
+    var currentFont = tec.Prefs.shared.getString(Labels.prefContentFontName, defaultValue: '');
+    if (currentFont.isEmpty) currentFont = _Fonts._systemDefault;
     var recentFonts = widget.fonts.recent
-      ..remove(_currentFont)
-      ..insert(0, _currentFont);
+      ..remove(currentFont)
+      ..insert(0, currentFont);
     recentFonts = recentFonts.take(100).toList();
     Prefs.shared.setStringList('_font_settings_recent', recentFonts);
     _scrollController.dispose();
 
     super.dispose();
-  }
-
-  String get _currentFont {
-    final font = AppSettings.shared.contentFontName.value;
-    return font.isEmpty ? _Fonts._systemDefault : font;
   }
 
   void updateFromWidget() {
@@ -185,8 +185,11 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                                   : GoogleFonts.getFont(name, fontSize: fontSize, color: textColor),
                         );
                       }),
-                      onPressed: () => AppSettings.shared.contentFontName
-                          .add(name == _Fonts._systemDefault ? '' : name),
+                      onPressed: () {
+                        final settings = context.bloc<ContentSettingsBloc>().state;
+                        context.bloc<ContentSettingsBloc>().updateWith(
+                            settings.copyWith(fontName: name == _Fonts._systemDefault ? '' : name));
+                      },
                     )
                   ],
                 );
@@ -195,18 +198,18 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
           ),
           Padding(
             padding: EdgeInsets.fromLTRB(halfPad, halfPad, halfPad, 0),
-            child: StreamBuilder<double>(
-              stream: AppSettings.shared.contentTextScaleFactor.stream,
-              builder: (c, snapshot) {
-                final percent = (snapshot.hasData
-                    ? snapshot.data
-                    : AppSettings.shared.contentTextScaleFactor.value);
+            child: BlocBuilder<ContentSettingsBloc, ContentSettings>(
+              builder: (context, settings) {
                 return IntrinsicHeight(
                   child: Slider.adaptive(
-                    value: percent,
+                    value: settings.textScaleFactor,
                     min: 0.75,
                     max: 3.0,
-                    onChanged: AppSettings.shared.contentTextScaleFactor.add,
+                    onChanged: (newValue) {
+                      context
+                          .bloc<ContentSettingsBloc>()
+                          .updateWith(settings.copyWith(textScaleFactor: newValue));
+                    },
                     activeColor: Theme.of(context).accentColor,
                   ),
                 );

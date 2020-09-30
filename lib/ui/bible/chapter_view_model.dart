@@ -13,20 +13,20 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/content_settings.dart';
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../../models/app_settings.dart';
 import '../../models/color_utils.dart';
 import '../note/margin_note_view.dart';
 
 const _debugMode = false; // kDebugMode
 
 ///
-/// BibleChapterViewModel
+/// ChapterViewModel
 ///
-class BibleChapterViewModel {
+class ChapterViewModel {
   final int viewUid;
   final int volume;
   final int book;
@@ -38,13 +38,13 @@ class BibleChapterViewModel {
   final void Function(VoidCallback fn) refreshFunc;
 
   ///
-  /// Returns a new [BibleChapterViewModel].
+  /// Returns a new [ChapterViewModel].
   ///
   /// Note, the [versesToShow] and [highlights] parameters are functions that will be called as
   /// needed to get the current value of the indicated property, since the property value can
   /// change between widget rebuilds.
   ///
-  BibleChapterViewModel({
+  ChapterViewModel({
     @required this.viewUid,
     @required this.volume,
     @required this.book,
@@ -151,7 +151,7 @@ class BibleChapterViewModel {
           child: Container(
             width: widgetWidth,
             // use app settings height to determine correct line height
-            height: AppSettings.shared.contentTextScaleFactor.value * 18.0,
+            height: context.bloc<ContentSettingsBloc>().state.textScaleFactor * 18.0,
             decoration: BoxDecoration(color: _backgroundColor(isDarkTheme)),
             child: Align(
               alignment: Alignment.centerLeft,
@@ -202,7 +202,7 @@ class BibleChapterViewModel {
         child: Container(
           width: containerWidth,
           // use app settings height to determine correct line height
-          height: AppSettings.shared.contentTextScaleFactor.value * 18.0,
+          height: context.bloc<ContentSettingsBloc>().state.textScaleFactor * 18.0,
           decoration: BoxDecoration(color: _backgroundColor(isDarkTheme)),
           child: Align(
             alignment: Alignment.topLeft,
@@ -517,7 +517,7 @@ class BibleChapterViewModel {
 /// the same helper cannot be used for multiple widget builds.
 ///
 class TecHtmlBuildHelper {
-  final BibleChapterViewModel viewModel;
+  final ChapterViewModel viewModel;
 
   TecHtmlBuildHelper(this.viewModel);
 

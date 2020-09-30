@@ -7,9 +7,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/content_settings.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
-import '../../models/app_settings.dart';
 import '../../models/labels.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
@@ -294,7 +294,8 @@ class _DynamicGrid extends StatelessWidget {
         MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 600;
 
     double extentCalculated() {
-      if (textScaleFactor >= 2.0 || AppSettings.shared.contentTextScaleFactor.value >= 2.0) {
+      if (textScaleFactor >= 2.0 ||
+          context.bloc<ContentSettingsBloc>().state.textScaleFactor >= 2.0) {
         return 100;
       }
       if (((smallWidth && !smallHeight) || isLargeScreen) ||
@@ -338,7 +339,7 @@ class _PillButton extends StatelessWidget {
       child: Text(
         text,
         textAlign: TextAlign.center,
-        textScaleFactor: AppSettings.shared.contentTextScaleFactor.value,
+        textScaleFactor: context.bloc<ContentSettingsBloc>().state.textScaleFactor,
         maxLines: 1,
       ),
     );

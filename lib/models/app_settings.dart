@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pedantic/pedantic.dart';
-import 'package:rxdart/rxdart.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:tec_user_account/tec_user_account.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import 'labels.dart';
+import '../blocs/content_settings.dart';
 
 class AppSettings {
   static final AppSettings shared = AppSettings._();
@@ -23,16 +23,6 @@ class AppSettings {
 
   tec.DeviceInfo deviceInfo;
   tua.UserAccount userAccount;
-
-  ///
-  /// The font scale factor for content (e.g. Bible or study content HTML).
-  ///
-  final contentTextScaleFactor = BehaviorSubject<double>.seeded(1); // ignore: close_sinks
-
-  ///
-  /// The font scale factor for content (e.g. Bible or study content HTML).
-  ///
-  final contentFontName = BehaviorSubject<String>.seeded(''); // ignore: close_sinks
 
   ///
   /// isDarkTheme
@@ -88,18 +78,6 @@ class AppSettings {
     if (userAccount.user.isSignedIn) {
       unawaited(userAccount.syncUserDb<void>(itemTypes: userAccount.itemTypesToSync));
     }
-
-    contentTextScaleFactor
-      ..add((tec.Prefs.shared.getDouble(Labels.prefContentTextScaleFactor, defaultValue: 1.2)))
-      ..listen((scaleFactor) {
-        tec.Prefs.shared.setDouble(Labels.prefContentTextScaleFactor, scaleFactor);
-      });
-
-    contentFontName
-      ..add((tec.Prefs.shared.getString(Labels.prefContentFontName, defaultValue: '')))
-      ..listen((fontName) {
-        tec.Prefs.shared.setString(Labels.prefContentFontName, fontName);
-      });
   }
 }
 
@@ -112,7 +90,7 @@ double contentTextScaleFactorWith(BuildContext context) {
         // dampingFactor: 0.5,
         // maxScaleFactor: 1.0,
       ) *
-      AppSettings.shared.contentTextScaleFactor.value;
+      context.bloc<ContentSettingsBloc>().state.textScaleFactor;
   // tec.dmPrint('scale: $scale');
   return scale;
 }

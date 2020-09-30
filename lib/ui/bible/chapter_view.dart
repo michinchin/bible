@@ -11,6 +11,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/content_settings.dart';
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
@@ -29,7 +30,7 @@ class ViewableBibleChapter extends Viewable {
 
   @override
   Widget builder(BuildContext context, ViewState state, Size size) {
-    return _PageableBibleView(state: state, size: size);
+    return _PageableChapterView(state: state, size: size);
   }
 
   @override
@@ -59,17 +60,17 @@ class ViewableBibleChapter extends Viewable {
   }
 }
 
-class _PageableBibleView extends StatefulWidget {
+class _PageableChapterView extends StatefulWidget {
   final ViewState state;
   final Size size;
 
-  const _PageableBibleView({Key key, this.state, this.size}) : super(key: key);
+  const _PageableChapterView({Key key, this.state, this.size}) : super(key: key);
 
   @override
-  __PageableBibleViewState createState() => __PageableBibleViewState();
+  _PageableChapterViewState createState() => _PageableChapterViewState();
 }
 
-class __PageableBibleViewState extends State<_PageableBibleView> {
+class _PageableChapterViewState extends State<_PageableChapterView> {
   TecPageController _pageController;
   BookChapterVerse _bcvPageZero;
   Bible _bible;
@@ -110,7 +111,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
                   return _BibleChapterView(
                       viewUid: widget.state.uid, size: size, bible: bible, ref: ref);
                 } else {
-                  throw UnsupportedError('_PageableBibleView must use ChapterViewData');
+                  throw UnsupportedError('_PageableChapterView must use ChapterViewData');
                 }
               },
             );
@@ -120,7 +121,7 @@ class __PageableBibleViewState extends State<_PageableBibleView> {
             final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
             if (bcv != null) {
               final viewData = ChapterViewData(_bible.id, bcv, page);
-              // tec.dmPrint('_PageableBibleView updating with new data: $viewData');
+              // tec.dmPrint('_PageableChapterView updating with new data: $viewData');
               context.bloc<ViewDataBloc>().update(viewData);
             }
           },
@@ -196,42 +197,29 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
     return TecFutureBuilder<tec.ErrorOrValue<String>>(
       future: _future,
       builder: (context, data, error) {
-        final html = data?.value;
-        if (tec.isNotNullOrEmpty(html)) {
-          return TecStreamBuilder<double>(
-            stream: AppSettings.shared.contentTextScaleFactor.stream,
-            initialData: AppSettings.shared.contentTextScaleFactor.value,
-            builder: (c, data, error) {
-              if (data != null) {
-                // when we get here, html and text scale are actually loaded and ready to go...
-                return _ChapterView(
-                  viewUid: widget.viewUid,
-                  bible: widget.bible,
-                  ref: widget.ref,
-                  html: html,
-                  size: widget.size,
-                );
-              } else {
-                return _blankContainer(context, error);
-              }
-            },
-          );
+        final htmlFragment = data?.value;
+        if (tec.isNotNullOrEmpty(htmlFragment)) {
+          return BlocBuilder<ContentSettingsBloc, ContentSettings>(builder: (context, settings) {
+            return _ChapterView(
+              viewUid: widget.viewUid,
+              bible: widget.bible,
+              ref: widget.ref,
+              htmlFragment: htmlFragment,
+              size: widget.size,
+            );
+          });
         } else {
           // tec.dmPrint('VIEW ${widget.viewUid} waiting for HTML to load...');
-          return _blankContainer(context, error ?? data?.error);
+          final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+          final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
+          return Container(
+            color: backgroundColor,
+            child: Center(
+              child: error == null ? const LoadingIndicator() : Text(error.toString()),
+            ),
+          );
         }
       },
-    );
-  }
-
-  Widget _blankContainer(BuildContext context, Object error) {
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDarkTheme ? Colors.black : Colors.white;
-    return Container(
-      color: backgroundColor,
-      child: Center(
-        child: error == null ? const LoadingIndicator() : Text(error.toString()),
-      ),
     );
   }
 }
@@ -243,7 +231,7 @@ class _ChapterView extends StatefulWidget {
   final int viewUid;
   final Bible bible;
   final BookChapterVerse ref;
-  final String html;
+  final String htmlFragment;
   final Size size;
   final List<String> versesToShow;
 
@@ -252,10 +240,10 @@ class _ChapterView extends StatefulWidget {
     @required this.viewUid,
     @required this.bible,
     @required this.ref,
-    @required this.html,
+    @required this.htmlFragment,
     @required this.size,
     this.versesToShow,
-  })  : assert(bible != null && html != null),
+  })  : assert(bible != null && htmlFragment != null),
         super(key: key);
 
   @override
@@ -266,7 +254,7 @@ class _ChapterViewState extends State<_ChapterView> {
   @override
   void didUpdateWidget(_ChapterView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.html != widget.html) _html = null;
+    if (oldWidget.htmlFragment != widget.htmlFragment) _html = null;
   }
 
   // Cached values, for quick rebuild.
@@ -292,7 +280,7 @@ class _ChapterViewState extends State<_ChapterView> {
 
     // Rebuild the HTML string only when necessary...
     _html ??= _env.html(
-      htmlFragment: widget.html,
+      htmlFragment: widget.htmlFragment,
       fontSizePercent: (_contentScaleFactor * 100.0).round(),
       marginLeft: '0px',
       marginRight: '0px',
@@ -326,50 +314,44 @@ class _ChapterViewState extends State<_ChapterView> {
         child: BlocBuilder<ChapterMarginNotesBloc, ChapterMarginNotes>(
           builder: (context, marginNotes) {
             return BlocBuilder<ChapterHighlightsBloc, ChapterHighlights>(
-                builder: (context, highlights) {
-              return TecStreamBuilder<String>(
-                stream: AppSettings.shared.contentFontName.stream,
-                initialData: AppSettings.shared.contentFontName.value,
-                builder: (c, fontName, error) {
-                  assert(fontName != null);
-                  var userContentValid = true;
-                  if (marginNotes.loaded && marginNotes.volumeId != widget.bible.id) {
-                    context
-                        .bloc<ChapterMarginNotesBloc>()
-                        .add(MarginNotesEvent.changeVolumeId(widget.bible.id));
-                    userContentValid = false;
-                  }
+              builder: (context, highlights) {
+                var userContentValid = true;
+                if (marginNotes.loaded && marginNotes.volumeId != widget.bible.id) {
+                  context
+                      .bloc<ChapterMarginNotesBloc>()
+                      .add(MarginNotesEvent.changeVolumeId(widget.bible.id));
+                  userContentValid = false;
+                }
 
-                  if (highlights.loaded && highlights.volumeId != widget.bible.id) {
-                    context
-                        .bloc<ChapterHighlightsBloc>()
-                        .add(HighlightEvent.changeVolumeId(widget.bible.id));
-                    userContentValid = false;
-                  }
+                if (highlights.loaded && highlights.volumeId != widget.bible.id) {
+                  context
+                      .bloc<ChapterHighlightsBloc>()
+                      .add(HighlightEvent.changeVolumeId(widget.bible.id));
+                  userContentValid = false;
+                }
 
-                  if (userContentValid && highlights.loaded && marginNotes.loaded) {
-                    // tec.dmPrint('loading ${widget.ref.chapter}');
+                if (userContentValid && highlights.loaded && marginNotes.loaded) {
+                  // tec.dmPrint('loading ${widget.ref.chapter}');
 
-                    return _BibleHtml(
-                      viewUid: widget.viewUid,
-                      volumeId: widget.bible.id,
-                      ref: widget.ref,
-                      baseUrl: widget.bible.baseUrl,
-                      html: _html,
-                      versesToShow: widget.versesToShow ?? [],
-                      // ['1', '2', '3']
-                      size: widget.size,
-                      fontName: fontName,
-                      highlights: highlights,
-                      marginNotes: marginNotes,
-                    );
-                  } else {
-                    // tec.dmPrint('VIEW ${widget.viewUid} waiting for highlights and margin notes');
-                    return Container();
-                  }
-                },
-              );
-            });
+                  return _BibleHtml(
+                    viewUid: widget.viewUid,
+                    volumeId: widget.bible.id,
+                    ref: widget.ref,
+                    baseUrl: widget.bible.baseUrl,
+                    html: _html,
+                    versesToShow: widget.versesToShow ?? [],
+                    // ['1', '2', '3']
+                    size: widget.size,
+                    fontName: context.bloc<ContentSettingsBloc>().state.fontName,
+                    highlights: highlights,
+                    marginNotes: marginNotes,
+                  );
+                } else {
+                  // tec.dmPrint('VIEW ${widget.viewUid} waiting for highlights and margin notes');
+                  return Container();
+                }
+              },
+            );
           },
         ),
       ),
@@ -410,13 +392,14 @@ class _BibleHtml extends StatefulWidget {
 class _BibleHtmlState extends State<_BibleHtml> {
   final _scrollController = ScrollController();
   final _selectionController = TecSelectableController();
+  ChapterViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
 
-    // tec.dmPrint('New BibleChapterViewModel for ${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}');
-    _viewModel = BibleChapterViewModel(
+    // tec.dmPrint('New ChapterViewModel for ${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}');
+    _viewModel = ChapterViewModel(
       viewUid: widget.viewUid,
       volume: widget.volumeId,
       book: widget.ref.book,
@@ -425,16 +408,10 @@ class _BibleHtmlState extends State<_BibleHtml> {
       highlights: () => widget.highlights,
       marginNotes: () => widget.marginNotes,
       selectionController: _selectionController,
-      refreshFunc: _refresh,
+      refreshFunc: (fn) => mounted ? setState(fn) : null,
     );
 
     _selectionController.addListener(() => _viewModel.onSelectionChanged(context));
-  }
-
-  BibleChapterViewModel _viewModel;
-
-  void _refresh(VoidCallback fn) {
-    if (mounted) setState(fn);
   }
 
   @override
