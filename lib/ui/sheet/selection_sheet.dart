@@ -196,6 +196,9 @@ class __MiniViewState extends State<_MiniView> {
                           Expanded(
                             child: child,
                           ),
+                        Expanded(
+                          child: SelectionSheetModel.defineButton(context),
+                        )
                       ])),
             ],
           );

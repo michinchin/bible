@@ -105,9 +105,14 @@ class SelectionSheetModel {
     var title = 'Web Search';
     var icon = FeatherIcons.compass;
     if (refs.length > 1) {
-      onPressed = () => TecToast.show(c, 'Cannot search on multiple references');
+      onPressed = () async {
+        final refChosen =
+            await _showRefPickerDialog<Reference>(c, refs, title: 'Select Verse to Web Search');
+        if (refChosen != null) {
+          await _defineWebSearch(c, refChosen);
+        }
+      };
     } else {
-      onPressed = () => _defineWebSearch(c);
       if (refs.isNotEmpty) {
         final ref = refs[0];
         if (ref.word == ref.endWord) {
@@ -115,21 +120,20 @@ class SelectionSheetModel {
           title = 'Define';
           icon = FeatherIcons.bookOpen;
         }
+        onPressed = () => _defineWebSearch(c, ref);
       }
     }
-    return ListTile(
-      dense: true,
-      title: Text(title),
-      leading: Icon(icon),
-      onTap: onPressed,
-      subtitle: Text(SelectionSheetModel.buttonSubtitles[title]),
+    return SelectionSheetButton(
+      icon: icon,
+      onPressed: onPressed,
+      title: title,
     );
   }
 
   static void buttonAction(BuildContext context, String type) {
     switch (type) {
       case 'Define':
-        _defineWebSearch(context);
+        // _defineWebSearch(context);
         break;
       case 'Compare':
         _compare(context);
@@ -228,9 +232,7 @@ class SelectionSheetModel {
     }
   }
 
-  static Future<void> _defineWebSearch(BuildContext c) async {
-    final ref = _grabRefs(c).first;
-
+  static Future<void> _defineWebSearch(BuildContext c, Reference ref) async {
     final value = await tecShowProgressDlg<ChapterVerses>(
         context: c, future: ChapterVerses.fetch(refForChapter: ref));
     ChapterVerses verses;
@@ -270,12 +272,38 @@ class SelectionSheetModel {
     for (final v in views) {
       refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
     }
-    final ref = refs[0];
+    var ref = refs[0];
+    // ask for which verse to compare if multiple selected in views
+    if (refs.length > 1) {
+      final refChosen =
+          await _showRefPickerDialog<Reference>(c, refs, title: 'Select Verse to Compare');
+      if (refChosen != null) {
+        ref = refChosen;
+      } else {
+        return;
+      }
+    }
     final bibleId = await showCompareSheet(c, ref);
     if (bibleId != null) {
       // TODO(abby): change chapter view ref to this translation
     }
   }
+
+  static Future<Reference> _showRefPickerDialog<Referemce>(BuildContext c, List<Reference> refs,
+          {String title = 'Select Verse'}) =>
+      showTecDialog<Reference>(
+          context: c,
+          cornerRadius: 15,
+          builder: (c) => Material(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(title),
+                    for (final ref in refs)
+                      ListTile(title: Text(ref.label()), onTap: () => Navigator.of(c).pop(ref))
+                  ],
+                ),
+              ));
 
   static List<Reference> _grabRefs(BuildContext c) {
     final bloc = c.bloc<ViewManagerBloc>(); //ignore: close_sinks
