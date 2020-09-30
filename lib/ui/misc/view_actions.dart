@@ -44,6 +44,12 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
         _showViewMenu(context: context, state: state, insets: insets);
       },
     ),
+    IconButton(
+      icon: const Icon(SFSymbols.play, size: 20),
+      tooltip: 'Play Audio',
+      color: Theme.of(context).textColor.withOpacity(0.5),
+      onPressed: () {},
+    ),
     if (topRight)
       IconButton(
         icon: const Icon(Icons.account_circle_outlined),

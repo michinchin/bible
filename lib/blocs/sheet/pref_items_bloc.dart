@@ -49,9 +49,8 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
     final items =
         await AppSettings.shared.userAccount.userDb.getItemsOfTypes([tua.UserItemType.prefItem]);
     final prefItems = items.map<PrefItem>((i) => PrefItem.from(i)).toList();
-    final itemIds = prefItems.map((p) => p.id);
 
-    if (!itemIds.contains(PrefItemId.customColor1)) {
+    if (prefItems.itemWithId(PrefItemId.customColor1) == null) {
       // Custom color initialization
       for (var i = PrefItemId.customColor1; i <= PrefItemId.customColors.length; i++) {
         prefItems.add(PrefItem(
@@ -60,7 +59,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
             verse: unsetHighlightColor.value));
       }
     }
-    if (!itemIds.contains(PrefItemId.navLayout)) {
+    if (prefItems.itemWithId(PrefItemId.navLayout) == null) {
       // Nav pref initialization
       prefItems
         ..add(PrefItem(
@@ -68,7 +67,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
         ..add(PrefItem(
             prefItemDataType: PrefItemDataType.bool, prefItemId: PrefItemId.nav3Tap, verse: 0));
     }
-    if (!itemIds.contains(PrefItemId.translationsFilter)) {
+    if (prefItems.itemWithId(PrefItemId.translationsFilter) == null) {
       // Translations for search filter pref initialization
       final bibleIds = VolumesRepository.shared.volumeIdsWithType(VolumeType.bible);
       final volumes = VolumesRepository.shared.volumesWithIds(bibleIds);
@@ -86,27 +85,27 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
           info: availableVolumes.join('|')));
     }
 
-    if (!itemIds.contains(PrefItemId.navBookOrder)) {
+    if (prefItems.itemWithId(PrefItemId.navBookOrder) == null) {
       // Navigation book order alphabetical/ot/nt
       prefItems.add(PrefItem(
           prefItemDataType: PrefItemDataType.bool, prefItemId: PrefItemId.navBookOrder, verse: 0));
     }
 
-    if (!itemIds.contains(PrefItemId.includeShareLink)) {
+    if (prefItems.itemWithId(PrefItemId.includeShareLink) == null) {
       prefItems.add(PrefItem(
           prefItemDataType: PrefItemDataType.bool,
           prefItemId: PrefItemId.includeShareLink,
           verse: 0));
     }
 
-    if (!itemIds.contains(PrefItemId.translationsAbbreviated)) {
+    if (prefItems.itemWithId(PrefItemId.translationsAbbreviated) == null) {
       prefItems.add(PrefItem(
           prefItemDataType: PrefItemDataType.bool,
           prefItemId: PrefItemId.translationsAbbreviated,
           verse: 0));
     }
-    if (!itemIds.contains(PrefItemId.searchFilterBookGridView) ||
-        !itemIds.contains(PrefItemId.searchFilterTranslationGridView)) {
+    if (prefItems.itemWithId(PrefItemId.searchFilterBookGridView) == null ||
+        prefItems.itemWithId(PrefItemId.searchFilterTranslationGridView) == null) {
       prefItems
         ..add(PrefItem(
             prefItemDataType: PrefItemDataType.bool,
@@ -130,6 +129,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
   }
 
   PrefItems _updateFromDb(List<PrefItem> prefItems) {
+    AppSettings.shared.userAccount.userDb.saveSyncItems(prefItems);
     return state.copyWith(items: prefItems);
   }
 
@@ -145,8 +145,9 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
   PrefItems _delete(PrefItem prefItem) {
     final items = List<PrefItem>.from(state.items);
     if (items.hasItem(prefItem)) {
+      final index = items.indexOfItem(prefItem);
       items.removeItem(prefItem);
-      AppSettings.shared.userAccount.userDb.deleteItem(prefItem);
+      AppSettings.shared.userAccount.userDb.deleteItem(prefItem.copyWith(id: items[index].id));
     }
     return state.copyWith(items: items);
   }
@@ -155,8 +156,8 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
     final items = List<PrefItem>.from(state.items);
     if (items.hasItem(prefItem)) {
       final index = items.indexOfItem(prefItem);
-      items[index] = prefItem;
-      AppSettings.shared.userAccount.userDb.saveItem(prefItem);
+      items[index] = PrefItem.from(prefItem.copyWith(id: items[index].id));
+      AppSettings.shared.userAccount.userDb.saveItem(prefItem.copyWith(id: items[index].id));
     }
     return state.copyWith(items: items);
   }

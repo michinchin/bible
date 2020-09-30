@@ -1,4 +1,3 @@
-import 'package:bible/blocs/search/search_bloc.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';

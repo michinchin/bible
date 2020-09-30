@@ -64,7 +64,7 @@ class _BottomSheet extends StatelessWidget {
       listenWhen: (previous, current) => previous.isTextSelected != current.isTextSelected,
       listener: (context, state) {
         if (state.isTextSelected) {
-          context.bloc<SheetManagerBloc>()..changeTypeSize(SheetType.selection, SheetSize.mini);
+          context.bloc<SheetManagerBloc>()..changeTypeSize(SheetType.selection, SheetSize.medium);
         } else {
           context.bloc<SheetManagerBloc>()..changeTypeSize(SheetType.main, SheetSize.mini);
         }

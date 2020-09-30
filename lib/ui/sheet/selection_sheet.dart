@@ -1,8 +1,12 @@
+import 'package:animations/animations.dart';
+import 'package:bible/ui/common/common.dart';
+import 'package:bible/ui/sheet/main_sheet.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
@@ -23,12 +27,12 @@ class SelectionSheet extends StatefulWidget {
 }
 
 class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProviderStateMixin {
-  bool showColorPicker;
+  // bool showColorPicker;
   bool underlineMode;
 
   @override
   void initState() {
-    showColorPicker = false;
+    // showColorPicker = false;
     underlineMode = false;
     super.initState();
   }
@@ -42,12 +46,6 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
   /// CHANGE MODES FOR SHEET
   ///
 
-  void onShowColorPicker() {
-    setState(() {
-      showColorPicker = !showColorPicker;
-    });
-  }
-
   void onSwitchToUnderline() {
     setState(() {
       underlineMode = !underlineMode;
@@ -56,23 +54,14 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    Widget child() {
-      if (widget.sheetSize == SheetSize.mini) {
-        return _MiniView();
-      } else if (widget.sheetSize == SheetSize.medium) {
-        return _MediumFullSheetItems(
-          isMediumView: true,
-          showColorPicker: showColorPicker,
-          onShowColorPicker: onShowColorPicker,
-          onSwitchToUnderline: onSwitchToUnderline,
-          underlineMode: underlineMode,
-        );
-      }
-      return Container();
+    if (widget.sheetSize == SheetSize.medium) {
+      return Material(
+          child: _MiniView(
+        onSwitchToUnderline: onSwitchToUnderline,
+        underlineMode: underlineMode,
+      ));
     }
-
-    return Material(
-        child: Padding(padding: const EdgeInsets.only(left: 15, right: 15), child: child()));
+    return const MainSheet(sheetSize: SheetSize.mini);
 
     // Column(children: [
 
@@ -105,256 +94,182 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
   }
 }
 
-class _MediumFullSheetItems extends StatefulWidget {
-  final bool isMediumView;
-  final bool showColorPicker;
+class _MiniView extends StatefulWidget {
   final bool underlineMode;
-
   final VoidCallback onSwitchToUnderline;
-  final VoidCallback onShowColorPicker;
 
-  const _MediumFullSheetItems({
-    @required this.isMediumView,
-    @required this.showColorPicker,
-    @required this.underlineMode,
-    @required this.onShowColorPicker,
-    @required this.onSwitchToUnderline,
-  });
+  const _MiniView({this.underlineMode, this.onSwitchToUnderline});
 
   @override
-  __MediumFullSheetItemsState createState() => __MediumFullSheetItemsState();
+  __MiniViewState createState() => __MiniViewState();
 }
 
-class __MediumFullSheetItemsState extends State<_MediumFullSheetItems> {
-  int _colorChosen;
-  int _colorIndex;
-  bool _editMode;
-
-  @override
-  void initState() {
-    super.initState();
-    _colorChosen = 0xff999999;
-    _colorIndex = 0;
-    _editMode = false;
-  }
-
-  void _setColor(int color) {
-    setState(() {
-      _colorChosen = color;
-    });
-  }
-
-  void _onEditColor(int colorIndex) {
-    widget.onShowColorPicker();
-    setState(() {
-      _colorIndex = colorIndex;
-    });
-  }
-
-  void _onEditColors() {
-    setState(() {
-      _editMode = !_editMode;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<PrefItemsBloc, PrefItems>(
-        cubit: context.bloc<PrefItemsBloc>(),
-        builder: (context, state) {
-          final prefItems = state?.items?.where((i) => i.book >= 1 && i.book <= 4)?.toList() ?? [];
-          final customColors = [for (final color in prefItems) Color(color.verse)];
-          final colors = [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-              for (final color in SelectionSheetModel.defaultColors) ...[
-                Expanded(
-                  child: _ColorPickerButton(
-                    color: color,
-                  ),
-                ),
-              ],
-              if (tec.isNotNullOrEmpty(customColors))
-                for (var i = 0; i < 4; i++) ...[
-                  Expanded(
-                    child: _ColorPickerButton(
-                      editMode: _editMode || customColors[i] == unsetHighlightColor,
-                      onEdit: () => _onEditColor(i),
-                      color: customColors[i],
-                    ),
-                  ),
-                ],
-              Expanded(
-                child: IconButton(
-                  icon: Icon(_editMode ? Icons.close : Icons.colorize),
-                  onPressed: _onEditColors,
-                ),
+class __MiniViewState extends State<_MiniView> {
+  Future<void> onShowColorPicker(
+      BuildContext context, List<PrefItem> prefItems, int colorIndex) async {
+    final colorChosen = await showModalBottomSheet<int>(
+        context: context,
+        useRootNavigator: true,
+        barrierColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
+        builder: (c) => BlocProvider.value(
+              value: context.bloc<SelectionStyleBloc>(),
+              child: _ColorSelectionView(
+                prefItems: prefItems,
+                colorIndex: colorIndex,
+                underlineMode: widget.underlineMode,
               ),
-            ]),
-          ];
-
-          final sheetButtons = [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ListTile(
-                  dense: true,
-                  title: Text(SelectionSheetModel.buttons.keys.first),
-                  leading: Icon(SelectionSheetModel.buttons.values.first),
-                  subtitle: Text(
-                      SelectionSheetModel.buttonSubtitles[SelectionSheetModel.buttons.keys.first]),
-                  onTap: () => SelectionSheetModel.buttonAction(
-                      context, SelectionSheetModel.buttons.keys.first),
-                ),
-                SelectionSheetModel.defineButton(context),
-                for (final each in SelectionSheetModel.buttons.keys.skip(1)) ...[
-                  ListTile(
-                      dense: true,
-                      title: Text(each),
-                      subtitle: Text(SelectionSheetModel.buttonSubtitles[each]),
-                      leading: Icon(SelectionSheetModel.buttons[each]),
-                      onTap: () => SelectionSheetModel.buttonAction(context, each)),
-                  if (SelectionSheetModel.buttons.keys.last != each) const SizedBox(width: 10)
-                ]
-              ],
-            ),
-          ];
-          final mediumViewChildren = <Widget>[
-            if (widget.showColorPicker)
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 300,
-                        child: ColorPicker(
-                            showColorContainer: false,
-                            color: Color(prefItems[_colorIndex]?.verse ?? _colorChosen),
-                            onColorChanged: (c) {
-                              context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-                                  type: widget.underlineMode
-                                      ? HighlightType.underline
-                                      : HighlightType.highlight,
-                                  isTrialMode: true,
-                                  color: c.value));
-                              _setColor(c.value);
-                            }),
-                      ),
-                    ),
-                    const VerticalDivider(),
-                    Column(
-                      children: [
-                        SquareSheetButton(
-                            icon: Icons.close,
-                            onPressed: () {
-                              context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(
-                                  type: HighlightType.clear, isTrialMode: true));
-                            }),
-                        const Divider(color: Colors.transparent),
-                        SquareSheetButton(
-                          icon: Icons.done,
-                          onPressed: () {
-                            context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-                                type: widget.underlineMode
-                                    ? HighlightType.underline
-                                    : HighlightType.highlight,
-                                color: _colorChosen));
-                            context.bloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
-                                prefItem: PrefItem.from(
-                                    prefItems[_colorIndex].copyWith(verse: _colorChosen))));
-                            widget.onShowColorPicker();
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              )
-            else ...[
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (final color in SelectionSheetModel.defaultColors) ...[
-                        Expanded(
-                          child: _ColorPickerButton(
-                            isForUnderline: widget.underlineMode,
-                            color: color,
-                          ),
-                        ),
-                      ],
-                      Expanded(
-                        child: SelectionSheetModel.circleUnderlineButton(context,
-                            underlineMode: widget.underlineMode,
-                            onSwitchToUnderline: widget.onSwitchToUnderline),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(children: [
-                    if (tec.isNotNullOrEmpty(customColors))
-                      for (var i = 0; i < 4; i++) ...[
-                        Expanded(
-                          child: _ColorPickerButton(
-                            isForUnderline: widget.underlineMode,
-                            editMode: _editMode || customColors[i] == unsetHighlightColor,
-                            onEdit: () => _onEditColor(i),
-                            color: customColors[i],
-                          ),
-                        ),
-                      ],
-                    Expanded(
-                        child: CircleButton(
-                      icon: Icon(_editMode ? Icons.close : Icons.add, color: Colors.grey, size: 20),
-                      onPressed: _onEditColors,
-                      color: Colors.transparent,
-                      borderColor: Colors.grey.withOpacity(0.5),
-                    )),
-                  ]),
-                ],
-              ),
-            ]
-          ];
-          return Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 5,
-              runSpacing: 10,
-              children: [
-                ...mediumViewChildren,
-                if (widget.isMediumView && !widget.showColorPicker) ...sheetButtons,
-              ]);
-        });
+            ));
+    if (colorChosen != null) {
+      context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
+          type: widget.underlineMode ? HighlightType.underline : HighlightType.highlight,
+          color: colorChosen));
+      context.bloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
+          prefItem: PrefItem.from(prefItems.itemWithId(colorIndex).copyWith(verse: colorChosen))));
+    } else {
+      context
+          .bloc<SelectionStyleBloc>()
+          ?.add(const SelectionStyle(type: HighlightType.clear, isTrialMode: true));
+    }
   }
-}
 
-class _MiniView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final miniChildren = [
-      IconButton(icon: Icon(Icons.close), onPressed: () => SelectionSheetModel.deselect(context)),
       for (final button in SelectionSheetModel.miniButtons.keys) ...[
-        SquareSheetButton(
+        SelectionSheetButton(
           icon: SelectionSheetModel.miniButtons[button],
           onPressed: () => SelectionSheetModel.buttonAction(context, button),
           title: button,
         ),
       ],
-      IconButton(
-          icon: Icon(FeatherIcons.chevronUp), onPressed: () => SelectionSheetModel.more(context)),
     ];
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            for (final child in miniChildren)
-              Expanded(
-                child: child,
+    return BlocBuilder<PrefItemsBloc, PrefItems>(
+        cubit: context.bloc<PrefItemsBloc>(),
+        builder: (context, state) {
+          final prefItems = state?.items
+                  ?.where(
+                      (i) => i.book >= PrefItemId.customColor1 && i.book <= PrefItemId.customColor4)
+                  ?.toList() ??
+              [];
+          final customColors = [for (final color in prefItems) Color(color.verse)];
+          final colors = [
+            SelectionSheetModel.noColorButton(context, 40),
+            SelectionSheetModel.underlineButton(
+                underlineMode: widget.underlineMode,
+                onSwitchToUnderline: widget.onSwitchToUnderline),
+            for (final color in SelectionSheetModel.defaultColors) ...[
+              _ColorPickerButton(
+                isForUnderline: widget.underlineMode,
+                color: color,
+                onEdit: () => TecToast.show(context, 'Cannot edit default colors'),
               ),
-          ]),
+            ],
+            if (tec.isNotNullOrEmpty(customColors))
+              for (var i = 0; i < customColors.length; i++) ...[
+                _ColorPickerButton(
+                  isForUnderline: widget.underlineMode,
+                  color: customColors[i],
+                  onEdit: () => onShowColorPicker(context, prefItems, i + 1),
+                ),
+              ],
+            const SizedBox(width: 5)
+          ];
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 5),
+              Container(
+                  padding: const EdgeInsets.only(left: 8),
+                  height: 40,
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: colors.length,
+                    itemBuilder: (c, i) => colors[i],
+                    separatorBuilder: (c, i) =>
+                        const VerticalDivider(color: Colors.transparent, width: 10),
+                  )),
+              const SizedBox(height: 10),
+              Padding(
+                  padding: const EdgeInsets.only(top: 5, left: 8, right: 8),
+                  child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        for (final child in miniChildren)
+                          Expanded(
+                            child: child,
+                          ),
+                      ])),
+            ],
+          );
+        });
+  }
+}
+
+class _ColorSelectionView extends StatefulWidget {
+  final List<PrefItem> prefItems;
+  final int colorIndex;
+  final bool underlineMode;
+  const _ColorSelectionView({this.prefItems, this.colorIndex, this.underlineMode});
+
+  @override
+  __ColorSelectionViewState createState() => __ColorSelectionViewState();
+}
+
+class __ColorSelectionViewState extends State<_ColorSelectionView> {
+  int colorChosen;
+  @override
+  void initState() {
+    colorChosen = 0xff999999;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+        height: 300,
+        child: Row(children: [
+          Expanded(
+            child: ColorPicker(
+                showColorContainer: false,
+                color: Color(widget.prefItems.itemWithId(widget.colorIndex)?.verse ?? colorChosen),
+                onColorChanged: (color) {
+                  context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
+                      type:
+                          widget.underlineMode ? HighlightType.underline : HighlightType.highlight,
+                      isTrialMode: true,
+                      color: color.value));
+                  colorChosen = color.value;
+                }),
+          ),
+          const VerticalDivider(
+            color: Colors.transparent,
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SelectionSheetButton(
+                  icon: Icons.close,
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  }),
+              const Divider(color: Colors.transparent),
+              SelectionSheetButton(
+                icon: Icons.done,
+                onPressed: () {
+                  Navigator.of(context).pop(colorChosen);
+                },
+              ),
+            ],
+          )
+        ]),
+      ),
     );
   }
 }
@@ -362,21 +277,19 @@ class _MiniView extends StatelessWidget {
 class _ColorPickerButton extends StatelessWidget {
   final bool isForUnderline;
   final Color color;
-  final bool editMode;
   final VoidCallback onEdit;
 
   const _ColorPickerButton(
-      {@required this.color, this.isForUnderline = false, this.editMode = false, this.onEdit})
+      {@required this.color, this.isForUnderline = false, @required this.onEdit})
       : assert(color != null);
 
   @override
   Widget build(BuildContext context) {
-    const width = 20.0;
-
     return InkWell(
       customBorder: const CircleBorder(),
+      onLongPress: onEdit,
       onTap: () {
-        if (editMode) {
+        if (color == unsetHighlightColor) {
           onEdit();
         } else {
           context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
@@ -389,34 +302,26 @@ class _ColorPickerButton extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           Container(
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.transparent,
-                  width: 5,
-                )),
+            decoration: const ShapeDecoration(shape: CircleBorder()),
             child: CircleAvatar(
               backgroundColor: isForUnderline ? Colors.transparent : color,
-              radius: width,
               child: isForUnderline
                   ? Container(
                       decoration: ShapeDecoration(
                           color: color,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                            borderRadius: BorderRadius.circular(10),
                           )),
-                      width: 35,
-                      height: width,
+                      height: 15,
                     )
                   : null,
             ),
           ),
-          if (editMode)
+          if (color == unsetHighlightColor)
             const Icon(
               Icons.colorize,
               color: Colors.white,
-              size: width,
-            ),
+            )
         ],
       ),
     );

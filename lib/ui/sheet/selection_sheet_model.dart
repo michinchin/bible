@@ -43,11 +43,14 @@ class SelectionSheetModel {
 
   static const miniButtons = <String, IconData>{
     // 'No Color': Icons.format_color_reset,
-    // 'Note': FeatherIcons.edit2,
-    'Learn': Icons.lightbulb_outline,
-    'Compare': Icons.compare_arrows,
+
     'Copy': FeatherIcons.copy,
     'Share': FeatherIcons.share,
+    'Compare': Icons.compare_arrows,
+    'Learn': Icons.lightbulb_outline,
+    // 'Audio': Icons.play_arrow,
+    'Note': FeatherIcons.edit2,
+
     // 'More': FeatherIcons.chevronUp
   };
 
@@ -66,24 +69,29 @@ class SelectionSheetModel {
     Color(defaultColorIntForIndex(4)),
   ];
 
-  static Widget squareUnderlineButton(
+  static Widget underlineButton(
           {@required bool underlineMode, @required VoidCallback onSwitchToUnderline}) =>
-      SquareSheetButton(
+      SelectionSheetButton(
         icon: underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
         onPressed: onSwitchToUnderline,
-        title: underlineMode ? 'Highlight' : 'Underline',
       );
-  static Widget circleUnderlineButton(BuildContext context,
-          {@required bool underlineMode, @required VoidCallback onSwitchToUnderline}) =>
-      CircleButton(
-        icon: Icon(
-          underlineMode ? FeatherIcons.edit3 : FeatherIcons.underline,
-          size: 20,
-          color: Colors.grey,
+
+  static Widget noColorButton(BuildContext context, double width) => InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () => _noColor(context),
+        child: Container(
+          height: width,
+          width: width,
+          decoration:
+              const ShapeDecoration(shape: CircleBorder(side: BorderSide(color: Colors.grey))),
+          child: Transform.rotate(
+              angle: 10,
+              child: VerticalDivider(
+                color: Colors.grey,
+                thickness: 1,
+                width: width,
+              )),
         ),
-        onPressed: onSwitchToUnderline,
-        color: Colors.transparent,
-        borderColor: Colors.grey.withOpacity(0.5),
       );
 
   static Widget defineButton(BuildContext c) {
