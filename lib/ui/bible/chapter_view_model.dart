@@ -114,7 +114,7 @@ class ChapterViewModel {
         }
       }
 
-      _toggleSelectionForVerse(context, tag.verse);
+      if (volume < 1000) _toggleSelectionForVerse(context, tag.verse);
     }
   }
 
