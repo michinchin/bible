@@ -85,39 +85,43 @@ class _MenuItems extends StatelessWidget {
     final vmBloc = context.bloc<ViewManagerBloc>();
     final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if ((vmBloc?.state?.views?.length ?? 0) > 1)
-          _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
-              isMaximized ? 'Restore' : 'Maximize', () {
-            Navigator.of(context).maybePop();
-            vmBloc?.add(isMaximized
-                ? const ViewManagerEvent.restore()
-                : ViewManagerEvent.maximize(state.uid));
-          }),
-        if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
-          _titleDivider(context, isMaximized ? 'Switch To' : 'Switch With'),
-          ..._generateOffScreenItems(context, state.uid)
+    return Material(
+      color: Colors.transparent, // Theme.of(context).scaffoldBackgroundColor,
+      child: Table(
+        defaultColumnWidth: const IntrinsicColumnWidth(),
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        children: [
+          if ((vmBloc?.state?.views?.length ?? 0) > 1)
+            _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
+                isMaximized ? 'Restore' : 'Maximize', () {
+              Navigator.of(context).maybePop();
+              vmBloc?.add(isMaximized
+                  ? const ViewManagerEvent.restore()
+                  : ViewManagerEvent.maximize(state.uid));
+            }),
+          if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
+            _divider(context, isMaximized ? 'Switch To' : 'Switch With'),
+            ..._generateOffScreenItems(context, state.uid)
+          ],
+          _divider(context, 'Open New'),
+          ...generateAddMenuItems(context, state.uid),
+          if ((vmBloc?.state?.views?.length ?? 0) > 1) ...[
+            _divider(context),
+            _menuItem(context, Icons.close, 'Close View', () {
+              Navigator.of(context).maybePop();
+              vmBloc?.add(ViewManagerEvent.remove(state.uid));
+            }),
+          ],
         ],
-        _titleDivider(context, 'Open New'),
-        ...generateAddMenuItems(context, state.uid),
-        if ((vmBloc?.state?.views?.length ?? 0) > 1) ...[
-          const SizedBox(width: _menuWidth, child: Divider()),
-          _menuItem(context, Icons.close, 'Close View', () {
-            Navigator.of(context).maybePop();
-            vmBloc?.add(ViewManagerEvent.remove(state.uid));
-          }),
-        ],
-      ],
+      ),
     );
   }
 
-  Iterable<Widget> _generateOffScreenItems(BuildContext context, int viewUid) {
+  Iterable<TableRow> _generateOffScreenItems(BuildContext context, int viewUid) {
     // ignore: close_sinks
     final vmBloc = context.bloc<ViewManagerBloc>();
     final vm = ViewManager.shared;
-    final items = <Widget>[];
+    final items = <TableRow>[];
     for (final view in vmBloc?.state?.views) {
       if (!vmBloc.isViewVisible(view.uid)) {
         final title = vm.menuTitleWith(context: context, state: view);
@@ -141,13 +145,13 @@ class _MenuItems extends StatelessWidget {
     return items;
   }
 
-  Iterable<Widget> generateAddMenuItems(BuildContext context, int viewUid) {
+  Iterable<TableRow> generateAddMenuItems(BuildContext context, int viewUid) {
     assert(context != null && viewUid != null);
     final vm = ViewManager.shared;
-    return vm.types.map<Widget>((type) {
+    return vm.types.map<TableRow>((type) {
       final title = vm.menuTitleWith(type: type);
       // Types that cannot be created from the menu return `null` for the menu title.
-      if (title == null) return Container(width: _menuWidth);
+      if (title == null) return TableRow(children: [Container(width: _menuWidth)]);
       return _menuItem(context, vm.iconWithType(type), '$title', () async {
         tec.dmPrint('Adding new view of type $type.');
         await vm.onAddView(context, type, currentViewId: viewUid);
@@ -157,44 +161,54 @@ class _MenuItems extends StatelessWidget {
   }
 }
 
-Widget _titleDivider(BuildContext context, String title) {
+TableRow _divider(BuildContext context, [String title]) {
   final textColor = Theme.of(context).textColor.withOpacity(0.5);
-  return SizedBox(
-    width: _menuWidth,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TecText(title, style: TextStyle(fontSize: 12, color: textColor)),
-        const Expanded(child: Divider(indent: 10))
-      ],
-    ),
+  return TableRow(
+    children: [
+      SizedBox(
+        width: _menuWidth,
+        child: tec.isNotNullOrEmpty(title)
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TecText(title, style: TextStyle(fontSize: 12, color: textColor)),
+                  const Expanded(child: Divider(indent: 10))
+                ],
+              )
+            : const Divider(),
+      ),
+    ],
   );
 }
 
-Widget _menuItem(BuildContext context, IconData icon, String title, VoidCallback onTap) {
+TableRow _menuItem(BuildContext context, IconData icon, String title, VoidCallback onTap) {
   final textScaleFactor = scaleFactorWith(context, maxScaleFactor: 1.2);
   final textColor = Theme.of(context).textColor.withOpacity(onTap == null ? 0.2 : 0.5);
   final iconSize = 24.0 * textScaleFactor;
 
-  return CupertinoButton(
-    padding: const EdgeInsets.only(top: 8, bottom: 8), // EdgeInsets.zero,
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (icon == null)
-          SizedBox(width: iconSize)
-        else
-          Icon(icon, color: textColor, size: iconSize),
-        const SizedBox(width: 10),
-        TecText(
-          title,
-          textScaleFactor: textScaleFactor,
-          style: TextStyle(color: textColor),
+  return TableRow(
+    children: [
+      TableRowInkWell(
+        onTap: onTap,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 10, 14, 10),
+              child: icon == null
+                  ? SizedBox(width: iconSize)
+                  : Icon(icon, color: textColor, size: iconSize),
+            ),
+            // const SizedBox(width: 10),
+            TecText(
+              title,
+              textScaleFactor: textScaleFactor,
+              style: TextStyle(color: textColor),
+            ),
+          ],
         ),
-      ],
-    ),
-    borderRadius: null,
-    onPressed: onTap,
+      ),
+    ],
   );
 }
