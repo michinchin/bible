@@ -9,7 +9,7 @@ import '../bible/chapter_view.dart';
 import '../common/bible_chapter_title.dart';
 import '../common/common.dart';
 import '../library/library.dart';
-import '../misc/view_actions.dart';
+import '../menu/view_actions.dart';
 
 class ViewableStudyContent extends Viewable {
   ViewableStudyContent(String typeName, IconData icon) : super(typeName, icon);
@@ -17,7 +17,7 @@ class ViewableStudyContent extends Viewable {
   @override
   Widget builder(BuildContext context, ViewState state, Size size) {
     return PageableChapterView(state: state, size: size);
-    // return _StudyView(state: state, size: size);
+    // return StudyView(state: state, size: size);
   }
 
   @override
@@ -45,11 +45,11 @@ class ViewableStudyContent extends Viewable {
   }
 }
 
-class _StudyView extends StatelessWidget {
+class StudyView extends StatelessWidget {
   final ViewState state;
   final Size size;
 
-  const _StudyView({Key key, this.state, this.size}) : super(key: key);
+  const StudyView({Key key, this.state, this.size}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

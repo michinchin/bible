@@ -8,7 +8,7 @@ import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../common/bible_chapter_title.dart';
-import '../misc/view_actions.dart';
+import '../menu/view_actions.dart';
 
 class ChapterViewAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VolumeType volumeType;

@@ -54,39 +54,33 @@ class _MainMenuState extends State<MainMenu> {
       GestureTapCallback onTap,
     }) {
       final textColor = Theme.of(context).textColor.withOpacity(onTap == null ? 0.2 : 0.5);
+      Widget _cell(Widget child) => TableRowInkWell(
+            onTap: onTap == null ? null : () => setState(() => onTap()),
+            child: child,
+          );
 
       return TableRow(
         children: [
-          if (icon == null)
-            Container()
-          else
-            IconButton(
-              icon: Icon(icon),
-              color: textColor,
-              iconSize: iconSize,
-              padding: EdgeInsets.zero,
-              onPressed: onTap == null ? null : () => setState(() => onTap()),
-            ),
-          Row(
-            children: [
-              CupertinoButton(
-                onPressed: onTap == null ? null : () => setState(() => onTap()),
-                child: TecText(
-                  title,
-                  textScaleFactor: textScaleFactor,
-                  style: TextStyle(color: textColor),
-                ),
+          _cell(icon == null ? Container() : Icon(icon, color: textColor, size: iconSize)),
+          _cell(
+            Container(
+              padding: const EdgeInsets.fromLTRB(10, 16, 10, 16),
+              child: TecText(
+                title,
+                textScaleFactor: textScaleFactor,
+                style: TextStyle(color: textColor),
               ),
-            ],
-          ),
-          if (switchValue == null)
-            Container()
-          else
-            Switch.adaptive(
-              activeColor: tecartaBlue,
-              value: switchValue() ?? false,
-              onChanged: onTap == null ? null : (_) => setState(() => onTap()),
             ),
+          ),
+          _cell(
+            switchValue == null
+                ? Container(padding: const EdgeInsets.fromLTRB(0, 16, 0, 16))
+                : Switch.adaptive(
+                    activeColor: tecartaBlue,
+                    value: switchValue() ?? false,
+                    onChanged: onTap == null ? null : (_) => setState(() => onTap()),
+                  ),
+          ),
         ],
       );
     }

@@ -11,7 +11,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../common/common.dart';
-import '../menu/main_menu.dart';
+import 'main_menu.dart';
 
 const _menuWidth = 175.0;
 

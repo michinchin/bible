@@ -15,7 +15,7 @@ import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
-import '../misc/view_actions.dart';
+import '../menu/view_actions.dart';
 import 'tec_image_delegate.dart';
 
 const marginNoteViewType = 'MarginNoteView';

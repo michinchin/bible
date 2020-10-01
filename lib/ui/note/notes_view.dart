@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/notes/note_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../common/common.dart';
-import '../misc/view_actions.dart';
+import '../menu/view_actions.dart';
 import 'note_view.dart';
 
 class ViewableNotes extends Viewable {
