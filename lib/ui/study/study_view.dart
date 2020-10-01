@@ -5,6 +5,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../bible/chapter_view.dart';
 import '../common/bible_chapter_title.dart';
 import '../common/common.dart';
 import '../library/library.dart';
@@ -15,7 +16,8 @@ class ViewableStudyContent extends Viewable {
 
   @override
   Widget builder(BuildContext context, ViewState state, Size size) {
-    return _StudyView(state: state, size: size);
+    return PageableChapterView(state: state, size: size);
+    // return _StudyView(state: state, size: size);
   }
 
   @override
@@ -34,9 +36,9 @@ class ViewableStudyContent extends Viewable {
 
     if (volumeId != null) {
       final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-      final previous = VolumeViewData.fromJson(vmBloc?.dataWithView(currentViewId));
+      final previous = ChapterViewData.fromJson(vmBloc?.dataWithView(currentViewId));
       assert(previous != null);
-      return VolumeViewData(volumeId, previous.bcv);
+      return ChapterViewData(volumeId, previous.bcv, previous.page);
     }
 
     return null;

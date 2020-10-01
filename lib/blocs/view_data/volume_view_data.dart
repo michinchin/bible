@@ -9,8 +9,15 @@ import 'view_data.dart';
 
 export 'view_data.dart';
 
-const _defaultBibleId = 9;
-const _defaultBCV = BookChapterVerse(50, 1, 1);
+const defaultBibleId = 9;
+const defaultBCV = BookChapterVerse(50, 1, 1);
+
+extension VolumeViewDataExtOnVolume on Volume {
+  Bible get assocBible => this is Bible
+      ? this as Bible
+      : (VolumesRepository.shared.bibleWithId(assocVolumeId > 0 ? assocVolumeId : defaultBibleId) ??
+          VolumesRepository.shared.bibleWithId(defaultBibleId));
+}
 
 ///
 /// VolumeViewData
@@ -28,14 +35,14 @@ class VolumeViewData extends ViewData {
     return VolumeViewData.fromJson(context.bloc<ViewManagerBloc>()?.dataWithView(viewUid));
   }
 
-  String get bookNameAndChapter =>
-      (VolumesRepository.shared.bibleWithId(volumeId) ?? VolumesRepository.shared.bibleWithId(9))
-          .titleWithBookAndChapter(bcv.book, bcv.chapter);
+  String get bookNameAndChapter => (VolumesRepository.shared.bibleWithId(volumeId) ??
+          VolumesRepository.shared.bibleWithId(defaultBibleId))
+      .titleWithBookAndChapter(bcv.book, bcv.chapter);
 
   String get bookNameChapterAndAbbr {
     final volume = VolumesRepository.shared.volumeWithId(volumeId);
     assert(volume != null);
-    final bible = volume is Bible ? volume : VolumesRepository.shared.bibleWithId(9);
+    final bible = volume is Bible ? volume : VolumesRepository.shared.bibleWithId(defaultBibleId);
     assert(bible != null && (volume.type != VolumeType.bible || identical(volume, bible)));
     return '${bible.titleWithBookAndChapter(bcv.book, bcv.chapter)}, ${volume.abbreviation}';
   }
@@ -59,7 +66,7 @@ class VolumeViewData extends ViewData {
       volumeId = tec.as<int>(jsonMap['vid']);
       bcv = BookChapterVerse.fromJson(jsonMap['bcv']);
     }
-    return VolumeViewData(volumeId ?? _defaultBibleId, bcv ?? _defaultBCV);
+    return VolumeViewData(volumeId ?? defaultBibleId, bcv ?? defaultBCV);
   }
 }
 

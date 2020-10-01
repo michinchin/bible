@@ -30,7 +30,7 @@ class ViewableBibleChapter extends Viewable {
 
   @override
   Widget builder(BuildContext context, ViewState state, Size size) {
-    return _PageableChapterView(state: state, size: size);
+    return PageableChapterView(state: state, size: size);
   }
 
   @override
@@ -60,19 +60,20 @@ class ViewableBibleChapter extends Viewable {
   }
 }
 
-class _PageableChapterView extends StatefulWidget {
+class PageableChapterView extends StatefulWidget {
   final ViewState state;
   final Size size;
 
-  const _PageableChapterView({Key key, this.state, this.size}) : super(key: key);
+  const PageableChapterView({Key key, this.state, this.size}) : super(key: key);
 
   @override
   _PageableChapterViewState createState() => _PageableChapterViewState();
 }
 
-class _PageableChapterViewState extends State<_PageableChapterView> {
+class _PageableChapterViewState extends State<PageableChapterView> {
   TecPageController _pageController;
   BookChapterVerse _bcvPageZero;
+  Volume _volume;
   Bible _bible;
 
   @override
@@ -81,14 +82,18 @@ class _PageableChapterViewState extends State<_PageableChapterView> {
       create: (context) {
         final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
         final viewData = ChapterViewData.fromJson(vmBloc.dataWithView(widget.state.uid));
-        _bible = VolumesRepository.shared.bibleWithId(viewData.bibleId);
+        _volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
+        _bible = _volume.assocBible;
         _bcvPageZero = viewData.bcv;
         return ViewDataBloc(vmBloc, widget.state.uid, viewData);
       },
       child: Scaffold(
         appBar: MinHeightAppBar(
-            appBar:
-                ChapterViewAppBar(viewState: widget.state, size: widget.size, onUpdate: _onUpdate)),
+            appBar: ChapterViewAppBar(
+                volumeType: _volume is Bible ? VolumeType.bible : VolumeType.studyContent,
+                viewState: widget.state,
+                size: widget.size,
+                onUpdate: _onUpdate)),
         body: PageableView(
           state: widget.state,
           size: widget.size,
@@ -101,17 +106,17 @@ class _PageableChapterViewState extends State<_PageableChapterView> {
             if (ref == null) return null;
             return BlocBuilder<ViewDataBloc, ViewData>(
               buildWhen: (before, after) =>
-                  (before as ChapterViewData).bibleId != (after as ChapterViewData).bibleId,
+                  (before as ChapterViewData).volumeId != (after as ChapterViewData).volumeId,
               builder: (context, viewData) {
                 if (viewData is ChapterViewData) {
-                  final bible = VolumesRepository.shared.bibleWithId(viewData.bibleId);
-                  final ref = _bcvPageZero.advancedBy(chapters: index, bible: bible);
+                  final volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
+                  final ref = _bcvPageZero.advancedBy(chapters: index, bible: volume.assocBible);
                   if (ref == null) return Container();
                   // tec.dmPrint('page builder: ${ref.toString()}');
                   return _BibleChapterView(
-                      viewUid: widget.state.uid, size: size, bible: bible, ref: ref);
+                      viewUid: widget.state.uid, size: size, volume: volume, ref: ref);
                 } else {
-                  throw UnsupportedError('_PageableChapterView must use ChapterViewData');
+                  throw UnsupportedError('PageableChapterView must use ChapterViewData');
                 }
               },
             );
@@ -120,8 +125,8 @@ class _PageableChapterViewState extends State<_PageableChapterView> {
             // tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
             final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
             if (bcv != null) {
-              final viewData = ChapterViewData(_bible.id, bcv, page);
-              // tec.dmPrint('_PageableChapterView updating with new data: $viewData');
+              final viewData = ChapterViewData(_volume.id, bcv, page);
+              // tec.dmPrint('PageableChapterView updating with new data: $viewData');
               context.bloc<ViewDataBloc>().update(viewData);
             }
           },
@@ -131,28 +136,51 @@ class _PageableChapterViewState extends State<_PageableChapterView> {
   }
 
   void _onUpdate(
-      BuildContext context, int newBibleId, BookChapterVerse newBcv, VolumeViewData viewData) {
-    if (!mounted || newBibleId == null || newBcv == null) return;
+      BuildContext context, int newVolumeId, BookChapterVerse newBcv, VolumeViewData viewData) {
+    if (!mounted || newVolumeId == null || newBcv == null) return;
 
-    var bibleChanged = false;
-    var bible = _bible;
-    if (newBibleId != viewData.volumeId) {
-      bibleChanged = true;
-      bible = VolumesRepository.shared.bibleWithId(newBibleId);
-      if (bible == null) return; // ---------------------------------------->
+    var volumeChanged = false;
+    var volume = _volume;
+    if (newVolumeId != viewData.volumeId) {
+      volumeChanged = true;
+      volume = VolumesRepository.shared.volumeWithId(newVolumeId);
+      if (volume == null) return; // ---------------------------------------->
     }
 
-    final page = _bcvPageZero.chaptersTo(newBcv, bible: bible);
+    final page = _bcvPageZero.chaptersTo(newBcv, bible: volume.assocBible);
     if (page == null) {
-      tec.dmPrint('BibleView unable to navigate to $newBcv in ${bible.abbreviation}');
+      tec.dmPrint('BibleView unable to navigate to $newBcv in ${volume.assocBible.abbreviation}');
       return; // ---------------------------------------->
     }
 
-    if (bibleChanged) {
-      _bible = bible;
-      context.bloc<ViewDataBloc>()?.update(ChapterViewData(bible.id, newBcv, page));
+    if (volumeChanged) {
+      _volume = volume;
+      _bible = volume.assocBible;
+      context.bloc<ViewDataBloc>()?.update(ChapterViewData(volume.id, newBcv, page));
     } else if (newBcv != viewData.bcv) {
       _pageController?.jumpToPage(page);
+    }
+  }
+}
+
+Future<tec.ErrorOrValue<String>> _chapterHtmlWith(Volume volume, int book, int chapter) async {
+  if (volume is Bible) {
+    return volume.chapterHtmlWith(book, chapter);
+  } else {
+    final result = await volume.resourcesWithBook(book, chapter, ResourceType.studyNote);
+    assert(result != null);
+    if (result.error != null) {
+      return tec.ErrorOrValue<String>(result.error, null);
+    } else {
+      final html = StringBuffer();
+      for (final note in result.value) {
+        if (html.isNotEmpty) html.writeln('<p> </p>');
+        html.writeln('<div id="${note.verse}" end="${note.endVerse}">${note.textData}</div>');
+      }
+      if (html.isEmpty) {
+        html.writeln('<p>Study notes are not available for this chapter.</p>');
+      }
+      return tec.ErrorOrValue<String>(null, html.toString());
     }
   }
 }
@@ -160,14 +188,14 @@ class _PageableChapterViewState extends State<_PageableChapterView> {
 class _BibleChapterView extends StatefulWidget {
   final int viewUid;
   final Size size;
-  final Bible bible;
+  final Volume volume;
   final BookChapterVerse ref;
 
   const _BibleChapterView({
     Key key,
     @required this.viewUid,
     @required this.size,
-    @required this.bible,
+    @required this.volume,
     @required this.ref,
   }) : super(key: key);
 
@@ -181,14 +209,14 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
   @override
   void initState() {
     super.initState();
-    _future = widget.bible.chapterHtmlWith(widget.ref.book, widget.ref.chapter);
+    _future = _chapterHtmlWith(widget.volume, widget.ref.book, widget.ref.chapter);
   }
 
   @override
   void didUpdateWidget(_BibleChapterView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.bible.id != widget.bible.id || oldWidget.ref != widget.ref) {
-      _future = widget.bible.chapterHtmlWith(widget.ref.book, widget.ref.chapter);
+    if (oldWidget.volume.id != widget.volume.id || oldWidget.ref != widget.ref) {
+      _future = _chapterHtmlWith(widget.volume, widget.ref.book, widget.ref.chapter);
     }
   }
 
@@ -202,7 +230,7 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
           return BlocBuilder<ContentSettingsBloc, ContentSettings>(builder: (context, settings) {
             return _ChapterView(
               viewUid: widget.viewUid,
-              bible: widget.bible,
+              volume: widget.volume,
               ref: widget.ref,
               htmlFragment: htmlFragment,
               size: widget.size,
@@ -229,7 +257,7 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
 ///
 class _ChapterView extends StatefulWidget {
   final int viewUid;
-  final Bible bible;
+  final Volume volume;
   final BookChapterVerse ref;
   final String htmlFragment;
   final Size size;
@@ -238,12 +266,12 @@ class _ChapterView extends StatefulWidget {
   const _ChapterView({
     Key key,
     @required this.viewUid,
-    @required this.bible,
+    @required this.volume,
     @required this.ref,
     @required this.htmlFragment,
     @required this.size,
     this.versesToShow,
-  })  : assert(bible != null && htmlFragment != null),
+  })  : assert(volume != null && htmlFragment != null),
         super(key: key);
 
   @override
@@ -286,7 +314,7 @@ class _ChapterViewState extends State<_ChapterView> {
       marginRight: '0px',
       marginTop: '0px',
       marginBottom: '60px',
-      vendorFolder: widget.bible.vendorFolder,
+      vendorFolder: widget.volume.vendorFolder,
       customStyles: ' .C, .cno { display: none; } '
           '.FOOTNO { line-height: inherit; top: inherit; }'
           'h5, .SUBA, h1 { font-weight: normal !important; font-style: italic; font-size: 100% !important;}',
@@ -298,14 +326,14 @@ class _ChapterViewState extends State<_ChapterView> {
         providers: [
           BlocProvider(
             create: (context) => ChapterMarginNotesBloc(
-              volumeId: widget.bible.id,
+              volumeId: widget.volume.id,
               book: widget.ref.book,
               chapter: widget.ref.chapter,
             ),
           ),
           BlocProvider(
             create: (context) => ChapterHighlightsBloc(
-              volumeId: widget.bible.id,
+              volumeId: widget.volume.id,
               book: widget.ref.book,
               chapter: widget.ref.chapter,
             ),
@@ -316,17 +344,17 @@ class _ChapterViewState extends State<_ChapterView> {
             return BlocBuilder<ChapterHighlightsBloc, ChapterHighlights>(
               builder: (context, highlights) {
                 var userContentValid = true;
-                if (marginNotes.loaded && marginNotes.volumeId != widget.bible.id) {
+                if (marginNotes.loaded && marginNotes.volumeId != widget.volume.id) {
                   context
                       .bloc<ChapterMarginNotesBloc>()
-                      .add(MarginNotesEvent.changeVolumeId(widget.bible.id));
+                      .add(MarginNotesEvent.changeVolumeId(widget.volume.id));
                   userContentValid = false;
                 }
 
-                if (highlights.loaded && highlights.volumeId != widget.bible.id) {
+                if (highlights.loaded && highlights.volumeId != widget.volume.id) {
                   context
                       .bloc<ChapterHighlightsBloc>()
-                      .add(HighlightEvent.changeVolumeId(widget.bible.id));
+                      .add(HighlightEvent.changeVolumeId(widget.volume.id));
                   userContentValid = false;
                 }
 
@@ -335,9 +363,9 @@ class _ChapterViewState extends State<_ChapterView> {
 
                   return _BibleHtml(
                     viewUid: widget.viewUid,
-                    volumeId: widget.bible.id,
+                    volumeId: widget.volume.id,
                     ref: widget.ref,
-                    baseUrl: widget.bible.baseUrl,
+                    baseUrl: widget.volume.baseUrl,
                     html: _html,
                     versesToShow: widget.versesToShow ?? [],
                     // ['1', '2', '3']

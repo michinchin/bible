@@ -11,13 +11,15 @@ import '../common/bible_chapter_title.dart';
 import '../misc/view_actions.dart';
 
 class ChapterViewAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final VolumeType volumeType;
   final ViewState viewState;
   final Size size;
   final SelectionState selectionState;
   final void Function(
           BuildContext context, int newBibleId, BookChapterVerse newBcv, VolumeViewData viewData)
       onUpdate;
-  const ChapterViewAppBar({Key key, this.viewState, this.size, this.selectionState, this.onUpdate})
+
+  const ChapterViewAppBar({Key key, this.volumeType, this.viewState, this.size, this.selectionState, this.onUpdate})
       : super(key: key);
 
   @override
@@ -41,7 +43,7 @@ class ChapterViewAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       automaticallyImplyLeading: false,
       centerTitle: false,
-      title: BibleChapterTitle(volumeType: VolumeType.bible, onUpdate: onUpdate),
+      title: BibleChapterTitle(volumeType: volumeType, onUpdate: onUpdate),
       actions: defaultActionsBuilder(context, viewState, size),
     );
     // },
