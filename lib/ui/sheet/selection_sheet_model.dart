@@ -99,35 +99,19 @@ class SelectionSheetModel {
         onPressed: onEditMode,
       );
 
-  static Widget defineButton(BuildContext c) {
+  static Future<void> defineWebSearch(BuildContext c) async {
     final refs = _grabRefs(c);
-    VoidCallback onPressed;
-    var title = 'Web Search';
-    var icon = FeatherIcons.compass;
+
     if (refs.length > 1) {
-      onPressed = () async {
-        final refChosen =
-            await _showRefPickerDialog<Reference>(c, refs, title: 'Select Verse to Web Search');
-        if (refChosen != null) {
-          await _defineWebSearch(c, refChosen);
-        }
-      };
-    } else {
-      if (refs.isNotEmpty) {
-        final ref = refs[0];
-        if (ref.word == ref.endWord) {
-          //single word define
-          title = 'Define';
-          icon = FeatherIcons.bookOpen;
-        }
-        onPressed = () => _defineWebSearch(c, ref);
+      final refChosen =
+          await _showRefPickerDialog<Reference>(c, refs, title: 'Select Verse to Web Search');
+      if (refChosen != null) {
+        await _defineWebSearch(c, refChosen);
       }
+    } else if (refs.isNotEmpty) {
+      final ref = refs[0];
+      await _defineWebSearch(c, ref);
     }
-    return SelectionSheetButton(
-      icon: icon,
-      onPressed: onPressed,
-      title: title,
-    );
   }
 
   static void buttonAction(BuildContext context, String type) {
@@ -152,6 +136,10 @@ class SelectionSheetModel {
         break;
       case 'More':
         more(context);
+        break;
+      case 'Learn':
+        // put define/web search in learn for now
+        defineWebSearch(context);
         break;
       default:
         break;

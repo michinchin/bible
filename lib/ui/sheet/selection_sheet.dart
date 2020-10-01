@@ -174,7 +174,7 @@ class __MiniViewState extends State<_MiniView> {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 5),
+              const SizedBox(height: 10),
               Container(
                   padding: const EdgeInsets.only(left: 8),
                   height: 40,
@@ -186,6 +186,7 @@ class __MiniViewState extends State<_MiniView> {
                     separatorBuilder: (c, i) =>
                         const VerticalDivider(color: Colors.transparent, width: 10),
                   )),
+              const SizedBox(height: 15),
               Padding(
                   padding: const EdgeInsets.all(10),
                   child: Row(
@@ -196,9 +197,9 @@ class __MiniViewState extends State<_MiniView> {
                           Expanded(
                             child: child,
                           ),
-                        Expanded(
-                          child: SelectionSheetModel.defineButton(context),
-                        )
+                        // Expanded(
+                        //   child: SelectionSheetModel.defineButton(context),
+                        // )
                       ])),
             ],
           );
