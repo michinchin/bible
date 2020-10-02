@@ -77,23 +77,32 @@ class _PageableChapterViewState extends State<PageableChapterView> {
   Bible _bible;
 
   @override
+  void initState() {
+    super.initState();
+    final viewData =
+        ChapterViewData.fromJson(context.bloc<ViewManagerBloc>().dataWithView(widget.state.uid));
+    _volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
+    _bible = _volume.assocBible;
+    _bcvPageZero = viewData.bcv;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) {
         final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
         final viewData = ChapterViewData.fromJson(vmBloc.dataWithView(widget.state.uid));
-        _volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
-        _bible = _volume.assocBible;
-        _bcvPageZero = viewData.bcv;
         return ViewDataBloc(vmBloc, widget.state.uid, viewData);
       },
       child: Scaffold(
         appBar: MinHeightAppBar(
-            appBar: ChapterViewAppBar(
-                volumeType: _volume is Bible ? VolumeType.bible : VolumeType.studyContent,
-                viewState: widget.state,
-                size: widget.size,
-                onUpdate: _onUpdate)),
+          appBar: ChapterViewAppBar(
+            volumeType: _volume is Bible ? VolumeType.bible : VolumeType.studyContent,
+            viewState: widget.state,
+            size: widget.size,
+            onUpdate: _onUpdate,
+          ),
+        ),
         body: PageableView(
           state: widget.state,
           size: widget.size,
