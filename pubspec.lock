@@ -348,7 +348,7 @@ packages:
       name: flutter_local_notifications
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.4+4"
+    version: "1.4.4+5"
   flutter_local_notifications_platform_interface:
     dependency: transitive
     description:
@@ -392,13 +392,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_widgets:
-    dependency: transitive
-    description:
-      name: flutter_widgets
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.12"
   freezed:
     dependency: "direct dev"
     description:
@@ -734,7 +727,7 @@ packages:
       name: plugin_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.2"
+    version: "1.0.3"
   pointycastle:
     dependency: transitive
     description:
@@ -1054,7 +1047,7 @@ packages:
       name: tec_user_account
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.7"
+    version: "2.0.8"
   tec_util:
     dependency: "direct main"
     description:
@@ -1082,7 +1075,7 @@ packages:
       name: tec_widgets
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.10"
+    version: "2.0.11"
   term_glyph:
     dependency: transitive
     description:

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
+		27102D472527DE6600BAAB4D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 27102D462527DE6600BAAB4D /* GoogleService-Info.plist */; };
 		275A100E24A3BEFC0035A8A6 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 275A0FFE24A3BEFC0035A8A6 /* Default@2x.png */; };
 		275A100F24A3BEFC0035A8A6 /* Default-Landscape.png in Resources */ = {isa = PBXBuildFile; fileRef = 275A100024A3BEFC0035A8A6 /* Default-Landscape.png */; };
 		275A101024A3BEFC0035A8A6 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 275A100224A3BEFC0035A8A6 /* LaunchScreen.xib */; };
@@ -42,6 +43,7 @@
 		060C3B3252FAE275B2F45EAD /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
+		27102D462527DE6600BAAB4D /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		275A0FFF24A3BEFC0035A8A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = "Base.lproj/Default@2x.png"; sourceTree = "<group>"; };
 		275A100124A3BEFC0035A8A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = "Base.lproj/Default-Landscape.png"; sourceTree = "<group>"; };
 		275A100324A3BEFC0035A8A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				27102D462527DE6600BAAB4D /* GoogleService-Info.plist */,
 				275A101924A3C5E20035A8A6 /* Runner.entitlements */,
 				275A101624A3BF010035A8A6 /* Launch Screen */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
@@ -240,6 +243,7 @@
 				275A101424A3BEFC0035A8A6 /* Default-Portrait@2x.png in Resources */,
 				275A101024A3BEFC0035A8A6 /* LaunchScreen.xib in Resources */,
 				275A101524A3BEFC0035A8A6 /* Default-568h@2x.png in Resources */,
+				27102D472527DE6600BAAB4D /* GoogleService-Info.plist in Resources */,
 				275A101224A3BEFC0035A8A6 /* Default-Landscape@2x.png in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,

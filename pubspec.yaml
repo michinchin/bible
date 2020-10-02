@@ -10,7 +10,7 @@ dependencies:
   # Flutter default dependencies
   flutter:
     sdk: flutter
-  cupertino_icons: ^0.1.3
+  cupertino_icons: ^0.1.2
 
   # Localization related dependencies
   flutter_localizations:
@@ -39,7 +39,7 @@ dependencies:
   path_provider: ^1.6.11
   pedantic: ^1.9.2
   provider: ^4.3.2+2
-  quill_delta: ^1.0.2
+  quill_delta: ^1.0.0
   rxdart: ^0.24.1
   scrollable_positioned_list: ^0.1.7
   share: ^0.6.5
