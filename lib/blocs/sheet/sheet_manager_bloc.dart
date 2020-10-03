@@ -27,6 +27,7 @@ abstract class SheetEvent with _$SheetEvent {
 
 class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
   SheetManagerBloc() : super(const SheetManagerState(type: SheetType.main, size: SheetSize.mini));
+  bool _correctHiddenValue;
 
   @override
   Stream<SheetManagerState> mapEventToState(SheetEvent event) async* {
@@ -49,7 +50,12 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
   void changeSize(SheetSize size) => add(SheetEvent.changeSize(size));
   void changeTypeSize(SheetType type, SheetSize size) => add(SheetEvent.changeTypeSize(type, size));
   void setUid(int uid) => add(SheetEvent.changeView(uid));
-  void collapse(BuildContext context) => SheetController.of(context).hide();
+
+  void collapse(BuildContext context) {
+    _correctHiddenValue = true;
+    SheetController.of(context).hide();
+  }
+
   void restore(BuildContext context) {
     // Only change the state if it actually needs to change.
 
@@ -64,6 +70,27 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
       changeSize(SheetSize.mini);
     }
 
-    SheetController.of(context).show();
+    _correctHiddenValue = false;
+    _show(context);
+  }
+
+  void _show(BuildContext context) {
+    if (_correctHiddenValue) {
+      // async issue - trying to do a delayed show - but it's supposed to be hidden
+      // ignore
+      return;
+    }
+
+    // the sheet is supposed to visible now
+    if (SheetController.of(context).state.isHidden) {
+      // the sheet thinks it's actually hidden - ok to show now
+      SheetController.of(context).show();
+    }
+    else {
+      // there was a quick change... need to wait for the async 'hidden' to finish
+      Future.delayed(const Duration(milliseconds: 150), () {
+        _show(context);
+      });
+    }
   }
 }

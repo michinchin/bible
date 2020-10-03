@@ -26,12 +26,16 @@ class _VMViewStack extends StatelessWidget {
 
     final portraitHeight = math.max(constraints.maxWidth, constraints.maxHeight);
     final portraitWidth = math.min(constraints.maxWidth, constraints.maxHeight);
+
+    var numViewsLimited = false;
+
     if (portraitHeight < 950.0 && portraitWidth < 500) {
       // This is a phone or small app window, so only allow 2 views.
       _minSize = math.max(
           ((math.max(adjustedConstraints.maxWidth, adjustedConstraints.maxHeight)) / 2.0)
               .floorToDouble(),
           244);
+      numViewsLimited = true;
     } else {
       // This is a larger window or tablet.
       _minSize = 300;
@@ -65,8 +69,9 @@ class _VMViewStack extends StatelessWidget {
 
     // Build children and save the view rects.
     final viewRects = <ViewRect>[];
-    final children =
-        rows.toViewList(adjustedConstraints, maximizedView, viewWithKeyboardFocus, viewRects);
+    final children = rows.toViewList(
+        adjustedConstraints, maximizedView, viewWithKeyboardFocus, viewRects,
+        numViewsLimited: numViewsLimited);
     bloc?._viewRects = viewRects;
 
     // If the state of visible selected text changed, call _updateSelectionBloc after the build.
@@ -404,6 +409,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     ViewState maximizedView,
     ViewState viewWithKeyboardFocus,
     List<ViewRect> rects,
+    { bool numViewsLimited = false }
   ) {
     // Cannot have both a maximizedView and a viewWithKeyboardFocus.
     assert(maximizedView == null || viewWithKeyboardFocus == null);
@@ -491,6 +497,17 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
         }
 
         final isMaximized = (maximizedView?.uid == state.uid);
+
+        // special case - phone/small app view with 2 windows in portrait
+        // reducing space from the top window so both windows have save visible height
+        if (c == 0 &&
+            length == 2 &&
+            numViewsLimited &&
+            noViewIsMaximized &&
+            constraints.maxHeight > constraints.maxWidth) {
+          final heightAdjust = (TecScaffoldWrapper.navigationBarPadding < 15.0) ? 31.0 : 41.0;
+          height += (r == 0) ? -heightAdjust : heightAdjust;
+        }
 
         _addViewWithIndex(i, state, r, c, row.length, x, y, width, height,
             isVisible: noViewIsMaximized || isMaximized, isMaximized: isMaximized);

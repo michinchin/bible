@@ -322,7 +322,7 @@ class _ChapterViewState extends State<_ChapterView> {
       marginLeft: '0px',
       marginRight: '0px',
       marginTop: '0px',
-      marginBottom: '60px',
+      marginBottom: '160px',
       vendorFolder: widget.volume.vendorFolder,
       customStyles: ' .C, .cno { display: none; } '
           '.FOOTNO { line-height: inherit; top: inherit; }'
