@@ -28,7 +28,8 @@ class ViewableNotes extends Viewable {
   String menuTitle({BuildContext context, ViewState state}) => 'Notes';
 
   @override
-  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) => Future.value(null);
+  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) =>
+      Future.value(const ViewData());
 }
 
 Widget notesViewBuilder(BuildContext context, ViewState viewState, Size size) =>
