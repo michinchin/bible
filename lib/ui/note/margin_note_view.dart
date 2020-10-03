@@ -31,7 +31,8 @@ class ViewableMarginNote extends Viewable {
   String menuTitle({BuildContext context, ViewState state}) => null;
 
   @override
-  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) => Future.value(null);
+  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) =>
+      Future.value(const ViewData());
 }
 
 class _MarginNoteView extends StatefulWidget {

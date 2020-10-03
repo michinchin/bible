@@ -18,7 +18,8 @@ class ViewableTest extends Viewable {
   String menuTitle({BuildContext context, ViewState state}) => 'test';
 
   @override
-  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) => Future.value(null);
+  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) =>
+      Future.value(const ViewData());
 }
 
 void main() {

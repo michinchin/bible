@@ -33,7 +33,9 @@ class ViewManager {
     }
     final viewData =
         await _types[type]?.dataForNewView(context: context, currentViewId: currentViewId);
-    vmBloc?.add(ViewManagerEvent.add(type: type, position: position, data: viewData?.toString()));
+    if (viewData != null) {
+      vmBloc?.add(ViewManagerEvent.add(type: type, position: position, data: viewData.toString()));
+    }
   }
 
   String menuTitleWith({String type, BuildContext context, ViewState state}) {
