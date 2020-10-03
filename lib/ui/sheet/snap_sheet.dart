@@ -23,7 +23,7 @@ class SnapSheet extends StatefulWidget {
   _SnapSheetState createState() => _SnapSheetState();
 }
 
-const _headerHeight = 15.0;
+const _headerHeight = 21.0;
 
 class _SnapSheetState extends State<SnapSheet> {
   ValueNotifier<double> onDragValue;
@@ -72,10 +72,13 @@ class _SnapSheetState extends State<SnapSheet> {
 
     // current sheet size
     SheetSize _getSheetSize(double d) {
-      final snap = snapOffsets.indexWhere((s) => s == d);
-      if (snap != -1) {
-        return SheetSize.values[snap];
+      // sheet sizes and snaps aren't always exactly the same - effected by device pixel density
+      for (var i = 0; i < snapOffsets.length; i++) {
+        if (d.round() == snapOffsets[i].round()) {
+          return SheetSize.values[i];
+        }
       }
+
       return null;
     }
 
@@ -139,6 +142,8 @@ class _SnapSheetState extends State<SnapSheet> {
                   addTopViewPaddingOnFullscreen: true,
                   listener: (s) {
                     onDragValue.value = s.extent;
+                    // debugPrint('${onDragValue.value}');
+                    // need to figure out how to catch a mode change when a full drag happened...
                   },
                   closeOnBackButtonPressed: true,
                   snapSpec: SnapSpec(
@@ -164,7 +169,7 @@ class _SnapSheetState extends State<SnapSheet> {
                       // different snap settings for the different sheet types
 
                       // might need to adjust snap though...
-                      if (onDragValue.value != snapOffsets[current.size.index]) {
+                      if (onDragValue.value.round() != snapOffsets[current.size.index].round()) {
                         SheetController.of(c).snapToExtent(snapOffsets[current.size.index]);
                       }
 
@@ -243,6 +248,8 @@ class _SnapSheetState extends State<SnapSheet> {
                         c.bloc<SheetManagerBloc>().changeSize(nextSize);
                       },
                       child: Padding(
+                        // NOTICE: adjust the _headerHeight variable at the top of this
+                        // class if you adjust this padding
                         padding: const EdgeInsets.all(8),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,

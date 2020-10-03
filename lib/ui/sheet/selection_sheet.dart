@@ -188,7 +188,8 @@ class __MiniViewState extends State<_MiniView> {
                   )),
               const SizedBox(height: 15),
               Padding(
-                  padding: const EdgeInsets.all(10),
+                  // bottom padding is handled by TecScaffoldWrapper
+                  padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
                   child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
