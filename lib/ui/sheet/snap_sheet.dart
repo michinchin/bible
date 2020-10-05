@@ -323,34 +323,33 @@ class SelectionSheetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget iconButton() => InkWell(
-          onTap: onPressed,
-          customBorder: const CircleBorder(),
-          child: Container(
-              padding: const EdgeInsets.all(10),
-              child: Icon(
-                icon,
-                color: Colors.grey,
-                size: 20,
-              ),
-              decoration:
-                  const ShapeDecoration(shape: CircleBorder(side: BorderSide(color: Colors.grey)))),
+    Widget iconButton() => Padding(
+          padding: const EdgeInsets.all(5),
+          child: Icon(
+            icon,
+            color: Colors.grey,
+            size: 20,
+          ),
         );
     return (title != null)
-        ? Column(mainAxisSize: MainAxisSize.min, children: [
-            iconButton(),
-            const SizedBox(height: 5),
-            TecText(
-              title,
-              autoSize: true,
-              textAlign: TextAlign.center,
-              textScaleFactor: 0.9,
-              style: Theme.of(context).textTheme.caption.copyWith(
-                    color: Theme.of(context).textColor.withOpacity(0.5),
-                  ),
-            ),
-          ])
-        : iconButton();
+        ? InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(15),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              iconButton(),
+              const SizedBox(height: 2),
+              TecText(
+                title,
+                autoSize: true,
+                textAlign: TextAlign.center,
+                textScaleFactor: 0.8,
+                maxLines: 1,
+                style: Theme.of(context).textTheme.caption.copyWith(
+                      color: Theme.of(context).textColor.withOpacity(0.5),
+                    ),
+              ),
+            ]))
+        : InkWell(onTap: onPressed, customBorder: const CircleBorder(), child: iconButton());
   }
 }
 

@@ -13,6 +13,16 @@ import '../../models/pref_item.dart';
 part 'pref_items_bloc.freezed.dart';
 
 const unsetHighlightColor = Color(0xff999999);
+const defaultCustomHighlightColor1 = Color(0xffffc595);
+const defaultCustomHighlightColor2 = Color(0xffdac6ff);
+const defaultCustomHighlightColor3 = Color(0xff80cbc4);
+const defaultCustomHighlightColor4 = Color(0xffffadaf);
+const defaultCustomColors = [
+  defaultCustomHighlightColor1,
+  defaultCustomHighlightColor2,
+  defaultCustomHighlightColor3,
+  defaultCustomHighlightColor4
+];
 
 @freezed
 abstract class PrefItemEvent with _$PrefItemEvent {
@@ -56,7 +66,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
         prefItems.add(PrefItem(
             prefItemDataType: PrefItemDataType.int,
             prefItemId: i,
-            verse: unsetHighlightColor.value));
+            verse: defaultCustomColors[i-1].value));
       }
     }
     if (prefItems.itemWithId(PrefItemId.navLayout) == null) {

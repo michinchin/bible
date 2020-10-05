@@ -148,13 +148,15 @@ class __MiniViewState extends State<_MiniView> {
               [];
           final customColors = [for (final color in prefItems) Color(color.verse)];
           final colors = [
-            SelectionSheetModel.noColorButton(context),
             SelectionSheetModel.underlineButton(
                 underlineMode: underlineMode, onSwitchToUnderline: _onSwitchToUnderline),
+            SelectionSheetModel.noColorButton(context, forUnderline: underlineMode),
             for (final color in SelectionSheetModel.defaultColors) ...[
               _ColorPickerButton(
                 isForUnderline: underlineMode,
                 color: color,
+                editMode: editMode,
+                defaultColors: true,
                 onEdit: () => TecToast.show(context, 'Cannot edit default colors'),
               ),
             ],
@@ -176,7 +178,7 @@ class __MiniViewState extends State<_MiniView> {
             children: [
               const SizedBox(height: 10),
               Container(
-                  padding: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.only(left: 25),
                   height: 40,
                   child: ListView.separated(
                     shrinkWrap: true,
@@ -186,7 +188,7 @@ class __MiniViewState extends State<_MiniView> {
                     separatorBuilder: (c, i) =>
                         const VerticalDivider(color: Colors.transparent, width: 10),
                   )),
-              const SizedBox(height: 15),
+              const SizedBox(height: 5),
               Padding(
                   // bottom padding is handled by TecScaffoldWrapper
                   padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
@@ -278,13 +280,15 @@ class _ColorPickerButton extends StatelessWidget {
   final VoidCallback onEdit;
   final bool editMode;
   final VoidCallback switchToEditMode;
+  final bool defaultColors;
 
   const _ColorPickerButton(
       {@required this.color,
       this.isForUnderline = false,
       @required this.onEdit,
       this.editMode = false,
-      this.switchToEditMode})
+      this.switchToEditMode,
+      this.defaultColors = false})
       : assert(color != null);
 
   @override
@@ -297,7 +301,7 @@ class _ColorPickerButton extends StatelessWidget {
         }
       },
       onTap: () {
-        if (color == unsetHighlightColor || editMode) {
+        if (editMode) {
           onEdit();
         } else {
           context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
@@ -325,7 +329,7 @@ class _ColorPickerButton extends StatelessWidget {
                   : null,
             ),
           ),
-          if (color == unsetHighlightColor || editMode)
+          if (editMode && !defaultColors)
             const Icon(
               Icons.colorize,
               color: Colors.white,
