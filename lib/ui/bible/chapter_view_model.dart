@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
@@ -184,9 +185,23 @@ class ChapterViewModel {
     final iconWidth = (style.fontSize ?? 16.0) * 0.6;
     final containerWidth = iconWidth + 4.0; // small right padding
 
-    void _onPress() {
-      if (_selectedVerses.isEmpty) {
-        tecShowSimpleAlertDialog<void>(context: context, content: tag.href);
+    Future<void> _onPress() async {
+      final bible = VolumesRepository.shared.bibleWithId(volume);
+      final footnoteHtml =
+          await bible.footnoteHtmlWith(book, chapter, int.parse(tag.href.split('_').last));
+      if (tec.isNotNullOrEmpty(footnoteHtml.value) &&
+          tec.isNullOrEmpty(footnoteHtml.error) &&
+          _selectedVerses.isEmpty) {
+        await showDialog<void>(
+            context: context,
+            barrierDismissible: true,
+            builder: (builder) {
+              return AlertDialog(
+                contentPadding: const EdgeInsets.all(0),
+                content: TecHtml(footnoteHtml.value, baseUrl: '', selectable: false),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              );
+            });
       } else {
         TecToast.show(context, 'Clear selection to view footnote');
         // not sure if I want to force this...
@@ -692,11 +707,7 @@ class TecHtmlBuildHelper {
 ///
 /// Returns the merged result of two [TextStyle]s, and either, or both, can be `null`.
 ///
-TextStyle _merge(TextStyle s1, TextStyle s2) => s1 == null
-    ? s2
-    : s2 == null
-        ? s1
-        : s1.merge(s2);
+TextStyle _merge(TextStyle s1, TextStyle s2) => s1 == null ? s2 : s2 == null ? s1 : s1.merge(s2);
 
 ///
 /// Returns a new [Reference] from the given set of [verses] and other optional parameters.
