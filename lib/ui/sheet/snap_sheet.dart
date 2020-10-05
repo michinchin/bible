@@ -342,7 +342,7 @@ class SelectionSheetButton extends StatelessWidget {
                 title,
                 autoSize: true,
                 textAlign: TextAlign.center,
-                textScaleFactor: 0.8,
+                textScaleFactor: 0.9,
                 maxLines: 1,
                 style: Theme.of(context).textTheme.caption.copyWith(
                       color: Theme.of(context).textColor.withOpacity(0.5),

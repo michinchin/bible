@@ -178,20 +178,20 @@ class __MiniViewState extends State<_MiniView> {
             children: [
               const SizedBox(height: 10),
               Container(
-                  padding: const EdgeInsets.only(left: 25),
-                  height: 40,
+                  padding: const EdgeInsets.only(left: 10),
+                  height: 35,
                   child: ListView.separated(
                     shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
                     itemCount: colors.length,
                     itemBuilder: (c, i) => colors[i],
                     separatorBuilder: (c, i) =>
-                        const VerticalDivider(color: Colors.transparent, width: 10),
+                        const VerticalDivider(color: Colors.transparent, width: 5),
                   )),
               const SizedBox(height: 5),
               Padding(
                   // bottom padding is handled by TecScaffoldWrapper
-                  padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
+                  padding: const EdgeInsets.only(left: 10, top: 5, right: 10),
                   child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,

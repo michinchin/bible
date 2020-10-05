@@ -42,13 +42,13 @@ class SelectionSheetModel {
 
   static const miniButtons = <String, IconData>{
     // 'No Color': Icons.format_color_reset,
+    'Save': FeatherIcons.bookmark,
     'Copy': FeatherIcons.copy,
     'Share': FeatherIcons.share,
     'Compare': Icons.compare_arrows,
     'Learn': Icons.lightbulb_outline,
     // 'Audio': Icons.play_arrow,
     'Note': FeatherIcons.edit2,
-    'Bookmark': FeatherIcons.bookmark
   };
 
   static const buttonSubtitles = <String, String>{
