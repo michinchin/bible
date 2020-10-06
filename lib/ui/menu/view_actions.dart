@@ -9,6 +9,8 @@ import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/shared_bible_ref_bloc.dart';
+import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../common/common.dart';
 import 'main_menu.dart';
@@ -61,6 +63,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
 }
 
 Future<void> _showViewMenu({BuildContext context, ViewState state, EdgeInsetsGeometry insets}) {
+  final originalContext = context;
   return showTecModalPopup<void>(
     useRootNavigator: true,
     context: context,
@@ -68,22 +71,31 @@ Future<void> _showViewMenu({BuildContext context, ViewState state, EdgeInsetsGeo
     edgeInsets: insets,
     builder: (context) {
       return TecPopupSheet(
-        child: _MenuItems(state: state),
+        child: _MenuItems(originalContext: originalContext, state: state),
       );
     },
   );
 }
 
 class _MenuItems extends StatelessWidget {
+  final BuildContext originalContext;
   final ViewState state;
 
-  const _MenuItems({Key key, this.state}) : super(key: key);
+  const _MenuItems({
+    Key key,
+    @required this.originalContext,
+    @required this.state,
+  })  : assert(originalContext != null && state != null),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // ignore: close_sinks
     final vmBloc = context.bloc<ViewManagerBloc>();
     final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
+
+    final viewData = ChapterViewData.fromContext(context, state.uid);
+    final useSharedRef = viewData.useSharedRef;
 
     return Material(
       color: Colors.transparent, // Theme.of(context).scaffoldBackgroundColor,
@@ -105,6 +117,22 @@ class _MenuItems extends StatelessWidget {
           ],
           _divider(context, 'Open New'),
           ...generateAddMenuItems(context, state.uid),
+          if ({'BibleChapter', 'StudyView'}.contains(state.type)) ...[
+            _divider(context),
+            _menuItem(
+              context,
+              useSharedRef ? Icons.link_off : Icons.link,
+              useSharedRef ? 'Un-link Reference' : 'Link Reference',
+              () {
+                Navigator.of(context).maybePop();
+                final viewDataBloc = originalContext.bloc<ViewDataBloc>();
+                viewDataBloc?.update(viewData.copyWith(useSharedRef: !useSharedRef));
+                if (!useSharedRef) {
+                  originalContext.bloc<SharedBibleRefBloc>().update(viewData.bcv);
+                }
+              },
+            ),
+          ],
           if ((vmBloc?.state?.views?.length ?? 0) > 1) ...[
             _divider(context),
             _menuItem(context, Icons.close, 'Close View', () {

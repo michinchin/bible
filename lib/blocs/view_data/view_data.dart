@@ -31,6 +31,8 @@ class ViewData extends Equatable {
     return ViewData.fromJson(context.bloc<ViewManagerBloc>()?.dataWithView(viewUid));
   }
 
+  ViewData copyWith() => const ViewData();
+
   @override
   List<Object> get props => [];
 

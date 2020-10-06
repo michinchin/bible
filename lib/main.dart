@@ -17,6 +17,7 @@ import 'blocs/app_theme_bloc.dart';
 import 'blocs/content_settings.dart';
 import 'blocs/downloads/downloads_bloc.dart';
 import 'blocs/search/search_bloc.dart';
+import 'blocs/shared_bible_ref_bloc.dart';
 import 'blocs/sheet/pref_items_bloc.dart';
 import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
@@ -87,6 +88,7 @@ class App extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => DownloadsBloc.create()),
+        BlocProvider(create: (context) => SharedBibleRefBloc()),
         BlocProvider(create: (context) => ViewManagerBloc(kvStore: tec.Prefs.shared)),
         BlocProvider(create: (context) => ThemeModeBloc()),
         BlocProvider(create: (context) => ContentSettingsBloc()),

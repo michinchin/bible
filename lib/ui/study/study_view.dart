@@ -35,10 +35,9 @@ class ViewableStudyContent extends Viewable {
     // tec.dmPrint('selected $bibleId');
 
     if (volumeId != null) {
-      final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-      final previous = ChapterViewData.fromJson(vmBloc?.dataWithView(currentViewId));
+      final previous = ChapterViewData.fromContext(context, currentViewId);
       assert(previous != null);
-      return ChapterViewData(volumeId, previous.bcv, previous.page);
+      return previous.copyWith(volumeId: volumeId);
     }
 
     return null;
@@ -71,11 +70,8 @@ class StudyView extends StatelessWidget {
 
     return BlocProvider(
       create: (context) {
-        final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-        final viewData = ChapterViewData.fromJson(vmBloc.dataWithView(state.uid));
-        // _bible = VolumesRepository.shared.bibleWithId(viewData.bibleId);
-        // _bcvPageZero = viewData.bcv;
-        return ViewDataBloc(vmBloc, state.uid, viewData);
+        final viewData = ChapterViewData.fromContext(context, state.uid);
+        return ViewDataBloc(context.bloc<ViewManagerBloc>(), state.uid, viewData);
       },
       child: DefaultTabController(
         length: tabs.length,
@@ -109,7 +105,7 @@ class StudyView extends StatelessWidget {
       BuildContext context, int newVolumeId, BookChapterVerse newBcv, VolumeViewData viewData) {
     if (newVolumeId == null || newBcv == null) return;
     if (newVolumeId != viewData.volumeId || newBcv != viewData.bcv) {
-      context.bloc<ViewDataBloc>()?.update(VolumeViewData(newVolumeId, newBcv));
+      context.bloc<ViewDataBloc>()?.update(viewData.copyWith(volumeId: newVolumeId, bcv: newBcv));
     }
   }
 }

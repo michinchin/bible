@@ -286,7 +286,11 @@ class TecPageController implements PageController {
   Future<void> animateToPage(int page, {Duration duration, Curve curve}) {
     final actualPage = _actualPageFromFauxPage(page);
     _enableActualPage(actualPage);
-    return _pageController.animateToPage(actualPage, duration: duration, curve: curve);
+    return _pageController.animateToPage(
+      actualPage,
+      duration: duration ?? const Duration(milliseconds: 200),
+      curve: curve ?? Curves.easeIn,
+    );
   }
 
   @override
