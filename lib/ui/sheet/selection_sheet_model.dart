@@ -74,49 +74,53 @@ class SelectionSheetModel {
       );
 
   static Widget noColorButton(BuildContext context,
-          {bool forUnderline = false, double radius = 20}) =>
-      forUnderline
-          ? InkWell(
+      {bool forUnderline = false, double radius = 20}) {
+    final borderColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey.withOpacity(0.5)
+        : Colors.grey;
+    return forUnderline
+        ? InkWell(
+            customBorder: const CircleBorder(),
+            onTap: () => _noColor(context),
+            child: CircleAvatar(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                height: 15,
+                width: radius * 2,
+                decoration: ShapeDecoration(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        side: BorderSide(
+                          width: 2,
+                          color: borderColor,
+                        ))),
+                child: Transform.rotate(
+                    angle: 10,
+                    child: VerticalDivider(
+                      color: borderColor,
+                      thickness: 2,
+                    )),
+              ),
+            ),
+          )
+        : SizedBox.fromSize(
+            size: Size.fromRadius(radius),
+            child: InkWell(
               customBorder: const CircleBorder(),
               onTap: () => _noColor(context),
-              child: CircleAvatar(
-                backgroundColor: Colors.transparent,
-                child: Container(
-                  height: 15,
-                  width: radius * 2,
-                  decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          side: const BorderSide(
-                            width: 2,
-                            color: Colors.grey,
-                          ))),
-                  child: Transform.rotate(
-                      angle: 10,
-                      child: const VerticalDivider(
-                        color: Colors.grey,
-                        thickness: 2,
-                      )),
-                ),
+              child: Container(
+                decoration: ShapeDecoration(
+                    shape: CircleBorder(side: BorderSide(color: borderColor, width: 2))),
+                child: Transform.rotate(
+                    angle: 10,
+                    child: VerticalDivider(
+                      color: borderColor,
+                      thickness: 2,
+                    )),
               ),
-            )
-          : SizedBox.fromSize(
-              size: Size.fromRadius(radius),
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: () => _noColor(context),
-                child: Container(
-                  decoration: const ShapeDecoration(
-                      shape: CircleBorder(side: BorderSide(color: Colors.grey, width: 2))),
-                  child: Transform.rotate(
-                      angle: 10,
-                      child: const VerticalDivider(
-                        color: Colors.grey,
-                        thickness: 2,
-                      )),
-                ),
-              ),
-            );
+            ),
+          );
+  }
 
   static Widget pickColorButton({@required bool editMode, @required VoidCallback onEditMode}) =>
       SelectionSheetButton(

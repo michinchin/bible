@@ -1,3 +1,4 @@
+import 'package:bible/models/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -102,6 +103,7 @@ class __MiniViewState extends State<_MiniView> {
     final colorChosen = await showModalBottomSheet<int>(
         context: context,
         useRootNavigator: true,
+        enableDrag: false,
         barrierColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
             borderRadius:
@@ -293,6 +295,10 @@ class _ColorPickerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final formattedColor =
+        isDarkMode ? textColorWith(color, isDarkMode: true) : highlightColorWith(color);
+    final borderColor = isDarkMode ? Colors.grey.withOpacity(0.5) : Colors.grey;
     return InkWell(
       customBorder: const CircleBorder(),
       onLongPress: () {
@@ -314,25 +320,28 @@ class _ColorPickerButton extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           Container(
-            decoration: const ShapeDecoration(shape: CircleBorder()),
+            decoration: isForUnderline
+                ? null
+                : ShapeDecoration(
+                    shape: CircleBorder(side: BorderSide(color: borderColor, width: 2))),
             child: CircleAvatar(
-              backgroundColor: isForUnderline ? Colors.transparent : color,
+              backgroundColor: isForUnderline ? Colors.transparent : formattedColor,
               child: isForUnderline
                   ? Container(
                       decoration: ShapeDecoration(
-                          color: color,
+                          color: formattedColor,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          )),
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(color: borderColor, width: 2))),
                       height: 15,
                     )
                   : null,
             ),
           ),
           if (editMode && !defaultColors)
-            const Icon(
+            Icon(
               Icons.colorize,
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               size: 15,
             )
         ],

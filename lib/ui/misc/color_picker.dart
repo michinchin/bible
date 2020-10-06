@@ -403,56 +403,56 @@ class _ColorPickerState extends State<ColorPicker> {
         _raiseColorChanged();
       },
     );
-    return Column(mainAxisSize: MainAxisSize.min, children: [
-      if (widget.showColorContainer)
-        SizedBox(
-          height: parameters.colorContainerHeight,
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Expanded(child: ColorContainer(color: _color)),
-            const SizedBox(width: 16),
+    return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.showColorContainer)
             SizedBox(
-              width: 116,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: colorHex,
-              ),
+              height: parameters.colorContainerHeight,
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Expanded(child: ColorContainer(color: _color)),
+                const SizedBox(width: 16),
+                SizedBox(
+                  width: 116,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: colorHex,
+                  ),
+                ),
+              ]),
             ),
-          ]),
-        )
-      else
-        colorHex,
-      const SizedBox(height: 16),
-      Expanded(
-        child: Palette(
-          rainbowColor: _rainbowColor,
-          position: _palettePosition,
-          onPositionChanged: (position, color) {
-            _palettePosition = position;
-            _paletteColor = color;
-            _updateAlpha(withAlpha);
-          },
-        ),
-      ),
-      const SizedBox(height: 16),
-      RainbowSlider(
-        position: _rainbowPosition,
-        onPositionChanged: (position, color) {
-          _rainbowPosition = position;
-          _rainbowColor = color;
-          _paletteColor = Palette.getColor(_rainbowColor, _palettePosition);
-          _updateAlpha(withAlpha);
-        },
-      ),
-      if (withAlpha)
-        AlphaSlider(
-          alpha: _alpha,
-          color: _paletteColor,
-          onAlphaChanged: (alpha) {
-            _alpha = alpha;
-            _updateAlpha(withAlpha);
-          },
-        ),
-    ]);
+          RainbowSlider(
+            position: _rainbowPosition,
+            onPositionChanged: (position, color) {
+              _rainbowPosition = position;
+              _rainbowColor = color;
+              _paletteColor = Palette.getColor(_rainbowColor, _palettePosition);
+              _updateAlpha(withAlpha);
+            },
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: Palette(
+              rainbowColor: _rainbowColor,
+              position: _palettePosition,
+              onPositionChanged: (position, color) {
+                _palettePosition = position;
+                _paletteColor = color;
+                _updateAlpha(withAlpha);
+              },
+            ),
+          ),
+          const SizedBox(height: 10),
+          if (withAlpha)
+            AlphaSlider(
+              alpha: _alpha,
+              color: _paletteColor,
+              onAlphaChanged: (alpha) {
+                _alpha = alpha;
+                _updateAlpha(withAlpha);
+              },
+            ),
+        ]);
   }
 }
 
