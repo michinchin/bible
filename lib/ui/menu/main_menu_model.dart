@@ -8,7 +8,7 @@ import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../version.dart';
 
-class MenuModel {
+class MainMenuModel {
   Future<void> shareApp(BuildContext context) async {
     await Navigator.of(context).maybePop();
     return Share.share(Const.tecartaBibleLink);

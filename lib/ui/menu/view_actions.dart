@@ -17,8 +17,6 @@ import '../common/common.dart';
 import '../common/tec_modal_popup_menu.dart';
 import 'main_menu.dart';
 
-const _menuWidth = 175.0;
-
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   // ignore: close_sinks
   final vmBloc = context.bloc<ViewManagerBloc>();
@@ -46,13 +44,15 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
       onPressed: () {
         TecAutoScroll.stopAutoscroll();
         showTecModalPopupMenu(
+          context: context,
+          insets: insets,
+          minWidth: 125,
+          menuItemsBuilder: (menuContext) => _buildMenuItemsForViewWithState(
+            state,
             context: context,
-            menuItemsBuilder: (menuContext) => _buildMenuItemsForViewWithState(
-                  state,
-                  context: context,
-                  menuContext: menuContext,
-                ),
-            insets: insets);
+            menuContext: menuContext,
+          ),
+        );
       },
     ),
     if (state.type == Const.viewTypeChapter)
@@ -102,13 +102,14 @@ List<TableRow> _buildMenuItemsForViewWithState(
             isMaximized ? const ViewManagerEvent.restore() : ViewManagerEvent.maximize(state.uid));
       }),
     if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
-      tecModalPopupMenuDivider(menuContext, _menuWidth, isMaximized ? 'Switch To' : 'Switch With'),
+      tecModalPopupMenuDivider(menuContext, isMaximized ? 'Switch To' : 'Switch With'),
       ..._generateOffScreenItems(menuContext, state.uid)
     ],
-    tecModalPopupMenuDivider(menuContext, _menuWidth, 'Open New'),
+    tecModalPopupMenuDivider(menuContext, 'Open New'),
     ...generateAddMenuItems(menuContext, state.uid),
-    if ({Const.viewTypeChapter, Const.viewTypeStudy}.contains(state.type)) ...[
-      tecModalPopupMenuDivider(menuContext, _menuWidth),
+    if ((vmBloc?.state?.views?.length ?? 0) > 1 &&
+        {Const.viewTypeChapter, Const.viewTypeStudy}.contains(state.type)) ...[
+      tecModalPopupMenuDivider(menuContext),
       tecModalPopupMenuItem(
         menuContext,
         useSharedRef ? Icons.link_off : Icons.link,
@@ -124,7 +125,7 @@ List<TableRow> _buildMenuItemsForViewWithState(
       ),
     ],
     if ((vmBloc?.state?.views?.length ?? 0) > 1) ...[
-      tecModalPopupMenuDivider(menuContext, _menuWidth),
+      tecModalPopupMenuDivider(menuContext),
       tecModalPopupMenuItem(menuContext, Icons.close, 'Close View', () {
         Navigator.of(menuContext).maybePop();
         vmBloc?.add(ViewManagerEvent.remove(state.uid));
@@ -164,9 +165,10 @@ Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
   assert(menuContext != null && viewUid != null);
   final vm = ViewManager.shared;
   return vm.types.map<TableRow>((type) {
-    final title = vm.menuTitleWith(type: type);
     // Types that cannot be created from the menu return `null` for the menu title.
-    if (title == null) return TableRow(children: [Container(width: _menuWidth)]);
+    final title = vm.menuTitleWith(type: type);
+    if (title == null) return TableRow(children: [Container(), Container()]);
+
     return tecModalPopupMenuItem(menuContext, vm.iconWithType(type), '$title', () async {
       tec.dmPrint('Adding new view of type $type.');
       await vm.onAddView(menuContext, type, currentViewId: viewUid);
