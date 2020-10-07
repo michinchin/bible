@@ -403,56 +403,54 @@ class _ColorPickerState extends State<ColorPicker> {
         _raiseColorChanged();
       },
     );
-    return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (widget.showColorContainer)
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      if (widget.showColorContainer)
+        SizedBox(
+          height: parameters.colorContainerHeight,
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: ColorContainer(color: _color)),
+            const SizedBox(width: 16),
             SizedBox(
-              height: parameters.colorContainerHeight,
-              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(child: ColorContainer(color: _color)),
-                const SizedBox(width: 16),
-                SizedBox(
-                  width: 116,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: colorHex,
-                  ),
-                ),
-              ]),
+              width: 116,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: colorHex,
+              ),
             ),
-          RainbowSlider(
-            position: _rainbowPosition,
-            onPositionChanged: (position, color) {
-              _rainbowPosition = position;
-              _rainbowColor = color;
-              _paletteColor = Palette.getColor(_rainbowColor, _palettePosition);
-              _updateAlpha(withAlpha);
-            },
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Palette(
-              rainbowColor: _rainbowColor,
-              position: _palettePosition,
-              onPositionChanged: (position, color) {
-                _palettePosition = position;
-                _paletteColor = color;
-                _updateAlpha(withAlpha);
-              },
-            ),
-          ),
-          const SizedBox(height: 10),
-          if (withAlpha)
-            AlphaSlider(
-              alpha: _alpha,
-              color: _paletteColor,
-              onAlphaChanged: (alpha) {
-                _alpha = alpha;
-                _updateAlpha(withAlpha);
-              },
-            ),
-        ]);
+          ]),
+        ),
+      // RainbowSlider(
+      //   position: _rainbowPosition,
+      //   onPositionChanged: (position, color) {
+      //     _rainbowPosition = position;
+      //     _rainbowColor = color;
+      //     _paletteColor = Palette.getColor(_rainbowColor, _palettePosition);
+      //     _updateAlpha(withAlpha);
+      //   },
+      // ),
+      const SizedBox(height: 10),
+      Expanded(
+        child: Palette(
+          rainbowColor: _rainbowColor,
+          position: _palettePosition,
+          onPositionChanged: (position, color) {
+            _palettePosition = position;
+            _paletteColor = color;
+            _updateAlpha(withAlpha);
+          },
+        ),
+      ),
+      const SizedBox(height: 10),
+      if (withAlpha)
+        AlphaSlider(
+          alpha: _alpha,
+          color: _paletteColor,
+          onAlphaChanged: (alpha) {
+            _alpha = alpha;
+            _updateAlpha(withAlpha);
+          },
+        ),
+    ]);
   }
 }
 
@@ -639,13 +637,37 @@ class Palette extends StatefulWidget {
     final channels = _getSortedChannels(color);
     final brightness = channels[0].value / 0xff;
     if (brightness == 0) return const Offset(1, 1);
-    final y = 1 - brightness;
-    final x = channels[2].value / brightness / 0xff;
+    final y = 1 - (channels[2].value / brightness / 0xff);
+    final x = 1 - (getXPosition(color) / (_rainbow.colors.length - 1));
+    // 1/_rainbow.colors.length
     return Offset(x, y);
   }
 
-  static Color getColor(Color rainbowColor, Offset position) =>
-      Color.lerp(Color.lerp(rainbowColor, Colors.white, position.dx), Colors.black, position.dy);
+  // ignore: missing_return
+  static double getXPosition(Color color) {
+    final channels = _getSortedChannels(color);
+    final c0 = channels[0].value;
+    final c1 = channels[1].value;
+    final c2 = channels[2].value;
+    if (c0 == c1 && c0 == c2) return 0.0;
+    final second = channels[1].key;
+    final coef = (c1 - c2) / (c0 - c2);
+    switch (channels[0].key) {
+      case _ColorChannel.red: // red / purple
+        return second == _ColorChannel.blue ? 6 - coef : 0 + coef;
+      case _ColorChannel.green: // yellow / green
+        return second == _ColorChannel.red ? 2 - coef : 2 + coef;
+      case _ColorChannel.blue: // blue / purple
+        return second == _ColorChannel.green ? 4 - coef : 4 + coef;
+    }
+  }
+
+  static Color getColor(Color rainbowColor, Offset position) {
+    if (position.dy <= 0.2) {
+      return Color.lerp(Colors.white, rainbowColor, 0.1);
+    }
+    return Color.lerp(Colors.white, rainbowColor, position.dy);
+  }
 
   @override
   _PaletteState createState() => _PaletteState(position);
@@ -676,10 +698,21 @@ class _PaletteState extends State<Palette> {
     final y = (position.dy / height).clamp(0.0, 1.0).toDouble();
     setState(() {
       _position = Offset(x, y);
-      _color = Palette.getColor(widget.rainbowColor, _position);
+      _color = Palette.getColor(getColor(_position.dx), _position);
     });
     final onPositionChanged = widget.onPositionChanged;
     if (onPositionChanged != null) onPositionChanged(_position, _color);
+  }
+
+  static Color getColor(double position) {
+    var index = ((1 - position) * (_rainbow.colors.length)).truncate();
+    if (position == 0) {
+      index = _rainbow.colors.length - 1;
+    }
+    final colors = _rainbow.colors;
+    final color = colors[index];
+    final coef = position - index;
+    return coef < 0.00001 ? color : Color.lerp(color, colors[index], coef);
   }
 
   @override
@@ -737,15 +770,15 @@ class _PalettePainter extends CustomPainter {
     canvas
       ..drawRect(
         rect,
-        Paint()..shader = LinearGradient(colors: [Colors.white, color]).createShader(rect),
+        Paint()..shader = _rainbow.createShader(rect),
       )
       ..drawRect(
         rect,
         Paint()
           ..shader = LinearGradient(
-                  colors: [Colors.black, Colors.black.withOpacity(0.0)],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter)
+                  colors: [Colors.white.withOpacity(0.8), Colors.transparent],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter)
               .createShader(rect),
       );
   }

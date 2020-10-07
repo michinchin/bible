@@ -100,6 +100,10 @@ class __MiniViewState extends State<_MiniView> {
 
   Future<void> onShowColorPicker(
       BuildContext context, List<PrefItem> prefItems, int colorIndex) async {
+    context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
+        type: underlineMode ? HighlightType.underline : HighlightType.highlight,
+        isTrialMode: true,
+        color: context.bloc<PrefItemsBloc>().itemWithId(colorIndex)?.verse));
     final colorChosen = await showModalBottomSheet<int>(
         context: context,
         useRootNavigator: true,
@@ -122,8 +126,6 @@ class __MiniViewState extends State<_MiniView> {
           color: colorChosen));
       context.bloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
           prefItem: PrefItem.from(prefItems.itemWithId(colorIndex).copyWith(verse: colorChosen))));
-    } else {
-      context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(isTrialMode: true));
     }
   }
 
@@ -232,7 +234,7 @@ class __ColorSelectionViewState extends State<_ColorSelectionView> {
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
-        height: 300,
+        height: 200,
         child: Row(children: [
           Expanded(
             child: ColorPicker(
@@ -265,6 +267,14 @@ class __ColorSelectionViewState extends State<_ColorSelectionView> {
                   Navigator.of(context).pop(colorChosen);
                 },
               ),
+              const Divider(color: Colors.transparent),
+              SelectionSheetButton(
+                  icon: Icons.info_outline,
+                  onPressed: () {
+                    tecShowSimpleAlertDialog<void>(
+                        context: context,
+                        content: 'Colors are slightly adjusted for readability');
+                  }),
             ],
           )
         ]),
