@@ -9,7 +9,7 @@ import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/content_settings.dart';
-import '../../models/labels.dart';
+import '../../models/const.dart';
 import '../common/common.dart';
 
 void showTextSettingsDialog(BuildContext context) {
@@ -68,7 +68,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
   @override
   void dispose() {
     // Update the recent fonts list in prefs.
-    var currentFont = tec.Prefs.shared.getString(Labels.prefContentFontName, defaultValue: '');
+    var currentFont = tec.Prefs.shared.getString(Const.prefContentFontName, defaultValue: '');
     if (currentFont.isEmpty) currentFont = _Fonts._systemDefault;
     var recentFonts = widget.fonts.recent
       ..remove(currentFont)

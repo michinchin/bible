@@ -5,13 +5,13 @@ import 'package:tec_widgets/tec_widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../models/app_settings.dart';
-import '../../models/labels.dart';
+import '../../models/const.dart';
 import '../../version.dart';
 
 class MenuModel {
   Future<void> shareApp(BuildContext context) async {
     await Navigator.of(context).maybePop();
-    return Share.share(Labels.tecartaBibleLink);
+    return Share.share(Const.tecartaBibleLink);
   }
 
   /// Opens the native email UI with an email for questions or comments.
@@ -64,7 +64,7 @@ class MenuModel {
           child: const TecText('Website'),
           onPressed: () {
             Navigator.of(context).maybePop();
-            launcher.launch(Labels.tecartaBibleLink);
+            launcher.launch(Const.tecartaBibleLink);
           },
         ),
       ],

@@ -21,6 +21,7 @@ import 'blocs/shared_bible_ref_bloc.dart';
 import 'blocs/sheet/pref_items_bloc.dart';
 import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
+import 'models/const.dart';
 import 'models/iap/iap.dart';
 import 'ui/bible/chapter_view.dart';
 import 'ui/common/common.dart';
@@ -37,11 +38,11 @@ const _appTitle = 'Tecarta Bible';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  ViewManagerState.defaultViewType = 'BibleChapter';
+  ViewManagerState.defaultViewType = Const.viewTypeChapter;
   ViewManager.shared
-    ..register(ViewableBibleChapter('BibleChapter', FeatherIcons.book))
-    ..register(ViewableStudyContent('StudyView', FeatherIcons.bookOpen))
-    ..register(ViewableNotes('NotesView', FeatherIcons.edit))
+    ..register(ViewableBibleChapter(Const.viewTypeChapter, FeatherIcons.book))
+    ..register(ViewableStudyContent(Const.viewTypeStudy, FeatherIcons.bookOpen))
+    ..register(ViewableNotes(Const.viewTypeNotes, FeatherIcons.edit))
     ..register(ViewableMarginNote(marginNoteViewType, TecIcons.marginNoteOutline));
 
   final stopwatch = Stopwatch()..start();

@@ -9,7 +9,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/app_theme_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/app_settings.dart';
-import '../../models/labels.dart';
+import '../../models/const.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
 import '../misc/text_settings.dart';
@@ -152,7 +152,7 @@ class _MainMenuState extends State<MainMenu> {
                     context: context,
                     account: AppSettings.shared.userAccount,
                     useRootNavigator: true,
-                    appName: Labels.appNameForUA);
+                    appName: Const.appNameForUA);
               }),
           if (tec.platformIs(tec.Platform.iOS))
             _tableRow(

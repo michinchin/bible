@@ -14,7 +14,7 @@ import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/app_settings.dart';
-import '../../models/labels.dart';
+import '../../models/const.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/context.dart';
 import '../../models/search/search_history_item.dart';
@@ -633,7 +633,7 @@ class SearchResultsLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final searchBlocState = context.bloc<SearchBloc>().state;
-    final bible = VolumesRepository.shared.bibleWithId(Labels.defaultBible);
+    final bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
     var book = bible.firstBook;
     // ignore: prefer_collection_literals
     final booksSelected = LinkedHashMap<int, String>();

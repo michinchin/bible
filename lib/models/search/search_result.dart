@@ -5,7 +5,7 @@ import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../labels.dart';
+import '../const.dart';
 import 'verse.dart';
 
 class SearchResult {
@@ -211,8 +211,8 @@ String _formatRefs(String query) {
   final arr = regex.allMatches(query).toList();
   if (arr.isNotEmpty) {
     final shortRef = arr[0].group(0);
-    if (Labels.extraBookNames.containsKey(shortRef)) {
-      final bookId = Labels.extraBookNames[shortRef];
+    if (Const.extraBookNames.containsKey(shortRef)) {
+      final bookId = Const.extraBookNames[shortRef];
       final fullBookName = VolumesRepository.shared.bibleWithId(9).nameOfBook(bookId);
       final fixedQuery = query.replaceAll(shortRef, fullBookName);
 
@@ -231,15 +231,15 @@ String _getCacheKey(String keywords, String translationIds, int exact, int phras
 
   words += '_';
   final encoded = StringBuffer();
-  const length = Labels.base64Map.length;
+  const length = Const.base64Map.length;
   final volumeIds = translationIds.split('|').toList().map(double.parse).toList()..sort();
 
   for (var i = 0; i < volumeIds.length; i++) {
     var volumeId = volumeIds[i];
     final digit = volumeId / length;
-    encoded.write(Labels.base64Map[digit.toInt()]);
+    encoded.write(Const.base64Map[digit.toInt()]);
     volumeId -= digit.toInt() * length;
-    encoded.write(Labels.base64Map[volumeId.toInt()]);
+    encoded.write(Const.base64Map[volumeId.toInt()]);
   }
   return '$words${encoded.toString()}_0_0_${phrase}_$exact';
 }

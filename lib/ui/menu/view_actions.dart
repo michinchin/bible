@@ -12,6 +12,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/const.dart';
 import '../common/common.dart';
 import 'main_menu.dart';
 
@@ -46,12 +47,13 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
         _showViewMenu(context: context, state: state, insets: insets);
       },
     ),
-    IconButton(
-      icon: const Icon(SFSymbols.play, size: 20),
-      tooltip: 'Play Audio',
-      color: Theme.of(context).textColor.withOpacity(0.5),
-      onPressed: () {},
-    ),
+    if (state.type == Const.viewTypeChapter)
+      IconButton(
+        icon: const Icon(SFSymbols.play, size: 20),
+        tooltip: 'Play Audio',
+        color: Theme.of(context).textColor.withOpacity(0.5),
+        onPressed: () {},
+      ),
     if (topRight)
       IconButton(
         icon: const Icon(Icons.account_circle_outlined),
@@ -117,7 +119,7 @@ class _MenuItems extends StatelessWidget {
           ],
           _divider(context, 'Open New'),
           ...generateAddMenuItems(context, state.uid),
-          if ({'BibleChapter', 'StudyView'}.contains(state.type)) ...[
+          if ({Const.viewTypeChapter, Const.viewTypeStudy}.contains(state.type)) ...[
             _divider(context),
             _menuItem(
               context,

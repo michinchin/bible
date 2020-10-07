@@ -10,7 +10,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
-import '../../models/labels.dart';
+import '../../models/const.dart';
 import '../../models/language_utils.dart' as l;
 import '../../models/pref_item.dart';
 import '../common/common.dart';
@@ -342,7 +342,7 @@ class __BookFilterState extends State<_BookFilter> {
   }
 
   void _initBible() {
-    bible = VolumesRepository.shared.bibleWithId(Labels.defaultBible);
+    bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
     var book = bible.firstBook;
     while (book != 0) {
       bookNames[book] = bible.nameOfBook(book);

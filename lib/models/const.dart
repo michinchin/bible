@@ -1,6 +1,11 @@
-class Labels {
+class Const {
   static const appNameForUA = 'tecarta_bible';
 
+  static const viewTypeChapter = 'BibleChapter';
+  static const viewTypeStudy = 'StudyView';
+  static const viewTypeNotes = 'NotesView';
+
+  //------------------------------------------
   // Preference key names:
 
   // Font
@@ -12,6 +17,8 @@ class Labels {
 
   // Links
   static const tecartaBibleLink = 'https://tecartabible.com/';
+
+  //------------------------------------------
 
   // Bible
   static const defaultBible = 9;

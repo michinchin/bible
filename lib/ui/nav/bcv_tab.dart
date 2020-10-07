@@ -10,7 +10,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/content_settings.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
-import '../../models/labels.dart';
+import '../../models/const.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
 import '../common/tec_tab_indicator.dart';
@@ -150,7 +150,7 @@ class _BookView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bible = VolumesRepository.shared.bibleWithId(Labels.defaultBible);
+    final bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
     final navCanonical = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.navBookOrder);
     void updateSearch(String s) => searchController
       ..text = s
