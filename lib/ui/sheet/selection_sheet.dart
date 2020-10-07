@@ -123,9 +123,7 @@ class __MiniViewState extends State<_MiniView> {
       context.bloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
           prefItem: PrefItem.from(prefItems.itemWithId(colorIndex).copyWith(verse: colorChosen))));
     } else {
-      context
-          .bloc<SelectionStyleBloc>()
-          ?.add(const SelectionStyle(type: HighlightType.clear, isTrialMode: true));
+      context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(isTrialMode: true));
     }
   }
 
@@ -178,11 +176,10 @@ class __MiniViewState extends State<_MiniView> {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 10),
               Container(
-                  padding: const EdgeInsets.only(left: 10),
                   height: 35,
                   child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                     shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
                     itemCount: colors.length,
@@ -298,7 +295,7 @@ class _ColorPickerButton extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final formattedColor =
         isDarkMode ? textColorWith(color, isDarkMode: true) : highlightColorWith(color);
-    final borderColor = isDarkMode ? Colors.grey.withOpacity(0.5) : Colors.grey;
+    final borderColor = isDarkMode ? Colors.transparent : Colors.grey.withOpacity(0.5);
     return InkWell(
       customBorder: const CircleBorder(),
       onLongPress: () {
@@ -323,7 +320,7 @@ class _ColorPickerButton extends StatelessWidget {
             decoration: isForUnderline
                 ? null
                 : ShapeDecoration(
-                    shape: CircleBorder(side: BorderSide(color: borderColor, width: 2))),
+                    shape: CircleBorder(side: BorderSide(color: borderColor, width: 1))),
             child: CircleAvatar(
               backgroundColor: isForUnderline ? Colors.transparent : formattedColor,
               child: isForUnderline
@@ -332,7 +329,7 @@ class _ColorPickerButton extends StatelessWidget {
                           color: formattedColor,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
-                              side: BorderSide(color: borderColor, width: 2))),
+                              side: BorderSide(color: borderColor, width: 1))),
                       height: 15,
                     )
                   : null,
