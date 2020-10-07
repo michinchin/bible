@@ -307,7 +307,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                       .add(const NavEvent.changeNavView(state: NavViewState.searchResults));
                   _searchResultsTabController.animateTo(0);
                 }),
-            IconButton(icon: const Icon(Icons.more_vert), onPressed: _moreButton)
+            IconButton(icon: Icon(platformAwareMoreIcon(context)), onPressed: _moreButton)
           ];
         }
       } else if (s.navViewState == NavViewState.searchResults) {

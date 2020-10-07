@@ -14,6 +14,7 @@ import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
 import '../common/common.dart';
+import '../common/tec_modal_popup_menu.dart';
 import 'main_menu.dart';
 
 const _menuWidth = 175.0;
@@ -40,11 +41,18 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
   return [
     IconButton(
       icon: const Icon(SFSymbols.square_stack, size: 20),
-      tooltip: 'Windows',
+      tooltip: 'View Menu',
       color: Theme.of(context).textColor.withOpacity(0.5),
       onPressed: () {
         TecAutoScroll.stopAutoscroll();
-        _showViewMenu(context: context, state: state, insets: insets);
+        showTecModalPopupMenu(
+            context: context,
+            menuItemsBuilder: (menuContext) => _buildMenuItemsForViewWithState(
+                  state,
+                  context: context,
+                  menuContext: menuContext,
+                ),
+            insets: insets);
       },
     ),
     if (state.type == Const.viewTypeChapter)
@@ -54,6 +62,13 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
         color: Theme.of(context).textColor.withOpacity(0.5),
         onPressed: () {},
       ),
+    if (state.type == Const.viewTypeStudy)
+      IconButton(
+          icon: Icon(platformAwareMoreIcon(context)),
+          onPressed: () {
+            // TecAutoScroll.stopAutoscroll();
+            // showTecModalPopupMenu(context: context, state: state, insets: insets);
+          }),
     if (topRight)
       IconButton(
         icon: const Icon(Icons.account_circle_outlined),
@@ -64,181 +79,98 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
   ];
 }
 
-Future<void> _showViewMenu({BuildContext context, ViewState state, EdgeInsetsGeometry insets}) {
-  final originalContext = context;
-  return showTecModalPopup<void>(
-    useRootNavigator: true,
-    context: context,
-    alignment: Alignment.topRight,
-    edgeInsets: insets,
-    builder: (context) {
-      return TecPopupSheet(
-        child: _MenuItems(originalContext: originalContext, state: state),
-      );
-    },
-  );
-}
+List<TableRow> _buildMenuItemsForViewWithState(
+  ViewState state, {
+  BuildContext context,
+  BuildContext menuContext,
+}) {
+  // ignore: close_sinks
+  final vmBloc = context.bloc<ViewManagerBloc>();
+  final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
 
-class _MenuItems extends StatelessWidget {
-  final BuildContext originalContext;
-  final ViewState state;
+  final viewData = ChapterViewData.fromContext(context, state.uid);
+  final useSharedRef = viewData.useSharedRef;
 
-  const _MenuItems({
-    Key key,
-    @required this.originalContext,
-    @required this.state,
-  })  : assert(originalContext != null && state != null),
-        super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // ignore: close_sinks
-    final vmBloc = context.bloc<ViewManagerBloc>();
-    final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
-
-    final viewData = ChapterViewData.fromContext(context, state.uid);
-    final useSharedRef = viewData.useSharedRef;
-
-    return Material(
-      color: Colors.transparent, // Theme.of(context).scaffoldBackgroundColor,
-      child: Table(
-        defaultColumnWidth: const IntrinsicColumnWidth(),
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        children: [
-          if ((vmBloc?.state?.views?.length ?? 0) > 1)
-            _menuItem(context, isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
-                isMaximized ? 'Restore' : 'Maximize', () {
-              Navigator.of(context).maybePop();
-              vmBloc?.add(isMaximized
-                  ? const ViewManagerEvent.restore()
-                  : ViewManagerEvent.maximize(state.uid));
-            }),
-          if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
-            _divider(context, isMaximized ? 'Switch To' : 'Switch With'),
-            ..._generateOffScreenItems(context, state.uid)
-          ],
-          _divider(context, 'Open New'),
-          ...generateAddMenuItems(context, state.uid),
-          if ({Const.viewTypeChapter, Const.viewTypeStudy}.contains(state.type)) ...[
-            _divider(context),
-            _menuItem(
-              context,
-              useSharedRef ? Icons.link_off : Icons.link,
-              useSharedRef ? 'Un-link Reference' : 'Link Reference',
-              () {
-                Navigator.of(context).maybePop();
-                final viewDataBloc = originalContext.bloc<ViewDataBloc>();
-                viewDataBloc?.update(viewData.copyWith(useSharedRef: !useSharedRef));
-                if (!useSharedRef) {
-                  originalContext.bloc<SharedBibleRefBloc>().update(viewData.bcv);
-                }
-              },
-            ),
-          ],
-          if ((vmBloc?.state?.views?.length ?? 0) > 1) ...[
-            _divider(context),
-            _menuItem(context, Icons.close, 'Close View', () {
-              Navigator.of(context).maybePop();
-              vmBloc?.add(ViewManagerEvent.remove(state.uid));
-            }),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Iterable<TableRow> _generateOffScreenItems(BuildContext context, int viewUid) {
-    // ignore: close_sinks
-    final vmBloc = context.bloc<ViewManagerBloc>();
-    final vm = ViewManager.shared;
-    final items = <TableRow>[];
-    for (final view in vmBloc?.state?.views) {
-      if (!vmBloc.isViewVisible(view.uid)) {
-        final title = vm.menuTitleWith(context: context, state: view);
-        items.add(_menuItem(context, vm.iconWithType(view.type), '$title', () {
-          if (vmBloc.state.maximizedViewUid == viewUid) {
-            vmBloc?.add(ViewManagerEvent.maximize(view.uid));
-            Navigator.of(context).maybePop();
-          } else {
-            final thisViewPos = vmBloc.indexOfView(viewUid);
-            final hiddenViewPos = vmBloc.indexOfView(view.uid);
-            vmBloc?.add(ViewManagerEvent.move(
-                fromPosition: vmBloc.indexOfView(view.uid),
-                toPosition: vmBloc.indexOfView(viewUid)));
-            vmBloc?.add(
-                ViewManagerEvent.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos));
-            Navigator.of(context).maybePop();
+  return [
+    if ((vmBloc?.state?.views?.length ?? 0) > 1)
+      tecModalPopupMenuItem(
+          menuContext,
+          isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
+          isMaximized ? 'Restore' : 'Maximize', () {
+        Navigator.of(menuContext).maybePop();
+        vmBloc?.add(
+            isMaximized ? const ViewManagerEvent.restore() : ViewManagerEvent.maximize(state.uid));
+      }),
+    if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
+      tecModalPopupMenuDivider(menuContext, _menuWidth, isMaximized ? 'Switch To' : 'Switch With'),
+      ..._generateOffScreenItems(menuContext, state.uid)
+    ],
+    tecModalPopupMenuDivider(menuContext, _menuWidth, 'Open New'),
+    ...generateAddMenuItems(menuContext, state.uid),
+    if ({Const.viewTypeChapter, Const.viewTypeStudy}.contains(state.type)) ...[
+      tecModalPopupMenuDivider(menuContext, _menuWidth),
+      tecModalPopupMenuItem(
+        menuContext,
+        useSharedRef ? Icons.link_off : Icons.link,
+        useSharedRef ? 'Un-link Reference' : 'Link Reference',
+        () {
+          Navigator.of(menuContext).maybePop();
+          final viewDataBloc = context.bloc<ViewDataBloc>();
+          viewDataBloc?.update(viewData.copyWith(useSharedRef: !useSharedRef));
+          if (!useSharedRef) {
+            context.bloc<SharedBibleRefBloc>().update(viewData.bcv);
           }
-        }));
-      }
+        },
+      ),
+    ],
+    if ((vmBloc?.state?.views?.length ?? 0) > 1) ...[
+      tecModalPopupMenuDivider(menuContext, _menuWidth),
+      tecModalPopupMenuItem(menuContext, Icons.close, 'Close View', () {
+        Navigator.of(menuContext).maybePop();
+        vmBloc?.add(ViewManagerEvent.remove(state.uid));
+      }),
+    ],
+  ];
+}
+
+Iterable<TableRow> _generateOffScreenItems(BuildContext menuContext, int viewUid) {
+  // ignore: close_sinks
+  final vmBloc = menuContext.bloc<ViewManagerBloc>();
+  final vm = ViewManager.shared;
+  final items = <TableRow>[];
+  for (final view in vmBloc?.state?.views) {
+    if (!vmBloc.isViewVisible(view.uid)) {
+      final title = vm.menuTitleWith(context: menuContext, state: view);
+      items.add(tecModalPopupMenuItem(menuContext, vm.iconWithType(view.type), '$title', () {
+        if (vmBloc.state.maximizedViewUid == viewUid) {
+          vmBloc?.add(ViewManagerEvent.maximize(view.uid));
+          Navigator.of(menuContext).maybePop();
+        } else {
+          final thisViewPos = vmBloc.indexOfView(viewUid);
+          final hiddenViewPos = vmBloc.indexOfView(view.uid);
+          vmBloc?.add(ViewManagerEvent.move(
+              fromPosition: vmBloc.indexOfView(view.uid), toPosition: vmBloc.indexOfView(viewUid)));
+          vmBloc?.add(
+              ViewManagerEvent.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos));
+          Navigator.of(menuContext).maybePop();
+        }
+      }));
     }
-    return items;
   }
+  return items;
+}
 
-  Iterable<TableRow> generateAddMenuItems(BuildContext context, int viewUid) {
-    assert(context != null && viewUid != null);
-    final vm = ViewManager.shared;
-    return vm.types.map<TableRow>((type) {
-      final title = vm.menuTitleWith(type: type);
-      // Types that cannot be created from the menu return `null` for the menu title.
-      if (title == null) return TableRow(children: [Container(width: _menuWidth)]);
-      return _menuItem(context, vm.iconWithType(type), '$title', () async {
-        tec.dmPrint('Adding new view of type $type.');
-        await vm.onAddView(context, type, currentViewId: viewUid);
-        await Navigator.of(context).maybePop();
-      });
+Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
+  assert(menuContext != null && viewUid != null);
+  final vm = ViewManager.shared;
+  return vm.types.map<TableRow>((type) {
+    final title = vm.menuTitleWith(type: type);
+    // Types that cannot be created from the menu return `null` for the menu title.
+    if (title == null) return TableRow(children: [Container(width: _menuWidth)]);
+    return tecModalPopupMenuItem(menuContext, vm.iconWithType(type), '$title', () async {
+      tec.dmPrint('Adding new view of type $type.');
+      await vm.onAddView(menuContext, type, currentViewId: viewUid);
+      await Navigator.of(menuContext).maybePop();
     });
-  }
-}
-
-TableRow _divider(BuildContext context, [String title]) {
-  final textColor = Theme.of(context).textColor.withOpacity(0.5);
-  return TableRow(
-    children: [
-      SizedBox(
-        width: _menuWidth,
-        child: tec.isNotNullOrEmpty(title)
-            ? Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TecText(title, style: TextStyle(fontSize: 12, color: textColor)),
-                  const Expanded(child: Divider(indent: 10))
-                ],
-              )
-            : const Divider(),
-      ),
-    ],
-  );
-}
-
-TableRow _menuItem(BuildContext context, IconData icon, String title, VoidCallback onTap) {
-  final textScaleFactor = scaleFactorWith(context, maxScaleFactor: 1.2);
-  final textColor = Theme.of(context).textColor.withOpacity(onTap == null ? 0.2 : 0.5);
-  final iconSize = 24.0 * textScaleFactor;
-
-  return TableRow(
-    children: [
-      TableRowInkWell(
-        onTap: onTap,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 10, 14, 10),
-              child: icon == null
-                  ? SizedBox(width: iconSize)
-                  : Icon(icon, color: textColor, size: iconSize),
-            ),
-            // const SizedBox(width: 10),
-            TecText(
-              title,
-              textScaleFactor: textScaleFactor,
-              style: TextStyle(color: textColor),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
+  });
 }

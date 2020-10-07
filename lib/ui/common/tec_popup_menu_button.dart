@@ -35,7 +35,8 @@ class TecEZPopupMenuButton extends TecPopupMenuButton<String> {
 }
 
 ///
-/// A button that shows a popup menu when tapped.
+/// A button that shows a popup menu when tapped. A styled easier to use version of
+/// `PopupMenuButton`.
 ///
 class TecPopupMenuButton<T> extends StatelessWidget {
   final String title;
