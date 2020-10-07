@@ -7,8 +7,8 @@ import 'package:tec_volumes/tec_volumes.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../common/bible_chapter_title.dart';
 import '../menu/view_actions.dart';
+import 'chapter_title.dart';
 
 class ChapterViewAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VolumeType volumeType;
@@ -43,7 +43,7 @@ class ChapterViewAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       automaticallyImplyLeading: false,
       centerTitle: false,
-      title: BibleChapterTitle(volumeType: volumeType, onUpdate: onUpdate),
+      title: ChapterTitle(volumeType: volumeType, onUpdate: onUpdate),
       actions: defaultActionsBuilder(context, viewState, size),
     );
     // },

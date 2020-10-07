@@ -11,18 +11,18 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/user_item_helper.dart';
+import '../common/common.dart';
 import '../library/library.dart';
 import '../nav/nav.dart';
 import '../sheet/selection_sheet_model.dart';
-import 'common.dart';
 
-class BibleChapterTitle extends StatelessWidget {
+class ChapterTitle extends StatelessWidget {
   final VolumeType volumeType;
   final void Function(
           BuildContext context, int newVolumeId, BookChapterVerse newBcv, VolumeViewData viewData)
       onUpdate;
 
-  const BibleChapterTitle({Key key, this.volumeType = VolumeType.anyType, @required this.onUpdate})
+  const ChapterTitle({Key key, this.volumeType = VolumeType.anyType, @required this.onUpdate})
       : assert(volumeType == VolumeType.bible || volumeType == VolumeType.studyContent),
         assert(onUpdate != null),
         super(key: key);
@@ -98,7 +98,7 @@ class BibleChapterTitle extends StatelessWidget {
             ],
           );
         } else {
-          throw UnsupportedError('BibleChapterTitle must use VolumeViewData');
+          throw UnsupportedError('ChapterTitle must use VolumeViewData');
         }
       },
     );

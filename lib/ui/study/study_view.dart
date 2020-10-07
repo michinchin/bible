@@ -5,8 +5,8 @@ import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../bible/chapter_title.dart';
 import '../bible/chapter_view.dart';
-import '../common/bible_chapter_title.dart';
 import '../common/common.dart';
 import '../library/library.dart';
 import '../menu/view_actions.dart';
@@ -79,7 +79,7 @@ class StudyView extends StatelessWidget {
           appBar: MinHeightAppBar(
             appBar: AppBar(
               centerTitle: false,
-              title: BibleChapterTitle(volumeType: VolumeType.studyContent, onUpdate: _onUpdate),
+              title: ChapterTitle(volumeType: VolumeType.studyContent, onUpdate: _onUpdate),
               actions: defaultActionsBuilder(context, state, size),
             ),
           ),
