@@ -68,7 +68,6 @@ class ChapterViewModel {
   // Maintain a list of keys for footnotes, margin notes, ...
   final _widgetKeys = <String, GlobalKey>{};
 
-  TapUpDetails _tapUpDetails;
   var _marginNoteVerse = 0;
   String _currentFootnoteHref;
 
@@ -76,27 +75,50 @@ class ChapterViewModel {
     return isDarkTheme ? Colors.black : Colors.white;
   }
 
-  // only call widgetHitTest from onTap (and set _tapUpDetails in onTapUp)
-  void _widgetHitTest(BuildContext context, Object tag) {
-    final padding = MediaQuery.of(context).devicePixelRatio * 2.5;
+  Stopwatch _tapDownStopwatch;
+  Object _tapDownTag;
+  TapUpDetails _tapUpDetails;
 
+  void _onTappedSpanWithTag(BuildContext context, Object tag) {
     if (tag is _VerseTag) {
-      if (_selectedVerses.isEmpty && _tapUpDetails != null) {
+      var handledTap = false;
+
+      // Was it a long press on an xref?
+      if (!handledTap &&
+          tag.isInXref &&
+          tec.isNotNullOrEmpty(tag.href) &&
+          _tapDownStopwatch.elapsed.inMilliseconds > 500 &&
+          _tapDownTag is _VerseTag &&
+          (_tapDownTag as _VerseTag).href == tag.href) {
+        handledTap = true;
+        showDialog<void>(
+          context: context,
+          barrierDismissible: true,
+          builder: (builder) {
+            return AlertDialog(
+              contentPadding: const EdgeInsets.all(0),
+              content: TecHtml('<p>${tag.href}</p>', baseUrl: '', selectable: false),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            );
+          },
+        );
+      }
+
+      // Was the tap near a margin note or footnote widget?
+      // Note, `_tapUpDetails` is set in the `onTapUp` handler.
+      if (!handledTap && !hasSelection && _tapUpDetails != null) {
         final x = _tapUpDetails.globalPosition.dx;
         final y = _tapUpDetails.globalPosition.dy;
 
-        // clear current details
-        _tapUpDetails = null;
+        final padding = MediaQuery.of(context).devicePixelRatio * 2.5;
 
         for (final key in _widgetKeys.keys) {
           final renderBox = _widgetKeys[key].currentContext?.findRenderObject();
           if (renderBox is RenderBox) {
             final position = renderBox.localToGlobal(Offset.zero);
 
-            if (y < position.dy) {
-              // don't bother checking rest of chapter... tap is above those...
-              break;
-            }
+            // If the tap is above widget, don't bother checking the rest of the widgets.
+            if (y < position.dy) break;
 
             final hit = x >= (position.dx - padding) &&
                 x <= (position.dx + renderBox.size.width + padding) &&
@@ -107,15 +129,22 @@ class ChapterViewModel {
               if (_widgetKeys[key].currentWidget is GestureDetector) {
                 // this is a widget hit - execute the tap...
                 (_widgetKeys[key].currentWidget as GestureDetector).onTap();
-                return;
+                handledTap = true;
+                break;
               }
             }
           }
         }
       }
 
-      if (volume < 1000) _toggleSelectionForVerse(context, tag.verse);
+      // If the tap hasn't been handled yet and this is a bible, toggle verse selection.
+      if (!handledTap && volume < 1000) _toggleSelectionForVerse(context, tag.verse);
     }
+
+    _tapDownStopwatch?.stop();
+    _tapDownStopwatch = null;
+    _tapDownTag = null;
+    _tapUpDetails = null;
   }
 
   InlineSpan _marginNoteSpan(
@@ -125,19 +154,18 @@ class ChapterViewModel {
     final widgetWidth = iconWidth;
 
     void _onPress() {
-      if (_selectedVerses.isEmpty) {
+      if (hasSelection) {
+        TecToast.show(context, 'Clear selection to view margin note');
+        // not sure if I want to force this...
+        // _toggleSelectionForVerse(context, tag.verse);
+      } else {
         final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
         final position = vmBloc?.indexOfView(viewUid) ?? -1;
         final mn = marginNotes().marginNoteForVerse(tag.verse);
-
         vmBloc?.add(ViewManagerEvent.add(
             type: marginNoteViewType,
             data: tec.toJsonString(mn.stateJson()),
             position: position == -1 ? null : position + 1));
-      } else {
-        TecToast.show(context, 'Clear selection to view margin note');
-        // not sure if I want to force this...
-        // _toggleSelectionForVerse(context, tag.verse);
       }
     }
 
@@ -188,10 +216,13 @@ class ChapterViewModel {
       final bible = VolumesRepository.shared.bibleWithId(volume);
       final footnoteHtml =
           await bible.footnoteHtmlWith(book, chapter, int.parse(tag.href.split('_').last));
-      if (tec.isNotNullOrEmpty(footnoteHtml.value) &&
-          tec.isNullOrEmpty(footnoteHtml.error) &&
-          _selectedVerses.isEmpty) {
-        await showDialog<void>(
+      if (tec.isNotNullOrEmpty(footnoteHtml.value)) {
+        if (hasSelection) {
+          TecToast.show(context, 'Clear selection to view footnote');
+          // not sure if I want to force this...
+          // _toggleSelectionForVerse(context, tag.verse);
+        } else {
+          await showDialog<void>(
             context: context,
             barrierDismissible: true,
             builder: (builder) {
@@ -200,11 +231,11 @@ class ChapterViewModel {
                 content: TecHtml(footnoteHtml.value, baseUrl: '', selectable: false),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               );
-            });
-      } else {
-        TecToast.show(context, 'Clear selection to view footnote');
-        // not sure if I want to force this...
-        // _toggleSelectionForVerse(context, tag.verse);
+            },
+          );
+        }
+      } else if (tec.isNullOrEmpty(footnoteHtml.error)) {
+        tec.dmPrint('ERROR: ${footnoteHtml?.error}');
       }
     }
 
@@ -268,8 +299,17 @@ class ChapterViewModel {
 
     if (tag is _VerseTag) {
       final recognizer = tag.verse == null ? null : TapGestureRecognizer();
-      recognizer?.onTapUp = (details) => _tapUpDetails = details;
-      recognizer?.onTap = () => _widgetHitTest(context, tag);
+      if (recognizer != null) {
+        recognizer
+          ..onTapDown = (details) {
+            _tapDownStopwatch = Stopwatch()..start();
+            _tapDownTag = tag;
+          }
+          ..onTapUp = (details) {
+            _tapUpDetails = details;
+          }
+          ..onTap = () => _onTappedSpanWithTag(context, tag);
+      }
 
       // We're building a list of one or more spans...
       final spans = <InlineSpan>[];
@@ -286,12 +326,22 @@ class ChapterViewModel {
         }
       }
 
+      var textStyle = style;
+
+      // If in xref, add xref styling to the span:
+      if (tag.isInXref) {
+        textStyle = textStyle.merge(TextStyle(
+            decoration: TextDecoration.underline,
+            decorationStyle: TextDecorationStyle.dotted,
+            decorationColor: textStyle.color ?? Colors.blueAccent));
+      }
+
       // If not in trial mode, and this whole verse is selected, just
       // return a span with the selected text style.
       if (!_isSelectionTrialMode && _selectedVerses.contains(tag.verse)) {
         final textSpan = TaggableTextSpan(
             text: text,
-            style: tag.isInVerse ? _merge(style, selectedTextStyle) : style,
+            style: tag.isInVerse ? _merge(textStyle, selectedTextStyle) : textStyle,
             tag: tag,
             recognizer: recognizer);
         if (spans.isEmpty) {
@@ -311,13 +361,13 @@ class ChapterViewModel {
         /// to and including the given [word], with the given [style]. And
         /// also updates `currentWord` and `remainingText` appropriately.
         ///
-        InlineSpan _spanToWord(int word, TextStyle style) {
+        InlineSpan _spanToWord(int word, TextStyle textStyle) {
           final wordCount = (word - currentWord) + 1;
           final endIndex = remainingText.indexAtEndOfWord(wordCount);
           if (endIndex > 0 && endIndex <= remainingText.length) {
             final span = TaggableTextSpan(
                 text: remainingText.substring(0, endIndex),
-                style: style,
+                style: textStyle,
                 tag: tag.copyWith(word: currentWord),
                 recognizer: recognizer);
             remainingText = remainingText.substring(endIndex);
@@ -340,24 +390,24 @@ class ChapterViewModel {
 
           // If there are one or more words before the highlight, add them with the default style.
           if (currentWord < hlStartWord) {
-            spans.add(_spanToWord(hlStartWord - 1, style));
+            spans.add(_spanToWord(hlStartWord - 1, textStyle));
           }
 
-          var hlStyle = style;
+          var hlStyle = textStyle;
           if (tag.isInVerse ||
               highlight.ref.word != Reference.minWord ||
               highlight.ref.endWord != Reference.maxWord) {
             final color = Color(highlight.color ?? 0xfff8f888);
             if (highlight.highlightType == HighlightType.underline) {
               hlStyle = _merge(
-                  style,
+                  hlStyle,
                   TextStyle(
                       decoration: TextDecoration.underline,
                       decorationColor: textColorWith(color, isDarkMode: isDarkTheme),
                       decorationThickness: 2));
             } else {
               hlStyle = _merge(
-                  style,
+                  hlStyle,
                   isDarkTheme
                       ? TextStyle(color: textColorWith(color, isDarkMode: isDarkTheme))
                       : TextStyle(
@@ -373,7 +423,7 @@ class ChapterViewModel {
         if (remainingText.isNotEmpty) {
           spans.add(TaggableTextSpan(
               text: remainingText,
-              style: style,
+              style: textStyle,
               tag: tag.copyWith(word: currentWord),
               recognizer: recognizer));
         }
@@ -706,7 +756,11 @@ class TecHtmlBuildHelper {
 ///
 /// Returns the merged result of two [TextStyle]s, and either, or both, can be `null`.
 ///
-TextStyle _merge(TextStyle s1, TextStyle s2) => s1 == null ? s2 : s2 == null ? s1 : s1.merge(s2);
+TextStyle _merge(TextStyle s1, TextStyle s2) => s1 == null
+    ? s2
+    : s2 == null
+        ? s1
+        : s1.merge(s2);
 
 ///
 /// Returns a new [Reference] from the given set of [verses] and other optional parameters.
