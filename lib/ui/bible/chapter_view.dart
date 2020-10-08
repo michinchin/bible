@@ -196,7 +196,8 @@ class _PageableChapterViewState extends State<PageableChapterView> {
             .bloc<ViewDataBloc>()
             ?.update(viewData.copyWith(volumeId: volume.id, bcv: newBcv, page: page));
       }
-    } else if (newBcv != viewData.bcv) {
+    }
+    if (newBcv != viewData.bcv) {
       _pageController?.jumpToPage(page);
     }
   }

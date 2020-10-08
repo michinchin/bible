@@ -422,7 +422,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
   }
 
   void _openInTB() {
-    Navigator.of(context).pop(Reference.fromHref(widget.res.searchResult.href,
+    Navigator.of(context, rootNavigator: true).pop(Reference.fromHref(widget.res.searchResult.href,
         volume: widget.res.searchResult.verses[widget.res.currentVerseIndex].id));
     tec.dmPrint('Navigating to verse: ${widget.res.searchResult.href}');
   }

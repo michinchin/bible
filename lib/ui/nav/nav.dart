@@ -113,7 +113,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   @override
   void deactivate() {
-    _tabController.dispose();
+    // _tabController.dispose();
     super.deactivate();
   }
 
