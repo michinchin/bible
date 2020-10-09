@@ -113,9 +113,13 @@ class _PageableChapterViewState extends State<PageableChapterView> {
               final currentPage = _pageController.page.round();
               final newPage = _bcvPageZero.chaptersTo(bcv, bible: _bible);
               if (newPage != null && newPage != currentPage) {
-                _animatingToPage = true;
-                await _pageController.animateToPage(newPage);
-                _animatingToPage = false;
+                if ((newPage - currentPage).abs() > 1) {
+                  _pageController.jumpToPage(newPage);
+                } else {
+                  _animatingToPage = true;
+                  await _pageController.animateToPage(newPage);
+                  _animatingToPage = false;
+                }
               }
             }
           },
@@ -172,7 +176,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
 
   void _onUpdate(
       BuildContext context, int newVolumeId, BookChapterVerse newBcv, VolumeViewData viewData) {
-    if (!mounted || newVolumeId == null || newBcv == null) return;
+    if (!mounted || newVolumeId == null || newBcv == null || viewData == null) return;
 
     var volumeChanged = false;
     var volume = _volume;
@@ -184,11 +188,12 @@ class _PageableChapterViewState extends State<PageableChapterView> {
 
     final page = _bcvPageZero.chaptersTo(newBcv, bible: volume.assocBible);
     if (page == null) {
-      tec.dmPrint('BibleView unable to navigate to $newBcv in ${volume.assocBible.abbreviation}');
+      tec.dmPrint('ChapterView unable to navigate to $newBcv in ${volume.assocBible.abbreviation}');
       return; // ---------------------------------------->
     }
 
     if (volumeChanged) {
+      // tec.dmPrint('Volume changed from ${_volume.id} to ${volume.id}.');
       _volume = volume;
       _bible = volume.assocBible;
       if (viewData is ChapterViewData) {
@@ -197,7 +202,9 @@ class _PageableChapterViewState extends State<PageableChapterView> {
             ?.update(viewData.copyWith(volumeId: volume.id, bcv: newBcv, page: page));
       }
     }
-    if (newBcv != viewData.bcv) {
+
+    if (_pageController != null && _pageController.page.round() != page) {
+      // tec.dmPrint('Page changed from ${_pageController.page.round()} to $page');
       _pageController?.jumpToPage(page);
     }
   }
