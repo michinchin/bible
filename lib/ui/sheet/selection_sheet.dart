@@ -1,3 +1,4 @@
+import 'package:bible/blocs/highlights/highlights_bloc.dart';
 import 'package:bible/models/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -100,10 +101,6 @@ class __MiniViewState extends State<_MiniView> {
 
   Future<void> onShowColorPicker(
       BuildContext context, List<PrefItem> prefItems, int colorIndex) async {
-    context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-        type: underlineMode ? HighlightType.underline : HighlightType.highlight,
-        isTrialMode: true,
-        color: context.bloc<PrefItemsBloc>().itemWithId(colorIndex)?.verse));
     final colorChosen = await showModalBottomSheet<int>(
         context: context,
         useRootNavigator: true,
@@ -126,6 +123,10 @@ class __MiniViewState extends State<_MiniView> {
           color: colorChosen));
       context.bloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
           prefItem: PrefItem.from(prefItems.itemWithId(colorIndex).copyWith(verse: colorChosen))));
+    } else {
+      //TODO(abby): issue once in trial mode, can't select more verses
+      context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
+          type: HighlightType.highlight, isTrialMode: true, color: unsetHighlightColor.value));
     }
   }
 
@@ -255,11 +256,7 @@ class __ColorSelectionViewState extends State<_ColorSelectionView> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SelectionSheetButton(
-                  icon: Icons.close,
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  }),
+              SelectionSheetButton(icon: Icons.close, onPressed: () => Navigator.of(context).pop()),
               const Divider(color: Colors.transparent),
               SelectionSheetButton(
                 icon: Icons.done,
@@ -272,8 +269,7 @@ class __ColorSelectionViewState extends State<_ColorSelectionView> {
                   icon: Icons.info_outline,
                   onPressed: () {
                     tecShowSimpleAlertDialog<void>(
-                        context: context,
-                        content: 'Colors are slightly adjusted for readability');
+                        context: context, content: 'Colors are slightly adjusted for readability');
                   }),
             ],
           )

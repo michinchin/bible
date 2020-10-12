@@ -90,7 +90,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
 
-    _searchResultsTabController = TabController(length: 2, initialIndex: 0, vsync: this)
+    _searchResultsTabController = TabController(length: 2, initialIndex: 1, vsync: this)
       ..addListener(() {
         if (_searchResultsTabController.index == 0) {
           if (searchBloc().state.selectionMode) {
@@ -251,15 +251,16 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           ss.selectionMode &&
           _searchResultsTabController.index == 1) {
         return CloseButton(onPressed: _selectionMode);
-      } else if (s == NavViewState.bcvTabs) {
-        return const CloseButton();
       } else {
-        return BackButton(onPressed: () {
-          c.bloc<NavBloc>()
-            ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
-            ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
-            ..add(const NavEvent.onSearchChange(search: ''));
-        });
+        return const CloseButton();
+        // else if (s == NavViewState.bcvTabs) {closeButton}
+        // else{
+        // return BackButton(onPressed: () {
+        // c.bloc<NavBloc>()
+        //   ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
+        //   ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
+        //   ..add(const NavEvent.onSearchChange(search: ''));
+        // });
       }
     }
 
@@ -305,7 +306,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                   c
                       .bloc<NavBloc>()
                       .add(const NavEvent.changeNavView(state: NavViewState.searchResults));
-                  _searchResultsTabController.animateTo(0);
+                  _searchResultsTabController.animateTo(1);
                 }),
             IconButton(icon: Icon(platformAwareMoreIcon(context)), onPressed: _moreButton)
           ];

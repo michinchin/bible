@@ -154,6 +154,9 @@ class _PageableChapterViewState extends State<PageableChapterView> {
         },
         onPageChanged: (context, _, page) async {
           // tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
+          context
+              .bloc<SelectionStyleBloc>()
+              ?.add(const SelectionStyle(type: HighlightType.clear, isTrialMode: true));
           final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
           if (bcv != null) {
             final viewData = ChapterViewData.fromContext(context, widget.state.uid)

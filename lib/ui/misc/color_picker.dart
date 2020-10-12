@@ -776,7 +776,7 @@ class _PalettePainter extends CustomPainter {
         rect,
         Paint()
           ..shader = LinearGradient(
-                  colors: [Colors.white.withOpacity(0.8), Colors.transparent],
+                  colors: [Colors.white.withOpacity(0.9), Colors.transparent],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter)
               .createShader(rect),
