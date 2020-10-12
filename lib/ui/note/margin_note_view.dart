@@ -45,70 +45,70 @@ class _MarginNoteView extends StatefulWidget {
   __MarginNoteScreenState createState() => __MarginNoteScreenState();
 }
 
-class ToolbarDelegate implements ZefyrToolbarDelegate {
-  static const kDefaultButtonIcons = {
-    ZefyrToolbarAction.bold: Icons.format_bold,
-    ZefyrToolbarAction.italic: Icons.format_italic,
-    ZefyrToolbarAction.heading: Icons.format_size,
-    ZefyrToolbarAction.bulletList: Icons.format_list_bulleted,
-    ZefyrToolbarAction.numberList: Icons.format_list_numbered,
-    ZefyrToolbarAction.quote: Icons.format_quote,
-  };
-
-  static const kIgnoreButtonIcons = {
-    ZefyrToolbarAction.link: Icons.link,
-    ZefyrToolbarAction.unlink: Icons.link_off,
-    ZefyrToolbarAction.clipboardCopy: Icons.content_copy,
-    ZefyrToolbarAction.horizontalRule: Icons.remove,
-    ZefyrToolbarAction.openInBrowser: Icons.open_in_new,
-    ZefyrToolbarAction.code: Icons.code,
-    ZefyrToolbarAction.image: Icons.photo,
-    ZefyrToolbarAction.cameraImage: Icons.photo_camera,
-    ZefyrToolbarAction.galleryImage: Icons.photo_library,
-    ZefyrToolbarAction.hideKeyboard: Icons.keyboard_hide,
-    ZefyrToolbarAction.close: Icons.close,
-    ZefyrToolbarAction.confirm: Icons.check,
-  };
-
-  static const kSpecialIconSizes = {
-    ZefyrToolbarAction.unlink: 20.0,
-    ZefyrToolbarAction.clipboardCopy: 20.0,
-    ZefyrToolbarAction.openInBrowser: 20.0,
-    ZefyrToolbarAction.close: 20.0,
-    ZefyrToolbarAction.confirm: 20.0,
-  };
-
-  static const kDefaultButtonTexts = {
-    ZefyrToolbarAction.headingLevel1: 'H1',
-    ZefyrToolbarAction.headingLevel2: 'H2',
-    ZefyrToolbarAction.headingLevel3: 'H3',
-  };
-
-  @override
-  Widget buildButton(BuildContext context, ZefyrToolbarAction action, {VoidCallback onPressed}) {
-    if (kDefaultButtonIcons.containsKey(action)) {
-      final icon = kDefaultButtonIcons[action];
-      final size = kSpecialIconSizes[action];
-      return ZefyrButton.icon(
-        action: action,
-        icon: icon,
-        iconSize: size,
-        onPressed: onPressed,
-      );
-    } else if (kDefaultButtonTexts.containsKey(action)) {
-      final theme = Theme.of(context);
-      final style = theme.textTheme.caption.copyWith(fontWeight: FontWeight.bold, fontSize: 14.0);
-      return ZefyrButton.text(
-        action: action,
-        text: kDefaultButtonTexts[action],
-        style: style,
-        onPressed: onPressed,
-      );
-    } else {
-      return Container();
-    }
-  }
-}
+// class ToolbarDelegate implements ZefyrToolbarDelegate {
+//   static const kDefaultButtonIcons = {
+//     ZefyrToolbarAction.bold: Icons.format_bold,
+//     ZefyrToolbarAction.italic: Icons.format_italic,
+//     ZefyrToolbarAction.heading: Icons.format_size,
+//     ZefyrToolbarAction.bulletList: Icons.format_list_bulleted,
+//     ZefyrToolbarAction.numberList: Icons.format_list_numbered,
+//     ZefyrToolbarAction.quote: Icons.format_quote,
+//   };
+//
+//   static const kIgnoreButtonIcons = {
+//     ZefyrToolbarAction.link: Icons.link,
+//     ZefyrToolbarAction.unlink: Icons.link_off,
+//     ZefyrToolbarAction.clipboardCopy: Icons.content_copy,
+//     ZefyrToolbarAction.horizontalRule: Icons.remove,
+//     ZefyrToolbarAction.openInBrowser: Icons.open_in_new,
+//     ZefyrToolbarAction.code: Icons.code,
+//     ZefyrToolbarAction.image: Icons.photo,
+//     ZefyrToolbarAction.cameraImage: Icons.photo_camera,
+//     ZefyrToolbarAction.galleryImage: Icons.photo_library,
+//     ZefyrToolbarAction.hideKeyboard: Icons.keyboard_hide,
+//     ZefyrToolbarAction.close: Icons.close,
+//     ZefyrToolbarAction.confirm: Icons.check,
+//   };
+//
+//   static const kSpecialIconSizes = {
+//     ZefyrToolbarAction.unlink: 20.0,
+//     ZefyrToolbarAction.clipboardCopy: 20.0,
+//     ZefyrToolbarAction.openInBrowser: 20.0,
+//     ZefyrToolbarAction.close: 20.0,
+//     ZefyrToolbarAction.confirm: 20.0,
+//   };
+//
+//   static const kDefaultButtonTexts = {
+//     ZefyrToolbarAction.headingLevel1: 'H1',
+//     ZefyrToolbarAction.headingLevel2: 'H2',
+//     ZefyrToolbarAction.headingLevel3: 'H3',
+//   };
+//
+//   @override
+//   Widget buildButton(BuildContext context, ZefyrToolbarAction action, {VoidCallback onPressed}) {
+//     if (kDefaultButtonIcons.containsKey(action)) {
+//       final icon = kDefaultButtonIcons[action];
+//       final size = kSpecialIconSizes[action];
+//       return ZefyrButton.icon(
+//         action: action,
+//         icon: icon,
+//         iconSize: size,
+//         onPressed: onPressed,
+//       );
+//     } else if (kDefaultButtonTexts.containsKey(action)) {
+//       final theme = Theme.of(context);
+//       final style = theme.textTheme.caption.copyWith(fontWeight: FontWeight.bold, fontSize: 14.0);
+//       return ZefyrButton.text(
+//         action: action,
+//         text: kDefaultButtonTexts[action],
+//         style: style,
+//         onPressed: onPressed,
+//       );
+//     } else {
+//       return Container();
+//     }
+//   }
+// }
 
 class __MarginNoteScreenState extends State<_MarginNoteView> {
   UserItem _item;
@@ -292,16 +292,19 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
         color: (Theme.of(context).brightness == Brightness.dark) ? Colors.black : Colors.white,
         child: (_controller == null)
             ? null
-            : ZefyrScaffold(
-                child: ZefyrEditor(
-                  padding: _editMode
-                      ? const EdgeInsets.all(16)
-                      : const EdgeInsets.all(16).copyWith(bottom: 65),
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  toolbarDelegate: ToolbarDelegate(),
-                  mode: _editMode ? ZefyrMode.edit : ZefyrMode.select,
-                  imageDelegate: TecImageDelegate(),
+            : Scaffold(
+                body: Expanded(
+                  child: ZefyrEditor(
+                    padding: _editMode
+                        ? const EdgeInsets.all(16)
+                        : const EdgeInsets.all(16).copyWith(bottom: 65),
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    // toolbarDelegate: ToolbarDelegate(),
+                    readOnly: !_editMode,
+                    expands: true,
+                    // imageDelegate: TecImageDelegate(),
+                  ),
                 ),
               ),
       ),

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:zefyr/zefyr.dart';
 
-class TecImageDelegate implements ZefyrImageDelegate<ImageSource> {
+class TecImageDelegate /* implements ZefyrImageDelegate<ImageSource> */ {
   @override
   ImageSource get cameraSource => ImageSource.camera;
 

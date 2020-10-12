@@ -71,12 +71,12 @@ class __NoteScreenState extends State<_NoteScreen> {
                 ),
               ),
               body: SafeArea(
-                child: ZefyrScaffold(
-                  child: ZefyrEditor(
+                child: Scaffold(
+                  body: ZefyrEditor(
                     padding: const EdgeInsets.all(16),
                     controller: _controller,
                     focusNode: _focusNode,
-                    imageDelegate: TecImageDelegate(),
+                    // imageDelegate: TecImageDelegate(),
                   ),
                 ),
               ));

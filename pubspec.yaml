@@ -39,17 +39,13 @@ dependencies:
   path_provider: ^1.6.11
   pedantic: ^1.9.2
   provider: ^4.3.2+2
-  quill_delta: ^1.0.0
+  quill_delta: ^2.0.0
   rxdart: ^0.24.1
   scrollable_positioned_list: ^0.1.7
   share: ^0.6.5
   tuple: ^1.0.3
   url_launcher: ^5.5.3
-  zefyr:
-    git:
-      url: git://github.com/memspace/zefyr
-      path: packages/zefyr
-      commit: 6951cba
+  zefyr: ^1.0.0-dev.1.0
 
   # Internal dependencies
   sliding_sheet:
