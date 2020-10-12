@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:bible/ui/bible/chapter_view_model.dart';
+import 'package:bible/models/misc_utils.dart';
+import 'package:bible/models/string_utils.dart';
 
 void main() {
   test('String.countOfWords in bible_chapter_view.dart', () {
