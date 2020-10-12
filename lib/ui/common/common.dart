@@ -170,35 +170,37 @@ class IconSpan extends FixedWidthWidgetSpan {
 class IconWithNumberBadge extends StatelessWidget {
   final IconData icon;
   final int value;
-  const IconWithNumberBadge({this.icon, this.value});
+  final Color color;
+  const IconWithNumberBadge({this.icon, this.value, this.color});
 
   @override
   Widget build(BuildContext context) {
     return Stack(children: <Widget>[
       Icon(icon),
-      if (value != 0)
-        Positioned(
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.all(1),
-            decoration: BoxDecoration(
-              color: Colors.red,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            constraints: const BoxConstraints(
-              minWidth: 12,
-              minHeight: 12,
-            ),
-            child: Text(
-              '$value',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 8,
-              ),
-              textAlign: TextAlign.center,
-            ),
+      Positioned(
+        right: 0,
+        child: Container(
+          padding: const EdgeInsets.all(1),
+          decoration: BoxDecoration(
+            color: color ?? Colors.red,
+            borderRadius: BorderRadius.circular(6),
           ),
-        )
+          constraints: const BoxConstraints(
+            minWidth: 12,
+            minHeight: 12,
+          ),
+          child: value != null
+              ? Text(
+                  '$value',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                  ),
+                  textAlign: TextAlign.center,
+                )
+              : null,
+        ),
+      )
     ]);
   }
 }

@@ -90,7 +90,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
 
-    _searchResultsTabController = TabController(length: 2, initialIndex: 1, vsync: this)
+    _searchResultsTabController = TabController(length: 2, initialIndex: 0, vsync: this)
       ..addListener(() {
         if (_searchResultsTabController.index == 0) {
           if (searchBloc().state.selectionMode) {
@@ -299,14 +299,20 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                 onPressed: () => Navigator.of(context).maybePop(s.ref))
           ];
         } else {
+          final hasSearchResults = c.bloc<SearchBloc>().state.searchResults.isNotEmpty;
           return [
             IconButton(
-                icon: const Icon(Icons.youtube_searched_for),
+                icon: hasSearchResults
+                    ? const IconWithNumberBadge(
+                        color: Colors.orange, icon: Icons.youtube_searched_for)
+                    : const Icon(Icons.youtube_searched_for),
                 onPressed: () {
                   c
                       .bloc<NavBloc>()
                       .add(const NavEvent.changeNavView(state: NavViewState.searchResults));
-                  _searchResultsTabController.animateTo(1);
+                  if (hasSearchResults) {
+                    _searchResultsTabController.animateTo(1);
+                  }
                 }),
             IconButton(icon: Icon(platformAwareMoreIcon(context)), onPressed: _moreButton)
           ];
