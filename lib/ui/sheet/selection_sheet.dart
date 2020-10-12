@@ -134,10 +134,10 @@ class __MiniViewState extends State<_MiniView> {
   Widget build(BuildContext context) {
     final miniChildren = [
       for (final button in SelectionSheetModel.miniButtons.keys) ...[
-        SelectionSheetButton(
+        SheetIconButton(
           icon: SelectionSheetModel.miniButtons[button],
           onPressed: () => SelectionSheetModel.buttonAction(context, button),
-          title: button,
+          text: button,
         ),
       ],
     ];
@@ -176,37 +176,39 @@ class __MiniViewState extends State<_MiniView> {
             SelectionSheetModel.pickColorButton(editMode: editMode, onEditMode: _onEditMode),
             const SizedBox(width: 5)
           ];
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                  height: 35,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: colors.length,
-                    itemBuilder: (c, i) => colors[i],
-                    separatorBuilder: (c, i) =>
-                        const VerticalDivider(color: Colors.transparent, width: 5),
-                  )),
-              const SizedBox(height: 5),
-              Padding(
-                  // bottom padding is handled by TecScaffoldWrapper
-                  padding: const EdgeInsets.only(left: 10, top: 5, right: 10),
-                  child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        for (final child in miniChildren)
-                          Expanded(
-                            child: child,
-                          ),
-                        // Expanded(
-                        //   child: SelectionSheetModel.defineButton(context),
-                        // )
-                      ])),
-            ],
+          return Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                    height: 35,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: colors.length,
+                      itemBuilder: (c, i) => colors[i],
+                      separatorBuilder: (c, i) =>
+                          const VerticalDivider(color: Colors.transparent, width: 5),
+                    )),
+                Padding(
+                    // bottom padding is handled by TecScaffoldWrapper
+                    padding: const EdgeInsets.only(left: 10, right: 10, top: 15),
+                    child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          for (final child in miniChildren)
+                            Expanded(
+                              child: child,
+                            ),
+                          // Expanded(
+                          //   child: SelectionSheetModel.defineButton(context),
+                          // )
+                        ])),
+              ],
+            ),
           );
         });
   }
