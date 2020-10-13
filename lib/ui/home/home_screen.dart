@@ -22,7 +22,7 @@ class HomeScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
-        BlocProvider<SelectionStyleBloc>(create: (context) => SelectionStyleBloc()),
+        BlocProvider<SelectionCmdBloc>(create: (context) => SelectionCmdBloc()),
         BlocProvider<SheetManagerBloc>(
           create: (context) => SheetManagerBloc(),
         ),

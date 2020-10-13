@@ -16,7 +16,6 @@ import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/tec_share.dart';
-import '../../models/shared_types.dart';
 import '../common/common.dart';
 import 'compare_verse.dart';
 import 'snap_sheet.dart';
@@ -133,7 +132,7 @@ class SelectionSheetModel {
 
     if (refs.length > 1) {
       final refChosen =
-          await _showRefPickerDialog<Reference>(c, refs, title: 'Select Verse to Web Search');
+          await _showRefPickerDialog(c, refs, title: 'Select Verse to Web Search');
       if (refChosen != null) {
         await _defineWebSearch(c, refChosen);
       }
@@ -176,14 +175,13 @@ class SelectionSheetModel {
   }
 
   static void _noColor(BuildContext context) =>
-      context.bloc<SelectionStyleBloc>()?.add(const SelectionStyle(type: HighlightType.clear));
+      context.bloc<SelectionCmdBloc>()?.add(const SelectionCmd.clearStyle());
 
   static void more(BuildContext context) =>
       context.bloc<SheetManagerBloc>()?.add(const SheetEvent.changeSize(SheetSize.medium));
 
-  static void deselect(BuildContext c) => c
-      .bloc<SelectionStyleBloc>()
-      ?.add(const SelectionStyle(type: HighlightType.clear, isTrialMode: true));
+  static void deselect(BuildContext c) =>
+      c.bloc<SelectionCmdBloc>()?.add(const SelectionCmd.deselectAll());
 
   static Future<void> copy(BuildContext c, {int uid}) async {
     final copyWithLink = c.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
@@ -293,7 +291,7 @@ class SelectionSheetModel {
     // ask for which verse to compare if multiple selected in views
     if (refs.length > 1) {
       final refChosen =
-          await _showRefPickerDialog<Reference>(c, refs, title: 'Select Verse to Compare');
+          await _showRefPickerDialog(c, refs, title: 'Select Verse to Compare');
       if (refChosen != null) {
         ref = refChosen;
       } else {
@@ -306,7 +304,7 @@ class SelectionSheetModel {
     }
   }
 
-  static Future<Reference> _showRefPickerDialog<Referemce>(BuildContext c, List<Reference> refs,
+  static Future<Reference> _showRefPickerDialog(BuildContext c, List<Reference> refs,
           {String title = 'Select Verse'}) =>
       showTecDialog<Reference>(
           context: c,

@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:quill_delta/quill_delta.dart';
 import 'package:tec_user_account/tec_user_account.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:zefyr/zefyr.dart';
 
@@ -16,7 +17,6 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../menu/view_actions.dart';
-import 'tec_image_delegate.dart';
 
 const marginNoteViewType = 'MarginNoteView';
 
@@ -28,7 +28,17 @@ class ViewableMarginNote extends Viewable {
       _MarginNoteView(state: state, size: size);
 
   @override
-  String menuTitle({BuildContext context, ViewState state}) => null;
+  String menuTitle({BuildContext context, ViewState state}) {
+    if (state?.uid != null) {
+      final json = context.bloc<ViewManagerBloc>()?.dataWithView(state.uid);
+      final jsonMap = json is String ? tec.parseJsonSync(json) : json;
+      if (jsonMap is Map<String, dynamic>) {
+        return tec.as<String>(jsonMap['title']);
+      }
+    }
+
+    return null;
+  }
 
   @override
   Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) =>
@@ -269,7 +279,13 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
       appBar: MinHeightAppBar(
         appBar: AppBar(
           centerTitle: false,
-          title: (_item == null) ? null : Text(_title),
+          title: (_item == null)
+              ? null
+              : Text(_title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline6
+                      .copyWith(color: Theme.of(context).textColor.withOpacity(0.5))),
           leading: (!_editMode)
               ? null
               : IconButton(
@@ -283,31 +299,38 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
                     icon: const Icon(FeatherIcons.trash2),
                     tooltip: 'Delete Note',
                     onPressed: _deleteNoteDialog,
+                    color: Theme.of(context).textColor.withOpacity(0.5),
                   ),
                 ]
               : defaultActionsBuilder(context, widget.state, widget.size),
         ),
       ),
-      body: Container(
-        color: (Theme.of(context).brightness == Brightness.dark) ? Colors.black : Colors.white,
-        child: (_controller == null)
-            ? null
-            : Scaffold(
-                body: Expanded(
-                  child: ZefyrEditor(
+      body: (_controller == null)
+          ? null
+          : Column(
+              children: [
+                if (_editMode) ZefyrToolbar.basic(controller: _controller),
+                if (_editMode) Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
+                Expanded(
+                  child: Container(
+                    color: Colors.green,
                     padding: _editMode
                         ? const EdgeInsets.all(16)
                         : const EdgeInsets.all(16).copyWith(bottom: 65),
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    // toolbarDelegate: ToolbarDelegate(),
-                    readOnly: !_editMode,
-                    expands: true,
-                    // imageDelegate: TecImageDelegate(),
+                    child: ZefyrEditor(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      autofocus: _editMode,
+                      // toolbarDelegate: ToolbarDelegate(),
+                      readOnly: !_editMode,
+                      showCursor: _editMode,
+                      expands: true,
+                      // imageDelegate: TecImageDelegate(),
+                    ),
                   ),
                 ),
-              ),
-      ),
+              ],
+            ),
     );
   }
 }

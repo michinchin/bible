@@ -251,15 +251,16 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           ss.selectionMode &&
           _searchResultsTabController.index == 1) {
         return CloseButton(onPressed: _selectionMode);
-      } else if (s == NavViewState.bcvTabs) {
-        return const CloseButton();
       } else {
-        return BackButton(onPressed: () {
-          c.bloc<NavBloc>()
-            ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
-            ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
-            ..add(const NavEvent.onSearchChange(search: ''));
-        });
+        return const CloseButton();
+        // else if (s == NavViewState.bcvTabs) {closeButton}
+        // else{
+        // return BackButton(onPressed: () {
+        // c.bloc<NavBloc>()
+        //   ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
+        //   ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
+        //   ..add(const NavEvent.onSearchChange(search: ''));
+        // });
       }
     }
 
@@ -298,14 +299,20 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                 onPressed: () => Navigator.of(context).maybePop(s.ref))
           ];
         } else {
+          final hasSearchResults = c.bloc<SearchBloc>().state.searchResults.isNotEmpty;
           return [
             IconButton(
-                icon: const Icon(Icons.youtube_searched_for),
+                icon: hasSearchResults
+                    ? const IconWithNumberBadge(
+                        color: Colors.orange, icon: Icons.youtube_searched_for)
+                    : const Icon(Icons.youtube_searched_for),
                 onPressed: () {
                   c
                       .bloc<NavBloc>()
                       .add(const NavEvent.changeNavView(state: NavViewState.searchResults));
-                  _searchResultsTabController.animateTo(0);
+                  if (hasSearchResults) {
+                    _searchResultsTabController.animateTo(1);
+                  }
                 }),
             IconButton(icon: Icon(platformAwareMoreIcon(context)), onPressed: _moreButton)
           ];

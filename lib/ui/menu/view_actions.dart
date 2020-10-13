@@ -20,6 +20,7 @@ import 'main_menu.dart';
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   // ignore: close_sinks
   final vmBloc = context.bloc<ViewManagerBloc>();
+  final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
   final topRight = vmBloc.state.maximizedViewUid == state.uid ||
       (vmBloc.columnsInRow(0) - 1) == vmBloc.indexOfView(state.uid);
 
@@ -37,6 +38,22 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
   }
 
   return [
+    if ((vmBloc?.countOfInvisibleViews ?? 0) >= 1 && isMaximized)
+      IconButton(
+          icon: const Icon(SFSymbols.arrow_up_arrow_down_circle, size: 20),
+          color: Theme.of(context).textColor.withOpacity(0.5),
+          onPressed: () {
+            ViewState view;
+            if (vmBloc.indexOfView(vmBloc.state.maximizedViewUid) ==
+                vmBloc.state.views.length - 1) {
+              view = vmBloc.state.views.first;
+            } else {
+              view = vmBloc.state.views.firstWhere((v) =>
+                  vmBloc.indexOfView(v.uid) ==
+                  vmBloc.indexOfView(vmBloc.state.maximizedViewUid) + 1);
+            }
+            _onSwitchViews(vmBloc, vmBloc.state.maximizedViewUid, view);
+          }),
     IconButton(
       icon: const Icon(SFSymbols.square_stack, size: 20),
       tooltip: 'View Menu',
@@ -71,7 +88,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
           }),
     if (topRight)
       IconButton(
-        icon: const Icon(Icons.account_circle_outlined),
+        icon: const Icon(SFSymbols.person_crop_circle),
         tooltip: 'Main Menu',
         color: Theme.of(context).textColor.withOpacity(0.5),
         onPressed: () => showMainMenu(context),
@@ -134,6 +151,18 @@ List<TableRow> _buildMenuItemsForViewWithState(
   ];
 }
 
+void _onSwitchViews(ViewManagerBloc vmBloc, int viewUid, ViewState view) {
+  if (vmBloc.state.maximizedViewUid == viewUid) {
+    vmBloc?.add(ViewManagerEvent.maximize(view.uid));
+  } else {
+    final thisViewPos = vmBloc.indexOfView(viewUid);
+    final hiddenViewPos = vmBloc.indexOfView(view.uid);
+    vmBloc?.add(ViewManagerEvent.move(
+        fromPosition: vmBloc.indexOfView(view.uid), toPosition: vmBloc.indexOfView(viewUid)));
+    vmBloc?.add(ViewManagerEvent.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos));
+  }
+}
+
 Iterable<TableRow> _generateOffScreenItems(BuildContext menuContext, int viewUid) {
   // ignore: close_sinks
   final vmBloc = menuContext.bloc<ViewManagerBloc>();
@@ -143,18 +172,8 @@ Iterable<TableRow> _generateOffScreenItems(BuildContext menuContext, int viewUid
     if (!vmBloc.isViewVisible(view.uid)) {
       final title = vm.menuTitleWith(context: menuContext, state: view);
       items.add(tecModalPopupMenuItem(menuContext, vm.iconWithType(view.type), '$title', () {
-        if (vmBloc.state.maximizedViewUid == viewUid) {
-          vmBloc?.add(ViewManagerEvent.maximize(view.uid));
-          Navigator.of(menuContext).maybePop();
-        } else {
-          final thisViewPos = vmBloc.indexOfView(viewUid);
-          final hiddenViewPos = vmBloc.indexOfView(view.uid);
-          vmBloc?.add(ViewManagerEvent.move(
-              fromPosition: vmBloc.indexOfView(view.uid), toPosition: vmBloc.indexOfView(viewUid)));
-          vmBloc?.add(
-              ViewManagerEvent.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos));
-          Navigator.of(menuContext).maybePop();
-        }
+        _onSwitchViews(vmBloc, viewUid, view);
+        Navigator.of(menuContext).maybePop();
       }));
     }
   }

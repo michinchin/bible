@@ -323,13 +323,15 @@ class SelectionSheetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget iconButton() => Padding(
-          padding: const EdgeInsets.all(5),
-          child: Icon(
-            icon,
-            color: Colors.grey,
-            size: 20,
-          ),
+    Widget iconButton() =>
+        // Padding(
+        // padding: const EdgeInsets.all(5),
+        // child:
+        Icon(
+          icon,
+          color: Colors.grey,
+          size: 20,
+          // ),
         );
     return (title != null)
         ? InkWell(
@@ -337,7 +339,6 @@ class SelectionSheetButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(15),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               iconButton(),
-              const SizedBox(height: 2),
               TecText(
                 title,
                 autoSize: true,
@@ -365,6 +366,7 @@ class SheetIconButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
+        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         onTap: onPressed,
         child: Column(
           mainAxisSize: MainAxisSize.min,

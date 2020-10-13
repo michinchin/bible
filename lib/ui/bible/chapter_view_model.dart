@@ -19,6 +19,8 @@ import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/color_utils.dart';
+import '../../models/misc_utils.dart';
+import '../../models/string_utils.dart';
 import '../note/margin_note_view.dart';
 
 const _debugMode = false; // kDebugMode
@@ -90,18 +92,7 @@ class ChapterViewModel {
           _tapDownStopwatch.elapsed.inMilliseconds > 500 &&
           _tapDownTag is _VerseTag &&
           (_tapDownTag as _VerseTag).href == tag.href) {
-        handledTap = true;
-        showDialog<void>(
-          context: context,
-          barrierDismissible: true,
-          builder: (builder) {
-            return AlertDialog(
-              contentPadding: const EdgeInsets.all(0),
-              content: TecHtml('<p>${tag.href}</p>', baseUrl: '', selectable: false),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            );
-          },
-        );
+        handledTap = _handleXref(context, _tapDownTag as _VerseTag);
       }
 
       // Was the tap near a margin note or footnote widget?
@@ -451,8 +442,44 @@ class ChapterViewModel {
 
   /// Call to clear all selections, if any.
   void clearAllSelections(BuildContext context) {
+    _isSelectionTrialMode = false;
     selectionController.deselectAll();
     _clearAllSelectedVerses(context);
+  }
+
+  Iterable<TecSelectableMenuItem> menuItems(BuildContext context) {
+    return [
+      TecSelectableMenuItem(type: TecSelectableMenuItemType.define),
+      TecSelectableMenuItem(
+        title: 'Cross-ref',
+        isEnabled: (ctl) {
+          tec.dmPrint(
+              'Enable Xref? Words selected: ${ctl.wordCount}, \nstart: ${ctl.selectionStart}, \nend:   ${ctl.selectionEnd}');
+          return ctl.wordCount == 1 && (ctl.selectionStart?.verseTag?.isInXref ?? false);
+        },
+        handler: (ctl) {
+          return _handleXref(context, ctl.selectionStart?.verseTag);
+        },
+      ),
+    ];
+  }
+
+  bool _handleXref(BuildContext context, _VerseTag tag) {
+    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (builder) {
+          return AlertDialog(
+            contentPadding: const EdgeInsets.all(0),
+            content: TecHtml('<p>${tag.href}</p>', baseUrl: '', selectable: false),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          );
+        },
+      );
+      return true;
+    }
+    return false;
   }
 
   void notifyOfSelections(BuildContext context) {
@@ -510,35 +537,27 @@ class ChapterViewModel {
   ///
   /// Handles selection style changed events.
   ///
-  void selectionStyleChanged(
-      BuildContext context, SelectionStyle selectionStyle, int volume, int book, int chapter) {
+  void handleSelectionCmd(BuildContext context, SelectionCmd cmd) {
     final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
-
     if (bloc == null || !hasSelection) return;
-    final mode = (selectionStyle.isTrialMode) ? HighlightMode.trial : HighlightMode.save;
 
-    // when color picker exists with "cancel(clear)" - style is in preview mode, but trial is over
-    _isSelectionTrialMode =
-        selectionStyle.isTrialMode && selectionStyle.type != HighlightType.clear;
+    Reference ref() => _selectionReference;
 
-    final ref = _selectionReference;
-
-    if (!_isSelectionTrialMode) {
+    cmd.when(clearStyle: () {
+      bloc.add(HighlightEvent.clear(ref(), HighlightMode.save));
       clearAllSelections(context);
-    } else if (hasWordRangeSelected) {
-      refreshFunc(() {});
-    }
-
-    if (selectionStyle.type == HighlightType.clear) {
-      bloc.add(HighlightEvent.clear(ref, mode));
-    } else {
-      bloc.add(HighlightEvent.add(
-        type: selectionStyle.type,
-        color: selectionStyle.color,
-        ref: ref,
-        mode: mode,
-      ));
-    }
+    }, setStyle: (type, color) {
+      bloc.add(HighlightEvent.add(type: type, color: color, ref: ref(), mode: HighlightMode.save));
+      clearAllSelections(context);
+    }, tryStyle: (type, color) {
+      _isSelectionTrialMode = true;
+      bloc.add(HighlightEvent.add(type: type, color: color, ref: ref(), mode: HighlightMode.trial));
+    }, cancelTrial: () {
+      _isSelectionTrialMode = false;
+      bloc.add(HighlightEvent.clear(ref(), HighlightMode.trial));
+    }, deselectAll: () {
+      clearAllSelections(context);
+    });
   }
 
   //
@@ -554,14 +573,12 @@ class ChapterViewModel {
 
   void _toggleSelectionForVerse(BuildContext context, int verse) {
     assert(verse != null);
-    TecAutoScroll.stopAutoscroll();
     _updateSelectedVersesInBlock(() {
       if (!_selectedVerses.remove(verse)) _selectedVerses.add(verse);
     }, context);
   }
 
   void _clearAllSelectedVerses(BuildContext context) {
-    TecAutoScroll.stopAutoscroll();
     if (_selectedVerses.isEmpty) return;
     _updateSelectedVersesInBlock(_selectedVerses.clear, context);
   }
@@ -787,29 +804,6 @@ Reference _referenceWithVerses(
       modified: modified);
 }
 
-extension ChapterViewModelExtOnIterableInt on Iterable<int> {
-  ///
-  /// With a sorted list of ints, returns the ints that are missing from the list.
-  ///
-  Iterable<int> missingValues() {
-    int prevValue;
-    return expand((e) {
-      // Save the current value of `prevValue` for use in the generator block. This must be done
-      // because `Iterable<int>.generate` generates its elements dynamically, which means that
-      // its generator function is not called now, it is called later, when, and if, needed. So,
-      // if we used `prevValue` in the generator block, it would be using the future value
-      // of `prevValue`, not the current value, which would make the block return the wrong value.
-      final bakedPrevValue = prevValue;
-      final values = Iterable<int>.generate(
-        e - (prevValue ?? e) - 1,
-        (i) => i + bakedPrevValue + 1,
-      );
-      prevValue = e;
-      return values;
-    });
-  }
-}
-
 ///
 /// [_VerseTag]
 ///
@@ -877,6 +871,8 @@ class _VerseTag {
 }
 
 extension on TaggedText {
+  _VerseTag get verseTag => (tag is _VerseTag) ? tag as _VerseTag : null;
+
   int get verse => (tag is _VerseTag) ? (tag as _VerseTag).verse : null;
 
   int get word {
@@ -889,60 +885,12 @@ extension on TaggedText {
   }
 }
 
-extension ChapterViewModelExtOnString on String {
-  ///
-  /// Returns the count of words in the string. If [toIndex] if provided, returns the count of
-  /// words up to, but not including, that index.
-  ///
-  /// Note, if [toIndex] is provided, and [toIndex] is in the middle of a word, that word is
-  /// not counted. For example, if the string is 'cat dog', and [toIndex] is 0, 1, or 2, the
-  /// function returns 0. If [toIndex] is 3, 4, 5, or 6, the function returns 1. If [toIndex]
-  /// is 7 or null, the function returns 2.
-  ///
-  int countOfWords({int toIndex}) {
-    var count = 0;
-    var isInWord = false;
-    var i = 0;
-    final units = codeUnits;
-    for (final codeUnit in units) {
-      final isWhitespace = tec.isWhitespace(codeUnit);
-      if (isInWord) {
-        if (isWhitespace) {
-          isInWord = false;
-          count++;
-        }
-      } else if (!isWhitespace) {
-        isInWord = true;
-      }
-      if (toIndex != null && i >= toIndex) break;
-      i++;
-    }
-    if (isInWord && i >= units.length) count++;
-    return count;
-  }
+extension on TecSelectableController {
+  /// Returns the number of verses that the selection spans.
+  int get verseCount => (selectionEnd?.verse ?? -1) + 1 - (selectionStart?.verse ?? 0);
 
-  ///
-  /// Returns the index at the end of the given word.
-  ///
-  int indexAtEndOfWord(int word) {
-    if (word == null || word <= 0) return 0;
-    var wordCount = 0;
-    var isInWord = false;
-    var i = 0;
-    final units = codeUnits;
-    for (final codeUnit in units) {
-      final isWhitespace = tec.isWhitespace(codeUnit);
-      if (isInWord) {
-        if (isWhitespace) {
-          isInWord = false;
-          if (word == wordCount) return i;
-        }
-      } else if (!isWhitespace) {
-        wordCount++;
-        isInWord = true;
-      }
-      i++;
-    }
-    return i;
-  }
+  /// Returns the number of words that are selected in a single verse. If more than one
+  /// verse is selected, `null` is returned.
+  int get wordCount =>
+      verseCount == 1 ? ((selectionEnd?.word ?? 0) - (selectionStart?.word ?? 0)) : null;
 }

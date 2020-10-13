@@ -512,9 +512,8 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
     return MultiBlocListener(
       listeners: [
-        BlocListener<SelectionStyleBloc, SelectionStyle>(
-          listener: (context, selectionStyle) => _viewModel.selectionStyleChanged(
-              context, selectionStyle, widget.volumeId, widget.ref.book, widget.ref.chapter),
+        BlocListener<SelectionCmdBloc, SelectionCmd>(
+          listener: (context, cmd) => _viewModel.handleSelectionCmd(context, cmd),
         ),
         BlocListener<ViewDataBloc, ViewData>(
           listener: (context, viewData) {
@@ -575,7 +574,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
                   selectable: !_viewModel.hasVersesSelected,
                   selectionColor: selectionColor,
                   showSelection: !_viewModel.isSelectionTrialMode,
-                  showSelectionPopup: false,
+                  selectionMenuItems: _viewModel.menuItems(context),
                   selectionController: _selectionController,
 
                   // `versesToShow` related (when viewing a subset of verses in the chapter):

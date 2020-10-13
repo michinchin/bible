@@ -24,6 +24,8 @@ import '../../models/user_item_helper.dart';
 import '../common/common.dart';
 import '../sheet/compare_verse.dart';
 
+const searchThemeColor = Colors.orange;
+
 class SearchAndHistoryView extends StatelessWidget {
   final TextEditingController searchController;
   final TabController tabController;
@@ -41,7 +43,7 @@ class SearchAndHistoryView extends StatelessWidget {
               controller: tabController,
               isScrollable: true,
               indicatorSize: TabBarIndicatorSize.label,
-              indicator: BubbleTabIndicator(color: Colors.blue.withOpacity(0.5)),
+              indicator: BubbleTabIndicator(color: searchThemeColor.withOpacity(0.5)),
               labelColor: Theme.of(context).textColor.withOpacity(0.7),
               unselectedLabelColor: Theme.of(context).textColor.withOpacity(0.7),
               tabs: const [Tab(child: Text('HISTORY')), Tab(child: Text('SEARCH RESULTS'))]),
@@ -439,8 +441,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
 
   @override
   Widget build(BuildContext context) {
-    final textColor =
-        widget.res.selected ? Theme.of(context).accentColor : Theme.of(context).textColor;
+    final textColor = widget.res.selected ? searchThemeColor : Theme.of(context).textColor;
     Widget content() => Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: TecText.rich(
@@ -498,6 +499,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
           Stack(children: [
             ButtonBar(alignment: MainAxisAlignment.start, children: [
               FlatButton(
+                textColor: searchThemeColor,
                 // icon: RotatedBox(
                 //   quarterTurns: 1,
                 //   child: Icon(widget.res.contextExpanded ? Icons.unfold_less : Icons.unfold_more),
@@ -579,7 +581,7 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
               }
             },
             textColor: selectedTextColor,
-            splashColor: Theme.of(context).accentColor,
+            splashColor: searchThemeColor,
           ),
         ));
 
@@ -591,7 +593,7 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
       Color textColor;
       final curr = widget.res.searchResult.verses[widget.res.currentVerseIndex].id;
 
-      buttonColor = curr == each.id ? Theme.of(context).accentColor : Colors.transparent;
+      buttonColor = curr == each.id ? searchThemeColor : Colors.transparent;
       textColor = curr == each.id ? Theme.of(context).cardColor : selectedTextColor;
 
       buttons.add(ButtonTheme(
