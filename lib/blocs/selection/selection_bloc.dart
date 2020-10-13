@@ -26,22 +26,19 @@ class SelectionBloc extends Bloc<SelectionState, SelectionState> {
 }
 
 @freezed
-abstract class SelectionStyle with _$SelectionStyle {
-  const factory SelectionStyle({
-    HighlightType type,
-    int color,
-    @Default(false) bool isTrialMode,
-    DateTime modified,
-  }) = _SelectionStyle;
+abstract class SelectionCmd with _$SelectionCmd {
+  const factory SelectionCmd.clearStyle() = _ClearStyle;
+  const factory SelectionCmd.setStyle(HighlightType type, int color) = _SetStyle;
+  const factory SelectionCmd.tryStyle(HighlightType type, int color) = _TryStyle;
+  const factory SelectionCmd.cancelTrial() = _CancelTrial;
+  const factory SelectionCmd.deselectAll() = _DeselectAll;
 }
 
-class SelectionStyleBloc extends Bloc<SelectionStyle, SelectionStyle> {
-  SelectionStyleBloc() : super(const SelectionStyle());
+class SelectionCmdBloc extends Cubit<SelectionCmd> {
+  SelectionCmdBloc() : super(const SelectionCmd.clearStyle());
 
-  @override
-  Stream<SelectionStyle> mapEventToState(SelectionStyle event) async* {
-    final newState = event.modified != null ? event : event.copyWith(modified: DateTime.now());
-    // tec.dmPrint('$newState');
-    yield newState;
+  void add(SelectionCmd cmd) {
+    assert(cmd != null);
+    emit(cmd);
   }
 }

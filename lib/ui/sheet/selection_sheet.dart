@@ -1,13 +1,13 @@
-import 'package:bible/blocs/highlights/highlights_bloc.dart';
-import 'package:bible/models/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
+import '../../models/color_utils.dart';
 import '../../models/pref_item.dart';
 import '../../ui/sheet/snap_sheet.dart';
 import '../misc/color_picker.dart';
@@ -110,7 +110,7 @@ class __MiniViewState extends State<_MiniView> {
             borderRadius:
                 BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
         builder: (c) => BlocProvider.value(
-              value: context.bloc<SelectionStyleBloc>(),
+              value: context.bloc<SelectionCmdBloc>(),
               child: _ColorSelectionView(
                 prefItems: prefItems,
                 colorIndex: colorIndex,
@@ -118,15 +118,13 @@ class __MiniViewState extends State<_MiniView> {
               ),
             ));
     if (colorChosen != null) {
-      context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-          type: underlineMode ? HighlightType.underline : HighlightType.highlight,
-          color: colorChosen));
+      context.bloc<SelectionCmdBloc>()?.add(SelectionCmd.setStyle(
+          underlineMode ? HighlightType.underline : HighlightType.highlight, colorChosen));
       context.bloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
           prefItem: PrefItem.from(prefItems.itemWithId(colorIndex).copyWith(verse: colorChosen))));
     } else {
-      //TODO(abby): issue once in trial mode, can't select more verses
-      context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-          type: HighlightType.highlight, isTrialMode: true, color: unsetHighlightColor.value));
+      // TODO(abby): issue once in trial mode, can't select more verses
+      context.bloc<SelectionCmdBloc>()?.add(const SelectionCmd.cancelTrial());
     }
   }
 
@@ -244,11 +242,9 @@ class __ColorSelectionViewState extends State<_ColorSelectionView> {
                 showColorContainer: false,
                 color: Color(widget.prefItems.itemWithId(widget.colorIndex)?.verse ?? colorChosen),
                 onColorChanged: (color) {
-                  context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-                      type:
-                          widget.underlineMode ? HighlightType.underline : HighlightType.highlight,
-                      isTrialMode: true,
-                      color: color.value));
+                  context.bloc<SelectionCmdBloc>()?.add(SelectionCmd.tryStyle(
+                      widget.underlineMode ? HighlightType.underline : HighlightType.highlight,
+                      color.value));
                   colorChosen = color.value;
                 }),
           ),
@@ -315,9 +311,9 @@ class _ColorPickerButton extends StatelessWidget {
         if (editMode) {
           onEdit();
         } else {
-          context.bloc<SelectionStyleBloc>()?.add(SelectionStyle(
-                type: (isForUnderline) ? HighlightType.underline : HighlightType.highlight,
-                color: color.value,
+          context.bloc<SelectionCmdBloc>()?.add(SelectionCmd.setStyle(
+                isForUnderline ? HighlightType.underline : HighlightType.highlight,
+                color.value,
               ));
         }
       },

@@ -158,9 +158,6 @@ class _PageableChapterViewState extends State<PageableChapterView> {
         },
         onPageChanged: (context, _, page) async {
           // tec.dmPrint('View ${widget.state.uid} onPageChanged($page)');
-          context
-              .bloc<SelectionStyleBloc>()
-              ?.add(const SelectionStyle(type: HighlightType.clear, isTrialMode: true));
           final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
           if (bcv != null) {
             final viewData = ChapterViewData.fromContext(context, widget.state.uid)
@@ -515,9 +512,8 @@ class _BibleHtmlState extends State<_BibleHtml> {
 
     return MultiBlocListener(
       listeners: [
-        BlocListener<SelectionStyleBloc, SelectionStyle>(
-          listener: (context, selectionStyle) => _viewModel.selectionStyleChanged(
-              context, selectionStyle, widget.volumeId, widget.ref.book, widget.ref.chapter),
+        BlocListener<SelectionCmdBloc, SelectionCmd>(
+          listener: (context, cmd) => _viewModel.handleSelectionCmd(context, cmd),
         ),
         BlocListener<ViewDataBloc, ViewData>(
           listener: (context, viewData) {

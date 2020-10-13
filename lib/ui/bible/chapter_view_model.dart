@@ -442,6 +442,7 @@ class ChapterViewModel {
 
   /// Call to clear all selections, if any.
   void clearAllSelections(BuildContext context) {
+    _isSelectionTrialMode = false;
     selectionController.deselectAll();
     _clearAllSelectedVerses(context);
   }
@@ -536,35 +537,27 @@ class ChapterViewModel {
   ///
   /// Handles selection style changed events.
   ///
-  void selectionStyleChanged(
-      BuildContext context, SelectionStyle selectionStyle, int volume, int book, int chapter) {
+  void handleSelectionCmd(BuildContext context, SelectionCmd cmd) {
     final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
-
     if (bloc == null || !hasSelection) return;
-    final mode = (selectionStyle.isTrialMode) ? HighlightMode.trial : HighlightMode.save;
 
-    // when color picker exists with "cancel(clear)" - style is in preview mode, but trial is over
-    _isSelectionTrialMode =
-        selectionStyle.isTrialMode && selectionStyle.type != HighlightType.clear;
+    Reference ref() => _selectionReference;
 
-    final ref = _selectionReference;
-
-    if (!_isSelectionTrialMode) {
+    cmd.when(clearStyle: () {
+      bloc.add(HighlightEvent.clear(ref(), HighlightMode.save));
       clearAllSelections(context);
-    } else if (hasWordRangeSelected) {
-      refreshFunc(() {});
-    }
-
-    if (selectionStyle.type == HighlightType.clear) {
-      bloc.add(HighlightEvent.clear(ref, mode));
-    } else {
-      bloc.add(HighlightEvent.add(
-        type: selectionStyle.type,
-        color: selectionStyle.color,
-        ref: ref,
-        mode: mode,
-      ));
-    }
+    }, setStyle: (type, color) {
+      bloc.add(HighlightEvent.add(type: type, color: color, ref: ref(), mode: HighlightMode.save));
+      clearAllSelections(context);
+    }, tryStyle: (type, color) {
+      _isSelectionTrialMode = true;
+      bloc.add(HighlightEvent.add(type: type, color: color, ref: ref(), mode: HighlightMode.trial));
+    }, cancelTrial: () {
+      _isSelectionTrialMode = false;
+      bloc.add(HighlightEvent.clear(ref(), HighlightMode.trial));
+    }, deselectAll: () {
+      clearAllSelections(context);
+    });
   }
 
   //
@@ -580,14 +573,12 @@ class ChapterViewModel {
 
   void _toggleSelectionForVerse(BuildContext context, int verse) {
     assert(verse != null);
-    TecAutoScroll.stopAutoscroll();
     _updateSelectedVersesInBlock(() {
       if (!_selectedVerses.remove(verse)) _selectedVerses.add(verse);
     }, context);
   }
 
   void _clearAllSelectedVerses(BuildContext context) {
-    TecAutoScroll.stopAutoscroll();
     if (_selectedVerses.isEmpty) return;
     _updateSelectedVersesInBlock(_selectedVerses.clear, context);
   }
