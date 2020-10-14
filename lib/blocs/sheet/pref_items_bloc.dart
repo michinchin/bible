@@ -28,7 +28,7 @@ abstract class PrefItemEvent with _$PrefItemEvent {
   const factory PrefItemEvent.add({@required PrefItem prefItem}) = _Add;
   const factory PrefItemEvent.delete({@required PrefItem prefItem}) = _Delete;
   const factory PrefItemEvent.update({@required PrefItem prefItem}) = _Update;
-  const factory PrefItemEvent.updateFromDb({@required List<PrefItem> prefItems}) = _UpdateFromDb;
+  const factory PrefItemEvent.updateItems({@required List<PrefItem> prefItems}) = _UpdateFromDb;
 }
 
 @freezed
@@ -72,11 +72,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
     return items;
   }
 
-  Future<void> _loadFromDb() async {
-    final items = await _loadItems();
-
-    final prefItems = items?.map<PrefItem>((i) => PrefItem.from(i))?.toList() ?? [];
-
+  Future<void> _loadDefaults(List<PrefItem> prefItems) async {
     if (prefItems.itemWithId(PrefItemId.customColor1) == null) {
       // Custom color initialization
       for (var i = PrefItemId.customColor1; i <= PrefItemId.customColor4; i++) {
@@ -152,20 +148,24 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
           prefItemId: PrefItemId.closeAfterCopyShare,
           verse: 0));
     }
+  }
 
-    add(PrefItemEvent.updateFromDb(prefItems: prefItems));
+  Future<void> _loadFromDb() async {
+    final items = await _loadItems();
+    final prefItems = items?.map<PrefItem>((i) => PrefItem.from(i))?.toList() ?? [];
+    await _loadDefaults(prefItems);
+    add(PrefItemEvent.updateItems(prefItems: prefItems));
   }
 
   @override
   Stream<PrefItems> mapEventToState(PrefItemEvent event) async* {
     final newState =
-        event.when(add: _add, delete: _delete, update: _update, updateFromDb: _updateFromDb);
+        event.when(add: _add, delete: _delete, update: _update, updateItems: _updateItems);
     tec.dmPrint('Updated to $newState');
     yield newState;
   }
 
-  PrefItems _updateFromDb(List<PrefItem> prefItems) {
-    // AppSettings.shared.userAccount.userDb.saveSyncItems(prefItems);
+  PrefItems _updateItems(List<PrefItem> prefItems) {
     return state.copyWith(items: prefItems);
   }
 

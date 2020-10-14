@@ -9,6 +9,7 @@ part of 'pref_items_bloc.dart';
 
 T _$identity<T>(T value) => value;
 
+/// @nodoc
 class _$PrefItemEventTearOff {
   const _$PrefItemEventTearOff();
 
@@ -34,30 +35,32 @@ class _$PrefItemEventTearOff {
   }
 
 // ignore: unused_element
-  _UpdateFromDb updateFromDb({@required List<PrefItem> prefItems}) {
+  _UpdateFromDb updateItems({@required List<PrefItem> prefItems}) {
     return _UpdateFromDb(
       prefItems: prefItems,
     );
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $PrefItemEvent = _$PrefItemEventTearOff();
 
+/// @nodoc
 mixin _$PrefItemEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result add(PrefItem prefItem),
     @required Result delete(PrefItem prefItem),
     @required Result update(PrefItem prefItem),
-    @required Result updateFromDb(List<PrefItem> prefItems),
+    @required Result updateItems(List<PrefItem> prefItems),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result add(PrefItem prefItem),
     Result delete(PrefItem prefItem),
     Result update(PrefItem prefItem),
-    Result updateFromDb(List<PrefItem> prefItems),
+    Result updateItems(List<PrefItem> prefItems),
     @required Result orElse(),
   });
   @optionalTypeArgs
@@ -65,24 +68,26 @@ mixin _$PrefItemEvent {
     @required Result add(_Add value),
     @required Result delete(_Delete value),
     @required Result update(_Update value),
-    @required Result updateFromDb(_UpdateFromDb value),
+    @required Result updateItems(_UpdateFromDb value),
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result add(_Add value),
     Result delete(_Delete value),
     Result update(_Update value),
-    Result updateFromDb(_UpdateFromDb value),
+    Result updateItems(_UpdateFromDb value),
     @required Result orElse(),
   });
 }
 
+/// @nodoc
 abstract class $PrefItemEventCopyWith<$Res> {
   factory $PrefItemEventCopyWith(
           PrefItemEvent value, $Res Function(PrefItemEvent) then) =
       _$PrefItemEventCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class _$PrefItemEventCopyWithImpl<$Res>
     implements $PrefItemEventCopyWith<$Res> {
   _$PrefItemEventCopyWithImpl(this._value, this._then);
@@ -92,12 +97,14 @@ class _$PrefItemEventCopyWithImpl<$Res>
   final $Res Function(PrefItemEvent) _then;
 }
 
+/// @nodoc
 abstract class _$AddCopyWith<$Res> {
   factory _$AddCopyWith(_Add value, $Res Function(_Add) then) =
       __$AddCopyWithImpl<$Res>;
   $Res call({PrefItem prefItem});
 }
 
+/// @nodoc
 class __$AddCopyWithImpl<$Res> extends _$PrefItemEventCopyWithImpl<$Res>
     implements _$AddCopyWith<$Res> {
   __$AddCopyWithImpl(_Add _value, $Res Function(_Add) _then)
@@ -116,6 +123,7 @@ class __$AddCopyWithImpl<$Res> extends _$PrefItemEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_Add implements _Add {
   const _$_Add({@required this.prefItem}) : assert(prefItem != null);
 
@@ -150,12 +158,12 @@ class _$_Add implements _Add {
     @required Result add(PrefItem prefItem),
     @required Result delete(PrefItem prefItem),
     @required Result update(PrefItem prefItem),
-    @required Result updateFromDb(List<PrefItem> prefItems),
+    @required Result updateItems(List<PrefItem> prefItems),
   }) {
     assert(add != null);
     assert(delete != null);
     assert(update != null);
-    assert(updateFromDb != null);
+    assert(updateItems != null);
     return add(prefItem);
   }
 
@@ -165,7 +173,7 @@ class _$_Add implements _Add {
     Result add(PrefItem prefItem),
     Result delete(PrefItem prefItem),
     Result update(PrefItem prefItem),
-    Result updateFromDb(List<PrefItem> prefItems),
+    Result updateItems(List<PrefItem> prefItems),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -181,12 +189,12 @@ class _$_Add implements _Add {
     @required Result add(_Add value),
     @required Result delete(_Delete value),
     @required Result update(_Update value),
-    @required Result updateFromDb(_UpdateFromDb value),
+    @required Result updateItems(_UpdateFromDb value),
   }) {
     assert(add != null);
     assert(delete != null);
     assert(update != null);
-    assert(updateFromDb != null);
+    assert(updateItems != null);
     return add(this);
   }
 
@@ -196,7 +204,7 @@ class _$_Add implements _Add {
     Result add(_Add value),
     Result delete(_Delete value),
     Result update(_Update value),
-    Result updateFromDb(_UpdateFromDb value),
+    Result updateItems(_UpdateFromDb value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -214,12 +222,14 @@ abstract class _Add implements PrefItemEvent {
   _$AddCopyWith<_Add> get copyWith;
 }
 
+/// @nodoc
 abstract class _$DeleteCopyWith<$Res> {
   factory _$DeleteCopyWith(_Delete value, $Res Function(_Delete) then) =
       __$DeleteCopyWithImpl<$Res>;
   $Res call({PrefItem prefItem});
 }
 
+/// @nodoc
 class __$DeleteCopyWithImpl<$Res> extends _$PrefItemEventCopyWithImpl<$Res>
     implements _$DeleteCopyWith<$Res> {
   __$DeleteCopyWithImpl(_Delete _value, $Res Function(_Delete) _then)
@@ -238,6 +248,7 @@ class __$DeleteCopyWithImpl<$Res> extends _$PrefItemEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_Delete implements _Delete {
   const _$_Delete({@required this.prefItem}) : assert(prefItem != null);
 
@@ -272,12 +283,12 @@ class _$_Delete implements _Delete {
     @required Result add(PrefItem prefItem),
     @required Result delete(PrefItem prefItem),
     @required Result update(PrefItem prefItem),
-    @required Result updateFromDb(List<PrefItem> prefItems),
+    @required Result updateItems(List<PrefItem> prefItems),
   }) {
     assert(add != null);
     assert(delete != null);
     assert(update != null);
-    assert(updateFromDb != null);
+    assert(updateItems != null);
     return delete(prefItem);
   }
 
@@ -287,7 +298,7 @@ class _$_Delete implements _Delete {
     Result add(PrefItem prefItem),
     Result delete(PrefItem prefItem),
     Result update(PrefItem prefItem),
-    Result updateFromDb(List<PrefItem> prefItems),
+    Result updateItems(List<PrefItem> prefItems),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -303,12 +314,12 @@ class _$_Delete implements _Delete {
     @required Result add(_Add value),
     @required Result delete(_Delete value),
     @required Result update(_Update value),
-    @required Result updateFromDb(_UpdateFromDb value),
+    @required Result updateItems(_UpdateFromDb value),
   }) {
     assert(add != null);
     assert(delete != null);
     assert(update != null);
-    assert(updateFromDb != null);
+    assert(updateItems != null);
     return delete(this);
   }
 
@@ -318,7 +329,7 @@ class _$_Delete implements _Delete {
     Result add(_Add value),
     Result delete(_Delete value),
     Result update(_Update value),
-    Result updateFromDb(_UpdateFromDb value),
+    Result updateItems(_UpdateFromDb value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -336,12 +347,14 @@ abstract class _Delete implements PrefItemEvent {
   _$DeleteCopyWith<_Delete> get copyWith;
 }
 
+/// @nodoc
 abstract class _$UpdateCopyWith<$Res> {
   factory _$UpdateCopyWith(_Update value, $Res Function(_Update) then) =
       __$UpdateCopyWithImpl<$Res>;
   $Res call({PrefItem prefItem});
 }
 
+/// @nodoc
 class __$UpdateCopyWithImpl<$Res> extends _$PrefItemEventCopyWithImpl<$Res>
     implements _$UpdateCopyWith<$Res> {
   __$UpdateCopyWithImpl(_Update _value, $Res Function(_Update) _then)
@@ -360,6 +373,7 @@ class __$UpdateCopyWithImpl<$Res> extends _$PrefItemEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_Update implements _Update {
   const _$_Update({@required this.prefItem}) : assert(prefItem != null);
 
@@ -394,12 +408,12 @@ class _$_Update implements _Update {
     @required Result add(PrefItem prefItem),
     @required Result delete(PrefItem prefItem),
     @required Result update(PrefItem prefItem),
-    @required Result updateFromDb(List<PrefItem> prefItems),
+    @required Result updateItems(List<PrefItem> prefItems),
   }) {
     assert(add != null);
     assert(delete != null);
     assert(update != null);
-    assert(updateFromDb != null);
+    assert(updateItems != null);
     return update(prefItem);
   }
 
@@ -409,7 +423,7 @@ class _$_Update implements _Update {
     Result add(PrefItem prefItem),
     Result delete(PrefItem prefItem),
     Result update(PrefItem prefItem),
-    Result updateFromDb(List<PrefItem> prefItems),
+    Result updateItems(List<PrefItem> prefItems),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -425,12 +439,12 @@ class _$_Update implements _Update {
     @required Result add(_Add value),
     @required Result delete(_Delete value),
     @required Result update(_Update value),
-    @required Result updateFromDb(_UpdateFromDb value),
+    @required Result updateItems(_UpdateFromDb value),
   }) {
     assert(add != null);
     assert(delete != null);
     assert(update != null);
-    assert(updateFromDb != null);
+    assert(updateItems != null);
     return update(this);
   }
 
@@ -440,7 +454,7 @@ class _$_Update implements _Update {
     Result add(_Add value),
     Result delete(_Delete value),
     Result update(_Update value),
-    Result updateFromDb(_UpdateFromDb value),
+    Result updateItems(_UpdateFromDb value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -458,6 +472,7 @@ abstract class _Update implements PrefItemEvent {
   _$UpdateCopyWith<_Update> get copyWith;
 }
 
+/// @nodoc
 abstract class _$UpdateFromDbCopyWith<$Res> {
   factory _$UpdateFromDbCopyWith(
           _UpdateFromDb value, $Res Function(_UpdateFromDb) then) =
@@ -465,6 +480,7 @@ abstract class _$UpdateFromDbCopyWith<$Res> {
   $Res call({List<PrefItem> prefItems});
 }
 
+/// @nodoc
 class __$UpdateFromDbCopyWithImpl<$Res>
     extends _$PrefItemEventCopyWithImpl<$Res>
     implements _$UpdateFromDbCopyWith<$Res> {
@@ -486,6 +502,7 @@ class __$UpdateFromDbCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_UpdateFromDb implements _UpdateFromDb {
   const _$_UpdateFromDb({@required this.prefItems}) : assert(prefItems != null);
 
@@ -494,7 +511,7 @@ class _$_UpdateFromDb implements _UpdateFromDb {
 
   @override
   String toString() {
-    return 'PrefItemEvent.updateFromDb(prefItems: $prefItems)';
+    return 'PrefItemEvent.updateItems(prefItems: $prefItems)';
   }
 
   @override
@@ -520,13 +537,13 @@ class _$_UpdateFromDb implements _UpdateFromDb {
     @required Result add(PrefItem prefItem),
     @required Result delete(PrefItem prefItem),
     @required Result update(PrefItem prefItem),
-    @required Result updateFromDb(List<PrefItem> prefItems),
+    @required Result updateItems(List<PrefItem> prefItems),
   }) {
     assert(add != null);
     assert(delete != null);
     assert(update != null);
-    assert(updateFromDb != null);
-    return updateFromDb(prefItems);
+    assert(updateItems != null);
+    return updateItems(prefItems);
   }
 
   @override
@@ -535,12 +552,12 @@ class _$_UpdateFromDb implements _UpdateFromDb {
     Result add(PrefItem prefItem),
     Result delete(PrefItem prefItem),
     Result update(PrefItem prefItem),
-    Result updateFromDb(List<PrefItem> prefItems),
+    Result updateItems(List<PrefItem> prefItems),
     @required Result orElse(),
   }) {
     assert(orElse != null);
-    if (updateFromDb != null) {
-      return updateFromDb(prefItems);
+    if (updateItems != null) {
+      return updateItems(prefItems);
     }
     return orElse();
   }
@@ -551,13 +568,13 @@ class _$_UpdateFromDb implements _UpdateFromDb {
     @required Result add(_Add value),
     @required Result delete(_Delete value),
     @required Result update(_Update value),
-    @required Result updateFromDb(_UpdateFromDb value),
+    @required Result updateItems(_UpdateFromDb value),
   }) {
     assert(add != null);
     assert(delete != null);
     assert(update != null);
-    assert(updateFromDb != null);
-    return updateFromDb(this);
+    assert(updateItems != null);
+    return updateItems(this);
   }
 
   @override
@@ -566,12 +583,12 @@ class _$_UpdateFromDb implements _UpdateFromDb {
     Result add(_Add value),
     Result delete(_Delete value),
     Result update(_Update value),
-    Result updateFromDb(_UpdateFromDb value),
+    Result updateItems(_UpdateFromDb value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
-    if (updateFromDb != null) {
-      return updateFromDb(this);
+    if (updateItems != null) {
+      return updateItems(this);
     }
     return orElse();
   }
@@ -585,6 +602,7 @@ abstract class _UpdateFromDb implements PrefItemEvent {
   _$UpdateFromDbCopyWith<_UpdateFromDb> get copyWith;
 }
 
+/// @nodoc
 class _$PrefItemsTearOff {
   const _$PrefItemsTearOff();
 
@@ -596,21 +614,25 @@ class _$PrefItemsTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $PrefItems = _$PrefItemsTearOff();
 
+/// @nodoc
 mixin _$PrefItems {
   List<PrefItem> get items;
 
   $PrefItemsCopyWith<PrefItems> get copyWith;
 }
 
+/// @nodoc
 abstract class $PrefItemsCopyWith<$Res> {
   factory $PrefItemsCopyWith(PrefItems value, $Res Function(PrefItems) then) =
       _$PrefItemsCopyWithImpl<$Res>;
   $Res call({List<PrefItem> items});
 }
 
+/// @nodoc
 class _$PrefItemsCopyWithImpl<$Res> implements $PrefItemsCopyWith<$Res> {
   _$PrefItemsCopyWithImpl(this._value, this._then);
 
@@ -628,6 +650,7 @@ class _$PrefItemsCopyWithImpl<$Res> implements $PrefItemsCopyWith<$Res> {
   }
 }
 
+/// @nodoc
 abstract class _$PrefItemsCopyWith<$Res> implements $PrefItemsCopyWith<$Res> {
   factory _$PrefItemsCopyWith(
           _PrefItems value, $Res Function(_PrefItems) then) =
@@ -636,6 +659,7 @@ abstract class _$PrefItemsCopyWith<$Res> implements $PrefItemsCopyWith<$Res> {
   $Res call({List<PrefItem> items});
 }
 
+/// @nodoc
 class __$PrefItemsCopyWithImpl<$Res> extends _$PrefItemsCopyWithImpl<$Res>
     implements _$PrefItemsCopyWith<$Res> {
   __$PrefItemsCopyWithImpl(_PrefItems _value, $Res Function(_PrefItems) _then)
@@ -654,6 +678,7 @@ class __$PrefItemsCopyWithImpl<$Res> extends _$PrefItemsCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_PrefItems implements _PrefItems {
   const _$_PrefItems(this.items) : assert(items != null);
 
