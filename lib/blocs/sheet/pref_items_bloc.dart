@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_user_account/tec_user_account.dart' as tua;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/app_settings.dart';
@@ -55,17 +54,36 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
   PrefItem infoChangedPrefItem(int id, String info) =>
       PrefItem.from(itemWithId(id).copyWith(info: info));
 
+  Future<List<PrefItem>> _loadItems() async {
+    final items = <PrefItem>[];
+    for (final id in PrefItemId.saveToDbList) {
+      final item = await AppSettings.shared.userAccount.userDb.getItem(PrefItemId.uniqueId(id));
+      if (item != null) {
+        items.add(PrefItem.from(item));
+      }
+    }
+    for (final id in PrefItemId.saveToPrefsList) {
+      final value = tec.Prefs.shared.getString(PrefItemId.keyForPrefs(id), defaultValue: '');
+      if (tec.isNotNullOrEmpty(value)) {
+        final prefItem = PrefItemHelper.fromSharedPrefs(PrefItemId.keyForPrefs(id), value);
+        items.add(prefItem);
+      }
+    }
+    return items;
+  }
+
   Future<void> _loadFromDb() async {
-    final items =
-        await AppSettings.shared.userAccount.userDb.getItemsOfTypes([tua.UserItemType.prefItem]);
-    final prefItems = items.map<PrefItem>((i) => PrefItem.from(i)).toList();
+    final items = await _loadItems();
+
+    final prefItems = items?.map<PrefItem>((i) => PrefItem.from(i))?.toList() ?? [];
 
     if (prefItems.itemWithId(PrefItemId.customColor1) == null) {
       // Custom color initialization
-      for (var i = PrefItemId.customColor1; i <= PrefItemId.customColors.length; i++) {
+      for (var i = PrefItemId.customColor1; i <= PrefItemId.customColor4; i++) {
         prefItems.add(PrefItem(
             prefItemDataType: PrefItemDataType.int,
             prefItemId: i,
+            id: PrefItemId.uniqueId(i),
             verse: defaultCustomColors[i - 1].value));
       }
     }
@@ -92,6 +110,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
       prefItems.add(PrefItem(
           prefItemDataType: PrefItemDataType.string,
           prefItemId: PrefItemId.translationsFilter,
+          id: PrefItemId.uniqueId(PrefItemId.translationsFilter),
           info: availableVolumes.join('|')));
     }
 
@@ -146,7 +165,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
   }
 
   PrefItems _updateFromDb(List<PrefItem> prefItems) {
-    AppSettings.shared.userAccount.userDb.saveSyncItems(prefItems);
+    // AppSettings.shared.userAccount.userDb.saveSyncItems(prefItems);
     return state.copyWith(items: prefItems);
   }
 
@@ -154,7 +173,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
     final items = List<PrefItem>.from(state.items);
     if (!items.hasItem(prefItem)) {
       items.add(prefItem);
-      AppSettings.shared.userAccount.userDb.saveItem(prefItem);
+      _savePrefItem(prefItem);
     }
     return state.copyWith(items: items);
   }
@@ -164,7 +183,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
     if (items.hasItem(prefItem)) {
       final index = items.indexOfItem(prefItem);
       items.removeItem(prefItem);
-      AppSettings.shared.userAccount.userDb.deleteItem(prefItem.copyWith(id: items[index].id));
+      AppSettings.shared.userAccount.userDb.deleteItem(prefItem.copyWith(book: items[index].book));
     }
     return state.copyWith(items: items);
   }
@@ -173,10 +192,19 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
     final items = List<PrefItem>.from(state.items);
     if (items.hasItem(prefItem)) {
       final index = items.indexOfItem(prefItem);
-      items[index] = PrefItem.from(prefItem.copyWith(id: items[index].id));
-      AppSettings.shared.userAccount.userDb.saveItem(prefItem.copyWith(id: items[index].id));
+      items[index] = PrefItem.from(prefItem.copyWith(book: items[index].book));
+      _savePrefItem(items[index]);
     }
     return state.copyWith(items: items);
+  }
+
+  Future<dynamic> _savePrefItem(PrefItem prefItem) {
+    if (prefItem.saveToDb) {
+      return AppSettings.shared.userAccount.userDb
+          .saveItem(prefItem.copyWith(id: prefItem.uniqueId));
+    } else {
+      return tec.Prefs.shared.setString(prefItem.keyForPrefs, prefItem.valueToSave);
+    }
   }
 }
 
