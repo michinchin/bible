@@ -123,7 +123,6 @@ class __MiniViewState extends State<_MiniView> {
       context.bloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
           prefItem: PrefItem.from(prefItems.itemWithId(colorIndex).copyWith(verse: colorChosen))));
     } else {
-      // TODO(abby): issue once in trial mode, can't select more verses
       context.bloc<SelectionCmdBloc>()?.add(const SelectionCmd.cancelTrial());
     }
   }
@@ -227,6 +226,9 @@ class __ColorSelectionViewState extends State<_ColorSelectionView> {
   @override
   void initState() {
     colorChosen = 0xff999999;
+    context.bloc<SelectionCmdBloc>()?.add(SelectionCmd.tryStyle(
+        widget.underlineMode ? HighlightType.underline : HighlightType.highlight,
+        widget.prefItems.itemWithId(widget.colorIndex).verse));
     super.initState();
   }
 

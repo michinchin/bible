@@ -66,6 +66,14 @@ List<TableRow> _buildMenuItems(
     ),
     tecModalPopupMenuItem(
       menuContext,
+      Icons.close,
+      'Close Sheet after Copy/Share',
+      () => prefBloc.add(
+          PrefItemEvent.update(prefItem: prefBloc.toggledPrefItem(PrefItemId.closeAfterCopyShare))),
+      getSwitchValue: () => prefBloc.itemBool(PrefItemId.closeAfterCopyShare),
+    ),
+    tecModalPopupMenuItem(
+      menuContext,
       Icons.play_circle_outline,
       'Autoscroll',
       () => TecAutoScroll.setEnabled(enabled: !TecAutoScroll.isEnabled()),
