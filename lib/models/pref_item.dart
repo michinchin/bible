@@ -34,6 +34,9 @@ class PrefItemId {
   /// what format to keep the search filter page (grid view or list view)
   static const searchFilterBookGridView = 11;
   static const searchFilterTranslationGridView = 12;
+
+  // selection sheet setting
+  static const closeAfterCopyShare = 13;
 }
 
 class PrefItem extends tua.UserItem {

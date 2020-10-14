@@ -66,7 +66,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
         prefItems.add(PrefItem(
             prefItemDataType: PrefItemDataType.int,
             prefItemId: i,
-            verse: defaultCustomColors[i-1].value));
+            verse: defaultCustomColors[i - 1].value));
       }
     }
     if (prefItems.itemWithId(PrefItemId.navLayout) == null) {
@@ -125,6 +125,13 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
             prefItemDataType: PrefItemDataType.bool,
             prefItemId: PrefItemId.searchFilterTranslationGridView,
             verse: 0));
+    }
+
+    if (prefItems.itemWithId(PrefItemId.closeAfterCopyShare) == null) {
+      prefItems.add(PrefItem(
+          prefItemDataType: PrefItemDataType.bool,
+          prefItemId: PrefItemId.closeAfterCopyShare,
+          verse: 0));
     }
 
     add(PrefItemEvent.updateFromDb(prefItems: prefItems));
