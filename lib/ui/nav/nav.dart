@@ -38,7 +38,7 @@ Future<Reference> navigate(BuildContext context, Reference ref,
                 create: (_) => NavBloc(ref, initialTabIndex: initialIndex)
                   ..add(NavEvent.changeNavView(
                       state: searchView ? NavViewState.searchResults : NavViewState.bcvTabs))),
-          ], child: Nav())),
+          ], child: Nav(searchView: searchView))),
     );
   }
 
@@ -60,11 +60,13 @@ Future<Reference> navigate(BuildContext context, Reference ref,
           ..add(NavEvent.changeNavView(
               state: searchView ? NavViewState.searchResults : NavViewState.bcvTabs)),
       ),
-    ], child: Nav()),
+    ], child: Nav(searchView: searchView)),
   ));
 }
 
 class Nav extends StatefulWidget {
+  final bool searchView;
+  const Nav({this.searchView});
   @override
   _NavState createState() => _NavState();
 }
@@ -285,6 +287,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         return const Text('History');
       } else {
         return TextField(
+            // focus text field when no current search results but coming from magnifying glass
+            autofocus: widget.searchView && ss.searchResults.isEmpty,
             onChanged: (s) => navBloc().add(NavEvent.onSearchChange(search: s)),
             onSubmitted: (s) => onSubmit(query: s),
             decoration: const InputDecoration(

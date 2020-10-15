@@ -54,15 +54,13 @@ class ChapterTitle extends StatelessWidget {
                     cubit: context.bloc<SearchBloc>(),
                     builder: (c, s) => IconButton(
                         padding: const EdgeInsets.only(right: 8.0),
+                        iconSize: 20,
                         icon: s.searchResults.isNotEmpty
                             ? const IconWithNumberBadge(
                                 color: Colors.orange,
                                 icon: FeatherIcons.search,
                               )
-                            : const Icon(
-                                FeatherIcons.search,
-                                size: 20,
-                              ),
+                            : const Icon(FeatherIcons.search),
                         tooltip: 'Search',
                         color: Theme.of(context).textColor.withOpacity(0.5),
                         onPressed: () => _onNavigate(context, viewData, searchView: true))),
