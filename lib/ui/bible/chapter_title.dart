@@ -1,3 +1,5 @@
+import 'package:bible/blocs/search/nav_bloc.dart';
+import 'package:bible/blocs/search/search_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -48,12 +50,20 @@ class ChapterTitle extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(0),
                 width: 32.0,
-                child: IconButton(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    icon: const Icon(FeatherIcons.search, size: 20),
-                    tooltip: 'Search',
-                    color: Theme.of(context).textColor.withOpacity(0.5),
-                    onPressed: () => _onNavigate(context, viewData)),
+                child: BlocBuilder<SearchBloc, SearchState>(
+                    cubit: context.bloc<SearchBloc>(),
+                    builder: (c, s) => IconButton(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        iconSize: 20,
+                        icon: s.searchResults.isNotEmpty
+                            ? const IconWithNumberBadge(
+                                color: Colors.orange,
+                                icon: FeatherIcons.search,
+                              )
+                            : const Icon(FeatherIcons.search),
+                        tooltip: 'Search',
+                        color: Theme.of(context).textColor.withOpacity(0.5),
+                        onPressed: () => _onNavigate(context, viewData, searchView: true))),
               ),
               Flexible(
                 flex: 3,
@@ -105,12 +115,12 @@ class ChapterTitle extends StatelessWidget {
   }
 
   Future<void> _onNavigate(BuildContext context, VolumeViewData viewData,
-      {int initialIndex = 0}) async {
+      {int initialIndex = 0, bool searchView = false}) async {
     TecAutoScroll.stopAutoscroll();
 
     final ref = await navigate(
         context, Reference.fromHref(viewData.bcv.toString(), volume: viewData.volumeId),
-        initialIndex: initialIndex);
+        initialIndex: initialIndex, searchView: searchView);
 
     if (ref != null) {
       // Save navigation ref to nav history.

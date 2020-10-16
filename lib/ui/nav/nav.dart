@@ -21,7 +21,8 @@ import 'search_suggestions.dart';
 
 const tabColors = [Colors.blue, Colors.orange, Colors.green];
 
-Future<Reference> navigate(BuildContext context, Reference ref, {int initialIndex = 0}) {
+Future<Reference> navigate(BuildContext context, Reference ref,
+    {int initialIndex = 0, bool searchView = false}) {
   final isLargeScreen =
       MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 600;
   if (isLargeScreen) {
@@ -33,8 +34,11 @@ Future<Reference> navigate(BuildContext context, Reference ref, {int initialInde
           height: 600,
           width: 500,
           child: MultiBlocProvider(providers: [
-            BlocProvider<NavBloc>(create: (_) => NavBloc(ref, initialTabIndex: initialIndex)),
-          ], child: Nav())),
+            BlocProvider<NavBloc>(
+                create: (_) => NavBloc(ref, initialTabIndex: initialIndex)
+                  ..add(NavEvent.changeNavView(
+                      state: searchView ? NavViewState.searchResults : NavViewState.bcvTabs))),
+          ], child: Nav(searchView: searchView))),
     );
   }
 
@@ -51,12 +55,18 @@ Future<Reference> navigate(BuildContext context, Reference ref, {int initialInde
   return Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
     fullscreenDialog: true,
     builder: (context) => MultiBlocProvider(providers: [
-      BlocProvider<NavBloc>(create: (_) => NavBloc(ref, initialTabIndex: initialIndex)),
-    ], child: Nav()),
+      BlocProvider<NavBloc>(
+        create: (_) => NavBloc(ref, initialTabIndex: initialIndex)
+          ..add(NavEvent.changeNavView(
+              state: searchView ? NavViewState.searchResults : NavViewState.bcvTabs)),
+      ),
+    ], child: Nav(searchView: searchView)),
   ));
 }
 
 class Nav extends StatefulWidget {
+  final bool searchView;
+  const Nav({this.searchView});
   @override
   _NavState createState() => _NavState();
 }
@@ -90,7 +100,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
 
-    _searchResultsTabController = TabController(length: 2, initialIndex: 0, vsync: this)
+    _searchResultsTabController = TabController(length: 2, initialIndex: 1, vsync: this)
       ..addListener(() {
         if (_searchResultsTabController.index == 0) {
           if (searchBloc().state.selectionMode) {
@@ -277,6 +287,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         return const Text('History');
       } else {
         return TextField(
+            // focus text field when no current search results but coming from magnifying glass
+            autofocus: widget.searchView && ss.searchResults.isEmpty,
             onChanged: (s) => navBloc().add(NavEvent.onSearchChange(search: s)),
             onSubmitted: (s) => onSubmit(query: s),
             decoration: const InputDecoration(

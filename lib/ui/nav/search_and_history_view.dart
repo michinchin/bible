@@ -110,63 +110,73 @@ class _HistoryViewState extends State<HistoryView> {
               ..sort((a, b) => b.modified.compareTo(a.modified));
             return searchHistory.isEmpty && navHistory.isEmpty
                 ? const Center(child: Text('Search or navigate to view history'))
-                : Column(children: [
-                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                      const ListLabel('Navigation History'),
-                      IconButton(
-                          icon: Icon(Icons.chevron_right,
-                              color: Theme.of(context).textTheme.caption.color),
-                          onPressed: () async {
-                            final ref = await Navigator.of(c).push(MaterialPageRoute<Reference>(
-                                builder: (c) => _NavHistoryView(navHistory)));
-                            if (ref != null) {
-                              _onNavHistoryTap(c, ref, context.bloc<NavBloc>().state.ref.volume);
-                            }
-                          })
-                    ]),
-                    Flexible(
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: navHistory.length,
-                        separatorBuilder: (c, i) => const Divider(height: 5),
-                        itemBuilder: (c, i) => ListTile(
-                          dense: true,
-                          leading: const Icon(Icons.history),
-                          title: Text(navHistory[i].label()),
-                          onTap: () => _onNavHistoryTap(
-                              c, navHistory[i], context.bloc<NavBloc>().state.ref.volume),
+                : SingleChildScrollView(
+                    child: Column(children: [
+                      InkWell(
+                        onTap: () async {
+                          final ref = await Navigator.of(c).push(MaterialPageRoute<Reference>(
+                              builder: (c) => _NavHistoryView(navHistory)));
+                          if (ref != null) {
+                            _onNavHistoryTap(c, ref, context.bloc<NavBloc>().state.ref.volume);
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                            const ListLabel('Navigation History'),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Icon(Icons.chevron_right,
+                                  color: Theme.of(context).textTheme.caption.color),
+                            ),
+                          ]),
                         ),
                       ),
-                    ),
-                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                      const ListLabel('Search History'),
-                      IconButton(
-                          icon:
-                              Icon(Icons.chevron_right, color: Theme.of(c).textTheme.caption.color),
-                          onPressed: () async {
+                      ...ListTile.divideTiles(context: context, tiles: [
+                        for (final navHistoryItem in navHistory.take(5))
+                          ListTile(
+                            dense: true,
+                            leading: const Icon(Icons.history),
+                            // remove translation from label
+                            title: Text(navHistoryItem
+                                .label()
+                                .split(' ')
+                                .take(navHistoryItem.label().split(' ').length - 1)
+                                .join(' ')),
+                            onTap: () => _onNavHistoryTap(
+                                c, navHistoryItem, context.bloc<NavBloc>().state.ref.volume),
+                          )
+                      ]),
+                      InkWell(
+                          onTap: () async {
                             final searchChosen = await Navigator.of(c).push(
                                 MaterialPageRoute<SearchHistoryItem>(
                                     builder: (c) => _SearchHistoryView(searchHistory)));
                             if (searchChosen != null) {
                               _onSearchTap(c, searchChosen);
                             }
-                          }),
+                          },
+                          child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child:
+                                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                                const ListLabel('Search History'),
+                                Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: Icon(Icons.chevron_right,
+                                        color: Theme.of(c).textTheme.caption.color)),
+                              ]))),
+                      ...ListTile.divideTiles(context: context, tiles: [
+                        for (final searchHistoryItem in searchHistory.take(5))
+                          ListTile(
+                            dense: true,
+                            leading: const Icon(Icons.search),
+                            title: Text(searchHistoryItem.search),
+                            onTap: () => _onSearchTap(c, searchHistoryItem),
+                          )
+                      ]),
                     ]),
-                    Flexible(
-                        child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: searchHistory.length,
-                      physics: const NeverScrollableScrollPhysics(),
-                      separatorBuilder: (c, i) => const Divider(height: 5),
-                      itemBuilder: (c, i) => ListTile(
-                        dense: true,
-                        leading: const Icon(Icons.search),
-                        title: Text(searchHistory[i].search),
-                        onTap: () => _onSearchTap(c, searchHistory[i]),
-                      ),
-                    )),
-                  ]);
+                  );
           }
           return const Center(child: Text('Unable to load currently'));
         });
