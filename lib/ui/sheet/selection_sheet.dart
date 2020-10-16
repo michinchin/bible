@@ -145,7 +145,8 @@ class __MiniViewState extends State<_MiniView> {
                   ?.where(
                       (i) => i.book >= PrefItemId.customColor1 && i.book <= PrefItemId.customColor4)
                   ?.toList() ??
-              [];
+              []
+            ..sort((i1, i2) => i1.book.compareTo(i2.book));
           final customColors = [for (final color in prefItems) Color(color.verse)];
           final colors = [
             SelectionSheetModel.underlineButton(

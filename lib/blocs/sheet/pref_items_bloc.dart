@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tec_user_account/tec_user_account.dart';
 
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
@@ -54,10 +55,30 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
   PrefItem infoChangedPrefItem(int id, String info) =>
       PrefItem.from(itemWithId(id).copyWith(info: info));
 
+  /// in case of "retiring" any prefItems to local storage instead of db
+  Future<void> _removeOldPrefItems(List<UserItem> prefItems) async {
+    final saveToDbListIds = PrefItemId.saveToDbList.map((i) => i + 100).toList();
+    final items = <UserItem>[];
+
+    for (final item in prefItems) {
+      if (!saveToDbListIds.contains(item.id)) {
+        items.add(item.copyWith(deleted: 1));
+      }
+    }
+
+    await AppSettings.shared.userAccount.userDb.saveSyncItems(items);
+  }
+
   Future<List<PrefItem>> _loadItems() async {
     final items = <PrefItem>[];
+    final prefItems =
+        await AppSettings.shared.userAccount.userDb.getItemsOfTypes([UserItemType.prefItem]);
+
+    await _removeOldPrefItems(prefItems);
+
     for (final id in PrefItemId.saveToDbList) {
-      final item = await AppSettings.shared.userAccount.userDb.getItem(PrefItemId.uniqueId(id));
+      final uid = PrefItemId.uniqueId(id);
+      final item = prefItems.firstWhere((i) => i.id == uid, orElse: () => null);
       if (item != null) {
         items.add(PrefItem.from(item));
       }
@@ -73,9 +94,9 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
   }
 
   Future<void> _loadDefaults(List<PrefItem> prefItems) async {
-    if (prefItems.itemWithId(PrefItemId.customColor1) == null) {
-      // Custom color initialization
-      for (var i = PrefItemId.customColor1; i <= PrefItemId.customColor4; i++) {
+    // Custom color initialization
+    for (var i = PrefItemId.customColor1; i <= PrefItemId.customColor4; i++) {
+      if (prefItems.itemWithId(i) == null) {
         prefItems.add(PrefItem(
             prefItemDataType: PrefItemDataType.int,
             prefItemId: i,
@@ -85,12 +106,15 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
     }
     if (prefItems.itemWithId(PrefItemId.navLayout) == null) {
       // Nav pref initialization
-      prefItems
-        ..add(PrefItem(
-            prefItemDataType: PrefItemDataType.bool, prefItemId: PrefItemId.navLayout, verse: 0))
-        ..add(PrefItem(
-            prefItemDataType: PrefItemDataType.bool, prefItemId: PrefItemId.nav3Tap, verse: 0));
+      prefItems.add(PrefItem(
+          prefItemDataType: PrefItemDataType.bool, prefItemId: PrefItemId.navLayout, verse: 0));
     }
+
+    if (prefItems.itemWithId(PrefItemId.nav3Tap) == null) {
+      prefItems.add(PrefItem(
+          prefItemDataType: PrefItemDataType.bool, prefItemId: PrefItemId.nav3Tap, verse: 0));
+    }
+
     if (prefItems.itemWithId(PrefItemId.translationsFilter) == null) {
       // Translations for search filter pref initialization
       final bibleIds = VolumesRepository.shared.volumeIdsWithType(VolumeType.bible);
@@ -129,17 +153,18 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
           prefItemId: PrefItemId.translationsAbbreviated,
           verse: 0));
     }
-    if (prefItems.itemWithId(PrefItemId.searchFilterBookGridView) == null ||
-        prefItems.itemWithId(PrefItemId.searchFilterTranslationGridView) == null) {
-      prefItems
-        ..add(PrefItem(
-            prefItemDataType: PrefItemDataType.bool,
-            prefItemId: PrefItemId.searchFilterBookGridView,
-            verse: 0))
-        ..add(PrefItem(
-            prefItemDataType: PrefItemDataType.bool,
-            prefItemId: PrefItemId.searchFilterTranslationGridView,
-            verse: 0));
+    if (prefItems.itemWithId(PrefItemId.searchFilterBookGridView) == null) {
+      prefItems.add(PrefItem(
+          prefItemDataType: PrefItemDataType.bool,
+          prefItemId: PrefItemId.searchFilterBookGridView,
+          verse: 0));
+    }
+    
+    if (prefItems.itemWithId(PrefItemId.searchFilterTranslationGridView) == null) {
+      prefItems.add(PrefItem(
+          prefItemDataType: PrefItemDataType.bool,
+          prefItemId: PrefItemId.searchFilterTranslationGridView,
+          verse: 0));
     }
 
     if (prefItems.itemWithId(PrefItemId.closeAfterCopyShare) == null) {
