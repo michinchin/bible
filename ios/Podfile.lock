@@ -168,7 +168,7 @@ SPEC CHECKSUMS:
   tec_platform_util: 2fc2b292ec7eddcc80717ae9d28257498b686f59
   tec_web_view: 1fa4ae0861ce5f49367bfdd85385345d2e4e7688
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
-  wakelock: 0d4a70faf8950410735e3f61fb15d517c8a6efc4
+  wakelock: bfc7955c418d0db797614075aabbc58a39ab5107
 
 PODFILE CHECKSUM: cc61e23122a58c4d7e2d898eb696d6c708ce621b
 

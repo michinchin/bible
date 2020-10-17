@@ -1,6 +1,9 @@
 extension TecExtOnIterableInt on Iterable<int> {
   ///
-  /// With a sorted list of ints, returns the ints that are missing from the list.
+  /// With a sorted list of ints, returns an Iterable of the ints that are missing from the list.
+  ///
+  /// Why an Iterable instead of a List? Because with an Iterable, each element is not calculated 
+  /// until it is needed, making it faster if only the first or first few elements are needed.
   ///
   Iterable<int> missingValues() {
     int prevValue;

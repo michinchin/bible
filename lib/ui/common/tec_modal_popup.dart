@@ -71,11 +71,12 @@ class TecPopupSheet extends StatelessWidget {
   ///
   /// Creates a [TecPopupSheet].
   ///
-  const TecPopupSheet({Key key, @required this.child})
+  const TecPopupSheet({Key key, @required this.child, this.padding})
       : assert(child != null),
         super(key: key);
 
   final Widget child;
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +100,7 @@ class TecPopupSheet extends StatelessWidget {
                 filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
                 child: Container(
                   color: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
-                  child: _PopupSheetContent(child: child),
+                  child: _PopupSheetContent(child: child, padding: padding),
                 ),
               ),
             ),
@@ -278,8 +279,9 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
 class _PopupSheetContent extends StatelessWidget {
   final Widget child;
   final ScrollController scrollController;
+  final EdgeInsets padding;
 
-  const _PopupSheetContent({Key key, @required this.child, this.scrollController})
+  const _PopupSheetContent({Key key, @required this.child, this.scrollController, this.padding})
       : super(key: key);
 
   @override
@@ -294,10 +296,11 @@ class _PopupSheetContent extends StatelessWidget {
         child: SingleChildScrollView(
           controller: scrollController,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: _kContentHorizontalPadding,
-              vertical: _kContentVerticalPadding,
-            ),
+            padding: padding ??
+                const EdgeInsets.symmetric(
+                  horizontal: _kContentHorizontalPadding,
+                  vertical: _kContentVerticalPadding,
+                ),
             child: DefaultTextStyle(
               style: _kPopupSheetContentStyle.copyWith(fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,

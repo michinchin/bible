@@ -17,11 +17,14 @@ import '../../blocs/content_settings.dart';
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
+import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/color_utils.dart';
 import '../../models/misc_utils.dart';
 import '../../models/string_utils.dart';
 import '../note/margin_note_view.dart';
+import '../strongs/strongs_popup.dart';
+import '../xref/xref_popup.dart';
 
 const _debugMode = false; // kDebugMode
 
@@ -451,32 +454,71 @@ class ChapterViewModel {
     return [
       TecSelectableMenuItem(type: TecSelectableMenuItemType.define),
       TecSelectableMenuItem(
-        title: 'Cross-ref',
-        isEnabled: (ctl) {
-          tec.dmPrint(
-              'Enable Xref? Words selected: ${ctl.wordCount}, \nstart: ${ctl.selectionStart}, \nend:   ${ctl.selectionEnd}');
-          return ctl.wordCount == 1 && (ctl.selectionStart?.verseTag?.isInXref ?? false);
-        },
+        title: 'Strong\'s',
+        isEnabled: (ctl) => _enableStrongs(ctl.selectionStart?.verseTag),
         handler: (ctl) {
-          return _handleXref(context, ctl.selectionStart?.verseTag);
+          final handled = _handleStrongs(context, ctl.selectionStart?.verseTag);
+          if (handled) ctl?.deselectAll();
+          return handled;
+        },
+      ),
+      TecSelectableMenuItem(
+        title: 'Cross-ref',
+        isEnabled: (ctl) => _enableXref(ctl.selectionStart?.verseTag),
+        handler: (ctl) {
+          final handled = _handleXref(context, ctl.selectionStart?.verseTag);
+          if (handled) ctl?.deselectAll();
+          return handled;
         },
       ),
     ];
   }
 
+  bool _enableStrongs(_VerseTag tag) {
+    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
+      final parts = tag.href.split(';');
+      for (final part in parts) {
+        if (part.startsWith('G') || part.startsWith('H')) return true;
+      }
+    }
+    return false;
+  }
+
+  bool _handleStrongs(BuildContext context, _VerseTag tag) {
+    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
+      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
+      final parts = tag.href.split(';');
+      for (final part in parts) {
+        if (part.startsWith('G') || part.startsWith('H')) {
+          bible?.strongsHtmlWith(part)?.then((result) {
+            final html = result?.value == null ? '<p>${result?.error}</p>' : result.value;
+            showStrongsPopup(context: context, html: html);
+          });
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  bool _enableXref(_VerseTag tag) {
+    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
+      if (tag.href.contains('_') || tag.href.contains('/')) return true;
+    }
+    return false;
+  }
+
   bool _handleXref(BuildContext context, _VerseTag tag) {
     if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
-      showDialog<void>(
-        context: context,
-        barrierDismissible: true,
-        builder: (builder) {
-          return AlertDialog(
-            contentPadding: const EdgeInsets.all(0),
-            content: TecHtml('<p>${tag.href}</p>', baseUrl: '', selectable: false),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          );
-        },
-      );
+      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
+
+      bible?.xrefsWithHrefProperty(tag.href)?.then((result) {
+        if (result?.value?.isEmpty ?? true) {
+          // TODO(ron): ...
+        } else {
+          showXrefsPopup(context: context, xrefs: result.value);
+        }
+      });
       return true;
     }
     return false;

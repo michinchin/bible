@@ -167,3 +167,8 @@ extension on Bible {
     return '${nameOfBook(book)} $chapter';
   }
 }
+
+extension VolumeViewDataExtOnViewData on ViewData {
+  VolumeViewData get asVolumeViewData => this as VolumeViewData;
+  ChapterViewData get asChapterViewData => this as ChapterViewData;
+}
