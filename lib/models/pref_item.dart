@@ -5,13 +5,35 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 enum PrefItemDataType { json, string, bool, int }
 
+/// default pref items to be per device (value pair)
 class PrefItemId {
   /// highlight/underline colors
   static const customColor1 = 1;
   static const customColor2 = 2;
   static const customColor3 = 3;
   static const customColor4 = 4;
-  static const customColors = [customColor1, customColor2, customColor3, customColor4];
+
+  /// unique id is (100 + color id)
+  static const saveToDbList = [
+    customColor1,
+    customColor2,
+    customColor3,
+    customColor4,
+    translationsFilter
+  ];
+  static const saveToPrefsList = [
+    navLayout,
+    nav3Tap,
+    navBookOrder,
+    includeShareLink,
+    translationsAbbreviated,
+    searchFilterBookGridView,
+    searchFilterTranslationGridView,
+    closeAfterCopyShare
+  ];
+
+  static int uniqueId(int id) => 100 + id;
+  static String keyForPrefs(int id) => 'prefItem_$id';
 
   /// grid view default (0), scroll view (1)
   static const navLayout = 5;
@@ -70,4 +92,43 @@ class PrefItem extends tua.UserItem {
       deleted: item.deleted,
       created: tec.dateOnlyFromDbInt(item.created),
       modified: tec.dateOnlyFromDbInt(item.modified));
+}
+
+extension PrefItemHelper on PrefItem {
+  bool get saveToDb => PrefItemId.saveToDbList.contains(book);
+  int get uniqueId => 100 + book;
+  String get keyForPrefs => 'prefItem_$book';
+  String get valueToSave {
+    final type = PrefItemDataType.values[chapter];
+    switch (type) {
+      case PrefItemDataType.bool:
+      case PrefItemDataType.int:
+        return '${chapter}_$verse';
+      case PrefItemDataType.string:
+      case PrefItemDataType.json:
+        return '${chapter}_$info';
+    }
+    return '';
+  }
+
+  static PrefItem fromSharedPrefs(String key, String value) {
+    final splitValue = value.split('_');
+    final prefItemDataType = int.parse(splitValue.first);
+    final prefItemId = int.parse(key.split('_').last);
+
+    if (prefItemDataType == PrefItemDataType.bool.index ||
+        prefItemDataType == PrefItemDataType.int.index) {
+      final verse = int.parse(splitValue.last);
+      return PrefItem(
+          prefItemDataType: PrefItemDataType.values[prefItemDataType],
+          prefItemId: prefItemId,
+          verse: verse);
+    } else {
+      final info = splitValue.last;
+      return PrefItem(
+          prefItemDataType: PrefItemDataType.values[prefItemDataType],
+          prefItemId: prefItemId,
+          info: info);
+    }
+  }
 }

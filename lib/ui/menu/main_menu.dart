@@ -1,3 +1,4 @@
+import 'package:bible/ui/menu/settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +23,7 @@ Future<void> showMainMenu(BuildContext context) {
   TecAutoScroll.stopAutoscroll();
   return showTecModalPopupMenu(
     context: context,
+    insets: const EdgeInsets.symmetric(horizontal: 15),
     menuItemsBuilder: (menuContext) => _buildMenuItems(
       MainMenuModel(),
       context: context,
@@ -35,91 +37,69 @@ List<TableRow> _buildMenuItems(
   BuildContext context,
   BuildContext menuContext,
 }) {
-  final prefBloc = context.bloc<PrefItemsBloc>(); //ignore: close_sinks
   return [
+    TableRow(children: [
+      AppBar(
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        leading: const CloseButton(),
+        title: const Text('Tecarta'),
+      ),
+      TableRowInkWell(
+        onTap: null,
+        child: Container(),
+      )
+    ]),
     tecModalPopupMenuItem(
       menuContext,
-      tec.platformIs(tec.Platform.iOS) ? FeatherIcons.share : FeatherIcons.share2,
-      'Share app',
-      () => menuModel.shareApp(menuContext),
-    ),
-    tecModalPopupMenuItem(
-      menuContext,
-      FeatherIcons.bell,
-      'Notifications',
-      null,
-    ),
-    tecModalPopupMenuItem(
-      menuContext,
-      Icons.lightbulb_outline,
-      'Dark theme',
-      () => context.bloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
-      getSwitchValue: AppSettings.shared.isDarkTheme,
-    ),
-    tecModalPopupMenuItem(
-      menuContext,
-      Icons.link,
-      'Include Link in Copy/Share',
-      () => prefBloc.add(
-          PrefItemEvent.update(prefItem: prefBloc.toggledPrefItem(PrefItemId.includeShareLink))),
-      getSwitchValue: () => prefBloc.itemBool(PrefItemId.includeShareLink),
-    ),
-    tecModalPopupMenuItem(
-      menuContext,
-      Icons.close,
-      'Close Sheet after Copy/Share',
-      () => prefBloc.add(
-          PrefItemEvent.update(prefItem: prefBloc.toggledPrefItem(PrefItemId.closeAfterCopyShare))),
-      getSwitchValue: () => prefBloc.itemBool(PrefItemId.closeAfterCopyShare),
-    ),
-    tecModalPopupMenuItem(
-      menuContext,
-      Icons.play_circle_outline,
-      'Autoscroll',
-      () => TecAutoScroll.setEnabled(enabled: !TecAutoScroll.isEnabled()),
-      getSwitchValue: TecAutoScroll.isEnabled,
-    ),
-    tecModalPopupMenuItem(
-      menuContext,
-      Icons.format_size,
-      'Text Settings',
+      FeatherIcons.user,
+      AppSettings.shared.userAccount.isSignedIn
+          ? '${AppSettings.shared.userAccount.user.email}'
+          : 'Account',
       () {
         Navigator.of(menuContext).pop();
-        showTextSettingsDialog(menuContext);
+        tua.showSignInDlg(
+            context: menuContext,
+            account: AppSettings.shared.userAccount,
+            useRootNavigator: true,
+            appName: Const.appNameForUA);
       },
+      // subtitle: AppSettings.shared.userAccount.isSignedIn
+      //     ? '${AppSettings.shared.userAccount.user.firstName}'
+      //     : 'Sign in'
     ),
+    // tecModalPopupMenuItem(
+    //   menuContext,
+    //   tec.platformIs(tec.Platform.iOS) ? FeatherIcons.share : FeatherIcons.share2,
+    //   'Share app',
+    //   () => menuModel.shareApp(menuContext),
+    // ),
+    tecModalPopupMenuDivider(menuContext),
+
+    tecModalPopupMenuItem(menuContext, FeatherIcons.bell, 'Notifications', null,
+        subtitle: 'Reminders for daily verse, devotional of the day, and more.'),
+
     tecModalPopupMenuDivider(menuContext),
     tecModalPopupMenuItem(
-        menuContext,
-        FeatherIcons.user,
-        AppSettings.shared.userAccount.isSignedIn
-            ? '${AppSettings.shared.userAccount.user.email}'
-            : 'Account', () {
-      Navigator.of(menuContext).pop();
-      tua.showSignInDlg(
-          context: menuContext,
-          account: AppSettings.shared.userAccount,
-          useRootNavigator: true,
-          appName: Const.appNameForUA);
-    }),
-    if (tec.platformIs(tec.Platform.iOS))
-      tecModalPopupMenuItem(
-        menuContext,
-        Icons.restore,
-        'Restore Purchases',
-        null,
-      ),
+        menuContext, FeatherIcons.settings, 'Settings', () => showSettings(context),
+        subtitle: 'Font Size, line spacing, dark mode'),
+    // if (tec.platformIs(tec.Platform.iOS))
+    //   tecModalPopupMenuItem(
+    //     menuContext,
+    //     Icons.restore,
+    //     'Restore Purchases',
+    //     null,
+    //   ),
+    tecModalPopupMenuDivider(menuContext),
+
+    tecModalPopupMenuItem(menuContext, FeatherIcons.helpCircle, 'Help & Feedback',
+        () => menuModel.emailFeedback(menuContext),
+        subtitle: 'App Features, Support, and FAQs'),
+    tecModalPopupMenuDivider(menuContext),
+
     tecModalPopupMenuItem(
-      menuContext,
-      FeatherIcons.helpCircle,
-      'Help & Feedback',
-      () => menuModel.emailFeedback(menuContext),
-    ),
-    tecModalPopupMenuItem(
-      menuContext,
-      FeatherIcons.info,
-      'About',
-      () => menuModel.showAboutDialog(menuContext),
-    ),
+        menuContext, FeatherIcons.info, 'About', () => menuModel.showAboutDialog(menuContext),
+        subtitle: 'App Info, version number, website link'),
   ];
 }

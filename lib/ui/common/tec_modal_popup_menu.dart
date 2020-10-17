@@ -16,7 +16,7 @@ Future<void> showTecModalPopupMenu({
   return showTecModalPopup<void>(
     useRootNavigator: true,
     context: context,
-    alignment: Alignment.topRight,
+    alignment: Alignment.center,
     edgeInsets: insets,
     builder: (context) => TecPopupSheet(
       child: Material(
@@ -48,6 +48,7 @@ TableRow tecModalPopupMenuItem(
   String title,
   VoidCallback onTap, {
   bool Function() getSwitchValue,
+  String subtitle,
 }) {
   final textScaleFactor = scaleFactorWith(context, maxScaleFactor: 1.2);
   final textColor = Theme.of(context).textColor.withOpacity(onTap == null ? 0.2 : 0.5);
@@ -76,10 +77,22 @@ TableRow tecModalPopupMenuItem(
                   : Icon(icon, color: textColor, size: iconSize),
             ),
             // const SizedBox(width: 10),
-            TecText(
-              title,
-              textScaleFactor: textScaleFactor,
-              style: TextStyle(color: textColor),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                TecText(
+                  title,
+                  textScaleFactor: textScaleFactor,
+                  style: TextStyle(color: textColor),
+                ),
+                if (subtitle != null)
+                  TecText(
+                    subtitle,
+                    textScaleFactor: textScaleFactor,
+                    // maxLines: 1,
+                    // overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: textColor),
+                  ),
+              ]),
             ),
           ],
         ),
