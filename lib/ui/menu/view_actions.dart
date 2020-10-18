@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:bible/ui/menu/settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -64,6 +63,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
         showTecModalPopupMenu(
           context: context,
           insets: insets,
+          alignment: Alignment.topRight,
           minWidth: 125,
           menuItemsBuilder: (menuContext) => _buildMenuItemsForViewWithState(
             state,
