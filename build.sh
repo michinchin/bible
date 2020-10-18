@@ -33,7 +33,6 @@ sed -i '' "s/flutter_service_worker./flutter_service_worker.${BUILD_NUMBER}./g" 
 sed -i '' "s/sourceMappingURL=main.dart./sourceMappingURL=main.dart.${BUILD_NUMBER}./g" build/web/main.dart.js
 
 mv build/web/main.dart.js build/web/main.dart.$BUILD_NUMBER.js
-mv build/web/main.dart.js.map build/web/main.dart.$BUILD_NUMBER.js.map
 mv build/web/flutter_service_worker.js build/web/flutter_service_worker.$BUILD_NUMBER.js
 
 pushd build/web
