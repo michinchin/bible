@@ -313,18 +313,16 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
                 if (_editMode) Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
                 Expanded(
                   child: Container(
-                    color: Colors.green,
-                    padding: _editMode
-                        ? const EdgeInsets.all(16)
-                        : const EdgeInsets.all(16).copyWith(bottom: 65),
+                    color: Colors.blue,
+                    padding: EdgeInsets.only(left: 16, right: 16, bottom: _editMode ? 0 : 65),
                     child: ZefyrEditor(
                       controller: _controller,
                       focusNode: _focusNode,
-                      autofocus: _editMode,
+                      // autofocus: _editMode,
                       // toolbarDelegate: ToolbarDelegate(),
                       readOnly: !_editMode,
                       showCursor: _editMode,
-                      expands: true,
+                      // expands: true,
                       // imageDelegate: TecImageDelegate(),
                     ),
                   ),

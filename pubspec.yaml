@@ -19,32 +19,32 @@ dependencies:
 
   # External dependencies
   animations: ^1.1.2
-  bloc: ^6.0.3
-  cached_network_image: ^2.3.2+1
+  bloc: ^6.1.0
+  cached_network_image: ^2.3.3
   combos: ^1.2.0
   equatable: ^1.2.3
   feather_icons_flutter: ^4.7.4
   flutter_bloc: ^6.0.6
   flutter_downloader: ^1.5.1
   flutter_keyboard_visibility: ^3.2.1
-  flutter_local_notifications: ^2.0.0+1
+  flutter_local_notifications: ^2.0.1
   flutter_sfsymbols: ^1.0.0
   flutter_svg: ^0.19.0
   freezed_annotation: ^0.12.0
-  google_fonts: ^1.1.0
-  image_picker: ^0.6.7+2
-  in_app_purchase: ^0.3.4+12
+  google_fonts: ^1.1.1
+  image_picker: ^0.6.7+12
+  in_app_purchase: ^0.3.4+15
   json_annotation: ^3.0.1
   path: ^1.7.0
-  path_provider: ^1.6.11
+  path_provider: ^1.6.21
   pedantic: ^1.9.2
   provider: ^4.3.2+2
   quill_delta: ^2.0.0
   rxdart: ^0.24.1
   scrollable_positioned_list: ^0.1.8
-  share: ^0.6.5
+  share: ^0.6.5+3
   tuple: ^1.0.3
-  url_launcher: ^5.5.3
+  url_launcher: ^5.7.5
   zefyr: ^1.0.0-dev.1.0
 
   # Internal dependencies
@@ -77,7 +77,7 @@ dependencies:
     hosted:
       name: tec_user_account
       url: http://noah.tecarta.com:8100
-    version: ^2.0.7
+    version: ^2.0.10
   tec_util:
     hosted:
       name: tec_util
@@ -87,7 +87,7 @@ dependencies:
     hosted:
       name: tec_volumes
       url: http://noah.tecarta.com:8100
-    version: ^1.2.5
+    version: ^1.2.6
   tec_web_view:
     hosted:
       name: tec_web_view
@@ -97,9 +97,9 @@ dependencies:
     hosted:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
-    version: ^2.0.10
+    version: ^2.0.16
 
-#dependency_overrides:
+# dependency_overrides:
   # tec_util:
   #   path: ../shared/tec_util
   #  tec_widgets:

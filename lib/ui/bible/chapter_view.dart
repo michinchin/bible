@@ -90,40 +90,53 @@ class _PageableChapterViewState extends State<PageableChapterView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ViewDataBloc(context.bloc<ViewManagerBloc>(), widget.state.uid,
-          ChapterViewData.fromContext(context, widget.state.uid)),
-      child: Scaffold(
-        appBar: MinHeightAppBar(
-          appBar: ChapterViewAppBar(
-            volumeType: _volume is Bible ? VolumeType.bible : VolumeType.studyContent,
-            viewState: widget.state,
-            size: widget.size,
-            onUpdate: _onUpdate,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => ViewDataBloc(
+            context.bloc<ViewManagerBloc>(),
+            widget.state.uid,
+            ChapterViewData.fromContext(context, widget.state.uid),
           ),
         ),
-        body: BlocListener<SharedBibleRefBloc, BookChapterVerse>(
-          listener: (context, bcv) async {
-            if (!_updatingSharedBibleRef &&
-                !_animatingToPage &&
-                mounted &&
-                _pageController != null &&
-                _bible != null &&
-                ChapterViewData.fromContext(context, widget.state.uid).useSharedRef) {
-              final currentPage = _pageController.page.round();
-              final newPage = _bcvPageZero.chaptersTo(bcv, bible: _bible);
-              if (newPage != null && newPage != currentPage) {
-                if ((newPage - currentPage).abs() > 1) {
-                  _pageController.jumpToPage(newPage);
-                } else {
-                  _animatingToPage = true;
-                  await _pageController.animateToPage(newPage);
-                  _animatingToPage = false;
+      ],
+      child: BlocListener<ViewDataBloc, ViewData>(
+        listenWhen: (a, b) =>
+            a.asChapterViewData.volumeId != b.asChapterViewData.volumeId ||
+            a.asChapterViewData.bcv != b.asChapterViewData.bcv,
+        listener: (context, viewData) => _onNewViewData(viewData.asChapterViewData),
+        child: Scaffold(
+          appBar: MinHeightAppBar(
+            appBar: ChapterViewAppBar(
+              volumeType: _volume is Bible ? VolumeType.bible : VolumeType.studyContent,
+              viewState: widget.state,
+              size: widget.size,
+              onUpdate: _onUpdate,
+            ),
+          ),
+          body: BlocListener<SharedBibleRefBloc, BookChapterVerse>(
+            listener: (context, bcv) async {
+              if (!_updatingSharedBibleRef &&
+                  !_animatingToPage &&
+                  mounted &&
+                  _pageController != null &&
+                  _bible != null &&
+                  ChapterViewData.fromContext(context, widget.state.uid).useSharedRef) {
+                final currentPage = _pageController.page.round();
+                final newPage = _bcvPageZero.chaptersTo(bcv, bible: _bible);
+                if (newPage != null && newPage != currentPage) {
+                  if ((newPage - currentPage).abs() > 1) {
+                    _pageController.jumpToPage(newPage);
+                  } else {
+                    _animatingToPage = true;
+                    await _pageController.animateToPage(newPage);
+                    _animatingToPage = false;
+                  }
                 }
               }
-            }
-          },
-          child: pageableView(),
+            },
+            child: pageableView(),
+          ),
         ),
       ),
     );
@@ -140,8 +153,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
           final ref = _bcvPageZero.advancedBy(chapters: index, bible: _bible);
           if (ref == null) return null;
           return BlocBuilder<ViewDataBloc, ViewData>(
-            buildWhen: (before, after) =>
-                (before as ChapterViewData).volumeId != (after as ChapterViewData).volumeId,
+            buildWhen: (a, b) => a.asChapterViewData.volumeId != b.asChapterViewData.volumeId,
             builder: (context, viewData) {
               if (viewData is ChapterViewData) {
                 final volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
@@ -201,6 +213,40 @@ class _PageableChapterViewState extends State<PageableChapterView> {
             .bloc<ViewDataBloc>()
             ?.update(viewData.copyWith(volumeId: volume.id, bcv: newBcv, page: page));
       }
+    }
+
+    if (_pageController != null && _pageController.page.round() != page) {
+      // tec.dmPrint('Page changed from ${_pageController.page.round()} to $page');
+      _pageController?.jumpToPage(page);
+    }
+  }
+
+  void _onNewViewData(ChapterViewData viewData) {
+    if (!mounted || viewData == null || _volume == null) return;
+
+    var volumeChanged = false;
+    var volume = _volume;
+    if (volume?.id != viewData.volumeId) {
+      volumeChanged = true;
+      volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
+      if (volume == null) return; // --------------------------------------->
+    }
+
+    final page = _bcvPageZero.chaptersTo(viewData.bcv, bible: volume.assocBible);
+    if (page == null) {
+      tec.dmPrint(
+          'ChapterView unable to navigate to ${viewData.bcv} in ${volume.assocBible.abbreviation}');
+      return; // ----------------------------------------------------------->
+    }
+
+    if (volumeChanged) {
+      // tec.dmPrint('Volume changed from ${_volume.id} to ${volume.id}.');
+      _volume = volume;
+      _bible = volume.assocBible;
+      // TODO(ron): need to do this?
+      // if (viewData is ChapterViewData && viewData.page != page) {
+      //   context.bloc<ViewDataBloc>()?.update(viewData.copyWith(page: page));
+      // }
     }
 
     if (_pageController != null && _pageController.page.round() != page) {
@@ -517,7 +563,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
         ),
         BlocListener<ViewDataBloc, ViewData>(
           listener: (context, viewData) {
-            if ((viewData as ChapterViewData).bcv == widget.ref) {
+            if (viewData.asChapterViewData.bcv == widget.ref) {
               // tec.dmPrint('Notifying of selections for ${widget.ref}');
               _viewModel.notifyOfSelections(context);
             } else {

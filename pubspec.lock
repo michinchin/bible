@@ -56,7 +56,7 @@ packages:
       name: bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.3"
+    version: "6.1.0"
   bloc_test:
     dependency: "direct dev"
     description:
@@ -133,7 +133,7 @@ packages:
       name: cached_network_image
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.3.2+1"
+    version: "2.3.3"
   characters:
     dependency: transitive
     description:
@@ -238,7 +238,7 @@ packages:
       name: device_info
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.2+8"
+    version: "0.4.2+9"
   device_info_platform_interface:
     dependency: transitive
     description:
@@ -320,7 +320,7 @@ packages:
       name: flutter_cache_manager
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.2"
+    version: "2.0.0"
   flutter_downloader:
     dependency: "direct main"
     description:
@@ -348,7 +348,7 @@ packages:
       name: flutter_local_notifications
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0+1"
+    version: "2.0.1"
   flutter_local_notifications_platform_interface:
     dependency: transitive
     description:
@@ -419,14 +419,14 @@ packages:
       name: google_fonts
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.1"
   google_sign_in:
     dependency: transitive
     description:
       name: google_sign_in
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.5.4"
+    version: "4.5.5"
   google_sign_in_platform_interface:
     dependency: transitive
     description:
@@ -496,7 +496,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.7+11"
+    version: "0.6.7+12"
   image_picker_platform_interface:
     dependency: transitive
     description:
@@ -504,13 +504,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.1"
+  import_js_library:
+    dependency: transitive
+    description:
+      name: import_js_library
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   in_app_purchase:
     dependency: "direct main"
     description:
       name: in_app_purchase
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.4+12"
+    version: "0.3.4+15"
   intl:
     dependency: transitive
     description:
@@ -566,7 +573,7 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.0-nullsafety.3"
+    version: "1.3.0-nullsafety.4"
   mime:
     dependency: transitive
     description:
@@ -615,7 +622,7 @@ packages:
       name: notus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0-dev.2.0"
+    version: "1.0.0-dev.3.0"
   octo_image:
     dependency: transitive
     description:
@@ -664,7 +671,7 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.18"
+    version: "1.6.21"
   path_provider_linux:
     dependency: transitive
     description:
@@ -818,14 +825,14 @@ packages:
       name: share
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.5+2"
+    version: "0.6.5+3"
   shared_preferences:
     dependency: transitive
     description:
       name: shared_preferences
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.12"
+    version: "0.5.12+2"
   shared_preferences_linux:
     dependency: transitive
     description:
@@ -956,7 +963,7 @@ packages:
       name: stack_trace
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.10.0-nullsafety.1"
+    version: "1.10.0-nullsafety.2"
   stream_channel:
     dependency: transitive
     description:
@@ -1033,7 +1040,7 @@ packages:
       name: tec_product_db
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.1.5"
+    version: "1.1.6"
   tec_selectable:
     dependency: transitive
     description:
@@ -1047,7 +1054,7 @@ packages:
       name: tec_user_account
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.9"
+    version: "2.0.10"
   tec_util:
     dependency: "direct main"
     description:
@@ -1061,7 +1068,7 @@ packages:
       name: tec_volumes
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.5"
+    version: "1.2.6"
   tec_web_view:
     dependency: "direct main"
     description:
@@ -1075,7 +1082,7 @@ packages:
       name: tec_widgets
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.14"
+    version: "2.0.16"
   term_glyph:
     dependency: transitive
     description:
@@ -1138,7 +1145,7 @@ packages:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.7.2"
+    version: "5.7.5"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -1201,7 +1208,21 @@ packages:
       name: wakelock
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.4+2"
+    version: "0.2.0+1"
+  wakelock_platform_interface:
+    dependency: transitive
+    description:
+      name: wakelock_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0"
+  wakelock_web:
+    dependency: transitive
+    description:
+      name: wakelock_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0+2"
   watcher:
     dependency: transitive
     description:
@@ -1259,5 +1280,5 @@ packages:
     source: hosted
     version: "1.0.0-dev.1.0"
 sdks:
-  dart: ">=2.10.0 <2.11.0"
+  dart: ">=2.10.0 <=2.11.0-213.1.beta"
   flutter: ">=1.20.0 <2.0.0"
