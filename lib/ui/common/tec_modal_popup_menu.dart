@@ -52,7 +52,7 @@ TableRow tecModalPopupMenuItem(
   String subtitle,
 }) {
   final scale = scaleFactorWith(context, maxScaleFactor: 1.2);
-  final textColor = Theme.of(context).textColor.withOpacity(onTap == null ? 0.2 : 0.5);
+  final color = Theme.of(context).textColor.withOpacity(onTap == null ? 0.2 : 0.5);
   final iconSize = 24.0 * scale;
 
   void Function() _onTap() => onTap == null
@@ -75,15 +75,17 @@ TableRow tecModalPopupMenuItem(
               padding: const EdgeInsets.fromLTRB(4, 10, 14, 10),
               child: icon == null
                   ? SizedBox(width: iconSize)
-                  : Icon(icon, color: textColor, size: iconSize),
+                  : Icon(icon, color: color, size: iconSize),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TecText(title, textScaleFactor: scale, style: TextStyle(color: textColor)),
-                if (subtitle != null)
-                  TecText(subtitle, textScaleFactor: scale, style: TextStyle(color: textColor)),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TecText(title, textScaleFactor: scale, style: TextStyle(color: color)),
+                  if (subtitle != null)
+                    TecText(subtitle, textScaleFactor: scale, style: TextStyle(color: color)),
+                ],
+              ),
             ),
           ],
         ),
