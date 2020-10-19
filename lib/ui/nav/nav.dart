@@ -25,6 +25,7 @@ Future<Reference> navigate(BuildContext context, Reference ref,
     {int initialIndex = 0, bool searchView = false}) {
   final isLargeScreen =
       MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 600;
+  final hasSearchResults = context.bloc<SearchBloc>().state.searchResults.isNotEmpty;
   if (isLargeScreen) {
     return showTecDialog<Reference>(
       context: context,
@@ -37,7 +38,9 @@ Future<Reference> navigate(BuildContext context, Reference ref,
             BlocProvider<NavBloc>(
                 create: (_) => NavBloc(ref, initialTabIndex: initialIndex)
                   ..add(NavEvent.changeNavView(
-                      state: searchView ? NavViewState.searchResults : NavViewState.bcvTabs))),
+                      state: searchView && hasSearchResults
+                          ? NavViewState.searchResults
+                          : NavViewState.bcvTabs))),
           ], child: Nav(searchView: searchView))),
     );
   }
@@ -58,13 +61,66 @@ Future<Reference> navigate(BuildContext context, Reference ref,
       BlocProvider<NavBloc>(
         create: (_) => NavBloc(ref, initialTabIndex: initialIndex)
           ..add(NavEvent.changeNavView(
-              state: searchView ? NavViewState.searchResults : NavViewState.bcvTabs)),
+              state: searchView && hasSearchResults
+                  ? NavViewState.searchResults
+                  : NavViewState.bcvTabs)),
       ),
     ], child: Nav(searchView: searchView)),
   ));
 }
 
+/// show search with requested search string, returns `Reference` in case of nav
+Future<Reference> showBibleSearch(BuildContext context, Reference ref, {String search = ''}) {
+  final isLargeScreen =
+      MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 600;
+
+  if (search.isNotEmpty) {
+    final translations = context
+        .bloc<PrefItemsBloc>()
+        .state
+        .items
+        .itemWithId(PrefItemId.translationsFilter)
+        .info
+        .split('|')
+        .map(int.parse)
+        .toList();
+    context
+        .bloc<SearchBloc>()
+        ?.add(SearchEvent.request(search: search, translations: translations));
+  }
+  if (isLargeScreen) {
+    return showTecDialog<Reference>(
+      context: context,
+      useRootNavigator: true,
+      cornerRadius: 15,
+      builder: (context) => Container(
+          height: 600,
+          width: 500,
+          child: MultiBlocProvider(
+              providers: [
+                BlocProvider<NavBloc>(
+                    create: (_) => NavBloc(ref)
+                      ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))),
+              ],
+              child: const Nav(
+                searchView: true,
+              ))),
+    );
+  }
+
+  return Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
+    fullscreenDialog: true,
+    builder: (context) => MultiBlocProvider(providers: [
+      BlocProvider<NavBloc>(
+        create: (_) =>
+            NavBloc(ref)..add(const NavEvent.changeNavView(state: NavViewState.searchResults)),
+      ),
+    ], child: const Nav(searchView: true)),
+  ));
+}
+
 class Nav extends StatefulWidget {
+  /// if set to `true`, will focus `TextField` immediately when no search results present
   final bool searchView;
   const Nav({this.searchView});
   @override
@@ -322,9 +378,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                   c
                       .bloc<NavBloc>()
                       .add(const NavEvent.changeNavView(state: NavViewState.searchResults));
-                  if (hasSearchResults) {
-                    _searchResultsTabController.animateTo(1);
-                  }
+                  // default to show history first
+                  _searchResultsTabController.animateTo(0);
                 }),
             IconButton(icon: Icon(platformAwareMoreIcon(context)), onPressed: _moreButton)
           ];
