@@ -188,7 +188,8 @@ class IconWithNumberBadge extends StatelessWidget {
     return Stack(children: <Widget>[
       Icon(icon),
       Positioned(
-        right: 0,
+        right: 3,
+        top: 1,
         child: Container(
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
@@ -196,8 +197,8 @@ class IconWithNumberBadge extends StatelessWidget {
             borderRadius: BorderRadius.circular(6),
           ),
           constraints: const BoxConstraints(
-            minWidth: 12,
-            minHeight: 12,
+            minWidth: 8,
+            minHeight: 8,
           ),
           child: value != null
               ? Text(
