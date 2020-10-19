@@ -30,6 +30,8 @@ Future<void> showXrefsPopup({
       value: originalContext.bloc<ViewDataBloc>(),
       child: TecPopupSheet(
         padding: const EdgeInsets.all(8),
+        bgOpacity: 0.5,
+        bgBlur: 5,
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -53,21 +55,28 @@ class _XrefWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // final scale = textScaleFactorWith(context);
     final volumeId = context.bloc<ViewDataBloc>().state.asChapterViewData.volumeId;
     final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible;
 
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDarkTheme ? Colors.black : Colors.white;
+    final txColor = isDarkTheme ? const Color(0xFF999999) : const Color(0xFF333333);
+    final txStyle = TextStyle(color: txColor);
+
     return TecCard(
+      color: bgColor,
       elevation: 5,
       padding: 4,
       cornerRadius: 8,
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(8),
-          child: Text.rich(TextSpan(children: [
+          child: TecText.rich(TextSpan(children: [
             TextSpan(
                 text: '${bible.nameOfBook(xref.book)} ${xref.chapter}:${xref.verse}  ',
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(text: xref.text),
+                style: TextStyle(fontWeight: FontWeight.bold, color: txColor)),
+            TextSpan(text: xref.text, style: txStyle),
           ])),
         );
       },

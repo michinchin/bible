@@ -7,12 +7,12 @@ import 'package:flutter/widgets.dart';
 
 enum TecPopupAnimationType { fadeScale, slide }
 
-/// Shows a modal popup that, depending on the [alignment] setting, can slide
-/// up from the bottom of the screen (the default), slide down from the top of
-/// the screen, slide in from either side, or slide in from any corner. :)
+/// Shows a modal popup that is positioned based on [alignment] and
+/// [edgeInsets], and is animated when opening and closing based on
+/// [animationType].
 ///
-/// Such a popup is an alternative to a menu or a dialog and prevents the user
-/// from interacting with the rest of the app (or current [Navigator] area).
+/// It is an alternative to a menu or a dialog and prevents the user from
+/// interacting with the rest of the app (or current [Navigator] area).
 ///
 /// The `context` argument is used to look up the [Navigator] for the popup.
 /// It is only used when the method is called. Its corresponding widget can be
@@ -75,15 +75,27 @@ class TecPopupSheet extends StatelessWidget {
   ///
   /// Creates a [TecPopupSheet].
   ///
-  const TecPopupSheet({Key key, @required this.child, this.padding})
-      : assert(child != null),
+  const TecPopupSheet({
+    Key key,
+    @required this.child,
+    this.padding,
+    this.bgOpacity = 0.75,
+    this.bgBlur = 20.0,
+  })  : assert(child != null),
         super(key: key);
 
   final Widget child;
   final EdgeInsets padding;
+  final double bgOpacity;
+  final double bgBlur;
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = CupertinoDynamicColor.withBrightness(
+      color: const Color(0xFFF9F9F9).withOpacity(bgOpacity), // FDFDFD, // originally F9F9F9
+      darkColor: const Color(0xFF252525).withOpacity(bgOpacity), // 1E1E1E, // originally 252525
+    );
+
     return Semantics(
       namesRoute: true,
       scopesRoute: true,
@@ -99,9 +111,10 @@ class TecPopupSheet extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12.0),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
+              filter: ImageFilter.blur(sigmaX: bgBlur, sigmaY: bgBlur),
+              // child: Container(width: 300, height: 300, color: Colors.white.withOpacity(0.7)),
               child: Container(
-                color: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+                color: CupertinoDynamicColor.resolve(bgColor, context),
                 child: _PopupSheetContent(child: child, padding: padding),
               ),
             ),
@@ -111,6 +124,9 @@ class TecPopupSheet extends StatelessWidget {
     );
   }
 }
+
+const double _kEdgeHorizontalPadding = 8.0;
+const double _kEdgeVerticalPadding = 8.0; // originally 10.0;
 
 ///
 /// Builds and shows a dialog. If [maxWidth] and/or [maxHeight] are are not
@@ -326,6 +342,9 @@ class _PopupSheetContent extends StatelessWidget {
   }
 }
 
+const double _kContentHorizontalPadding = 14.0; // originally 40.0;
+const double _kContentVerticalPadding = 14.0;
+
 const TextStyle _kPopupSheetContentStyle = TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
@@ -335,20 +354,5 @@ const TextStyle _kPopupSheetContentStyle = TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
-// Translucent, very light gray that is painted on top of the blurred backdrop
-// as the sheet's background color.
-const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFFDFDFD), // originally Color(0xC7F9F9F9),
-  darkColor: Color(0xFF1E1E1E), // originally Color(0xC7252525)
-);
-
 // The gray color used for text that appears in the content area.
 const Color _kContentTextColor = Color(0xFF8F8F8F);
-
-const double _kBlurAmount = 20.0;
-
-const double _kEdgeHorizontalPadding = 8.0;
-const double _kEdgeVerticalPadding = 8.0; // originally 10.0;
-
-const double _kContentHorizontalPadding = 14.0; // originally 40.0;
-const double _kContentVerticalPadding = 14.0;

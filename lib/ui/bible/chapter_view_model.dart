@@ -90,6 +90,7 @@ class ChapterViewModel {
 
       // Was it a long press on an xref?
       if (!handledTap &&
+          !hasSelection &&
           tag.isInXref &&
           tec.isNotNullOrEmpty(tag.href) &&
           _tapDownStopwatch.elapsed.inMilliseconds > 500 &&
@@ -516,7 +517,11 @@ class ChapterViewModel {
         if (result?.value?.isEmpty ?? true) {
           // TODO(ron): ...
         } else {
-          showXrefsPopup(context: context, xrefs: result.value);
+          showXrefsPopup(
+            context: context,
+            xrefs: result.value,
+            insets: context.bloc<ViewManagerBloc>().globalInsetsOfView(viewUid, context),
+          );
         }
       });
       return true;
