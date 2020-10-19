@@ -1,12 +1,13 @@
-import 'package:bible/blocs/app_theme_bloc.dart';
-import 'package:bible/blocs/sheet/pref_items_bloc.dart';
-import 'package:bible/models/app_settings.dart';
-import 'package:bible/models/pref_item.dart';
-import 'package:bible/ui/misc/text_settings.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:tec_widgets/tec_widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_widgets/tec_widgets.dart';
+
+import '../../blocs/app_theme_bloc.dart';
+import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../models/app_settings.dart';
+import '../../models/pref_item.dart';
+import '../misc/text_settings.dart';
 import 'main_menu_model.dart';
 
 void showSettings(BuildContext context) =>
@@ -53,19 +54,16 @@ class SettingsView extends StatelessWidget {
                       textColor: Theme.of(context).textColor.withOpacity(0.5),
                       icon: const Text('Sync now'),
                       label: Icon(Icons.sync, color: Theme.of(context).textColor.withOpacity(0.5)),
-                      onPressed: () {},
+                      onPressed: () => TecToast.show(context, 'Not yet implemented'),
                     ),
                   ),
-                  _TitleSettingTile(title: 'Read', icon: FeatherIcons.bookmark),
+                  const _TitleSettingTile(title: 'Read', icon: FeatherIcons.bookmark),
                   Padding(
                     padding: const EdgeInsets.only(left: 30),
                     child: Column(children: readTiles(context)),
                   ),
-                  _TitleSettingTile(title: 'Notifications', icon: FeatherIcons.bell),
-                  _TitleSettingTile(
-                    title: 'Audio',
-                    icon: FeatherIcons.volume1,
-                  ),
+                  const _TitleSettingTile(title: 'Notifications', icon: FeatherIcons.bell),
+                  const _TitleSettingTile(title: 'Audio', icon: FeatherIcons.volume1),
                 ]),
               )
             ],
@@ -94,25 +92,25 @@ List<Widget> readTiles(BuildContext context) {
     ),
     SwitchListTile.adaptive(
       dense: true,
-      secondary: Icon(Icons.close),
-      title: Text('Close Sheet after Copy/Share'),
+      secondary: const Icon(Icons.close),
+      title: const Text('Close Sheet after Copy/Share'),
       onChanged: (_) => prefBloc.add(
           PrefItemEvent.update(prefItem: prefBloc.toggledPrefItem(PrefItemId.closeAfterCopyShare))),
       value: prefBloc.itemBool(PrefItemId.closeAfterCopyShare),
     ),
     SwitchListTile.adaptive(
       dense: true,
-      secondary: Icon(Icons.play_circle_outline),
-      title: Text('Autoscroll'),
+      secondary: const Icon(Icons.play_circle_outline),
+      title: const Text('Autoscroll'),
       onChanged: (_) => TecAutoScroll.setEnabled(enabled: !TecAutoScroll.isEnabled()),
       value: TecAutoScroll.isEnabled(),
     ),
     ListTile(
       dense: true,
-      leading: Icon(Icons.format_size),
-      title: Text('Text Settings'),
+      leading: const Icon(Icons.format_size),
+      title: const Text('Text Settings'),
       onTap: () {
-        while(Navigator.canPop(context)){
+        while (Navigator.canPop(context)) {
           Navigator.of(context).pop();
         }
         showTextSettingsDialog(context);
@@ -150,7 +148,7 @@ class _TitleSettingTile extends StatelessWidget {
           ),
           if (trailing != null) Padding(padding: const EdgeInsets.only(right: 15), child: trailing)
         ]),
-        Divider(indent: 40),
+        const Divider(indent: 40),
       ]),
     );
   }
