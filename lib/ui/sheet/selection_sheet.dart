@@ -180,7 +180,7 @@ class __MiniViewState extends State<_MiniView> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                    height: 35,
+                    height: 40,
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       shrinkWrap: true,
@@ -188,7 +188,7 @@ class __MiniViewState extends State<_MiniView> {
                       itemCount: colors.length,
                       itemBuilder: (c, i) => colors[i],
                       separatorBuilder: (c, i) =>
-                          const VerticalDivider(color: Colors.transparent, width: 5),
+                          const VerticalDivider(color: Colors.transparent, width: 15),
                     )),
                 Padding(
                     // bottom padding is handled by TecScaffoldWrapper
@@ -238,7 +238,7 @@ class __ColorSelectionViewState extends State<_ColorSelectionView> {
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
-        height: 200,
+        height: 300,
         child: Row(children: [
           Expanded(
             child: ColorPicker(
