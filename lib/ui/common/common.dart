@@ -17,6 +17,16 @@ export 'tec_tab_indicator.dart';
 const defaultElevation = 3.0;
 
 ///
+/// Returns a new `EdgeInsets` object based on the given [parentSize] and [childRect].
+///
+EdgeInsets insetsFromParentSizeAndChildRect(Size parentSize, Rect childRect) => EdgeInsets.fromLTRB(
+      childRect.left,
+      childRect.top,
+      parentSize.width - childRect.right,
+      parentSize.height - childRect.bottom,
+    );
+
+///
 /// Shape and border radius to use for bottom sheets.
 ///
 const bottomSheetShape = RoundedRectangleBorder(borderRadius: bottomSheetBorderRadius);

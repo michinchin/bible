@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -21,39 +19,25 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
   // ignore: close_sinks
   final vmBloc = context.bloc<ViewManagerBloc>();
   final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
-  final topRight = vmBloc.state.maximizedViewUid == state.uid ||
+  final isTopRightView = vmBloc.state.maximizedViewUid == state.uid ||
       (vmBloc.columnsInRow(0) - 1) == vmBloc.indexOfView(state.uid);
-
-  var insets = const EdgeInsets.all(0);
-  final rect = vmBloc.rectOfView(state.uid)?.rect;
-  final vmSize = vmBloc.size;
-  if (rect != null && vmSize != null) {
-    final mq = MediaQuery.of(context);
-    insets = EdgeInsets.fromLTRB(
-      math.max(0, rect.left + (mq?.padding?.left ?? 0.0)),
-      math.max(0, rect.top + (mq?.padding?.top ?? 0.0)),
-      math.max(0, vmSize.width - rect.right),
-      mq?.padding?.bottom ?? 0.0,
-    );
-  }
 
   return [
     if ((vmBloc?.countOfInvisibleViews ?? 0) >= 1 && isMaximized)
       IconButton(
-          icon: const Icon(SFSymbols.arrow_up_arrow_down_circle, size: 20),
-          color: Theme.of(context).textColor.withOpacity(0.5),
-          onPressed: () {
-            ViewState view;
-            if (vmBloc.indexOfView(vmBloc.state.maximizedViewUid) ==
-                vmBloc.state.views.length - 1) {
-              view = vmBloc.state.views.first;
-            } else {
-              view = vmBloc.state.views.firstWhere((v) =>
-                  vmBloc.indexOfView(v.uid) ==
-                  vmBloc.indexOfView(vmBloc.state.maximizedViewUid) + 1);
-            }
-            _onSwitchViews(vmBloc, vmBloc.state.maximizedViewUid, view);
-          }),
+        icon: const Icon(SFSymbols.arrow_up_arrow_down_circle, size: 20),
+        color: Theme.of(context).textColor.withOpacity(0.5),
+        onPressed: () {
+          ViewState view;
+          if (vmBloc.indexOfView(vmBloc.state.maximizedViewUid) == vmBloc.state.views.length - 1) {
+            view = vmBloc.state.views.first;
+          } else {
+            view = vmBloc.state.views.firstWhere((v) =>
+                vmBloc.indexOfView(v.uid) == vmBloc.indexOfView(vmBloc.state.maximizedViewUid) + 1);
+          }
+          _onSwitchViews(vmBloc, vmBloc.state.maximizedViewUid, view);
+        },
+      ),
     IconButton(
       icon: const Icon(SFSymbols.square_stack, size: 20),
       tooltip: 'View Menu',
@@ -62,7 +46,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
         TecAutoScroll.stopAutoscroll();
         showTecModalPopupMenu(
           context: context,
-          insets: insets,
+          insets: vmBloc.globalInsetsOfView(state.uid, context),
           alignment: Alignment.topRight,
           minWidth: 125,
           menuItemsBuilder: (menuContext) => _buildMenuItemsForViewWithState(
@@ -87,7 +71,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
             // TecAutoScroll.stopAutoscroll();
             // showTecModalPopupMenu(context: context, state: state, insets: insets);
           }),
-    if (topRight)
+    if (isTopRightView)
       IconButton(
         icon: const Icon(SFSymbols.person_crop_circle),
         tooltip: 'Main Menu',

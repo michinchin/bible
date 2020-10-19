@@ -1,21 +1,15 @@
-import 'package:bible/ui/menu/settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
-import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/app_theme_bloc.dart';
-import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
-import '../../models/pref_item.dart';
 import '../common/tec_modal_popup_menu.dart';
-import '../misc/text_settings.dart';
 import 'main_menu_model.dart';
+import 'settings.dart';
 
 const tecartaBlue = Color(0xff4a7dee);
 
@@ -38,19 +32,7 @@ List<TableRow> _buildMenuItems(
   BuildContext menuContext,
 }) {
   return [
-    TableRow(children: [
-      AppBar(
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        leading: const CloseButton(),
-        title: const Text('Tecarta'),
-      ),
-      TableRowInkWell(
-        onTap: null,
-        child: Container(),
-      )
-    ]),
+    tecModalPopupMenuTitle('Tecarta', showClose: true),
     tecModalPopupMenuItem(
       menuContext,
       FeatherIcons.user,

@@ -130,7 +130,58 @@ TableRow tecModalPopupMenuDivider(BuildContext context, [String title]) {
   );
 }
 
+TableRow tecModalPopupMenuTitle(String title, {bool showClose = true}) {
+  return TableRow(
+    children: [
+      _MenuTitleBar(title: title),
+      Container(),
+    ],
+  );
+}
+
 class _RefreshBloc extends Cubit<int> {
   _RefreshBloc() : super(0);
   void refresh() => emit(state + 1);
+}
+
+class _MenuTitleBar extends StatelessWidget {
+  final String title;
+
+  const _MenuTitleBar({Key key, this.title}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    final color = isDarkTheme ? Colors.white : Colors.grey[700];
+    return Stack(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+        ),
+        Positioned(
+          left: 4,
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: IconButton(
+              icon: const Icon(Icons.close),
+              padding: EdgeInsets.zero,
+              splashRadius: 12,
+              color: color,
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+              onPressed: () => Navigator.of(context, rootNavigator: true).maybePop(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

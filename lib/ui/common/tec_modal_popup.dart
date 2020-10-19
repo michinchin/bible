@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+enum TecPopupAnimationType { fadeScale, slide }
+
 /// Shows a modal popup that, depending on the [alignment] setting, can slide
 /// up from the bottom of the screen (the default), slide down from the top of
 /// the screen, slide in from either side, or slide in from any corner. :)
@@ -47,6 +49,7 @@ Future<T> showTecModalPopup<T>({
   bool semanticsDismissible,
   Alignment alignment = Alignment.bottomCenter,
   EdgeInsetsGeometry edgeInsets = const EdgeInsets.all(0),
+  TecPopupAnimationType animationType = TecPopupAnimationType.fadeScale,
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
@@ -56,6 +59,7 @@ Future<T> showTecModalPopup<T>({
       builder: builder,
       alignment: alignment ?? Alignment.bottomCenter,
       edgeInsets: edgeInsets,
+      animationType: animationType ?? TecPopupAnimationType.fadeScale,
       filter: filter,
       semanticsDismissible: semanticsDismissible,
     ),
@@ -80,28 +84,25 @@ class TecPopupSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: Semantics(
-        namesRoute: true,
-        scopesRoute: true,
-        explicitChildNodes: true,
-        label: 'Popup',
-        child: CupertinoUserInterfaceLevel(
-          data: CupertinoUserInterfaceLevelData.elevated,
-          child: Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: _kEdgeHorizontalPadding,
-              vertical: _kEdgeVerticalPadding,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-                child: Container(
-                  color: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
-                  child: _PopupSheetContent(child: child, padding: padding),
-                ),
+    return Semantics(
+      namesRoute: true,
+      scopesRoute: true,
+      explicitChildNodes: true,
+      label: 'Popup',
+      child: CupertinoUserInterfaceLevel(
+        data: CupertinoUserInterfaceLevelData.elevated,
+        child: Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: _kEdgeHorizontalPadding,
+            vertical: _kEdgeVerticalPadding,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12.0),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
+              child: Container(
+                color: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+                child: _PopupSheetContent(child: child, padding: padding),
               ),
             ),
           ),
@@ -191,6 +192,7 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
     this.builder,
     this.alignment,
     this.edgeInsets = const EdgeInsets.all(0),
+    this.animationType = TecPopupAnimationType.fadeScale,
     bool semanticsDismissible,
     ImageFilter filter,
     RouteSettings settings,
@@ -207,6 +209,8 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
   final Alignment alignment;
 
   final EdgeInsetsGeometry edgeInsets;
+
+  final TecPopupAnimationType animationType;
 
   @override
   final String barrierLabel;
@@ -225,21 +229,30 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
 
   Animation<double> _animation;
 
-  // Tween<Offset> _offsetTween;
+  Tween<Offset> _offsetTween;
 
   @override
   Animation<double> createAnimation() {
     assert(_animation == null);
-    _animation = super.createAnimation();
-    /*
-    _animation = CurvedAnimation(
-        parent: super.createAnimation(),
-        curve: Curves.linearToEaseOut,
-        reverseCurve: Curves.linearToEaseOut.flipped);
-    final beginX = (alignment.x < 0.0 ? -1.0 : alignment.x > 0.0 ? 1.0 : 0.0);
-    final beginY = (alignment.y < 0.0 ? -1.0 : alignment.y > 0.0 ? 1.0 : 0.0);
-    _offsetTween = Tween<Offset>(begin: Offset(beginX, beginY), end: const Offset(0.0, 0.0));
-    */
+    if (animationType == TecPopupAnimationType.slide) {
+      _animation = CurvedAnimation(
+          parent: super.createAnimation(),
+          curve: Curves.linearToEaseOut,
+          reverseCurve: Curves.linearToEaseOut.flipped);
+      final beginX = (alignment.x < 0.0
+          ? -1.0
+          : alignment.x > 0.0
+              ? 1.0
+              : 0.0);
+      final beginY = (alignment.y < 0.0
+          ? -1.0
+          : alignment.y > 0.0
+              ? 1.0
+              : 0.0);
+      _offsetTween = Tween<Offset>(begin: Offset(beginX, beginY), end: const Offset(0.0, 0.0));
+    } else {
+      _animation = super.createAnimation();
+    }
     return _animation;
   }
 
@@ -264,9 +277,9 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
       child: ClipRect(
         child: Align(
           alignment: alignment,
-          child:
-              // FractionalTranslation(translation: _offsetTween.evaluate(_animation), child: child),
-              FadeScaleTransition(animation: _animation, child: child),
+          child: animationType == TecPopupAnimationType.slide
+              ? FractionalTranslation(translation: _offsetTween.evaluate(_animation), child: child)
+              : FadeScaleTransition(animation: _animation, child: child),
         ),
       ),
     );

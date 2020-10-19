@@ -34,6 +34,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   ViewManagerBloc({@required tec.KeyValueStore kvStore})
       : assert(kvStore != null),
         _kvStore = kvStore,
+        _globalKey = GlobalKey(),
         super(_initialState(kvStore));
 
   static ViewManagerState _initialState(tec.KeyValueStore kvStore) {
@@ -51,9 +52,26 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   }
 
   final tec.KeyValueStore _kvStore;
+  final GlobalKey _globalKey;
 
   var _viewRects = <ViewRect>[]; // ignore: prefer_final_fields
   List<List<ViewState>> _rows = []; // ignore: prefer_final_fields
+
+  ///
+  /// Returns the view manager rect in global coordinates.
+  ///
+  Rect get globalRect {
+    // return null;
+    final rb = _globalKey.currentContext?.findRenderObject();
+    if (rb is RenderBox) {
+      final pt = rb.localToGlobal(Offset.zero);
+      final size = _size ?? Size.zero;
+      final rect = Rect.fromLTWH(pt.dx, pt.dy, size.width, size.height);
+      // tec.dmPrint('View manager rect: $rect');
+      return rect;
+    }
+    return Rect.zero;
+  }
 
   ///
   /// Returns the size of the view manager rectangle.
@@ -132,6 +150,29 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   /// Returns the [ViewRect] of the view with the given [uid], or null if none.
   ///
   ViewRect rectOfView(int uid) => _viewRects.firstWhere((e) => e.uid == uid, orElse: () => null);
+
+  ///
+  /// Returns the global [Rect] of the view with the given [uid], or null if none.
+  ///
+  Rect globalRectOfView(int uid) {
+    final gr = globalRect;
+    return _viewRects
+        .firstWhere((e) => e.uid == uid, orElse: () => null)
+        ?.rect
+        ?.translate(gr?.left ?? 0.0, gr?.top ?? 0.0);
+  }
+
+  ///
+  /// Returns the global insets of the view with the given [uid].
+  ///
+  EdgeInsets globalInsetsOfView(int uid, BuildContext context) {
+    final rect = globalRectOfView(uid);
+    final mq = MediaQuery.of(context);
+    if (rect != null && mq?.size != null) {
+      return insetsFromParentSizeAndChildRect(mq.size, rect);
+    }
+    return mq?.padding ?? EdgeInsets.zero;
+  }
 
   //-------------------------------------------------------------------------
   // Getting and updating view specific data:
@@ -414,6 +455,7 @@ class ViewManagerWidget extends StatelessWidget {
     // tec.dmPrint('ViewManagerWidget build()');
     return LayoutBuilder(
       builder: (context, constraints) => _VMViewStack(
+        key: context.bloc<ViewManagerBloc>()?._globalKey,
         vmState: state,
         constraints: constraints,
       ),
@@ -426,7 +468,6 @@ class ViewManagerWidget extends StatelessWidget {
 ///
 typedef IndexedBuilderWithViewState = Widget Function(
     BuildContext context, ViewState state, Size size, int index);
-
 
 ///
 /// View that uses a [TecPageView] for paging.
