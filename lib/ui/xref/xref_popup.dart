@@ -18,7 +18,7 @@ Future<void> showXrefsPopup({
 }) {
   if (xrefs?.isEmpty ?? true) return Future.value();
 
-  final maxWidth = math.min(420.0, (MediaQuery.of(context).size.width * 0.90).roundToDouble());
+  final maxWidth = math.min(420.0, MediaQuery.of(context).size.width);
 
   final originalContext = context;
   return showTecModalPopup<void>(
@@ -29,6 +29,7 @@ Future<void> showXrefsPopup({
     builder: (context) => BlocProvider.value(
       value: originalContext.bloc<ViewDataBloc>(),
       child: TecPopupSheet(
+        margin: const EdgeInsets.all(0),
         padding: const EdgeInsets.all(8),
         bgOpacity: 0.5,
         bgBlur: 5,
@@ -36,11 +37,7 @@ Future<void> showXrefsPopup({
           color: Colors.transparent,
           child: Container(
             constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
-            child: Column(
-              children: [
-                ...xrefs.map((xref) => _XrefWidget(xref: xref)),
-              ],
-            ),
+            child: Column(children: [...xrefs.map((xref) => _XrefWidget(xref: xref))]),
           ),
         ),
       ),

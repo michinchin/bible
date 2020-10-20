@@ -52,13 +52,13 @@ Future<T> showTecModalPopup<T>({
   TecPopupAnimationType animationType = TecPopupAnimationType.fadeScale,
 }) {
   assert(useRootNavigator != null);
-  return Navigator.of(context, rootNavigator: useRootNavigator).push(
+  return Navigator.of(context, rootNavigator: useRootNavigator ?? true).push(
     _TecModalPopupRoute<T>(
       barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
       barrierLabel: 'Dismiss',
       builder: builder,
       alignment: alignment ?? Alignment.bottomCenter,
-      edgeInsets: edgeInsets,
+      edgeInsets: edgeInsets ?? const EdgeInsets.all(0),
       animationType: animationType ?? TecPopupAnimationType.fadeScale,
       filter: filter,
       semanticsDismissible: semanticsDismissible,
@@ -78,13 +78,15 @@ class TecPopupSheet extends StatelessWidget {
   const TecPopupSheet({
     Key key,
     @required this.child,
-    this.padding,
+    this.margin = const EdgeInsets.all(8),
+    this.padding = const EdgeInsets.all(14),
     this.bgOpacity = 0.75,
     this.bgBlur = 20.0,
   })  : assert(child != null),
         super(key: key);
 
   final Widget child;
+  final EdgeInsets margin;
   final EdgeInsets padding;
   final double bgOpacity;
   final double bgBlur;
@@ -92,8 +94,8 @@ class TecPopupSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bgColor = CupertinoDynamicColor.withBrightness(
-      color: const Color(0xFFF9F9F9).withOpacity(bgOpacity), // FDFDFD, // originally F9F9F9
-      darkColor: const Color(0xFF252525).withOpacity(bgOpacity), // 1E1E1E, // originally 252525
+      color: const Color(0xFFFFFFFF).withOpacity(bgOpacity), // originally F9F9F9
+      darkColor: const Color(0xFF252525).withOpacity(bgOpacity), // originally 252525
     );
 
     return Semantics(
@@ -104,10 +106,7 @@ class TecPopupSheet extends StatelessWidget {
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.elevated,
         child: Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: _kEdgeHorizontalPadding,
-            vertical: _kEdgeVerticalPadding,
-          ),
+          margin: margin ?? const EdgeInsets.all(8),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12.0),
             child: BackdropFilter(
@@ -124,9 +123,6 @@ class TecPopupSheet extends StatelessWidget {
     );
   }
 }
-
-const double _kEdgeHorizontalPadding = 8.0;
-const double _kEdgeVerticalPadding = 8.0; // originally 10.0;
 
 ///
 /// Builds and shows a dialog. If [maxWidth] and/or [maxHeight] are are not
@@ -325,13 +321,9 @@ class _PopupSheetContent extends StatelessWidget {
         child: SingleChildScrollView(
           controller: scrollController,
           child: Padding(
-            padding: padding ??
-                const EdgeInsets.symmetric(
-                  horizontal: _kContentHorizontalPadding,
-                  vertical: _kContentVerticalPadding,
-                ),
+            padding: padding ?? const EdgeInsets.all(14),
             child: DefaultTextStyle(
-              style: _kPopupSheetContentStyle.copyWith(fontWeight: FontWeight.w600),
+              style: _kPopupSheetContentStyle,
               textAlign: TextAlign.center,
               child: child,
             ),
@@ -342,17 +334,11 @@ class _PopupSheetContent extends StatelessWidget {
   }
 }
 
-const double _kContentHorizontalPadding = 14.0; // originally 40.0;
-const double _kContentVerticalPadding = 14.0;
-
 const TextStyle _kPopupSheetContentStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  // fontFamily: '.SF UI Text',
   inherit: false,
   fontSize: 13.0,
-  fontWeight: FontWeight.w400,
-  color: _kContentTextColor,
+  fontWeight: FontWeight.w600,
+  color: Color(0xFF8F8F8F),
   textBaseline: TextBaseline.alphabetic,
 );
-
-// The gray color used for text that appears in the content area.
-const Color _kContentTextColor = Color(0xFF8F8F8F);
