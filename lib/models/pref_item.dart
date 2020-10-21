@@ -29,7 +29,8 @@ class PrefItemId {
     translationsAbbreviated,
     searchFilterBookGridView,
     searchFilterTranslationGridView,
-    closeAfterCopyShare
+    closeAfterCopyShare,
+    priorityTranslations
   ];
 
   static int uniqueId(int id) => 100 + id;
@@ -57,8 +58,11 @@ class PrefItemId {
   static const searchFilterBookGridView = 11;
   static const searchFilterTranslationGridView = 12;
 
-  // selection sheet setting
+  /// selection sheet setting
   static const closeAfterCopyShare = 13;
+
+  /// priority translations for sorting individual search result translations
+  static const priorityTranslations = 14;
 }
 
 class PrefItem extends tua.UserItem {

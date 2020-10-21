@@ -264,7 +264,7 @@ class __VolumeFilterState extends State<_VolumeFilter> {
                                 ButtonTheme(
                                   minWidth: 50,
                                   height: 30,
-                                  padding: EdgeInsets.zero,
+                                  padding: const EdgeInsets.symmetric(horizontal: 5),
                                   layoutBehavior: ButtonBarLayoutBehavior.constrained,
                                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                   child: FlatButton(
@@ -462,17 +462,20 @@ class __BookFilterState extends State<_BookFilter> {
                   if (bookResults[b] != 0)
                     ButtonTheme(
                       height: 30,
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      minWidth: 50,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       layoutBehavior: ButtonBarLayoutBehavior.constrained,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       child: FlatButton(
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                           color: !widget.selectedBooks.contains(b)
                               ? Theme.of(context).accentColor
-                              : isDarkTheme ? Theme.of(context).cardColor : Colors.grey[200],
+                              : isDarkTheme
+                                  ? Theme.of(context).cardColor
+                                  : Colors.grey[200],
                           onPressed: () => _toggle(b),
                           child: Text(
-                            '${bookNames[b]} ${searchResults.isNotEmpty ? '(${bookResults[b]})' : ''}',
+                            '${bookNames[b]}${searchResults.isNotEmpty ? ' (${bookResults[b]})' : ''}',
                             style: TextStyle(
                                 color: !widget.selectedBooks.contains(b)
                                     ? Colors.white
@@ -510,10 +513,14 @@ class __BookFilterState extends State<_BookFilter> {
               children: [
                 FlatButton(
                     height: 30,
+                    minWidth: 50,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                     color: _testSelected(s)
                         ? Theme.of(context).accentColor
-                        : isDarkTheme ? Theme.of(context).cardColor : Colors.grey[200],
+                        : isDarkTheme
+                            ? Theme.of(context).cardColor
+                            : Colors.grey[200],
                     onPressed: () => _toggle(s == otLabel ? otId : ntId),
                     child: Text(
                       '$s ${searchResults.isNotEmpty ? '(${s == otLabel ? _otCount : _ntCount})' : ''}',

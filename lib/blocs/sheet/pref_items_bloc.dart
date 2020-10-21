@@ -159,7 +159,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
           prefItemId: PrefItemId.searchFilterBookGridView,
           verse: 0));
     }
-    
+
     if (prefItems.itemWithId(PrefItemId.searchFilterTranslationGridView) == null) {
       prefItems.add(PrefItem(
           prefItemDataType: PrefItemDataType.bool,
@@ -172,6 +172,12 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
           prefItemDataType: PrefItemDataType.bool,
           prefItemId: PrefItemId.closeAfterCopyShare,
           verse: 0));
+    }
+    if (prefItems.itemWithId(PrefItemId.priorityTranslations) == null) {
+      prefItems.add(PrefItem(
+          prefItemDataType: PrefItemDataType.json,
+          prefItemId: PrefItemId.priorityTranslations,
+          info: ''));
     }
   }
 

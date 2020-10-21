@@ -294,7 +294,9 @@ class _SearchResultsViewState extends State<SearchResultsView> {
     return BlocConsumer<SearchBloc, SearchState>(
         listener: (c, s) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            scrollController.scrollTo(index: 0, duration: const Duration(milliseconds: 250));
+            if (scrollController.isAttached) {
+              scrollController.scrollTo(index: 0, duration: const Duration(milliseconds: 250));
+            }
           });
         },
         listenWhen: (p, c) => !tec.areEqualLists(p.excludedBooks, c.excludedBooks),
