@@ -57,15 +57,25 @@ class UserItemHelper {
     final items = await AppSettings.shared.userAccount.userDb
         .getItemsWithParent(navHistoryParentId, ofTypes: [UserItemType.bookmark]);
     final refs = <Reference>[];
+    final itemsToDelete = <UserItem>[];
     for (final i in items) {
-      final ref = Reference(
-        book: i.book,
-        chapter: i.chapter,
-        verse: i.verse,
-        volume: i.volumeId,
-      ).copyWith(modified: tec.dateTimeFromDbInt(i.modified));
-      refs.add(ref);
+      if (i.book == 0 || i.chapter == 0 || i.verse == 0 || i.volumeId == 0) {
+        itemsToDelete.add(i.copyWith(deleted: 1));
+      } else {
+        final ref = Reference(
+          book: i.book,
+          chapter: i.chapter,
+          verse: i.verse,
+          volume: i.volumeId,
+        ).copyWith(modified: tec.dateTimeFromDbInt(i.modified));
+        refs.add(ref);
+      }
     }
+
+    if (itemsToDelete.isNotEmpty) {
+      await AppSettings.shared.userAccount.userDb.saveSyncItems(itemsToDelete);
+    }
+    
     return refs;
   }
 
