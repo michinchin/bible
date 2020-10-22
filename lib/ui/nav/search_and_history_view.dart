@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:bible/models/search/verse.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -288,6 +289,25 @@ class _SearchResultsViewState extends State<SearchResultsView> {
     super.deactivate();
   }
 
+  SearchResultInfo orderByDefaultTranslation(SearchResultInfo res) {
+    final defaultTranslations =
+        context.bloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
+    final dts = (defaultTranslations?.split('|')?.map(int.tryParse)?.toList() ?? [])
+      ..removeWhere((p) => p == null);
+
+    final verses = res.searchResult.verses;
+    final ids = verses.map((v) => v.id).toList();
+    final orderedVerses = List<Verse>.from(verses);
+    for (final dt in dts.reversed) {
+      if (ids.contains(dt)) {
+        final idx = orderedVerses.indexWhere((v) => v.id == dt);
+        final verse = orderedVerses.removeAt(idx);
+        orderedVerses.insert(0, verse);
+      }
+    }
+    return res.copyWith(searchResult: res.searchResult.copyWith(verses: orderedVerses));
+  }
+
   Future<void> _saveSearch(SearchState s) async {
     if (positionListener.itemPositions.value.isNotEmpty) {
       if (s.filteredResults.isNotEmpty) {
@@ -323,11 +343,12 @@ class _SearchResultsViewState extends State<SearchResultsView> {
               child: Text('No Results'),
             );
           }
+          final results = state.filteredResults.map(orderByDefaultTranslation).toList();
           return SafeArea(
             bottom: false,
             child: Scaffold(
               body: ScrollablePositionedList.separated(
-                itemCount: state.filteredResults.length + 1,
+                itemCount: results.length + 1,
                 itemScrollController: scrollController,
                 itemPositionsListener: positionListener,
                 separatorBuilder: (c, i) {
@@ -341,11 +362,10 @@ class _SearchResultsViewState extends State<SearchResultsView> {
                 },
                 itemBuilder: (c, i) {
                   if (i == 0) {
-                    return SearchResultsLabel(
-                        state.filteredResults.map((r) => r.searchResult).toList());
+                    return SearchResultsLabel(results.map((r) => r.searchResult).toList());
                   }
                   i--;
-                  final res = state.filteredResults[i];
+                  final res = results[i];
                   return _SearchResultCard(res);
                 },
               ),

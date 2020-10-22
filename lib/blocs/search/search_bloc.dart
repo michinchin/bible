@@ -73,7 +73,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       tec.dmPrint('Loading search: ${event.search}');
 
       try {
-        final translations = event.translations?.join('|') ?? '';
+        final translations =
+            event.translations?.join('|') ?? state.filteredTranslations?.join('|') ?? '';
         final res = await SearchResults.fetch(words: event.search, translationIds: translations);
         tec.dmPrint('Completed search "${event.search}" with ${res.length} result(s)');
 
@@ -123,7 +124,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
   SearchState _modifySearchResult(SearchResultInfo info) {
     final res = List<SearchResultInfo>.from(state.filteredResults);
-    final index = res.indexWhere((i) => i.searchResult == info.searchResult);
+    final index = res.indexWhere((i) => i.searchResult.ref == info.searchResult.ref);
     var s = state;
     if (index != -1) {
       res[index] = info;

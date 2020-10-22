@@ -55,16 +55,26 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
   bool _booksInGridView;
   bool _volumesInGridView;
   TabController _tabController;
+  String _currFilter;
+  bool _showPriorityTranslations;
 
   PrefItemsBloc prefsBloc() => context.bloc<PrefItemsBloc>();
 
+  final bookTitle = 'Book';
+  final translationTitle = 'Translation';
+  final priorityTranslationTitle = 'Priority Translation';
+
   @override
   void initState() {
+    _currFilter = bookTitle;
+    _showPriorityTranslations = false;
     _tabController = TabController(initialIndex: 0, vsync: this, length: 2)
       ..addListener(() {
         if (_tabController.previousIndex != _tabController.index) {
           setState(() {
-            _currFilter = _tabController.index == 1 ? 'Translation' : 'Book';
+            _currFilter = _tabController.index == 1 ? translationTitle : bookTitle;
+            // take out of priority translation mode if in it
+            _showPriorityTranslations = false;
           });
         }
       });
@@ -110,25 +120,29 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
     }
   }
 
-  String _currFilter = 'Book';
-
   void _changeFilter(String s) {
     setState(() {
       _currFilter = s;
     });
 
-    _tabController.animateTo(_currFilter == 'Book' ? 0 : 1);
+    _tabController.animateTo(_currFilter == bookTitle ? 0 : 1);
+  }
+
+  void _togglePriorityTranslations() {
+    setState(() {
+      _showPriorityTranslations = !_showPriorityTranslations;
+    });
   }
 
   void _gridViewToggle() {
     setState(() {
-      _currFilter == 'Book'
+      _currFilter == bookTitle
           ? _booksInGridView = !_booksInGridView
           : _volumesInGridView = !_volumesInGridView;
     });
   }
 
-  bool get _gridView => _currFilter == 'Book' ? _booksInGridView : _volumesInGridView;
+  bool get _gridView => _currFilter == bookTitle ? _booksInGridView : _volumesInGridView;
 
   @override
   Widget build(BuildContext context) {
@@ -156,42 +170,57 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('$_currFilter filter'),
-                      Row(
-                        children: [
+                      Row(children: [
+                        if (_currFilter == 'Translation')
                           IconButton(
-                            icon: Icon(
-                              _gridView ? Icons.format_list_bulleted : FeatherIcons.grid,
-                              color: Theme.of(context).textColor.withOpacity(0.5),
-                            ),
-                            onPressed: _gridViewToggle,
+                            icon: const Icon(Icons.error_outline),
+                            constraints: const BoxConstraints(),
+                            onPressed: () {
+                              _togglePriorityTranslations();
+                              if (_showPriorityTranslations) {
+                                TecToast.show(context, 'select up to 3 translations');
+                              }
+                            },
                           ),
-                          Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: Theme.of(context).textColor.withOpacity(0.5)),
-                                  color: Theme.of(context).canvasColor,
-                                  borderRadius: BorderRadius.circular(5)),
-                              child: DropdownButton<String>(
-                                  isDense: true,
-                                  value: _currFilter,
-                                  underline: const SizedBox(),
-                                  iconSize: 15,
-                                  style: Theme.of(context).textTheme.caption,
-                                  icon: const Icon(Icons.expand_more),
-                                  items: <String>[
-                                    'Book',
-                                    'Translation',
-                                  ].map((value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                  onChanged: _changeFilter)),
-                        ],
-                      ),
+                        Text(
+                            '${_showPriorityTranslations ? priorityTranslationTitle : _currFilter} filter'),
+                      ]),
+                      if (!_showPriorityTranslations)
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                _gridView ? Icons.format_list_bulleted : FeatherIcons.grid,
+                                color: Theme.of(context).textColor.withOpacity(0.5),
+                              ),
+                              onPressed: _gridViewToggle,
+                            ),
+                            Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Theme.of(context).textColor.withOpacity(0.5)),
+                                    color: Theme.of(context).canvasColor,
+                                    borderRadius: BorderRadius.circular(5)),
+                                child: DropdownButton<String>(
+                                    isDense: true,
+                                    value: _currFilter,
+                                    underline: const SizedBox(),
+                                    iconSize: 15,
+                                    style: Theme.of(context).textTheme.caption,
+                                    icon: const Icon(Icons.expand_more),
+                                    items: <String>[
+                                      'Book',
+                                      'Translation',
+                                    ].map((value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                    onChanged: _changeFilter)),
+                          ],
+                        ),
                     ],
                   ),
                 ),
@@ -200,7 +229,8 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
           ),
           body: TabBarView(controller: _tabController, children: [
             _BookFilter(_filteredBooks ?? {}, gridView: _gridView),
-            _VolumeFilter(widget.filter, _selectedVolumes ?? {}, gridView: _gridView),
+            _VolumeFilter(widget.filter, _selectedVolumes ?? {},
+                gridView: _gridView, priorityTranslationMode: _showPriorityTranslations),
           ])),
     );
   }
@@ -210,20 +240,65 @@ class _VolumeFilter extends StatefulWidget {
   final VolumesFilter filter;
   final Set<int> selectedVolumes;
   final bool gridView;
-  const _VolumeFilter(this.filter, this.selectedVolumes, {this.gridView});
+  final bool priorityTranslationMode;
+  const _VolumeFilter(this.filter, this.selectedVolumes,
+      {this.gridView, this.priorityTranslationMode = false});
 
   @override
   __VolumeFilterState createState() => __VolumeFilterState();
 }
 
 class __VolumeFilterState extends State<_VolumeFilter> {
+  List<int> _priorityTranslationList;
+  PrefItemsBloc prefBloc() => context.bloc<PrefItemsBloc>();
+
+  @override
+  void deactivate() {
+    final priorityTranslations =
+        context.bloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
+    final pt = (priorityTranslations?.split('|')?.map(int.tryParse)?.toList() ?? [])
+      ..removeWhere((p) => p == null);
+    if (pt != _priorityTranslationList) {
+      prefBloc().add(PrefItemEvent.update(
+          prefItem: prefBloc().infoChangedPrefItem(
+              PrefItemId.priorityTranslations, _priorityTranslationList.join('|'))));
+      // TODO(abby): kinda hacky way to load res should probably do something else
+      context.bloc<SearchBloc>()
+        ..add(const SearchEvent.selectionModeToggle())
+        ..add(const SearchEvent.selectionModeToggle());
+    }
+    super.deactivate();
+  }
+
+  @override
+  void initState() {
+    final priorityTranslations =
+        context.bloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
+    final pt = (priorityTranslations?.split('|')?.map(int.tryParse)?.toList() ?? [])
+      ..removeWhere((p) => p == null);
+    _priorityTranslationList = pt.toList();
+    super.initState();
+  }
+
   void _refresh([VoidCallback fn]) {
     if (mounted) setState(fn ?? () {});
   }
 
   void _toggle(int id) {
     _refresh(() {
-      if (!widget.selectedVolumes.remove(id)) widget.selectedVolumes.add(id);
+      if (widget.priorityTranslationMode) {
+        if (_priorityTranslationList.contains(id)) {
+          _priorityTranslationList.remove(id);
+        } else {
+          if (_priorityTranslationList.length >= 3) {
+            TecToast.show(context, 'Cannot select more than 3');
+          } else {
+            _priorityTranslationList.add(id);
+          }
+        }
+      } else {
+        if (!widget.selectedVolumes.remove(id)) widget.selectedVolumes.add(id);
+      }
     });
   }
 
@@ -235,6 +310,24 @@ class __VolumeFilterState extends State<_VolumeFilter> {
         ..add(volume);
     }
     return map;
+  }
+
+  bool _selected(Volume v) {
+    if (widget.priorityTranslationMode) {
+      return _priorityTranslationList.contains(v.id);
+    }
+    return widget.selectedVolumes.contains(v.id);
+  }
+
+  String _title(Volume v) {
+    if (widget.gridView) {
+      var title = v.abbreviation;
+      if (widget.priorityTranslationMode && _priorityTranslationList.contains(v.id)) {
+        title = '${_priorityTranslationList.indexOf(v.id) + 1}. $title';
+      }
+      return title;
+    }
+    return v.name;
   }
 
   @override
@@ -254,7 +347,7 @@ class __VolumeFilterState extends State<_VolumeFilter> {
                 ListLabel(l.languageNameFromCode(lang)),
                 Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: widget.gridView
+                    child: widget.gridView || widget.priorityTranslationMode
                         ? Wrap(
                             alignment: WrapAlignment.start,
                             spacing: 10,
@@ -270,16 +363,16 @@ class __VolumeFilterState extends State<_VolumeFilter> {
                                   child: FlatButton(
                                       shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(5)),
-                                      color: widget.selectedVolumes.contains(v.id)
+                                      color: _selected(v)
                                           ? Theme.of(context).accentColor
                                           : Theme.of(context).brightness == Brightness.dark
                                               ? Theme.of(context).cardColor
                                               : Colors.grey[200],
                                       onPressed: () => _toggle(v.id),
                                       child: Text(
-                                        v.abbreviation,
+                                        _title(v),
                                         style: TextStyle(
-                                            color: widget.selectedVolumes.contains(v.id)
+                                            color: _selected(v)
                                                 ? Colors.white
                                                 : Theme.of(context).textColor.withOpacity(0.8)),
                                       )),
@@ -291,12 +384,12 @@ class __VolumeFilterState extends State<_VolumeFilter> {
                               for (final v in map[lang])
                                 ListTile(
                                   onTap: () => _toggle(v.id),
-                                  leading: widget.selectedVolumes.contains(v.id)
+                                  leading: _selected(v)
                                       ? const Icon(Icons.check_circle, color: Colors.blue)
                                       : const Icon(Icons.panorama_fish_eye),
                                   dense: true,
                                   visualDensity: VisualDensity.compact,
-                                  title: Text(v.name),
+                                  title: Text(_title(v)),
                                 )
                             ],
                           )),
