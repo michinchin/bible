@@ -124,11 +124,16 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   SearchState _modifySearchResult(SearchResultInfo info) {
     final res = List<SearchResultInfo>.from(state.filteredResults);
     final index = res.indexWhere((i) => i.searchResult == info.searchResult);
+    var s = state;
     if (index != -1) {
       res[index] = info;
-      return state.copyWith(filteredResults: res);
+      s = state.copyWith(filteredResults: res);
     }
-    return state;
+
+    if (s.selectionMode && s.filteredResults.where((r) => r.selected).isEmpty) {
+      add(const SearchEvent.selectionModeToggle());
+    }
+    return s;
   }
 
   /// save search when navigating away or entering new search

@@ -451,100 +451,123 @@ class __SearchResultCardState extends State<_SearchResultCard> {
     }
   }
 
+  void _onLongPress() {
+    // ignore: close_sinks
+    final searchBloc = context.bloc<SearchBloc>();
+    final selectionMode = searchBloc.state.selectionMode;
+    if (!selectionMode) {
+      searchBloc
+        ..add(const SearchEvent.selectionModeToggle())
+        ..add(SearchEvent.modifySearchResult(
+            searchResult: widget.res.copyWith(selected: !widget.res.selected)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final textColor = widget.res.selected ? searchThemeColor : Theme.of(context).textColor;
-    Widget content() => Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: TecText.rich(
+    Widget content() => TecText.rich(
           TextSpan(
-            children: searchResTextSpans(
-              widget.res.currentText,
-              context.bloc<SearchBloc>().state.search,
-            ),
+            children: [
+              TextSpan(
+                  text: '${widget.res.label}\n',
+                  style: TextStyle(color: textColor, fontWeight: FontWeight.w500)),
+              WidgetSpan(child: Container(height: 3)),
+              ...searchResTextSpans(
+                widget.res.currentText,
+                context.bloc<SearchBloc>().state.search,
+              ),
+            ],
             style: TextStyle(color: textColor),
           ),
           textScaleFactor: contentTextScaleFactorWith(context),
-        ));
-    Widget label() => Padding(
-        padding: const EdgeInsets.only(top: 10.0, bottom: 5),
-        child: Text(
-          widget.res.label,
-          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
-          textScaleFactor: contentTextScaleFactorWith(context),
-        ));
+        );
 
     if (!widget.res.expanded) {
-      return ListTile(
-        title: label(),
-        subtitle: content(),
+      return InkWell(
         onTap: _onListTileTap,
-        trailing: IconButton(
-          tooltip: 'Expand Card',
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          alignment: Alignment.bottomRight,
-          padding: const EdgeInsets.all(0),
-          icon: const Icon(Icons.expand_more),
-          onPressed: _onExpanded,
+        onLongPress: _onLongPress,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(children: [
+            Expanded(child: content()),
+            IconButton(
+              tooltip: 'Expand Card',
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+              alignment: Alignment.center,
+              icon: const Icon(Icons.expand_more),
+              onPressed: _onExpanded,
+            ),
+          ]),
         ),
       );
     } else {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            title: label(),
-            subtitle: content(),
-            onTap: _onListTileTap,
-            trailing: IconButton(
-              tooltip: 'Collapse Card',
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              alignment: Alignment.bottomRight,
-              padding: const EdgeInsets.all(0),
-              icon: const Icon(Icons.expand_less),
-              onPressed: _onExpanded,
-            ),
-          ),
-          Stack(children: [
-            ButtonBar(alignment: MainAxisAlignment.start, children: [
-              FlatButton(
-                textColor: searchThemeColor,
-                // icon: RotatedBox(
-                //   quarterTurns: 1,
-                //   child: Icon(widget.res.contextExpanded ? Icons.unfold_less : Icons.unfold_more),
-                // ),
-                child: Text(
-                  widget.res.contextExpanded ? 'Hide Context' : 'Context',
-                  semanticsLabel:
-                      widget.res.contextExpanded ? 'Collapse Context' : 'Expand Context',
-                  textScaleFactor: contentTextScaleFactorWith(context),
+      return InkWell(
+          onTap: _onListTileTap,
+          onLongPress: _onLongPress,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: Row(children: [
+                    Expanded(child: content()),
+                    IconButton(
+                      tooltip: 'Expand Card',
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                      alignment: Alignment.center,
+                      icon: const Icon(Icons.expand_less),
+                      onPressed: _onExpanded,
+                    ),
+                  ]),
                 ),
-                onPressed: _onContext,
-              ),
-            ]),
-            ButtonBar(
-              children: <Widget>[
-                IconButton(
-                    tooltip: 'Copy',
-                    icon: const Icon(Icons.content_copy, size: 20),
-                    onPressed: _onCopy),
-                IconButton(
-                    tooltip: 'Share',
-                    icon: const Icon(FeatherIcons.share2, size: 20),
-                    onPressed: _onShare),
-                IconButton(
-                    tooltip: 'Open in TecartaBible',
-                    icon: const Icon(TecIcons.tbOutlineLogo),
-                    onPressed: _openInTB),
+                Stack(children: [
+                  ButtonBar(alignment: MainAxisAlignment.start, children: [
+                    FlatButton(
+                      textColor: searchThemeColor,
+                      // icon: RotatedBox(
+                      //   quarterTurns: 1,
+                      //   child: Icon(widget.res.contextExpanded ? Icons.unfold_less : Icons.unfold_more),
+                      // ),
+                      child: Text(
+                        widget.res.contextExpanded ? 'Hide Context' : 'Context',
+                        semanticsLabel:
+                            widget.res.contextExpanded ? 'Collapse Context' : 'Expand Context',
+                        textScaleFactor: contentTextScaleFactorWith(context),
+                      ),
+                      onPressed: _onContext,
+                    ),
+                  ]),
+                  ButtonBar(
+                    children: <Widget>[
+                      IconButton(
+                          tooltip: 'Copy',
+                          icon: const Icon(Icons.content_copy, size: 20),
+                          onPressed: _onCopy),
+                      IconButton(
+                          tooltip: 'Share',
+                          icon: const Icon(FeatherIcons.share2, size: 20),
+                          onPressed: _onShare),
+                      IconButton(
+                          tooltip: 'Open in TecartaBible',
+                          icon: const Icon(TecIcons.tbOutlineLogo),
+                          onPressed: _openInTB),
+                    ],
+                  ),
+                ]),
+                _TranslationSelector(widget.res, _changeTranslation)
               ],
             ),
-          ]),
-          _TranslationSelector(widget.res, _changeTranslation)
-        ],
-      );
+          ));
     }
   }
 }
@@ -693,7 +716,7 @@ class SearchResultsLabel extends StatelessWidget {
     }
 
     return Container(
-        padding: navView ? EdgeInsets.zero : const EdgeInsets.fromLTRB(15, 10, 15, 0),
+        padding: navView ? EdgeInsets.zero : const EdgeInsets.fromLTRB(10, 10, 10, 0),
         child: Align(
           alignment: Alignment.centerLeft,
           child: TecText.rich(
