@@ -33,7 +33,6 @@ class SearchAndHistoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(abby): if no search results currently, do most recent search or focus on textfield
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -188,6 +187,13 @@ class _SearchHistoryView extends StatelessWidget {
   const _SearchHistoryView(this.searchHistory);
   @override
   Widget build(BuildContext context) {
+    String _subtitle(int i) {
+      final localizations = MaterialLocalizations.of(context);
+      final formattedTimeOfDay = localizations.formatTimeOfDay(TimeOfDay(
+          hour: searchHistory[i].modified.hour, minute: searchHistory[i].modified.minute));
+      return '${tec.shortDate(searchHistory[i].modified)}, $formattedTimeOfDay';
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search History'),
@@ -204,8 +210,7 @@ class _SearchHistoryView extends StatelessWidget {
                 dense: true,
                 leading: const Icon(Icons.search),
                 title: Text(searchHistory[i].search),
-                subtitle: Text(
-                    '${tec.shortDate(searchHistory[i].modified)}, ${searchHistory[i].modified.hour}:${searchHistory[i].modified.minute}'),
+                subtitle: Text(_subtitle(i)),
                 onTap: () => Navigator.of(c).pop<SearchHistoryItem>(searchHistory[i]),
               ),
             ),
@@ -218,6 +223,13 @@ class _NavHistoryView extends StatelessWidget {
   const _NavHistoryView(this.navHistory);
   @override
   Widget build(BuildContext context) {
+    String _subtitle(int i) {
+      final localizations = MaterialLocalizations.of(context);
+      final formattedTimeOfDay = localizations.formatTimeOfDay(
+          TimeOfDay(hour: navHistory[i].modified.hour, minute: navHistory[i].modified.minute));
+      return '${tec.shortDate(navHistory[i].modified)}, $formattedTimeOfDay';
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Navigation History'),
@@ -234,8 +246,7 @@ class _NavHistoryView extends StatelessWidget {
                 dense: true,
                 leading: const Icon(Icons.history),
                 title: Text(navHistory[i].label()),
-                subtitle: Text(
-                    '${tec.shortDate(navHistory[i].modified)}, ${navHistory[i].modified.hour}:${navHistory[i].modified.minute}'),
+                subtitle: Text(_subtitle(i)),
                 onTap: () {
                   Navigator.of(context).maybePop<Reference>(navHistory[i]);
                 },
