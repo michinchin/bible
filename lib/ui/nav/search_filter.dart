@@ -170,21 +170,38 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(children: [
-                        if (_currFilter == 'Translation')
-                          IconButton(
-                            icon: const Icon(Icons.error_outline),
-                            constraints: const BoxConstraints(),
-                            onPressed: () {
-                              _togglePriorityTranslations();
-                              if (_showPriorityTranslations) {
-                                TecToast.show(context, 'select up to 3 translations');
-                              }
-                            },
-                          ),
-                        Text(
-                            '${_showPriorityTranslations ? priorityTranslationTitle : _currFilter} filter'),
-                      ]),
+                      Expanded(
+                        child: Row(
+                            mainAxisAlignment: _showPriorityTranslations
+                                ? MainAxisAlignment.spaceBetween
+                                : MainAxisAlignment.start,
+                            children: [
+                              if (_currFilter == 'Translation' && !_showPriorityTranslations)
+                                IconButton(
+                                  icon: const Icon(Icons.error_outline),
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () {
+                                    _togglePriorityTranslations();
+                                    if (_showPriorityTranslations) {
+                                      TecToast.show(context, 'select up to 3 translations');
+                                    }
+                                  },
+                                ),
+                              Text(
+                                  '${_showPriorityTranslations ? priorityTranslationTitle : _currFilter} filter'),
+                              if (_showPriorityTranslations)
+                                FlatButton(
+                                  child: const Text('Done'),
+                                  visualDensity: VisualDensity.compact,
+                                  onPressed: () {
+                                    _togglePriorityTranslations();
+                                    if (_showPriorityTranslations) {
+                                      TecToast.show(context, 'select up to 3 translations');
+                                    }
+                                  },
+                                ),
+                            ]),
+                      ),
                       if (!_showPriorityTranslations)
                         Row(
                           children: [
