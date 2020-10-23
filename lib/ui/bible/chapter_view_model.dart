@@ -531,6 +531,8 @@ class ChapterViewModel {
       bloc.add(HighlightEvent.clear(ref(), HighlightMode.trial));
     }, deselectAll: () {
       clearAllSelections(context);
+    }, noOp: () {
+      // no-op
     });
   }
 
