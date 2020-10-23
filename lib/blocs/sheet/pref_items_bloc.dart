@@ -42,7 +42,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
     _loadFromDb();
   }
 
-  // returns verse == 0 for item with id
+  /// returns verse == 0 for item with id
   bool itemBool(int id) => state.items.boolForPrefItem(id);
 
   PrefItem itemWithId(int id) => state.items.itemWithId(id);
@@ -175,7 +175,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
     }
     if (prefItems.itemWithId(PrefItemId.priorityTranslations) == null) {
       prefItems.add(PrefItem(
-          prefItemDataType: PrefItemDataType.json,
+          prefItemDataType: PrefItemDataType.string,
           prefItemId: PrefItemId.priorityTranslations,
           info: ''));
     }

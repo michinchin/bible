@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:bible/models/search/verse.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +34,6 @@ class SearchAndHistoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(abby): if no search results currently, do most recent search or focus on textfield
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -188,6 +188,13 @@ class _SearchHistoryView extends StatelessWidget {
   const _SearchHistoryView(this.searchHistory);
   @override
   Widget build(BuildContext context) {
+    String _subtitle(int i) {
+      final localizations = MaterialLocalizations.of(context);
+      final formattedTimeOfDay = localizations.formatTimeOfDay(TimeOfDay(
+          hour: searchHistory[i].modified.hour, minute: searchHistory[i].modified.minute));
+      return '${tec.shortDate(searchHistory[i].modified)}, $formattedTimeOfDay';
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search History'),
@@ -204,8 +211,7 @@ class _SearchHistoryView extends StatelessWidget {
                 dense: true,
                 leading: const Icon(Icons.search),
                 title: Text(searchHistory[i].search),
-                subtitle: Text(
-                    '${tec.shortDate(searchHistory[i].modified)}, ${searchHistory[i].modified.hour}:${searchHistory[i].modified.minute}'),
+                subtitle: Text(_subtitle(i)),
                 onTap: () => Navigator.of(c).pop<SearchHistoryItem>(searchHistory[i]),
               ),
             ),
@@ -218,6 +224,13 @@ class _NavHistoryView extends StatelessWidget {
   const _NavHistoryView(this.navHistory);
   @override
   Widget build(BuildContext context) {
+    String _subtitle(int i) {
+      final localizations = MaterialLocalizations.of(context);
+      final formattedTimeOfDay = localizations.formatTimeOfDay(
+          TimeOfDay(hour: navHistory[i].modified.hour, minute: navHistory[i].modified.minute));
+      return '${tec.shortDate(navHistory[i].modified)}, $formattedTimeOfDay';
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Navigation History'),
@@ -234,8 +247,7 @@ class _NavHistoryView extends StatelessWidget {
                 dense: true,
                 leading: const Icon(Icons.history),
                 title: Text(navHistory[i].label()),
-                subtitle: Text(
-                    '${tec.shortDate(navHistory[i].modified)}, ${navHistory[i].modified.hour}:${navHistory[i].modified.minute}'),
+                subtitle: Text(_subtitle(i)),
                 onTap: () {
                   Navigator.of(context).maybePop<Reference>(navHistory[i]);
                 },
@@ -277,6 +289,25 @@ class _SearchResultsViewState extends State<SearchResultsView> {
     super.deactivate();
   }
 
+  SearchResultInfo orderByDefaultTranslation(SearchResultInfo res) {
+    final defaultTranslations =
+        context.bloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
+    final dts = (defaultTranslations?.split('|')?.map(int.tryParse)?.toList() ?? [])
+      ..removeWhere((p) => p == null);
+
+    final verses = res.searchResult.verses;
+    final ids = verses.map((v) => v.id).toList();
+    final orderedVerses = List<Verse>.from(verses);
+    for (final dt in dts.reversed) {
+      if (ids.contains(dt)) {
+        final idx = orderedVerses.indexWhere((v) => v.id == dt);
+        final verse = orderedVerses.removeAt(idx);
+        orderedVerses.insert(0, verse);
+      }
+    }
+    return res.copyWith(searchResult: res.searchResult.copyWith(verses: orderedVerses));
+  }
+
   Future<void> _saveSearch(SearchState s) async {
     if (positionListener.itemPositions.value.isNotEmpty) {
       if (s.filteredResults.isNotEmpty) {
@@ -312,11 +343,12 @@ class _SearchResultsViewState extends State<SearchResultsView> {
               child: Text('No Results'),
             );
           }
+          final results = state.filteredResults.map(orderByDefaultTranslation).toList();
           return SafeArea(
             bottom: false,
             child: Scaffold(
               body: ScrollablePositionedList.separated(
-                itemCount: state.filteredResults.length + 1,
+                itemCount: results.length + 1,
                 itemScrollController: scrollController,
                 itemPositionsListener: positionListener,
                 separatorBuilder: (c, i) {
@@ -330,11 +362,10 @@ class _SearchResultsViewState extends State<SearchResultsView> {
                 },
                 itemBuilder: (c, i) {
                   if (i == 0) {
-                    return SearchResultsLabel(
-                        state.filteredResults.map((r) => r.searchResult).toList());
+                    return SearchResultsLabel(results.map((r) => r.searchResult).toList());
                   }
                   i--;
-                  final res = state.filteredResults[i];
+                  final res = results[i];
                   return _SearchResultCard(res);
                 },
               ),
@@ -451,100 +482,123 @@ class __SearchResultCardState extends State<_SearchResultCard> {
     }
   }
 
+  void _onLongPress() {
+    // ignore: close_sinks
+    final searchBloc = context.bloc<SearchBloc>();
+    final selectionMode = searchBloc.state.selectionMode;
+    if (!selectionMode) {
+      searchBloc
+        ..add(const SearchEvent.selectionModeToggle())
+        ..add(SearchEvent.modifySearchResult(
+            searchResult: widget.res.copyWith(selected: !widget.res.selected)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final textColor = widget.res.selected ? searchThemeColor : Theme.of(context).textColor;
-    Widget content() => Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: TecText.rich(
+    Widget content() => TecText.rich(
           TextSpan(
-            children: searchResTextSpans(
-              widget.res.currentText,
-              context.bloc<SearchBloc>().state.search,
-            ),
+            children: [
+              TextSpan(
+                  text: '${widget.res.label}\n',
+                  style: TextStyle(color: textColor, fontWeight: FontWeight.w500)),
+              WidgetSpan(child: Container(height: 3)),
+              ...searchResTextSpans(
+                widget.res.currentText,
+                context.bloc<SearchBloc>().state.search,
+              ),
+            ],
             style: TextStyle(color: textColor),
           ),
           textScaleFactor: contentTextScaleFactorWith(context),
-        ));
-    Widget label() => Padding(
-        padding: const EdgeInsets.only(top: 10.0, bottom: 5),
-        child: Text(
-          widget.res.label,
-          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
-          textScaleFactor: contentTextScaleFactorWith(context),
-        ));
+        );
 
     if (!widget.res.expanded) {
-      return ListTile(
-        title: label(),
-        subtitle: content(),
+      return InkWell(
         onTap: _onListTileTap,
-        trailing: IconButton(
-          tooltip: 'Expand Card',
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          alignment: Alignment.bottomRight,
-          padding: const EdgeInsets.all(0),
-          icon: const Icon(Icons.expand_more),
-          onPressed: _onExpanded,
+        onLongPress: _onLongPress,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(children: [
+            Expanded(child: content()),
+            IconButton(
+              tooltip: 'Expand Card',
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+              alignment: Alignment.center,
+              icon: const Icon(Icons.expand_more),
+              onPressed: _onExpanded,
+            ),
+          ]),
         ),
       );
     } else {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            title: label(),
-            subtitle: content(),
-            onTap: _onListTileTap,
-            trailing: IconButton(
-              tooltip: 'Collapse Card',
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              alignment: Alignment.bottomRight,
-              padding: const EdgeInsets.all(0),
-              icon: const Icon(Icons.expand_less),
-              onPressed: _onExpanded,
-            ),
-          ),
-          Stack(children: [
-            ButtonBar(alignment: MainAxisAlignment.start, children: [
-              FlatButton(
-                textColor: searchThemeColor,
-                // icon: RotatedBox(
-                //   quarterTurns: 1,
-                //   child: Icon(widget.res.contextExpanded ? Icons.unfold_less : Icons.unfold_more),
-                // ),
-                child: Text(
-                  widget.res.contextExpanded ? 'Hide Context' : 'Context',
-                  semanticsLabel:
-                      widget.res.contextExpanded ? 'Collapse Context' : 'Expand Context',
-                  textScaleFactor: contentTextScaleFactorWith(context),
+      return InkWell(
+          onTap: _onListTileTap,
+          onLongPress: _onLongPress,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: Row(children: [
+                    Expanded(child: content()),
+                    IconButton(
+                      tooltip: 'Expand Card',
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                      alignment: Alignment.center,
+                      icon: const Icon(Icons.expand_less),
+                      onPressed: _onExpanded,
+                    ),
+                  ]),
                 ),
-                onPressed: _onContext,
-              ),
-            ]),
-            ButtonBar(
-              children: <Widget>[
-                IconButton(
-                    tooltip: 'Copy',
-                    icon: const Icon(Icons.content_copy, size: 20),
-                    onPressed: _onCopy),
-                IconButton(
-                    tooltip: 'Share',
-                    icon: const Icon(FeatherIcons.share2, size: 20),
-                    onPressed: _onShare),
-                IconButton(
-                    tooltip: 'Open in TecartaBible',
-                    icon: const Icon(TecIcons.tbOutlineLogo),
-                    onPressed: _openInTB),
+                Stack(children: [
+                  ButtonBar(alignment: MainAxisAlignment.start, children: [
+                    FlatButton(
+                      textColor: searchThemeColor,
+                      // icon: RotatedBox(
+                      //   quarterTurns: 1,
+                      //   child: Icon(widget.res.contextExpanded ? Icons.unfold_less : Icons.unfold_more),
+                      // ),
+                      child: Text(
+                        widget.res.contextExpanded ? 'Hide Context' : 'Context',
+                        semanticsLabel:
+                            widget.res.contextExpanded ? 'Collapse Context' : 'Expand Context',
+                        textScaleFactor: contentTextScaleFactorWith(context),
+                      ),
+                      onPressed: _onContext,
+                    ),
+                  ]),
+                  ButtonBar(
+                    children: <Widget>[
+                      IconButton(
+                          tooltip: 'Copy',
+                          icon: const Icon(Icons.content_copy, size: 20),
+                          onPressed: _onCopy),
+                      IconButton(
+                          tooltip: 'Share',
+                          icon: const Icon(FeatherIcons.share2, size: 20),
+                          onPressed: _onShare),
+                      IconButton(
+                          tooltip: 'Open in TecartaBible',
+                          icon: const Icon(TecIcons.tbOutlineLogo),
+                          onPressed: _openInTB),
+                    ],
+                  ),
+                ]),
+                _TranslationSelector(widget.res, _changeTranslation)
               ],
             ),
-          ]),
-          _TranslationSelector(widget.res, _changeTranslation)
-        ],
-      );
+          ));
     }
   }
 }
@@ -693,7 +747,7 @@ class SearchResultsLabel extends StatelessWidget {
     }
 
     return Container(
-        padding: navView ? EdgeInsets.zero : const EdgeInsets.fromLTRB(15, 10, 15, 0),
+        padding: navView ? EdgeInsets.zero : const EdgeInsets.fromLTRB(10, 10, 10, 0),
         child: Align(
           alignment: Alignment.centerLeft,
           child: TecText.rich(

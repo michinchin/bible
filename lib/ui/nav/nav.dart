@@ -347,10 +347,19 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             autofocus: widget.searchView && ss.searchResults.isEmpty,
             onChanged: (s) => navBloc().add(NavEvent.onSearchChange(search: s)),
             onSubmitted: (s) => onSubmit(query: s),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
                 border: InputBorder.none,
+                suffixIcon: s == NavViewState.searchSuggestions
+                    ? IconButton(
+                        color: Theme.of(context).textColor,
+                        icon: const Icon(Icons.cancel_outlined),
+                        onPressed: () {
+                          _searchController.clear();
+                          navBloc().add(const NavEvent.onSearchChange(search: ''));
+                        })
+                    : null,
                 hintText: 'Enter references or keywords',
-                hintStyle: TextStyle(fontStyle: FontStyle.italic)),
+                hintStyle: const TextStyle(fontStyle: FontStyle.italic)),
             controller: _searchController);
       }
     }
