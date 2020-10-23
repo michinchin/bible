@@ -48,7 +48,7 @@ Future<T> showTecModalPopup<T>({
   ImageFilter filter,
   bool useRootNavigator = true,
   bool semanticsDismissible,
-  Alignment alignment = Alignment.bottomCenter,
+  Alignment alignment = Alignment.center,
   Offset offset,
   EdgeInsetsGeometry edgeInsets = const EdgeInsets.all(0),
   TecPopupAnimationType animationType = TecPopupAnimationType.fadeScale,

@@ -30,7 +30,7 @@ Future<Reference> navigate(BuildContext context, Reference ref,
     return showTecDialog<Reference>(
       context: context,
       useRootNavigator: true,
-      cornerRadius: 15,
+      padding: const EdgeInsets.all(0),
       builder: (context) => Container(
           height: 600,
           width: 500,
@@ -92,7 +92,7 @@ Future<Reference> showBibleSearch(BuildContext context, Reference ref, {String s
     return showTecDialog<Reference>(
       context: context,
       useRootNavigator: true,
-      cornerRadius: 15,
+      padding: const EdgeInsets.all(0),
       builder: (context) => Container(
           height: 600,
           width: 500,

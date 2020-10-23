@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'common.dart';
+
 ///
 /// Builds and shows a dialog. If [maxWidth] and/or [maxHeight] are are not
 /// `null`, the size of the dialog is constrained accordingly. If either
@@ -15,7 +17,6 @@ Future<T> showTecDialog<T extends Object>({
   WidgetBuilder builder,
   double maxWidth,
   double maxHeight,
-  double cornerRadius,
   EdgeInsets padding = const EdgeInsets.all(20),
 }) {
   var windowSize = Size.zero;
@@ -27,6 +28,32 @@ Future<T> showTecDialog<T extends Object>({
   if ((maxWidth == null && maxHeight == null) ||
       (maxWidth != null && maxWidth <= windowSize.width) ||
       (maxHeight != null && maxHeight <= windowSize.height)) {
+    return showTecModalPopup<T>(
+      context: context,
+      useRootNavigator: useRootNavigator,
+      semanticsDismissible: barrierDismissible,
+      builder: (context) {
+        return TecPopupSheet(
+          margin: const EdgeInsets.all(32),
+          padding: padding, // const EdgeInsets.all(0),
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              // color: Colors.red,
+              constraints: maxWidth == null && maxHeight == null
+                  ? null
+                  : BoxConstraints(
+                      maxWidth: maxWidth,
+                      maxHeight: maxHeight,
+                    ),
+              child: Builder(builder: builder),
+            ),
+          ),
+        );
+      },
+    );
+
+    /* OLD WAY:
     return showDialog<T>(
       context: context,
       barrierDismissible: barrierDismissible,
@@ -41,14 +68,14 @@ Future<T> showTecDialog<T extends Object>({
             ),
             decoration: BoxDecoration(
               color: Theme.of(context).canvasColor,
-              borderRadius: BorderRadius.circular(cornerRadius ?? 8),
+              borderRadius: BorderRadius.circular(15),
             ),
             padding: padding,
             child: Builder(builder: builder),
           ),
         );
       },
-    );
+    ); */
   }
 
   return Navigator.of(context, rootNavigator: useRootNavigator)
