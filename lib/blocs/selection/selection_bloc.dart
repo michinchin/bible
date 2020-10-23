@@ -40,7 +40,7 @@ class SelectionCmdBloc extends Cubit<SelectionCmd> {
 
   void add(SelectionCmd cmd) {
     assert(cmd != null);
-    emit(SelectionCmd.noOp());
+    emit(const SelectionCmd.noOp());
     emit(cmd);
   }
 }
