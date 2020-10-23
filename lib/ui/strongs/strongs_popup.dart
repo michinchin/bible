@@ -1,46 +1,46 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
+// import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_data/volume_view_data.dart';
-import '../common/tec_modal_popup.dart';
+import '../common/common.dart';
+//import '../common/tec_modal_popup.dart';
 
 // ignore_for_file: cascade_invocations
 
 Future<void> showStrongsPopup({
   @required BuildContext context,
+  @required String title,
   @required String html,
   EdgeInsetsGeometry insets,
 }) {
   if (html?.isEmpty ?? true) return Future.value();
 
-  final maxWidth = math.min(500.0, (MediaQuery.of(context).size.width * 0.90).roundToDouble());
-
   final volumeId = context.bloc<ViewDataBloc>().state.asChapterViewData.volumeId;
   final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible;
-
   final originalContext = context;
-
   final fullHtml = _htmlWithFragment(html);
 
-  return showTecModalPopup<void>(
-    useRootNavigator: true,
-    context: context,
-    alignment: Alignment.center,
-    edgeInsets: insets,
-    builder: (context) => BlocProvider.value(
-      value: originalContext.bloc<ViewDataBloc>(),
-      child: TecPopupSheet(
-        padding: const EdgeInsets.all(0),
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
-            child: TecHtml(fullHtml, baseUrl: bible.baseUrl, selectable: false),
+  final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+
+  return Navigator.of(context, rootNavigator: true).push<void>(
+    MaterialPageRoute(
+      fullscreenDialog: true,
+      builder: (context) => BlocProvider.value(
+        value: originalContext.bloc<ViewDataBloc>(),
+        child: Scaffold(
+          appBar: MinHeightAppBar(
+            appBar: AppBar(
+                leading: const CloseButton(), title: tec.isNullOrEmpty(title) ? null : Text(title)),
+          ),
+          body: Container(
+            color: isDarkTheme ? Colors.black : Colors.white,
+            child: SingleChildScrollView(
+              child: TecHtml(fullHtml, baseUrl: bible.baseUrl, selectable: false),
+            ),
           ),
         ),
       ),

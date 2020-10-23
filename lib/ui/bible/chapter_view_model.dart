@@ -84,7 +84,7 @@ class ChapterViewModel {
 
   Stopwatch _tapDownStopwatch;
   Object _tapDownTag;
-  TapUpDetails _tapUpDetails;
+  Offset _tapGlobalPosition;
 
   void _onTappedSpanWithTag(BuildContext context, Object tag) {
     if (tag is _VerseTag) {
@@ -101,13 +101,13 @@ class ChapterViewModel {
         final verseTag = _tapDownTag as _VerseTag;
         final reference =
             Reference(volume: volume, book: book, chapter: chapter, verse: verseTag.verse);
-        handledTap = _handleXref(context, reference, null, verseTag, _tapUpDetails?.globalPosition);
+        handledTap = _handleXref(context, reference, null, verseTag, _tapGlobalPosition);
       }
 
       // Was the tap near a margin note or footnote widget?
-      // Note, `_tapUpDetails` is set in the `onTapUp` handler.
-      if (!handledTap && !hasSelection && _tapUpDetails != null) {
-        final pt = _tapUpDetails.globalPosition;
+      // Note, `_tapGlobalPosition` is set in the `onTapUp` handler.
+      if (!handledTap && !hasSelection && _tapGlobalPosition != null) {
+        final pt = _tapGlobalPosition;
 
         for (final key in _widgetKeys.keys) {
           final rect = globalRectWithKey(_widgetKeys[key])?.inflate(12);
@@ -186,8 +186,9 @@ class ChapterViewModel {
               ),
             ),
           ),
-          onTapUp: (details) => _tapUpDetails = details,
+          onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
           onTap: _onPress,
+          onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
           onLongPress: _onPress,
         ),
       ),
@@ -212,7 +213,7 @@ class ChapterViewModel {
           return showTecModalPopup<void>(
             useRootNavigator: true,
             context: context,
-            offset: _tapUpDetails?.globalPosition,
+            offset: _tapGlobalPosition,
             builder: (context) {
               final maxWidth = math.min(320.0, MediaQuery.of(context).size.width);
               return TecPopupSheet(
@@ -264,8 +265,9 @@ class ChapterViewModel {
             ),
           ),
         ),
-        onTapUp: (details) => _tapUpDetails = details,
+        onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
         onTap: _onPress,
+        onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
         onLongPress: _onPress,
       ),
     );
@@ -304,7 +306,7 @@ class ChapterViewModel {
             _tapDownTag = tag;
           }
           ..onTapUp = (details) {
-            _tapUpDetails = details;
+            _tapGlobalPosition = details?.globalPosition;
           }
           ..onTap = () => _onTappedSpanWithTag(context, tag);
       }
@@ -584,7 +586,7 @@ class ChapterViewModel {
         if (part.startsWith('G') || part.startsWith('H')) {
           bible?.strongsHtmlWith(part)?.then((result) {
             final html = result?.value == null ? '<p>${result?.error}</p>' : result.value;
-            showStrongsPopup(context: context, html: html);
+            showStrongsPopup(context: context, title: part, html: html);
           });
           return true;
         }

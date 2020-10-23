@@ -25,9 +25,8 @@ Future<T> showTecDialog<T extends Object>({
     windowSize = (MediaQuery.of(context, nullOk: true)?.size ?? Size.zero);
   }
 
-  if ((maxWidth == null && maxHeight == null) ||
-      (maxWidth != null && maxWidth <= windowSize.width) ||
-      (maxHeight != null && maxHeight <= windowSize.height)) {
+  if ((maxWidth == null || maxWidth + 40.0 <= windowSize.width) &&
+      (maxHeight == null || maxHeight + 40.0 <= windowSize.height)) {
     return showTecModalPopup<T>(
       context: context,
       useRootNavigator: useRootNavigator,
@@ -52,32 +51,8 @@ Future<T> showTecDialog<T extends Object>({
         );
       },
     );
-
-    /* OLD WAY:
-    return showDialog<T>(
-      context: context,
-      barrierDismissible: barrierDismissible,
-      useRootNavigator: useRootNavigator,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: maxWidth ?? double.infinity,
-              maxHeight: maxHeight ?? double.infinity,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).canvasColor,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            padding: padding,
-            child: Builder(builder: builder),
-          ),
-        );
-      },
-    ); */
   }
 
   return Navigator.of(context, rootNavigator: useRootNavigator)
-      .push<T>(MaterialPageRoute<T>(builder: builder));
+      .push<T>(MaterialPageRoute<T>(builder: builder, fullscreenDialog: true));
 }

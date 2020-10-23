@@ -23,6 +23,13 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
       (vmBloc.columnsInRow(0) - 1) == vmBloc.indexOfView(state.uid);
 
   return [
+    if (state.type == Const.viewTypeChapter)
+      IconButton(
+        icon: const Icon(SFSymbols.play, size: 20),
+        tooltip: 'Play Audio',
+        color: Theme.of(context).textColor.withOpacity(0.5),
+        onPressed: () {},
+      ),
     if ((vmBloc?.countOfInvisibleViews ?? 0) >= 1 && isMaximized)
       IconButton(
         icon: const Icon(SFSymbols.arrow_up_arrow_down_circle, size: 20),
@@ -57,13 +64,6 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
         );
       },
     ),
-    if (state.type == Const.viewTypeChapter)
-      IconButton(
-        icon: const Icon(SFSymbols.play, size: 20),
-        tooltip: 'Play Audio',
-        color: Theme.of(context).textColor.withOpacity(0.5),
-        onPressed: () {},
-      ),
     if (state.type == Const.viewTypeStudy)
       IconButton(
           icon: Icon(platformAwareMoreIcon(context)),
