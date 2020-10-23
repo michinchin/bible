@@ -23,57 +23,26 @@ const tabColors = [Colors.blue, Colors.orange, Colors.green];
 
 Future<Reference> navigate(BuildContext context, Reference ref,
     {int initialIndex = 0, bool searchView = false}) {
-  final isLargeScreen =
-      MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 600;
   final hasSearchResults = context.bloc<SearchBloc>().state.searchResults.isNotEmpty;
-  if (isLargeScreen) {
-    return showTecDialog<Reference>(
-      context: context,
-      useRootNavigator: true,
-      cornerRadius: 15,
-      builder: (context) => Container(
-          height: 600,
-          width: 500,
-          child: MultiBlocProvider(providers: [
-            BlocProvider<NavBloc>(
-                create: (_) => NavBloc(ref, initialTabIndex: initialIndex)
-                  ..add(NavEvent.changeNavView(
-                      state: searchView && hasSearchResults
-                          ? NavViewState.searchResults
-                          : NavViewState.bcvTabs))),
-          ], child: Nav(searchView: searchView))),
-    );
-  }
-
-  // Other ways we could show the nav UI:
-//  return showTecModalPopup<BookChapterVerse>(
-//       context: context,
-//       alignment: Alignment.center,
-//       // useRootNavigator: false,
-//       builder: (context) => TecPopupSheet(
-//           child: BlocProvider(
-//               create: (context) => NavBloc(bcv),
-//               child: Container(height: 600, width: 500, child: Nav()))),
-
-  return Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
-    fullscreenDialog: true,
+  return showTecDialog<Reference>(
+    context: context,
+    useRootNavigator: true,
+    padding: const EdgeInsets.all(0),
+    maxWidth: 500,
+    maxHeight: 600,
     builder: (context) => MultiBlocProvider(providers: [
       BlocProvider<NavBloc>(
-        create: (_) => NavBloc(ref, initialTabIndex: initialIndex)
-          ..add(NavEvent.changeNavView(
-              state: searchView && hasSearchResults
-                  ? NavViewState.searchResults
-                  : NavViewState.bcvTabs)),
-      ),
+          create: (_) => NavBloc(ref, initialTabIndex: initialIndex)
+            ..add(NavEvent.changeNavView(
+                state: searchView && hasSearchResults
+                    ? NavViewState.searchResults
+                    : NavViewState.bcvTabs))),
     ], child: Nav(searchView: searchView)),
-  ));
+  );
 }
 
 /// show search with requested search string, returns `Reference` in case of nav
 Future<Reference> showBibleSearch(BuildContext context, Reference ref, {String search = ''}) {
-  final isLargeScreen =
-      MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 600;
-
   if (search.isNotEmpty) {
     final translations = context
         .bloc<PrefItemsBloc>()
@@ -88,35 +57,17 @@ Future<Reference> showBibleSearch(BuildContext context, Reference ref, {String s
         .bloc<SearchBloc>()
         ?.add(SearchEvent.request(search: search, translations: translations));
   }
-  if (isLargeScreen) {
-    return showTecDialog<Reference>(
+  return showTecDialog<Reference>(
       context: context,
       useRootNavigator: true,
-      cornerRadius: 15,
-      builder: (context) => Container(
-          height: 600,
-          width: 500,
-          child: MultiBlocProvider(
-              providers: [
-                BlocProvider<NavBloc>(
-                    create: (_) => NavBloc(ref)
-                      ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))),
-              ],
-              child: const Nav(
-                searchView: true,
-              ))),
-    );
-  }
-
-  return Navigator.of(context, rootNavigator: true).push<Reference>(TecPageRoute<Reference>(
-    fullscreenDialog: true,
-    builder: (context) => MultiBlocProvider(providers: [
-      BlocProvider<NavBloc>(
-        create: (_) =>
-            NavBloc(ref)..add(const NavEvent.changeNavView(state: NavViewState.searchResults)),
-      ),
-    ], child: const Nav(searchView: true)),
-  ));
+      padding: const EdgeInsets.all(0),
+      maxWidth: 500,
+      maxHeight: 600,
+      builder: (context) => MultiBlocProvider(providers: [
+            BlocProvider<NavBloc>(
+                create: (_) => NavBloc(ref)
+                  ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))),
+          ], child: const Nav(searchView: true)));
 }
 
 class Nav extends StatefulWidget {
@@ -347,10 +298,19 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             autofocus: widget.searchView && ss.searchResults.isEmpty,
             onChanged: (s) => navBloc().add(NavEvent.onSearchChange(search: s)),
             onSubmitted: (s) => onSubmit(query: s),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
                 border: InputBorder.none,
+                suffixIcon: s == NavViewState.searchSuggestions
+                    ? IconButton(
+                        color: Theme.of(context).textColor,
+                        icon: const Icon(Icons.cancel_outlined),
+                        onPressed: () {
+                          _searchController.clear();
+                          navBloc().add(const NavEvent.onSearchChange(search: ''));
+                        })
+                    : null,
                 hintText: 'Enter references or keywords',
-                hintStyle: TextStyle(fontStyle: FontStyle.italic)),
+                hintStyle: const TextStyle(fontStyle: FontStyle.italic)),
             controller: _searchController);
       }
     }

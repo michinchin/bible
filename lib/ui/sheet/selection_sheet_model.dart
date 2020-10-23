@@ -308,8 +308,8 @@ class SelectionSheetModel {
           {String title = 'Select Verse'}) =>
       showTecDialog<Reference>(
           context: c,
-          cornerRadius: 15,
           builder: (c) => Material(
+            color: Colors.transparent,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

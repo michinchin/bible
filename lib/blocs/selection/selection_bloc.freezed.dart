@@ -158,6 +158,11 @@ class _$SelectionCmdTearOff {
   const _$SelectionCmdTearOff();
 
 // ignore: unused_element
+  _NoOp noOp() {
+    return const _NoOp();
+  }
+
+// ignore: unused_element
   _ClearStyle clearStyle() {
     return const _ClearStyle();
   }
@@ -197,6 +202,7 @@ const $SelectionCmd = _$SelectionCmdTearOff();
 mixin _$SelectionCmd {
   @optionalTypeArgs
   Result when<Result extends Object>({
+    @required Result noOp(),
     @required Result clearStyle(),
     @required Result setStyle(HighlightType type, int color),
     @required Result tryStyle(HighlightType type, int color),
@@ -205,6 +211,7 @@ mixin _$SelectionCmd {
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
+    Result noOp(),
     Result clearStyle(),
     Result setStyle(HighlightType type, int color),
     Result tryStyle(HighlightType type, int color),
@@ -214,6 +221,7 @@ mixin _$SelectionCmd {
   });
   @optionalTypeArgs
   Result map<Result extends Object>({
+    @required Result noOp(_NoOp value),
     @required Result clearStyle(_ClearStyle value),
     @required Result setStyle(_SetStyle value),
     @required Result tryStyle(_TryStyle value),
@@ -222,6 +230,7 @@ mixin _$SelectionCmd {
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
+    Result noOp(_NoOp value),
     Result clearStyle(_ClearStyle value),
     Result setStyle(_SetStyle value),
     Result tryStyle(_TryStyle value),
@@ -245,6 +254,118 @@ class _$SelectionCmdCopyWithImpl<$Res> implements $SelectionCmdCopyWith<$Res> {
   final SelectionCmd _value;
   // ignore: unused_field
   final $Res Function(SelectionCmd) _then;
+}
+
+/// @nodoc
+abstract class _$NoOpCopyWith<$Res> {
+  factory _$NoOpCopyWith(_NoOp value, $Res Function(_NoOp) then) =
+      __$NoOpCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$NoOpCopyWithImpl<$Res> extends _$SelectionCmdCopyWithImpl<$Res>
+    implements _$NoOpCopyWith<$Res> {
+  __$NoOpCopyWithImpl(_NoOp _value, $Res Function(_NoOp) _then)
+      : super(_value, (v) => _then(v as _NoOp));
+
+  @override
+  _NoOp get _value => super._value as _NoOp;
+}
+
+/// @nodoc
+class _$_NoOp implements _NoOp {
+  const _$_NoOp();
+
+  @override
+  String toString() {
+    return 'SelectionCmd.noOp()';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) || (other is _NoOp);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>({
+    @required Result noOp(),
+    @required Result clearStyle(),
+    @required Result setStyle(HighlightType type, int color),
+    @required Result tryStyle(HighlightType type, int color),
+    @required Result cancelTrial(),
+    @required Result deselectAll(),
+  }) {
+    assert(noOp != null);
+    assert(clearStyle != null);
+    assert(setStyle != null);
+    assert(tryStyle != null);
+    assert(cancelTrial != null);
+    assert(deselectAll != null);
+    return noOp();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>({
+    Result noOp(),
+    Result clearStyle(),
+    Result setStyle(HighlightType type, int color),
+    Result tryStyle(HighlightType type, int color),
+    Result cancelTrial(),
+    Result deselectAll(),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (noOp != null) {
+      return noOp();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>({
+    @required Result noOp(_NoOp value),
+    @required Result clearStyle(_ClearStyle value),
+    @required Result setStyle(_SetStyle value),
+    @required Result tryStyle(_TryStyle value),
+    @required Result cancelTrial(_CancelTrial value),
+    @required Result deselectAll(_DeselectAll value),
+  }) {
+    assert(noOp != null);
+    assert(clearStyle != null);
+    assert(setStyle != null);
+    assert(tryStyle != null);
+    assert(cancelTrial != null);
+    assert(deselectAll != null);
+    return noOp(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>({
+    Result noOp(_NoOp value),
+    Result clearStyle(_ClearStyle value),
+    Result setStyle(_SetStyle value),
+    Result tryStyle(_TryStyle value),
+    Result cancelTrial(_CancelTrial value),
+    Result deselectAll(_DeselectAll value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if (noOp != null) {
+      return noOp(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _NoOp implements SelectionCmd {
+  const factory _NoOp() = _$_NoOp;
 }
 
 /// @nodoc
@@ -285,12 +406,14 @@ class _$_ClearStyle implements _ClearStyle {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
+    @required Result noOp(),
     @required Result clearStyle(),
     @required Result setStyle(HighlightType type, int color),
     @required Result tryStyle(HighlightType type, int color),
     @required Result cancelTrial(),
     @required Result deselectAll(),
   }) {
+    assert(noOp != null);
     assert(clearStyle != null);
     assert(setStyle != null);
     assert(tryStyle != null);
@@ -302,6 +425,7 @@ class _$_ClearStyle implements _ClearStyle {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
+    Result noOp(),
     Result clearStyle(),
     Result setStyle(HighlightType type, int color),
     Result tryStyle(HighlightType type, int color),
@@ -319,12 +443,14 @@ class _$_ClearStyle implements _ClearStyle {
   @override
   @optionalTypeArgs
   Result map<Result extends Object>({
+    @required Result noOp(_NoOp value),
     @required Result clearStyle(_ClearStyle value),
     @required Result setStyle(_SetStyle value),
     @required Result tryStyle(_TryStyle value),
     @required Result cancelTrial(_CancelTrial value),
     @required Result deselectAll(_DeselectAll value),
   }) {
+    assert(noOp != null);
     assert(clearStyle != null);
     assert(setStyle != null);
     assert(tryStyle != null);
@@ -336,6 +462,7 @@ class _$_ClearStyle implements _ClearStyle {
   @override
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
+    Result noOp(_NoOp value),
     Result clearStyle(_ClearStyle value),
     Result setStyle(_SetStyle value),
     Result tryStyle(_TryStyle value),
@@ -422,12 +549,14 @@ class _$_SetStyle implements _SetStyle {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
+    @required Result noOp(),
     @required Result clearStyle(),
     @required Result setStyle(HighlightType type, int color),
     @required Result tryStyle(HighlightType type, int color),
     @required Result cancelTrial(),
     @required Result deselectAll(),
   }) {
+    assert(noOp != null);
     assert(clearStyle != null);
     assert(setStyle != null);
     assert(tryStyle != null);
@@ -439,6 +568,7 @@ class _$_SetStyle implements _SetStyle {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
+    Result noOp(),
     Result clearStyle(),
     Result setStyle(HighlightType type, int color),
     Result tryStyle(HighlightType type, int color),
@@ -456,12 +586,14 @@ class _$_SetStyle implements _SetStyle {
   @override
   @optionalTypeArgs
   Result map<Result extends Object>({
+    @required Result noOp(_NoOp value),
     @required Result clearStyle(_ClearStyle value),
     @required Result setStyle(_SetStyle value),
     @required Result tryStyle(_TryStyle value),
     @required Result cancelTrial(_CancelTrial value),
     @required Result deselectAll(_DeselectAll value),
   }) {
+    assert(noOp != null);
     assert(clearStyle != null);
     assert(setStyle != null);
     assert(tryStyle != null);
@@ -473,6 +605,7 @@ class _$_SetStyle implements _SetStyle {
   @override
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
+    Result noOp(_NoOp value),
     Result clearStyle(_ClearStyle value),
     Result setStyle(_SetStyle value),
     Result tryStyle(_TryStyle value),
@@ -563,12 +696,14 @@ class _$_TryStyle implements _TryStyle {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
+    @required Result noOp(),
     @required Result clearStyle(),
     @required Result setStyle(HighlightType type, int color),
     @required Result tryStyle(HighlightType type, int color),
     @required Result cancelTrial(),
     @required Result deselectAll(),
   }) {
+    assert(noOp != null);
     assert(clearStyle != null);
     assert(setStyle != null);
     assert(tryStyle != null);
@@ -580,6 +715,7 @@ class _$_TryStyle implements _TryStyle {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
+    Result noOp(),
     Result clearStyle(),
     Result setStyle(HighlightType type, int color),
     Result tryStyle(HighlightType type, int color),
@@ -597,12 +733,14 @@ class _$_TryStyle implements _TryStyle {
   @override
   @optionalTypeArgs
   Result map<Result extends Object>({
+    @required Result noOp(_NoOp value),
     @required Result clearStyle(_ClearStyle value),
     @required Result setStyle(_SetStyle value),
     @required Result tryStyle(_TryStyle value),
     @required Result cancelTrial(_CancelTrial value),
     @required Result deselectAll(_DeselectAll value),
   }) {
+    assert(noOp != null);
     assert(clearStyle != null);
     assert(setStyle != null);
     assert(tryStyle != null);
@@ -614,6 +752,7 @@ class _$_TryStyle implements _TryStyle {
   @override
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
+    Result noOp(_NoOp value),
     Result clearStyle(_ClearStyle value),
     Result setStyle(_SetStyle value),
     Result tryStyle(_TryStyle value),
@@ -675,12 +814,14 @@ class _$_CancelTrial implements _CancelTrial {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
+    @required Result noOp(),
     @required Result clearStyle(),
     @required Result setStyle(HighlightType type, int color),
     @required Result tryStyle(HighlightType type, int color),
     @required Result cancelTrial(),
     @required Result deselectAll(),
   }) {
+    assert(noOp != null);
     assert(clearStyle != null);
     assert(setStyle != null);
     assert(tryStyle != null);
@@ -692,6 +833,7 @@ class _$_CancelTrial implements _CancelTrial {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
+    Result noOp(),
     Result clearStyle(),
     Result setStyle(HighlightType type, int color),
     Result tryStyle(HighlightType type, int color),
@@ -709,12 +851,14 @@ class _$_CancelTrial implements _CancelTrial {
   @override
   @optionalTypeArgs
   Result map<Result extends Object>({
+    @required Result noOp(_NoOp value),
     @required Result clearStyle(_ClearStyle value),
     @required Result setStyle(_SetStyle value),
     @required Result tryStyle(_TryStyle value),
     @required Result cancelTrial(_CancelTrial value),
     @required Result deselectAll(_DeselectAll value),
   }) {
+    assert(noOp != null);
     assert(clearStyle != null);
     assert(setStyle != null);
     assert(tryStyle != null);
@@ -726,6 +870,7 @@ class _$_CancelTrial implements _CancelTrial {
   @override
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
+    Result noOp(_NoOp value),
     Result clearStyle(_ClearStyle value),
     Result setStyle(_SetStyle value),
     Result tryStyle(_TryStyle value),
@@ -783,12 +928,14 @@ class _$_DeselectAll implements _DeselectAll {
   @override
   @optionalTypeArgs
   Result when<Result extends Object>({
+    @required Result noOp(),
     @required Result clearStyle(),
     @required Result setStyle(HighlightType type, int color),
     @required Result tryStyle(HighlightType type, int color),
     @required Result cancelTrial(),
     @required Result deselectAll(),
   }) {
+    assert(noOp != null);
     assert(clearStyle != null);
     assert(setStyle != null);
     assert(tryStyle != null);
@@ -800,6 +947,7 @@ class _$_DeselectAll implements _DeselectAll {
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
+    Result noOp(),
     Result clearStyle(),
     Result setStyle(HighlightType type, int color),
     Result tryStyle(HighlightType type, int color),
@@ -817,12 +965,14 @@ class _$_DeselectAll implements _DeselectAll {
   @override
   @optionalTypeArgs
   Result map<Result extends Object>({
+    @required Result noOp(_NoOp value),
     @required Result clearStyle(_ClearStyle value),
     @required Result setStyle(_SetStyle value),
     @required Result tryStyle(_TryStyle value),
     @required Result cancelTrial(_CancelTrial value),
     @required Result deselectAll(_DeselectAll value),
   }) {
+    assert(noOp != null);
     assert(clearStyle != null);
     assert(setStyle != null);
     assert(tryStyle != null);
@@ -834,6 +984,7 @@ class _$_DeselectAll implements _DeselectAll {
   @override
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
+    Result noOp(_NoOp value),
     Result clearStyle(_ClearStyle value),
     Result setStyle(_SetStyle value),
     Result tryStyle(_TryStyle value),

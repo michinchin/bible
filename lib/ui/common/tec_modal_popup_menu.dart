@@ -133,7 +133,7 @@ TableRow tecModalPopupMenuDivider(BuildContext context, [String title]) {
 TableRow tecModalPopupMenuTitle(String title, {bool showClose = true}) {
   return TableRow(
     children: [
-      _MenuTitleBar(title: title),
+      TecTitleBar(title: title),
       Container(),
     ],
   );
@@ -144,44 +144,49 @@ class _RefreshBloc extends Cubit<int> {
   void refresh() => emit(state + 1);
 }
 
-class _MenuTitleBar extends StatelessWidget {
+class TecTitleBar extends StatelessWidget {
   final String title;
+  final TextStyle style;
+  final double maxWidth;
 
-  const _MenuTitleBar({Key key, this.title}) : super(key: key);
+  const TecTitleBar({Key key, this.title, this.style, this.maxWidth}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final color = isDarkTheme ? Colors.white : Colors.grey[700];
-    return Stack(
-      children: [
-        Row(
+    var textStyle = TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w500);
+    if (style != null) textStyle = textStyle.merge(style);
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            Expanded(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w500),
+            Row(
+              children: [
+                Expanded(child: Text(title, textAlign: TextAlign.center, style: textStyle)),
+              ],
+            ),
+            Positioned(
+              left: 4,
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: IconButton(
+                  icon: const Icon(Icons.close),
+                  padding: EdgeInsets.zero,
+                  splashRadius: 12,
+                  color: color,
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  onPressed: () => Navigator.of(context, rootNavigator: true).maybePop(),
+                ),
               ),
             ),
           ],
         ),
-        Positioned(
-          left: 4,
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: IconButton(
-              icon: const Icon(Icons.close),
-              padding: EdgeInsets.zero,
-              splashRadius: 12,
-              color: color,
-              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-              onPressed: () => Navigator.of(context, rootNavigator: true).maybePop(),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

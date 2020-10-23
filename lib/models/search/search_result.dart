@@ -5,6 +5,7 @@ import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
+import '../../ui/nav/search_and_history_view.dart';
 import '../const.dart';
 import 'verse.dart';
 
@@ -332,7 +333,10 @@ List<TextSpan> searchResTextSpans(
         // add the bold text...
         content.add(TextSpan(
             text: verse.substring(where, where + bold[where]),
-            style: const TextStyle(fontWeight: FontWeight.w900)));
+            style: const TextStyle(
+              // fontWeight: FontWeight.w900,
+              color: searchThemeColor
+              )));
 
         lastEnd = where + bold[where];
       }

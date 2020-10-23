@@ -8,7 +8,7 @@ import 'search/search_history_item.dart';
 
 class UserItemHelper {
   static const searchHistoryParentId = 3; // using note user item type
-  static const navHistoryParentId = 4; // using book user item type
+  static const navHistoryParentId = 4; // using bookmark user item type
   /// only allow 50 items to save at a time
   static const maxHistoryLength = 50;
 
@@ -26,7 +26,6 @@ class UserItemHelper {
         await AppSettings.shared.userAccount.userDb.saveItem(items[i]);
       }
     }
-
     final index = items.indexWhere((i) =>
         i.book == ref.book &&
         i.chapter == ref.chapter &&
@@ -76,7 +75,7 @@ class UserItemHelper {
     if (itemsToDelete.isNotEmpty) {
       await AppSettings.shared.userAccount.userDb.saveSyncItems(itemsToDelete);
     }
-    
+
     return refs;
   }
 

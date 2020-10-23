@@ -61,16 +61,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   /// Returns the view manager rect in global coordinates.
   ///
   Rect get globalRect {
-    // return null;
-    final rb = _globalKey.currentContext?.findRenderObject();
-    if (rb is RenderBox) {
-      final pt = rb.localToGlobal(Offset.zero);
-      final size = _size ?? Size.zero;
-      final rect = Rect.fromLTWH(pt.dx, pt.dy, size.width, size.height);
-      // tec.dmPrint('View manager rect: $rect');
-      return rect;
-    }
-    return Rect.zero;
+    return globalRectWithKey(_globalKey, _size ?? Size.zero) ?? Rect.zero;
   }
 
   ///

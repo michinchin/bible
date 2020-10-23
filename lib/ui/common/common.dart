@@ -6,6 +6,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import 'tec_tab_indicator.dart';
 
+export 'tec_dialog.dart';
 export 'tec_future_builder.dart';
 export 'tec_modal_popup.dart';
 export 'tec_page_route.dart';
@@ -25,6 +26,23 @@ EdgeInsets insetsFromParentSizeAndChildRect(Size parentSize, Rect childRect) => 
       parentSize.width - childRect.right,
       parentSize.height - childRect.bottom,
     );
+
+///
+/// Returns the global rect of the widget with the given [globalKey], or null if none.
+/// 
+/// Uses [size] if provided, otherwise uses `(renderBox.hasSize ? renderBox.size : Size.zero)`.
+///
+Rect globalRectWithKey(GlobalKey globalKey, [Size size]) {
+  if (globalKey != null) {
+    final renderBox = globalKey.currentContext?.findRenderObject();
+    if (renderBox is RenderBox) {
+      final pt = renderBox.localToGlobal(Offset.zero);
+      final rbSize = size ?? (renderBox.hasSize ? renderBox.size : Size.zero);
+      return Rect.fromLTWH(pt.dx, pt.dy, rbSize.width, rbSize.height);
+    }
+  }
+  return null;
+}
 
 ///
 /// Shape and border radius to use for bottom sheets.

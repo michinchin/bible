@@ -21,7 +21,9 @@ import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/color_utils.dart';
 import '../../models/misc_utils.dart';
+import '../../models/rect_utils.dart';
 import '../../models/string_utils.dart';
+import '../common/common.dart';
 import '../note/margin_note_view.dart';
 import '../strongs/strongs_popup.dart';
 import '../xref/xref_popup.dart';
@@ -82,7 +84,7 @@ class ChapterViewModel {
 
   Stopwatch _tapDownStopwatch;
   Object _tapDownTag;
-  TapUpDetails _tapUpDetails;
+  Offset _tapGlobalPosition;
 
   void _onTappedSpanWithTag(BuildContext context, Object tag) {
     if (tag is _VerseTag) {
@@ -90,39 +92,33 @@ class ChapterViewModel {
 
       // Was it a long press on an xref?
       if (!handledTap &&
-          !hasSelection &&
+          // !hasSelection &&
           tag.isInXref &&
           tec.isNotNullOrEmpty(tag.href) &&
           _tapDownStopwatch.elapsed.inMilliseconds > 500 &&
           _tapDownTag is _VerseTag &&
           (_tapDownTag as _VerseTag).href == tag.href) {
-        handledTap = _handleXref(context, _tapDownTag as _VerseTag);
+        final verseTag = _tapDownTag as _VerseTag;
+        final reference =
+            Reference(volume: volume, book: book, chapter: chapter, verse: verseTag.verse);
+        handledTap = _handleXref(context, reference, null, verseTag, _tapGlobalPosition);
       }
 
       // Was the tap near a margin note or footnote widget?
-      // Note, `_tapUpDetails` is set in the `onTapUp` handler.
-      if (!handledTap && !hasSelection && _tapUpDetails != null) {
-        final x = _tapUpDetails.globalPosition.dx;
-        final y = _tapUpDetails.globalPosition.dy;
-
-        final padding = MediaQuery.of(context).devicePixelRatio * 2.5;
+      // Note, `_tapGlobalPosition` is set in the `onTapUp` handler.
+      if (!handledTap && !hasSelection && _tapGlobalPosition != null) {
+        final pt = _tapGlobalPosition;
 
         for (final key in _widgetKeys.keys) {
-          final renderBox = _widgetKeys[key].currentContext?.findRenderObject();
-          if (renderBox is RenderBox) {
-            final position = renderBox.localToGlobal(Offset.zero);
+          final rect = globalRectWithKey(_widgetKeys[key])?.inflate(12);
+          if (rect != null) {
+            // If the tap is above the widget, don't bother checking the rest of the widgets.
+            if (pt.dy < rect.top) break;
 
-            // If the tap is above widget, don't bother checking the rest of the widgets.
-            if (y < position.dy) break;
-
-            final hit = x >= (position.dx - padding) &&
-                x <= (position.dx + renderBox.size.width + padding) &&
-                y >= (position.dy - padding) &&
-                y <= (position.dy + renderBox.size.height + padding);
-
-            if (hit) {
+            // If the tap is in the rect...
+            if (rect.contains(pt)) {
               if (_widgetKeys[key].currentWidget is GestureDetector) {
-                // this is a widget hit - execute the tap...
+                // This is a widget hit. Execute the tap...
                 (_widgetKeys[key].currentWidget as GestureDetector).onTap();
                 handledTap = true;
                 break;
@@ -139,7 +135,6 @@ class ChapterViewModel {
     _tapDownStopwatch?.stop();
     _tapDownStopwatch = null;
     _tapDownTag = null;
-    _tapUpDetails = null;
   }
 
   InlineSpan _marginNoteSpan(
@@ -181,12 +176,8 @@ class ChapterViewModel {
               child: Padding(
                 padding: const EdgeInsets.only(top: 3.0),
                 child: kIsWeb
-                    ? Icon(
-                        FeatherIcons.fileText,
-                        size: iconWidth,
-                        color: color,
-                        semanticLabel: 'Margin Note',
-                      )
+                    ? Icon(FeatherIcons.fileText,
+                        size: iconWidth, color: color, semanticLabel: 'Margin Note')
                     : SvgPicture.asset('assets/marginNote.svg',
                         width: iconWidth,
                         height: iconWidth,
@@ -195,7 +186,9 @@ class ChapterViewModel {
               ),
             ),
           ),
+          onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
           onTap: _onPress,
+          onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
           onLongPress: _onPress,
         ),
       ),
@@ -217,14 +210,25 @@ class ChapterViewModel {
           // not sure if I want to force this...
           // _toggleSelectionForVerse(context, tag.verse);
         } else {
-          await showDialog<void>(
+          return showTecModalPopup<void>(
+            useRootNavigator: true,
             context: context,
-            barrierDismissible: true,
-            builder: (builder) {
-              return AlertDialog(
-                contentPadding: const EdgeInsets.all(0),
-                content: TecHtml(footnoteHtml.value, baseUrl: '', selectable: false),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            offset: _tapGlobalPosition,
+            builder: (context) {
+              final maxWidth = math.min(320.0, MediaQuery.of(context).size.width);
+              return TecPopupSheet(
+                padding: const EdgeInsets.all(0),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    // color: Colors.red,
+                    constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
+                    child: GestureDetector(
+                      child: TecHtml(footnoteHtml.value, baseUrl: '', selectable: false),
+                      onTap: () => Navigator.of(context).maybePop(),
+                    ),
+                  ),
+                ),
               );
             },
           );
@@ -247,22 +251,23 @@ class ChapterViewModel {
           child: Align(
             alignment: Alignment.topLeft,
             child: Padding(
-                padding: const EdgeInsets.only(top: 3.0),
-                child: kIsWeb
-                    ? Icon(
-                        Icons.ac_unit,
-                        size: iconWidth,
-                        color: Theme.of(context).accentColor,
-                        semanticLabel: 'Footnote',
-                      )
-                    : SvgPicture.asset('assets/footnote.svg',
-                        width: iconWidth,
-                        height: iconWidth,
-                        color: Theme.of(context).accentColor,
-                        semanticsLabel: 'Footnote')),
+              padding: const EdgeInsets.only(top: 3.0),
+              child: kIsWeb
+                  ? Icon(Icons.ac_unit,
+                      size: iconWidth,
+                      color: Theme.of(context).accentColor,
+                      semanticLabel: 'Footnote')
+                  : SvgPicture.asset('assets/footnote.svg',
+                      width: iconWidth,
+                      height: iconWidth,
+                      color: Theme.of(context).accentColor,
+                      semanticsLabel: 'Footnote'),
+            ),
           ),
         ),
+        onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
         onTap: _onPress,
+        onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
         onLongPress: _onPress,
       ),
     );
@@ -301,7 +306,7 @@ class ChapterViewModel {
             _tapDownTag = tag;
           }
           ..onTapUp = (details) {
-            _tapUpDetails = details;
+            _tapGlobalPosition = details?.globalPosition;
           }
           ..onTap = () => _onTappedSpanWithTag(context, tag);
       }
@@ -451,84 +456,6 @@ class ChapterViewModel {
     _clearAllSelectedVerses(context);
   }
 
-  Iterable<TecSelectableMenuItem> menuItems(BuildContext context) {
-    return [
-      TecSelectableMenuItem(type: TecSelectableMenuItemType.define),
-      TecSelectableMenuItem(
-        title: 'Strong\'s',
-        isEnabled: (ctl) => _enableStrongs(ctl.selectionStart?.verseTag),
-        handler: (ctl) {
-          final handled = _handleStrongs(context, ctl.selectionStart?.verseTag);
-          if (handled) ctl?.deselectAll();
-          return handled;
-        },
-      ),
-      TecSelectableMenuItem(
-        title: 'Cross-ref',
-        isEnabled: (ctl) => _enableXref(ctl.selectionStart?.verseTag),
-        handler: (ctl) {
-          final handled = _handleXref(context, ctl.selectionStart?.verseTag);
-          if (handled) ctl?.deselectAll();
-          return handled;
-        },
-      ),
-    ];
-  }
-
-  bool _enableStrongs(_VerseTag tag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
-      final parts = tag.href.split(';');
-      for (final part in parts) {
-        if (part.startsWith('G') || part.startsWith('H')) return true;
-      }
-    }
-    return false;
-  }
-
-  bool _handleStrongs(BuildContext context, _VerseTag tag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
-      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
-      final parts = tag.href.split(';');
-      for (final part in parts) {
-        if (part.startsWith('G') || part.startsWith('H')) {
-          bible?.strongsHtmlWith(part)?.then((result) {
-            final html = result?.value == null ? '<p>${result?.error}</p>' : result.value;
-            showStrongsPopup(context: context, html: html);
-          });
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  bool _enableXref(_VerseTag tag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
-      if (tag.href.contains('_') || tag.href.contains('/')) return true;
-    }
-    return false;
-  }
-
-  bool _handleXref(BuildContext context, _VerseTag tag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
-      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
-
-      bible?.xrefsWithHrefProperty(tag.href)?.then((result) {
-        if (result?.value?.isEmpty ?? true) {
-          // TODO(ron): ...
-        } else {
-          showXrefsPopup(
-            context: context,
-            xrefs: result.value,
-            insets: context.bloc<ViewManagerBloc>().globalInsetsOfView(viewUid, context),
-          );
-        }
-      });
-      return true;
-    }
-    return false;
-  }
-
   void notifyOfSelections(BuildContext context) {
     // Notify the view manager, if there is one.
     context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInView(viewUid, _selectionReference, context,
@@ -604,7 +531,101 @@ class ChapterViewModel {
       bloc.add(HighlightEvent.clear(ref(), HighlightMode.trial));
     }, deselectAll: () {
       clearAllSelections(context);
+    }, noOp: () {
+      // no-op
     });
+  }
+
+  //-------------------------------------------------------------------------
+  // Selection popup menu related:
+
+  Iterable<TecSelectableMenuItem> menuItems(BuildContext context, GlobalKey key) {
+    return [
+      TecSelectableMenuItem(type: TecSelectableMenuItemType.define),
+      TecSelectableMenuItem(
+        title: 'Strong\'s',
+        isEnabled: (ctl) =>
+            _enableStrongs(ctl.selectionStart?.verseTag, ctl.selectionEnd?.verseTag),
+        handler: (ctl) {
+          final handled = _handleStrongs(context, ctl.selectionStart?.verseTag);
+          if (handled) ctl?.deselectAll();
+          return handled;
+        },
+      ),
+      TecSelectableMenuItem(
+        title: 'Cross-ref',
+        isEnabled: (ctl) => _enableXref(ctl.selectionStart?.verseTag, ctl.selectionEnd?.verseTag),
+        handler: (ctl) {
+          var handled = false;
+          final globalOffset = globalRectWithKey(key)?.topLeft;
+          if (globalOffset != null) {
+            final pt = ctl.rects.merged().center + globalOffset;
+            handled = _handleXref(
+                context, _selectionReference, ctl.text?.trim(), ctl.selectionStart?.verseTag, pt);
+          }
+          if (handled) ctl?.deselectAll();
+          return handled;
+        },
+      ),
+    ];
+  }
+
+  bool _enableStrongs(_VerseTag tag, _VerseTag endTag) {
+    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href) && tag.href == endTag?.href) {
+      final parts = tag.href.split(';');
+      for (final part in parts) {
+        if (part.startsWith('G') || part.startsWith('H')) return true;
+      }
+    }
+    return false;
+  }
+
+  bool _handleStrongs(BuildContext context, _VerseTag tag) {
+    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
+      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
+      final parts = tag.href.split(';');
+      for (final part in parts) {
+        if (part.startsWith('G') || part.startsWith('H')) {
+          bible?.strongsHtmlWith(part)?.then((result) {
+            final html = result?.value == null ? '<p>${result?.error}</p>' : result.value;
+            showStrongsPopup(context: context, title: part, html: html);
+          });
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  bool _enableXref(_VerseTag tag, _VerseTag endTag) {
+    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href) && tag.href == endTag?.href) {
+      if (tag.href.contains('_') || tag.href.contains('/')) return true;
+    }
+    return false;
+  }
+
+  bool _handleXref(
+      BuildContext context, Reference reference, String text, _VerseTag tag, Offset pt) {
+    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
+      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
+
+      bible?.xrefsWithHrefProperty(tag.href)?.then((result) {
+        if (result?.value?.isEmpty ?? true) {
+          // TODO(ron): ...
+        } else {
+          showXrefsPopup(
+            context: context,
+            reference: reference,
+            text: text,
+            xrefs: result.value,
+            offset: pt,
+            // insets: context.bloc<ViewManagerBloc>().globalInsetsOfView(viewUid, context),
+          );
+        }
+      });
+      return true;
+    }
+    return false;
   }
 
   //
@@ -932,12 +953,12 @@ extension on TaggedText {
   }
 }
 
-extension on TecSelectableController {
-  /// Returns the number of verses that the selection spans.
-  int get verseCount => (selectionEnd?.verse ?? -1) + 1 - (selectionStart?.verse ?? 0);
+// extension on TecSelectableController {
+//   /// Returns the number of verses that the selection spans.
+//   int get verseCount => (selectionEnd?.verse ?? -1) + 1 - (selectionStart?.verse ?? 0);
 
-  /// Returns the number of words that are selected in a single verse. If more than one
-  /// verse is selected, `null` is returned.
-  int get wordCount =>
-      verseCount == 1 ? ((selectionEnd?.word ?? 0) - (selectionStart?.word ?? 0)) : null;
-}
+//   /// Returns the number of words that are selected in a single verse. If more than one
+//   /// verse is selected, `null` is returned.
+//   int get wordCount =>
+//       verseCount == 1 ? ((selectionEnd?.word ?? 0) - (selectionStart?.word ?? 0)) : null;
+// }
