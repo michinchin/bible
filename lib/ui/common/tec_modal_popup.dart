@@ -2,6 +2,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -48,6 +49,7 @@ Future<T> showTecModalPopup<T>({
   bool useRootNavigator = true,
   bool semanticsDismissible,
   Alignment alignment = Alignment.bottomCenter,
+  Offset offset,
   EdgeInsetsGeometry edgeInsets = const EdgeInsets.all(0),
   TecPopupAnimationType animationType = TecPopupAnimationType.fadeScale,
 }) {
@@ -58,6 +60,7 @@ Future<T> showTecModalPopup<T>({
       barrierLabel: 'Dismiss',
       builder: builder,
       alignment: alignment ?? Alignment.bottomCenter,
+      offset: offset,
       edgeInsets: edgeInsets ?? const EdgeInsets.all(0),
       animationType: animationType ?? TecPopupAnimationType.fadeScale,
       filter: filter,
@@ -72,12 +75,20 @@ Future<T> showTecModalPopup<T>({
 /// [showTecModalPopup].
 ///
 class TecPopupSheet extends StatelessWidget {
+  final Widget child;
+  final Widget title;
+  final EdgeInsets margin;
+  final EdgeInsets padding;
+  final double bgOpacity;
+  final double bgBlur;
+
   ///
   /// Creates a [TecPopupSheet].
   ///
   const TecPopupSheet({
     Key key,
     @required this.child,
+    this.title,
     this.margin = const EdgeInsets.all(8),
     this.padding = const EdgeInsets.all(14),
     this.bgOpacity = 0.75,
@@ -85,18 +96,14 @@ class TecPopupSheet extends StatelessWidget {
   })  : assert(child != null),
         super(key: key);
 
-  final Widget child;
-  final EdgeInsets margin;
-  final EdgeInsets padding;
-  final double bgOpacity;
-  final double bgBlur;
-
   @override
   Widget build(BuildContext context) {
     final bgColor = CupertinoDynamicColor.withBrightness(
       color: const Color(0xFFFFFFFF).withOpacity(bgOpacity), // originally F9F9F9
       darkColor: const Color(0xFF252525).withOpacity(bgOpacity), // originally 252525
     );
+
+    // return Container(width: 10, height: 10, color: Colors.red.withOpacity(0.5));
 
     return Semantics(
       namesRoute: true,
@@ -114,7 +121,7 @@ class TecPopupSheet extends StatelessWidget {
               // child: Container(width: 300, height: 300, color: Colors.white.withOpacity(0.7)),
               child: Container(
                 color: CupertinoDynamicColor.resolve(bgColor, context),
-                child: _PopupSheetContent(child: child, padding: padding),
+                child: _PopupSheetContent(child: child, title: title, padding: padding),
               ),
             ),
           ),
@@ -124,61 +131,6 @@ class TecPopupSheet extends StatelessWidget {
   }
 }
 
-///
-/// Builds and shows a dialog. If [maxWidth] and/or [maxHeight] are are not
-/// `null`, the size of the dialog is constrained accordingly. If either
-/// [maxWidth] or [maxHeight] is greater than the device window size, instead
-/// of showing a dialog, a new route is pushed on the navigator using:
-///
-///   `Navigator.of(context).push<T>(MaterialPageRoute<T>(builder: builder))`
-///
-Future<T> showTecDialog<T extends Object>({
-  BuildContext context,
-  bool useRootNavigator = true,
-  bool barrierDismissible = true,
-  WidgetBuilder builder,
-  double maxWidth,
-  double maxHeight,
-  double cornerRadius,
-  EdgeInsets padding = const EdgeInsets.all(20),
-}) {
-  var windowSize = Size.zero;
-  if (maxWidth != null || maxHeight != null) {
-    assert(debugCheckHasMediaQuery(context));
-    windowSize = (MediaQuery.of(context, nullOk: true)?.size ?? Size.zero);
-  }
-
-  if ((maxWidth == null && maxHeight == null) ||
-      (maxWidth != null && maxWidth <= windowSize.width) ||
-      (maxHeight != null && maxHeight <= windowSize.height)) {
-    return showDialog<T>(
-      context: context,
-      barrierDismissible: barrierDismissible,
-      useRootNavigator: useRootNavigator,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: maxWidth ?? double.infinity,
-              maxHeight: maxHeight ?? double.infinity,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).canvasColor,
-              borderRadius: BorderRadius.circular(cornerRadius ?? 8),
-            ),
-            padding: padding,
-            child: Builder(builder: builder),
-          ),
-        );
-      },
-    );
-  }
-
-  return Navigator.of(context, rootNavigator: useRootNavigator)
-      .push<T>(MaterialPageRoute<T>(builder: builder));
-}
-
 //
 // PRIVATE DATA, FUNCTIONS, AND CLASSES
 //
@@ -186,7 +138,7 @@ Future<T> showTecDialog<T extends Object>({
 /// Barrier color for a Cupertino modal barrier.
 /// Extracted from https://developer.apple.com/design/resources/.
 const Color _kModalBarrierColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x11000000), // Color(0x33000000),
+  color: Color(0x22000000), // Color(0x33000000),
   darkColor: Color(0x7A000000),
 );
 
@@ -198,31 +150,29 @@ const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 /// bottom of the screen, or slide down from the top of the screen.
 ///
 class _TecModalPopupRoute<T> extends PopupRoute<T> {
+  final WidgetBuilder builder;
+  final bool _semanticsDismissible;
+  final Alignment alignment;
+  final Offset offset;
+  final EdgeInsetsGeometry edgeInsets;
+  final TecPopupAnimationType animationType;
+
   _TecModalPopupRoute({
     this.barrierColor,
     this.barrierLabel,
     this.builder,
     this.alignment,
+    this.offset,
     this.edgeInsets = const EdgeInsets.all(0),
     this.animationType = TecPopupAnimationType.fadeScale,
     bool semanticsDismissible,
     ImageFilter filter,
     RouteSettings settings,
-  }) : super(
+  })  : _semanticsDismissible = semanticsDismissible,
+        super(
           filter: filter,
           settings: settings,
-        ) {
-    _semanticsDismissible = semanticsDismissible;
-  }
-
-  final WidgetBuilder builder;
-  bool _semanticsDismissible;
-
-  final Alignment alignment;
-
-  final EdgeInsetsGeometry edgeInsets;
-
-  final TecPopupAnimationType animationType;
+        );
 
   @override
   final String barrierLabel;
@@ -240,7 +190,6 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
   Animation<double> _animation;
-
   Tween<Offset> _offsetTween;
 
   @override
@@ -284,15 +233,38 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return Container(
-      padding: edgeInsets,
-      child: ClipRect(
-        child: Align(
-          alignment: alignment,
-          child: animationType == TecPopupAnimationType.slide
-              ? FractionalTranslation(translation: _offsetTween.evaluate(_animation), child: child)
-              : FadeScaleTransition(animation: _animation, child: child),
-        ),
+    final safeAreaInsets = MediaQuery.of(context).viewPadding;
+    // dmPrint('_TecModalPopupRoute buildTransitions safe area $safeAreaInsets');
+
+    return SafeArea(
+      bottom: false,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // dmPrint('_TecModalPopupRoute buildTransitions constraints: ${constraints.biggest}');
+
+          var align = alignment;
+          if (offset != null) {
+            final cx = constraints.maxWidth / 2;
+            final cy = constraints.maxHeight / 2;
+            final x = ((offset.dx - safeAreaInsets.left) - cx) / cx;
+            final y = ((offset.dy - safeAreaInsets.top) - cy) / cy;
+            align = Alignment(x, y);
+            // dmPrint('_TecModalPopupRoute buildTransitions alignment: $align');
+          }
+
+          return Container(
+            padding: edgeInsets,
+            child: ClipRect(
+              child: Align(
+                alignment: align,
+                child: animationType == TecPopupAnimationType.slide
+                    ? FractionalTranslation(
+                        translation: _offsetTween.evaluate(_animation), child: child)
+                    : FadeScaleTransition(animation: _animation, child: child),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -303,11 +275,17 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
 ///
 class _PopupSheetContent extends StatelessWidget {
   final Widget child;
+  final Widget title;
   final ScrollController scrollController;
   final EdgeInsets padding;
 
-  const _PopupSheetContent({Key key, @required this.child, this.scrollController, this.padding})
-      : super(key: key);
+  const _PopupSheetContent({
+    Key key,
+    @required this.child,
+    this.title,
+    this.scrollController,
+    this.padding,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -317,20 +295,33 @@ class _PopupSheetContent extends StatelessWidget {
         child: const SizedBox(width: 0.0, height: 0.0),
       );
     } else {
-      return CupertinoScrollbar(
-        child: SingleChildScrollView(
-          controller: scrollController,
-          child: Padding(
-            padding: padding ?? const EdgeInsets.all(14),
-            child: DefaultTextStyle(
-              style: _kPopupSheetContentStyle,
-              textAlign: TextAlign.center,
-              child: child,
-            ),
+      if (title != null) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            title,
+            Flexible(child: scrollableChild()),
+          ],
+        );
+      }
+      return scrollableChild();
+    }
+  }
+
+  Widget scrollableChild() {
+    return CupertinoScrollbar(
+      child: SingleChildScrollView(
+        controller: scrollController,
+        child: Padding(
+          padding: padding ?? const EdgeInsets.all(14),
+          child: DefaultTextStyle(
+            style: _kPopupSheetContentStyle,
+            textAlign: TextAlign.center,
+            child: child,
           ),
         ),
-      );
-    }
+      ),
+    );
   }
 }
 
@@ -342,3 +333,7 @@ const TextStyle _kPopupSheetContentStyle = TextStyle(
   color: Color(0xFF8F8F8F),
   textBaseline: TextBaseline.alphabetic,
 );
+
+void dmPrint(Object object) {
+  if (kDebugMode) print(object); // ignore: avoid_print
+}

@@ -515,6 +515,8 @@ class _BibleHtmlState extends State<_BibleHtml> {
   final _selectionController = TecSelectableController();
   ChapterViewModel _viewModel;
 
+  final _tecHtmlKey = GlobalKey(); 
+
   @override
   void initState() {
     super.initState();
@@ -592,6 +594,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
               children: <Widget>[
                 TecHtml(
                   widget.html,
+                  key: _tecHtmlKey,
                   debugId: debugId,
                   avoidUsingWidgetSpans: false,
                   scrollController: _scrollController,
@@ -620,7 +623,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
                   selectable: !_viewModel.hasVersesSelected,
                   selectionColor: selectionColor,
                   showSelection: !_viewModel.isSelectionTrialMode,
-                  selectionMenuItems: _viewModel.menuItems(context),
+                  selectionMenuItems: _viewModel.menuItems(context, _tecHtmlKey),
                   selectionController: _selectionController,
 
                   // `versesToShow` related (when viewing a subset of verses in the chapter):

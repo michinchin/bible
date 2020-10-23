@@ -21,7 +21,9 @@ import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/color_utils.dart';
 import '../../models/misc_utils.dart';
+import '../../models/rect_utils.dart';
 import '../../models/string_utils.dart';
+import '../common/common.dart';
 import '../note/margin_note_view.dart';
 import '../strongs/strongs_popup.dart';
 import '../xref/xref_popup.dart';
@@ -90,39 +92,33 @@ class ChapterViewModel {
 
       // Was it a long press on an xref?
       if (!handledTap &&
-          !hasSelection &&
+          // !hasSelection &&
           tag.isInXref &&
           tec.isNotNullOrEmpty(tag.href) &&
           _tapDownStopwatch.elapsed.inMilliseconds > 500 &&
           _tapDownTag is _VerseTag &&
           (_tapDownTag as _VerseTag).href == tag.href) {
-        handledTap = _handleXref(context, _tapDownTag as _VerseTag);
+        final verseTag = _tapDownTag as _VerseTag;
+        final reference =
+            Reference(volume: volume, book: book, chapter: chapter, verse: verseTag.verse);
+        handledTap = _handleXref(context, reference, null, verseTag, _tapUpDetails?.globalPosition);
       }
 
       // Was the tap near a margin note or footnote widget?
       // Note, `_tapUpDetails` is set in the `onTapUp` handler.
       if (!handledTap && !hasSelection && _tapUpDetails != null) {
-        final x = _tapUpDetails.globalPosition.dx;
-        final y = _tapUpDetails.globalPosition.dy;
-
-        final padding = MediaQuery.of(context).devicePixelRatio * 2.5;
+        final pt = _tapUpDetails.globalPosition;
 
         for (final key in _widgetKeys.keys) {
-          final renderBox = _widgetKeys[key].currentContext?.findRenderObject();
-          if (renderBox is RenderBox) {
-            final position = renderBox.localToGlobal(Offset.zero);
+          final rect = globalRectWithKey(_widgetKeys[key])?.inflate(8);
+          if (rect != null) {
+            // If the tap is above the widget, don't bother checking the rest of the widgets.
+            if (pt.dy < rect.top) break;
 
-            // If the tap is above widget, don't bother checking the rest of the widgets.
-            if (y < position.dy) break;
-
-            final hit = x >= (position.dx - padding) &&
-                x <= (position.dx + renderBox.size.width + padding) &&
-                y >= (position.dy - padding) &&
-                y <= (position.dy + renderBox.size.height + padding);
-
-            if (hit) {
+            // If the tap is in the rect...
+            if (rect.contains(pt)) {
               if (_widgetKeys[key].currentWidget is GestureDetector) {
-                // this is a widget hit - execute the tap...
+                // This is a widget hit. Execute the tap...
                 (_widgetKeys[key].currentWidget as GestureDetector).onTap();
                 handledTap = true;
                 break;
@@ -451,12 +447,13 @@ class ChapterViewModel {
     _clearAllSelectedVerses(context);
   }
 
-  Iterable<TecSelectableMenuItem> menuItems(BuildContext context) {
+  Iterable<TecSelectableMenuItem> menuItems(BuildContext context, GlobalKey key) {
     return [
       TecSelectableMenuItem(type: TecSelectableMenuItemType.define),
       TecSelectableMenuItem(
         title: 'Strong\'s',
-        isEnabled: (ctl) => _enableStrongs(ctl.selectionStart?.verseTag),
+        isEnabled: (ctl) =>
+            _enableStrongs(ctl.selectionStart?.verseTag, ctl.selectionEnd?.verseTag),
         handler: (ctl) {
           final handled = _handleStrongs(context, ctl.selectionStart?.verseTag);
           if (handled) ctl?.deselectAll();
@@ -465,9 +462,15 @@ class ChapterViewModel {
       ),
       TecSelectableMenuItem(
         title: 'Cross-ref',
-        isEnabled: (ctl) => _enableXref(ctl.selectionStart?.verseTag),
+        isEnabled: (ctl) => _enableXref(ctl.selectionStart?.verseTag, ctl.selectionEnd?.verseTag),
         handler: (ctl) {
-          final handled = _handleXref(context, ctl.selectionStart?.verseTag);
+          var handled = false;
+          final globalOffset = globalRectWithKey(key)?.topLeft;
+          if (globalOffset != null) {
+            final pt = ctl.rects.merged().center + globalOffset;
+            handled = _handleXref(
+                context, _selectionReference, ctl.text?.trim(), ctl.selectionStart?.verseTag, pt);
+          }
           if (handled) ctl?.deselectAll();
           return handled;
         },
@@ -475,8 +478,8 @@ class ChapterViewModel {
     ];
   }
 
-  bool _enableStrongs(_VerseTag tag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
+  bool _enableStrongs(_VerseTag tag, _VerseTag endTag) {
+    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href) && tag.href == endTag?.href) {
       final parts = tag.href.split(';');
       for (final part in parts) {
         if (part.startsWith('G') || part.startsWith('H')) return true;
@@ -502,14 +505,15 @@ class ChapterViewModel {
     return false;
   }
 
-  bool _enableXref(_VerseTag tag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
+  bool _enableXref(_VerseTag tag, _VerseTag endTag) {
+    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href) && tag.href == endTag?.href) {
       if (tag.href.contains('_') || tag.href.contains('/')) return true;
     }
     return false;
   }
 
-  bool _handleXref(BuildContext context, _VerseTag tag) {
+  bool _handleXref(
+      BuildContext context, Reference reference, String text, _VerseTag tag, Offset pt) {
     if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
       final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
 
@@ -519,8 +523,11 @@ class ChapterViewModel {
         } else {
           showXrefsPopup(
             context: context,
+            reference: reference,
+            text: text,
             xrefs: result.value,
-            insets: context.bloc<ViewManagerBloc>().globalInsetsOfView(viewUid, context),
+            offset: pt,
+            // insets: context.bloc<ViewManagerBloc>().globalInsetsOfView(viewUid, context),
           );
         }
       });
@@ -932,12 +939,12 @@ extension on TaggedText {
   }
 }
 
-extension on TecSelectableController {
-  /// Returns the number of verses that the selection spans.
-  int get verseCount => (selectionEnd?.verse ?? -1) + 1 - (selectionStart?.verse ?? 0);
+// extension on TecSelectableController {
+//   /// Returns the number of verses that the selection spans.
+//   int get verseCount => (selectionEnd?.verse ?? -1) + 1 - (selectionStart?.verse ?? 0);
 
-  /// Returns the number of words that are selected in a single verse. If more than one
-  /// verse is selected, `null` is returned.
-  int get wordCount =>
-      verseCount == 1 ? ((selectionEnd?.word ?? 0) - (selectionStart?.word ?? 0)) : null;
-}
+//   /// Returns the number of words that are selected in a single verse. If more than one
+//   /// verse is selected, `null` is returned.
+//   int get wordCount =>
+//       verseCount == 1 ? ((selectionEnd?.word ?? 0) - (selectionStart?.word ?? 0)) : null;
+// }
