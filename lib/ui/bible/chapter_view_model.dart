@@ -110,7 +110,7 @@ class ChapterViewModel {
         final pt = _tapUpDetails.globalPosition;
 
         for (final key in _widgetKeys.keys) {
-          final rect = globalRectWithKey(_widgetKeys[key])?.inflate(8);
+          final rect = globalRectWithKey(_widgetKeys[key])?.inflate(12);
           if (rect != null) {
             // If the tap is above the widget, don't bother checking the rest of the widgets.
             if (pt.dy < rect.top) break;
@@ -135,7 +135,6 @@ class ChapterViewModel {
     _tapDownStopwatch?.stop();
     _tapDownStopwatch = null;
     _tapDownTag = null;
-    _tapUpDetails = null;
   }
 
   InlineSpan _marginNoteSpan(
@@ -177,12 +176,8 @@ class ChapterViewModel {
               child: Padding(
                 padding: const EdgeInsets.only(top: 3.0),
                 child: kIsWeb
-                    ? Icon(
-                        FeatherIcons.fileText,
-                        size: iconWidth,
-                        color: color,
-                        semanticLabel: 'Margin Note',
-                      )
+                    ? Icon(FeatherIcons.fileText,
+                        size: iconWidth, color: color, semanticLabel: 'Margin Note')
                     : SvgPicture.asset('assets/marginNote.svg',
                         width: iconWidth,
                         height: iconWidth,
@@ -191,6 +186,7 @@ class ChapterViewModel {
               ),
             ),
           ),
+          onTapUp: (details) => _tapUpDetails = details,
           onTap: _onPress,
           onLongPress: _onPress,
         ),
@@ -213,14 +209,25 @@ class ChapterViewModel {
           // not sure if I want to force this...
           // _toggleSelectionForVerse(context, tag.verse);
         } else {
-          await showDialog<void>(
+          return showTecModalPopup<void>(
+            useRootNavigator: true,
             context: context,
-            barrierDismissible: true,
-            builder: (builder) {
-              return AlertDialog(
-                contentPadding: const EdgeInsets.all(0),
-                content: TecHtml(footnoteHtml.value, baseUrl: '', selectable: false),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            offset: _tapUpDetails?.globalPosition,
+            builder: (context) {
+              final maxWidth = math.min(320.0, MediaQuery.of(context).size.width);
+              return TecPopupSheet(
+                padding: const EdgeInsets.all(0),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    // color: Colors.red,
+                    constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
+                    child: GestureDetector(
+                      child: TecHtml(footnoteHtml.value, baseUrl: '', selectable: false),
+                      onTap: () => Navigator.of(context).maybePop(),
+                    ),
+                  ),
+                ),
               );
             },
           );
@@ -243,21 +250,21 @@ class ChapterViewModel {
           child: Align(
             alignment: Alignment.topLeft,
             child: Padding(
-                padding: const EdgeInsets.only(top: 3.0),
-                child: kIsWeb
-                    ? Icon(
-                        Icons.ac_unit,
-                        size: iconWidth,
-                        color: Theme.of(context).accentColor,
-                        semanticLabel: 'Footnote',
-                      )
-                    : SvgPicture.asset('assets/footnote.svg',
-                        width: iconWidth,
-                        height: iconWidth,
-                        color: Theme.of(context).accentColor,
-                        semanticsLabel: 'Footnote')),
+              padding: const EdgeInsets.only(top: 3.0),
+              child: kIsWeb
+                  ? Icon(Icons.ac_unit,
+                      size: iconWidth,
+                      color: Theme.of(context).accentColor,
+                      semanticLabel: 'Footnote')
+                  : SvgPicture.asset('assets/footnote.svg',
+                      width: iconWidth,
+                      height: iconWidth,
+                      color: Theme.of(context).accentColor,
+                      semanticsLabel: 'Footnote'),
+            ),
           ),
         ),
+        onTapUp: (details) => _tapUpDetails = details,
         onTap: _onPress,
         onLongPress: _onPress,
       ),
@@ -447,6 +454,87 @@ class ChapterViewModel {
     _clearAllSelectedVerses(context);
   }
 
+  void notifyOfSelections(BuildContext context) {
+    // Notify the view manager, if there is one.
+    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInView(viewUid, _selectionReference, context,
+        hasSelections: hasSelection);
+  }
+
+  ///
+  /// Handles the `TecSelectableController` `onSelectionChanged` callback.
+  ///
+  void onSelectionChanged(BuildContext context) {
+    // If any words are selected, clear selected verses, if any.
+    final isTextSelected = selectionController.isTextSelected;
+    if (isTextSelected) _clearAllSelectedVerses(context);
+
+    // Update _selectionStart and _selectionEnd.
+    final start = selectionController.selectionStart;
+    final end = selectionController.selectionEnd;
+    if (start != null && end != null) {
+      _selectionStart = start.tag is _VerseTag ? start : null;
+      _selectionEnd = end.tag is _VerseTag ? end : null;
+      if (_selectionStart == null || _selectionEnd == null) {
+        _selectionStart = _selectionEnd = null;
+        tec.dmPrint('ERROR, EITHER START OR END HAS INVALID TAG!');
+        tec.dmPrint('START: $_selectionStart');
+        tec.dmPrint('END:   $_selectionEnd');
+        assert(false);
+      } else {
+        // tec.dmPrint('START: $_selectionStart');
+        // tec.dmPrint('END:   $_selectionEnd');
+      }
+    } else {
+      _selectionStart = _selectionEnd = null;
+      // tec.dmPrint('No words selected.');
+    }
+
+    notifyOfSelections(context);
+  }
+
+  /// Returns the current selection reference, or null if nothing is selected.
+  Reference get _selectionReference => _selectedVerses.isNotEmpty
+      ? _referenceWithVerses(_selectedVerses, volume: volume, book: book, chapter: chapter)
+      : hasWordRangeSelected
+          ? Reference(
+              volume: volume,
+              book: book,
+              chapter: chapter,
+              verse: _selectionStart.verse,
+              word: _selectionStart.word,
+              endVerse: _selectionEnd.verse,
+              endWord: math.max(_selectionStart.word, _selectionEnd.word - 1))
+          : null;
+
+  ///
+  /// Handles selection style changed events.
+  ///
+  void handleSelectionCmd(BuildContext context, SelectionCmd cmd) {
+    final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
+    if (bloc == null || !hasSelection) return;
+
+    Reference ref() => _selectionReference;
+
+    cmd.when(clearStyle: () {
+      bloc.add(HighlightEvent.clear(ref(), HighlightMode.save));
+      clearAllSelections(context);
+    }, setStyle: (type, color) {
+      bloc.add(HighlightEvent.add(type: type, color: color, ref: ref(), mode: HighlightMode.save));
+      clearAllSelections(context);
+    }, tryStyle: (type, color) {
+      _isSelectionTrialMode = true;
+      bloc.add(HighlightEvent.add(type: type, color: color, ref: ref(), mode: HighlightMode.trial));
+    }, cancelTrial: () {
+      _isSelectionTrialMode = false;
+      bloc.add(HighlightEvent.clear(ref(), HighlightMode.trial));
+    }, deselectAll: () {
+      clearAllSelections(context);
+    });
+  }
+
+  //-------------------------------------------------------------------------
+  // Selection popup menu related:
+
   Iterable<TecSelectableMenuItem> menuItems(BuildContext context, GlobalKey key) {
     return [
       TecSelectableMenuItem(type: TecSelectableMenuItemType.define),
@@ -534,84 +622,6 @@ class ChapterViewModel {
       return true;
     }
     return false;
-  }
-
-  void notifyOfSelections(BuildContext context) {
-    // Notify the view manager, if there is one.
-    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInView(viewUid, _selectionReference, context,
-        hasSelections: hasSelection);
-  }
-
-  ///
-  /// Handles the `TecSelectableController` `onSelectionChanged` callback.
-  ///
-  void onSelectionChanged(BuildContext context) {
-    // If any words are selected, clear selected verses, if any.
-    final isTextSelected = selectionController.isTextSelected;
-    if (isTextSelected) _clearAllSelectedVerses(context);
-
-    // Update _selectionStart and _selectionEnd.
-    final start = selectionController.selectionStart;
-    final end = selectionController.selectionEnd;
-    if (start != null && end != null) {
-      _selectionStart = start.tag is _VerseTag ? start : null;
-      _selectionEnd = end.tag is _VerseTag ? end : null;
-      if (_selectionStart == null || _selectionEnd == null) {
-        _selectionStart = _selectionEnd = null;
-        tec.dmPrint('ERROR, EITHER START OR END HAS INVALID TAG!');
-        tec.dmPrint('START: $_selectionStart');
-        tec.dmPrint('END:   $_selectionEnd');
-        assert(false);
-      } else {
-        // tec.dmPrint('START: $_selectionStart');
-        // tec.dmPrint('END:   $_selectionEnd');
-      }
-    } else {
-      _selectionStart = _selectionEnd = null;
-      // tec.dmPrint('No words selected.');
-    }
-
-    notifyOfSelections(context);
-  }
-
-  /// Returns the current selection reference, or null if nothing is selected.
-  Reference get _selectionReference => _selectedVerses.isNotEmpty
-      ? _referenceWithVerses(_selectedVerses, volume: volume, book: book, chapter: chapter)
-      : hasWordRangeSelected
-          ? Reference(
-              volume: volume,
-              book: book,
-              chapter: chapter,
-              verse: _selectionStart.verse,
-              word: _selectionStart.word,
-              endVerse: _selectionEnd.verse,
-              endWord: math.max(_selectionStart.word, _selectionEnd.word - 1))
-          : null;
-
-  ///
-  /// Handles selection style changed events.
-  ///
-  void handleSelectionCmd(BuildContext context, SelectionCmd cmd) {
-    final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
-    if (bloc == null || !hasSelection) return;
-
-    Reference ref() => _selectionReference;
-
-    cmd.when(clearStyle: () {
-      bloc.add(HighlightEvent.clear(ref(), HighlightMode.save));
-      clearAllSelections(context);
-    }, setStyle: (type, color) {
-      bloc.add(HighlightEvent.add(type: type, color: color, ref: ref(), mode: HighlightMode.save));
-      clearAllSelections(context);
-    }, tryStyle: (type, color) {
-      _isSelectionTrialMode = true;
-      bloc.add(HighlightEvent.add(type: type, color: color, ref: ref(), mode: HighlightMode.trial));
-    }, cancelTrial: () {
-      _isSelectionTrialMode = false;
-      bloc.add(HighlightEvent.clear(ref(), HighlightMode.trial));
-    }, deselectAll: () {
-      clearAllSelections(context);
-    });
   }
 
   //
