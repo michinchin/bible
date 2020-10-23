@@ -71,10 +71,10 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
     }
 
     _correctHiddenValue = false;
-    _show(context);
+    _show(SheetController.of(context));
   }
 
-  void _show(BuildContext context) {
+  void _show(SheetController sheetController) {
     if (_correctHiddenValue) {
       // async issue - trying to do a delayed show - but it's supposed to be hidden
       // ignore
@@ -82,14 +82,14 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
     }
 
     // the sheet is supposed to visible now
-    if (SheetController.of(context).state.isHidden) {
+    if (sheetController.state == null || sheetController.state.isHidden) {
       // the sheet thinks it's actually hidden - ok to show now
-      SheetController.of(context).show();
+      sheetController.show();
     }
     else {
       // there was a quick change... need to wait for the async 'hidden' to finish
       Future.delayed(const Duration(milliseconds: 150), () {
-        _show(context);
+        _show(sheetController);
       });
     }
   }

@@ -60,6 +60,7 @@ class UserItemHelper {
     final itemsToDelete = <UserItem>[];
     for (final i in items) {
       if (i.book == 0 || i.chapter == 0 || i.verse == 0 || i.volumeId == 0) {
+        // delete invalid history entries
         itemsToDelete.add(i.copyWith(deleted: 1));
       } else {
         final ref = Reference(

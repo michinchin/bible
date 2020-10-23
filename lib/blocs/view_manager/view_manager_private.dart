@@ -441,8 +441,11 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
       bool isVisible = true,
       bool isMaximized = false,
     }) {
-      final rect = Rect.fromLTWH(isMaximized ? 0.0 : x, isMaximized ? 0.0 : y,
-          isMaximized ? constraints.maxWidth : width, isMaximized ? constraints.maxHeight : height);
+      // make hidden views same size as maximized for smoother swapping
+      final showMaximized = isMaximized || !isVisible;
+
+      final rect = Rect.fromLTWH(showMaximized ? 0.0 : x, showMaximized ? 0.0 : y,
+          showMaximized ? constraints.maxWidth : width, showMaximized ? constraints.maxHeight : height);
 
       rects.add(ViewRect(uid: state.uid, isVisible: isVisible, row: row, column: col, rect: rect));
 
@@ -499,7 +502,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
         final isMaximized = (maximizedView?.uid == state.uid);
 
         // special case - phone/small app view with 2 windows in portrait
-        // reducing space from the top window so both windows have save visible height
+        // reducing space from the top window so both windows have same visible height
         if (c == 0 &&
             length == 2 &&
             numViewsLimited &&

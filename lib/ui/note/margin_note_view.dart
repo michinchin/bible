@@ -128,6 +128,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   ZefyrController _controller;
   ViewManagerBloc viewManagerBloc;
   SheetManagerBloc sheetManagerBloc;
+  StreamSubscription<bool> keyboardListener;
   Timer _saveTimer;
   String _title;
   static const oldAppPrefix = 'You\'re using an old app.';
@@ -200,6 +201,10 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
 
   @override
   Future<void> dispose() async {
+    super.dispose();
+
+    await keyboardListener?.cancel();
+
     if (_saveTimer != null) {
       _saveTimer.cancel();
       _saveTimer = null;
@@ -207,19 +212,12 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     }
 
     _controller?.removeListener(_zephyrListener);
-    super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    KeyboardVisibility.onChange.listen(
-      (visible) {
-        if (visible) {
-          context?.bloc<SheetManagerBloc>()?.collapse(context);
-        }
-      },
-    );
+
     viewManagerBloc = context.bloc<ViewManagerBloc>();
     sheetManagerBloc = context.bloc<SheetManagerBloc>();
 
@@ -235,14 +233,28 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
       viewManagerBloc?.requestingKeyboardFocusInView(widget.state.uid);
     }
 
+    if (_editMode) {
+      sheetManagerBloc?.restore(context);
+    } else {
+      sheetManagerBloc?.collapse(context);
+    }
+
     setState(() {
       _editMode = !_editMode;
     });
 
     if (_editMode) {
-      sheetManagerBloc?.collapse(context);
-    } else {
-      sheetManagerBloc?.restore(context);
+      keyboardListener = KeyboardVisibility.onChange.listen(
+        (visible) {
+          if (!visible) {
+            _toggleEditMode();
+          }
+        },
+      );
+    }
+    else {
+      keyboardListener?.cancel();
+      keyboardListener = null;
     }
   }
 
@@ -309,11 +321,11 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
           ? null
           : Column(
               children: [
-                if (_editMode) ZefyrToolbar.basic(controller: _controller),
-                if (_editMode) Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
                 Expanded(
                   child: Container(
-                    color: Colors.blue,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black
+                        : Colors.white,
                     padding: EdgeInsets.only(left: 16, right: 16, bottom: _editMode ? 0 : 65),
                     child: ZefyrEditor(
                       controller: _controller,
@@ -327,6 +339,8 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
                     ),
                   ),
                 ),
+                // if (_editMode) Divider(height: 1, thickness: 1, color: Colors.grey.shade700),
+                if (_editMode) ZefyrToolbar.basic(controller: _controller),
               ],
             ),
     );

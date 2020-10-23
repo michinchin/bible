@@ -45,7 +45,7 @@ dependencies:
   share: ^0.6.5+3
   tuple: ^1.0.3
   url_launcher: ^5.7.5
-  zefyr: ^1.0.0-dev.1.0
+  # zefyr: ^1.0.0-dev.1.0
 
   # Internal dependencies
   sliding_sheet:
@@ -98,8 +98,14 @@ dependencies:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
     version: ^2.0.16
+  zefyr:
+    hosted:
+      name: zefyr
+      url: http://noah.tecarta.com:8100
+    version: ^1.0.0-dev.1.0
 
-# dependency_overrides:
+
+#dependency_overrides:
   # tec_util:
   #   path: ../shared/tec_util
   #  tec_widgets:

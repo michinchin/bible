@@ -1275,10 +1275,10 @@ packages:
   zefyr:
     dependency: "direct main"
     description:
-      name: zefyr
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../zefyr/packages/zefyr"
+      relative: true
+    source: path
     version: "1.0.0-dev.1.0"
 sdks:
-  dart: ">=2.10.0 <=2.11.0-213.1.beta"
+  dart: ">=2.10.0-110 <=2.11.0-213.1.beta"
   flutter: ">=1.22.0 <2.0.0"
