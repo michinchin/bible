@@ -70,7 +70,7 @@ class _VMViewStack extends StatelessWidget {
     // Build children and save the view rects.
     final viewRects = <ViewRect>[];
     final children = rows.toViewList(
-        adjustedConstraints, maximizedView, viewWithKeyboardFocus, viewRects,
+        context, adjustedConstraints, maximizedView, viewWithKeyboardFocus, viewRects,
         numViewsLimited: numViewsLimited);
     bloc?._viewRects = viewRects;
 
@@ -405,6 +405,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
   /// Returns the positioned view widgets.
   ///
   List<Widget> toViewList(
+    BuildContext context,
     BoxConstraints constraints,
     ViewState maximizedView,
     ViewState viewWithKeyboardFocus,
@@ -442,7 +443,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
       bool isMaximized = false,
     }) {
       // make hidden views same size as maximized for smoother swapping
-      final showMaximized = isMaximized || !isVisible;
+      final showMaximized = isMaximized /* || !isVisible */;
 
       final rect = Rect.fromLTWH(showMaximized ? 0.0 : x, showMaximized ? 0.0 : y,
           showMaximized ? constraints.maxWidth : width, showMaximized ? constraints.maxHeight : height);
@@ -495,10 +496,6 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           width = state.minWidth(constraints) + xDelta;
         }
 
-        if (viewWithKeyboardFocus?.uid == state.uid) {
-          viewWithKeyboardFocusIsVisible = true;
-        }
-
         final isMaximized = (maximizedView?.uid == state.uid);
 
         // special case - phone/small app view with 2 windows in portrait
@@ -512,8 +509,21 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           height += (r == 0) ? -heightAdjust : heightAdjust;
         }
 
-        _addViewWithIndex(i, state, r, c, row.length, x, y, width, height,
-            isVisible: noViewIsMaximized || isMaximized, isMaximized: isMaximized);
+        var addView = true;
+
+        if (viewWithKeyboardFocus?.uid == state.uid) {
+          // see if we need to maximize this view...
+          final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+          viewWithKeyboardFocusIsVisible = (y + height) <= (constraints.maxHeight - keyboardHeight);
+
+          // we'll add the view as a maxed view after all the other views have been added
+          addView = false;
+        }
+
+        if (addView) {
+          _addViewWithIndex(i, state, r, c, row.length, x, y, width, height,
+              isVisible: noViewIsMaximized || isMaximized, isMaximized: isMaximized);
+        }
 
         i++;
         c++;
