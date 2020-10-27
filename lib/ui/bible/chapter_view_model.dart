@@ -429,3 +429,34 @@ TextStyle _merge(TextStyle s1, TextStyle s2) => s1 == null
     : s2 == null
         ? s1
         : s1.merge(s2);
+
+///
+/// Returns the chapter HTML for the given volume, book, and chapter.
+/// 
+/// If the volume is a Bible, returns the Bible chapter HTML.
+/// 
+/// If the volume is study content, returns the study note HTML for the chapter.
+/// If the volume does not have study notes for the chapter, returns HTML with the
+/// message "Study notes are not available for this chapter."
+/// 
+Future<tec.ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int chapter) async {
+  if (volume is Bible) {
+    return volume.chapterHtmlWith(book, chapter);
+  } else {
+    final result = await volume.resourcesWithBook(book, chapter, ResourceType.studyNote);
+    assert(result != null);
+    if (result.error != null) {
+      return tec.ErrorOrValue<String>(result.error, null);
+    } else {
+      final html = StringBuffer();
+      for (final note in result.value) {
+        if (html.isNotEmpty) html.writeln('<p> </p>');
+        html.writeln('<div id="${note.verse}" end="${note.endVerse}">${note.textData}</div>');
+      }
+      if (html.isEmpty) {
+        html.writeln('<p>Study notes are not available for this chapter.</p>');
+      }
+      return tec.ErrorOrValue<String>(null, html.toString());
+    }
+  }
+}

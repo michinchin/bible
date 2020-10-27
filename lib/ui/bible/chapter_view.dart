@@ -245,37 +245,11 @@ class _PageableChapterViewState extends State<PageableChapterView> {
       // tec.dmPrint('Volume changed from ${_volume.id} to ${volume.id}.');
       _volume = volume;
       _bible = volume.assocBible;
-      // TODO(ron): need to do this?
-      // if (viewData is ChapterViewData && viewData.page != page) {
-      //   context.bloc<ViewDataBloc>()?.update(viewData.copyWith(page: page));
-      // }
     }
 
     if (_pageController != null && _pageController.page.round() != page) {
       // tec.dmPrint('Page changed from ${_pageController.page.round()} to $page');
       _pageController?.jumpToPage(page);
-    }
-  }
-}
-
-Future<tec.ErrorOrValue<String>> _chapterHtmlWith(Volume volume, int book, int chapter) async {
-  if (volume is Bible) {
-    return volume.chapterHtmlWith(book, chapter);
-  } else {
-    final result = await volume.resourcesWithBook(book, chapter, ResourceType.studyNote);
-    assert(result != null);
-    if (result.error != null) {
-      return tec.ErrorOrValue<String>(result.error, null);
-    } else {
-      final html = StringBuffer();
-      for (final note in result.value) {
-        if (html.isNotEmpty) html.writeln('<p> </p>');
-        html.writeln('<div id="${note.verse}" end="${note.endVerse}">${note.textData}</div>');
-      }
-      if (html.isEmpty) {
-        html.writeln('<p>Study notes are not available for this chapter.</p>');
-      }
-      return tec.ErrorOrValue<String>(null, html.toString());
     }
   }
 }
@@ -304,15 +278,19 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
   @override
   void initState() {
     super.initState();
-    _future = _chapterHtmlWith(widget.volume, widget.ref.book, widget.ref.chapter);
+    _update();
   }
 
   @override
   void didUpdateWidget(_BibleChapterView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.volume.id != widget.volume.id || oldWidget.ref != widget.ref) {
-      _future = _chapterHtmlWith(widget.volume, widget.ref.book, widget.ref.chapter);
+      _update();
     }
+  }
+
+  void _update() {
+    _future = chapterHtmlWith(widget.volume, widget.ref.book, widget.ref.chapter);
   }
 
   @override
@@ -456,7 +434,7 @@ class _ChapterViewState extends State<_ChapterView> {
                 if (userContentValid && highlights.loaded && marginNotes.loaded) {
                   // tec.dmPrint('loading ${widget.ref.chapter}');
 
-                  return _BibleHtml(
+                  return _ChapterHtml(
                     viewUid: widget.viewUid,
                     volumeId: widget.volume.id,
                     ref: widget.ref,
@@ -482,7 +460,7 @@ class _ChapterViewState extends State<_ChapterView> {
   }
 }
 
-class _BibleHtml extends StatefulWidget {
+class _ChapterHtml extends StatefulWidget {
   final int viewUid;
   final int volumeId;
   final BookChapterVerse ref;
@@ -494,7 +472,7 @@ class _BibleHtml extends StatefulWidget {
   final ChapterHighlights highlights;
   final ChapterMarginNotes marginNotes;
 
-  const _BibleHtml({
+  const _ChapterHtml({
     Key key,
     @required this.viewUid,
     @required this.volumeId,
@@ -509,10 +487,10 @@ class _BibleHtml extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _BibleHtmlState createState() => _BibleHtmlState();
+  _ChapterHtmlState createState() => _ChapterHtmlState();
 }
 
-class _BibleHtmlState extends State<_BibleHtml> {
+class _ChapterHtmlState extends State<_ChapterHtml> {
   final _scrollController = ScrollController();
   final _wordSelectionController = TecSelectableController();
   ChapterSelection _selection;
@@ -557,7 +535,7 @@ class _BibleHtmlState extends State<_BibleHtml> {
   @override
   Widget build(BuildContext context) {
     final debugId = '${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}';
-    // tec.dmPrint('_BibleHtml building TecHtml for $debugId ${widget.size}');
+    // tec.dmPrint('_ChapterHtml building TecHtml for $debugId ${widget.size}');
 
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
@@ -599,50 +577,48 @@ class _BibleHtmlState extends State<_BibleHtml> {
                 context.bloc<SheetManagerBloc>().restore(context);
               }
             },
-            child: ListView(
+            child: SingleChildScrollView(
               controller: _scrollController,
-              children: <Widget>[
-                TecHtml(
-                  widget.html,
-                  key: _tecHtmlKey,
-                  debugId: debugId,
-                  avoidUsingWidgetSpans: false,
-                  scrollController: _scrollController,
-                  baseUrl: widget.baseUrl,
-                  textScaleFactor: 1.0,
-                  // HTML is already scaled.
-                  textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
-                      ? TextStyle(color: textColor)
-                      : widget.fontName.startsWith('embedded_')
-                          ? TextStyle(color: textColor, fontFamily: widget.fontName.substring(9))
-                          : GoogleFonts.getFont(widget.fontName, color: textColor)),
+              child: TecHtml(
+                widget.html,
+                key: _tecHtmlKey,
+                debugId: debugId,
+                avoidUsingWidgetSpans: false,
+                scrollController: _scrollController,
+                baseUrl: widget.baseUrl,
+                textScaleFactor: 1.0,
+                // HTML is already scaled.
+                textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
+                    ? TextStyle(color: textColor)
+                    : widget.fontName.startsWith('embedded_')
+                        ? TextStyle(color: textColor, fontFamily: widget.fontName.substring(9))
+                        : GoogleFonts.getFont(widget.fontName, color: textColor)),
 
-                  padding: EdgeInsets.symmetric(
-                    horizontal: (widget.size.width * _marginPercent).roundToDouble(),
-                  ),
-
-                  // Tagging HTML elements:
-                  tagHtmlElement: helper.tagHtmlElement,
-
-                  // Rendering HTML text to a TextSpan:
-                  spanForText: (text, style, tag) => _viewModel.spanForText(
-                      context, text, style, tag, selectedTextStyle,
-                      isDarkTheme: isDarkTheme),
-
-                  // Word range selection related:
-                  selectable: !_selection.hasVerses,
-                  selectionColor: selectionColor,
-                  showSelection: !_selection.isInTrialMode,
-                  selectionMenuItems: _selection.menuItems(context, _tecHtmlKey),
-                  selectionController: _wordSelectionController,
-
-                  // `versesToShow` related (when viewing a subset of verses in the chapter):
-                  isInitialHtmlElementVisible:
-                      widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
-                  toggleVisibilityWithHtmlElement: helper.toggleVisibility,
-                  shouldSkipHtmlElement: helper.shouldSkip,
+                padding: EdgeInsets.symmetric(
+                  horizontal: (widget.size.width * _marginPercent).roundToDouble(),
                 ),
-              ],
+
+                // Tagging HTML elements:
+                tagHtmlElement: helper.tagHtmlElement,
+
+                // Rendering HTML text to a TextSpan:
+                spanForText: (text, style, tag) => _viewModel.spanForText(
+                    context, text, style, tag, selectedTextStyle,
+                    isDarkTheme: isDarkTheme),
+
+                // Word range selection related:
+                selectable: !_selection.hasVerses,
+                selectionColor: selectionColor,
+                showSelection: !_selection.isInTrialMode,
+                selectionMenuItems: _selection.menuItems(context, _tecHtmlKey),
+                selectionController: _wordSelectionController,
+
+                // `versesToShow` related (when viewing a subset of verses in the chapter):
+                isInitialHtmlElementVisible:
+                    widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
+                toggleVisibilityWithHtmlElement: helper.toggleVisibility,
+                shouldSkipHtmlElement: helper.shouldSkip,
+              ),
             ),
           ),
         ),
