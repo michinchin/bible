@@ -23,6 +23,8 @@ import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
 import '../library/library.dart';
+import 'chapter_build_helper.dart';
+import 'chapter_selection.dart';
 import 'chapter_view_app_bar.dart';
 import 'chapter_view_model.dart';
 
@@ -512,34 +514,42 @@ class _BibleHtml extends StatefulWidget {
 
 class _BibleHtmlState extends State<_BibleHtml> {
   final _scrollController = ScrollController();
-  final _selectionController = TecSelectableController();
+  final _wordSelectionController = TecSelectableController();
+  ChapterSelection _selection;
   ChapterViewModel _viewModel;
 
-  final _tecHtmlKey = GlobalKey(); 
+  final _tecHtmlKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
 
     // tec.dmPrint('New ChapterViewModel for ${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}');
+
+    _selection = ChapterSelection(
+        wordSelectionController: _wordSelectionController,
+        widgetNeedsRebuild: (fn) => mounted ? setState(fn) : null,
+        viewUid: widget.viewUid,
+        volume: widget.volumeId,
+        book: widget.ref.book,
+        chapter: widget.ref.chapter);
+
+    _wordSelectionController.addListener(() => _selection.onWordSelectionChanged(context));
+
     _viewModel = ChapterViewModel(
       viewUid: widget.viewUid,
       volume: widget.volumeId,
       book: widget.ref.book,
       chapter: widget.ref.chapter,
-      versesToShow: () => widget.versesToShow,
       highlights: () => widget.highlights,
       marginNotes: () => widget.marginNotes,
-      selectionController: _selectionController,
-      refreshFunc: (fn) => mounted ? setState(fn) : null,
+      selection: _selection,
     );
-
-    _selectionController.addListener(() => _viewModel.onSelectionChanged(context));
   }
 
   @override
   void dispose() {
-    _selectionController.dispose();
+    _wordSelectionController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -555,19 +565,19 @@ class _BibleHtmlState extends State<_BibleHtml> {
     final selectedTextStyle =
         TextStyle(backgroundColor: isDarkTheme ? const Color(0xff393939) : const Color(0xffe6e6e6));
 
-    // A new [TecHtmlBuildHelper] needs to be created for each build...
-    final helper = _viewModel.tecHtmlBuildHelper();
+    // A new [ChapterBuildHelper] needs to be created for each build...
+    final helper = ChapterBuildHelper(widget.volumeId, widget.versesToShow);
 
     return MultiBlocListener(
       listeners: [
         BlocListener<SelectionCmdBloc, SelectionCmd>(
-          listener: (context, cmd) => _viewModel.handleSelectionCmd(context, cmd),
+          listener: (context, cmd) => _selection.handleCmd(context, cmd),
         ),
         BlocListener<ViewDataBloc, ViewData>(
           listener: (context, viewData) {
             if (viewData.asChapterViewData.bcv == widget.ref) {
               // tec.dmPrint('Notifying of selections for ${widget.ref}');
-              _viewModel.notifyOfSelections(context);
+              _selection.notifyOfSelections(context);
             } else {
               // tec.dmPrint('Ignoring selections in ${widget.ref}');
             }
@@ -620,11 +630,11 @@ class _BibleHtmlState extends State<_BibleHtml> {
                       isDarkTheme: isDarkTheme),
 
                   // Word range selection related:
-                  selectable: !_viewModel.hasVersesSelected,
+                  selectable: !_selection.hasVerses,
                   selectionColor: selectionColor,
-                  showSelection: !_viewModel.isSelectionTrialMode,
-                  selectionMenuItems: _viewModel.menuItems(context, _tecHtmlKey),
-                  selectionController: _selectionController,
+                  showSelection: !_selection.isInTrialMode,
+                  selectionMenuItems: _selection.menuItems(context, _tecHtmlKey),
+                  selectionController: _wordSelectionController,
 
                   // `versesToShow` related (when viewing a subset of verses in the chapter):
                   isInitialHtmlElementVisible:

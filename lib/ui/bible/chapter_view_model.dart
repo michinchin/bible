@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -17,18 +16,13 @@ import '../../blocs/content_settings.dart';
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
-import '../../blocs/view_data/volume_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/color_utils.dart';
-import '../../models/misc_utils.dart';
-import '../../models/rect_utils.dart';
 import '../../models/string_utils.dart';
 import '../common/common.dart';
 import '../note/margin_note_view.dart';
-import '../strongs/strongs_popup.dart';
-import '../xref/xref_popup.dart';
-
-const _debugMode = false; // kDebugMode
+import 'chapter_selection.dart';
+import 'verse_tag.dart';
 
 ///
 /// ChapterViewModel
@@ -38,240 +32,26 @@ class ChapterViewModel {
   final int volume;
   final int book;
   final int chapter;
-  final List<String> Function() versesToShow;
   final ChapterHighlights Function() highlights;
   final ChapterMarginNotes Function() marginNotes;
-  final TecSelectableController selectionController;
-  final void Function(VoidCallback fn) refreshFunc;
+  final ChapterSelection selection;
 
   ///
   /// Returns a new [ChapterViewModel].
   ///
-  /// Note, the [versesToShow] and [highlights] parameters are functions that will be called as
-  /// needed to get the current value of the indicated property, since the property value can
-  /// change between widget rebuilds.
+  /// Note, the [highlights] and [marginNotes] parameters are functions that will be called
+  /// as needed to get the current value of the indicated property, since the property value
+  /// can change between widget rebuilds.
   ///
   ChapterViewModel({
     @required this.viewUid,
     @required this.volume,
     @required this.book,
     @required this.chapter,
-    @required this.versesToShow,
     @required this.highlights,
     @required this.marginNotes,
-    @required this.selectionController,
-    @required this.refreshFunc,
-  }) : assert(volume != null &&
-            book != null &&
-            chapter != null &&
-            versesToShow != null &&
-            highlights != null &&
-            selectionController != null &&
-            refreshFunc != null);
-
-  // ignore: use_to_and_as_if_applicable
-  TecHtmlBuildHelper tecHtmlBuildHelper() => TecHtmlBuildHelper(this);
-
-  // Maintain a list of keys for footnotes, margin notes, ...
-  final _widgetKeys = <String, GlobalKey>{};
-
-  var _marginNoteVerse = 0;
-  String _currentFootnoteHref;
-
-  Color _backgroundColor(bool isDarkTheme) {
-    return isDarkTheme ? Colors.black : Colors.white;
-  }
-
-  Stopwatch _tapDownStopwatch;
-  Object _tapDownTag;
-  Offset _tapGlobalPosition;
-
-  void _onTappedSpanWithTag(BuildContext context, Object tag) {
-    if (tag is _VerseTag) {
-      var handledTap = false;
-
-      // Was it a long press on an xref?
-      if (!handledTap &&
-          // !hasSelection &&
-          tag.isInXref &&
-          tec.isNotNullOrEmpty(tag.href) &&
-          _tapDownStopwatch.elapsed.inMilliseconds > 500 &&
-          _tapDownTag is _VerseTag &&
-          (_tapDownTag as _VerseTag).href == tag.href) {
-        final verseTag = _tapDownTag as _VerseTag;
-        final reference =
-            Reference(volume: volume, book: book, chapter: chapter, verse: verseTag.verse);
-        handledTap = _handleXref(context, reference, null, verseTag, _tapGlobalPosition);
-      }
-
-      // Was the tap near a margin note or footnote widget?
-      // Note, `_tapGlobalPosition` is set in the `onTapUp` handler.
-      if (!handledTap && !hasSelection && _tapGlobalPosition != null) {
-        final pt = _tapGlobalPosition;
-
-        for (final key in _widgetKeys.keys) {
-          final rect = globalRectWithKey(_widgetKeys[key])?.inflate(12);
-          if (rect != null) {
-            // If the tap is above the widget, don't bother checking the rest of the widgets.
-            if (pt.dy < rect.top) break;
-
-            // If the tap is in the rect...
-            if (rect.contains(pt)) {
-              if (_widgetKeys[key].currentWidget is GestureDetector) {
-                // This is a widget hit. Execute the tap...
-                (_widgetKeys[key].currentWidget as GestureDetector).onTap();
-                handledTap = true;
-                break;
-              }
-            }
-          }
-        }
-      }
-
-      // If the tap hasn't been handled yet and this is a bible, toggle verse selection.
-      if (!handledTap && volume < 1000) _toggleSelectionForVerse(context, tag.verse);
-    }
-
-    _tapDownStopwatch?.stop();
-    _tapDownStopwatch = null;
-    _tapDownTag = null;
-  }
-
-  InlineSpan _marginNoteSpan(
-      BuildContext context, TextStyle style, _VerseTag tag, Key key, bool isDarkTheme) {
-    final color = isDarkTheme ? const Color(0xFFFAFAFA) : const Color(0xFFA1090E);
-    final iconWidth = (style.fontSize ?? 16.0) / 1.2;
-    final widgetWidth = iconWidth;
-
-    void _onPress() {
-      if (hasSelection) {
-        TecToast.show(context, 'Clear selection to view margin note');
-        // not sure if I want to force this...
-        // _toggleSelectionForVerse(context, tag.verse);
-      } else {
-        final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-        final position = vmBloc?.indexOfView(viewUid) ?? -1;
-        final mn = marginNotes().marginNoteForVerse(tag.verse);
-        vmBloc?.add(ViewManagerEvent.add(
-            type: marginNoteViewType,
-            data: tec.toJsonString(mn.stateJson()),
-            position: position == -1 ? null : position + 1));
-      }
-    }
-
-    return TaggableWidgetSpan(
-      alignment: PlaceholderAlignment.middle,
-      childWidth: widgetWidth,
-      child: Transform.translate(
-        offset: Offset(-iconWidth / 4.5, 0),
-        child: GestureDetector(
-          key: key,
-          child: Container(
-            width: widgetWidth,
-            // use app settings height to determine correct line height
-            height: context.bloc<ContentSettingsBloc>().state.textScaleFactor * 18.0,
-            decoration: BoxDecoration(color: _backgroundColor(isDarkTheme)),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 3.0),
-                child: kIsWeb
-                    ? Icon(FeatherIcons.fileText,
-                        size: iconWidth, color: color, semanticLabel: 'Margin Note')
-                    : SvgPicture.asset('assets/marginNote.svg',
-                        width: iconWidth,
-                        height: iconWidth,
-                        color: color,
-                        semanticsLabel: 'Margin Note'),
-              ),
-            ),
-          ),
-          onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
-          onTap: _onPress,
-          onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
-          onLongPress: _onPress,
-        ),
-      ),
-    );
-  }
-
-  InlineSpan _footnoteSpan(
-      BuildContext context, TextStyle style, _VerseTag tag, Key key, bool isDarkTheme) {
-    final iconWidth = (style.fontSize ?? 16.0) * 0.6;
-    final containerWidth = iconWidth + 4.0; // small right padding
-
-    Future<void> _onPress() async {
-      final bible = VolumesRepository.shared.bibleWithId(volume);
-      final footnoteHtml =
-          await bible.footnoteHtmlWith(book, chapter, int.parse(tag.href.split('_').last));
-      if (tec.isNotNullOrEmpty(footnoteHtml.value)) {
-        if (hasSelection) {
-          TecToast.show(context, 'Clear selection to view footnote');
-          // not sure if I want to force this...
-          // _toggleSelectionForVerse(context, tag.verse);
-        } else {
-          return showTecModalPopup<void>(
-            useRootNavigator: true,
-            context: context,
-            offset: _tapGlobalPosition,
-            builder: (context) {
-              final maxWidth = math.min(320.0, MediaQuery.of(context).size.width);
-              return TecPopupSheet(
-                padding: const EdgeInsets.all(0),
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    // color: Colors.red,
-                    constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
-                    child: GestureDetector(
-                      child: TecHtml(footnoteHtml.value, baseUrl: '', selectable: false),
-                      onTap: () => Navigator.of(context).maybePop(),
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        }
-      } else if (tec.isNullOrEmpty(footnoteHtml.error)) {
-        tec.dmPrint('ERROR: ${footnoteHtml?.error}');
-      }
-    }
-
-    return TaggableWidgetSpan(
-      alignment: PlaceholderAlignment.top,
-      childWidth: containerWidth,
-      child: GestureDetector(
-        key: key,
-        child: Container(
-          width: containerWidth,
-          // use app settings height to determine correct line height
-          height: context.bloc<ContentSettingsBloc>().state.textScaleFactor * 18.0,
-          decoration: BoxDecoration(color: _backgroundColor(isDarkTheme)),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 3.0),
-              child: kIsWeb
-                  ? Icon(Icons.ac_unit,
-                      size: iconWidth,
-                      color: Theme.of(context).accentColor,
-                      semanticLabel: 'Footnote')
-                  : SvgPicture.asset('assets/footnote.svg',
-                      width: iconWidth,
-                      height: iconWidth,
-                      color: Theme.of(context).accentColor,
-                      semanticsLabel: 'Footnote'),
-            ),
-          ),
-        ),
-        onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
-        onTap: _onPress,
-        onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
-        onLongPress: _onPress,
-      ),
-    );
-  }
+    @required this.selection,
+  }) : assert(volume != null && book != null && chapter != null && highlights != null);
 
   ///
   /// Returns a TextSpan (or WidgetSpan) for the given HTML text node.
@@ -284,7 +64,7 @@ class ChapterViewModel {
     TextStyle selectedTextStyle, {
     bool isDarkTheme,
   }) {
-    if (tag is _VerseTag && tag.isInFootnote) {
+    if (tag is VerseTag && tag.isInFootnote) {
       if (tag.href != _currentFootnoteHref) {
         _currentFootnoteHref = tag.href;
 
@@ -297,7 +77,7 @@ class ChapterViewModel {
       return null;
     }
 
-    if (tag is _VerseTag) {
+    if (tag is VerseTag) {
       final recognizer = tag.verse == null ? null : TapGestureRecognizer();
       if (recognizer != null) {
         recognizer
@@ -338,7 +118,7 @@ class ChapterViewModel {
 
       // If not in trial mode, and this whole verse is selected, just
       // return a span with the selected text style.
-      if (!_isSelectionTrialMode && _selectedVerses.contains(tag.verse)) {
+      if (!selection.isInTrialMode && selection.hasVerse(tag.verse)) {
         final textSpan = TaggableTextSpan(
             text: text,
             style: tag.isInVerse ? _merge(textStyle, selectedTextStyle) : textStyle,
@@ -435,408 +215,211 @@ class ChapterViewModel {
     return TextSpan(text: text, style: style);
   }
 
-  //-------------------------------------------------------------------------
-  // Selection related:
-
-  /// Returns `true` iff verses or words are selected.
-  bool get hasSelection => hasVersesSelected || hasWordRangeSelected;
-
-  /// Returns `true` iff one or more verses is selected.
-  bool get hasVersesSelected => _selectedVerses.isNotEmpty;
-
-  /// Returns `true` iff a word range is selected.
-  bool get hasWordRangeSelected => _selectionStart != null;
-
-  bool get isSelectionTrialMode => _isSelectionTrialMode;
-
-  /// Call to clear all selections, if any.
-  void clearAllSelections(BuildContext context) {
-    _isSelectionTrialMode = false;
-    selectionController.deselectAll();
-    _clearAllSelectedVerses(context);
-  }
-
-  void notifyOfSelections(BuildContext context) {
-    // Notify the view manager, if there is one.
-    context.bloc<ViewManagerBloc>()?.notifyOfSelectionsInView(viewUid, _selectionReference, context,
-        hasSelections: hasSelection);
-  }
-
-  ///
-  /// Handles the `TecSelectableController` `onSelectionChanged` callback.
-  ///
-  void onSelectionChanged(BuildContext context) {
-    // If any words are selected, clear selected verses, if any.
-    final isTextSelected = selectionController.isTextSelected;
-    if (isTextSelected) _clearAllSelectedVerses(context);
-
-    // Update _selectionStart and _selectionEnd.
-    final start = selectionController.selectionStart;
-    final end = selectionController.selectionEnd;
-    if (start != null && end != null) {
-      _selectionStart = start.tag is _VerseTag ? start : null;
-      _selectionEnd = end.tag is _VerseTag ? end : null;
-      if (_selectionStart == null || _selectionEnd == null) {
-        _selectionStart = _selectionEnd = null;
-        tec.dmPrint('ERROR, EITHER START OR END HAS INVALID TAG!');
-        tec.dmPrint('START: $_selectionStart');
-        tec.dmPrint('END:   $_selectionEnd');
-        assert(false);
-      } else {
-        // tec.dmPrint('START: $_selectionStart');
-        // tec.dmPrint('END:   $_selectionEnd');
-      }
-    } else {
-      _selectionStart = _selectionEnd = null;
-      // tec.dmPrint('No words selected.');
-    }
-
-    notifyOfSelections(context);
-  }
-
-  /// Returns the current selection reference, or null if nothing is selected.
-  Reference get _selectionReference => _selectedVerses.isNotEmpty
-      ? _referenceWithVerses(_selectedVerses, volume: volume, book: book, chapter: chapter)
-      : hasWordRangeSelected
-          ? Reference(
-              volume: volume,
-              book: book,
-              chapter: chapter,
-              verse: _selectionStart.verse,
-              word: _selectionStart.word,
-              endVerse: _selectionEnd.verse,
-              endWord: math.max(_selectionStart.word, _selectionEnd.word - 1))
-          : null;
-
-  ///
-  /// Handles selection style changed events.
-  ///
-  void handleSelectionCmd(BuildContext context, SelectionCmd cmd) {
-    final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
-    if (bloc == null || !hasSelection) return;
-
-    Reference ref() => _selectionReference;
-
-    cmd.when(clearStyle: () {
-      bloc.add(HighlightEvent.clear(ref(), HighlightMode.save));
-      clearAllSelections(context);
-    }, setStyle: (type, color) {
-      bloc.add(HighlightEvent.add(type: type, color: color, ref: ref(), mode: HighlightMode.save));
-      clearAllSelections(context);
-    }, tryStyle: (type, color) {
-      _isSelectionTrialMode = true;
-      bloc.add(HighlightEvent.add(type: type, color: color, ref: ref(), mode: HighlightMode.trial));
-    }, cancelTrial: () {
-      _isSelectionTrialMode = false;
-      bloc.add(HighlightEvent.clear(ref(), HighlightMode.trial));
-    }, deselectAll: () {
-      clearAllSelections(context);
-    }, noOp: () {
-      // no-op
-    });
-  }
-
-  //-------------------------------------------------------------------------
-  // Selection popup menu related:
-
-  Iterable<TecSelectableMenuItem> menuItems(BuildContext context, GlobalKey key) {
-    return [
-      TecSelectableMenuItem(type: TecSelectableMenuItemType.define),
-      TecSelectableMenuItem(
-        title: 'Strong\'s',
-        isEnabled: (ctl) =>
-            _enableStrongs(ctl.selectionStart?.verseTag, ctl.selectionEnd?.verseTag),
-        handler: (ctl) {
-          final handled = _handleStrongs(context, ctl.selectionStart?.verseTag);
-          if (handled) ctl?.deselectAll();
-          return handled;
-        },
-      ),
-      TecSelectableMenuItem(
-        title: 'Cross-ref',
-        isEnabled: (ctl) => _enableXref(ctl.selectionStart?.verseTag, ctl.selectionEnd?.verseTag),
-        handler: (ctl) {
-          var handled = false;
-          final globalOffset = globalRectWithKey(key)?.topLeft;
-          if (globalOffset != null) {
-            final pt = ctl.rects.merged().center + globalOffset;
-            handled = _handleXref(
-                context, _selectionReference, ctl.text?.trim(), ctl.selectionStart?.verseTag, pt);
-          }
-          if (handled) ctl?.deselectAll();
-          return handled;
-        },
-      ),
-    ];
-  }
-
-  bool _enableStrongs(_VerseTag tag, _VerseTag endTag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href) && tag.href == endTag?.href) {
-      final parts = tag.href.split(';');
-      for (final part in parts) {
-        if (part.startsWith('G') || part.startsWith('H')) return true;
-      }
-    }
-    return false;
-  }
-
-  bool _handleStrongs(BuildContext context, _VerseTag tag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
-      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
-      final parts = tag.href.split(';');
-      for (final part in parts) {
-        if (part.startsWith('G') || part.startsWith('H')) {
-          bible?.strongsHtmlWith(part)?.then((result) {
-            final html = result?.value == null ? '<p>${result?.error}</p>' : result.value;
-            showStrongsPopup(context: context, title: part, html: html);
-          });
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  bool _enableXref(_VerseTag tag, _VerseTag endTag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href) && tag.href == endTag?.href) {
-      if (tag.href.contains('_') || tag.href.contains('/')) return true;
-    }
-    return false;
-  }
-
-  bool _handleXref(
-      BuildContext context, Reference reference, String text, _VerseTag tag, Offset pt) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
-      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
-
-      bible?.xrefsWithHrefProperty(tag.href)?.then((result) {
-        if (result?.value?.isEmpty ?? true) {
-          // TODO(ron): ...
-        } else {
-          showXrefsPopup(
-            context: context,
-            reference: reference,
-            text: text,
-            xrefs: result.value,
-            offset: pt,
-            // insets: context.bloc<ViewManagerBloc>().globalInsetsOfView(viewUid, context),
-          );
-        }
-      });
-      return true;
-    }
-    return false;
-  }
-
   //
   // PRIVATE STUFF
   //
 
-  var _isSelectionTrialMode = false;
+  // Maintain a list of keys for footnotes, margin notes, ...
+  final _widgetKeys = <String, GlobalKey>{};
 
-  TaggedText _selectionStart;
-  TaggedText _selectionEnd;
+  var _marginNoteVerse = 0;
+  String _currentFootnoteHref;
 
-  final _selectedVerses = <int>{};
-
-  void _toggleSelectionForVerse(BuildContext context, int verse) {
-    assert(verse != null);
-    _updateSelectedVersesInBlock(() {
-      if (!_selectedVerses.remove(verse)) _selectedVerses.add(verse);
-    }, context);
+  Color _backgroundColor(bool isDarkTheme) {
+    return isDarkTheme ? Colors.black : Colors.white;
   }
 
-  void _clearAllSelectedVerses(BuildContext context) {
-    if (_selectedVerses.isEmpty) return;
-    _updateSelectedVersesInBlock(_selectedVerses.clear, context);
-  }
+  Stopwatch _tapDownStopwatch;
+  Object _tapDownTag;
+  Offset _tapGlobalPosition;
 
-  void _updateSelectedVersesInBlock(void Function() block, BuildContext context) {
-    TecAutoScroll.stopAutoscroll();
-    refreshFunc(block);
-    tec.dmPrint('selected verses: $_selectedVerses');
-    notifyOfSelections(context);
-  }
-}
+  void _onTappedSpanWithTag(BuildContext context, Object tag) {
+    if (tag is VerseTag) {
+      var handledTap = false;
 
-///
-/// [TecHtmlBuildHelper]
-///
-/// Note, a new [TecHtmlBuildHelper] should be created for each `TechHtml` widget build,
-/// the same helper cannot be used for multiple widget builds.
-///
-class TecHtmlBuildHelper {
-  final ChapterViewModel viewModel;
-
-  TecHtmlBuildHelper(this.viewModel);
-
-  TecHtmlTagElementFunc get tagHtmlElement => _tagHtmlElement;
-
-  var _currentVerse = 1;
-  var _currentWord = 0;
-  var _isInVerse = false;
-  var _isInNonVerseElement = false;
-  var _nonVerseElementLevel = 0;
-  var _wasInVerse = false;
-
-  var _isInFootnote = false;
-  var _footnoteElementLevel = 0;
-
-  var _isInXref = false;
-  var _xrefElementLevel = 0;
-
-  String _href;
-
-  ///
-  /// Returns the _VerseTag for the given HTML element.
-  ///
-  Object _tagHtmlElement(
-    String name,
-    LinkedHashMap<dynamic, String> attrs,
-    String text,
-    int level,
-    bool isVisible,
-  ) {
-    if (_isInNonVerseElement && level <= _nonVerseElementLevel) {
-      _isInNonVerseElement = false;
-      _isInVerse = _wasInVerse;
-    }
-
-    // NOTE: footnotes and xrefs should NOT be nested
-
-    // if we are in an xref - do we need to end it?
-    if (_isInXref && level <= _xrefElementLevel) {
-      _isInXref = false;
-      _href = null;
-    }
-
-    // if we are in a footnote - do we need to end it?
-    else if (_isInFootnote && level <= _footnoteElementLevel) {
-      _isInFootnote = false;
-      _href = null;
-    }
-
-    // do we need to start an xref or footnote
-    if (!_isInXref && attrs.className.contains('xref')) {
-      _isInXref = true;
-      _xrefElementLevel = level;
-      _href = attrs['href'];
-    } else if (!_isInFootnote && attrs.className.contains('FOOTNO')) {
-      _isInFootnote = true;
-      _footnoteElementLevel = level;
-      _href = attrs['href'];
-    }
-
-    if (!_isInNonVerseElement) {
-      final id = attrs.id;
-      if (tec.isNotNullOrEmpty(id) &&
-          name == 'div' &&
-          (attrs.className == 'v' || attrs.className.startsWith('v '))) {
-        final verse = int.tryParse(id);
-        if (verse != null) {
-          _isInVerse = true;
-          if (verse > _currentVerse) {
-            _currentVerse = verse;
-            _currentWord = 0;
-          } else if (verse == 1) {
-            _currentWord++; // The old app has a chapter number, which is counted as a word.
-          } else {
-            tec.dmPrint('ERROR: new verse # ($id) is <= previous verse # ($_currentVerse)');
-            assert(false);
-          }
-        }
-      } else if (id == 'copyright' ||
-          attrs['v'] == '0' ||
-          _isSectionElement(name, attrs, level, isVisible)) {
-        _wasInVerse = _isInVerse;
-        _isInVerse = false;
-        _isInNonVerseElement = true;
-        _nonVerseElementLevel = level;
+      // Was it a long press on an xref?
+      if (!handledTap &&
+          // !hasSelection &&
+          tag.isInXref &&
+          tec.isNotNullOrEmpty(tag.href) &&
+          _tapDownStopwatch.elapsed.inMilliseconds > 500 &&
+          _tapDownTag is VerseTag &&
+          (_tapDownTag as VerseTag).href == tag.href) {
+        final verseTag = _tapDownTag as VerseTag;
+        final reference =
+            Reference(volume: volume, book: book, chapter: chapter, verse: verseTag.verse);
+        handledTap = selection.handleXref(context, reference, null, verseTag, _tapGlobalPosition);
       }
-    }
 
-    var word = _currentWord;
+      // Was the tap near a margin note or footnote widget?
+      // Note, `_tapGlobalPosition` is set in the `onTapUp` handler.
+      if (!handledTap && selection.isEmpty && _tapGlobalPosition != null) {
+        final pt = _tapGlobalPosition;
 
-    if (text?.isNotEmpty ?? false) {
-      final wordCount = tec.countOfWordsInString(text);
-      // tec.dmPrint('$wordCount words for text: $text');
-      if (wordCount > 0) {
-        word = _currentWord;
-        _currentWord += wordCount;
-        if (_debugMode) {
-          if (wordCount == 1) {
-            tec.dmPrint('verse: $_currentVerse, word $word: [$text]');
-          } else {
-            tec.dmPrint('verse: $_currentVerse, words $word-${word + wordCount - 1}: [$text]');
+        for (final key in _widgetKeys.keys) {
+          final rect = globalRectWithKey(_widgetKeys[key])?.inflate(12);
+          if (rect != null) {
+            // If the tap is above the widget, don't bother checking the rest of the widgets.
+            if (pt.dy < rect.top) break;
+
+            // If the tap is in the rect...
+            if (rect.contains(pt)) {
+              if (_widgetKeys[key].currentWidget is GestureDetector) {
+                // This is a widget hit. Execute the tap...
+                (_widgetKeys[key].currentWidget as GestureDetector).onTap();
+                handledTap = true;
+                break;
+              }
+            }
           }
         }
       }
+
+      // If the tap hasn't been handled yet and this is a bible, toggle verse selection.
+      if (!handledTap && volume < 1000) selection.toggleVerse(context, tag.verse);
     }
 
-    return _VerseTag(
-      verse: _currentVerse,
-      word: word,
-      isInVerse: _isInVerse,
-      isInXref: _isInXref,
-      isInFootnote: _isInFootnote,
-      href: _href,
+    _tapDownStopwatch?.stop();
+    _tapDownStopwatch = null;
+    _tapDownTag = null;
+  }
+
+  InlineSpan _marginNoteSpan(
+      BuildContext context, TextStyle style, VerseTag tag, Key key, bool isDarkTheme) {
+    final color = isDarkTheme ? const Color(0xFFFAFAFA) : const Color(0xFFA1090E);
+    final iconWidth = (style.fontSize ?? 16.0) / 1.2;
+    final widgetWidth = iconWidth;
+
+    void _onPress() {
+      if (selection.isNotEmpty) {
+        TecToast.show(context, 'Clear selection to view margin note');
+        // not sure if I want to force this...
+        // _toggleSelectionForVerse(context, tag.verse);
+      } else {
+        final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+        final position = vmBloc?.indexOfView(viewUid) ?? -1;
+        final mn = marginNotes().marginNoteForVerse(tag.verse);
+        vmBloc?.add(ViewManagerEvent.add(
+            type: marginNoteViewType,
+            data: tec.toJsonString(mn.stateJson()),
+            position: position == -1 ? null : position + 1));
+      }
+    }
+
+    return TaggableWidgetSpan(
+      alignment: PlaceholderAlignment.middle,
+      childWidth: widgetWidth,
+      child: Transform.translate(
+        offset: Offset(-iconWidth / 4.5, 0),
+        child: GestureDetector(
+          key: key,
+          child: Container(
+            width: widgetWidth,
+            // use app settings height to determine correct line height
+            height: context.bloc<ContentSettingsBloc>().state.textScaleFactor * 18.0,
+            decoration: BoxDecoration(color: _backgroundColor(isDarkTheme)),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 3.0),
+                child: kIsWeb
+                    ? Icon(FeatherIcons.fileText,
+                        size: iconWidth, color: color, semanticLabel: 'Margin Note')
+                    : SvgPicture.asset('assets/marginNote.svg',
+                        width: iconWidth,
+                        height: iconWidth,
+                        color: color,
+                        semanticsLabel: 'Margin Note'),
+              ),
+            ),
+          ),
+          onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
+          onTap: _onPress,
+          onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
+          onLongPress: _onPress,
+        ),
+      ),
     );
   }
 
-  ///
-  /// Returns null if viewModel.versesToShow() is empty, otherwise returns a func that
-  /// returns `true` iff the visibility should be toggled for the given element.
-  ///
-  TecHtmlCheckElementFunc get toggleVisibility => viewModel.versesToShow().isEmpty
-      ? null
-      : (name, attrs, level, isVisible) {
-          final id = attrs.id;
-          if (tec.isNotNullOrEmpty(id) &&
-              name == 'div' &&
-              (attrs.className == 'v' || attrs.className.startsWith('v '))) {
-            final toggle = (!isVisible && viewModel.versesToShow().contains(id)) ||
-                (isVisible && !viewModel.versesToShow().contains(id));
-            if (isVisible || toggle) {
-              final v = int.tryParse(id);
-              _skipSectionTitle =
-                  (v != null && !viewModel.versesToShow().contains((v + 1).toString()));
-            }
-            return toggle;
-          }
-          return false;
-        };
+  InlineSpan _footnoteSpan(
+      BuildContext context, TextStyle style, VerseTag tag, Key key, bool isDarkTheme) {
+    final iconWidth = (style.fontSize ?? 16.0) * 0.6;
+    final containerWidth = iconWidth + 4.0; // small right padding
 
-  ///
-  /// Returns null if viewModel.versesToShow() is empty, otherwise returns a func that
-  /// returns true iff the given element should be skipped.
-  ///
-  TecHtmlCheckElementFunc get shouldSkip => viewModel.versesToShow().isEmpty
-      ? null
-      : (name, attrs, level, isVisible) {
-          return (isVisible &&
-              _skipSectionTitle &&
-              _isSectionElement(name, attrs, level, isVisible));
-        };
-
-  //
-  // PRIVATE STUFF
-  //
-
-  var _skipSectionTitle = false;
-
-  /// Returns a func that returns `true` iff the given element is a section element.
-  TecHtmlCheckElementFunc get _isSectionElement => useZondervanCssWithVolume(viewModel.volume)
-      ? (name, attrs, level, isVisible) {
-          return name == 'div' && (attrs.className == 'SUBA' || attrs.className == 'PARREF');
+    Future<void> _onPress() async {
+      final bible = VolumesRepository.shared.bibleWithId(volume);
+      final footnoteHtml =
+          await bible.footnoteHtmlWith(book, chapter, int.parse(tag.href.split('_').last));
+      if (tec.isNotNullOrEmpty(footnoteHtml.value)) {
+        if (selection.isNotEmpty) {
+          TecToast.show(context, 'Clear selection to view footnote');
+          // not sure if I want to force this...
+          // _toggleSelectionForVerse(context, tag.verse);
+        } else {
+          return showTecModalPopup<void>(
+            useRootNavigator: true,
+            context: context,
+            offset: _tapGlobalPosition,
+            builder: (context) {
+              final maxWidth = math.min(320.0, MediaQuery.of(context).size.width);
+              return TecPopupSheet(
+                padding: const EdgeInsets.all(0),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    // color: Colors.red,
+                    constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
+                    child: GestureDetector(
+                      child: TecHtml(footnoteHtml.value, baseUrl: '', selectable: false),
+                      onTap: () => Navigator.of(context).maybePop(),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
         }
-      : (name, attrs, level, isVisible) {
-          return name == 'h5';
-        };
-}
+      } else if (tec.isNullOrEmpty(footnoteHtml.error)) {
+        tec.dmPrint('ERROR: ${footnoteHtml?.error}');
+      }
+    }
 
-//
-// PRIVATE STUFF
-//
+    return TaggableWidgetSpan(
+      alignment: PlaceholderAlignment.top,
+      childWidth: containerWidth,
+      child: GestureDetector(
+        key: key,
+        child: Container(
+          width: containerWidth,
+          // use app settings height to determine correct line height
+          height: context.bloc<ContentSettingsBloc>().state.textScaleFactor * 18.0,
+          decoration: BoxDecoration(color: _backgroundColor(isDarkTheme)),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 3.0),
+              child: kIsWeb
+                  ? Icon(Icons.ac_unit,
+                      size: iconWidth,
+                      color: Theme.of(context).accentColor,
+                      semanticLabel: 'Footnote')
+                  : SvgPicture.asset('assets/footnote.svg',
+                      width: iconWidth,
+                      height: iconWidth,
+                      color: Theme.of(context).accentColor,
+                      semanticsLabel: 'Footnote'),
+            ),
+          ),
+        ),
+        onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
+        onTap: _onPress,
+        onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
+        onLongPress: _onPress,
+      ),
+    );
+  }
+}
 
 ///
 /// Returns the merged result of two [TextStyle]s, and either, or both, can be `null`.
@@ -846,119 +429,3 @@ TextStyle _merge(TextStyle s1, TextStyle s2) => s1 == null
     : s2 == null
         ? s1
         : s1.merge(s2);
-
-///
-/// Returns a new [Reference] from the given set of [verses] and other optional parameters.
-///
-Reference _referenceWithVerses(
-  Set<int> verses, {
-  int volume,
-  int book,
-  int chapter,
-  DateTime modified,
-}) {
-  if (verses?.isEmpty ?? true) return null;
-  final sorted = List.of(verses)..sort();
-  final first = sorted.first;
-  final last = sorted.last;
-  final excluded = sorted.missingValues();
-  return Reference(
-      volume: volume,
-      book: book,
-      chapter: chapter,
-      verse: first,
-      endVerse: last,
-      excluded: excluded.isEmpty ? null : excluded.toSet(),
-      modified: modified);
-}
-
-///
-/// [_VerseTag]
-///
-/// Used to tag an HTML text node with the [verse] it is in, the [word] index
-/// of the first word in the text node, and a boolean indicating whether or not
-/// the associated text node is part of the actual verse text (as apposed to
-/// being the verse number, a footnote, a section title, or other text marked
-/// with v="0").
-///
-@immutable
-class _VerseTag {
-  final int verse;
-  final int word;
-  final bool isInVerse;
-  final bool isInXref;
-  final bool isInFootnote;
-  final String href;
-
-  const _VerseTag({
-    @required this.verse,
-    @required this.word,
-    this.isInVerse = false,
-    this.isInXref = false,
-    this.isInFootnote = false,
-    this.href,
-  }) : assert(verse != null &&
-            word != null &&
-            isInVerse != null &&
-            isInXref != null &&
-            isInFootnote != null);
-
-  _VerseTag copyWith({
-    int verse,
-    int word,
-    bool isInVerse,
-    bool isInXref,
-    bool isInFootnote,
-    String href,
-  }) =>
-      _VerseTag(
-        verse: verse ?? this.verse,
-        word: word ?? this.word,
-        isInVerse: isInVerse ?? this.isInVerse,
-        isInXref: isInXref ?? this.isInXref,
-        isInFootnote: isInFootnote ?? this.isInFootnote,
-        href: href ?? this.href,
-      );
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is _VerseTag &&
-          runtimeType == other.runtimeType &&
-          verse == other.verse &&
-          word == other.word &&
-          isInVerse == other.isInVerse;
-
-  @override
-  int get hashCode => verse.hashCode ^ word.hashCode ^ isInVerse.hashCode;
-
-  @override
-  String toString() {
-    return ('{ "v": $verse, "w": $word, "inV": $isInVerse }');
-  }
-}
-
-extension on TaggedText {
-  _VerseTag get verseTag => (tag is _VerseTag) ? tag as _VerseTag : null;
-
-  int get verse => (tag is _VerseTag) ? (tag as _VerseTag).verse : null;
-
-  int get word {
-    final t = tag;
-    if (t is _VerseTag) {
-      final words = text?.countOfWords(toIndex: index) ?? 0;
-      return t.word + words;
-    }
-    return null; // ignore: avoid_returning_null
-  }
-}
-
-// extension on TecSelectableController {
-//   /// Returns the number of verses that the selection spans.
-//   int get verseCount => (selectionEnd?.verse ?? -1) + 1 - (selectionStart?.verse ?? 0);
-
-//   /// Returns the number of words that are selected in a single verse. If more than one
-//   /// verse is selected, `null` is returned.
-//   int get wordCount =>
-//       verseCount == 1 ? ((selectionEnd?.word ?? 0) - (selectionStart?.word ?? 0)) : null;
-// }
