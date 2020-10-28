@@ -153,7 +153,8 @@ class _ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
           ),
         );
 
-    return !_showViewPadding || s.isMaximized || (s.rowCount == 1 && s.colCount == 1)
+    return !_showViewPadding
+        // || s.isMaximized || (s.rowCount == 1 && s.colCount == 1)
         ? _navigator()
         : Container(
             color: Theme.of(context).brightness == Brightness.dark
