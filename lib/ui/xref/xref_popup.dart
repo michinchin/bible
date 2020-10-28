@@ -55,15 +55,18 @@ Future<void> showXrefsPopup({
               // color: Colors.red,
               constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
               child: Column(children: [
-                ...xrefs.map((xref) {
+                ...xrefs.expand((xref) {
                   final card = _XrefWidget(
                     xref: xref,
                     padding: _xrefUiOption == XrefUiOption.flat
                         ? const EdgeInsets.all(0)
                         : EdgeInsets.only(left: 4, top: firstCard ? 0 : 4, right: 4, bottom: 4),
                   );
+                  final widgets = firstCard || _xrefUiOption != XrefUiOption.flat
+                      ? [card]
+                      : [const Divider(height: 1), card];
                   firstCard = false;
-                  return card;
+                  return widgets;
                 }),
               ]),
             ),
