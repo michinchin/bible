@@ -1,10 +1,11 @@
 import 'dart:math' as math;
 
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tec_html/tec_html.dart';
@@ -40,8 +41,7 @@ class ChapterViewModel {
   /// Returns a new [ChapterViewModel].
   ///
   /// Note, the [highlights] and [marginNotes] parameters are functions that will be called
-  /// as needed to get the current value of the indicated property, since the property value
-  /// can change between widget rebuilds.
+  /// as needed to get the current value, since the value can change between widget rebuilds.
   ///
   ChapterViewModel({
     @required this.viewUid,
@@ -54,7 +54,7 @@ class ChapterViewModel {
   }) : assert(volume != null && book != null && chapter != null && highlights != null);
 
   ///
-  /// Returns a TextSpan (or WidgetSpan) for the given HTML text node.
+  /// Returns a TextSpan, WidgetSpan, or `null` for the given HTML text node.
   ///
   InlineSpan spanForText(
     BuildContext context,
@@ -432,13 +432,13 @@ TextStyle _merge(TextStyle s1, TextStyle s2) => s1 == null
 
 ///
 /// Returns the chapter HTML for the given volume, book, and chapter.
-/// 
+///
 /// If the volume is a Bible, returns the Bible chapter HTML.
-/// 
+///
 /// If the volume is study content, returns the study note HTML for the chapter.
 /// If the volume does not have study notes for the chapter, returns HTML with the
 /// message "Study notes are not available for this chapter."
-/// 
+///
 Future<tec.ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int chapter) async {
   if (volume is Bible) {
     return volume.chapterHtmlWith(book, chapter);

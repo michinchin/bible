@@ -12,6 +12,9 @@ import '../common/common.dart';
 import '../common/tec_modal_popup.dart';
 import '../common/tec_modal_popup_menu.dart';
 
+enum XrefUiOption { flat, cards }
+const _xrefUiOption = XrefUiOption.flat;
+
 Future<void> showXrefsPopup({
   @required BuildContext context,
   @required Reference reference,
@@ -55,7 +58,9 @@ Future<void> showXrefsPopup({
                 ...xrefs.map((xref) {
                   final card = _XrefWidget(
                     xref: xref,
-                    padding: EdgeInsets.only(left: 4, top: firstCard ? 0 : 4, right: 4, bottom: 4),
+                    padding: _xrefUiOption == XrefUiOption.flat
+                        ? const EdgeInsets.all(0)
+                        : EdgeInsets.only(left: 4, top: firstCard ? 0 : 4, right: 4, bottom: 4),
                   );
                   firstCard = false;
                   return card;
@@ -100,8 +105,8 @@ class _XrefWidget extends StatelessWidget {
     final txStyle = TextStyle(color: txColor);
 
     return _Card(
-      color: bgColor,
-      elevation: 4,
+      color: _xrefUiOption == XrefUiOption.flat ? Colors.transparent : bgColor,
+      elevation: _xrefUiOption == XrefUiOption.flat ? 0 : 4,
       padding: padding ?? const EdgeInsets.all(4),
       cornerRadius: 8,
       child: Container(

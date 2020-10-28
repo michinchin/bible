@@ -199,14 +199,10 @@ class ChapterSelection {
 
   bool _handleStrongs(BuildContext context, VerseTag tag) {
     if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
-      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
       final parts = tag.href.split(';');
       for (final part in parts) {
         if (part.startsWith('G') || part.startsWith('H')) {
-          bible?.strongsHtmlWith(part)?.then((result) {
-            final html = result?.value == null ? '<p>${result?.error}</p>' : result.value;
-            showStrongsPopup(context: context, title: part, html: html);
-          });
+          showStrongsPopup(context: context, title: part, strongsId: part);
           return true;
         }
       }
