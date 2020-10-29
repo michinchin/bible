@@ -27,7 +27,7 @@ dependencies:
   flutter_bloc: ^6.0.6
   flutter_downloader: ^1.5.1
   flutter_keyboard_visibility: ^3.2.1
-  flutter_local_notifications: ^2.0.2
+  flutter_local_notifications: ^3.0.1
   flutter_sfsymbols: ^1.0.0
   flutter_svg: ^0.19.1
   freezed_annotation: ^0.12.0

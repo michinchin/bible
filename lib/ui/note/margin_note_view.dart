@@ -215,7 +215,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
 
     _controller?.removeListener(_zephyrListener);
 
-    _userDbChangeSubscription?.cancel();
+    await _userDbChangeSubscription?.cancel();
     _userDbChangeSubscription = null;
   }
 
