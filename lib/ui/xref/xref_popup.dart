@@ -41,7 +41,7 @@ Future<void> showXrefsPopup({
           // bgBlur: 5,
           title: (tec.isNotNullOrEmpty(title))
               ? Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 4),
+                  padding: const EdgeInsets.only(left: 6, top: 12, right: 6, bottom: 4),
                   child: TecTitleBar(
                     title: tec.isNullOrEmpty(text) ? title : "'$text', $title",
                     style: const TextStyle(fontSize: 18),
@@ -64,7 +64,7 @@ Future<void> showXrefsPopup({
                   );
                   final widgets = firstCard || _xrefUiOption != XrefUiOption.flat
                       ? [card]
-                      : [const Divider(height: 1), card];
+                      : [const Divider(height: 1, indent: 8, endIndent: 8), card];
                   firstCard = false;
                   return widgets;
                 }),
