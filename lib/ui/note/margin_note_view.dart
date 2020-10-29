@@ -132,6 +132,8 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   Timer _saveTimer;
   String _title;
   static const oldAppPrefix = 'You\'re using an old app.';
+  StreamSubscription<UserDbChange> _userDbChangeSubscription;
+  int _userId;
 
   Future<void> load() async {
     final data = viewManagerBloc?.dataWithView(widget.state?.uid);
@@ -212,6 +214,9 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     }
 
     _controller?.removeListener(_zephyrListener);
+
+    _userDbChangeSubscription?.cancel();
+    _userDbChangeSubscription = null;
   }
 
   @override
@@ -221,7 +226,21 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     viewManagerBloc = context.bloc<ViewManagerBloc>();
     sheetManagerBloc = context.bloc<SheetManagerBloc>();
 
+    _userId = AppSettings.shared.userAccount.user.userId;
+
+    // Start listening for changes to the db.
+    _userDbChangeSubscription =
+        AppSettings.shared.userAccount.userDbChangeStream.listen(_userDbChangeListener);
+
     load();
+  }
+
+  void _userDbChangeListener(UserDbChange change) {
+    // just check the userId.  If it's different - close this window w/o saving...
+    if (_userId != AppSettings.shared.userAccount.user.userId) {
+      // need to close the window...
+      viewManagerBloc?.add(ViewManagerEvent.remove(widget.state.uid));
+    }
   }
 
   void _toggleEditMode() {
