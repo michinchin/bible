@@ -104,10 +104,10 @@ List<TableRow> _buildMenuItemsForViewWithState(
             isMaximized ? const ViewManagerEvent.restore() : ViewManagerEvent.maximize(state.uid));
       }),
     if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
-      tecModalPopupMenuDivider(menuContext, isMaximized ? 'Switch To' : 'Switch With'),
+      tecModalPopupMenuDivider(menuContext, title: isMaximized ? 'Switch To' : 'Switch With'),
       ..._generateOffScreenItems(menuContext, state.uid)
     ],
-    tecModalPopupMenuDivider(menuContext, 'Open New'),
+    tecModalPopupMenuDivider(menuContext, title: 'Open New'),
     ...generateAddMenuItems(menuContext, state.uid),
     if ((vmBloc?.state?.views?.length ?? 0) > 1 &&
         {Const.viewTypeChapter, Const.viewTypeStudy}.contains(state.type)) ...[

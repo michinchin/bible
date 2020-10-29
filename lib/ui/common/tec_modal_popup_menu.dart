@@ -50,6 +50,8 @@ TableRow tecModalPopupMenuItem(
   VoidCallback onTap, {
   bool Function() getSwitchValue,
   String subtitle,
+  double rowPadding = 0.0,
+  bool scaleFont = false,
 }) {
   final scale = scaleFactorWith(context, maxScaleFactor: 1.2);
   final color = Theme.of(context).textColor.withOpacity(onTap == null ? 0.2 : 0.5);
@@ -68,64 +70,88 @@ TableRow tecModalPopupMenuItem(
     children: [
       TableRowInkWell(
         onTap: _onTap(),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 10, 14, 10),
-              child: icon == null
-                  ? SizedBox(width: iconSize)
-                  : Icon(icon, color: color, size: iconSize),
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TecText(title, textScaleFactor: scale, style: TextStyle(color: color)),
-                  if (subtitle != null)
-                    TecText(subtitle, textScaleFactor: scale, style: TextStyle(color: color)),
-                ],
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(4 + rowPadding, 0, 14, 0),
+                child: icon == null
+                    ? SizedBox(width: iconSize)
+                    : Icon(icon, color: color, size: iconSize),
               ),
-            ),
-          ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TecText(title,
+                        textScaleFactor: scaleFont ? scale * 1.2 : scale,
+                        style: TextStyle(
+                            color: color,
+                            fontWeight: scaleFont ? FontWeight.w500 : FontWeight.normal)),
+                    if (subtitle != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 3.0),
+                        child: TecText(subtitle,
+                            textScaleFactor: scaleFont ? scale * .9 : scale,
+                            style: TextStyle(color: color)),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       TableRowInkWell(
         onTap: _onTap(),
-        child: getSwitchValue == null
-            ? Container(padding: const EdgeInsets.fromLTRB(0, 16, 0, 16))
-            : Switch.adaptive(
-                activeColor: tecartaBlue,
-                value: getSwitchValue() ?? false,
-                onChanged: onTap == null ? null : (_) => _onTap()?.call(),
-              ),
+        child: Padding(
+          padding: EdgeInsets.only(right: rowPadding),
+          child: getSwitchValue == null
+              ? Container(padding: const EdgeInsets.fromLTRB(0, 16, 0, 16))
+              : Switch.adaptive(
+                  activeColor: tecartaBlue,
+                  value: getSwitchValue() ?? false,
+                  onChanged: onTap == null ? null : (_) => _onTap()?.call(),
+                ),
+        ),
       ),
     ],
   );
 }
 
-TableRow tecModalPopupMenuDivider(BuildContext context, [String title]) {
+TableRow tecModalPopupMenuDivider(BuildContext context, {String title, double rowPadding = 0.0}) {
   return TableRow(
     children: [
       if (title?.isEmpty ?? true)
-        const Divider(thickness: 1)
+        Padding(
+          padding: EdgeInsets.only(left: rowPadding),
+          child: const Divider(thickness: 1),
+        )
       else
         SizedBox(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TecText(title,
-                  style: TextStyle(
-                    fontSize: 13,
-                    // fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textColor.withOpacity(0.5),
-                  )),
-              const Expanded(child: Divider(indent: 10, thickness: 1))
-            ],
+          child: Padding(
+            padding: EdgeInsets.only(left: rowPadding, top: 5.0, bottom: 5.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TecText(title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      // fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textColor.withOpacity(0.5),
+                    )),
+                const Expanded(child: Divider(indent: 10, thickness: 1))
+              ],
+            ),
           ),
         ),
-      const Divider(thickness: 1),
+      Padding(
+        padding: EdgeInsets.only(right: rowPadding),
+        child: const Divider(thickness: 1),
+      ),
     ],
   );
 }
@@ -141,6 +167,7 @@ TableRow tecModalPopupMenuTitle(String title, {bool showClose = true}) {
 
 class _RefreshBloc extends Cubit<int> {
   _RefreshBloc() : super(0);
+
   void refresh() => emit(state + 1);
 }
 
@@ -157,16 +184,30 @@ class TecTitleBar extends StatelessWidget {
     final color = isDarkTheme ? Colors.white : Colors.grey[700];
     var textStyle = TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w500);
     if (style != null) textStyle = textStyle.merge(style);
+
     return Material(
       color: Colors.transparent,
       child: Container(
+        padding: const EdgeInsets.only(bottom: 15),
         constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
         child: Stack(
           alignment: Alignment.center,
           children: [
             Row(
               children: [
-                Expanded(child: Text(title, textAlign: TextAlign.center, style: textStyle)),
+                Expanded(
+                    child: (title == 'TecartaBible')
+                        ? RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(children: [
+                              TextSpan(text: 'Tecarta', style: textStyle),
+                              TextSpan(
+                                  text: 'Bible',
+                                  style: textStyle.copyWith(
+                                      color: tecartaBlue, fontWeight: FontWeight.bold)),
+                            ]),
+                          )
+                        : Text(title, textAlign: TextAlign.center, style: textStyle)),
               ],
             ),
             Positioned(

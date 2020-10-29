@@ -31,8 +31,10 @@ List<TableRow> _buildMenuItems(
   BuildContext context,
   BuildContext menuContext,
 }) {
+  const rowPadding = 20.0;
+
   return [
-    tecModalPopupMenuTitle('Tecarta', showClose: true),
+    tecModalPopupMenuTitle('TecartaBible', showClose: true),
     tecModalPopupMenuItem(
       menuContext,
       FeatherIcons.user,
@@ -47,6 +49,8 @@ List<TableRow> _buildMenuItems(
             useRootNavigator: true,
             appName: Const.appNameForUA);
       },
+      rowPadding: rowPadding,
+      scaleFont: true,
       // subtitle: AppSettings.shared.userAccount.isSignedIn
       //     ? '${AppSettings.shared.userAccount.user.firstName}'
       //     : 'Sign in'
@@ -57,15 +61,17 @@ List<TableRow> _buildMenuItems(
     //   'Share app',
     //   () => menuModel.shareApp(menuContext),
     // ),
-    tecModalPopupMenuDivider(menuContext),
+    tecModalPopupMenuDivider(menuContext, rowPadding: rowPadding),
 
     tecModalPopupMenuItem(menuContext, FeatherIcons.bell, 'Notifications', null,
-        subtitle: 'Reminders for daily verse, devotional of the day, and more.'),
+        subtitle: 'Reminders for daily verse, devotional of the day, and more.',
+        rowPadding: rowPadding,
+        scaleFont: true),
 
-    tecModalPopupMenuDivider(menuContext),
+    tecModalPopupMenuDivider(menuContext, rowPadding: rowPadding),
     tecModalPopupMenuItem(
         menuContext, FeatherIcons.settings, 'Settings', () => showSettings(context),
-        subtitle: 'Font Size, line spacing, dark mode'),
+        subtitle: 'Font Size, line spacing, dark mode', rowPadding: rowPadding, scaleFont: true),
     // if (tec.platformIs(tec.Platform.iOS))
     //   tecModalPopupMenuItem(
     //     menuContext,
@@ -73,15 +79,17 @@ List<TableRow> _buildMenuItems(
     //     'Restore Purchases',
     //     null,
     //   ),
-    tecModalPopupMenuDivider(menuContext),
+    tecModalPopupMenuDivider(menuContext, rowPadding: rowPadding),
 
     tecModalPopupMenuItem(menuContext, FeatherIcons.helpCircle, 'Help & Feedback',
         () => menuModel.emailFeedback(menuContext),
-        subtitle: 'App Features, Support, and FAQs'),
-    tecModalPopupMenuDivider(menuContext),
+        subtitle: 'App Features, Support, and FAQs', rowPadding: rowPadding, scaleFont: true),
+    tecModalPopupMenuDivider(menuContext, rowPadding: rowPadding),
 
     tecModalPopupMenuItem(
         menuContext, FeatherIcons.info, 'About', () => menuModel.showAboutDialog(menuContext),
-        subtitle: 'App Info, version number, website link'),
+        subtitle: 'App Info, version number, website link',
+        rowPadding: rowPadding,
+        scaleFont: true),
   ];
 }

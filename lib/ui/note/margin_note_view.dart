@@ -326,7 +326,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
                     color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.black
                         : Colors.white,
-                    padding: EdgeInsets.only(left: 16, right: 16, bottom: _editMode ? 0 : 65),
+                    padding: EdgeInsets.only(left: 16, right: 16, bottom: _editMode ? 0 : 85),
                     child: ZefyrEditor(
                       controller: _controller,
                       focusNode: _focusNode,
