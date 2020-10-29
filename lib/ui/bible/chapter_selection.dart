@@ -231,7 +231,6 @@ class ChapterSelection {
             text: text,
             xrefs: result.value,
             offset: pt,
-            // insets: context.bloc<ViewManagerBloc>().globalInsetsOfView(viewUid, context),
           );
         }
       });

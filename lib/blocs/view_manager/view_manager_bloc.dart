@@ -154,6 +154,17 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   }
 
   ///
+  /// Returns the insets of the view with the given [uid].
+  ///
+  EdgeInsets insetsOfView(int uid) {
+    final rect = rectOfView(uid)?.rect;
+    if (rect != null && size != null && size != Size.zero) {
+      return insetsFromParentSizeAndChildRect(size, rect);
+    }
+    return EdgeInsets.zero;
+  }
+
+  ///
   /// Returns the global insets of the view with the given [uid].
   ///
   EdgeInsets globalInsetsOfView(int uid, BuildContext context) {

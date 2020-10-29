@@ -52,7 +52,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
         TecAutoScroll.stopAutoscroll();
         showTecModalPopupMenu(
           context: context,
-          insets: vmBloc.globalInsetsOfView(state.uid, context),
+          insets: vmBloc.insetsOfView(state.uid),
           alignment: Alignment.topRight,
           minWidth: 125,
           menuItemsBuilder: (menuContext) => _buildMenuItemsForViewWithState(
