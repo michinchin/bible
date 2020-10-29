@@ -61,7 +61,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   /// Returns the view manager rect in global coordinates.
   ///
   Rect get globalRect {
-    return globalRectWithKey(_globalKey, _size ?? Size.zero) ?? Rect.zero;
+    return globalRectOfWidgetWithKey(_globalKey, _size ?? Size.zero) ?? Rect.zero;
   }
 
   ///

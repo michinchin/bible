@@ -28,7 +28,7 @@ Future<void> showTecModalPopupMenu({
             create: (context) => _RefreshBloc(),
             child: BlocBuilder<_RefreshBloc, int>(
               builder: (context, i) {
-                tec.dmPrint('TecModalPopupMenu build $i');
+                // tec.dmPrint('TecModalPopupMenu build $i');
                 return Table(
                   defaultColumnWidth: const IntrinsicColumnWidth(),
                   defaultVerticalAlignment: TableCellVerticalAlignment.middle,

@@ -257,7 +257,7 @@ class ChapterViewModel {
         final pt = _tapGlobalPosition;
 
         for (final key in _widgetKeys.keys) {
-          final rect = globalRectWithKey(_widgetKeys[key])?.inflate(12);
+          final rect = globalRectOfWidgetWithKey(_widgetKeys[key])?.inflate(12);
           if (rect != null) {
             // If the tap is above the widget, don't bother checking the rest of the widgets.
             if (pt.dy < rect.top) break;

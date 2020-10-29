@@ -174,7 +174,7 @@ class ChapterSelection {
         isEnabled: (ctl) => _enableXref(ctl.selectionStart?.verseTag, ctl.selectionEnd?.verseTag),
         handler: (ctl) {
           var handled = false;
-          final globalOffset = globalRectWithKey(key)?.topLeft;
+          final globalOffset = globalOffsetOfWidgetWithKey(key);
           if (globalOffset != null) {
             final pt = ctl.rects.merged().center + globalOffset;
             handled =
