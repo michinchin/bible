@@ -106,7 +106,8 @@ class _PageableChapterViewState extends State<PageableChapterView> {
       child: BlocListener<ViewDataBloc, ViewData>(
         listenWhen: (a, b) =>
             a.asChapterViewData.volumeId != b.asChapterViewData.volumeId ||
-            a.asChapterViewData.bcv != b.asChapterViewData.bcv,
+            a.asChapterViewData.bcv.book != b.asChapterViewData.bcv.book ||
+            a.asChapterViewData.bcv.chapter != b.asChapterViewData.bcv.chapter,
         listener: (context, viewData) => _onNewViewData(viewData.asChapterViewData),
         child: Scaffold(
           appBar: MinHeightAppBar(
@@ -237,8 +238,8 @@ class _PageableChapterViewState extends State<PageableChapterView> {
 
     final page = _bcvPageZero.chaptersTo(viewData.bcv, bible: volume.assocBible);
     if (page == null) {
-      tec.dmPrint(
-          'ChapterView unable to navigate to ${viewData.bcv} in ${volume.assocBible.abbreviation}');
+      tec.dmPrint('PageableChapterView unable to navigate to '
+          '${viewData.bcv} in ${volume.assocBible.abbreviation}');
       return; // ----------------------------------------------------------->
     }
 

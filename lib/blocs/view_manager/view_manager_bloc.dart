@@ -61,7 +61,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   /// Returns the view manager rect in global coordinates.
   ///
   Rect get globalRect {
-    return globalRectWithKey(_globalKey, _size ?? Size.zero) ?? Rect.zero;
+    return globalRectOfWidgetWithKey(_globalKey, _size ?? Size.zero) ?? Rect.zero;
   }
 
   ///
@@ -151,6 +151,17 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
         .firstWhere((e) => e.uid == uid, orElse: () => null)
         ?.rect
         ?.translate(gr?.left ?? 0.0, gr?.top ?? 0.0);
+  }
+
+  ///
+  /// Returns the insets of the view with the given [uid].
+  ///
+  EdgeInsets insetsOfView(int uid) {
+    final rect = rectOfView(uid)?.rect;
+    if (rect != null && size != null && size != Size.zero) {
+      return insetsFromParentSizeAndChildRect(size, rect);
+    }
+    return EdgeInsets.zero;
   }
 
   ///
