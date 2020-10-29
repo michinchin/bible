@@ -224,21 +224,21 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
     var newList = hls;
 
     if (hls.isNotEmpty) {
-      Stopwatch stopwatch;
-      if (kDebugMode) {
-        stopwatch = Stopwatch()..start();
-      }
+      // Stopwatch stopwatch;
+      // if (kDebugMode) {
+      //   stopwatch = Stopwatch()..start();
+      // }
 
       newList = state.highlights;
       for (final hl in hls) {
         newList = newList.copySubtracting(hl.ref)..add(hl);
       }
 
-      if (kDebugMode) {
-        tec.dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');
-      }
+      // if (kDebugMode) {
+      //   tec.dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');
+      // }
 
-//      _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
+      // _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
     }
 
     return ChapterHighlights(volumeId, book, chapter, newList, loaded: true);

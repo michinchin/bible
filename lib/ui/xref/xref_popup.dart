@@ -12,6 +12,9 @@ import '../common/common.dart';
 import '../common/tec_modal_popup.dart';
 import '../common/tec_modal_popup_menu.dart';
 
+enum XrefUiOption { flat, cards }
+const _xrefUiOption = XrefUiOption.flat;
+
 Future<void> showXrefsPopup({
   @required BuildContext context,
   @required Reference reference,
@@ -38,7 +41,7 @@ Future<void> showXrefsPopup({
           // bgBlur: 5,
           title: (tec.isNotNullOrEmpty(title))
               ? Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 4),
+                  padding: const EdgeInsets.only(left: 6, top: 12, right: 6, bottom: 4),
                   child: TecTitleBar(
                     title: tec.isNullOrEmpty(text) ? title : "'$text', $title",
                     style: const TextStyle(fontSize: 18),
@@ -52,13 +55,18 @@ Future<void> showXrefsPopup({
               // color: Colors.red,
               constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
               child: Column(children: [
-                ...xrefs.map((xref) {
+                ...xrefs.expand((xref) {
                   final card = _XrefWidget(
                     xref: xref,
-                    padding: EdgeInsets.only(left: 4, top: firstCard ? 0 : 4, right: 4, bottom: 4),
+                    padding: _xrefUiOption == XrefUiOption.flat
+                        ? const EdgeInsets.all(0)
+                        : EdgeInsets.only(left: 4, top: firstCard ? 0 : 4, right: 4, bottom: 4),
                   );
+                  final widgets = firstCard || _xrefUiOption != XrefUiOption.flat
+                      ? [card]
+                      : [const Divider(height: 1, indent: 8, endIndent: 8), card];
                   firstCard = false;
-                  return card;
+                  return widgets;
                 }),
               ]),
             ),
@@ -100,8 +108,8 @@ class _XrefWidget extends StatelessWidget {
     final txStyle = TextStyle(color: txColor);
 
     return _Card(
-      color: bgColor,
-      elevation: 4,
+      color: _xrefUiOption == XrefUiOption.flat ? Colors.transparent : bgColor,
+      elevation: _xrefUiOption == XrefUiOption.flat ? 0 : 4,
       padding: padding ?? const EdgeInsets.all(4),
       cornerRadius: 8,
       child: Container(

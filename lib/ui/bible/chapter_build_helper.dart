@@ -52,21 +52,19 @@ class ChapterBuildHelper {
       _isInVerse = _wasInVerse;
     }
 
-    // NOTE: footnotes and xrefs should NOT be nested
-
-    // if we are in an xref - do we need to end it?
+    // If in an xref, has it ended?
     if (_isInXref && level <= _xrefElementLevel) {
       _isInXref = false;
       _href = null;
     }
 
-    // if we are in a footnote - do we need to end it?
-    else if (_isInFootnote && level <= _footnoteElementLevel) {
+    // If in a footnote, has it ended?
+    if (_isInFootnote && level <= _footnoteElementLevel) {
       _isInFootnote = false;
       _href = null;
     }
 
-    // do we need to start an xref or footnote
+    // Is this the start of an xref or footnote?
     if (!_isInXref && attrs.className.contains('xref')) {
       _isInXref = true;
       _xrefElementLevel = level;
@@ -148,8 +146,7 @@ class ChapterBuildHelper {
                 (isVisible && !versesToShow.contains(id));
             if (isVisible || toggle) {
               final v = int.tryParse(id);
-              _skipSectionTitle =
-                  (v != null && !versesToShow.contains((v + 1).toString()));
+              _skipSectionTitle = (v != null && !versesToShow.contains((v + 1).toString()));
             }
             return toggle;
           }
