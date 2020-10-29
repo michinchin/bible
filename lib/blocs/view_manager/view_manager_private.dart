@@ -138,7 +138,8 @@ class _ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
   }
 
   Widget _routeBuilder(BuildContext context) => BlocBuilder<ManagedViewBloc, ManagedViewState>(
-      builder: (context, state) => _ManagedViewScaffold(state));
+      builder: (context, state) =>
+          ViewManager.shared._buildScaffold(context, state.viewState, state.viewSize));
 
   @override
   Widget build(BuildContext context) {
@@ -154,35 +155,21 @@ class _ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
         );
 
     return !_showViewPadding
-        // || s.isMaximized || (s.rowCount == 1 && s.colCount == 1)
         ? _navigator()
         : Container(
             color: Theme.of(context).brightness == Brightness.dark
                 ? _viewPaddingColorDark
                 : _viewPaddingColorLight,
-            padding: EdgeInsets.only(
-              left: s.col == 0 ? 0 : _viewPaddingSize,
-              right: s.col == s.colCount - 1 ? 0 : _viewPaddingSize,
-              top: s.row == 0 ? 0 : _viewPaddingSize,
-              bottom: s.row == s.rowCount - 1 ? 0 : _viewPaddingSize,
-            ),
+            padding: s.isMaximized || (s.rowCount == 1 && s.colCount == 1)
+                ? EdgeInsets.zero
+                : EdgeInsets.only(
+                    left: s.col == 0 ? 0 : _viewPaddingSize,
+                    right: s.col == s.colCount - 1 ? 0 : _viewPaddingSize,
+                    top: s.row == 0 ? 0 : _viewPaddingSize,
+                    bottom: s.row == s.rowCount - 1 ? 0 : _viewPaddingSize,
+                  ),
             child: _navigator(),
           );
-  }
-}
-
-///
-/// Scaffold for a managed view.
-///
-class _ManagedViewScaffold extends StatelessWidget {
-  final ManagedViewState state;
-
-  const _ManagedViewScaffold(this.state, {Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // tec.dmPrint('_ManagedViewScaffold building ${state.viewState.uid} with index ${state.viewIndex}');
-    return ViewManager.shared._buildScaffold(context, state.viewState, state.viewSize);
   }
 }
 
@@ -266,15 +253,10 @@ double _defaultMinHeight(BoxConstraints constraints) => math.max(
 ///
 extension _ExtOnViewState on ViewState {
   double minWidth(BoxConstraints c) => _defaultMinWidth(c);
-
   double minHeight(BoxConstraints c) => _defaultMinHeight(c);
-
   double idealWidth(BoxConstraints c) => math.max(preferredWidth ?? 0, minWidth(c));
-
   double idealHeight(BoxConstraints c) => math.max(preferredHeight ?? 0, minHeight(c));
-
   double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
-
   double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
 
   Widget toWidget({
@@ -311,7 +293,6 @@ extension _ExtOnViewState on ViewState {
       top: rect.top,
       width: rect.width,
       height: rect.height,
-      // child: _ManagedViewScaffold(mvs),
       child: BlocProvider(
         create: (context) => ManagedViewBloc(mvs),
         child: _ManagedViewNavigator(mvs),
@@ -325,17 +306,11 @@ extension _ExtOnViewState on ViewState {
 ///
 extension _ExtOnListOfViewState on List<ViewState> {
   double minWidth(BoxConstraints c) => fold(0.0, (t, el) => t + el.minWidth(c));
-
   double minHeight(BoxConstraints c) => fold(0.0, (t, el) => math.max(t, el.minHeight(c)));
-
   double idealWidth(BoxConstraints c) => fold(0.0, (t, el) => t + el.idealWidth(c));
-
   double idealHeight(BoxConstraints c) => fold(0.0, (t, el) => math.max(t, el.idealHeight(c)));
-
   double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
-
   double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
-
   String toDebugString() => '[${map<int>((e) => e.uid).join(', ')}]';
 }
 
@@ -346,11 +321,8 @@ extension _ExtOnListOfViewState on List<ViewState> {
 ///
 extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
   double minHeight(BoxConstraints c) => fold(0.0, (t, el) => t + el.minHeight(c));
-
   double idealHeight(BoxConstraints c) => fold(0.0, (t, el) => t + el.idealHeight(c));
-
   double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
-
   int get totalItems => fold(0, (t, el) => t + el.length);
 
   ///
@@ -409,9 +381,9 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     BoxConstraints constraints,
     ViewState maximizedView,
     ViewState viewWithKeyboardFocus,
-    List<ViewRect> rects,
-    { bool numViewsLimited = false }
-  ) {
+    List<ViewRect> rects, {
+    bool numViewsLimited = false,
+  }) {
     // Cannot have both a maximizedView and a viewWithKeyboardFocus.
     assert(maximizedView == null || viewWithKeyboardFocus == null);
 

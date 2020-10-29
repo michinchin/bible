@@ -83,6 +83,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
 
   @override
   void initState() {
+    // tec.dmPrint('_PageableChapterViewState initState for ${widget.state.uid} size ${widget.size}');
     super.initState();
     final viewData = ChapterViewData.fromContext(context, widget.state.uid);
     _volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
@@ -277,6 +278,7 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
 
   @override
   void initState() {
+    // tec.dmPrint('_BibleChapterView initState for ${widget.viewUid} size ${widget.size}');
     super.initState();
     _update();
   }
@@ -295,6 +297,7 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
 
   @override
   Widget build(BuildContext context) {
+    // tec.dmPrint('_BibleChapterView build for ${widget.viewUid} size ${widget.size}');
     return TecFutureBuilder<tec.ErrorOrValue<String>>(
       future: _future,
       builder: (context, data, error) {

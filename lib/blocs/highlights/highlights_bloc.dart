@@ -234,11 +234,11 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
         newList = newList.copySubtracting(hl.ref)..add(hl);
       }
 
-      if (kDebugMode) {
-        tec.dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');
-      }
+      // if (kDebugMode) {
+      //   tec.dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');
+      // }
 
-//      _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
+      // _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
     }
 
     return ChapterHighlights(volumeId, book, chapter, newList, loaded: true);
