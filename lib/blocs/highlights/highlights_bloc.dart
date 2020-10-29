@@ -224,10 +224,10 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
     var newList = hls;
 
     if (hls.isNotEmpty) {
-      Stopwatch stopwatch;
-      if (kDebugMode) {
-        stopwatch = Stopwatch()..start();
-      }
+      // Stopwatch stopwatch;
+      // if (kDebugMode) {
+      //   stopwatch = Stopwatch()..start();
+      // }
 
       newList = state.highlights;
       for (final hl in hls) {
