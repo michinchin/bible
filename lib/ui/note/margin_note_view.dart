@@ -270,8 +270,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
           }
         },
       );
-    }
-    else {
+    } else {
       keyboardListener?.cancel();
       keyboardListener = null;
     }
@@ -358,8 +357,50 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
                     ),
                   ),
                 ),
-                // if (_editMode) Divider(height: 1, thickness: 1, color: Colors.grey.shade700),
-                if (_editMode) ZefyrToolbar.basic(controller: _controller),
+                if (_editMode)
+                  ZefyrToolbar(children: [
+                    ToggleStyleButton(
+                      attribute: NotusAttribute.bold,
+                      icon: Icons.format_bold,
+                      controller: _controller,
+                    ),
+                    const SizedBox(width: 1),
+                    ToggleStyleButton(
+                      attribute: NotusAttribute.italic,
+                      icon: Icons.format_italic,
+                      controller: _controller,
+                    ),
+                    VerticalDivider(indent: 16, endIndent: 16, color: Colors.grey.shade400),
+                    // SelectHeadingStyleButton(controller: _controller),
+                    // VerticalDivider(indent: 16, endIndent: 16, color: Colors.grey.shade400),
+                    ToggleStyleButton(
+                      attribute: NotusAttribute.block.numberList,
+                      controller: _controller,
+                      icon: Icons.format_list_numbered,
+                    ),
+                    ToggleStyleButton(
+                      attribute: NotusAttribute.block.bulletList,
+                      controller: _controller,
+                      icon: Icons.format_list_bulleted,
+                    ),
+                    // ToggleStyleButton(
+                    //   attribute: NotusAttribute.block.code,
+                    //   controller: _controller,
+                    //   icon: Icons.code,
+                    // ),
+                    VerticalDivider(indent: 16, endIndent: 16, color: Colors.grey.shade400),
+                    ToggleStyleButton(
+                      attribute: NotusAttribute.block.quote,
+                      controller: _controller,
+                      icon: Icons.format_quote,
+                    ),
+                    VerticalDivider(indent: 16, endIndent: 16, color: Colors.grey.shade400),
+                    // LinkStyleButton(controller: _controller),
+                    // InsertEmbedButton(
+                    //   controller: _controller,
+                    //   icon: Icons.horizontal_rule,
+                    // ),
+                  ]),
               ],
             ),
     );
