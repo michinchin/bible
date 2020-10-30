@@ -65,6 +65,12 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   }
 
   ///
+  /// If we're running on a phone or a small app window, limit number of views to 2.
+  ///
+  bool get numViewsLimited => _numViewsLimited;
+  var _numViewsLimited = false; // ignore: prefer_final_fields
+
+  ///
   /// Returns the size of the view manager rectangle.
   ///
   Size get size => _size;

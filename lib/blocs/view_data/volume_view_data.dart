@@ -62,7 +62,7 @@ class VolumeViewData extends ViewData {
     assert(volume != null);
     final bible = volume is Bible ? volume : VolumesRepository.shared.bibleWithId(defaultBibleId);
     assert(bible != null && (volume.type != VolumeType.bible || identical(volume, bible)));
-    return '${bible.titleWithBookAndChapter(bcv.book, bcv.chapter)}, ${volume.abbreviation}';
+    return '${bible.titleWithBookAndChapter(bcv.book, bcv.chapter)} | ${volume.abbreviation}';
   }
 
   @override

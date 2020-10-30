@@ -27,7 +27,8 @@ class _VMViewStack extends StatelessWidget {
     final portraitHeight = math.max(constraints.maxWidth, constraints.maxHeight);
     final portraitWidth = math.min(constraints.maxWidth, constraints.maxHeight);
 
-    var numViewsLimited = false;
+    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+    assert(bloc != null);
 
     if (portraitHeight < 950.0 && portraitWidth < 500) {
       // This is a phone or small app window, so only allow 2 views.
@@ -35,14 +36,12 @@ class _VMViewStack extends StatelessWidget {
           ((math.max(adjustedConstraints.maxWidth, adjustedConstraints.maxHeight)) / 2.0)
               .floorToDouble(),
           244);
-      numViewsLimited = true;
+      bloc?._numViewsLimited = true;
     } else {
       // This is a larger window or tablet.
       _minSize = 300;
+      bloc?._numViewsLimited = false;
     }
-
-    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
-    assert(bloc != null);
 
     bloc?._size = Size(adjustedConstraints.maxWidth, adjustedConstraints.maxHeight);
 
@@ -71,7 +70,7 @@ class _VMViewStack extends StatelessWidget {
     final viewRects = <ViewRect>[];
     final children = rows.toViewList(
         context, adjustedConstraints, maximizedView, viewWithKeyboardFocus, viewRects,
-        numViewsLimited: numViewsLimited);
+        numViewsLimited: bloc.numViewsLimited);
     bloc?._viewRects = viewRects;
 
     // If the state of visible selected text changed, call _updateSelectionBloc after the build.
@@ -416,7 +415,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
       bool isMaximized = false,
     }) {
       // make hidden views same size as maximized for smoother swapping
-      final showMaximized = isMaximized /* || !isVisible */;
+      final showMaximized = isMaximized || !isVisible;
 
       final rect = Rect.fromLTWH(showMaximized ? 0.0 : x, showMaximized ? 0.0 : y,
           showMaximized ? constraints.maxWidth : width, showMaximized ? constraints.maxHeight : height);
