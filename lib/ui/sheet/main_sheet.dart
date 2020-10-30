@@ -5,6 +5,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../ui/sheet/snap_sheet.dart';
 import '../library/library.dart';
+import '../note/notes.dart';
 
 class MainSheet extends StatefulWidget {
   final SheetSize sheetSize;
@@ -41,6 +42,7 @@ class _MainSheetState extends State<MainSheet> {
               onPressed: () {
                 tec.dmPrint('Tapped button $key');
                 if (key == 'Library') showLibrary(context);
+                if (key == 'Notes') showNotes(context);
               },
             )
         ],
@@ -62,6 +64,7 @@ class _MainSheetState extends State<MainSheet> {
                   () {
                     tec.dmPrint('Tapped button $key');
                     if (key == 'Library') showLibrary(context);
+                    if (key == 'Notes') showNotes(context);
                   },
               text: key,
             ),

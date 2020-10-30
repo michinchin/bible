@@ -43,7 +43,7 @@ Future<void> main() async {
     ..register(ViewableBibleChapter(Const.viewTypeChapter, FeatherIcons.book))
     ..register(ViewableStudyContent(Const.viewTypeStudy, FeatherIcons.bookOpen))
     ..register(ViewableNotes(Const.viewTypeNotes, FeatherIcons.edit))
-    ..register(ViewableMarginNote(marginNoteViewType, TecIcons.marginNoteOutline));
+    ..register(ViewableMarginNote(Const.viewTypeMarginNote, TecIcons.marginNoteOutline));
 
   final stopwatch = Stopwatch()..start();
 

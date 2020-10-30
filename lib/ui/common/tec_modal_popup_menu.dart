@@ -181,8 +181,8 @@ class TecTitleBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final color = isDarkTheme ? Colors.white : Colors.grey[700];
-    var textStyle = TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w500);
+    final color = isDarkTheme ? Colors.white : Colors.black;
+    var textStyle = TextStyle(color: color.withOpacity(.5), fontSize: 20, fontWeight: FontWeight.w500);
     if (style != null) textStyle = textStyle.merge(style);
 
     return Material(
@@ -200,7 +200,9 @@ class TecTitleBar extends StatelessWidget {
                         ? RichText(
                             textAlign: TextAlign.center,
                             text: TextSpan(children: [
-                              TextSpan(text: 'Tecarta', style: textStyle),
+                              TextSpan(
+                                  text: 'Tecarta',
+                                  style: textStyle.copyWith(fontWeight: FontWeight.bold)),
                               TextSpan(
                                   text: 'Bible',
                                   style: textStyle.copyWith(
@@ -219,7 +221,7 @@ class TecTitleBar extends StatelessWidget {
                   icon: const Icon(Icons.close),
                   padding: EdgeInsets.zero,
                   splashRadius: 12,
-                  color: color,
+                  color: textStyle.color,
                   tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   onPressed: () => Navigator.of(context, rootNavigator: true).maybePop(),
                 ),

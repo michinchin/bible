@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:bible/models/const.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -300,7 +301,7 @@ class ChapterViewModel {
         final position = vmBloc?.indexOfView(viewUid) ?? -1;
         final mn = marginNotes().marginNoteForVerse(tag.verse);
         vmBloc?.add(ViewManagerEvent.add(
-            type: marginNoteViewType,
+            type: Const.viewTypeMarginNote,
             data: tec.toJsonString(mn.stateJson()),
             position: position == -1 ? null : position + 1));
       }

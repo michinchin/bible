@@ -4,6 +4,7 @@ class Const {
   static const viewTypeChapter = 'BibleChapter';
   static const viewTypeStudy = 'StudyView';
   static const viewTypeNotes = 'NotesView';
+  static const viewTypeMarginNote = 'MarginNoteView';
 
   //------------------------------------------
   // Preference key names:
