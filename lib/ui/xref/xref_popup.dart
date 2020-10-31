@@ -31,40 +31,48 @@ Future<void> showXrefsPopup({
     offset: offset,
     builder: (context) {
       final maxWidth = math.min(420.0, MediaQuery.of(context).size.width);
-      final title = 'verse ${reference.verse}'; // reference?.titleWithBookChapterVerse();
+      final padding = (6.0 * textScaleFactorWith(context)).roundToDouble();
+      final dblPad = padding * 2;
+      // final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+      // final titleBgClr =
+      //     isDarkTheme ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05);
+      final title = 'verse ${reference.verse}';
       var firstCard = true;
       return BlocProvider.value(
         value: originalContext.bloc<ViewDataBloc>(),
         child: TecPopupSheet(
-          padding: const EdgeInsets.all(6),
-          // bgOpacity: 0.5,
-          // bgBlur: 5,
+          padding: EdgeInsets.zero,
           title: (tec.isNotNullOrEmpty(title))
-              ? Padding(
-                  padding: const EdgeInsets.only(left: 6, top: 12, right: 6, bottom: 4),
+              ? Container(
+                  // color: _xrefUiOption == XrefUiOption.flat ? titleBgClr : Colors.transparent,
+                  constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
+                  padding: EdgeInsets.all(padding),
                   child: TecTitleBar(
                     title: tec.isNullOrEmpty(text) ? title : "'$text', $title",
                     style: const TextStyle(fontSize: 18),
-                    maxWidth: maxWidth,
                   ),
                 )
               : null,
           child: Material(
-            color: Colors.transparent,
+            color: _xrefUiOption == XrefUiOption.flat ? null : Colors.transparent,
             child: Container(
-              // color: Colors.red,
               constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
               child: Column(children: [
                 ...xrefs.expand((xref) {
                   final card = _XrefWidget(
                     xref: xref,
-                    padding: _xrefUiOption == XrefUiOption.flat
-                        ? const EdgeInsets.all(0)
-                        : EdgeInsets.only(left: 4, top: firstCard ? 0 : 4, right: 4, bottom: 4),
+                    padding: EdgeInsets.all(_xrefUiOption == XrefUiOption.flat ? dblPad : padding),
                   );
-                  final widgets = firstCard || _xrefUiOption != XrefUiOption.flat
+                  final widgets = firstCard || _xrefUiOption == XrefUiOption.cards
                       ? [card]
-                      : [const Divider(height: 1, indent: 8, endIndent: 8), card];
+                      : [
+                          Divider(
+                              thickness: 1,
+                              height: _xrefUiOption == XrefUiOption.flat ? 1 : dblPad,
+                              indent: dblPad,
+                              endIndent: dblPad),
+                          card
+                        ];
                   firstCard = false;
                   return widgets;
                 }),
@@ -109,11 +117,13 @@ class _XrefWidget extends StatelessWidget {
 
     return _Card(
       color: _xrefUiOption == XrefUiOption.flat ? Colors.transparent : bgColor,
-      elevation: _xrefUiOption == XrefUiOption.flat ? 0 : 4,
-      padding: padding ?? const EdgeInsets.all(4),
+      elevation: _xrefUiOption == XrefUiOption.flat ? 0 : 3,
+      padding: _xrefUiOption == XrefUiOption.flat
+          ? EdgeInsets.zero
+          : const EdgeInsets.only(left: 8, top: 2, right: 8, bottom: 8),
       cornerRadius: 8,
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: padding ?? const EdgeInsets.all(8),
         child: TecText.rich(TextSpan(children: [
           TextSpan(
               text: '${bible.nameOfBook(xref.book)} ${xref.chapter}:${xref.verse}  ',
@@ -177,7 +187,11 @@ class _Card extends StatelessWidget {
                 Positioned.fill(
                   child: Material(
                     type: MaterialType.transparency,
-                    child: InkWell(splashColor: Colors.grey.withOpacity(0.5), onTap: onTap),
+                    child: InkWell(
+                      highlightColor: Colors.grey.withOpacity(0.1),
+                      splashColor: Colors.grey.withOpacity(0.2),
+                      onTap: onTap,
+                    ),
                   ),
                 ),
             ],

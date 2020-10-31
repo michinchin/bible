@@ -213,7 +213,7 @@ Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
 
     return tecModalPopupMenuItem(menuContext, vm.iconWithType(type), '$title', () async {
       tec.dmPrint('Adding new view of type $type.');
-      // add the  new view - maximize the window on phones
+      // Add the new view, and maximize the view on phones.
       final vmBloc = menuContext.bloc<ViewManagerBloc>(); // ignore: close_sinks
       final nextUid = vmBloc?.state?.nextUid;
       await vm.onAddView(menuContext, type, currentViewId: viewUid);

@@ -470,8 +470,8 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
         final isMaximized = (maximizedView?.uid == state.uid);
 
-        // special case - phone/small app view with 2 windows in portrait
-        // reducing space from the top window so both windows have same visible height
+        // special case - phone/small app view with 2 views in portrait
+        // reducing space from the top view so both views have same visible height
         if (c == 0 &&
             length == 2 &&
             numViewsLimited &&

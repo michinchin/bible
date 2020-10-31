@@ -610,47 +610,49 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                 }
                 return false;
               },
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                child: TecHtml(
-                  widget.html,
-                  key: _tecHtmlKey,
-                  debugId: debugId,
-                  avoidUsingWidgetSpans: false,
-                  scrollController: _scrollController,
-                  baseUrl: widget.baseUrl,
-                  textScaleFactor: 1.0,
-                  // HTML is already scaled.
-                  textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
-                      ? TextStyle(color: textColor)
-                      : widget.fontName.startsWith('embedded_')
-                          ? TextStyle(color: textColor, fontFamily: widget.fontName.substring(9))
-                          : GoogleFonts.getFont(widget.fontName, color: textColor)),
+              child: CupertinoScrollbar(
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: TecHtml(
+                    widget.html,
+                    key: _tecHtmlKey,
+                    debugId: debugId,
+                    avoidUsingWidgetSpans: false,
+                    scrollController: _scrollController,
+                    baseUrl: widget.baseUrl,
+                    textScaleFactor: 1.0,
+                    // HTML is already scaled.
+                    textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
+                        ? TextStyle(color: textColor)
+                        : widget.fontName.startsWith('embedded_')
+                            ? TextStyle(color: textColor, fontFamily: widget.fontName.substring(9))
+                            : GoogleFonts.getFont(widget.fontName, color: textColor)),
 
-                  padding: EdgeInsets.symmetric(
-                    horizontal: (widget.size.width * _marginPercent).roundToDouble(),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: (widget.size.width * _marginPercent).roundToDouble(),
+                    ),
+
+                    // Tagging HTML elements:
+                    tagHtmlElement: helper.tagHtmlElement,
+
+                    // Rendering HTML text to a TextSpan:
+                    spanForText: (text, style, tag) => _viewModel.spanForText(
+                        context, text, style, tag, selectedTextStyle,
+                        isDarkTheme: isDarkTheme),
+
+                    // Word range selection related:
+                    selectable: !_selection.hasVerses,
+                    selectionColor: selectionColor,
+                    showSelection: !_selection.isInTrialMode,
+                    selectionMenuItems: _selection.menuItems(context, _tecHtmlKey),
+                    selectionController: _wordSelectionController,
+
+                    // `versesToShow` related (when viewing a subset of verses in the chapter):
+                    isInitialHtmlElementVisible:
+                        widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
+                    toggleVisibilityWithHtmlElement: helper.toggleVisibility,
+                    shouldSkipHtmlElement: helper.shouldSkip,
                   ),
-
-                  // Tagging HTML elements:
-                  tagHtmlElement: helper.tagHtmlElement,
-
-                  // Rendering HTML text to a TextSpan:
-                  spanForText: (text, style, tag) => _viewModel.spanForText(
-                      context, text, style, tag, selectedTextStyle,
-                      isDarkTheme: isDarkTheme),
-
-                  // Word range selection related:
-                  selectable: !_selection.hasVerses,
-                  selectionColor: selectionColor,
-                  showSelection: !_selection.isInTrialMode,
-                  selectionMenuItems: _selection.menuItems(context, _tecHtmlKey),
-                  selectionController: _wordSelectionController,
-
-                  // `versesToShow` related (when viewing a subset of verses in the chapter):
-                  isInitialHtmlElementVisible:
-                      widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
-                  toggleVisibilityWithHtmlElement: helper.toggleVisibility,
-                  shouldSkipHtmlElement: helper.shouldSkip,
                 ),
               ),
             ),
