@@ -1,3 +1,4 @@
+import 'package:bible/ui/home/home.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -18,7 +19,7 @@ class MainSheet extends StatefulWidget {
 
 class _MainSheetState extends State<MainSheet> {
   final miniViewIcons = {
-    'Explore': FeatherIcons.compass,
+    'Home': FeatherIcons.home,
     'Library': FeatherIcons.book,
     'Listen': FeatherIcons.play,
     'Notes': FeatherIcons.edit2
@@ -43,6 +44,7 @@ class _MainSheetState extends State<MainSheet> {
                 tec.dmPrint('Tapped button $key');
                 if (key == 'Library') showLibrary(context);
                 if (key == 'Notes') showNotes(context);
+                if (key == 'Home') showHome(context);
               },
             )
         ],
