@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tec_env/tec_env.dart';
@@ -384,18 +385,30 @@ class _ChapterViewState extends State<_ChapterView> {
     }
 
     // Rebuild the HTML string only when necessary...
-    _html ??= _env.html(
-      htmlFragment: widget.htmlFragment,
-      fontSizePercent: (_contentScaleFactor * 100.0).round(),
-      marginLeft: '0px',
-      marginRight: '0px',
-      marginTop: '0px',
-      marginBottom: '160px',
-      vendorFolder: widget.volume.vendorFolder,
-      customStyles: ' .C, .cno { display: none; } '
-          '.FOOTNO { line-height: inherit; top: inherit; }'
-          'h5, .SUBA, h1 { font-weight: normal !important; font-style: italic; font-size: 100% !important;}',
-    );
+    if (_html == null) {
+      final customStyles = widget.volume.id >= 1000
+          ? ' p { line-height: 1.2em; } '
+          : ' .C, .cno { display: none; } '
+              '.FOOTNO { line-height: inherit; top: inherit; } '
+              'h5, .SUBA, h1 { font-weight: normal !important; '
+              'font-style: italic; font-size: 100% !important; } ';
+
+      _html = _env.html(
+        htmlFragment: widget.htmlFragment,
+        fontSizePercent: (_contentScaleFactor * 100.0).round(),
+        marginLeft: '0px',
+        marginRight: '0px',
+        marginTop: '0px',
+        marginBottom: '160px',
+        vendorFolder: widget.volume.vendorFolder,
+        customStyles: customStyles,
+      );
+
+      // If it is a study volume, switch `bible_vendor.css` to `studynotes.css`.
+      if (widget.volume.id >= 1000) {
+        _html = _html.replaceAll('bible_vendor.css', 'studynotes.css');
+      }
+    }
 
     return Container(
       color: isDarkTheme ? Colors.black : Colors.white,
@@ -581,47 +594,64 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                 context.bloc<SheetManagerBloc>().restore(context);
               }
             },
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: TecHtml(
-                widget.html,
-                key: _tecHtmlKey,
-                debugId: debugId,
-                avoidUsingWidgetSpans: false,
-                scrollController: _scrollController,
-                baseUrl: widget.baseUrl,
-                textScaleFactor: 1.0,
-                // HTML is already scaled.
-                textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
-                    ? TextStyle(color: textColor)
-                    : widget.fontName.startsWith('embedded_')
-                        ? TextStyle(color: textColor, fontFamily: widget.fontName.substring(9))
-                        : GoogleFonts.getFont(widget.fontName, color: textColor)),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification is UserScrollNotification) {
+                  switch (notification.direction) {
+                    case ScrollDirection.forward:
+                      context.bloc<SheetManagerBloc>().restore(context);
+                      break;
+                    case ScrollDirection.reverse:
+                      context.bloc<SheetManagerBloc>().collapse(context);
+                      break;
+                    default:
+                      break;
+                  }
+                }
+                return false;
+              },
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: TecHtml(
+                  widget.html,
+                  key: _tecHtmlKey,
+                  debugId: debugId,
+                  avoidUsingWidgetSpans: false,
+                  scrollController: _scrollController,
+                  baseUrl: widget.baseUrl,
+                  textScaleFactor: 1.0,
+                  // HTML is already scaled.
+                  textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
+                      ? TextStyle(color: textColor)
+                      : widget.fontName.startsWith('embedded_')
+                          ? TextStyle(color: textColor, fontFamily: widget.fontName.substring(9))
+                          : GoogleFonts.getFont(widget.fontName, color: textColor)),
 
-                padding: EdgeInsets.symmetric(
-                  horizontal: (widget.size.width * _marginPercent).roundToDouble(),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: (widget.size.width * _marginPercent).roundToDouble(),
+                  ),
+
+                  // Tagging HTML elements:
+                  tagHtmlElement: helper.tagHtmlElement,
+
+                  // Rendering HTML text to a TextSpan:
+                  spanForText: (text, style, tag) => _viewModel.spanForText(
+                      context, text, style, tag, selectedTextStyle,
+                      isDarkTheme: isDarkTheme),
+
+                  // Word range selection related:
+                  selectable: !_selection.hasVerses,
+                  selectionColor: selectionColor,
+                  showSelection: !_selection.isInTrialMode,
+                  selectionMenuItems: _selection.menuItems(context, _tecHtmlKey),
+                  selectionController: _wordSelectionController,
+
+                  // `versesToShow` related (when viewing a subset of verses in the chapter):
+                  isInitialHtmlElementVisible:
+                      widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
+                  toggleVisibilityWithHtmlElement: helper.toggleVisibility,
+                  shouldSkipHtmlElement: helper.shouldSkip,
                 ),
-
-                // Tagging HTML elements:
-                tagHtmlElement: helper.tagHtmlElement,
-
-                // Rendering HTML text to a TextSpan:
-                spanForText: (text, style, tag) => _viewModel.spanForText(
-                    context, text, style, tag, selectedTextStyle,
-                    isDarkTheme: isDarkTheme),
-
-                // Word range selection related:
-                selectable: !_selection.hasVerses,
-                selectionColor: selectionColor,
-                showSelection: !_selection.isInTrialMode,
-                selectionMenuItems: _selection.menuItems(context, _tecHtmlKey),
-                selectionController: _wordSelectionController,
-
-                // `versesToShow` related (when viewing a subset of verses in the chapter):
-                isInitialHtmlElementVisible:
-                    widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
-                toggleVisibilityWithHtmlElement: helper.toggleVisibility,
-                shouldSkipHtmlElement: helper.shouldSkip,
               ),
             ),
           ),

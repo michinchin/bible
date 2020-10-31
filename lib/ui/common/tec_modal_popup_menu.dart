@@ -159,7 +159,7 @@ TableRow tecModalPopupMenuDivider(BuildContext context, {String title, double ro
 TableRow tecModalPopupMenuTitle(String title, {bool showClose = true}) {
   return TableRow(
     children: [
-      TecTitleBar(title: title),
+      Padding(padding: const EdgeInsets.only(bottom: 15), child: TecTitleBar(title: title)),
       Container(),
     ],
   );
@@ -188,7 +188,6 @@ class TecTitleBar extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Container(
-        padding: const EdgeInsets.only(bottom: 15),
         constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
         child: Stack(
           alignment: Alignment.center,

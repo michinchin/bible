@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -104,6 +105,17 @@ class ChapterViewModel {
           _widgetKeys[key] ??= GlobalKey();
           spans.add(_marginNoteSpan(context, style, tag, _widgetKeys[key], isDarkTheme));
         }
+      }
+
+      // Add a widget with a global key at the start of each verse so we can determine
+      // the scroll position of each verse.
+      if (tag.verse != null && tag.isInVerse && !_verses.containsKey(tag.verse)) {
+        _verses[tag.verse] = _KeyAndPos(GlobalKey(), null);
+        spans.add(TaggableWidgetSpan(
+          alignment: PlaceholderAlignment.top,
+          childWidth: 1,
+          child: SizedBox(key: _verses[tag.verse].key, width: 1, height: 1),
+        ));
       }
 
       var textStyle = style;
@@ -215,12 +227,18 @@ class ChapterViewModel {
     return TextSpan(text: text, style: style);
   }
 
+  void scrollToVerse(int verse, {bool pulse = false}) {}
+
   //
   // PRIVATE STUFF
   //
 
-  // Maintain a list of keys for footnotes, margin notes, ...
+  // Maintain a list of keys for footnotes and margin notes.
   final _widgetKeys = <String, GlobalKey>{};
+
+  // Map of verse numbers to _KeyAndPos.
+  // ignore: prefer_collection_literals
+  final _verses = LinkedHashMap<int, _KeyAndPos>();
 
   var _marginNoteVerse = 0;
   String _currentFootnoteHref;
@@ -419,6 +437,13 @@ class ChapterViewModel {
       ),
     );
   }
+}
+
+/// Verse key and scroll position.
+class _KeyAndPos {
+  final GlobalKey key;
+  final double pos;
+  _KeyAndPos(this.key, this.pos);
 }
 
 ///

@@ -1,7 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 
-///
-/// [VerseTag]
+import 'package:equatable/equatable.dart';
+
 ///
 /// Used to tag an HTML text node with the [verse] it is in, the [word] index
 /// of the first word in the text node, and a boolean indicating whether or not
@@ -10,9 +12,10 @@ import 'package:flutter/foundation.dart';
 /// with v="0").
 ///
 @immutable
-class VerseTag {
+class VerseTag extends Equatable {
   final int verse;
   final int word;
+  final int endVerse;
   final bool isInVerse;
   final bool isInXref;
   final bool isInFootnote;
@@ -21,19 +24,23 @@ class VerseTag {
   const VerseTag({
     @required this.verse,
     @required this.word,
+    int endVerse,
     this.isInVerse = false,
     this.isInXref = false,
     this.isInFootnote = false,
     this.href,
-  }) : assert(verse != null &&
+  })  : assert(verse != null &&
             word != null &&
+            (endVerse == null || endVerse >= verse) &&
             isInVerse != null &&
             isInXref != null &&
-            isInFootnote != null);
+            isInFootnote != null),
+        endVerse = endVerse ?? verse;
 
   VerseTag copyWith({
     int verse,
     int word,
+    int endVerse,
     bool isInVerse,
     bool isInXref,
     bool isInFootnote,
@@ -42,6 +49,7 @@ class VerseTag {
       VerseTag(
         verse: verse ?? this.verse,
         word: word ?? this.word,
+        endVerse: endVerse ?? verse ?? this.endVerse,
         isInVerse: isInVerse ?? this.isInVerse,
         isInXref: isInXref ?? this.isInXref,
         isInFootnote: isInFootnote ?? this.isInFootnote,
@@ -49,19 +57,17 @@ class VerseTag {
       );
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VerseTag &&
-          runtimeType == other.runtimeType &&
-          verse == other.verse &&
-          word == other.word &&
-          isInVerse == other.isInVerse;
-
-  @override
-  int get hashCode => verse.hashCode ^ word.hashCode ^ isInVerse.hashCode;
+  List<Object> get props => [verse, word, endVerse, isInVerse, isInXref, isInFootnote, href];
 
   @override
   String toString() {
-    return ('{ "v": $verse, "w": $word, "inV": $isInVerse }');
+    final buf = StringBuffer('{ "v": $verse, "w": $word');
+    if (endVerse != verse) buf.write(', "endV": $endVerse');
+    if (isInVerse) buf.write(', "inV": true');
+    if (isInXref) buf.write(', "inXref": true');
+    if (isInFootnote) buf.write(', "inFn": true');
+    if (href != null) buf.write(', "href": ${jsonEncode(href)}');
+    buf.write(' }');
+    return buf.toString();
   }
 }

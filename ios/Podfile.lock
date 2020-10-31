@@ -59,9 +59,9 @@ PODS:
     - Flutter
   - shared_preferences (0.0.1):
     - Flutter
-  - sqflite (0.0.1):
+  - sqflite (0.0.2):
     - Flutter
-    - FMDB (~> 2.7.2)
+    - FMDB (>= 2.7.5)
   - tec_platform_util (0.0.1):
     - Flutter
   - tec_web_view (0.0.1):
@@ -164,7 +164,7 @@ SPEC CHECKSUMS:
   permission: c186483e23779d53def6b55986323494927c22c8
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
-  sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
+  sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
   tec_platform_util: 2fc2b292ec7eddcc80717ae9d28257498b686f59
   tec_web_view: 1fa4ae0861ce5f49367bfdd85385345d2e4e7688
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
