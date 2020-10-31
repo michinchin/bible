@@ -92,29 +92,34 @@ List<TableRow> _buildMenuItemsForViewWithState(
   final viewData = ChapterViewData.fromContext(context, state.uid);
   final useSharedRef = viewData.useSharedRef;
 
-  return [
-    if ((vmBloc?.state?.views?.length ?? 0) > 1)
-      tecModalPopupMenuItem(
+  final items = <TableRow>[];
+
+  if ((vmBloc?.state?.views?.length ?? 0) > 1) {
+    items.add(tecModalPopupMenuDivider(menuContext, title: 'Window options'));
+
+    if (isMaximized) {
+      items.add(tecModalPopupMenuItem(
           menuContext,
-          isMaximized ? FeatherIcons.minimize2 : FeatherIcons.maximize2,
-          isMaximized ? 'Restore' : 'Maximize', () {
+          vmBloc.numViewsLimited ? Icons.horizontal_split_outlined : FeatherIcons.minimize2,
+          vmBloc.numViewsLimited ? 'Split screen' : 'Restore', () {
         Navigator.of(menuContext).maybePop();
-        vmBloc?.add(
-            isMaximized ? const ViewManagerEvent.restore() : ViewManagerEvent.maximize(state.uid));
-      }),
-    if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1 || isMaximized)) ...[
-      tecModalPopupMenuDivider(menuContext, title: isMaximized ? 'Switch To' : 'Switch With'),
-      ..._generateOffScreenItems(menuContext, state.uid)
-    ],
-    tecModalPopupMenuDivider(menuContext, title: 'Open New'),
-    ...generateAddMenuItems(menuContext, state.uid),
-    if ((vmBloc?.state?.views?.length ?? 0) > 1 &&
-        {Const.viewTypeChapter, Const.viewTypeStudy}.contains(state.type)) ...[
-      tecModalPopupMenuDivider(menuContext),
-      tecModalPopupMenuItem(
+        vmBloc?.add(const ViewManagerEvent.restore());
+      }));
+    } else {
+      items.add(tecModalPopupMenuItem(
+          menuContext,
+          vmBloc.numViewsLimited ? Icons.article_outlined : FeatherIcons.maximize2,
+          vmBloc.numViewsLimited ? 'Full screen' : 'Maximize', () {
+        Navigator.of(menuContext).maybePop();
+        vmBloc?.add(ViewManagerEvent.maximize(state.uid));
+      }));
+    }
+
+    if ({Const.viewTypeChapter, Const.viewTypeStudy}.contains(state.type)) {
+      items.add(tecModalPopupMenuItem(
         menuContext,
-        useSharedRef ? Icons.link_off : Icons.link,
-        useSharedRef ? 'Un-link Reference' : 'Link Reference',
+        useSharedRef ? Icons.link_off_outlined : Icons.link_outlined,
+        useSharedRef ? 'Unlink chapter' : 'Link chapter',
         () {
           Navigator.of(menuContext).maybePop();
           final viewDataBloc = context.bloc<ViewDataBloc>();
@@ -123,16 +128,50 @@ List<TableRow> _buildMenuItemsForViewWithState(
             context.bloc<SharedBibleRefBloc>().update(viewData.bcv);
           }
         },
-      ),
-    ],
-    if ((vmBloc?.state?.views?.length ?? 0) > 1) ...[
-      tecModalPopupMenuDivider(menuContext),
-      tecModalPopupMenuItem(menuContext, Icons.close, 'Close View', () {
-        Navigator.of(menuContext).maybePop();
-        vmBloc?.add(ViewManagerEvent.remove(state.uid));
-      }),
-    ],
-  ];
+      ));
+    }
+
+    items.add(tecModalPopupMenuItem(menuContext, Icons.close, 'Close', () {
+      Navigator.of(menuContext).maybePop();
+      var nextMaxUid = -1;
+
+      // on a phone - if maximized, maximize the underneath one
+      if (state.uid == vmBloc?.state?.maximizedViewUid &&
+          (vmBloc?.numViewsLimited ?? false) &&
+          (vmBloc?.state?.views?.length ?? 0) > 2) {
+        final views = vmBloc?.state?.views;
+        if (vmBloc.indexOfView(vmBloc.state.maximizedViewUid) == vmBloc.state.views.length - 1) {
+          nextMaxUid = views.first.uid;
+        } else {
+          nextMaxUid = views
+              .firstWhere((v) =>
+                  vmBloc.indexOfView(v.uid) ==
+                  vmBloc.indexOfView(vmBloc.state.maximizedViewUid) + 1)
+              .uid;
+        }
+      }
+
+      vmBloc?.add(ViewManagerEvent.remove(state.uid));
+
+      if (nextMaxUid > 0) {
+        vmBloc?.add(ViewManagerEvent.maximize(nextMaxUid));
+      }
+    }));
+  }
+
+  if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1)) {
+    items.addAll([
+      tecModalPopupMenuDivider(menuContext, title: 'Open existing'),
+      ..._generateOffScreenItems(menuContext, state.uid),
+    ]);
+  }
+
+  items.addAll([
+    tecModalPopupMenuDivider(menuContext, title: 'Open new'),
+    ...generateAddMenuItems(menuContext, state.uid),
+  ]);
+
+  return items;
 }
 
 void _onSwitchViews(ViewManagerBloc vmBloc, int viewUid, ViewState view) {
@@ -174,7 +213,13 @@ Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
 
     return tecModalPopupMenuItem(menuContext, vm.iconWithType(type), '$title', () async {
       tec.dmPrint('Adding new view of type $type.');
+      // add the  new view - maximize the window on phones
+      final vmBloc = menuContext.bloc<ViewManagerBloc>(); // ignore: close_sinks
+      final nextUid = vmBloc?.state?.nextUid;
       await vm.onAddView(menuContext, type, currentViewId: viewUid);
+      if ((vmBloc?.numViewsLimited ?? false) && vmBloc?.state?.maximizedViewUid != nextUid) {
+        vmBloc?.add(ViewManagerEvent.maximize(nextUid));
+      }
       await Navigator.of(menuContext).maybePop();
     });
   });
