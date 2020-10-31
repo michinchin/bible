@@ -1,12 +1,11 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tec_html/tec_html.dart';
@@ -20,9 +19,9 @@ import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/color_utils.dart';
+import '../../models/const.dart';
 import '../../models/string_utils.dart';
 import '../common/common.dart';
-import '../note/margin_note_view.dart';
 import 'chapter_selection.dart';
 import 'verse_tag.dart';
 
@@ -318,7 +317,7 @@ class ChapterViewModel {
         final position = vmBloc?.indexOfView(viewUid) ?? -1;
         final mn = marginNotes().marginNoteForVerse(tag.verse);
         vmBloc?.add(ViewManagerEvent.add(
-            type: marginNoteViewType,
+            type: Const.viewTypeMarginNote,
             data: tec.toJsonString(mn.stateJson()),
             position: position == -1 ? null : position + 1));
       }

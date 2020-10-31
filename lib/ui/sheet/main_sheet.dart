@@ -1,3 +1,4 @@
+import 'package:bible/ui/home/home.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -5,6 +6,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../ui/sheet/snap_sheet.dart';
 import '../library/library.dart';
+import '../note/notes.dart';
 
 class MainSheet extends StatefulWidget {
   final SheetSize sheetSize;
@@ -17,7 +19,7 @@ class MainSheet extends StatefulWidget {
 
 class _MainSheetState extends State<MainSheet> {
   final miniViewIcons = {
-    'Explore': FeatherIcons.compass,
+    'Home': FeatherIcons.home,
     'Library': FeatherIcons.book,
     'Listen': FeatherIcons.play,
     'Notes': FeatherIcons.edit2
@@ -41,6 +43,8 @@ class _MainSheetState extends State<MainSheet> {
               onPressed: () {
                 tec.dmPrint('Tapped button $key');
                 if (key == 'Library') showLibrary(context);
+                if (key == 'Notes') showNotes(context);
+                if (key == 'Home') showHome(context);
               },
             )
         ],
@@ -62,6 +66,7 @@ class _MainSheetState extends State<MainSheet> {
                   () {
                     tec.dmPrint('Tapped button $key');
                     if (key == 'Library') showLibrary(context);
+                    if (key == 'Notes') showNotes(context);
                   },
               text: key,
             ),

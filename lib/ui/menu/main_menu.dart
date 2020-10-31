@@ -1,3 +1,4 @@
+import 'package:bible/ui/menu/notifications.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -63,7 +64,8 @@ List<TableRow> _buildMenuItems(
     // ),
     tecModalPopupMenuDivider(menuContext, rowPadding: rowPadding),
 
-    tecModalPopupMenuItem(menuContext, FeatherIcons.bell, 'Notifications', null,
+    tecModalPopupMenuItem(
+        menuContext, FeatherIcons.bell, 'Notifications', () => showNotifications(context),
         subtitle: 'Reminders for daily verse, devotional of the day, and more.',
         rowPadding: rowPadding,
         scaleFont: true),

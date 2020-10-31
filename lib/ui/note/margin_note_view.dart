@@ -18,8 +18,6 @@ import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../menu/view_actions.dart';
 
-const marginNoteViewType = 'MarginNoteView';
-
 class ViewableMarginNote extends Viewable {
   ViewableMarginNote(String typeName, IconData icon) : super(typeName, icon);
 
