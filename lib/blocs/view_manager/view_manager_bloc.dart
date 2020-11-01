@@ -54,8 +54,14 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   final tec.KeyValueStore _kvStore;
   final GlobalKey _globalKey;
 
+  /// List of ViewRect objects, one for each open view.
   var _viewRects = <ViewRect>[]; // ignore: prefer_final_fields
+
+  /// Rows and columns of the open views that fit in the view manager.
   List<List<ViewState>> _rows = []; // ignore: prefer_final_fields
+
+  /// List of the open views that did not fit in `_rows`.
+  List<ViewState> _overflow = []; // ignore: prefer_final_fields
 
   ///
   /// Returns the view manager rect in global coordinates.
@@ -420,7 +426,22 @@ class ViewRect {
     @required this.row,
     @required this.column,
     @required this.rect,
-  });
+  }) : assert(uid != null && isVisible != null && row != null && column != null && rect != null);
+
+  ViewRect copyWith({
+    int uid,
+    bool isVisible,
+    int row,
+    int column,
+    Rect rect,
+  }) =>
+      ViewRect(
+        uid: uid ?? this.uid,
+        isVisible: isVisible ?? this.isVisible,
+        row: row ?? this.row,
+        column: column ?? this.column,
+        rect: rect ?? this.rect,
+      );
 }
 
 ///

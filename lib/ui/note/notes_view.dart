@@ -14,6 +14,7 @@ class ViewableNotes extends Viewable {
   @override
   Widget builder(BuildContext context, ViewState state, Size size) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: MinHeightAppBar(
         appBar: AppBar(
           title: const Text('Notes'),

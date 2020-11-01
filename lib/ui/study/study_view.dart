@@ -76,6 +76,7 @@ class StudyView extends StatelessWidget {
       child: DefaultTabController(
         length: tabs.length,
         child: Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: MinHeightAppBar(
             appBar: AppBar(
               centerTitle: false,

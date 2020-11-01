@@ -304,6 +304,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: MinHeightAppBar(
         appBar: AppBar(
           centerTitle: false,

@@ -111,6 +111,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
             a.asChapterViewData.bcv.chapter != b.asChapterViewData.bcv.chapter,
         listener: (context, viewData) => _onNewViewData(viewData.asChapterViewData),
         child: Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: MinHeightAppBar(
             appBar: ChapterViewAppBar(
               volumeType: _volume is Bible ? VolumeType.bible : VolumeType.studyContent,
@@ -589,9 +590,11 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
             navigationBarPadding: () => TecScaffoldWrapper.navigationBarPadding,
             autoscrollActive: (active) {
               if (active) {
+                tec.dmPrint('ChapterViewHtml: autoscroll is active, collapsing the bottom sheet.');
                 context.bloc<SheetManagerBloc>().collapse(context);
               } else {
-                context.bloc<SheetManagerBloc>().restore(context);
+                // tec.dmPrint('ChapterViewHtml autoscrollActive false, restoring the bottom sheet.');
+                // context.bloc<SheetManagerBloc>().restore(context);
               }
             },
             child: NotificationListener<ScrollNotification>(
@@ -599,9 +602,11 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                 if (notification is UserScrollNotification) {
                   switch (notification.direction) {
                     case ScrollDirection.forward:
+                      tec.dmPrint('ChapterViewHtml: scrolled up, restoring the bottom sheet.');
                       context.bloc<SheetManagerBloc>().restore(context);
                       break;
                     case ScrollDirection.reverse:
+                      tec.dmPrint('ChapterViewHtml: scrolled down, collapsing the bottom sheet.');
                       context.bloc<SheetManagerBloc>().collapse(context);
                       break;
                     default:

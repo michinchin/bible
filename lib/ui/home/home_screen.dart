@@ -33,7 +33,7 @@ class HomeScreen extends StatelessWidget {
           color: Theme.of(context).canvasColor,
           child: TecScaffoldWrapper(
             child: Scaffold(
-              resizeToAvoidBottomInset: false,
+              // resizeToAvoidBottomInset: false,
               body: SafeArea(
                 left: false,
                 right: false,
