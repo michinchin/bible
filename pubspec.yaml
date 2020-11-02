@@ -97,7 +97,7 @@ dependencies:
     hosted:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
-    version: ^2.0.16
+    version: ^2.0.17
   zefyr:
     hosted:
       name: zefyr
