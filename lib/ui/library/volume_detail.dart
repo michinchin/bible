@@ -317,7 +317,7 @@ class _ButtonsState extends State<_Buttons> {
           await AppSettings.shared.userAccount.userDb.addLicenseForFullVolume(id);
         }
         if (!isRestoration) {
-          // TODO(ron): ...
+          // TO-DO(ron): ...
           // await _newPurchase(id);
 
           await tecShowSimpleAlertDialog<bool>(

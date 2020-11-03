@@ -223,7 +223,7 @@ class ChapterSelection {
 
       bible?.xrefsWithHrefProperty(tag.href)?.then((result) {
         if (result?.value?.isEmpty ?? true) {
-          // TODO(ron): ...
+          // TO-DO(ron): ...
         } else {
           showXrefsPopup(
             context: context,

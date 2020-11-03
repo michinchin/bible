@@ -56,6 +56,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
 
   /// List of ViewRect objects, one for each open view.
   var _viewRects = <ViewRect>[]; // ignore: prefer_final_fields
+  var _lastBuildHadMaxedView = false; // ignore: prefer_final_fields
 
   /// Rows and columns of the open views that fit in the view manager.
   List<List<ViewState>> _rows = []; // ignore: prefer_final_fields
@@ -468,8 +469,6 @@ ViewManagerState _defaultState() {
   assert(tec.isNotNullOrEmpty(ViewManagerState.defaultViewType));
   return ViewManagerState([ViewState(uid: 1, type: ViewManagerState.defaultViewType)], 0, 2);
 }
-
-extension ViewManagerExtOnState on ViewManagerState {}
 
 ///
 /// ViewManagerWidget
