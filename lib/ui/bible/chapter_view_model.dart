@@ -226,7 +226,42 @@ class ChapterViewModel {
     return TextSpan(text: text, style: style);
   }
 
-  void scrollToVerse(int verse, {bool pulse = false}) {}
+  void scrollToVerse(
+    int verse,
+    GlobalKey tecHtmlKey,
+    ScrollController controller, {
+    bool animated = true,
+    bool pulse = false,
+  }) {
+    assert(verse != null && verse > 0 && tecHtmlKey != null && controller != null);
+    final keyAndPos = _keyAndPosForVerse(verse);
+    if (keyAndPos != null) {
+      final offset = globalOffsetOfWidgetWithKey(keyAndPos.key, ancestorKey: tecHtmlKey);
+      if (offset != null) {
+        tec.dmPrint('scrollToVerse scrolling to offset: ${offset.dy}, animated: $animated');
+        if (animated) {
+          controller.animateTo(offset.dy - 8,
+              duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+        } else {
+          controller.jumpTo(offset.dy - 8);
+        }
+      } else {
+        tec.dmPrint('scrollToVerse globalOffsetOfWidgetWithKey() returned null for verse $verse');
+      }
+    } else {
+      tec.dmPrint('scrollToVerse did not find verse $verse');
+    }
+  }
+
+  _KeyAndPos _keyAndPosForVerse(int verse) {
+    MapEntry<int, _KeyAndPos> last;
+    for (final entry in _verses.entries) {
+      if (verse == entry.key) return entry.value;
+      if (verse < entry.key) return last?.value;
+      last = entry;
+    }
+    return null;
+  }
 
   //
   // PRIVATE STUFF
@@ -274,7 +309,7 @@ class ChapterViewModel {
         final pt = _tapGlobalPosition;
 
         for (final key in _widgetKeys.keys) {
-          final rect = globalRectOfWidgetWithKey(_widgetKeys[key])?.inflate(12);
+          final rect = globalRectOfWidgetWithKey(_widgetKeys[key])?.inflate(16);
           if (rect != null) {
             // If the tap is above the widget, don't bother checking the rest of the widgets.
             if (pt.dy < rect.top) break;

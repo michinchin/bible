@@ -5,7 +5,7 @@ import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/view_data/volume_view_data.dart';
+import '../../blocs/view_data/chapter_view_data.dart';
 import '../common/common.dart';
 import 'strongs_build_helper.dart';
 
@@ -17,7 +17,7 @@ Future<void> showStrongsPopup({
 }) {
   if (strongsId?.isEmpty ?? true) return Future.value();
 
-  final volumeId = context.bloc<ViewDataBloc>().state.asChapterViewData.volumeId;
+  final volumeId = context.bloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
   final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible;
   final originalContext = context;
 
@@ -29,7 +29,7 @@ Future<void> showStrongsPopup({
       builder: (context) {
         final helper = StrongsBuildHelper();
         return BlocProvider.value(
-          value: originalContext.bloc<ViewDataBloc>(),
+          value: originalContext.bloc<ChapterViewDataBloc>(),
           child: Scaffold(
             appBar: MinHeightAppBar(
               appBar: AppBar(

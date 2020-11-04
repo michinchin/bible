@@ -201,8 +201,10 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   /// Updates the String [data] associated with the view with the given [uid], or removes
   /// it if [data] is null.
   ///
-  Future<void> updateDataWithView(int uid, String data) =>
-      data == null ? _kvStore?.remove('vm_$uid') : _kvStore?.setString('vm_$uid', data);
+  Future<void> updateDataWithView(int uid, String data) {
+    // tec.dmPrint('ViewManagerBloc.updateDataWithView uid: $uid, data: $data');
+    return data == null ? _kvStore?.remove('vm_$uid') : _kvStore?.setString('vm_$uid', data);
+  }
 
   //-------------------------------------------------------------------------
   // Keyboard focus related:
@@ -286,7 +288,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
 
   @override
   Stream<ViewManagerState> mapEventToState(ViewManagerEvent event) async* {
-    final value = event.when(
+    final value = await event.when(
       add: _add,
       remove: _remove,
       maximize: _maximize,
@@ -312,13 +314,13 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     }
   }
 
-  ViewManagerState _add(String type, int position, String data) {
+  Future<ViewManagerState> _add(String type, int position, String data) async {
     final nextUid = (state.nextUid ?? 1);
     final viewState = ViewState(uid: nextUid, type: type);
     final newViews = List.of(state.views); // shallow copy
     // tec.dmPrint('VM add type: $type, uid: $nextUid, position: $position, data: \'$data\'');
     newViews.insert(position ?? newViews.length, viewState);
-    updateDataWithView(nextUid, data);
+    await updateDataWithView(nextUid, data);
     return ViewManagerState(
       newViews,
       state.maximizedViewUid == 0 ? 0 : nextUid,
@@ -326,10 +328,10 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     );
   }
 
-  ViewManagerState _remove(int uid) {
+  Future<ViewManagerState> _remove(int uid) async {
     final position = indexOfView(uid);
     if (position < 0) return state;
-    updateDataWithView(uid, null); // Clear its data, if any.
+    await updateDataWithView(uid, null); // Clear its data, if any.
     final newViews = List.of(state.views) // shallow copy
       ..removeAt(position);
     if (newViews.isEmpty) return _defaultState();
@@ -340,17 +342,17 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     );
   }
 
-  ViewManagerState _maximize(int uid) {
+  Future<ViewManagerState> _maximize(int uid) async {
     final position = indexOfView(uid);
     if (position < 0) return state;
     return ViewManagerState(state.views, uid, state.nextUid);
   }
 
-  ViewManagerState _restore() {
+  Future<ViewManagerState> _restore() async {
     return ViewManagerState(state.views, 0, state.nextUid);
   }
 
-  ViewManagerState _move(int from, int to) {
+  Future<ViewManagerState> _move(int from, int to) async {
     if (from == to) return state;
     final newViews = List.of(state.views) // shallow copy
       ..move(from: from, to: to);
@@ -361,7 +363,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     );
   }
 
-  ViewManagerState _setWidth(int position, double width) {
+  Future<ViewManagerState> _setWidth(int position, double width) async {
     assert(state.views.isValidIndex(position));
     final newViews = List.of(state.views); // shallow copy
     newViews[position] = newViews[position].copyWith(preferredWidth: width);
@@ -372,7 +374,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     );
   }
 
-  ViewManagerState _setHeight(int position, double height) {
+  Future<ViewManagerState> _setHeight(int position, double height) async {
     assert(state.views.isValidIndex(position));
     final newViews = List.of(state.views); // shallow copy
     newViews[position] = newViews[position].copyWith(preferredHeight: height);

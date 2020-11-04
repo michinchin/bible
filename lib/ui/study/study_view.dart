@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/view_data/volume_view_data.dart';
+import '../../blocs/view_data/chapter_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../bible/chapter_title.dart';
 import '../bible/chapter_view.dart';
@@ -24,7 +24,7 @@ class ViewableStudyContent extends Viewable {
   String menuTitle({BuildContext context, ViewState state}) {
     return state?.uid == null
         ? 'Study'
-        : VolumeViewData.fromContext(context, state.uid).bookNameChapterAndAbbr;
+        : ChapterViewData.fromContext(context, state.uid).bookNameChapterAndAbbr;
   }
 
   @override
@@ -71,7 +71,7 @@ class StudyView extends StatelessWidget {
     return BlocProvider(
       create: (context) {
         final viewData = ChapterViewData.fromContext(context, state.uid);
-        return ViewDataBloc(context.bloc<ViewManagerBloc>(), state.uid, viewData);
+        return ChapterViewDataBloc(context.bloc<ViewManagerBloc>(), state.uid, viewData);
       },
       child: DefaultTabController(
         length: tabs.length,
@@ -80,7 +80,7 @@ class StudyView extends StatelessWidget {
           appBar: MinHeightAppBar(
             appBar: AppBar(
               centerTitle: false,
-              title: ChapterTitle(volumeType: VolumeType.studyContent, onUpdate: _onUpdate),
+              title: ChapterTitle(volumeType: VolumeType.studyContent),
               actions: defaultActionsBuilder(context, state, size),
             ),
           ),
@@ -100,14 +100,6 @@ class StudyView extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _onUpdate(
-      BuildContext context, int newVolumeId, BookChapterVerse newBcv, VolumeViewData viewData) {
-    if (newVolumeId == null || newBcv == null) return;
-    if (newVolumeId != viewData.volumeId || newBcv != viewData.bcv) {
-      context.bloc<ViewDataBloc>()?.update(viewData.copyWith(volumeId: newVolumeId, bcv: newBcv));
-    }
   }
 }
 
