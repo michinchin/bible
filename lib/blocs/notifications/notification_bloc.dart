@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:bible/models/notifications/local_notification.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+
+import '../../models/notifications/local_notification.dart';
 
 part 'notification_bloc.freezed.dart';
 

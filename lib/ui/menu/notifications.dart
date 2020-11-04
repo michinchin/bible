@@ -1,10 +1,11 @@
-import 'package:bible/blocs/notifications/notification_bloc.dart';
-import 'package:bible/models/notifications/days_of_week.dart';
-import 'package:bible/models/notifications/local_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_widgets/tec_widgets.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
+
+import '../../blocs/notifications/notification_bloc.dart';
+import '../../models/notifications/days_of_week.dart';
+import '../../models/notifications/local_notification.dart';
 
 void showNotifications(BuildContext context) =>
     Navigator.of(context, rootNavigator: true).push(MaterialPageRoute<void>(
