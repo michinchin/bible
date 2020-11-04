@@ -1,8 +1,6 @@
-import 'package:bible/ui/menu/notifications.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -10,6 +8,7 @@ import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../common/tec_modal_popup_menu.dart';
 import 'main_menu_model.dart';
+import 'notifications/notifications_view.dart';
 import 'settings.dart';
 
 const tecartaBlue = Color(0xff4a7dee);

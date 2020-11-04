@@ -1,10 +1,8 @@
-import 'package:bible/models/chapter_verses.dart';
-import 'package:bible/ui/common/common.dart';
 import 'package:flutter/material.dart';
-import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/home/votd.dart';
+import '../common/common.dart';
 
 void showHome(BuildContext context) {
   Navigator.of(context, rootNavigator: true).push<void>(

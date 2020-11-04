@@ -7,47 +7,10 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
-  # Flutter default dependencies
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.0
-
-  # Localization related dependencies
   flutter_localizations:
     sdk: flutter
-  i18n_extension: ^1.4.3
-
-  # External dependencies
-  animations: ^1.1.2
-  bloc: ^6.1.0
-  cached_network_image: ^2.3.3
-  combos: ^1.2.0
-  equatable: ^1.2.3
-  feather_icons_flutter: ^4.7.4
-  flutter_bloc: ^6.0.6
-  flutter_downloader: ^1.5.1
-  flutter_keyboard_visibility: ^3.2.1
-  flutter_local_notifications: ^3.0.1
-  flutter_sfsymbols: ^1.0.0
-  flutter_svg: ^0.19.1
-  freezed_annotation: ^0.12.0
-  google_fonts: ^1.1.1
-  image_picker: ^0.6.7+12
-  in_app_purchase: ^0.3.4+15
-  json_annotation: ^3.0.1
-  path: ^1.7.0
-  path_provider: ^1.6.21
-  pedantic: ^1.9.2
-  provider: ^4.3.2+2
-  quill_delta: ^2.0.0
-  rxdart: ^0.24.1
-  scrollable_positioned_list: ^0.1.8
-  share: ^0.6.5+3
-  tuple: ^1.0.3
-  url_launcher: ^5.7.5
-  # zefyr: ^1.0.0-dev.1.0
-
-  # Internal dependencies
   sliding_sheet:
     hosted:
       name: sliding_sheet
@@ -103,20 +66,37 @@ dependencies:
       name: zefyr
       url: http://noah.tecarta.com:8100
     version: ^1.0.0-dev.1.0
-
-
-#dependency_overrides:
-  # tec_util:
-  #   path: ../shared/tec_util
-  #  tec_widgets:
-  #    path: ../shared/tec_widgets
-  # sliding_sheet:
-  #   path: ../sliding_sheet
-  # tec_html:
-  #   path: ../shared/tec_html
-  # tec_volumes:
-  #   path: ../shared/tec_volumes
-
+  animations: ^1.1.2
+  bloc: ^6.1.0
+  cached_network_image: ^2.3.3
+  combos: ^1.2.0
+  cupertino_icons: ^1.0.0
+  equatable: ^1.2.3
+  feather_icons_flutter: ^4.7.4
+  flutter_bloc: ^6.0.6
+  flutter_downloader: ^1.5.1
+  flutter_keyboard_visibility: ^3.2.1
+  flutter_local_notifications: ^3.0.1
+  flutter_native_timezone: ^1.0.4
+  flutter_sfsymbols: ^1.0.0
+  flutter_svg: ^0.19.1
+  freezed_annotation: ^0.12.0
+  google_fonts: ^1.1.1
+  i18n_extension: ^1.4.3
+  image_picker: ^0.6.7+12
+  in_app_purchase: ^0.3.4+15
+  json_annotation: ^3.0.1
+  notification_permissions: ^0.4.8
+  path: ^1.7.0
+  path_provider: ^1.6.21
+  pedantic: ^1.9.2
+  provider: ^4.3.2+2
+  quill_delta: ^2.0.0
+  rxdart: ^0.24.1
+  scrollable_positioned_list: ^0.1.8
+  share: ^0.6.5+3
+  tuple: ^1.0.3
+  url_launcher: ^5.7.5
 dev_dependencies:
   flutter_test:
     sdk: flutter

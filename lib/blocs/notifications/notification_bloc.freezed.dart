@@ -152,7 +152,7 @@ class _$NotificationEventTearOff {
   }
 
 // ignore: unused_element
-  _AddToNotifications create(LocalNotification notification) {
+  _AddToNotifications add(LocalNotification notification) {
     return _AddToNotifications(
       notification,
     );
@@ -182,14 +182,14 @@ mixin _$NotificationEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result load(),
-    @required Result create(LocalNotification notification),
+    @required Result add(LocalNotification notification),
     @required Result update(LocalNotification notification),
     @required Result remove(LocalNotification notification),
   });
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result load(),
-    Result create(LocalNotification notification),
+    Result add(LocalNotification notification),
     Result update(LocalNotification notification),
     Result remove(LocalNotification notification),
     @required Result orElse(),
@@ -197,14 +197,14 @@ mixin _$NotificationEvent {
   @optionalTypeArgs
   Result map<Result extends Object>({
     @required Result load(_LoadNotifications value),
-    @required Result create(_AddToNotifications value),
+    @required Result add(_AddToNotifications value),
     @required Result update(_UpdateNotification value),
     @required Result remove(_RemoveFromNotifications value),
   });
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result load(_LoadNotifications value),
-    Result create(_AddToNotifications value),
+    Result add(_AddToNotifications value),
     Result update(_UpdateNotification value),
     Result remove(_RemoveFromNotifications value),
     @required Result orElse(),
@@ -276,12 +276,12 @@ class _$_LoadNotifications
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result load(),
-    @required Result create(LocalNotification notification),
+    @required Result add(LocalNotification notification),
     @required Result update(LocalNotification notification),
     @required Result remove(LocalNotification notification),
   }) {
     assert(load != null);
-    assert(create != null);
+    assert(add != null);
     assert(update != null);
     assert(remove != null);
     return load();
@@ -291,7 +291,7 @@ class _$_LoadNotifications
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result load(),
-    Result create(LocalNotification notification),
+    Result add(LocalNotification notification),
     Result update(LocalNotification notification),
     Result remove(LocalNotification notification),
     @required Result orElse(),
@@ -307,12 +307,12 @@ class _$_LoadNotifications
   @optionalTypeArgs
   Result map<Result extends Object>({
     @required Result load(_LoadNotifications value),
-    @required Result create(_AddToNotifications value),
+    @required Result add(_AddToNotifications value),
     @required Result update(_UpdateNotification value),
     @required Result remove(_RemoveFromNotifications value),
   }) {
     assert(load != null);
-    assert(create != null);
+    assert(add != null);
     assert(update != null);
     assert(remove != null);
     return load(this);
@@ -322,7 +322,7 @@ class _$_LoadNotifications
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result load(_LoadNotifications value),
-    Result create(_AddToNotifications value),
+    Result add(_AddToNotifications value),
     Result update(_UpdateNotification value),
     Result remove(_RemoveFromNotifications value),
     @required Result orElse(),
@@ -381,14 +381,14 @@ class _$_AddToNotifications
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'NotificationEvent.create(notification: $notification)';
+    return 'NotificationEvent.add(notification: $notification)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('type', 'NotificationEvent.create'))
+      ..add(DiagnosticsProperty('type', 'NotificationEvent.add'))
       ..add(DiagnosticsProperty('notification', notification));
   }
 
@@ -413,29 +413,29 @@ class _$_AddToNotifications
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result load(),
-    @required Result create(LocalNotification notification),
+    @required Result add(LocalNotification notification),
     @required Result update(LocalNotification notification),
     @required Result remove(LocalNotification notification),
   }) {
     assert(load != null);
-    assert(create != null);
+    assert(add != null);
     assert(update != null);
     assert(remove != null);
-    return create(notification);
+    return add(notification);
   }
 
   @override
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result load(),
-    Result create(LocalNotification notification),
+    Result add(LocalNotification notification),
     Result update(LocalNotification notification),
     Result remove(LocalNotification notification),
     @required Result orElse(),
   }) {
     assert(orElse != null);
-    if (create != null) {
-      return create(notification);
+    if (add != null) {
+      return add(notification);
     }
     return orElse();
   }
@@ -444,29 +444,29 @@ class _$_AddToNotifications
   @optionalTypeArgs
   Result map<Result extends Object>({
     @required Result load(_LoadNotifications value),
-    @required Result create(_AddToNotifications value),
+    @required Result add(_AddToNotifications value),
     @required Result update(_UpdateNotification value),
     @required Result remove(_RemoveFromNotifications value),
   }) {
     assert(load != null);
-    assert(create != null);
+    assert(add != null);
     assert(update != null);
     assert(remove != null);
-    return create(this);
+    return add(this);
   }
 
   @override
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result load(_LoadNotifications value),
-    Result create(_AddToNotifications value),
+    Result add(_AddToNotifications value),
     Result update(_UpdateNotification value),
     Result remove(_RemoveFromNotifications value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
-    if (create != null) {
-      return create(this);
+    if (add != null) {
+      return add(this);
     }
     return orElse();
   }
@@ -554,12 +554,12 @@ class _$_UpdateNotification
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result load(),
-    @required Result create(LocalNotification notification),
+    @required Result add(LocalNotification notification),
     @required Result update(LocalNotification notification),
     @required Result remove(LocalNotification notification),
   }) {
     assert(load != null);
-    assert(create != null);
+    assert(add != null);
     assert(update != null);
     assert(remove != null);
     return update(notification);
@@ -569,7 +569,7 @@ class _$_UpdateNotification
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result load(),
-    Result create(LocalNotification notification),
+    Result add(LocalNotification notification),
     Result update(LocalNotification notification),
     Result remove(LocalNotification notification),
     @required Result orElse(),
@@ -585,12 +585,12 @@ class _$_UpdateNotification
   @optionalTypeArgs
   Result map<Result extends Object>({
     @required Result load(_LoadNotifications value),
-    @required Result create(_AddToNotifications value),
+    @required Result add(_AddToNotifications value),
     @required Result update(_UpdateNotification value),
     @required Result remove(_RemoveFromNotifications value),
   }) {
     assert(load != null);
-    assert(create != null);
+    assert(add != null);
     assert(update != null);
     assert(remove != null);
     return update(this);
@@ -600,7 +600,7 @@ class _$_UpdateNotification
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result load(_LoadNotifications value),
-    Result create(_AddToNotifications value),
+    Result add(_AddToNotifications value),
     Result update(_UpdateNotification value),
     Result remove(_RemoveFromNotifications value),
     @required Result orElse(),
@@ -698,12 +698,12 @@ class _$_RemoveFromNotifications
   @optionalTypeArgs
   Result when<Result extends Object>({
     @required Result load(),
-    @required Result create(LocalNotification notification),
+    @required Result add(LocalNotification notification),
     @required Result update(LocalNotification notification),
     @required Result remove(LocalNotification notification),
   }) {
     assert(load != null);
-    assert(create != null);
+    assert(add != null);
     assert(update != null);
     assert(remove != null);
     return remove(notification);
@@ -713,7 +713,7 @@ class _$_RemoveFromNotifications
   @optionalTypeArgs
   Result maybeWhen<Result extends Object>({
     Result load(),
-    Result create(LocalNotification notification),
+    Result add(LocalNotification notification),
     Result update(LocalNotification notification),
     Result remove(LocalNotification notification),
     @required Result orElse(),
@@ -729,12 +729,12 @@ class _$_RemoveFromNotifications
   @optionalTypeArgs
   Result map<Result extends Object>({
     @required Result load(_LoadNotifications value),
-    @required Result create(_AddToNotifications value),
+    @required Result add(_AddToNotifications value),
     @required Result update(_UpdateNotification value),
     @required Result remove(_RemoveFromNotifications value),
   }) {
     assert(load != null);
-    assert(create != null);
+    assert(add != null);
     assert(update != null);
     assert(remove != null);
     return remove(this);
@@ -744,7 +744,7 @@ class _$_RemoveFromNotifications
   @optionalTypeArgs
   Result maybeMap<Result extends Object>({
     Result load(_LoadNotifications value),
-    Result create(_AddToNotifications value),
+    Result add(_AddToNotifications value),
     Result update(_UpdateNotification value),
     Result remove(_RemoveFromNotifications value),
     @required Result orElse(),
