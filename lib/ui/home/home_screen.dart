@@ -3,14 +3,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/notifications/notification_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
+import '../../models/notifications/notifications.dart';
 import '../sheet/snap_sheet.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key key}) : super(key: key);
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    initNotifications();
+    super.initState();
+  }
+
+  void initNotifications() {
+    Notifications.payloadStream.listen(handleNotification);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final granted = await Notifications.shared?.requestPermissions(context);
+      if (granted) {
+        NotificationBloc.shared.init();
+      }
+    });
+  }
+
+  void handleNotification(String payload) {}
+  // context.bloc<AppEntryCubit>().onNotification(payload, context);
 
   @override
   Widget build(BuildContext context) {

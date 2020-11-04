@@ -19,6 +19,11 @@ class Const {
   // Links
   static const tecartaBibleLink = 'https://tecartabible.com/';
 
+  // Notifications
+  static const prefFirstTimeOpen = 'firstTimeOpen';
+  static const prefNotifications = 'notifications';
+  static const prefNotificationUpdate = 'notificationUpdate';
+
   //------------------------------------------
 
   // Bible

@@ -10,6 +10,9 @@ import flutter_downloader
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
     FlutterDownloaderPlugin.setPluginRegistrantCallback(registerPlugins)
+    if #available(iOS 10.0, *) {
+      UNUserNotificationCenter.current().delegate = self
+    }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

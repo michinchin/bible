@@ -1,7 +1,6 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -12,6 +11,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+// import 'blocs/app_entry_cubit.dart';
 import 'blocs/app_lifecycle_bloc.dart';
 import 'blocs/app_theme_bloc.dart';
 import 'blocs/content_settings.dart';
@@ -23,8 +23,10 @@ import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'models/const.dart';
 import 'models/iap/iap.dart';
+import 'models/notifications/notifications.dart';
 import 'ui/bible/chapter_view.dart';
 import 'ui/common/common.dart';
+import 'ui/common/tec_modal_popup_menu.dart';
 import 'ui/home/home_screen.dart';
 import 'ui/note/margin_note_view.dart';
 import 'ui/note/notes_view.dart';
@@ -49,6 +51,10 @@ Future<void> main() async {
 
   if (!kIsWeb) {
     await FlutterDownloader.initialize(debug: kDebugMode);
+    await Notifications.init(
+        prefFirstTimeOpened: Const.prefFirstTimeOpen,
+        channelInfo: ChannelInfo(id: 'tec-id', name: 'tec-name', description: 'tec-description'),
+        color: tecartaBlue);
   }
 
   await tec.Prefs.shared.load();
@@ -95,6 +101,7 @@ class App extends StatelessWidget {
         BlocProvider(create: (context) => ContentSettingsBloc()),
         BlocProvider(create: (context) => PrefItemsBloc()),
         BlocProvider(create: (context) => SearchBloc()),
+        // BlocProvider(create: (context) => AppEntryCubit())
       ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (context, themeMode) {
