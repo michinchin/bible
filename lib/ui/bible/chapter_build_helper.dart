@@ -22,8 +22,9 @@ class ChapterBuildHelper {
 
   TecHtmlTagElementFunc get tagHtmlElement => _tagHtmlElement;
 
-  var _currentVerse = 1;
+  var _currentVerse = 0;
   var _currentWord = 0;
+  int _currentEndVerse;
   var _isInVerse = false;
   var _isInNonVerseElement = false;
   var _nonVerseElementLevel = 0;
@@ -82,15 +83,18 @@ class ChapterBuildHelper {
           (attrs.className == 'v' || attrs.className.startsWith('v '))) {
         final verse = int.tryParse(id);
         if (verse != null) {
-          _isInVerse = true;
-          if (verse > _currentVerse) {
-            _currentVerse = verse;
-            _currentWord = 0;
-          } else if (verse == 1) {
-            _currentWord++; // The old app has a chapter number, which is counted as a word.
-          } else {
+          if (verse <= _currentVerse && _isBibleId(volume)) {
             tec.dmPrint('ERROR: new verse # ($id) is <= previous verse # ($_currentVerse)');
             assert(false);
+          }
+
+          _isInVerse = true;
+          _currentVerse = verse;
+          _currentWord = 0;
+          _currentEndVerse = int.tryParse(attrs['end'] ?? '');
+
+          if (verse == 1 && _isBibleId(volume)) {
+            _currentWord++; // The old app has a chapter number, which is counted as a word.
           }
         }
       } else if (id == 'copyright' ||
@@ -124,6 +128,7 @@ class ChapterBuildHelper {
     return VerseTag(
       verse: _currentVerse,
       word: word,
+      endVerse: _currentEndVerse,
       isInVerse: _isInVerse,
       isInXref: _isInXref,
       isInFootnote: _isInFootnote,
@@ -180,3 +185,5 @@ class ChapterBuildHelper {
           return name == 'h5';
         };
 }
+
+bool _isBibleId(int id) => id != null && id < 1000;

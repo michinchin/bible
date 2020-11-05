@@ -510,7 +510,7 @@ Future<tec.ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int ch
       final html = StringBuffer();
       for (final note in result.value) {
         if (html.isNotEmpty) html.writeln('<p> </p>');
-        html.writeln('<div id="${note.verse}" end="${note.endVerse}">${note.textData}</div>');
+        html.writeln('<div class="v" id="${note.verse}" end="${note.endVerse}">${note.textData}</div>');
       }
       if (html.isEmpty) {
         html.writeln('<p>Study notes are not available for this chapter.</p>');
