@@ -1,10 +1,10 @@
-import 'package:bible/ui/home/home.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../ui/sheet/snap_sheet.dart';
+import '../home/home.dart';
 import '../library/library.dart';
 import '../note/notes.dart';
 

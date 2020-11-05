@@ -1,7 +1,6 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -99,7 +98,11 @@ List<TableRow> _buildMenuItemsForViewWithState(
     if (isMaximized) {
       items.add(tecModalPopupMenuItem(
           menuContext,
-          vmBloc.numViewsLimited ? Icons.horizontal_split_outlined : FeatherIcons.minimize2,
+          vmBloc.numViewsLimited
+              ? ((MediaQuery.of(context).orientation == Orientation.landscape)
+                  ? Icons.vertical_split_outlined
+                  : Icons.horizontal_split_outlined)
+              : FeatherIcons.minimize2,
           vmBloc.numViewsLimited ? 'Split screen' : 'Restore', () {
         Navigator.of(menuContext).maybePop();
         vmBloc?.add(const ViewManagerEvent.restore());
@@ -214,7 +217,9 @@ Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
       final vmBloc = menuContext.bloc<ViewManagerBloc>(); // ignore: close_sinks
       final nextUid = vmBloc?.state?.nextUid;
       await vm.onAddView(menuContext, type, currentViewId: viewUid);
-      if ((vmBloc?.numViewsLimited ?? false) && vmBloc?.state?.maximizedViewUid != nextUid) {
+      if (vmBloc.state.maximizedViewUid > 0 &&
+          (vmBloc?.numViewsLimited ?? false) &&
+          vmBloc?.state?.maximizedViewUid != nextUid) {
         vmBloc?.add(ViewManagerEvent.maximize(nextUid));
       }
       await Navigator.of(menuContext).maybePop();
