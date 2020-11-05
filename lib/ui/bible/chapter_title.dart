@@ -8,7 +8,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/search_bloc.dart';
-import '../../blocs/view_data/volume_view_data.dart';
+import '../../blocs/view_data/chapter_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/user_item_helper.dart';
 import '../common/common.dart';
@@ -18,21 +18,17 @@ import '../sheet/selection_sheet_model.dart';
 
 class ChapterTitle extends StatelessWidget {
   final VolumeType volumeType;
-  final void Function(
-          BuildContext context, int newVolumeId, BookChapterVerse newBcv, VolumeViewData viewData)
-      onUpdate;
 
-  const ChapterTitle({Key key, this.volumeType = VolumeType.anyType, @required this.onUpdate})
+  const ChapterTitle({Key key, this.volumeType = VolumeType.anyType})
       : assert(volumeType == VolumeType.bible || volumeType == VolumeType.studyContent),
-        assert(onUpdate != null),
         super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ViewDataBloc, ViewData>(
+    return BlocBuilder<ChapterViewDataBloc, ViewData>(
       builder: (context, viewData) {
         // tec.dmPrint('rebuilding PageableBibleView title with $viewData');
-        if (viewData is VolumeViewData) {
+        if (viewData is ChapterViewData) {
           const minFontSize = 10.0;
           const buttonPadding = EdgeInsets.only(top: 16.0, bottom: 16.0);
           final buttonStyle = Theme.of(context)
@@ -106,13 +102,13 @@ class ChapterTitle extends StatelessWidget {
             ],
           );
         } else {
-          throw UnsupportedError('ChapterTitle must use VolumeViewData');
+          throw UnsupportedError('ChapterTitle must use ChapterViewData');
         }
       },
     );
   }
 
-  Future<void> _onNavigate(BuildContext context, VolumeViewData viewData,
+  Future<void> _onNavigate(BuildContext context, ChapterViewData viewData,
       {int initialIndex = 0, bool searchView = false}) async {
     TecAutoScroll.stopAutoscroll();
 
@@ -126,24 +122,33 @@ class ChapterTitle extends StatelessWidget {
 
       // Small delay to allow the nav popup to clean up...
       await Future.delayed(const Duration(milliseconds: 350), () {
-        onUpdate(context, ref.volume, BookChapterVerse.fromRef(ref), viewData);
+        final newViewData = context
+            .bloc<ChapterViewDataBloc>()
+            .state
+            .asChapterViewData
+            .copyWith(bcv: BookChapterVerse.fromRef(ref));
+        tec.dmPrint('ChapterTitle _onNavigate updating with new data: $newViewData');
+        context.bloc<ChapterViewDataBloc>().update(context, newViewData);
       });
     }
   }
 
-  Future<void> _onSelectVolume(BuildContext context, VolumeViewData viewData) async {
+  Future<void> _onSelectVolume(BuildContext context, ChapterViewData viewData) async {
     TecAutoScroll.stopAutoscroll();
     final volumeTypeName = volumeType == VolumeType.bible
         ? 'Bible'
         : volumeType == VolumeType.studyContent
             ? 'Study Content'
             : 'Something';
-    final bibleId = await selectVolume(context,
+    final volumeId = await selectVolume(context,
         title: 'Select $volumeTypeName',
         filter: VolumesFilter(volumeType: volumeType),
         selectedVolume: viewData.volumeId);
 
-    onUpdate(context, bibleId, viewData.bcv, viewData);
+    final newViewData =
+        context.bloc<ChapterViewDataBloc>().state.asChapterViewData.copyWith(volumeId: volumeId);
+    tec.dmPrint('ChapterTitle _onSelectVolume updating with new data: $newViewData');
+    await context.bloc<ChapterViewDataBloc>().update(context, newViewData);
   }
 }
 

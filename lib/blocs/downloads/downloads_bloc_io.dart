@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -13,7 +12,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 
 import 'downloads_bloc.dart';
 
-const isDebugMode = kDebugMode;
+const isDebugMode = false; // kDebugMode;
 
 class DownloadsBlocImp extends DownloadsBloc {
   DownloadsBlocImp() {
@@ -171,8 +170,7 @@ class DownloadsBlocImp extends DownloadsBloc {
 
   static void _downloadCallback(String id, DownloadTaskStatus status, int progress) {
     if (isDebugMode) {
-      tec.dmPrint(
-          'Background Isolate Callback: task ($id) is in status ($status) and process ($progress)');
+      tec.dmPrint('DownloadsBloc: task ($id) is in status ($status) and process ($progress)');
     }
     final send = IsolateNameServer.lookupPortByName('downloader_send_port');
     send?.send([id, status, progress]);

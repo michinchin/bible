@@ -16,9 +16,10 @@ class ViewDataBloc extends Cubit<ViewData> {
       : assert(vmBloc != null && viewUid != null && data != null),
         super(data);
 
-  void update(ViewData viewData) {
+  Future<void> update(BuildContext context, ViewData viewData) async {
     assert(viewData != null);
-    vmBloc.updateDataWithView(viewUid, viewData.toString());
+    // tec.dmPrint('ViewDataBloc: updating data for view $viewUid to ${viewData.toString()}');
+    await vmBloc.updateDataWithView(viewUid, viewData.toString());
     emit(viewData);
   }
 }

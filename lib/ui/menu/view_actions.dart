@@ -6,8 +6,7 @@ import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/shared_bible_ref_bloc.dart';
-import '../../blocs/view_data/volume_view_data.dart';
+import '../../blocs/view_data/chapter_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
 import '../common/tec_modal_popup_menu.dart';
@@ -125,11 +124,9 @@ List<TableRow> _buildMenuItemsForViewWithState(
         useSharedRef ? 'Unlink chapter' : 'Link chapter',
         () {
           Navigator.of(menuContext).maybePop();
-          final viewDataBloc = context.bloc<ViewDataBloc>();
-          viewDataBloc?.update(viewData.copyWith(useSharedRef: !useSharedRef));
-          if (!useSharedRef) {
-            context.bloc<SharedBibleRefBloc>().update(viewData.bcv);
-          }
+          final viewDataBloc = context.bloc<ChapterViewDataBloc>();
+          assert(viewDataBloc != null);
+          viewDataBloc?.update(context, viewData.copyWith(useSharedRef: !useSharedRef));
         },
       ));
     }
