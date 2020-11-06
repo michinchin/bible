@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/notifications/notification_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
-import '../../models/notifications/notifications.dart';
+import '../../models/notifications/notifications_model.dart';
 import '../sheet/snap_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final granted = await Notifications.shared?.requestPermissions(context);
       if (granted) {
-        NotificationBloc.shared.init();
+        NotificationBloc.init(NotificationsModel());
       }
     });
   }

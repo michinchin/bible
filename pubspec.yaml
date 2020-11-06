@@ -61,6 +61,8 @@ dependencies:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
     version: ^2.0.17
+  tec_notifications:
+    path: ../shared/tec_notifications
   zefyr:
     hosted:
       name: zefyr
@@ -76,8 +78,6 @@ dependencies:
   flutter_bloc: ^6.0.6
   flutter_downloader: ^1.5.1
   flutter_keyboard_visibility: ^3.2.1
-  flutter_local_notifications: ^3.0.1
-  flutter_native_timezone: ^1.0.4
   flutter_sfsymbols: ^1.0.0
   flutter_svg: ^0.19.1
   freezed_annotation: ^0.12.0
@@ -86,7 +86,6 @@ dependencies:
   image_picker: ^0.6.7+12
   in_app_purchase: ^0.3.4+15
   json_annotation: ^3.0.1
-  notification_permissions: ^0.4.8
   path: ^1.7.0
   path_provider: ^1.6.21
   pedantic: ^1.9.2

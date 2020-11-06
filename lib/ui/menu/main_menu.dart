@@ -8,7 +8,7 @@ import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../common/tec_modal_popup_menu.dart';
 import 'main_menu_model.dart';
-import 'notifications/notifications_view.dart';
+import 'notifications_view.dart';
 import 'settings.dart';
 
 const tecartaBlue = Color(0xff4a7dee);

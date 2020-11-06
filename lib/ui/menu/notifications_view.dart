@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../../blocs/notifications/notification_bloc.dart';
-import '../../../models/notifications/days_of_week.dart';
-import '../../../models/notifications/local_notification.dart';
-import '../../../models/notifications/notifications.dart';
+import '../../models/notifications/notifications_model.dart';
 
 Future<void> showNotifications(BuildContext context) async {
   final allowed = await Notifications.shared?.requestPermissions(context) ?? false;
   if (allowed) {
+    NotificationBloc.init(NotificationsModel());
     await Navigator.of(context, rootNavigator: true).push(MaterialPageRoute<void>(
         builder: (c) =>
             BlocProvider.value(value: NotificationBloc.shared, child: NotificationsView())));
@@ -37,7 +36,8 @@ class _NotificationsViewState extends State<NotificationsView> {
   void deactivate() {
     const le = ListEquality<LocalNotification>();
     if (!le.equals(initialNotifications, NotificationBloc.shared.state.notifications)) {
-      unawaited(NotificationBloc.shared.updateNotifications());
+      unawaited(
+          NotificationBloc.shared.updateNotifications(NotificationBloc.shared.state.notifications));
     }
     super.deactivate();
   }
@@ -81,7 +81,6 @@ class __NotificationTileState extends State<_NotificationTile> {
   @override
   Widget build(BuildContext context) {
     return ExpansionTile(
-      key: PageStorageKey(widget.notification.title),
       onExpansionChanged: (b) => setState(() => _isExpanded = b),
       title: TecText.rich(
         TextSpan(children: [
@@ -103,8 +102,10 @@ class __NotificationTileState extends State<_NotificationTile> {
                     },
                     initialTime: TimeOfDay.fromDateTime(widget.notification.time));
                 if (selectedTime != null) {
-                  context.bloc<NotificationBloc>().update(widget.notification
-                      .copyWith(time: widget.notification.time.applied(selectedTime)));
+                  context.bloc<NotificationBloc>().update(
+                      widget.notification,
+                      widget.notification
+                          .copyWith(time: widget.notification.time.applied(selectedTime)));
                 }
               },
               child: Align(
@@ -116,7 +117,7 @@ class __NotificationTileState extends State<_NotificationTile> {
               ),
             ),
           ),
-          TextSpan(text: '${widget.notification.title}\n'),
+          TextSpan(text: '${NotificationConsts.titles[widget.notification.type]}\n'),
           TextSpan(text: tec.shortNamesOfWeekdays(widget.notification.week.bitField)),
         ]),
       ),
@@ -142,11 +143,11 @@ class __NotificationTileState extends State<_NotificationTile> {
                         onPressed: () {
                           final i = widget.notification.week.days
                               .indexWhere((d) => d.dayValue == day.dayValue);
-                          widget.notification.week.days[i].isSelected =
-                              !widget.notification.week.days[i].isSelected;
-                          widget.notification.week.update();
-                          context.bloc<NotificationBloc>().update(widget.notification
-                              .copyWith(week: Week(bitField: widget.notification.week.bitField)));
+                          widget.notification.week.toggleDay(widget.notification.week.days[i]);
+                          context.bloc<NotificationBloc>().update(
+                              widget.notification,
+                              widget.notification.copyWith(
+                                  week: Week(bitField: widget.notification.week.bitField)));
                         },
                         textColor: tec
                                 .weekdayListFromBitField(widget.notification.week.bitField)
@@ -171,7 +172,7 @@ class __NotificationTileState extends State<_NotificationTile> {
                     if (b != widget.notification.enabled) {
                       context
                           .bloc<NotificationBloc>()
-                          .update(widget.notification.copyWith(enabled: b));
+                          .update(widget.notification, widget.notification.copyWith(enabled: b));
                     }
                   })),
           const Spacer(),
