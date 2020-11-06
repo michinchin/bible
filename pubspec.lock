@@ -1044,9 +1044,9 @@ packages:
   tec_notifications:
     dependency: "direct main"
     description:
-      path: "../shared/tec_notifications"
-      relative: true
-    source: path
+      name: tec_notifications
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
     version: "0.0.1"
   tec_platform_util:
     dependency: "direct main"

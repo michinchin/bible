@@ -62,7 +62,10 @@ dependencies:
       url: http://noah.tecarta.com:8100
     version: ^2.0.17
   tec_notifications:
-    path: ../shared/tec_notifications
+    hosted:
+      name: tec_notifications
+      url: http://noah.tecarta.com:8100
+    version: ^0.0.1
   zefyr:
     hosted:
       name: zefyr
