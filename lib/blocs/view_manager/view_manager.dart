@@ -25,7 +25,7 @@ class ViewManager {
 
   Future<void> onAddView(BuildContext context, String type, {int currentViewId}) async {
     // await Navigator.of(context).maybePop();
-    final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+    final vmBloc = context.tbloc<ViewManagerBloc>(); // ignore: close_sinks
     assert(vmBloc != null);
     var position = vmBloc?.indexOfView(currentViewId);
     if (position != null && (!vmBloc.isFull || position < vmBloc.countOfVisibleViews - 1)) {
@@ -127,7 +127,7 @@ Future<void> _showMoreMenu(BuildContext context, ViewState state, Size size) {
           children: [
             _menuItem(context, Icons.close, 'Close View', () {
               Navigator.of(context).maybePop();
-              context.bloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.uid));
+              context.tbloc<ViewManagerBloc>()?.add(ViewManagerEvent.remove(state.uid));
             }),
             ..._generateAddMenuItems(context, state.uid),
           ],
@@ -143,7 +143,7 @@ Iterable<Widget> _generateAddMenuItems(BuildContext context, int viewUid) {
     (type) =>
         _menuItem(context, Icons.add, 'Add ${vm.menuTitleWith(context: context, type: type)}', () {
       Navigator.of(context).maybePop();
-      final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+      final vmBloc = context.tbloc<ViewManagerBloc>(); // ignore: close_sinks
       final position = vmBloc?.indexOfView(viewUid) ?? -1;
       vmBloc?.add(ViewManagerEvent.add(type: type, position: position == -1 ? null : position + 1));
     }),
@@ -183,7 +183,7 @@ IconData _moreIcon(BuildContext context) {
 
 // List<Widget> _testActionsForAdjustingSize(
 //     BuildContext context, ViewState state, Size size) {
-//   final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+//   final vmBloc = context.tbloc<ViewManagerBloc>(); // ignore: close_sinks
 //   return <Widget>[
 //     IconButton(
 //       icon: const Icon(Icons.border_outer),

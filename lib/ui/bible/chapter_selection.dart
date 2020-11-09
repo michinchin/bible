@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
@@ -73,7 +72,7 @@ class ChapterSelection {
   void notifyOfSelections(BuildContext context) {
     // Notify the view manager, if there is one.
     context
-        .bloc<ViewManagerBloc>()
+        .tbloc<ViewManagerBloc>()
         ?.notifyOfSelectionsInView(viewUid, _getRef(), context, hasSelections: isNotEmpty);
   }
 
@@ -129,7 +128,7 @@ class ChapterSelection {
   /// Handles a selection command.
   ///
   void handleCmd(BuildContext context, SelectionCmd cmd) {
-    final bloc = context.bloc<ChapterHighlightsBloc>(); // ignore: close_sinks
+    final bloc = context.tbloc<ChapterHighlightsBloc>(); // ignore: close_sinks
     if (bloc == null || isEmpty) return;
 
     cmd.when(clearStyle: () {

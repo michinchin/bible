@@ -102,7 +102,7 @@ class __NotificationTileState extends State<_NotificationTile> {
                     },
                     initialTime: TimeOfDay.fromDateTime(widget.notification.time));
                 if (selectedTime != null) {
-                  context.bloc<NotificationBloc>().update(
+                  context.tbloc<NotificationBloc>().update(
                       widget.notification,
                       widget.notification
                           .copyWith(time: widget.notification.time.applied(selectedTime)));
@@ -144,7 +144,7 @@ class __NotificationTileState extends State<_NotificationTile> {
                           final i = widget.notification.week.days
                               .indexWhere((d) => d.dayValue == day.dayValue);
                           widget.notification.week.toggleDay(widget.notification.week.days[i]);
-                          context.bloc<NotificationBloc>().update(
+                          context.tbloc<NotificationBloc>().update(
                               widget.notification,
                               widget.notification.copyWith(
                                   week: Week(bitField: widget.notification.week.bitField)));
@@ -171,7 +171,7 @@ class __NotificationTileState extends State<_NotificationTile> {
                   onChanged: (b) {
                     if (b != widget.notification.enabled) {
                       context
-                          .bloc<NotificationBloc>()
+                          .tbloc<NotificationBloc>()
                           .update(widget.notification, widget.notification.copyWith(enabled: b));
                     }
                   })),

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:zefyr/zefyr.dart';
 
 import '../../blocs/notes/note_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../common/common.dart';
-import 'tec_image_delegate.dart';
 
 Widget noteViewBuilder(BuildContext context, int id) => NoteView(id);
 
@@ -33,7 +33,7 @@ class __NoteScreenState extends State<_NoteScreen> {
   FocusNode _focusNode;
   ZefyrController _controller;
 
-  NoteBloc bloc() => context.bloc<NoteBloc>();
+  NoteBloc bloc() => context.tbloc<NoteBloc>();
 
   @override
   void initState() {
@@ -42,7 +42,7 @@ class __NoteScreenState extends State<_NoteScreen> {
     KeyboardVisibility.onChange.listen(
       (visible) {
         if (visible) {
-          context?.bloc<SheetManagerBloc>()?.collapse(context);
+          context?.tbloc<SheetManagerBloc>()?.collapse(context);
         }
       },
     );

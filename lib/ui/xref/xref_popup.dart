@@ -39,7 +39,7 @@ Future<void> showXrefsPopup({
       final title = 'verse ${reference.verse}';
       var firstCard = true;
       return BlocProvider.value(
-        value: originalContext.bloc<ChapterViewDataBloc>(),
+        value: originalContext.tbloc<ChapterViewDataBloc>(),
         child: TecPopupSheet(
           padding: EdgeInsets.zero,
           title: (tec.isNotNullOrEmpty(title))
@@ -107,7 +107,7 @@ class _XrefWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // final scale = textScaleFactorWith(context);
-    final volumeId = context.bloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
+    final volumeId = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
     final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible;
 
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
@@ -133,12 +133,12 @@ class _XrefWidget extends StatelessWidget {
       ),
       onTap: () {
         final viewData = context
-            .bloc<ChapterViewDataBloc>()
+            .tbloc<ChapterViewDataBloc>()
             .state
             .asChapterViewData
             .copyWith(bcv: BookChapterVerse(xref.book, xref.chapter, xref.verse));
         // tec.dmPrint('Xref updating with new data: $viewData');
-        context.bloc<ChapterViewDataBloc>().update(context, viewData);
+        context.tbloc<ChapterViewDataBloc>().update(context, viewData);
         Navigator.of(context).maybePop();
       },
     );

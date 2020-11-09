@@ -58,7 +58,7 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
   String _currFilter;
   bool _showPriorityTranslations;
 
-  PrefItemsBloc prefsBloc() => context.bloc<PrefItemsBloc>();
+  PrefItemsBloc prefsBloc() => context.tbloc<PrefItemsBloc>();
 
   final bookTitle = 'Book';
   final translationTitle = 'Translation';
@@ -110,13 +110,13 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
       prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
       if (widget.searchController.text.isNotEmpty) {
         context
-            .bloc<SearchBloc>()
+            .tbloc<SearchBloc>()
             .add(SearchEvent.request(search: widget.searchController.text, translations: volumes));
       }
     }
     if (books != null && !tec.areEqualSets(_filteredBooks, widget.selectedBooks.toSet())) {
       // excluded books
-      context.bloc<SearchBloc>().add(SearchEvent.filterBooks(books));
+      context.tbloc<SearchBloc>().add(SearchEvent.filterBooks(books));
     }
   }
 
@@ -267,12 +267,12 @@ class _VolumeFilter extends StatefulWidget {
 
 class __VolumeFilterState extends State<_VolumeFilter> {
   List<int> _priorityTranslationList;
-  PrefItemsBloc prefBloc() => context.bloc<PrefItemsBloc>();
+  PrefItemsBloc prefBloc() => context.tbloc<PrefItemsBloc>();
 
   @override
   void deactivate() {
     final priorityTranslations =
-        context.bloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
+        context.tbloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
     final pt = (priorityTranslations?.split('|')?.map(int.tryParse)?.toList() ?? [])
       ..removeWhere((p) => p == null);
     if (pt != _priorityTranslationList) {
@@ -280,7 +280,7 @@ class __VolumeFilterState extends State<_VolumeFilter> {
           prefItem: prefBloc().infoChangedPrefItem(
               PrefItemId.priorityTranslations, _priorityTranslationList.join('|'))));
       // TODO(abby): kinda hacky way to load res should probably do something else
-      context.bloc<SearchBloc>()
+      context.tbloc<SearchBloc>()
         ..add(const SearchEvent.selectionModeToggle())
         ..add(const SearchEvent.selectionModeToggle());
     }
@@ -290,7 +290,7 @@ class __VolumeFilterState extends State<_VolumeFilter> {
   @override
   void initState() {
     final priorityTranslations =
-        context.bloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
+        context.tbloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
     final pt = (priorityTranslations?.split('|')?.map(int.tryParse)?.toList() ?? [])
       ..removeWhere((p) => p == null);
     _priorityTranslationList = pt.toList();
@@ -446,7 +446,7 @@ class __BookFilterState extends State<_BookFilter> {
 
   @override
   void initState() {
-    searchResults = context.bloc<SearchBloc>().state.searchResults;
+    searchResults = context.tbloc<SearchBloc>().state.searchResults;
     _initBible();
     super.initState();
   }

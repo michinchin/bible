@@ -17,7 +17,7 @@ Future<void> showStrongsPopup({
 }) {
   if (strongsId?.isEmpty ?? true) return Future.value();
 
-  final volumeId = context.bloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
+  final volumeId = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
   final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible;
   final originalContext = context;
 
@@ -29,7 +29,7 @@ Future<void> showStrongsPopup({
       builder: (context) {
         final helper = StrongsBuildHelper();
         return BlocProvider.value(
-          value: originalContext.bloc<ChapterViewDataBloc>(),
+          value: originalContext.tbloc<ChapterViewDataBloc>(),
           child: Scaffold(
             appBar: MinHeightAppBar(
               appBar: AppBar(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 
 import '../../blocs/notes/note_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
@@ -61,7 +62,7 @@ class __NotesScreenState extends State<_NotesScreen> {
   @override
   void initState() {
     super.initState();
-    bloc = context.bloc<NoteManagerBloc>()..load();
+    bloc = context.tbloc<NoteManagerBloc>()..load();
   }
 
   @override

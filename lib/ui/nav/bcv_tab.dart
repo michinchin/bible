@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_volumes/tec_volumes.dart';
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/content_settings.dart';
@@ -25,8 +26,8 @@ class BCVTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final navBloc = context.bloc<NavBloc>(); // ignore: close_sinks
-    final prefState = context.bloc<PrefItemsBloc>(); // ignore: close_sinks
+    final navBloc = context.tbloc<NavBloc>(); // ignore: close_sinks
+    final prefState = context.tbloc<PrefItemsBloc>(); // ignore: close_sinks
     final navGridViewEnabled = prefState.itemBool(PrefItemId.navLayout);
     final nav3TapEnabled = prefState.itemBool(PrefItemId.nav3Tap);
     return BlocListener<PrefItemsBloc, PrefItems>(
@@ -81,7 +82,7 @@ class _ChapterView extends StatelessWidget {
         isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
     final bible = VolumesRepository.shared.bibleWithId(9);
 
-    final ref = context.bloc<NavBloc>().state.ref;
+    final ref = context.tbloc<NavBloc>().state.ref;
     final chapters = bible.chaptersIn(book: ref.book);
 
     void updateSearch(String s) => searchController
@@ -99,7 +100,7 @@ class _ChapterView extends StatelessWidget {
                   Navigator.of(context).maybePop(ref.copyWith(chapter: i));
                 } else {
                   updateSearch('${bible.nameOfBook(ref.book)} $i:');
-                  context.bloc<NavBloc>().selectChapter(ref.book, bible.nameOfBook(ref.book), i);
+                  context.tbloc<NavBloc>().selectChapter(ref.book, bible.nameOfBook(ref.book), i);
                 }
               },
               text: i.toString(),
@@ -119,7 +120,7 @@ class _VerseView extends StatelessWidget {
         isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
     final bible = VolumesRepository.shared.bibleWithId(9);
 
-    final ref = context.bloc<NavBloc>().state.ref;
+    final ref = context.tbloc<NavBloc>().state.ref;
     final book = ref.book;
     final chapter = ref.chapter;
     final verses = bible.versesIn(book: book, chapter: chapter);
@@ -131,7 +132,7 @@ class _VerseView extends StatelessWidget {
             onPressed: () {
               // TODO(abby): manually assigning end verse...probably shouldn't do this
               final updatedRef = ref.copyWith(verse: i, endVerse: i);
-              context.bloc<NavBloc>().add(NavEvent.setRef(ref: updatedRef));
+              context.tbloc<NavBloc>().add(NavEvent.setRef(ref: updatedRef));
               Navigator.of(context).maybePop(updatedRef);
             },
             textColor: ref.verse == i ? tabColors[NavTabs.verse.index] : textColor,
@@ -151,7 +152,7 @@ class _BookView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
-    final navCanonical = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.navBookOrder);
+    final navCanonical = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.navBookOrder);
     void updateSearch(String s) => searchController
       ..text = s
       ..selection = TextSelection.collapsed(offset: s.length);
@@ -182,14 +183,14 @@ class _BookView extends StatelessWidget {
     final alphabeticalList = bookNames.keys.toList()
       ..sort((k1, k2) =>
           compareNatural(removeDigits(bible.nameOfBook(k1)), removeDigits(bible.nameOfBook(k2))));
-    final ref = context.bloc<NavBloc>().state.ref;
+    final ref = context.tbloc<NavBloc>().state.ref;
 
     void onTap(int book) {
       //ignore: close_sinks
-      final bloc = context.bloc<NavBloc>();
+      final bloc = context.tbloc<NavBloc>();
       // if book only has one chapter, special case
       if (bible.chaptersIn(book: book) == 1) {
-        if (context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap)) {
+        if (context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap)) {
           final nameOfBook = bible.nameOfBook(book);
           updateSearch(nameOfBook);
           bloc
@@ -228,7 +229,7 @@ class _BookView extends StatelessWidget {
     //             shape: const StadiumBorder(),
     //             color: Colors.grey.withOpacity(0.1),
     //             textColor: ref.book == book ? tabColors[0] : textColor,
-    //             onPressed: () => context.bloc<NavBloc>().selectBook(book, bible.nameOfBook(book)),
+    //             onPressed: () => context.tbloc<NavBloc>().selectBook(book, bible.nameOfBook(book)),
     //             child: Text(
     //               bookNames[book],
     //             ),
@@ -295,7 +296,7 @@ class _DynamicGrid extends StatelessWidget {
 
     double extentCalculated() {
       if (textScaleFactor >= 2.0 ||
-          context.bloc<ContentSettingsBloc>().state.textScaleFactor >= 2.0) {
+          context.tbloc<ContentSettingsBloc>().state.textScaleFactor >= 2.0) {
         return 100;
       }
       if (((smallWidth && !smallHeight) || isLargeScreen) ||
@@ -339,7 +340,7 @@ class _PillButton extends StatelessWidget {
       child: Text(
         text,
         textAlign: TextAlign.center,
-        textScaleFactor: context.bloc<ContentSettingsBloc>().state.textScaleFactor,
+        textScaleFactor: context.tbloc<ContentSettingsBloc>().state.textScaleFactor,
         maxLines: 1,
       ),
     );

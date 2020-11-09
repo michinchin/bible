@@ -1082,7 +1082,7 @@ packages:
       name: tec_util
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.24"
+    version: "1.2.26"
   tec_volumes:
     dependency: "direct main"
     description:

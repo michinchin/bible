@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
@@ -27,7 +26,7 @@ class ChapterViewDataBloc extends ViewDataBloc {
     await super.update(context, viewData);
     if (updateSharedRef && viewData is ChapterViewData && viewData.useSharedRef) {
       _isUpdatingSharedBibleRef = true;
-      context.bloc<SharedBibleRefBloc>()?.update(viewData.bcv);
+      context.tbloc<SharedBibleRefBloc>()?.update(viewData.bcv);
       _isUpdatingSharedBibleRef = false;
     }
   }
@@ -64,13 +63,13 @@ class ChapterViewData extends ViewData {
       );
 
   factory ChapterViewData.fromContext(BuildContext context, int viewUid) {
-    // var viewData = ChapterViewData.fromJson(context.bloc<ViewManagerBloc>()?.dataWithView(viewUid));
+    // var viewData = ChapterViewData.fromJson(context.tbloc<ViewManagerBloc>()?.dataWithView(viewUid));
     // if (viewData.useSharedRef) {
-    //   final bcv = context.bloc<SharedBibleRefBloc>()?.state;
+    //   final bcv = context.tbloc<SharedBibleRefBloc>()?.state;
     //   if (bcv != null) viewData = viewData.copyWith(bcv: bcv);
     // }
     // return viewData;
-    return ChapterViewData.fromJson(context.bloc<ViewManagerBloc>()?.dataWithView(viewUid));
+    return ChapterViewData.fromJson(context.tbloc<ViewManagerBloc>()?.dataWithView(viewUid));
   }
 
   String get bookNameAndChapter => (VolumesRepository.shared.bibleWithId(volumeId) ??

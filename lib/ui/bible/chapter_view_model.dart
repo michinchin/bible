@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -348,7 +347,7 @@ class ChapterViewModel {
         // not sure if I want to force this...
         // _toggleSelectionForVerse(context, tag.verse);
       } else {
-        final vmBloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+        final vmBloc = context.tbloc<ViewManagerBloc>(); // ignore: close_sinks
         final position = vmBloc?.indexOfView(viewUid) ?? -1;
         final mn = marginNotes().marginNoteForVerse(tag.verse);
         vmBloc?.add(ViewManagerEvent.add(
@@ -368,7 +367,7 @@ class ChapterViewModel {
           child: Container(
             width: widgetWidth,
             // use app settings height to determine correct line height
-            height: context.bloc<ContentSettingsBloc>().state.textScaleFactor * 18.0,
+            height: context.tbloc<ContentSettingsBloc>().state.textScaleFactor * 18.0,
             decoration: BoxDecoration(color: _backgroundColor(isDarkTheme)),
             child: Align(
               alignment: Alignment.centerLeft,
@@ -445,7 +444,7 @@ class ChapterViewModel {
         child: Container(
           width: containerWidth,
           // use app settings height to determine correct line height
-          height: context.bloc<ContentSettingsBloc>().state.textScaleFactor * 18.0,
+          height: context.tbloc<ContentSettingsBloc>().state.textScaleFactor * 18.0,
           decoration: BoxDecoration(color: _backgroundColor(isDarkTheme)),
           child: Align(
             alignment: Alignment.topLeft,

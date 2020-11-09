@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
@@ -36,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void handleNotification(String payload) {}
-  // context.bloc<AppEntryCubit>().onNotification(payload, context);
+  // context.tbloc<AppEntryCubit>().onNotification(payload, context);
 
   @override
   Widget build(BuildContext context) {
@@ -86,13 +87,13 @@ class _BottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<SelectionBloc, SelectionState>(
-      cubit: context.bloc<SelectionBloc>(),
+      cubit: context.tbloc<SelectionBloc>(),
       listenWhen: (previous, current) => previous.isTextSelected != current.isTextSelected,
       listener: (context, state) {
         if (state.isTextSelected) {
-          context.bloc<SheetManagerBloc>()..changeTypeSize(SheetType.selection, SheetSize.medium);
+          context.tbloc<SheetManagerBloc>()..changeTypeSize(SheetType.selection, SheetSize.medium);
         } else {
-          context.bloc<SheetManagerBloc>()..changeTypeSize(SheetType.main, SheetSize.mini);
+          context.tbloc<SheetManagerBloc>()..changeTypeSize(SheetType.main, SheetSize.mini);
         }
       },
       child: SnapSheet(

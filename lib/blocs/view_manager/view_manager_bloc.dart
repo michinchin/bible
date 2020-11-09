@@ -274,7 +274,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   ///
   void _updateSelectionBloc(BuildContext context) {
     final views = visibleViewsWithSelections.toList();
-    final bloc = context.bloc<SelectionBloc>(); // ignore: close_sinks
+    final bloc = context.tbloc<SelectionBloc>(); // ignore: close_sinks
     assert(bloc != null);
     bloc?.add(SelectionState(isTextSelected: views.isNotEmpty, viewsWithSelections: views));
 
@@ -485,7 +485,7 @@ class ViewManagerWidget extends StatelessWidget {
     // tec.dmPrint('ViewManagerWidget build()');
     return LayoutBuilder(
       builder: (context, constraints) => _VMViewStack(
-        key: context.bloc<ViewManagerBloc>()?._globalKey,
+        key: context.tbloc<ViewManagerBloc>()?._globalKey,
         vmState: state,
         constraints: constraints,
       ),

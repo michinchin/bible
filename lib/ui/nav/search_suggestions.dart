@@ -1,6 +1,6 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/search/nav_bloc.dart';
@@ -13,7 +13,7 @@ class SearchSuggestionsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // ignore: close_sinks
-    final bloc = context.bloc<NavBloc>();
+    final bloc = context.tbloc<NavBloc>();
     final bible = VolumesRepository.shared.bibleWithId(9);
     final wordSuggestions = bloc.state.wordSuggestions ?? [];
     final bookSuggestions = bloc.state.bookSuggestions ?? [];

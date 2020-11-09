@@ -1,7 +1,6 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_web_view/tec_web_view.dart';
@@ -175,16 +174,16 @@ class SelectionSheetModel {
   }
 
   static void _noColor(BuildContext context) =>
-      context.bloc<SelectionCmdBloc>()?.add(const SelectionCmd.clearStyle());
+      context.tbloc<SelectionCmdBloc>()?.add(const SelectionCmd.clearStyle());
 
   static void more(BuildContext context) =>
-      context.bloc<SheetManagerBloc>()?.add(const SheetEvent.changeSize(SheetSize.medium));
+      context.tbloc<SheetManagerBloc>()?.add(const SheetEvent.changeSize(SheetSize.medium));
 
   static void deselect(BuildContext c) =>
-      c.bloc<SelectionCmdBloc>()?.add(const SelectionCmd.deselectAll());
+      c.tbloc<SelectionCmdBloc>()?.add(const SelectionCmd.deselectAll());
 
   static Future<void> copy(BuildContext c, {int uid}) async {
-    final copyWithLink = c.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    final copyWithLink = c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
     if (copyWithLink) {
       final text = await tecShowProgressDlg<String>(
         context: c,
@@ -198,7 +197,7 @@ class SelectionSheetModel {
   }
 
   static Future<String> _shareText(BuildContext c, {int uid}) async {
-    final bloc = c.bloc<ViewManagerBloc>(); //ignore: close_sinks
+    final bloc = c.tbloc<ViewManagerBloc>(); //ignore: close_sinks
     final views = bloc.visibleViewsWithSelections.toList();
     final verses = <String, ChapterVerses>{};
     final buffer = StringBuffer('');
@@ -208,7 +207,7 @@ class SelectionSheetModel {
       if (verses[key] == null) {
         verses[key] = await ChapterVerses.fetch(refForChapter: ref);
       }
-      final copyWithLink = c.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+      final copyWithLink = c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
       final verse = ChapterVerses.formatForShare([ref], verses[key].data);
       buffer.write(verse);
       if (copyWithLink) {
@@ -234,7 +233,7 @@ class SelectionSheetModel {
   }
 
   static Future<void> share(BuildContext c, {int uid}) async {
-    final copyWithLink = c.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    final copyWithLink = c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
     if (copyWithLink) {
       final text = await tecShowProgressDlg<String>(
         context: c,
@@ -281,7 +280,7 @@ class SelectionSheetModel {
   }
 
   static Future<void> _compare(BuildContext c) async {
-    final bloc = c.bloc<ViewManagerBloc>(); //ignore: close_sinks
+    final bloc = c.tbloc<ViewManagerBloc>(); //ignore: close_sinks
     final views = bloc.visibleViewsWithSelections.toList();
     final refs = <Reference>[];
     for (final v in views) {
@@ -321,7 +320,7 @@ class SelectionSheetModel {
               ));
 
   static List<Reference> _grabRefs(BuildContext c) {
-    final bloc = c.bloc<ViewManagerBloc>(); //ignore: close_sinks
+    final bloc = c.tbloc<ViewManagerBloc>(); //ignore: close_sinks
     final views = bloc.visibleViewsWithSelections.toList();
     final refs = <Reference>[];
     for (final v in views) {

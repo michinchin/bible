@@ -1,7 +1,6 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
@@ -14,7 +13,7 @@ import 'main_menu.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   // ignore: close_sinks
-  final vmBloc = context.bloc<ViewManagerBloc>();
+  final vmBloc = context.tbloc<ViewManagerBloc>();
   final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
   final isTopRightView = vmBloc.state.maximizedViewUid == state.uid ||
       (vmBloc.columnsInRow(0) - 1) == vmBloc.indexOfView(state.uid);
@@ -84,7 +83,7 @@ List<TableRow> _buildMenuItemsForViewWithState(
   BuildContext menuContext,
 }) {
   // ignore: close_sinks
-  final vmBloc = context.bloc<ViewManagerBloc>();
+  final vmBloc = context.tbloc<ViewManagerBloc>();
   final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
 
   final viewData = ChapterViewData.fromContext(context, state.uid);
@@ -124,7 +123,7 @@ List<TableRow> _buildMenuItemsForViewWithState(
         useSharedRef ? 'Unlink chapter' : 'Link chapter',
         () {
           Navigator.of(menuContext).maybePop();
-          final viewDataBloc = context.bloc<ChapterViewDataBloc>();
+          final viewDataBloc = context.tbloc<ChapterViewDataBloc>();
           assert(viewDataBloc != null);
           viewDataBloc?.update(context, viewData.copyWith(useSharedRef: !useSharedRef));
         },
@@ -188,7 +187,7 @@ void _onSwitchViews(ViewManagerBloc vmBloc, int viewUid, ViewState view) {
 
 Iterable<TableRow> _generateOffScreenItems(BuildContext menuContext, int viewUid) {
   // ignore: close_sinks
-  final vmBloc = menuContext.bloc<ViewManagerBloc>();
+  final vmBloc = menuContext.tbloc<ViewManagerBloc>();
   final vm = ViewManager.shared;
   final items = <TableRow>[];
   for (final view in vmBloc?.state?.views) {
@@ -214,7 +213,7 @@ Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
     return tecModalPopupMenuItem(menuContext, vm.iconWithType(type), '$title', () async {
       tec.dmPrint('Adding new view of type $type.');
       // Add the new view, and maximize the view on phones.
-      final vmBloc = menuContext.bloc<ViewManagerBloc>(); // ignore: close_sinks
+      final vmBloc = menuContext.tbloc<ViewManagerBloc>(); // ignore: close_sinks
       final nextUid = vmBloc?.state?.nextUid;
       await vm.onAddView(menuContext, type, currentViewId: viewUid);
       if (vmBloc.state.maximizedViewUid > 0 &&

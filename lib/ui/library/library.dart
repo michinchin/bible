@@ -290,11 +290,11 @@ class _VolumesListState extends State<_VolumesList> {
   }
 
   void _scrollToVolumeAfterBuild() {
-    if (_scrollToVolume && context.bloc<VolumesBloc>().state.volumes.isNotEmpty) {
+    if (_scrollToVolume && context.tbloc<VolumesBloc>().state.volumes.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         if (mounted && _scrollController.isAttached) {
           final index = context
-              .bloc<VolumesBloc>()
+              .tbloc<VolumesBloc>()
               .state
               .volumes
               .indexWhere((v) => widget.selectedVolumes.contains(v.id));
@@ -324,8 +324,8 @@ class _VolumesListState extends State<_VolumesList> {
       () {
         if (mounted) {
           // tec.dmPrint('search string: ${_textEditingController.text.trim()}');
-          context.bloc<VolumesBloc>()?.add(
-                context.bloc<VolumesBloc>().state.filter.copyWith(
+          context.tbloc<VolumesBloc>()?.add(
+                context.tbloc<VolumesBloc>().state.filter.copyWith(
                       searchFilter: _textEditingController.text.trim(),
                     ),
               );
@@ -346,7 +346,7 @@ class _VolumesListState extends State<_VolumesList> {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.bloc<VolumesBloc>(); // ignore: close_sinks
+    final bloc = context.tbloc<VolumesBloc>(); // ignore: close_sinks
     final showFilter = (bloc.languages?.length ?? 0) > 1 || (bloc.categories?.length ?? 0) > 1;
 
     final textScaleFactor = textScaleFactorWith(context);
@@ -419,7 +419,7 @@ class _VolumeActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.bloc<DownloadsBloc>(); // ignore: close_sinks
+    final bloc = context.tbloc<DownloadsBloc>(); // ignore: close_sinks
     assert(bloc != null);
     if (bloc == null || !bloc.supportsDownloading) return Container();
 
@@ -449,7 +449,7 @@ class _VolumeActionButton extends StatelessWidget {
         item.status == DownloadStatus.failed ||
         item.status == DownloadStatus.canceled) {
       // If free, or licensed, allow download.
-      if (volume.price == 0.0 || context.bloc<VolumesBloc>().isFullyLicensed(volume.id)) {
+      if (volume.price == 0.0 || context.tbloc<VolumesBloc>().isFullyLicensed(volume.id)) {
         return IconButton(
             icon: const Icon(Icons.cloud_download),
             iconSize: 32,

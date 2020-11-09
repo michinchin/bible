@@ -45,7 +45,7 @@ class ChapterTitle extends StatelessWidget {
                 padding: const EdgeInsets.all(0),
                 width: 32.0,
                 child: BlocBuilder<SearchBloc, SearchState>(
-                    cubit: context.bloc<SearchBloc>(),
+                    cubit: context.tbloc<SearchBloc>(),
                     builder: (c, s) => IconButton(
                         padding: const EdgeInsets.only(right: 8.0),
                         iconSize: 20,
@@ -123,12 +123,12 @@ class ChapterTitle extends StatelessWidget {
       // Small delay to allow the nav popup to clean up...
       await Future.delayed(const Duration(milliseconds: 350), () {
         final newViewData = context
-            .bloc<ChapterViewDataBloc>()
+            .tbloc<ChapterViewDataBloc>()
             .state
             .asChapterViewData
             .copyWith(bcv: BookChapterVerse.fromRef(ref));
         tec.dmPrint('ChapterTitle _onNavigate updating with new data: $newViewData');
-        context.bloc<ChapterViewDataBloc>().update(context, newViewData);
+        context.tbloc<ChapterViewDataBloc>().update(context, newViewData);
       });
     }
   }
@@ -146,9 +146,9 @@ class ChapterTitle extends StatelessWidget {
         selectedVolume: viewData.volumeId);
 
     final newViewData =
-        context.bloc<ChapterViewDataBloc>().state.asChapterViewData.copyWith(volumeId: volumeId);
+        context.tbloc<ChapterViewDataBloc>().state.asChapterViewData.copyWith(volumeId: volumeId);
     tec.dmPrint('ChapterTitle _onSelectVolume updating with new data: $newViewData');
-    await context.bloc<ChapterViewDataBloc>().update(context, newViewData);
+    await context.tbloc<ChapterViewDataBloc>().update(context, newViewData);
   }
 }
 
@@ -165,7 +165,7 @@ class SelectionModeBibleChapterTitle extends StatelessWidget {
         .copyWith(color: Theme.of(context).textColor.withOpacity(0.5));
 
     // ignore: close_sinks
-    final vmBloc = context.bloc<ViewManagerBloc>();
+    final vmBloc = context.tbloc<ViewManagerBloc>();
 
     final ref = tec.as<Reference>(vmBloc.selectionObjectWithViewUid(uid));
     return Row(children: [

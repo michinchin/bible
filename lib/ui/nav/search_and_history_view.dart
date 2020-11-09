@@ -67,7 +67,7 @@ class HistoryView extends StatefulWidget {
 
 class _HistoryViewState extends State<HistoryView> {
   void _onSearchTap(BuildContext c, SearchHistoryItem searchHistoryItem) {
-    c.bloc<SearchBloc>()
+    c.tbloc<SearchBloc>()
       ..add(SearchEvent.request(
         search: searchHistoryItem.search,
         translations: searchHistoryItem.volumesFiltered.isNotEmpty
@@ -79,7 +79,7 @@ class _HistoryViewState extends State<HistoryView> {
           : []))
       ..add(SearchEvent.setScrollIndex(searchHistoryItem?.index ?? 0));
 
-    c.bloc<NavBloc>().add(NavEvent.onSearchFinished(search: searchHistoryItem.search));
+    c.tbloc<NavBloc>().add(NavEvent.onSearchFinished(search: searchHistoryItem.search));
     widget.searchController
       ..text = searchHistoryItem.search
       ..selection = TextSelection.collapsed(offset: searchHistoryItem.search.length);
@@ -117,7 +117,7 @@ class _HistoryViewState extends State<HistoryView> {
                           final ref = await Navigator.of(c).push(MaterialPageRoute<Reference>(
                               builder: (c) => _NavHistoryView(navHistory)));
                           if (ref != null) {
-                            _onNavHistoryTap(c, ref, context.bloc<NavBloc>().state.ref.volume);
+                            _onNavHistoryTap(c, ref, context.tbloc<NavBloc>().state.ref.volume);
                           }
                         },
                         child: Padding(
@@ -144,7 +144,7 @@ class _HistoryViewState extends State<HistoryView> {
                                 .take(navHistoryItem.label().split(' ').length - 1)
                                 .join(' ')),
                             onTap: () => _onNavHistoryTap(
-                                c, navHistoryItem, context.bloc<NavBloc>().state.ref.volume),
+                                c, navHistoryItem, context.tbloc<NavBloc>().state.ref.volume),
                           )
                       ]),
                       InkWell(
@@ -268,7 +268,7 @@ class _SearchResultsViewState extends State<SearchResultsView> {
 
   @override
   void initState() {
-    final s = context.bloc<SearchBloc>().state;
+    final s = context.tbloc<SearchBloc>().state;
     scrollController = ItemScrollController();
     if (s.scrollIndex > 1) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -285,13 +285,13 @@ class _SearchResultsViewState extends State<SearchResultsView> {
 
   @override
   void deactivate() {
-    _saveSearch(context.bloc<SearchBloc>().state);
+    _saveSearch(context.tbloc<SearchBloc>().state);
     super.deactivate();
   }
 
   SearchResultInfo orderByDefaultTranslation(SearchResultInfo res) {
     final defaultTranslations =
-        context.bloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
+        context.tbloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
     final dts = (defaultTranslations?.split('|')?.map(int.tryParse)?.toList() ?? [])
       ..removeWhere((p) => p == null);
 
@@ -312,7 +312,7 @@ class _SearchResultsViewState extends State<SearchResultsView> {
     if (positionListener.itemPositions.value.isNotEmpty) {
       if (s.filteredResults.isNotEmpty) {
         // this is where we save the search result...once user exits page
-        await context.bloc<SearchBloc>().saveToSearchHistory(s.search,
+        await context.tbloc<SearchBloc>().saveToSearchHistory(s.search,
             translations: s.filteredTranslations.join('|'),
             booksExcluded: s.excludedBooks.join('|'),
             scrollIndex: positionListener.itemPositions.value.first.index);
@@ -388,7 +388,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
 
   @override
   void initState() {
-    _includeShareLink = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    _includeShareLink = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
     super.initState();
   }
 
@@ -404,10 +404,10 @@ class __SearchResultCardState extends State<_SearchResultCard> {
       );
       final map = Map<int, Context>.from(widget.res.contextMap);
       map[verseIndex] = newC;
-      context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+      context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
           searchResult: widget.res.copyWith(contextMap: map, currentVerseIndex: verseIndex)));
     } else {
-      context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+      context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
           searchResult: widget.res.copyWith(currentVerseIndex: verseIndex)));
     }
   }
@@ -424,17 +424,17 @@ class __SearchResultCardState extends State<_SearchResultCard> {
       );
       final map = Map<int, Context>.from(widget.res.contextMap);
       map[widget.res.currentVerseIndex] = newC;
-      context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+      context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
           searchResult:
               widget.res.copyWith(contextMap: map, contextExpanded: !widget.res.contextExpanded)));
     } else {
-      context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+      context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
           searchResult: widget.res.copyWith(contextExpanded: !widget.res.contextExpanded)));
     }
   }
 
   void _onExpanded() {
-    context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+    context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
         searchResult: widget.res.copyWith(expanded: !widget.res.expanded)));
   }
 
@@ -473,9 +473,9 @@ class __SearchResultCardState extends State<_SearchResultCard> {
   }
 
   void _onListTileTap() {
-    final selectionMode = context.bloc<SearchBloc>().state.selectionMode;
+    final selectionMode = context.tbloc<SearchBloc>().state.selectionMode;
     if (selectionMode) {
-      context.bloc<SearchBloc>().add(SearchEvent.modifySearchResult(
+      context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
           searchResult: widget.res.copyWith(selected: !widget.res.selected)));
     } else {
       _onExpanded();
@@ -484,7 +484,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
 
   void _onLongPress() {
     // ignore: close_sinks
-    final searchBloc = context.bloc<SearchBloc>();
+    final searchBloc = context.tbloc<SearchBloc>();
     final selectionMode = searchBloc.state.selectionMode;
     if (!selectionMode) {
       searchBloc
@@ -506,7 +506,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
               WidgetSpan(child: Container(height: 3)),
               ...searchResTextSpans(
                 widget.res.currentText,
-                context.bloc<SearchBloc>().state.search,
+                context.tbloc<SearchBloc>().state.search,
               ),
             ],
             style: TextStyle(color: textColor),
@@ -700,7 +700,7 @@ class SearchResultsLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final searchBlocState = context.bloc<SearchBloc>().state;
+    final searchBlocState = context.tbloc<SearchBloc>().state;
     final bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
     var book = bible.firstBook;
     // ignore: prefer_collection_literals
@@ -758,7 +758,7 @@ class SearchResultsLabel extends StatelessWidget {
                     text: '${navView ? '' : 'Showing'}'
                         ' ${results.length} verse${results.length > 1 ? 's' : ''} containing '),
                 TextSpan(
-                    text: '${context.bloc<SearchBloc>().state.search}',
+                    text: '${context.tbloc<SearchBloc>().state.search}',
                     style: const TextStyle(fontWeight: FontWeight.bold)),
                 if (searchBlocState.excludedBooks.isNotEmpty)
                   if (showOTLabel)

@@ -110,7 +110,7 @@ class __MiniViewState extends State<_MiniView> {
             borderRadius:
                 BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
         builder: (c) => BlocProvider.value(
-              value: context.bloc<SelectionCmdBloc>(),
+              value: context.tbloc<SelectionCmdBloc>(),
               child: _ColorSelectionView(
                 prefItems: prefItems,
                 colorIndex: colorIndex,
@@ -118,12 +118,12 @@ class __MiniViewState extends State<_MiniView> {
               ),
             ));
     if (colorChosen != null) {
-      context.bloc<SelectionCmdBloc>()?.add(SelectionCmd.setStyle(
+      context.tbloc<SelectionCmdBloc>()?.add(SelectionCmd.setStyle(
           underlineMode ? HighlightType.underline : HighlightType.highlight, colorChosen));
-      context.bloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
+      context.tbloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
           prefItem: PrefItem.from(prefItems.itemWithId(colorIndex).copyWith(verse: colorChosen))));
     } else {
-      context.bloc<SelectionCmdBloc>()?.add(const SelectionCmd.cancelTrial());
+      context.tbloc<SelectionCmdBloc>()?.add(const SelectionCmd.cancelTrial());
     }
   }
 
@@ -139,7 +139,7 @@ class __MiniViewState extends State<_MiniView> {
       ],
     ];
     return BlocBuilder<PrefItemsBloc, PrefItems>(
-        cubit: context.bloc<PrefItemsBloc>(),
+        cubit: context.tbloc<PrefItemsBloc>(),
         builder: (context, state) {
           final prefItems = state?.items
                   ?.where(
@@ -227,7 +227,7 @@ class __ColorSelectionViewState extends State<_ColorSelectionView> {
   @override
   void initState() {
     colorChosen = 0xff999999;
-    context.bloc<SelectionCmdBloc>()?.add(SelectionCmd.tryStyle(
+    context.tbloc<SelectionCmdBloc>()?.add(SelectionCmd.tryStyle(
         widget.underlineMode ? HighlightType.underline : HighlightType.highlight,
         widget.prefItems.itemWithId(widget.colorIndex).verse));
     super.initState();
@@ -245,7 +245,7 @@ class __ColorSelectionViewState extends State<_ColorSelectionView> {
                 showColorContainer: false,
                 color: Color(widget.prefItems.itemWithId(widget.colorIndex)?.verse ?? colorChosen),
                 onColorChanged: (color) {
-                  context.bloc<SelectionCmdBloc>()?.add(SelectionCmd.tryStyle(
+                  context.tbloc<SelectionCmdBloc>()?.add(SelectionCmd.tryStyle(
                       widget.underlineMode ? HighlightType.underline : HighlightType.highlight,
                       color.value));
                   colorChosen = color.value;
@@ -314,7 +314,7 @@ class _ColorPickerButton extends StatelessWidget {
         if (editMode) {
           onEdit();
         } else {
-          context.bloc<SelectionCmdBloc>()?.add(SelectionCmd.setStyle(
+          context.tbloc<SelectionCmdBloc>()?.add(SelectionCmd.setStyle(
                 isForUnderline ? HighlightType.underline : HighlightType.highlight,
                 color.value,
               ));

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import 'tec_modal_popup.dart';
@@ -63,7 +63,7 @@ TableRow tecModalPopupMenuItem(
           ? onTap
           : () {
               onTap();
-              context.bloc<_RefreshBloc>().refresh();
+              context.tbloc<_RefreshBloc>().refresh();
             };
 
   return TableRow(

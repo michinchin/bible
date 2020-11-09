@@ -186,8 +186,8 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                         );
                       }),
                       onPressed: () {
-                        final settings = context.bloc<ContentSettingsBloc>().state;
-                        context.bloc<ContentSettingsBloc>().updateWith(
+                        final settings = context.tbloc<ContentSettingsBloc>().state;
+                        context.tbloc<ContentSettingsBloc>().updateWith(
                             settings.copyWith(fontName: name == _Fonts._systemDefault ? '' : name));
                       },
                     )
@@ -207,7 +207,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                     max: 3.0,
                     onChanged: (newValue) {
                       context
-                          .bloc<ContentSettingsBloc>()
+                          .tbloc<ContentSettingsBloc>()
                           .updateWith(settings.copyWith(textScaleFactor: newValue));
                     },
                     activeColor: Theme.of(context).accentColor,

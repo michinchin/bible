@@ -1,6 +1,6 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/app_theme_bloc.dart';
@@ -73,14 +73,14 @@ class SettingsView extends StatelessWidget {
 }
 
 List<Widget> readTiles(BuildContext context) {
-  final prefBloc = context.bloc<PrefItemsBloc>(); //ignore: close_sinks
+  final prefBloc = context.tbloc<PrefItemsBloc>(); //ignore: close_sinks
 
   return [
     SwitchListTile.adaptive(
         dense: true,
         secondary: const Icon(Icons.lightbulb_outline),
         title: const Text('Dark theme'),
-        onChanged: (_) => context.bloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
+        onChanged: (_) => context.tbloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
         value: AppSettings.shared.isDarkTheme()),
     SwitchListTile.adaptive(
       dense: true,

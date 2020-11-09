@@ -25,7 +25,7 @@ class _VMViewStackState extends State<_VMViewStack> {
     final portraitHeight = math.max(widget.constraints.maxWidth, widget.constraints.maxHeight);
     final portraitWidth = math.min(widget.constraints.maxWidth, widget.constraints.maxHeight);
 
-    final bloc = context.bloc<ViewManagerBloc>(); // ignore: close_sinks
+    final bloc = context.tbloc<ViewManagerBloc>(); // ignore: close_sinks
     assert(bloc != null);
 
     if (portraitHeight < 950.0 && portraitWidth < 500) {
@@ -148,7 +148,7 @@ class _ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
   void didUpdateWidget(_ManagedViewNavigator oldWidget) {
     super.didUpdateWidget(oldWidget);
     final state = widget.managedViewState;
-    context.bloc<ManagedViewBloc>().add(state);
+    context.tbloc<ManagedViewBloc>().add(state);
   }
 
   Widget _routeBuilder(BuildContext context) => BlocBuilder<ManagedViewBloc, ManagedViewState>(

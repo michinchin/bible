@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/nav_bloc.dart';
@@ -23,7 +24,7 @@ const tabColors = [Colors.blue, Colors.orange, Colors.green];
 
 Future<Reference> navigate(BuildContext context, Reference ref,
     {int initialIndex = 0, bool searchView = false}) {
-  final hasSearchResults = context.bloc<SearchBloc>().state.searchResults.isNotEmpty;
+  final hasSearchResults = context.tbloc<SearchBloc>().state.searchResults.isNotEmpty;
   return showTecDialog<Reference>(
     context: context,
     useRootNavigator: true,
@@ -45,7 +46,7 @@ Future<Reference> navigate(BuildContext context, Reference ref,
 Future<Reference> showBibleSearch(BuildContext context, Reference ref, {String search = ''}) {
   if (search.isNotEmpty) {
     final translations = context
-        .bloc<PrefItemsBloc>()
+        .tbloc<PrefItemsBloc>()
         .state
         .items
         .itemWithId(PrefItemId.translationsFilter)
@@ -54,7 +55,7 @@ Future<Reference> showBibleSearch(BuildContext context, Reference ref, {String s
         .map(int.parse)
         .toList();
     context
-        .bloc<SearchBloc>()
+        .tbloc<SearchBloc>()
         ?.add(SearchEvent.request(search: search, translations: translations));
   }
   return showTecDialog<Reference>(
@@ -86,11 +87,11 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   TabController _searchResultsTabController;
   TextEditingController _searchController;
 
-  NavBloc navBloc() => context.bloc<NavBloc>();
+  NavBloc navBloc() => context.tbloc<NavBloc>();
 
-  PrefItemsBloc prefsBloc() => context.bloc<PrefItemsBloc>();
+  PrefItemsBloc prefsBloc() => context.tbloc<PrefItemsBloc>();
 
-  SearchBloc searchBloc() => context.bloc<SearchBloc>();
+  SearchBloc searchBloc() => context.tbloc<SearchBloc>();
 
   List<int> translations() => prefsBloc()
       .state
@@ -104,7 +105,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   @override
   void initState() {
     _searchController = TextEditingController(text: '');
-    final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
+    final nav3TapEnabled = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
 
     _searchResultsTabController = TabController(length: 2, initialIndex: 1, vsync: this)
@@ -135,7 +136,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   void _changeTabController() {
-    final nav3TapEnabled = context.bloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
+    final nav3TapEnabled = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
     setState(() {
       _tabController =
@@ -161,22 +162,22 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   void _selectionMode() {
-    final selectionModeOn = !context.bloc<SearchBloc>().state.selectionMode;
+    final selectionModeOn = !context.tbloc<SearchBloc>().state.selectionMode;
     if (selectionModeOn) {
       TecToast.show(context, 'Entered Selection Mode');
     }
-    context.bloc<SearchBloc>().add(const SearchEvent.selectionModeToggle());
+    context.tbloc<SearchBloc>().add(const SearchEvent.selectionModeToggle());
   }
 
   void _onSelectionCopied() {
-    final verses = context.bloc<SearchBloc>().state.filteredResults.where((s) => s.selected);
+    final verses = context.tbloc<SearchBloc>().state.filteredResults.where((s) => s.selected);
     if (verses.isNotEmpty) {
       TecShare.copy(context, verses.map((v) => v.shareText).join('\n\n'));
     }
   }
 
   void _onSelectionShared() {
-    final verses = context.bloc<SearchBloc>().state.filteredResults.where((s) => s.selected);
+    final verses = context.tbloc<SearchBloc>().state.filteredResults.where((s) => s.selected);
     if (verses.isNotEmpty) {
       TecShare.share(verses.map((v) => v.shareText).join('\n\n'));
     }
@@ -273,7 +274,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         // else if (s == NavViewState.bcvTabs) {closeButton}
         // else{
         // return BackButton(onPressed: () {
-        // c.bloc<NavBloc>()
+        // c.tbloc<NavBloc>()
         //   ..add(const NavEvent.changeNavView(state: NavViewState.bcvTabs))
         //   ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
         //   ..add(const NavEvent.onSearchChange(search: ''));
@@ -327,7 +328,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                 onPressed: () => Navigator.of(context).maybePop(s.ref))
           ];
         } else {
-          final hasSearchResults = c.bloc<SearchBloc>().state.searchResults.isNotEmpty;
+          final hasSearchResults = c.tbloc<SearchBloc>().state.searchResults.isNotEmpty;
           return [
             IconButton(
                 icon: hasSearchResults
@@ -336,7 +337,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                     : const Icon(Icons.youtube_searched_for),
                 onPressed: () {
                   c
-                      .bloc<NavBloc>()
+                      .tbloc<NavBloc>()
                       .add(const NavEvent.changeNavView(state: NavViewState.searchResults));
                   // default to show history first
                   _searchResultsTabController.animateTo(0);

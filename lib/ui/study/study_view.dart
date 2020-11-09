@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/view_data/chapter_view_data.dart';
@@ -71,7 +72,7 @@ class StudyView extends StatelessWidget {
     return BlocProvider(
       create: (context) {
         final viewData = ChapterViewData.fromContext(context, state.uid);
-        return ChapterViewDataBloc(context.bloc<ViewManagerBloc>(), state.uid, viewData);
+        return ChapterViewDataBloc(context.tbloc<ViewManagerBloc>(), state.uid, viewData);
       },
       child: DefaultTabController(
         length: tabs.length,

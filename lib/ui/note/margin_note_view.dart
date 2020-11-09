@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:quill_delta/quill_delta.dart';
 import 'package:tec_user_account/tec_user_account.dart';
@@ -28,7 +27,7 @@ class ViewableMarginNote extends Viewable {
   @override
   String menuTitle({BuildContext context, ViewState state}) {
     if (state?.uid != null) {
-      final json = context.bloc<ViewManagerBloc>()?.dataWithView(state.uid);
+      final json = context.tbloc<ViewManagerBloc>()?.dataWithView(state.uid);
       final jsonMap = json is String ? tec.parseJsonSync(json) : json;
       if (jsonMap is Map<String, dynamic>) {
         return tec.as<String>(jsonMap['title']);
@@ -221,8 +220,8 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   void initState() {
     super.initState();
 
-    viewManagerBloc = context.bloc<ViewManagerBloc>();
-    sheetManagerBloc = context.bloc<SheetManagerBloc>();
+    viewManagerBloc = context.tbloc<ViewManagerBloc>();
+    sheetManagerBloc = context.tbloc<SheetManagerBloc>();
 
     _userId = AppSettings.shared.userAccount.user.userId;
 

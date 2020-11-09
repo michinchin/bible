@@ -1,7 +1,7 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share/share.dart';
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/sheet/pref_items_bloc.dart';
@@ -15,7 +15,7 @@ Future<int> showCompareSheet(BuildContext c, Reference ref) async {
       chapter: ref.chapter,
       verse: ref.verse,
       translations:
-          c.bloc<PrefItemsBloc>().state.items.itemWithId(PrefItemId.translationsFilter).info);
+          c.tbloc<PrefItemsBloc>().state.items.itemWithId(PrefItemId.translationsFilter).info);
 
   return showModalBottomSheet<int>(
     shape: const RoundedRectangleBorder(

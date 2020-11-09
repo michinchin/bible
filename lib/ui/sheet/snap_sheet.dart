@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
@@ -94,7 +95,7 @@ class _SnapSheetState extends State<SnapSheet> {
       maxWidth = 460;
     }
 
-    final s = context.bloc<SheetManagerBloc>().state;
+    final s = context.tbloc<SheetManagerBloc>().state;
 
     return SafeArea(
       bottom: false,
@@ -152,9 +153,9 @@ class _SnapSheetState extends State<SnapSheet> {
                     onSnap: (s, snapPosition) {
                       final sheetSize = _getSheetSize(snapPosition);
                       if (sheetSize != null) {
-                        final prevSize = context.bloc<SheetManagerBloc>().state.size.index;
+                        final prevSize = context.tbloc<SheetManagerBloc>().state.size.index;
                         if (sheetSize.index != prevSize) {
-                          context.bloc<SheetManagerBloc>().changeSize(sheetSize);
+                          context.tbloc<SheetManagerBloc>().changeSize(sheetSize);
                         }
                       }
                     },
@@ -201,7 +202,7 @@ class _SnapSheetState extends State<SnapSheet> {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             SheetController.of(c).rebuild();
                             final extent = snapOffsets[
-                                (c.bloc<SheetManagerBloc>().state.size == SheetSize.mini) ? 0 : 1];
+                                (c.tbloc<SheetManagerBloc>().state.size == SheetSize.mini) ? 0 : 1];
                             SheetController.of(c).snapToExtent(extent);
                           });
                         }
@@ -241,11 +242,11 @@ class _SnapSheetState extends State<SnapSheet> {
                   headerBuilder: (c, s) {
                     return InkWell(
                       onTap: () {
-                        final nextSize = c.bloc<SheetManagerBloc>().state.size == SheetSize.mini
+                        final nextSize = c.tbloc<SheetManagerBloc>().state.size == SheetSize.mini
                             ? SheetSize.medium
                             : SheetSize.mini;
 
-                        c.bloc<SheetManagerBloc>().changeSize(nextSize);
+                        c.tbloc<SheetManagerBloc>().changeSize(nextSize);
                       },
                       child: Padding(
                         // NOTICE: adjust the _headerHeight variable at the top of this

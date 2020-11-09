@@ -96,7 +96,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
         providers: [
           BlocProvider(
             create: (context) => ChapterViewDataBloc(
-              context.bloc<ViewManagerBloc>(),
+              context.tbloc<ViewManagerBloc>(),
               widget.state.uid,
               ChapterViewData.fromContext(context, widget.state.uid),
             ),
@@ -176,7 +176,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
   ///
   Future<void> _onSharedBibleRefListener(BuildContext context, BookChapterVerse sharedRef) async {
     if (!_animatingToPage && mounted && _pageController != null && _bible != null) {
-      final viewDataBloc = context.bloc<ChapterViewDataBloc>();
+      final viewDataBloc = context.tbloc<ChapterViewDataBloc>();
       final viewData = viewDataBloc.state.asChapterViewData;
       if (!viewDataBloc.isUpdatingSharedBibleRef &&
           viewData.useSharedRef &&
@@ -224,14 +224,14 @@ class _PageableChapterViewState extends State<PageableChapterView> {
   Future<void> _onPageChanged(BuildContext context, ViewState _, int page) async {
     final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
     if (bcv != null) {
-      final viewData = context.bloc<ChapterViewDataBloc>().state.asChapterViewData;
+      final viewData = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData;
       final newData = viewData.copyWith(
           bcv: viewData.bcv.book == bcv.book && viewData.bcv.chapter == bcv.chapter ? null : bcv,
           page: page);
       // tec.dmPrint('PageableChapterView.onPageChanged: updating $viewData with new '
       //     'data: $newData');
       await context
-          .bloc<ChapterViewDataBloc>()
+          .tbloc<ChapterViewDataBloc>()
           .update(context, newData, updateSharedRef: !_animatingToPage);
     }
   }
@@ -416,14 +416,14 @@ class _ChapterViewState extends State<_ChapterView> {
                 var userContentValid = true;
                 if (marginNotes.loaded && marginNotes.volumeId != widget.volume.id) {
                   context
-                      .bloc<ChapterMarginNotesBloc>()
+                      .tbloc<ChapterMarginNotesBloc>()
                       .add(MarginNotesEvent.changeVolumeId(widget.volume.id));
                   userContentValid = false;
                 }
 
                 if (highlights.loaded && highlights.volumeId != widget.volume.id) {
                   context
-                      .bloc<ChapterHighlightsBloc>()
+                      .tbloc<ChapterHighlightsBloc>()
                       .add(HighlightEvent.changeVolumeId(widget.volume.id));
                   userContentValid = false;
                 }
@@ -440,7 +440,7 @@ class _ChapterViewState extends State<_ChapterView> {
                     versesToShow: widget.versesToShow ?? [],
                     // ['1', '2', '3']
                     size: widget.size,
-                    fontName: context.bloc<ContentSettingsBloc>().state.fontName,
+                    fontName: context.tbloc<ContentSettingsBloc>().state.fontName,
                     highlights: highlights,
                     marginNotes: marginNotes,
                   );
@@ -575,15 +575,15 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
         child: ExcludeSemantics(
           child: TecAutoScroll(
             scrollController: _scrollController,
-            allowAutoscroll: () => !context.bloc<SelectionBloc>().state.isTextSelected,
+            allowAutoscroll: () => !context.tbloc<SelectionBloc>().state.isTextSelected,
             navigationBarPadding: () => TecScaffoldWrapper.navigationBarPadding,
             autoscrollActive: (active) {
               if (active) {
                 tec.dmPrint('ChapterViewHtml: autoscroll is active, collapsing the bottom sheet.');
-                context.bloc<SheetManagerBloc>().collapse(context);
+                context.tbloc<SheetManagerBloc>().collapse(context);
               } else {
                 // tec.dmPrint('ChapterViewHtml autoscrollActive false, restoring the bottom sheet.');
-                // context.bloc<SheetManagerBloc>().restore(context);
+                // context.tbloc<SheetManagerBloc>().restore(context);
               }
             },
             child: NotificationListener<ScrollNotification>(
@@ -592,11 +592,11 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                   switch (notification.direction) {
                     case ScrollDirection.forward:
                       tec.dmPrint('ChapterViewHtml: scrolled up, restoring the bottom sheet.');
-                      context.bloc<SheetManagerBloc>().restore(context);
+                      context.tbloc<SheetManagerBloc>().restore(context);
                       break;
                     case ScrollDirection.reverse:
                       tec.dmPrint('ChapterViewHtml: scrolled down, collapsing the bottom sheet.');
-                      context.bloc<SheetManagerBloc>().collapse(context);
+                      context.tbloc<SheetManagerBloc>().collapse(context);
                       break;
                     default:
                       break;
