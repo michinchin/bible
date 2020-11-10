@@ -9,10 +9,12 @@ class NotificationsModel extends NotificationsHelper {
               time: DateTime.now().applied(const TimeOfDay(hour: 8, minute: 0))),
           LocalNotification.blank().copyWith(
               type: NotificationType.dotd,
-              time: DateTime.now().applied(const TimeOfDay(hour: 8, minute: 0))),
+              time: DateTime.now().applied(const TimeOfDay(hour: 8, minute: 0)),
+              enabled: false),
           LocalNotification.blank().copyWith(
               type: NotificationType.scriptureBreak,
-              time: DateTime.now().applied(const TimeOfDay(hour: 8, minute: 0))),
+              time: DateTime.now().applied(const TimeOfDay(hour: 8, minute: 0)),
+              enabled: false),
         ]);
 
   /// schedules notifications for the next 37 days

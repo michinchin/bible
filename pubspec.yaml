@@ -17,9 +17,9 @@ dependencies:
   cached_network_image: ^2.3.3
   combos: ^1.2.0
   cupertino_icons: ^1.0.0
-  equatable: ^1.2.3
+  equatable: ^1.2.5
   feather_icons_flutter: ^4.7.4
-  flutter_bloc: ^6.0.6
+  flutter_bloc: ^6.1.0
   flutter_downloader: ^1.5.1
   flutter_keyboard_visibility: ^3.3.0
   flutter_sfsymbols: ^1.0.0
@@ -117,7 +117,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  bloc_test: ^7.0.6
+  bloc_test: ^7.1.0
   build_runner: ^1.10.2
   freezed: ^0.12.2
   json_serializable: ^3.3.0

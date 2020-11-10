@@ -1,8 +1,9 @@
+import 'package:bible/ui/menu/notifications_view.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../models/home/votd.dart';
-import '../common/common.dart';
+import '../menu/main_menu.dart';
+import 'today_screen.dart';
 
 void showHome(BuildContext context) {
   Navigator.of(context, rootNavigator: true).push<void>(
@@ -21,32 +22,84 @@ class _HomeScreen extends StatefulWidget {
 class __HomeScreenState extends State<_HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(leading: const BackButton()),
-      body: FutureBuilder<VOTD>(
-        future: VOTD.fetch(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return Column(
-              children: [
-                TecCard(
-                  builder: (c) => Stack(alignment: Alignment.center, children: [
-                    TecImage(
-                      url: snapshot.data.url,
-                      colorBlendMode: BlendMode.softLight,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.black
-                          : Colors.white24,
-                    ),
-                  ]),
+    const tabs = [
+      Tab(text: 'Today'),
+      Tab(text: 'Explore'),
+      Tab(text: 'Study Bibles'),
+      Tab(text: 'Commentaries'),
+    ];
+    final tabViews = [TodayScreen(), Container(), Container(), Container()];
+
+    return TecScaffoldWrapper(
+      child: DefaultTabController(
+          length: tabs.length,
+          child: Scaffold(
+              floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+              floatingActionButton: BottomHomeFab(),
+              bottomNavigationBar: BottomHomeBar(),
+              appBar: AppBar(
+                automaticallyImplyLeading: false,
+                centerTitle: false,
+                title: const Text('Home'),
+                bottom: const TabBar(
+                  tabs: tabs,
+                  isScrollable: true,
                 ),
-                Text('VOTD: ${snapshot.data.refs}')
-              ],
-            );
-          }
-          return const Center(child: LoadingIndicator());
-        },
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.account_circle_outlined),
+                    onPressed: () => showMainMenu(context),
+                  )
+                ],
+              ),
+              body: TabBarView(children: tabViews))),
+    );
+  }
+}
+
+class BottomHomeBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BottomAppBar(
+      shape: const CircularNotchedRectangle(),
+      notchMargin: 4.0,
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.bookmarks_outlined),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () => showNotifications(context),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class BottomHomeFab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      child: const Icon(TecIcons.tbOutlineLogo, color: Colors.white),
+      backgroundColor: tecartaBlue,
+      onPressed: () {
+        while (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+      },
     );
   }
 }
