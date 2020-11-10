@@ -130,8 +130,7 @@ class SelectionSheetModel {
     final refs = _grabRefs(c);
 
     if (refs.length > 1) {
-      final refChosen =
-          await _showRefPickerDialog(c, refs, title: 'Select Verse to Web Search');
+      final refChosen = await _showRefPickerDialog(c, refs, title: 'Select Verse to Web Search');
       if (refChosen != null) {
         await _defineWebSearch(c, refChosen);
       }
@@ -197,7 +196,7 @@ class SelectionSheetModel {
   }
 
   static Future<String> _shareText(BuildContext c, {int uid}) async {
-    final bloc = c.tbloc<ViewManagerBloc>(); //ignore: close_sinks
+    final bloc = c.viewManager; //ignore: close_sinks
     final views = bloc.visibleViewsWithSelections.toList();
     final verses = <String, ChapterVerses>{};
     final buffer = StringBuffer('');
@@ -280,7 +279,7 @@ class SelectionSheetModel {
   }
 
   static Future<void> _compare(BuildContext c) async {
-    final bloc = c.tbloc<ViewManagerBloc>(); //ignore: close_sinks
+    final bloc = c.viewManager; //ignore: close_sinks
     final views = bloc.visibleViewsWithSelections.toList();
     final refs = <Reference>[];
     for (final v in views) {
@@ -289,8 +288,7 @@ class SelectionSheetModel {
     var ref = refs[0];
     // ask for which verse to compare if multiple selected in views
     if (refs.length > 1) {
-      final refChosen =
-          await _showRefPickerDialog(c, refs, title: 'Select Verse to Compare');
+      final refChosen = await _showRefPickerDialog(c, refs, title: 'Select Verse to Compare');
       if (refChosen != null) {
         ref = refChosen;
       } else {
@@ -308,7 +306,7 @@ class SelectionSheetModel {
       showTecDialog<Reference>(
           context: c,
           builder: (c) => Material(
-            color: Colors.transparent,
+                color: Colors.transparent,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -320,7 +318,7 @@ class SelectionSheetModel {
               ));
 
   static List<Reference> _grabRefs(BuildContext c) {
-    final bloc = c.tbloc<ViewManagerBloc>(); //ignore: close_sinks
+    final bloc = c.viewManager; //ignore: close_sinks
     final views = bloc.visibleViewsWithSelections.toList();
     final refs = <Reference>[];
     for (final v in views) {

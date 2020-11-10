@@ -1334,6 +1334,7 @@ class _$_SearchResultInfo extends _SearchResultInfo
 
 abstract class _SearchResultInfo extends SearchResultInfo {
   const _SearchResultInfo._() : super._();
+  // ignore: sort_unnamed_constructors_first
   const factory _SearchResultInfo(SearchResult searchResult,
       {bool contextExpanded,
       int currentVerseIndex,

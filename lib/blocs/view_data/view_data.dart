@@ -29,7 +29,7 @@ class ViewData extends Equatable {
   const ViewData();
 
   factory ViewData.fromContext(BuildContext context, int viewUid) {
-    return ViewData.fromJson(context.tbloc<ViewManagerBloc>()?.dataWithView(viewUid));
+    return ViewData.fromJson(context.viewManager?.dataWithView(viewUid));
   }
 
   ViewData copyWith() => const ViewData();

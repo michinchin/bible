@@ -274,7 +274,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   ///
   void _updateSelectionBloc(BuildContext context) {
     final views = visibleViewsWithSelections.toList();
-    final bloc = context.tbloc<SelectionBloc>(); // ignore: close_sinks
+    final bloc = context.read<SelectionBloc>(); // ignore: close_sinks
     assert(bloc != null);
     bloc?.add(SelectionState(isTextSelected: views.isNotEmpty, viewsWithSelections: views));
 
@@ -485,7 +485,7 @@ class ViewManagerWidget extends StatelessWidget {
     // tec.dmPrint('ViewManagerWidget build()');
     return LayoutBuilder(
       builder: (context, constraints) => _VMViewStack(
-        key: context.tbloc<ViewManagerBloc>()?._globalKey,
+        key: context.viewManager?._globalKey,
         vmState: state,
         constraints: constraints,
       ),
@@ -560,3 +560,7 @@ class PageableViewState extends State<PageableView> {
 /// Signature of the function that is called when the current page is changed.
 ///
 typedef PageableViewOnPageChanged = void Function(BuildContext context, ViewState state, int page);
+
+extension ViewManagerExtOnBuildContext on BuildContext {
+  ViewManagerBloc get viewManager => BlocProvider.of<ViewManagerBloc>(this);
+}

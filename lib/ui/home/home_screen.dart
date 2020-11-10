@@ -22,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
-    initNotifications();
+    if (!kDebugMode) initNotifications();
     super.initState();
   }
 
@@ -87,7 +87,6 @@ class _BottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<SelectionBloc, SelectionState>(
-      cubit: context.tbloc<SelectionBloc>(),
       listenWhen: (previous, current) => previous.isTextSelected != current.isTextSelected,
       listener: (context, state) {
         if (state.isTextSelected) {

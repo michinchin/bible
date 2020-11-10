@@ -347,7 +347,7 @@ class ChapterViewModel {
         // not sure if I want to force this...
         // _toggleSelectionForVerse(context, tag.verse);
       } else {
-        final vmBloc = context.tbloc<ViewManagerBloc>(); // ignore: close_sinks
+        final vmBloc = context.viewManager; // ignore: close_sinks
         final position = vmBloc?.indexOfView(viewUid) ?? -1;
         final mn = marginNotes().marginNoteForVerse(tag.verse);
         vmBloc?.add(ViewManagerEvent.add(

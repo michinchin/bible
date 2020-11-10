@@ -71,8 +71,7 @@ class ChapterSelection {
 
   void notifyOfSelections(BuildContext context) {
     // Notify the view manager, if there is one.
-    context
-        .tbloc<ViewManagerBloc>()
+    context.viewManager
         ?.notifyOfSelectionsInView(viewUid, _getRef(), context, hasSelections: isNotEmpty);
   }
 

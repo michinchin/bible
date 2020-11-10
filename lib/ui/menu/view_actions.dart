@@ -13,7 +13,7 @@ import 'main_menu.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   // ignore: close_sinks
-  final vmBloc = context.tbloc<ViewManagerBloc>();
+  final vmBloc = context.viewManager;
   final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
   final isTopRightView = vmBloc.state.maximizedViewUid == state.uid ||
       (vmBloc.columnsInRow(0) - 1) == vmBloc.indexOfView(state.uid);
@@ -83,7 +83,7 @@ List<TableRow> _buildMenuItemsForViewWithState(
   BuildContext menuContext,
 }) {
   // ignore: close_sinks
-  final vmBloc = context.tbloc<ViewManagerBloc>();
+  final vmBloc = context.viewManager;
   final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
 
   final viewData = ChapterViewData.fromContext(context, state.uid);
@@ -187,7 +187,7 @@ void _onSwitchViews(ViewManagerBloc vmBloc, int viewUid, ViewState view) {
 
 Iterable<TableRow> _generateOffScreenItems(BuildContext menuContext, int viewUid) {
   // ignore: close_sinks
-  final vmBloc = menuContext.tbloc<ViewManagerBloc>();
+  final vmBloc = menuContext.viewManager;
   final vm = ViewManager.shared;
   final items = <TableRow>[];
   for (final view in vmBloc?.state?.views) {
@@ -213,7 +213,7 @@ Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
     return tecModalPopupMenuItem(menuContext, vm.iconWithType(type), '$title', () async {
       tec.dmPrint('Adding new view of type $type.');
       // Add the new view, and maximize the view on phones.
-      final vmBloc = menuContext.tbloc<ViewManagerBloc>(); // ignore: close_sinks
+      final vmBloc = menuContext.viewManager; // ignore: close_sinks
       final nextUid = vmBloc?.state?.nextUid;
       await vm.onAddView(menuContext, type, currentViewId: viewUid);
       if (vmBloc.state.maximizedViewUid > 0 &&

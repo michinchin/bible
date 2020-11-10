@@ -27,7 +27,7 @@ class ViewableMarginNote extends Viewable {
   @override
   String menuTitle({BuildContext context, ViewState state}) {
     if (state?.uid != null) {
-      final json = context.tbloc<ViewManagerBloc>()?.dataWithView(state.uid);
+      final json = context.viewManager?.dataWithView(state.uid);
       final jsonMap = json is String ? tec.parseJsonSync(json) : json;
       if (jsonMap is Map<String, dynamic>) {
         return tec.as<String>(jsonMap['title']);
@@ -220,7 +220,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
   void initState() {
     super.initState();
 
-    viewManagerBloc = context.tbloc<ViewManagerBloc>();
+    viewManagerBloc = context.viewManager;
     sheetManagerBloc = context.tbloc<SheetManagerBloc>();
 
     _userId = AppSettings.shared.userAccount.user.userId;

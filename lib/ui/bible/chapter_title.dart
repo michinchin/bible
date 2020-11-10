@@ -165,7 +165,7 @@ class SelectionModeBibleChapterTitle extends StatelessWidget {
         .copyWith(color: Theme.of(context).textColor.withOpacity(0.5));
 
     // ignore: close_sinks
-    final vmBloc = context.tbloc<ViewManagerBloc>();
+    final vmBloc = context.viewManager;
 
     final ref = tec.as<Reference>(vmBloc.selectionObjectWithViewUid(uid));
     return Row(children: [

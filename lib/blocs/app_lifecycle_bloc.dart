@@ -132,7 +132,7 @@ class _AppBindingObserverState extends State<_AppBindingObserver> with WidgetsBi
       SystemChrome.setSystemUIOverlayStyle(AppSettings.shared.overlayStyle(context));
     }
 
-    context.tbloc<AppLifecycleBloc>()?.add(state);
+    context.read<AppLifecycleBloc>()?.add(state);
   }
 
   @override

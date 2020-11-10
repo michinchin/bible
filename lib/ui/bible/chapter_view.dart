@@ -96,7 +96,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
         providers: [
           BlocProvider(
             create: (context) => ChapterViewDataBloc(
-              context.tbloc<ViewManagerBloc>(),
+              context.viewManager,
               widget.state.uid,
               ChapterViewData.fromContext(context, widget.state.uid),
             ),
