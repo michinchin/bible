@@ -41,7 +41,7 @@ android {
     defaultConfig {
         applicationId "com.tecarta.TecartaBible"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
