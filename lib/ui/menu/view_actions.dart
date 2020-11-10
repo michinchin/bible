@@ -216,11 +216,16 @@ Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
       final vmBloc = menuContext.viewManager; // ignore: close_sinks
       final nextUid = vmBloc?.state?.nextUid;
       await vm.onAddView(menuContext, type, currentViewId: viewUid);
-      if (vmBloc.state.maximizedViewUid > 0 &&
-          (vmBloc?.numViewsLimited ?? false) &&
-          vmBloc?.state?.maximizedViewUid != nextUid) {
+
+      // open maximized on phones when...
+      // there is 1 view currently
+      // or current view is maximized
+      if ((vmBloc?.numViewsLimited ?? false) &&
+          vmBloc?.state?.maximizedViewUid != nextUid &&
+          vmBloc?.state?.views?.length == 1) {
         vmBloc?.add(ViewManagerEvent.maximize(nextUid));
       }
+
       await Navigator.of(menuContext).maybePop();
     });
   });

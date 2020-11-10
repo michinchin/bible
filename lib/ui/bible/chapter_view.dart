@@ -345,7 +345,7 @@ class _ChapterViewState extends State<_ChapterView> {
 
   // Cached values, for quick rebuild.
   var _contentScaleFactor = 1.0;
-  var _env = const TecEnv();
+  // var _env = const TecEnv();
   String _html;
 
   @override
@@ -359,8 +359,8 @@ class _ChapterViewState extends State<_ChapterView> {
 
     // Did the theme brightness change?
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    if (_env.darkMode != isDarkTheme) {
-      _env = _env.copyWith(darkMode: isDarkTheme);
+    if (AppSettings.shared.env.darkMode != isDarkTheme) {
+      AppSettings.shared.env = AppSettings.shared.env.copyWith(darkMode: isDarkTheme);
       _html = null; // Need to rebuild HTML.
     }
 
@@ -373,7 +373,7 @@ class _ChapterViewState extends State<_ChapterView> {
               'h5, .SUBA, h1 { font-weight: normal !important; '
               'font-style: italic; font-size: 100% !important; } ';
 
-      _html = _env.html(
+      _html = AppSettings.shared.env.html(
         htmlFragment: widget.htmlFragment,
         fontSizePercent: (_contentScaleFactor * 100.0).round(),
         marginLeft: '0px',
@@ -492,12 +492,15 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
   final _wordSelectionController = TecSelectableController();
   ChapterSelection _selection;
   ChapterViewModel _viewModel;
+  double lastScrollOffset;
 
   final _tecHtmlKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
+
+    lastScrollOffset = 0;
 
     // tec.dmPrint('New ChapterViewModel for ${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}');
 
@@ -589,17 +592,18 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
             child: NotificationListener<ScrollNotification>(
               onNotification: (notification) {
                 if (notification is UserScrollNotification) {
-                  switch (notification.direction) {
-                    case ScrollDirection.forward:
-                      tec.dmPrint('ChapterViewHtml: scrolled up, restoring the bottom sheet.');
-                      context.tbloc<SheetManagerBloc>().restore(context);
-                      break;
-                    case ScrollDirection.reverse:
-                      tec.dmPrint('ChapterViewHtml: scrolled down, collapsing the bottom sheet.');
-                      context.tbloc<SheetManagerBloc>().collapse(context);
-                      break;
-                    default:
-                      break;
+                  const scrollBuffer = 3.0;
+                  lastScrollOffset ??= notification.metrics.pixels - scrollBuffer - 1;
+                  if (notification.metrics.pixels < (lastScrollOffset - scrollBuffer)) {
+                    debugPrint('forward ${notification.metrics.pixels}');
+                    tec.dmPrint('ChapterViewHtml: scrolled up, restoring the bottom sheet.');
+                    context.tbloc<SheetManagerBloc>().restore(context);
+                    lastScrollOffset = notification.metrics.pixels;
+                  } else if (notification.metrics.pixels > (lastScrollOffset + scrollBuffer)) {
+                    debugPrint('reverse ${notification.metrics.pixels}');
+                    tec.dmPrint('ChapterViewHtml: scrolled down, collapsing the bottom sheet.');
+                    context.tbloc<SheetManagerBloc>().collapse(context);
+                    lastScrollOffset = notification.metrics.pixels;
                   }
                 }
                 return false;

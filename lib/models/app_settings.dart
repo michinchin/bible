@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:pedantic/pedantic.dart';
+import 'package:tec_env/tec_env.dart' as tev;
 import 'package:tec_user_account/tec_user_account.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
@@ -22,6 +23,7 @@ class AppSettings {
 
   tec.DeviceInfo deviceInfo;
   tua.UserAccount userAccount;
+  tev.TecEnv env;
 
   ///
   /// isDarkTheme
@@ -57,7 +59,7 @@ class AppSettings {
     @required List<tua.UserItemType> itemsToSync,
   }) async {
     assert(shared.userAccount == null, 'AppSettings.load() must only be called once.');
-
+    env = const tev.TecEnv();
     deviceInfo = await tec.DeviceInfo.fetch();
     tec.dmPrint(
         'Running on ${deviceInfo.productName} with ${tec.platformName} ${deviceInfo.version}');
