@@ -225,7 +225,7 @@ class _BookView extends StatelessWidget {
     //         ButtonTheme(
     //           minWidth: 50,
     //           child: FlatButton(
-    //             padding: const EdgeInsets.all(0),
+    //             padding: EdgeInsets.zero,
     //             shape: const StadiumBorder(),
     //             color: Colors.grey.withOpacity(0.1),
     //             textColor: ref.book == book ? tabColors[0] : textColor,

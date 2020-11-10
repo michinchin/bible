@@ -290,7 +290,7 @@ class SheetButton extends StatelessWidget {
     return ButtonTheme(
         height: 50,
         child: OutlineButton.icon(
-          padding: const EdgeInsets.all(0),
+          padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           label: TecText(
             text,

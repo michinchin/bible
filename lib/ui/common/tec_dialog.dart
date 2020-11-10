@@ -34,7 +34,7 @@ Future<T> showTecDialog<T extends Object>({
       builder: (context) {
         return TecPopupSheet(
           margin: const EdgeInsets.all(32),
-          padding: padding, // const EdgeInsets.all(0),
+          padding: padding, // EdgeInsets.zero,
           child: Material(
             color: Colors.transparent,
             child: Container(

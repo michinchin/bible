@@ -50,7 +50,7 @@ Future<T> showTecModalPopup<T>({
   bool semanticsDismissible,
   Alignment alignment = Alignment.center,
   Offset offset,
-  EdgeInsetsGeometry edgeInsets = const EdgeInsets.all(0),
+  EdgeInsetsGeometry edgeInsets = EdgeInsets.zero,
   TecPopupAnimationType animationType = TecPopupAnimationType.fadeScale,
 }) {
   assert(useRootNavigator != null);
@@ -61,7 +61,7 @@ Future<T> showTecModalPopup<T>({
       builder: builder,
       alignment: alignment ?? Alignment.bottomCenter,
       offset: offset,
-      edgeInsets: edgeInsets ?? const EdgeInsets.all(0),
+      edgeInsets: edgeInsets ?? EdgeInsets.zero,
       animationType: animationType ?? TecPopupAnimationType.fadeScale,
       filter: filter,
       semanticsDismissible: semanticsDismissible,
@@ -163,7 +163,7 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
     this.builder,
     this.alignment,
     this.offset,
-    this.edgeInsets = const EdgeInsets.all(0),
+    this.edgeInsets = EdgeInsets.zero,
     this.animationType = TecPopupAnimationType.fadeScale,
     bool semanticsDismissible,
     ImageFilter filter,
@@ -252,8 +252,22 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
             // dmPrint('_TecModalPopupRoute buildTransitions alignment: $align');
           }
 
+          var padding = edgeInsets;
+          if (padding != EdgeInsets.zero) {
+            if (alignment.x < 0.5) {
+              padding = padding._copyWith(right: 0);
+            } else if (alignment.x > 0.5) {
+              padding = padding._copyWith(left: 0);
+            }
+            if (alignment.y < 0.5) {
+              padding = padding._copyWith(bottom: 0);
+            } else if (alignment.y > 0.5) {
+              padding = padding._copyWith(top: 0);
+            }
+          }
+
           return Container(
-            padding: edgeInsets,
+            padding: padding,
             child: ClipRect(
               child: Align(
                 alignment: align,
@@ -266,6 +280,18 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
           );
         },
       ),
+    );
+  }
+}
+
+extension on EdgeInsetsGeometry {
+  EdgeInsets _copyWith({double left, double top, double right, double bottom}) {
+    final insets = this as EdgeInsets;
+    return EdgeInsets.fromLTRB(
+      left ?? insets.left,
+      top ?? insets.top,
+      right ?? insets.right,
+      bottom ?? insets.bottom,
     );
   }
 }

@@ -28,7 +28,7 @@ Future<Reference> navigate(BuildContext context, Reference ref,
   return showTecDialog<Reference>(
     context: context,
     useRootNavigator: true,
-    padding: const EdgeInsets.all(0),
+    padding: EdgeInsets.zero,
     maxWidth: 500,
     maxHeight: 600,
     builder: (context) => MultiBlocProvider(providers: [
@@ -61,7 +61,7 @@ Future<Reference> showBibleSearch(BuildContext context, Reference ref, {String s
   return showTecDialog<Reference>(
       context: context,
       useRootNavigator: true,
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       maxWidth: 500,
       maxHeight: 600,
       builder: (context) => MultiBlocProvider(providers: [

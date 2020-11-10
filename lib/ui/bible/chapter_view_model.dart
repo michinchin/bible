@@ -415,7 +415,7 @@ class ChapterViewModel {
             builder: (context) {
               final maxWidth = math.min(320.0, MediaQuery.of(context).size.width);
               return TecPopupSheet(
-                padding: const EdgeInsets.all(0),
+                padding: EdgeInsets.zero,
                 child: Material(
                   color: Colors.transparent,
                   child: Container(

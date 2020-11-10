@@ -42,7 +42,7 @@ class ChapterTitle extends StatelessWidget {
           return Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(0),
+                padding: EdgeInsets.zero,
                 width: 32.0,
                 child: BlocBuilder<SearchBloc, SearchState>(
                     cubit: context.tbloc<SearchBloc>(),
@@ -170,7 +170,7 @@ class SelectionModeBibleChapterTitle extends StatelessWidget {
     final ref = tec.as<Reference>(vmBloc.selectionObjectWithViewUid(uid));
     return Row(children: [
       Container(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         width: 32.0,
         child: IconButton(
             padding: const EdgeInsets.only(right: 8.0),
