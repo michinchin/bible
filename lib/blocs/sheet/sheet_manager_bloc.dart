@@ -27,7 +27,7 @@ abstract class SheetEvent with _$SheetEvent {
 
 class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
   SheetManagerBloc() : super(const SheetManagerState(type: SheetType.main, size: SheetSize.mini));
-  bool _correctHiddenValue;
+  bool _correctHiddenValue = false;
 
   @override
   Stream<SheetManagerState> mapEventToState(SheetEvent event) async* {
@@ -52,8 +52,10 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
   void setUid(int uid) => add(SheetEvent.changeView(uid));
 
   void collapse(BuildContext context) {
-    _correctHiddenValue = true;
-    SheetController.of(context).hide();
+    if (!_correctHiddenValue && state.type == SheetType.main) {
+      _correctHiddenValue = true;
+      SheetController.of(context).hide();
+    }
   }
 
   void restore(BuildContext context) {
@@ -70,8 +72,10 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
       changeSize(SheetSize.mini);
     }
 
-    _correctHiddenValue = false;
-    _show(SheetController.of(context));
+    if (_correctHiddenValue) {
+      _correctHiddenValue = false;
+      _show(SheetController.of(context));
+    }
   }
 
   void _show(SheetController sheetController) {

@@ -224,6 +224,11 @@ class _PageableChapterViewState extends State<PageableChapterView> {
   Future<void> _onPageChanged(BuildContext context, ViewState _, int page) async {
     final bcv = _bcvPageZero.advancedBy(chapters: page, bible: _bible);
     if (bcv != null) {
+      // restore the sheet...
+      Future.delayed(const Duration(milliseconds: 250), () {
+        context.tbloc<SheetManagerBloc>().restore(context);
+      });
+
       final viewData = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData;
       final newData = viewData.copyWith(
           bcv: viewData.bcv.book == bcv.book && viewData.bcv.chapter == bcv.chapter ? null : bcv,
@@ -595,12 +600,10 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                   const scrollBuffer = 3.0;
                   lastScrollOffset ??= notification.metrics.pixels - scrollBuffer - 1;
                   if (notification.metrics.pixels < (lastScrollOffset - scrollBuffer)) {
-                    debugPrint('forward ${notification.metrics.pixels}');
                     tec.dmPrint('ChapterViewHtml: scrolled up, restoring the bottom sheet.');
                     context.tbloc<SheetManagerBloc>().restore(context);
                     lastScrollOffset = notification.metrics.pixels;
                   } else if (notification.metrics.pixels > (lastScrollOffset + scrollBuffer)) {
-                    debugPrint('reverse ${notification.metrics.pixels}');
                     tec.dmPrint('ChapterViewHtml: scrolled down, collapsing the bottom sheet.');
                     context.tbloc<SheetManagerBloc>().collapse(context);
                     lastScrollOffset = notification.metrics.pixels;

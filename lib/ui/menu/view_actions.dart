@@ -212,20 +212,7 @@ Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
 
     return tecModalPopupMenuItem(menuContext, vm.iconWithType(type), '$title', () async {
       tec.dmPrint('Adding new view of type $type.');
-      // Add the new view, and maximize the view on phones.
-      final vmBloc = menuContext.viewManager; // ignore: close_sinks
-      final nextUid = vmBloc?.state?.nextUid;
       await vm.onAddView(menuContext, type, currentViewId: viewUid);
-
-      // open maximized on phones when...
-      // there is 1 view currently
-      // or current view is maximized
-      if ((vmBloc?.numViewsLimited ?? false) &&
-          vmBloc?.state?.maximizedViewUid != nextUid &&
-          vmBloc?.state?.views?.length == 1) {
-        vmBloc?.add(ViewManagerEvent.maximize(nextUid));
-      }
-
       await Navigator.of(menuContext).maybePop();
     });
   });

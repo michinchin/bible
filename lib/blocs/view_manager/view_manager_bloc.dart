@@ -321,9 +321,19 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     // tec.dmPrint('VM add type: $type, uid: $nextUid, position: $position, data: \'$data\'');
     newViews.insert(position ?? newViews.length, viewState);
     await updateDataWithView(nextUid, data);
+
+    var maximizedViewUid = state.maximizedViewUid == 0 ? 0 : nextUid;
+
+    // open maximized on phones when...
+    // there is 1 view currently
+    // or a view is already maximized
+    if ((numViewsLimited ?? false) && (state.maximizedViewUid != 0 || state.views.length == 1)) {
+      maximizedViewUid = nextUid;
+    }
+
     return ViewManagerState(
       newViews,
-      state.maximizedViewUid == 0 ? 0 : nextUid,
+      maximizedViewUid,
       tec.nextIntWithJsSafeWraparound(nextUid, wrapTo: 1),
     );
   }
