@@ -198,7 +198,8 @@ class _SnapSheetState extends State<SnapSheet> {
 
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             SheetController.of(c).rebuild();
-                            final extent = snapOffsets[(s.size == SheetSize.mini) ? 0 : 1];
+                            final extent = snapOffsets[
+                                (c.read<SheetManagerBloc>().state.size == SheetSize.mini) ? 0 : 1];
                             SheetController.of(c).snapToExtent(extent);
                           });
                         }
@@ -240,7 +241,6 @@ class _SnapSheetState extends State<SnapSheet> {
                       onTap: () {
                         final nextSize =
                             state.size == SheetSize.mini ? SheetSize.medium : SheetSize.mini;
-
                         c.read<SheetManagerBloc>().changeSize(nextSize);
                       },
                       child: Padding(
