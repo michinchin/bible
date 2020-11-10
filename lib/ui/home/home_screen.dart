@@ -50,9 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
       providers: [
         BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
         BlocProvider<SelectionCmdBloc>(create: (context) => SelectionCmdBloc()),
-        BlocProvider<SheetManagerBloc>(
-          create: (context) => SheetManagerBloc(),
-        ),
+        BlocProvider<SheetManagerBloc>(create: (context) => SheetManagerBloc()),
       ],
       child: TecSystemUiOverlayWidget(
         AppSettings.shared.overlayStyle(context),
@@ -95,9 +93,7 @@ class _BottomSheet extends StatelessWidget {
           context.tbloc<SheetManagerBloc>()..changeTypeSize(SheetType.main, SheetSize.mini);
         }
       },
-      child: SnapSheet(
-        body: child,
-      ),
+      child: SnapSheet(body: child),
     );
   }
 }

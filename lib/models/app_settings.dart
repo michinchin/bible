@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_env/tec_env.dart' as tev;
 import 'package:tec_user_account/tec_user_account.dart' as tua;
@@ -91,7 +92,7 @@ double contentTextScaleFactorWith(BuildContext context) {
         // dampingFactor: 0.5,
         // maxScaleFactor: 1.0,
       ) *
-      context.tbloc<ContentSettingsBloc>().state.textScaleFactor;
+      BlocProvider.of<ContentSettingsBloc>(context).state.textScaleFactor;
   // tec.dmPrint('scale: $scale');
   return scale;
 }
