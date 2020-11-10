@@ -345,7 +345,7 @@ class _ChapterViewState extends State<_ChapterView> {
 
   // Cached values, for quick rebuild.
   var _contentScaleFactor = 1.0;
-  var _env = const TecEnv();
+  // var _env = const TecEnv();
   String _html;
 
   @override
@@ -359,8 +359,8 @@ class _ChapterViewState extends State<_ChapterView> {
 
     // Did the theme brightness change?
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    if (_env.darkMode != isDarkTheme) {
-      _env = _env.copyWith(darkMode: isDarkTheme);
+    if (AppSettings.shared.env.darkMode != isDarkTheme) {
+      AppSettings.shared.env = AppSettings.shared.env.copyWith(darkMode: isDarkTheme);
       _html = null; // Need to rebuild HTML.
     }
 
@@ -373,7 +373,7 @@ class _ChapterViewState extends State<_ChapterView> {
               'h5, .SUBA, h1 { font-weight: normal !important; '
               'font-style: italic; font-size: 100% !important; } ';
 
-      _html = _env.html(
+      _html = AppSettings.shared.env.html(
         htmlFragment: widget.htmlFragment,
         fontSizePercent: (_contentScaleFactor * 100.0).round(),
         marginLeft: '0px',
