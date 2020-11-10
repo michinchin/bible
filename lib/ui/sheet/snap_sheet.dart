@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
-import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
@@ -95,8 +94,6 @@ class _SnapSheetState extends State<SnapSheet> {
       maxWidth = 460;
     }
 
-    final s = context.tbloc<SheetManagerBloc>().state;
-
     return SafeArea(
       bottom: false,
       child: Stack(
@@ -137,7 +134,7 @@ class _SnapSheetState extends State<SnapSheet> {
                 return SlidingSheet(
                   maxWidth: maxWidth,
                   elevation: 3,
-                  closeOnBackdropTap: s.type == SheetType.windows,
+                  closeOnBackdropTap: state.type == SheetType.windows,
                   cornerRadius: 15,
                   duration: const Duration(milliseconds: 250),
                   addTopViewPaddingOnFullscreen: true,
@@ -148,14 +145,14 @@ class _SnapSheetState extends State<SnapSheet> {
                   },
                   closeOnBackButtonPressed: true,
                   snapSpec: SnapSpec(
-                    initialSnap: snapOffsets[s.size.index],
+                    initialSnap: snapOffsets[state.size.index],
                     snappings: snapOffsets,
                     onSnap: (s, snapPosition) {
                       final sheetSize = _getSheetSize(snapPosition);
                       if (sheetSize != null) {
-                        final prevSize = context.tbloc<SheetManagerBloc>().state.size.index;
+                        final prevSize = state.size.index;
                         if (sheetSize.index != prevSize) {
-                          context.tbloc<SheetManagerBloc>().changeSize(sheetSize);
+                          context.read<SheetManagerBloc>().changeSize(sheetSize);
                         }
                       }
                     },
@@ -201,8 +198,7 @@ class _SnapSheetState extends State<SnapSheet> {
 
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             SheetController.of(c).rebuild();
-                            final extent = snapOffsets[
-                                (c.tbloc<SheetManagerBloc>().state.size == SheetSize.mini) ? 0 : 1];
+                            final extent = snapOffsets[(s.size == SheetSize.mini) ? 0 : 1];
                             SheetController.of(c).snapToExtent(extent);
                           });
                         }
@@ -242,11 +238,10 @@ class _SnapSheetState extends State<SnapSheet> {
                   headerBuilder: (c, s) {
                     return InkWell(
                       onTap: () {
-                        final nextSize = c.tbloc<SheetManagerBloc>().state.size == SheetSize.mini
-                            ? SheetSize.medium
-                            : SheetSize.mini;
+                        final nextSize =
+                            state.size == SheetSize.mini ? SheetSize.medium : SheetSize.mini;
 
-                        c.tbloc<SheetManagerBloc>().changeSize(nextSize);
+                        c.read<SheetManagerBloc>().changeSize(nextSize);
                       },
                       child: Padding(
                         // NOTICE: adjust the _headerHeight variable at the top of this
