@@ -492,12 +492,15 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
   final _wordSelectionController = TecSelectableController();
   ChapterSelection _selection;
   ChapterViewModel _viewModel;
+  double lastScrollOffset;
 
   final _tecHtmlKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
+
+    lastScrollOffset = 0;
 
     // tec.dmPrint('New ChapterViewModel for ${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}');
 
@@ -589,17 +592,18 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
             child: NotificationListener<ScrollNotification>(
               onNotification: (notification) {
                 if (notification is UserScrollNotification) {
-                  switch (notification.direction) {
-                    case ScrollDirection.forward:
-                      tec.dmPrint('ChapterViewHtml: scrolled up, restoring the bottom sheet.');
-                      context.tbloc<SheetManagerBloc>().restore(context);
-                      break;
-                    case ScrollDirection.reverse:
-                      tec.dmPrint('ChapterViewHtml: scrolled down, collapsing the bottom sheet.');
-                      context.tbloc<SheetManagerBloc>().collapse(context);
-                      break;
-                    default:
-                      break;
+                  const scrollBuffer = 3.0;
+                  lastScrollOffset ??= notification.metrics.pixels - scrollBuffer - 1;
+                  if (notification.metrics.pixels < (lastScrollOffset - scrollBuffer)) {
+                    debugPrint('forward ${notification.metrics.pixels}');
+                    tec.dmPrint('ChapterViewHtml: scrolled up, restoring the bottom sheet.');
+                    context.tbloc<SheetManagerBloc>().restore(context);
+                    lastScrollOffset = notification.metrics.pixels;
+                  } else if (notification.metrics.pixels > (lastScrollOffset + scrollBuffer)) {
+                    debugPrint('reverse ${notification.metrics.pixels}');
+                    tec.dmPrint('ChapterViewHtml: scrolled down, collapsing the bottom sheet.');
+                    context.tbloc<SheetManagerBloc>().collapse(context);
+                    lastScrollOffset = notification.metrics.pixels;
                   }
                 }
                 return false;
