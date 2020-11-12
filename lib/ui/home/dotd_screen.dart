@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
+import '../../models/const.dart';
 import '../../models/home/devo_resource.dart';
 import '../../models/home/dotd.dart';
+import '../../models/home/interstitial.dart';
 import 'day_card.dart';
 import 'home.dart';
 
-Future<void> showDotdScreen(BuildContext context, DevoRes devo) =>
-    Navigator.of(context).push(MaterialPageRoute(builder: (c) => _DotdScreen(devo)));
+Future<void> showDotdScreen(BuildContext context, DevoRes devo) async {
+  await Interstitial.init(context, productId: devo.productId, adUnitId: Const.prefNativeAdId);
+  await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _DotdScreen(devo)));
+  await Interstitial.show(context);
+}
 
 class _DotdScreen extends StatelessWidget {
   final DevoRes devo;
@@ -43,11 +49,16 @@ class _DotdScreen extends StatelessWidget {
 //       );
 
 Future<void> showAllDotd(BuildContext context, Dotd dotd, {DateTime scrollToDateTime}) =>
-    Navigator.of(context).push(MaterialPageRoute(builder: (c) => _DotdsScreen(dotd)));
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (c) => _DotdsScreen(
+              dotd,
+              scrollToDateTime: scrollToDateTime,
+            )));
 
 class _DotdsScreen extends StatelessWidget {
   final Dotd dotd;
-  const _DotdsScreen(this.dotd);
+  final DateTime scrollToDateTime;
+  const _DotdsScreen(this.dotd, {this.scrollToDateTime});
   @override
   Widget build(BuildContext context) {
     final dotds = <DevoRes>[];
@@ -61,13 +72,19 @@ class _DotdsScreen extends StatelessWidget {
     }
     return TecScaffoldWrapper(
         child: Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text('${tec.today.year} Devotionals Of The Day'),
+      ),
       body: Scrollbar(
-        child: ListView.builder(
+        child: ScrollablePositionedList.builder(
+            initialScrollIndex: scrollToDateTime == null
+                ? days.indexOf(tec.today)
+                : days.indexOf(tec.dateOnly(scrollToDateTime)),
             itemCount: dotds.length,
             itemBuilder: (c, i) => DayCard(
                 date: days[i],
                 title: dotds[i].title,
+                body: dotds[i].intro,
                 imageUrl: dotds[i].imageUrl(AppSettings.shared.env),
                 onTap: () => showDotdScreen(context, dotds[i]))),
       ),

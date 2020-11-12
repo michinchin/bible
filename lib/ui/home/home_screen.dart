@@ -22,22 +22,22 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
-    if (!kDebugMode) initNotifications();
+    // if (!kDebugMode)
+    initNotifications();
     super.initState();
   }
 
   void initNotifications() {
-    Notifications.payloadStream.listen(handleNotification);
+    Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final granted = await Notifications.shared?.requestPermissions(context);
-      if (granted) {
-        NotificationBloc.init(NotificationsModel());
+      if (mounted) {
+        final granted = await Notifications.shared?.requestPermissions(context);
+        if (granted) {
+          NotificationBloc.init(NotificationsModel.shared);
+        }
       }
     });
   }
-
-  void handleNotification(String payload) {}
-  // context.tbloc<AppEntryCubit>().onNotification(payload, context);
 
   @override
   Widget build(BuildContext context) {

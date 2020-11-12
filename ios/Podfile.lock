@@ -34,13 +34,40 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
+  - Google-Mobile-Ads-SDK (7.66.0):
+    - GoogleAppMeasurement (~> 6.0)
+    - GoogleUserMessagingPlatform (~> 1.1)
   - google_sign_in (0.0.1):
     - Flutter
     - GoogleSignIn (~> 5.0)
+  - GoogleAppMeasurement (6.8.3):
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.7)
+    - GoogleUtilities/MethodSwizzler (~> 6.7)
+    - GoogleUtilities/Network (~> 6.7)
+    - "GoogleUtilities/NSData+zlib (~> 6.7)"
+    - nanopb (~> 1.30906.0)
   - GoogleSignIn (5.0.2):
     - AppAuth (~> 1.2)
     - GTMAppAuth (~> 1.0)
     - GTMSessionFetcher/Core (~> 1.1)
+  - GoogleUserMessagingPlatform (1.2.0)
+  - GoogleUtilities/AppDelegateSwizzler (6.7.2):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+  - GoogleUtilities/Environment (6.7.2):
+    - PromisesObjC (~> 1.2)
+  - GoogleUtilities/Logger (6.7.2):
+    - GoogleUtilities/Environment
+  - GoogleUtilities/MethodSwizzler (6.7.2):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/Network (6.7.2):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (6.7.2)"
+  - GoogleUtilities/Reachability (6.7.2):
+    - GoogleUtilities/Logger
   - GTMAppAuth (1.0.0):
     - AppAuth/Core (~> 1.0)
     - GTMSessionFetcher (~> 1.1)
@@ -53,12 +80,18 @@ PODS:
     - Flutter
   - in_app_purchase (0.0.1):
     - Flutter
+  - nanopb (1.30906.0):
+    - nanopb/decode (= 1.30906.0)
+    - nanopb/encode (= 1.30906.0)
+  - nanopb/decode (1.30906.0)
+  - nanopb/encode (1.30906.0)
   - notification_permissions (0.4.4):
     - Flutter
   - path_provider (0.0.1):
     - Flutter
   - permission (0.0.1):
     - Flutter
+  - PromisesObjC (1.2.10)
   - share (0.0.1):
     - Flutter
   - shared_preferences (0.0.1):
@@ -66,6 +99,9 @@ PODS:
   - sqflite (0.0.2):
     - Flutter
     - FMDB (>= 2.7.5)
+  - tec_native_ad (0.0.1):
+    - Flutter
+    - Google-Mobile-Ads-SDK
   - tec_notifications (0.0.1):
     - Flutter
   - tec_platform_util (0.0.1):
@@ -95,6 +131,7 @@ DEPENDENCIES:
   - share (from `.symlinks/plugins/share/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - tec_native_ad (from `.symlinks/plugins/tec_native_ad/ios`)
   - tec_notifications (from `.symlinks/plugins/tec_notifications/ios`)
   - tec_platform_util (from `.symlinks/plugins/tec_platform_util/ios`)
   - tec_web_view (from `.symlinks/plugins/tec_web_view/ios`)
@@ -107,9 +144,15 @@ SPEC REPOS:
     - FBSDKCoreKit
     - FBSDKLoginKit
     - FMDB
+    - Google-Mobile-Ads-SDK
+    - GoogleAppMeasurement
     - GoogleSignIn
+    - GoogleUserMessagingPlatform
+    - GoogleUtilities
     - GTMAppAuth
     - GTMSessionFetcher
+    - nanopb
+    - PromisesObjC
 
 EXTERNAL SOURCES:
   apple_sign_in:
@@ -146,6 +189,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
+  tec_native_ad:
+    :path: ".symlinks/plugins/tec_native_ad/ios"
   tec_notifications:
     :path: ".symlinks/plugins/tec_notifications/ios"
   tec_platform_util:
@@ -170,18 +215,25 @@ SPEC CHECKSUMS:
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   flutter_native_timezone: e72ff1900460ff57cfd331d1758050c9269f3e99
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  Google-Mobile-Ads-SDK: 7d7074359c040f5add4e0963bf860e14690060d0
   google_sign_in: 6bd214b9c154f881422f5fe27b66aaa7bbd580cc
+  GoogleAppMeasurement: 966e88df9d19c15715137bb2ddaf52373f111436
   GoogleSignIn: 7137d297ddc022a7e0aa4619c86d72c909fa7213
+  GoogleUserMessagingPlatform: c85530d930ba509583aa5a6d50a10aca22cf8502
+  GoogleUtilities: 7f2f5a07f888cdb145101d6042bc4422f57e70b3
   GTMAppAuth: 4deac854479704f348309e7b66189e604cf5e01e
   GTMSessionFetcher: 6f5c8abbab8a9bce4bb3f057e317728ec6182b10
   image_picker: 9c3312491f862b28d21ecd8fdf0ee14e601b3f09
   in_app_purchase: 3e2155afa9d03d4fa32d9e62d567885080ce97d6
+  nanopb: 59317e09cf1f1a0af72f12af412d54edf52603fc
   notification_permissions: b74860c2967c1579243a675e63cd55e0ae75cef7
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   permission: c186483e23779d53def6b55986323494927c22c8
+  PromisesObjC: b14b1c6b68e306650688599de8a45e49fae81151
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
+  tec_native_ad: ccac8689f45bbac1e13031a36f2e48c15051a864
   tec_notifications: 5e2664df69613bc5e490af09fe41810600c189ad
   tec_platform_util: 2fc2b292ec7eddcc80717ae9d28257498b686f59
   tec_web_view: 1fa4ae0861ce5f49367bfdd85385345d2e4e7688

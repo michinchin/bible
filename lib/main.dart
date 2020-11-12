@@ -24,6 +24,7 @@ import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'models/const.dart';
 import 'models/iap/iap.dart';
+import 'navigation_service.dart';
 import 'ui/bible/chapter_view.dart';
 import 'ui/common/common.dart';
 import 'ui/common/tec_modal_popup_menu.dart';
@@ -106,34 +107,34 @@ class App extends StatelessWidget {
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (context, themeMode) {
           return tec.BlocProvider<TecStyleBloc>(
-            bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
-            child: OKToast(
-              child: AppLifecycleWrapper(
-                child: MaterialApp(
-                  theme: ThemeData.light().copyWithAppTheme(),
-                  darkTheme: ThemeData.dark().copyWithAppTheme(),
-                  themeMode: themeMode,
-                  debugShowCheckedModeBanner: false,
-                  localizationsDelegates: const [
-                    GlobalMaterialLocalizations.delegate,
-                    GlobalWidgetsLocalizations.delegate,
-                    GlobalCupertinoLocalizations.delegate,
-                  ],
-                  supportedLocales: const [
-                    Locale('en', 'US'),
-                    Locale('es'), // Spanish
-                    Locale('ar'), // Arabic
-                  ],
-                  title: _appTitle,
-                  home: I18n(
-                    //initialLocale: const Locale('es'),
-                    //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
-                    child: const HomeScreen(),
+              bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
+              child: OKToast(
+                child: AppLifecycleWrapper(
+                  child: MaterialApp(
+                    navigatorKey: navService.navigatorKey,
+                    theme: ThemeData.light().copyWithAppTheme(),
+                    darkTheme: ThemeData.dark().copyWithAppTheme(),
+                    themeMode: themeMode,
+                    debugShowCheckedModeBanner: false,
+                    localizationsDelegates: const [
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
+                    supportedLocales: const [
+                      Locale('en', 'US'),
+                      Locale('es'), // Spanish
+                      Locale('ar'), // Arabic
+                    ],
+                    title: _appTitle,
+                    home: I18n(
+                      //initialLocale: const Locale('es'),
+                      //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
+                      child: const HomeScreen(),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          );
+              ));
         },
       ),
     );

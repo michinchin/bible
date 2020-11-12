@@ -49,7 +49,8 @@ class VotdEntry {
 class Votd {
   final List<dynamic> data;
   final Map<String, dynamic> specials;
-  Votd({this.data, this.specials});
+  final List<String> verses;
+  Votd({this.data, this.specials, this.verses});
 
   factory Votd.fromJson(Map<String, dynamic> json) {
     final specials = tec.as<Map<String, dynamic>>(json['specials']);
@@ -76,14 +77,18 @@ class Votd {
 
   VotdEntry forDateTime(DateTime time) {
     final ordinalDay = time.difference(DateTime(time.year, 1, 1)).inDays;
-    final isSpecial = tec.isNullOrEmpty(specials['${ordinalDay + 1}']);
-    final image =
-        tec.as<String>(isSpecial ? data[ordinalDay][1] : specials['${ordinalDay + 1}'][1]);
-    final refs = tec.as<String>(isSpecial ? data[ordinalDay][0] : specials['${ordinalDay + 1}'][0]);
-    return VotdEntry(
-      imageUrl: '${tec.streamUrl}/votd/$image',
-      refs: refs,
-    );
+    if (tec.isNotNullOrEmpty(specials) && tec.isNotNullOrEmpty(data)) {
+      final isSpecial = tec.isNullOrEmpty(specials['${ordinalDay + 1}']);
+      final image =
+          tec.as<String>(isSpecial ? data[ordinalDay][1] : specials['${ordinalDay + 1}'][1]);
+      final refs =
+          tec.as<String>(isSpecial ? data[ordinalDay][0] : specials['${ordinalDay + 1}'][0]);
+      return VotdEntry(
+        imageUrl: '${tec.streamUrl}/votd/$image',
+        refs: refs,
+      );
+    }
+    return null;
   }
 }
 

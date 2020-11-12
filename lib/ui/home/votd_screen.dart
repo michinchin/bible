@@ -1,5 +1,7 @@
+import 'package:bible/models/home/interstitial.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -12,8 +14,12 @@ import '../common/common.dart';
 import 'day_card.dart';
 import 'home.dart';
 
-Future<void> showVotdScreen(BuildContext context, VotdEntry votd) =>
-    Navigator.of(context).push(MaterialPageRoute(builder: (c) => _VotdScreen(votd)));
+Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
+  await Interstitial.init(context, adUnitId: Const.prefNativeAdId);
+  await Navigator.of(context, rootNavigator: true)
+      .push<void>(MaterialPageRoute(builder: (c) => _VotdScreen(votd)));
+  await Interstitial.show(context);
+}
 
 class _VotdScreen extends StatefulWidget {
   final VotdEntry votd;
@@ -26,35 +32,21 @@ class _VotdScreen extends StatefulWidget {
 class __VotdScreenState extends State<_VotdScreen> {
   int _translation;
 
+  @override
+  void initState() {
+    // _translation ??= currentBible(context).id;
+    super.initState();
+  }
+
   void setTranslation(int id) {
     setState(() {
       _translation = id;
     });
   }
 
-  Bible currentBible() {
-    // find bible translation from views
-    final view = context
-        .watch<ViewManagerBloc>()
-        .state
-        .views
-        .firstWhere((v) => v.type == Const.viewTypeChapter)
-        ?.uid;
-    Bible bible;
-    if (view != null) {
-      final viewData = ChapterViewData.fromContext(context, view);
-      _translation ??= viewData.volumeId;
-      bible = VolumesRepository.shared.bibleWithId(viewData.volumeId);
-    } else {
-      _translation ??= defaultBibleId;
-      bible = VolumesRepository.shared.bibleWithId(_translation);
-    }
-    return bible;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final bible = currentBible();
+    final bible = currentBible(context);
     return Scaffold(
       appBar: AppBar(),
       floatingActionButton: BottomHomeFab(),
@@ -88,11 +80,13 @@ class __VotdScreenState extends State<_VotdScreen> {
 }
 
 Future<void> showAllVotd(BuildContext context, Votd votd, {DateTime scrollToDateTime}) =>
-    Navigator.of(context).push(MaterialPageRoute(builder: (c) => _VotdsScreen(votd)));
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (c) => _VotdsScreen(votd, scrollToDateTime: scrollToDateTime)));
 
 class _VotdsScreen extends StatelessWidget {
   final Votd votd;
-  const _VotdsScreen(this.votd);
+  final DateTime scrollToDateTime;
+  const _VotdsScreen(this.votd, {this.scrollToDateTime});
 
   @override
   Widget build(BuildContext context) {
@@ -105,18 +99,45 @@ class _VotdsScreen extends StatelessWidget {
       days.add(day);
       votds.add(votd.forDateTime(day));
     }
+
     return TecScaffoldWrapper(
         child: Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text('${tec.today.year} Verses Of The Day'),
+      ),
       body: Scrollbar(
-        child: ListView.builder(
+        child: ScrollablePositionedList.builder(
+            initialScrollIndex: scrollToDateTime == null
+                ? days.indexOf(tec.today)
+                : days.indexOf(tec.dateOnly(scrollToDateTime)),
             itemCount: votds.length,
-            itemBuilder: (c, i) => DayCard(
-                date: days[i],
-                title: votds[i].refs,
-                imageUrl: votds[i].imageUrl,
-                onTap: () => showVotdScreen(context, votds[i]))),
+            itemBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
+                future: votds[i].getFormattedVerse(currentBible(context)),
+                builder: (context, snapshot) => DayCard(
+                    date: days[i],
+                    title: votds[i].ref.label(),
+                    body: snapshot.data?.value ?? '',
+                    imageUrl: votds[i].imageUrl,
+                    onTap: () => showVotdScreen(context, votds[i])))),
       ),
     ));
   }
+}
+
+Bible currentBible(BuildContext context) {
+  // find bible translation from views
+  final view = context
+      .tbloc<ViewManagerBloc>()
+      .state
+      .views
+      .firstWhere((v) => v.type == Const.viewTypeChapter, orElse: () => null)
+      ?.uid;
+  Bible bible;
+  if (view != null) {
+    final viewData = ChapterViewData.fromContext(context, view);
+    bible = VolumesRepository.shared.bibleWithId(viewData.volumeId);
+  } else {
+    bible = VolumesRepository.shared.bibleWithId(defaultBibleId);
+  }
+  return bible;
 }

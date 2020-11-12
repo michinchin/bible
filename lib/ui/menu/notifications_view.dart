@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
@@ -33,22 +32,24 @@ class _NotificationsViewState extends State<NotificationsView> {
   }
 
   @override
-  void deactivate() {
-    const le = ListEquality<LocalNotification>();
-    if (!le.equals(initialNotifications, NotificationBloc.shared.state.notifications)) {
-      unawaited(
-          NotificationBloc.shared.updateNotifications(NotificationBloc.shared.state.notifications));
-    }
-    super.deactivate();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return TecScaffoldWrapper(
         child: Scaffold(
       appBar: AppBar(
         elevation: 0,
         title: const Text('Notifications'),
+        leading: BackButton(
+          onPressed: () async {
+            const le = ListEquality<LocalNotification>();
+            if (!le.equals(initialNotifications, NotificationBloc.shared.state.notifications)) {
+              final update = NotificationBloc.shared
+                  .updateNotifications(NotificationBloc.shared.state.notifications);
+              await tecShowProgressDlg(
+                  context: context, future: update, title: 'Saving Notifications');
+            }
+            await Navigator.of(context).maybePop();
+          },
+        ),
       ),
       body: BlocBuilder<NotificationBloc, NotificationState>(
         builder: (context, state) {
