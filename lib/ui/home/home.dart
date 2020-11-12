@@ -1,8 +1,8 @@
-import 'package:bible/ui/menu/notifications_view.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../menu/main_menu.dart';
+import '../menu/notifications_view.dart';
 import 'today_screen.dart';
 
 void showHome(BuildContext context) {

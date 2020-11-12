@@ -3,23 +3,22 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:image_picker/image_picker.dart';
-import 'package:zefyr/zefyr.dart';
 
 class TecImageDelegate /* implements ZefyrImageDelegate<ImageSource> */ {
-  @override
+  // @override
   ImageSource get cameraSource => ImageSource.camera;
 
-  @override
+  // @override
   ImageSource get gallerySource => ImageSource.gallery;
 
-  @override
+  // @override
   Future<String> pickImage(ImageSource source) async {
     final file = await ImagePicker().getImage(source: source);
     if (file == null) return null;
     return file.path;
   }
 
-  @override
+  // @override
   Widget buildImage(BuildContext context, String key) {
     // We use custom "asset" scheme to distinguish asset images from other files.
     if (key.startsWith('asset://')) {

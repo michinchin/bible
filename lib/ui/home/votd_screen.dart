@@ -1,4 +1,3 @@
-import 'package:bible/ui/home/day_card.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
@@ -6,6 +5,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/home/votd.dart';
 import '../common/common.dart';
+import 'day_card.dart';
 import 'home.dart';
 
 Future<void> showVotdScreen(BuildContext context, VotdEntry votd) =>

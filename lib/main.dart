@@ -28,9 +28,9 @@ import 'ui/bible/chapter_view.dart';
 import 'ui/common/common.dart';
 import 'ui/common/tec_modal_popup_menu.dart';
 import 'ui/home/home_screen.dart';
-import 'ui/note/margin_note_view.dart';
-import 'ui/note/notes_view.dart';
 import 'ui/study/study_view.dart';
+import 'ui/ugc/margin_note_view.dart';
+import 'ui/ugc/ugc_view.dart';
 
 const _appTitle = 'Tecarta Bible';
 
@@ -44,7 +44,7 @@ Future<void> main() async {
   ViewManager.shared
     ..register(ViewableBibleChapter(Const.viewTypeChapter, FeatherIcons.book))
     ..register(ViewableStudyContent(Const.viewTypeStudy, FeatherIcons.bookOpen))
-    ..register(ViewableNotes(Const.viewTypeNotes, FeatherIcons.edit))
+    ..register(ViewableUGC(Const.viewTypeNotes, FeatherIcons.edit))
     ..register(ViewableMarginNote(Const.viewTypeMarginNote, TecIcons.marginNoteOutline));
 
   final stopwatch = Stopwatch()..start();
@@ -70,12 +70,17 @@ Future<void> main() async {
   await VolumesRepository.shared.loadProducts(updateLocalVolumes: true);
 
   await AppSettings.shared.load(appName: 'Bible', itemsToSync: [
-    tua.UserItemType.license,
-    tua.UserItemType.highlight,
-    tua.UserItemType.marginNote,
-    tua.UserItemType.note,
-    tua.UserItemType.prefItem,
+    tua.UserItemType.folder,
     tua.UserItemType.bookmark,
+    tua.UserItemType.note,
+    tua.UserItemType.marginNote,
+    tua.UserItemType.highlight,
+    tua.UserItemType.license,
+    tua.UserItemType.completed,
+    /* tua.UserItemType.devoPlan,
+    tua.UserItemType.tag,
+    tua.UserItemType.tagItem,*/
+    tua.UserItemType.prefItem,
   ]);
 
   InAppPurchases.init();
