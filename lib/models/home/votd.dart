@@ -8,17 +8,49 @@ class VotdEntry {
   final String refs;
   VotdEntry({this.imageUrl, this.refs});
 
-// TODO(abby): this is broken
-  Reference get ref => Reference.fromHref(refs.replaceAll(';', ','));
+  Reference get ref {
+    final hrefs = refs.split(';').map<Reference>((href) => Reference.fromHref(href)).toList();
+    var finalRef = hrefs[0];
+    for (var i = 0; i < hrefs.length - 1; i++) {
+      final h1 = hrefs[i];
+      final h2 = hrefs[i + 1];
+      final sameBookChapter = h1.book == h2.book && h1.chapter == h2.chapter;
+      final isSequential = h1.verse + 1 == h2.verse;
+      if (sameBookChapter && isSequential) {
+        finalRef = finalRef.copyWith(endVerse: h2.verse);
+      }
+    }
+    return finalRef;
+  }
 
-  Future<tec.ErrorOrValue<Map<int, String>>> getRes(Bible bible) =>
-      bible.verseTextWith(ref.book, ref.chapter, ref.verses.toList());
+  Future<tec.ErrorOrValue<String>> getFormattedVerse(Bible bible) async {
+    final verseText = await bible?.verseTextWith(ref.book, ref.chapter, ref.verses.toList());
+    if (verseText.error == null && tec.isNotNullOrEmpty(verseText.value)) {
+      final verse = verseText.value;
+      return tec.ErrorOrValue(verseText.error, _formatVerse(verse));
+    } else {
+      return tec.ErrorOrValue(verseText.error, '');
+    }
+  }
+
+  String _formatVerse(Map<int, String> verse) {
+    // final buffer = StringBuffer();
+    // for (final v in verse.keys) {
+    //   if (v != verse.keys.first) {
+    //     buffer.write(' [$v] ');
+    //   }
+    //   buffer.write('${verse[v]}');
+    // }
+    // return buffer.toString();
+    return verse.values.join(' ');
+  }
 }
 
 class Votd {
   final List<dynamic> data;
   final Map<String, dynamic> specials;
-  Votd({this.data, this.specials});
+  final List<String> verses;
+  Votd({this.data, this.specials, this.verses});
 
   factory Votd.fromJson(Map<String, dynamic> json) {
     final specials = tec.as<Map<String, dynamic>>(json['specials']);
@@ -45,14 +77,18 @@ class Votd {
 
   VotdEntry forDateTime(DateTime time) {
     final ordinalDay = time.difference(DateTime(time.year, 1, 1)).inDays;
-    final isSpecial = tec.isNullOrEmpty(specials['${ordinalDay + 1}']);
-    final image =
-        tec.as<String>(isSpecial ? data[ordinalDay][1] : specials['${ordinalDay + 1}'][1]);
-    final refs = tec.as<String>(isSpecial ? data[ordinalDay][0] : specials['${ordinalDay + 1}'][0]);
-    return VotdEntry(
-      imageUrl: '${tec.streamUrl}/votd/$image',
-      refs: refs,
-    );
+    if (tec.isNotNullOrEmpty(specials) && tec.isNotNullOrEmpty(data)) {
+      final isSpecial = tec.isNullOrEmpty(specials['${ordinalDay + 1}']);
+      final image =
+          tec.as<String>(isSpecial ? data[ordinalDay][1] : specials['${ordinalDay + 1}'][1]);
+      final refs =
+          tec.as<String>(isSpecial ? data[ordinalDay][0] : specials['${ordinalDay + 1}'][0]);
+      return VotdEntry(
+        imageUrl: '${tec.streamUrl}/votd/$image',
+        refs: refs,
+      );
+    }
+    return null;
   }
 }
 

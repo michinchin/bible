@@ -1041,6 +1041,13 @@ packages:
       url: "http://noah.tecarta.com:8100"
     source: hosted
     version: "3.1.2"
+  tec_native_ad:
+    dependency: "direct main"
+    description:
+      name: tec_native_ad
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
+    version: "0.0.4"
   tec_notifications:
     dependency: "direct main"
     description:

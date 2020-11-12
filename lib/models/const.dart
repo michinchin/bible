@@ -1,3 +1,6 @@
+import 'package:tec_util/tec_util.dart';
+
+// ignore: avoid_classes_with_only_static_members
 class Const {
   static const appNameForUA = 'tecarta_bible';
 
@@ -5,6 +8,16 @@ class Const {
   static const viewTypeStudy = 'StudyView';
   static const viewTypeNotes = 'NotesView';
   static const viewTypeMarginNote = 'MarginNoteView';
+
+  //------------------------------------------
+  // Ad info:
+
+  // native ads
+  static final prefNativeAdId = platformIs(Platform.android)
+      ? 'ca-app-pub-5279916355700267/7465311659'
+      : platformIs(Platform.iOS)
+          ? 'ca-app-pub-5279916355700267/1130609577'
+          : null;
 
   //------------------------------------------
   // Preference key names:

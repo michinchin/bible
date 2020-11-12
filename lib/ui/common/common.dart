@@ -278,3 +278,32 @@ class IconWithNumberBadge extends StatelessWidget {
     ]);
   }
 }
+
+const TextStyle cardTitleCompactStyle = TecTextStyle(
+  fontSize: 18,
+  fontWeight: FontWeight.w700, // w700 == Bold
+);
+
+const TecTextStyle cardSubtitleCompactStyle = TecTextStyle(
+  fontSize: 15,
+  fontWeight: FontWeight.w400, // w500 == Normal
+);
+
+class TecTextStyle extends TextStyle {
+  const TecTextStyle({
+    double fontSize = 12.0,
+    FontWeight fontWeight,
+    Color color = Colors.black,
+    double letterSpacing,
+    double height,
+  }) : super(
+          inherit: false,
+          color: color,
+          //fontFamily: 'Avenir',
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          textBaseline: TextBaseline.alphabetic,
+          letterSpacing: letterSpacing,
+          height: height,
+        );
+}
