@@ -217,7 +217,7 @@ class ChapterSelection {
 
   bool handleXref(BuildContext context, Reference reference, String text, VerseTag tag, Offset pt) {
     if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
-      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
+      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible();
 
       bible?.xrefsWithHrefProperty(tag.href)?.then((result) {
         if (result?.value?.isEmpty ?? true) {

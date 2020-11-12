@@ -18,7 +18,7 @@ Future<void> showStrongsPopup({
   if (strongsId?.isEmpty ?? true) return Future.value();
 
   final volumeId = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
-  final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible;
+  final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible();
   final originalContext = context;
 
   final isDarkTheme = Theme.of(context).brightness == Brightness.dark;

@@ -1068,7 +1068,7 @@ packages:
       name: tec_product_db
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.1.8"
+    version: "1.1.10"
   tec_selectable:
     dependency: transitive
     description:
@@ -1096,7 +1096,7 @@ packages:
       name: tec_volumes
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.8"
+    version: "1.2.9"
   tec_web_view:
     dependency: "direct main"
     description:

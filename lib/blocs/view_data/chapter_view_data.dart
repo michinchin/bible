@@ -115,22 +115,6 @@ class ChapterViewData extends ViewData {
   }
 }
 
-extension ChapterViewDataExtOnVolume on Volume {
-  Bible get assocBible => this is Bible
-      ? this as Bible
-      : (VolumesRepository.shared.bibleWithId(assocVolumeId > 0 ? assocVolumeId : defaultBibleId) ??
-          VolumesRepository.shared.bibleWithId(defaultBibleId));
-}
-
-extension on Bible {
-  String titleWithBookAndChapter(int book, int chapter, {bool includeAbbreviation = false}) {
-    if (includeAbbreviation) {
-      return '${nameOfBook(book)} $chapter, $abbreviation';
-    }
-    return '${nameOfBook(book)} $chapter';
-  }
-}
-
 extension ChapterViewDataExtOnViewData on ViewData {
   ChapterViewData get asChapterViewData => this as ChapterViewData;
 }

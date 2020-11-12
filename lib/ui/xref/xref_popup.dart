@@ -108,7 +108,7 @@ class _XrefWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // final scale = textScaleFactorWith(context);
     final volumeId = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
-    final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible;
+    final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible();
 
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDarkTheme ? Colors.black : Colors.white;

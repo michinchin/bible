@@ -87,7 +87,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
     super.initState();
     final viewData = ChapterViewData.fromContext(context, widget.state.uid);
     _volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
-    _bible = _volume.assocBible;
+    _bible = _volume.assocBible();
     _bcvPageZero = viewData.bcv;
   }
 
@@ -150,10 +150,10 @@ class _PageableChapterViewState extends State<PageableChapterView> {
       if (volume == null) return; // --------------------------------------->
     }
 
-    final page = _bcvPageZero.chaptersTo(viewData.bcv, bible: volume.assocBible);
+    final page = _bcvPageZero.chaptersTo(viewData.bcv, bible: volume.assocBible());
     if (page == null) {
       // tec.dmPrint('PageableChapterView._onNewViewData unable to navigate to '
-      //     '${viewData.bcv} in ${volume.assocBible.abbreviation}');
+      //     '${viewData.bcv} in ${volume.assocBible().abbreviation}');
       return; // ----------------------------------------------------------->
     }
 
@@ -161,7 +161,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
       // tec.dmPrint('PageableChapterView._onNewViewData: Volume changed '
       //     'from ${_volume.id} to ${volume.id}.');
       _volume = volume;
-      _bible = volume.assocBible;
+      _bible = volume.assocBible();
     }
 
     if (_pageController != null && _pageController.page.round() != page) {
@@ -201,7 +201,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
       builder: (context, viewData) {
         if (viewData is ChapterViewData) {
           final volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
-          var ref = _bcvPageZero.advancedBy(chapters: index, bible: volume.assocBible);
+          var ref = _bcvPageZero.advancedBy(chapters: index, bible: volume.assocBible());
           if (ref == null) return Container();
           if (ref.book == viewData.bcv.book &&
               ref.chapter == viewData.bcv.chapter &&
