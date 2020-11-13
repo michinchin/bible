@@ -285,7 +285,7 @@ class _DynamicGrid extends StatelessWidget {
   const _DynamicGrid({@required this.children}) : assert(children != null);
   @override
   Widget build(BuildContext context) {
-    debugPrint(
+    dmPrint(
         'width: ${MediaQuery.of(context).size.width}\nheight: ${MediaQuery.of(context).size.height}');
     final smallHeight =
         MediaQuery.of(context).size.height <= 685; // pixel 2 height, iphonex height = 812

@@ -1,3 +1,4 @@
+import 'package:bible/ui/home/votd_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -42,6 +43,8 @@ class _NotificationsViewState extends State<NotificationsView> {
           onPressed: () async {
             const le = ListEquality<LocalNotification>();
             if (!le.equals(initialNotifications, NotificationBloc.shared.state.notifications)) {
+              final bible = currentBibleFromContext(context);
+              NotificationsModel.shared.bible = bible;
               final update = NotificationBloc.shared
                   .updateNotifications(NotificationBloc.shared.state.notifications);
               await tecShowProgressDlg(
