@@ -4,7 +4,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
-import '../../models/home/dotd.dart';
+import '../../models/home/dotds.dart';
 import '../../models/home/votd.dart';
 import '../menu/main_menu.dart';
 import '../menu/notifications_view.dart';
@@ -39,7 +39,7 @@ Future<void> showDotdFromNotification(BuildContext context, DateTime date) async
     Navigator.of(context).pop();
   }
   unawaited(showHome(context));
-  final dotds = await Dotd.fetch(AppSettings.shared.env);
+  final dotds = await Dotds.fetch(AppSettings.shared.env);
   if (tec.dateOnly(date).isAtSameMomentAs(tec.today)) {
     await showDotdScreen(context, dotds.devoForDate(date));
   } else {
@@ -56,38 +56,41 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
-    const tabs = [
-      Tab(text: 'Today'),
-      Tab(text: 'Explore'),
-      Tab(text: 'Study Bibles'),
-      Tab(text: 'Commentaries'),
-    ];
-    final tabViews = [TodayScreen(), Container(), Container(), Container()];
+    // const tabs = [
+    //   Tab(text: 'Today'),
+    //   Tab(text: 'Explore'),
+    //   Tab(text: 'Study Bibles'),
+    //   Tab(text: 'Commentaries'),
+    // ];
+    // final tabViews = [TodayScreen(), Container(), Container(), Container()];
 
     return TecScaffoldWrapper(
-      child: DefaultTabController(
-          length: tabs.length,
-          child: Scaffold(
-              floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-              floatingActionButton: BottomHomeFab(),
-              bottomNavigationBar: BottomHomeBar(),
-              appBar: AppBar(
-                automaticallyImplyLeading: false,
-                centerTitle: false,
-                title: const Text('Home'),
-                bottom: const TabBar(
-                  tabs: tabs,
-                  isScrollable: true,
-                ),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.account_circle_outlined),
-                    onPressed: () => showMainMenu(context),
-                  )
-                ],
-              ),
-              body: TabBarView(children: tabViews))),
-    );
+        // child: DefaultTabController(
+        // length: tabs.length,
+        child: Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: BottomHomeFab(),
+      bottomNavigationBar: BottomHomeBar(),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        title: const Text('Home'),
+        // bottom: const TabBar(
+        //   tabs: tabs,
+        //   isScrollable: true,
+        // ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle_outlined),
+            onPressed: () => showMainMenu(context),
+          )
+        ],
+      ),
+      body:
+          // TabBarView(children:
+
+          TodayScreen(),
+    ));
   }
 }
 

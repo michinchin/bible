@@ -1,3 +1,6 @@
+import 'package:bible/ui/library/library.dart';
+import 'package:bible/ui/library/volumes_filter_sheet.dart';
+import 'package:bible/ui/nav/search_filter.dart';
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -20,6 +23,8 @@ Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
   await Interstitial.show(context);
 }
 
+const imageAspectRatio = 1080.0 / 555.0;
+
 class _VotdScreen extends StatefulWidget {
   final VotdEntry votd;
   const _VotdScreen(this.votd);
@@ -29,46 +34,88 @@ class _VotdScreen extends StatefulWidget {
 }
 
 class __VotdScreenState extends State<_VotdScreen> {
-  int _translation;
+  Bible _bible;
 
   @override
   void initState() {
-    // _translation ??= currentBible(context).id;
+    _bible ??= currentBibleFromContext(context);
     super.initState();
   }
 
-  void setTranslation(int id) {
+  void setBible(Bible bible) {
     setState(() {
-      _translation = id;
+      _bible = bible;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final bible = currentBible(context);
-    return Scaffold(
-      appBar: AppBar(),
+    return TecImageAppBarScaffold(
+      imageUrl: widget.votd.imageUrl,
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
+      imageAspectRatio: imageAspectRatio,
+      //  scrollController: scrollController,
       floatingActionButton: BottomHomeFab(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      bottomNavigationBar: BottomHomeBar(),
-      body: FutureBuilder<tec.ErrorOrValue<String>>(
-        future: widget.votd.getFormattedVerse(bible),
+      // bottomNavigationBar: BottomHomeBar(),
+      actions: [
+        FlatButton(
+          child: Row(children: [
+            TecText(
+              _bible.abbreviation,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    offset: Offset(1.0, 1.0),
+                    blurRadius: 1.0,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            ),
+            const TecIcon(Icon(Icons.arrow_drop_down),
+                color: Colors.white, shadowColor: Colors.black),
+          ]),
+          onPressed: () async {
+            final vol = await selectVolume(context,
+                title: 'Select Bible',
+                filter: VolumesFilter(volumeType: _bible.type),
+                selectedVolume: _bible.id);
+            if (vol != null) {
+              setBible(VolumesRepository.shared.bibleWithId(vol));
+            }
+          },
+        ),
+      ],
+      childBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
+        future: widget.votd.getFormattedVerse(_bible),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data.error == null) {
             final res = snapshot.data.value;
-            final ref = widget.votd.ref.copyWith(volume: bible.id);
-            return Column(
-              children: [
-                TecImage(
-                  url: widget.votd.imageUrl,
-                  colorBlendMode: BlendMode.softLight,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.black
-                      : Colors.white24,
+            final ref = widget.votd.ref.copyWith(volume: _bible.id);
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    TecText(
+                      res,
+                      style: cardSubtitleCompactStyle,
+                      textAlign: TextAlign.end,
+                    ),
+                    const SizedBox(height: 5),
+                    TecText(
+                      ref.label(),
+                      style: cardTitleCompactStyle,
+                      textAlign: TextAlign.end,
+                    ),
+                  ],
                 ),
-                Text(ref.label()),
-                Text(res)
-              ],
+              ),
             );
           }
           return const Center(child: LoadingIndicator());
@@ -111,7 +158,7 @@ class _VotdsScreen extends StatelessWidget {
                 : days.indexOf(tec.dateOnly(scrollToDateTime)),
             itemCount: votds.length,
             itemBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
-                future: votds[i].getFormattedVerse(currentBible(context)),
+                future: votds[i].getFormattedVerse(currentBibleFromContext(context)),
                 builder: (context, snapshot) => DayCard(
                     date: days[i],
                     title: votds[i].ref.label(),
@@ -123,7 +170,7 @@ class _VotdsScreen extends StatelessWidget {
   }
 }
 
-Bible currentBible(BuildContext context) {
+Bible currentBibleFromContext(BuildContext context) {
   // find bible translation from views
   final view = context
       .tbloc<ViewManagerBloc>()

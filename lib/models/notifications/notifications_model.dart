@@ -6,11 +6,11 @@ import '../../blocs/view_data/chapter_view_data.dart';
 import '../../navigation_service.dart';
 import '../../ui/home/home.dart';
 import '../app_settings.dart';
-import '../home/dotd.dart';
+import '../home/dotds.dart';
 import '../home/votd.dart';
 
 class NotificationsModel extends NotificationsHelper {
-  Dotd dotds;
+  Dotds dotds;
   Votd votds;
   Bible bible;
 
@@ -35,8 +35,8 @@ class NotificationsModel extends NotificationsHelper {
 
   @override
   Future<void> scheduleNotificationsForFuture(LocalNotification n) async {
-    dotds ??= await Dotd.fetch(AppSettings.shared.env);
-    votds ??= await Votd.fetch(AppSettings.shared.env);
+    shared.dotds ??= await Dotds.fetch(AppSettings.shared.env);
+    shared.votds ??= await Votd.fetch(AppSettings.shared.env);
     await super.scheduleNotificationsForFuture(n);
   }
 
@@ -48,17 +48,17 @@ class NotificationsModel extends NotificationsHelper {
 
     switch (n.type) {
       case NotificationType.votd:
-        final votdEntry = votds?.forDateTime(n.time);
+        final votdEntry = shared.votds?.forDateTime(n.time);
         if (votdEntry != null) {
-          final ref = votdEntry.ref;
-          final text = (await votdEntry.getFormattedVerse(bible)).value;
+          final ref = votdEntry.ref.copyWith(volume: shared.bible.id);
+          final text = (await votdEntry.getFormattedVerse(shared.bible)).value;
           title = ref.label();
           subtitle = text;
         }
         break;
       // get title and subtitle (day and verse text)
       case NotificationType.dotd:
-        final devo = dotds?.devoForDate(n.time);
+        final devo = shared.dotds?.devoForDate(n.time);
         title = 'Devotional of the day: ${devo.title}';
         subtitle = devo.intro;
         break;
@@ -90,6 +90,6 @@ class NotificationsModel extends NotificationsHelper {
       default:
         break;
     }
-    debugPrint(uri.toString());
+    // tec.dmPrint(uri.toString());
   }
 }

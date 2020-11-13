@@ -5,20 +5,20 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
-import '../../models/home/devo_resource.dart';
 import '../../models/home/dotd.dart';
+import '../../models/home/dotds.dart';
 import '../../models/home/interstitial.dart';
 import 'day_card.dart';
 import 'home.dart';
 
-Future<void> showDotdScreen(BuildContext context, DevoRes devo) async {
+Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
   await Interstitial.init(context, productId: devo.productId, adUnitId: Const.prefNativeAdId);
   await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _DotdScreen(devo)));
   await Interstitial.show(context);
 }
 
 class _DotdScreen extends StatelessWidget {
-  final DevoRes devo;
+  final Dotd devo;
   const _DotdScreen(this.devo);
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class _DotdScreen extends StatelessWidget {
 //         resourceId: devo.resourceId,
 //       );
 
-Future<void> showAllDotd(BuildContext context, Dotd dotd, {DateTime scrollToDateTime}) =>
+Future<void> showAllDotd(BuildContext context, Dotds dotd, {DateTime scrollToDateTime}) =>
     Navigator.of(context).push(MaterialPageRoute(
         builder: (c) => _DotdsScreen(
               dotd,
@@ -56,12 +56,12 @@ Future<void> showAllDotd(BuildContext context, Dotd dotd, {DateTime scrollToDate
             )));
 
 class _DotdsScreen extends StatelessWidget {
-  final Dotd dotd;
+  final Dotds dotd;
   final DateTime scrollToDateTime;
   const _DotdsScreen(this.dotd, {this.scrollToDateTime});
   @override
   Widget build(BuildContext context) {
-    final dotds = <DevoRes>[];
+    final dotds = <Dotd>[];
     final days = <DateTime>[];
     for (var day = DateTime(tec.today.year, 1, 1);
         day.isBefore(DateTime(tec.today.year, 12, 31)) ||
