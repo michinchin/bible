@@ -566,7 +566,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
             if (newBcv.book == widget.ref.book && newBcv.chapter == widget.ref.chapter) {
               // tec.dmPrint('Notifying of selections for ${widget.ref}');
               _selection.notifyOfSelections(context);
-              // TODO(ron): Only scroll if the verse changes?
+              // TO-DO(ron): Only scroll if the verse changes?
               if (newBcv.verse > 1 || _scrollController.offset > 0) {
                 tec.dmPrint('ChapterHtml ViewData changed, so scrolling to verse ${newBcv.verse}');
                 _viewModel.scrollToVerse(newBcv.verse, _tecHtmlKey, _scrollController);
