@@ -18,7 +18,6 @@ import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/view_data/chapter_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
@@ -27,6 +26,7 @@ import '../library/library.dart';
 import 'chapter_build_helper.dart';
 import 'chapter_selection.dart';
 import 'chapter_view_app_bar.dart';
+import 'chapter_view_data.dart';
 import 'chapter_view_model.dart';
 
 class ViewableBibleChapter extends Viewable {

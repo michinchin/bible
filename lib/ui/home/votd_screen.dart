@@ -1,18 +1,17 @@
-import 'package:bible/ui/library/library.dart';
-import 'package:bible/ui/library/volumes_filter_sheet.dart';
-import 'package:bible/ui/nav/search_filter.dart';
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/view_data/chapter_view_data.dart';
+import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
 import '../../models/home/interstitial.dart';
 import '../../models/home/votd.dart';
+import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
+import '../library/library.dart';
 import 'day_card.dart';
 import 'home.dart';
 

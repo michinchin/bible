@@ -9,7 +9,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
-import '../../blocs/view_data/chapter_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/misc_utils.dart';
 import '../../models/rect_utils.dart';

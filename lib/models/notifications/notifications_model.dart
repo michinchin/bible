@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/view_data/chapter_view_data.dart';
+import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../navigation_service.dart';
 import '../../ui/home/home.dart';
 import '../app_settings.dart';

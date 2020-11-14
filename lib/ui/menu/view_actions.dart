@@ -5,9 +5,9 @@ import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/view_data/chapter_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
+import '../bible/chapter_view_data.dart';
 import '../common/tec_modal_popup_menu.dart';
 import 'main_menu.dart';
 

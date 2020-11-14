@@ -4,14 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
-import '../shared_bible_ref_bloc.dart';
-import '../view_manager/view_manager_bloc.dart';
-import 'view_data.dart';
+import '../../blocs/shared_bible_ref_bloc.dart';
+import '../../blocs/view_manager/view_data.dart';
+import '../../blocs/view_manager/view_manager_bloc.dart';
 
-export 'view_data.dart';
-
-const defaultBibleId = 9;
-const defaultBCV = BookChapterVerse(50, 1, 1);
+export '../../blocs/view_manager/view_data.dart';
 
 class ChapterViewDataBloc extends ViewDataBloc {
   ChapterViewDataBloc(ViewManagerBloc vmBloc, int viewUid, ChapterViewData data)

@@ -7,7 +7,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/view_data/chapter_view_data.dart';
+import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
 import '../common/tec_modal_popup.dart';
 import '../common/tec_modal_popup_menu.dart';
