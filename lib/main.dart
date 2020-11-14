@@ -41,7 +41,7 @@ const _appTitle = 'Tecarta Bible';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  ViewManagerState.defaultViewType = Const.viewTypeChapter;
+  ViewManager.defaultViewType = Const.viewTypeChapter;
   ViewManager.shared
     ..register(ViewableBibleChapter(Const.viewTypeChapter, FeatherIcons.book))
     ..register(ViewableStudyContent(Const.viewTypeStudy, FeatherIcons.bookOpen))

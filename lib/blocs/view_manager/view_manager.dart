@@ -8,6 +8,14 @@ part of 'view_manager_bloc.dart';
 class ViewManager {
   static final ViewManager shared = ViewManager();
 
+  static String defaultViewType;
+
+  // ignore: prefer_constructors_over_static_methods
+  static ViewManagerState defaultState() {
+    assert(tec.isNotNullOrEmpty(defaultViewType));
+    return ViewManagerState([ViewState(uid: 1, type: defaultViewType)], 0, 2);
+  }
+
   final _types = <String, Viewable>{};
 
   ///

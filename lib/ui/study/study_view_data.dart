@@ -6,10 +6,14 @@ import 'package:tec_volumes/tec_volumes.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../bible/chapter_view_data.dart';
 
-// class StudyBloc extends Cubit<StudyViewData> {
-//   StudyBloc() : super(StudyViewData()) {
-//   }
-// }
+class StudyViewDataBloc extends ChapterViewDataBloc {
+  StudyViewDataBloc(ViewManagerBloc vmBloc, int viewUid, StudyViewData data)
+      : super(vmBloc, viewUid, data);
+}
+
+extension StudyViewDataExtOnViewData on ViewData {
+  StudyViewData get asStudyViewData => this as StudyViewData;
+}
 
 ///
 /// StudyViewData
@@ -27,8 +31,13 @@ class StudyViewData extends ChapterViewData {
   }) : super(volumeId, bcv, page, useSharedRef: useSharedRef);
 
   @override
-  StudyViewData copyWith(
-          {int foobar, int volumeId, BookChapterVerse bcv, bool useSharedRef, int page}) =>
+  StudyViewData copyWith({
+    int foobar,
+    int volumeId,
+    BookChapterVerse bcv,
+    bool useSharedRef,
+    int page,
+  }) =>
       StudyViewData(
         foobar ?? this.foobar,
         volumeId ?? this.volumeId,
@@ -63,8 +72,4 @@ class StudyViewData extends ChapterViewData {
 
     return StudyViewData(foobar, sup.volumeId, sup.bcv, sup.page, useSharedRef: sup.useSharedRef);
   }
-}
-
-extension StudyViewDataExtOnViewData on ViewData {
-  StudyViewData get asStudyViewData => this as StudyViewData;
 }

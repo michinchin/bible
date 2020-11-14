@@ -9,6 +9,7 @@ part of 'highlights_bloc.dart';
 
 T _$identity<T>(T value) => value;
 
+/// @nodoc
 class _$ChapterHighlightsTearOff {
   const _$ChapterHighlightsTearOff();
 
@@ -26,9 +27,11 @@ class _$ChapterHighlightsTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $ChapterHighlights = _$ChapterHighlightsTearOff();
 
+/// @nodoc
 mixin _$ChapterHighlights {
   int get volumeId;
   int get book;
@@ -39,6 +42,7 @@ mixin _$ChapterHighlights {
   $ChapterHighlightsCopyWith<ChapterHighlights> get copyWith;
 }
 
+/// @nodoc
 abstract class $ChapterHighlightsCopyWith<$Res> {
   factory $ChapterHighlightsCopyWith(
           ChapterHighlights value, $Res Function(ChapterHighlights) then) =
@@ -51,6 +55,7 @@ abstract class $ChapterHighlightsCopyWith<$Res> {
       bool loaded});
 }
 
+/// @nodoc
 class _$ChapterHighlightsCopyWithImpl<$Res>
     implements $ChapterHighlightsCopyWith<$Res> {
   _$ChapterHighlightsCopyWithImpl(this._value, this._then);
@@ -79,6 +84,7 @@ class _$ChapterHighlightsCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 abstract class _$ChapterHighlightsCopyWith<$Res>
     implements $ChapterHighlightsCopyWith<$Res> {
   factory _$ChapterHighlightsCopyWith(
@@ -93,6 +99,7 @@ abstract class _$ChapterHighlightsCopyWith<$Res>
       bool loaded});
 }
 
+/// @nodoc
 class __$ChapterHighlightsCopyWithImpl<$Res>
     extends _$ChapterHighlightsCopyWithImpl<$Res>
     implements _$ChapterHighlightsCopyWith<$Res> {
@@ -121,6 +128,7 @@ class __$ChapterHighlightsCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ChapterHighlights
     with DiagnosticableTreeMixin
     implements _ChapterHighlights {
@@ -212,6 +220,7 @@ abstract class _ChapterHighlights implements ChapterHighlights {
   _$ChapterHighlightsCopyWith<_ChapterHighlights> get copyWith;
 }
 
+/// @nodoc
 class _$HighlightTearOff {
   const _$HighlightTearOff();
 
@@ -225,9 +234,11 @@ class _$HighlightTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $Highlight = _$HighlightTearOff();
 
+/// @nodoc
 mixin _$Highlight {
   HighlightType get highlightType;
   int get color;
@@ -236,12 +247,14 @@ mixin _$Highlight {
   $HighlightCopyWith<Highlight> get copyWith;
 }
 
+/// @nodoc
 abstract class $HighlightCopyWith<$Res> {
   factory $HighlightCopyWith(Highlight value, $Res Function(Highlight) then) =
       _$HighlightCopyWithImpl<$Res>;
   $Res call({HighlightType highlightType, int color, Reference ref});
 }
 
+/// @nodoc
 class _$HighlightCopyWithImpl<$Res> implements $HighlightCopyWith<$Res> {
   _$HighlightCopyWithImpl(this._value, this._then);
 
@@ -265,6 +278,7 @@ class _$HighlightCopyWithImpl<$Res> implements $HighlightCopyWith<$Res> {
   }
 }
 
+/// @nodoc
 abstract class _$HighlightCopyWith<$Res> implements $HighlightCopyWith<$Res> {
   factory _$HighlightCopyWith(
           _Highlight value, $Res Function(_Highlight) then) =
@@ -273,6 +287,7 @@ abstract class _$HighlightCopyWith<$Res> implements $HighlightCopyWith<$Res> {
   $Res call({HighlightType highlightType, int color, Reference ref});
 }
 
+/// @nodoc
 class __$HighlightCopyWithImpl<$Res> extends _$HighlightCopyWithImpl<$Res>
     implements _$HighlightCopyWith<$Res> {
   __$HighlightCopyWithImpl(_Highlight _value, $Res Function(_Highlight) _then)
@@ -297,6 +312,7 @@ class __$HighlightCopyWithImpl<$Res> extends _$HighlightCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_Highlight with DiagnosticableTreeMixin implements _Highlight {
   const _$_Highlight(this.highlightType, this.color, this.ref)
       : assert(highlightType != null),
@@ -364,6 +380,7 @@ abstract class _Highlight implements Highlight {
   _$HighlightCopyWith<_Highlight> get copyWith;
 }
 
+/// @nodoc
 class _$HighlightEventTearOff {
   const _$HighlightEventTearOff();
 
@@ -404,9 +421,11 @@ class _$HighlightEventTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $HighlightEvent = _$HighlightEventTearOff();
 
+/// @nodoc
 mixin _$HighlightEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
@@ -443,12 +462,14 @@ mixin _$HighlightEvent {
   });
 }
 
+/// @nodoc
 abstract class $HighlightEventCopyWith<$Res> {
   factory $HighlightEventCopyWith(
           HighlightEvent value, $Res Function(HighlightEvent) then) =
       _$HighlightEventCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class _$HighlightEventCopyWithImpl<$Res>
     implements $HighlightEventCopyWith<$Res> {
   _$HighlightEventCopyWithImpl(this._value, this._then);
@@ -458,6 +479,7 @@ class _$HighlightEventCopyWithImpl<$Res>
   final $Res Function(HighlightEvent) _then;
 }
 
+/// @nodoc
 abstract class _$UpdateFromDbCopyWith<$Res> {
   factory _$UpdateFromDbCopyWith(
           _UpdateFromDb value, $Res Function(_UpdateFromDb) then) =
@@ -465,6 +487,7 @@ abstract class _$UpdateFromDbCopyWith<$Res> {
   $Res call({List<Highlight> hls});
 }
 
+/// @nodoc
 class __$UpdateFromDbCopyWithImpl<$Res>
     extends _$HighlightEventCopyWithImpl<$Res>
     implements _$UpdateFromDbCopyWith<$Res> {
@@ -485,6 +508,7 @@ class __$UpdateFromDbCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
   const _$_UpdateFromDb({@required this.hls}) : assert(hls != null);
 
@@ -594,12 +618,14 @@ abstract class _UpdateFromDb implements HighlightEvent {
   _$UpdateFromDbCopyWith<_UpdateFromDb> get copyWith;
 }
 
+/// @nodoc
 abstract class _$AddCopyWith<$Res> {
   factory _$AddCopyWith(_Add value, $Res Function(_Add) then) =
       __$AddCopyWithImpl<$Res>;
   $Res call({HighlightType type, int color, Reference ref, HighlightMode mode});
 }
 
+/// @nodoc
 class __$AddCopyWithImpl<$Res> extends _$HighlightEventCopyWithImpl<$Res>
     implements _$AddCopyWith<$Res> {
   __$AddCopyWithImpl(_Add _value, $Res Function(_Add) _then)
@@ -624,6 +650,7 @@ class __$AddCopyWithImpl<$Res> extends _$HighlightEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_Add with DiagnosticableTreeMixin implements _Add {
   const _$_Add(
       {@required this.type,
@@ -766,12 +793,14 @@ abstract class _Add implements HighlightEvent {
   _$AddCopyWith<_Add> get copyWith;
 }
 
+/// @nodoc
 abstract class _$ClearCopyWith<$Res> {
   factory _$ClearCopyWith(_Clear value, $Res Function(_Clear) then) =
       __$ClearCopyWithImpl<$Res>;
   $Res call({Reference ref, HighlightMode mode});
 }
 
+/// @nodoc
 class __$ClearCopyWithImpl<$Res> extends _$HighlightEventCopyWithImpl<$Res>
     implements _$ClearCopyWith<$Res> {
   __$ClearCopyWithImpl(_Clear _value, $Res Function(_Clear) _then)
@@ -792,6 +821,7 @@ class __$ClearCopyWithImpl<$Res> extends _$HighlightEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_Clear with DiagnosticableTreeMixin implements _Clear {
   const _$_Clear(this.ref, this.mode)
       : assert(ref != null),
@@ -910,6 +940,7 @@ abstract class _Clear implements HighlightEvent {
   _$ClearCopyWith<_Clear> get copyWith;
 }
 
+/// @nodoc
 abstract class _$ChangeVolumeIdCopyWith<$Res> {
   factory _$ChangeVolumeIdCopyWith(
           _ChangeVolumeId value, $Res Function(_ChangeVolumeId) then) =
@@ -917,6 +948,7 @@ abstract class _$ChangeVolumeIdCopyWith<$Res> {
   $Res call({int volumeId});
 }
 
+/// @nodoc
 class __$ChangeVolumeIdCopyWithImpl<$Res>
     extends _$HighlightEventCopyWithImpl<$Res>
     implements _$ChangeVolumeIdCopyWith<$Res> {
@@ -937,6 +969,7 @@ class __$ChangeVolumeIdCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ChangeVolumeId
     with DiagnosticableTreeMixin
     implements _ChangeVolumeId {

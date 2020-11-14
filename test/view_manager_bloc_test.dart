@@ -28,7 +28,7 @@ void main() {
     ViewManagerBloc bloc; // ignore: close_sinks
 
     setUpAll(() {
-      ViewManagerState.defaultViewType = 'test';
+      ViewManager.defaultViewType = 'test';
       ViewManager.shared.register(ViewableTest('test', null));
     });
 

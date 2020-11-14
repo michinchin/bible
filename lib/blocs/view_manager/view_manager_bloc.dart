@@ -13,12 +13,17 @@ import '../../ui/common/common.dart';
 import '../../ui/common/tec_page_view.dart';
 import '../selection/selection_bloc.dart';
 import 'view_data.dart';
+import 'view_manager_event.dart';
+import 'view_manager_state.dart';
+import 'view_state.dart';
 
 export 'view_data.dart';
+export 'view_manager_event.dart';
+export 'view_manager_state.dart';
+export 'view_state.dart';
 
 part 'view_manager.dart';
 part 'view_manager_bloc.freezed.dart';
-part 'view_manager_bloc.g.dart';
 part 'view_manager_private.dart';
 
 const String _key = 'viewManagerState';
@@ -46,7 +51,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       if (json != null) state = ViewManagerState.fromJson(json);
     }
     if (state == null || state.views.isEmpty) {
-      return _defaultState();
+      return ViewManager.defaultState();
     }
     return state;
   }
@@ -344,7 +349,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     await updateDataWithView(uid, null); // Clear its data, if any.
     final newViews = List.of(state.views) // shallow copy
       ..removeAt(position);
-    if (newViews.isEmpty) return _defaultState();
+    if (newViews.isEmpty) return ViewManager.defaultState();
     return ViewManagerState(
       newViews,
       state.maximizedViewUid == uid ? 0 : state.maximizedViewUid,
@@ -397,32 +402,6 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
 }
 
 ///
-/// ViewManagerEvent
-///
-@freezed
-abstract class ViewManagerEvent with _$ViewManagerEvent {
-  const factory ViewManagerEvent.add({@required String type, int position, String data}) = _Add;
-  const factory ViewManagerEvent.remove(int uid) = _Remove;
-  const factory ViewManagerEvent.maximize(int uid) = _Maximize;
-  const factory ViewManagerEvent.restore() = _Restore;
-  const factory ViewManagerEvent.move({int fromPosition, int toPosition}) = _Move;
-  const factory ViewManagerEvent.setWidth({int position, double width}) = _SetWidth;
-  const factory ViewManagerEvent.setHeight({int position, double height}) = _SetHeight;
-}
-
-///
-/// ViewState
-///
-@freezed
-abstract class ViewState with _$ViewState {
-  factory ViewState({int uid, String type, double preferredWidth, double preferredHeight}) =
-      _ViewState;
-
-  /// fromJson
-  factory ViewState.fromJson(Map<String, dynamic> json) => _$ViewStateFromJson(json);
-}
-
-///
 /// View rectangle and other info.
 ///
 @immutable
@@ -455,31 +434,6 @@ class ViewRect {
         column: column ?? this.column,
         rect: rect ?? this.rect,
       );
-}
-
-///
-/// ViewManagerState
-///
-
-@freezed
-abstract class ViewManagerState with _$ViewManagerState {
-  static String defaultViewType;
-
-  factory ViewManagerState(List<ViewState> views, int maximizedViewUid, int nextUid) = _Views;
-
-  /// fromJson
-  factory ViewManagerState.fromJson(Map<String, dynamic> json) {
-    ViewManagerState state;
-    try {
-      state = _$ViewManagerStateFromJson(json);
-    } catch (_) {}
-    return state ?? _defaultState();
-  }
-}
-
-ViewManagerState _defaultState() {
-  assert(tec.isNotNullOrEmpty(ViewManagerState.defaultViewType));
-  return ViewManagerState([ViewState(uid: 1, type: ViewManagerState.defaultViewType)], 0, 2);
 }
 
 ///

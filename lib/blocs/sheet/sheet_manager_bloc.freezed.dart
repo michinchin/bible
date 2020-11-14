@@ -9,6 +9,7 @@ part of 'sheet_manager_bloc.dart';
 
 T _$identity<T>(T value) => value;
 
+/// @nodoc
 class _$SheetManagerStateTearOff {
   const _$SheetManagerStateTearOff();
 
@@ -23,9 +24,11 @@ class _$SheetManagerStateTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $SheetManagerState = _$SheetManagerStateTearOff();
 
+/// @nodoc
 mixin _$SheetManagerState {
   SheetType get type;
   SheetSize get size;
@@ -34,6 +37,7 @@ mixin _$SheetManagerState {
   $SheetManagerStateCopyWith<SheetManagerState> get copyWith;
 }
 
+/// @nodoc
 abstract class $SheetManagerStateCopyWith<$Res> {
   factory $SheetManagerStateCopyWith(
           SheetManagerState value, $Res Function(SheetManagerState) then) =
@@ -41,6 +45,7 @@ abstract class $SheetManagerStateCopyWith<$Res> {
   $Res call({SheetType type, SheetSize size, int viewUid});
 }
 
+/// @nodoc
 class _$SheetManagerStateCopyWithImpl<$Res>
     implements $SheetManagerStateCopyWith<$Res> {
   _$SheetManagerStateCopyWithImpl(this._value, this._then);
@@ -63,6 +68,7 @@ class _$SheetManagerStateCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 abstract class _$SheetStateCopyWith<$Res>
     implements $SheetManagerStateCopyWith<$Res> {
   factory _$SheetStateCopyWith(
@@ -72,6 +78,7 @@ abstract class _$SheetStateCopyWith<$Res>
   $Res call({SheetType type, SheetSize size, int viewUid});
 }
 
+/// @nodoc
 class __$SheetStateCopyWithImpl<$Res>
     extends _$SheetManagerStateCopyWithImpl<$Res>
     implements _$SheetStateCopyWith<$Res> {
@@ -96,6 +103,7 @@ class __$SheetStateCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_SheetState with DiagnosticableTreeMixin implements _SheetState {
   const _$_SheetState({@required this.type, @required this.size, this.viewUid})
       : assert(type != null),
@@ -163,6 +171,7 @@ abstract class _SheetState implements SheetManagerState {
   _$SheetStateCopyWith<_SheetState> get copyWith;
 }
 
+/// @nodoc
 class _$SheetEventTearOff {
   const _$SheetEventTearOff();
 
@@ -196,9 +205,11 @@ class _$SheetEventTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $SheetEvent = _$SheetEventTearOff();
 
+/// @nodoc
 mixin _$SheetEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
@@ -232,12 +243,14 @@ mixin _$SheetEvent {
   });
 }
 
+/// @nodoc
 abstract class $SheetEventCopyWith<$Res> {
   factory $SheetEventCopyWith(
           SheetEvent value, $Res Function(SheetEvent) then) =
       _$SheetEventCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class _$SheetEventCopyWithImpl<$Res> implements $SheetEventCopyWith<$Res> {
   _$SheetEventCopyWithImpl(this._value, this._then);
 
@@ -246,6 +259,7 @@ class _$SheetEventCopyWithImpl<$Res> implements $SheetEventCopyWith<$Res> {
   final $Res Function(SheetEvent) _then;
 }
 
+/// @nodoc
 abstract class _$ChangeSizeCopyWith<$Res> {
   factory _$ChangeSizeCopyWith(
           _ChangeSize value, $Res Function(_ChangeSize) then) =
@@ -253,6 +267,7 @@ abstract class _$ChangeSizeCopyWith<$Res> {
   $Res call({SheetSize size});
 }
 
+/// @nodoc
 class __$ChangeSizeCopyWithImpl<$Res> extends _$SheetEventCopyWithImpl<$Res>
     implements _$ChangeSizeCopyWith<$Res> {
   __$ChangeSizeCopyWithImpl(
@@ -272,6 +287,7 @@ class __$ChangeSizeCopyWithImpl<$Res> extends _$SheetEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ChangeSize with DiagnosticableTreeMixin implements _ChangeSize {
   const _$_ChangeSize(this.size) : assert(size != null);
 
@@ -377,6 +393,7 @@ abstract class _ChangeSize implements SheetEvent {
   _$ChangeSizeCopyWith<_ChangeSize> get copyWith;
 }
 
+/// @nodoc
 abstract class _$ChangeTypeCopyWith<$Res> {
   factory _$ChangeTypeCopyWith(
           _ChangeType value, $Res Function(_ChangeType) then) =
@@ -384,6 +401,7 @@ abstract class _$ChangeTypeCopyWith<$Res> {
   $Res call({SheetType type});
 }
 
+/// @nodoc
 class __$ChangeTypeCopyWithImpl<$Res> extends _$SheetEventCopyWithImpl<$Res>
     implements _$ChangeTypeCopyWith<$Res> {
   __$ChangeTypeCopyWithImpl(
@@ -403,6 +421,7 @@ class __$ChangeTypeCopyWithImpl<$Res> extends _$SheetEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ChangeType with DiagnosticableTreeMixin implements _ChangeType {
   const _$_ChangeType(this.type) : assert(type != null);
 
@@ -508,6 +527,7 @@ abstract class _ChangeType implements SheetEvent {
   _$ChangeTypeCopyWith<_ChangeType> get copyWith;
 }
 
+/// @nodoc
 abstract class _$ChangeViewCopyWith<$Res> {
   factory _$ChangeViewCopyWith(
           _ChangeView value, $Res Function(_ChangeView) then) =
@@ -515,6 +535,7 @@ abstract class _$ChangeViewCopyWith<$Res> {
   $Res call({int uid});
 }
 
+/// @nodoc
 class __$ChangeViewCopyWithImpl<$Res> extends _$SheetEventCopyWithImpl<$Res>
     implements _$ChangeViewCopyWith<$Res> {
   __$ChangeViewCopyWithImpl(
@@ -534,6 +555,7 @@ class __$ChangeViewCopyWithImpl<$Res> extends _$SheetEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ChangeView with DiagnosticableTreeMixin implements _ChangeView {
   const _$_ChangeView(this.uid) : assert(uid != null);
 
@@ -639,6 +661,7 @@ abstract class _ChangeView implements SheetEvent {
   _$ChangeViewCopyWith<_ChangeView> get copyWith;
 }
 
+/// @nodoc
 abstract class _$ChangeTypeSizeCopyWith<$Res> {
   factory _$ChangeTypeSizeCopyWith(
           _ChangeTypeSize value, $Res Function(_ChangeTypeSize) then) =
@@ -646,6 +669,7 @@ abstract class _$ChangeTypeSizeCopyWith<$Res> {
   $Res call({SheetType type, SheetSize size});
 }
 
+/// @nodoc
 class __$ChangeTypeSizeCopyWithImpl<$Res> extends _$SheetEventCopyWithImpl<$Res>
     implements _$ChangeTypeSizeCopyWith<$Res> {
   __$ChangeTypeSizeCopyWithImpl(
@@ -667,6 +691,7 @@ class __$ChangeTypeSizeCopyWithImpl<$Res> extends _$SheetEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ChangeTypeSize
     with DiagnosticableTreeMixin
     implements _ChangeTypeSize {

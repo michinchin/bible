@@ -41,12 +41,17 @@ class _VMViewStackState extends State<_VMViewStack> {
       bloc?._numViewsLimited = false;
     }
 
-    bloc?._size = Size(widget.constraints.maxWidth, widget.constraints.maxHeight);
+    final sizeChanged = ((bloc?._size ?? Size.zero) != widget.constraints.biggest);
+    if (sizeChanged) tec.dmPrint('ViewManager size changed to ${widget.constraints.biggest}');
+
+    bloc?._size = widget.constraints.biggest;
 
     final wasVisibleTextSelected = (bloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
 
     // Build and update the rows, which updates `bloc._rows`, `._overflow`, and `._isFull`.
+    final countOfOnScreenViews = bloc?._rows?.totalItems ?? 0;
     _buildRows(bloc, _Size.ideal, widget.vmState, widget.constraints)..balance(widget.constraints);
+    final countOfOnScreenViewsChanged = (countOfOnScreenViews != (bloc?._rows?.totalItems ?? 0));
 
     // Is there a maximized view?
     var maximizedView = widget.vmState.views
@@ -73,7 +78,10 @@ class _VMViewStackState extends State<_VMViewStack> {
       viewWithKeyboardFocus,
       bloc?._overflow,
       viewRects,
-      numViewsLimited: bloc.numViewsLimited,
+      sizeChanged || countOfOnScreenViewsChanged || lastBuildHadMaxedView != thisBuildHasMaxedView
+          ? _viewResizeAnimationDuration
+          : null,
+      numViewsLimited: bloc?.numViewsLimited ?? true,
       lastBuildHadMaxedView: lastBuildHadMaxedView,
     );
     bloc?._viewRects = viewRects;
@@ -82,7 +90,7 @@ class _VMViewStackState extends State<_VMViewStack> {
     // If this build has a maxed view, but the last one didn't, rebuild again after the
     // view resize animation finishes -- because, for a nicer and smoother maximize
     // animation, we only animate the view that is maximized, but after the animation is
-    // finished, we still want to update the size of all the other views so that if they
+    // finished, we still want to update the size of all the other views, so that if they
     // are switched to, they are already full screen.)
     if (thisBuildHasMaxedView && !lastBuildHadMaxedView) {
       Future.delayed(_viewResizeAnimationDuration, () => setState(() {}));
@@ -360,7 +368,8 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     ViewState maximizedView,
     ViewState viewWithKeyboardFocus,
     List<ViewState> overflowViews,
-    List<ViewRect> rects, {
+    List<ViewRect> rects,
+    Duration animationDuration, {
     bool numViewsLimited = false,
     bool lastBuildHadMaxedView = true,
   }) {
@@ -481,7 +490,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
       final widget = AnimatedPositioned(
         // We need a key so when views are removed or reordered the element tree stays in sync.
         key: ValueKey(vr.uid),
-        duration: vr.isVisible ? _viewResizeAnimationDuration : Duration.zero,
+        duration: (vr.isVisible ? animationDuration : null) ?? Duration.zero,
         left: vr.rect.left,
         top: vr.rect.top,
         width: vr.rect.width,
