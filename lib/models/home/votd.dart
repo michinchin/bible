@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_env/tec_env.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -24,25 +26,26 @@ class VotdEntry {
   }
 
   Future<tec.ErrorOrValue<String>> getFormattedVerse(Bible bible) async {
-    final verseText = await bible?.verseTextWith(ref.book, ref.chapter, ref.verses.toList());
-    if (verseText.error == null && tec.isNotNullOrEmpty(verseText.value)) {
-      final verse = verseText.value;
-      return tec.ErrorOrValue(verseText.error, _formatVerse(verse));
+    final refAndVerse = await bible?.referenceAndVerseTextWith(ref);
+    if (refAndVerse.error == null &&
+        refAndVerse.value != null &&
+        tec.isNotNullOrEmpty(refAndVerse.value.verseText)) {
+      final verseText = refAndVerse.value.verseText;
+      return tec.ErrorOrValue(refAndVerse.error, _formatVerse(verseText));
     } else {
-      return tec.ErrorOrValue(verseText.error, '');
+      return tec.ErrorOrValue(refAndVerse.error, '');
     }
   }
 
-  String _formatVerse(Map<int, String> verse) {
-    // final buffer = StringBuffer();
-    // for (final v in verse.keys) {
-    //   if (v != verse.keys.first) {
-    //     buffer.write(' [$v] ');
-    //   }
-    //   buffer.write('${verse[v]}');
-    // }
-    // return buffer.toString();
-    return verse.values.join(' ');
+  String _formatVerse(LinkedHashMap<int, VerseText> verse) {
+    final buffer = StringBuffer();
+    for (final v in verse.keys) {
+      if (v != verse.keys.first) {
+        buffer.write(' [$v] ');
+      }
+      buffer.write('${verse[v].text}');
+    }
+    return buffer.toString();
   }
 }
 
