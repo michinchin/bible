@@ -14,10 +14,9 @@ class _$SheetManagerStateTearOff {
   const _$SheetManagerStateTearOff();
 
 // ignore: unused_element
-  _SheetState call({@required SheetType type, int viewUid}) {
+  _SheetState call({@required SheetType type}) {
     return _SheetState(
       type: type,
-      viewUid: viewUid,
     );
   }
 }
@@ -29,7 +28,6 @@ const $SheetManagerState = _$SheetManagerStateTearOff();
 /// @nodoc
 mixin _$SheetManagerState {
   SheetType get type;
-  int get viewUid;
 
   $SheetManagerStateCopyWith<SheetManagerState> get copyWith;
 }
@@ -39,7 +37,7 @@ abstract class $SheetManagerStateCopyWith<$Res> {
   factory $SheetManagerStateCopyWith(
           SheetManagerState value, $Res Function(SheetManagerState) then) =
       _$SheetManagerStateCopyWithImpl<$Res>;
-  $Res call({SheetType type, int viewUid});
+  $Res call({SheetType type});
 }
 
 /// @nodoc
@@ -54,11 +52,9 @@ class _$SheetManagerStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object type = freezed,
-    Object viewUid = freezed,
   }) {
     return _then(_value.copyWith(
       type: type == freezed ? _value.type : type as SheetType,
-      viewUid: viewUid == freezed ? _value.viewUid : viewUid as int,
     ));
   }
 }
@@ -70,7 +66,7 @@ abstract class _$SheetStateCopyWith<$Res>
           _SheetState value, $Res Function(_SheetState) then) =
       __$SheetStateCopyWithImpl<$Res>;
   @override
-  $Res call({SheetType type, int viewUid});
+  $Res call({SheetType type});
 }
 
 /// @nodoc
@@ -87,28 +83,23 @@ class __$SheetStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object type = freezed,
-    Object viewUid = freezed,
   }) {
     return _then(_SheetState(
       type: type == freezed ? _value.type : type as SheetType,
-      viewUid: viewUid == freezed ? _value.viewUid : viewUid as int,
     ));
   }
 }
 
 /// @nodoc
 class _$_SheetState with DiagnosticableTreeMixin implements _SheetState {
-  const _$_SheetState({@required this.type, this.viewUid})
-      : assert(type != null);
+  const _$_SheetState({@required this.type}) : assert(type != null);
 
   @override
   final SheetType type;
-  @override
-  final int viewUid;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'SheetManagerState(type: $type, viewUid: $viewUid)';
+    return 'SheetManagerState(type: $type)';
   }
 
   @override
@@ -116,8 +107,7 @@ class _$_SheetState with DiagnosticableTreeMixin implements _SheetState {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'SheetManagerState'))
-      ..add(DiagnosticsProperty('type', type))
-      ..add(DiagnosticsProperty('viewUid', viewUid));
+      ..add(DiagnosticsProperty('type', type));
   }
 
   @override
@@ -125,16 +115,12 @@ class _$_SheetState with DiagnosticableTreeMixin implements _SheetState {
     return identical(this, other) ||
         (other is _SheetState &&
             (identical(other.type, type) ||
-                const DeepCollectionEquality().equals(other.type, type)) &&
-            (identical(other.viewUid, viewUid) ||
-                const DeepCollectionEquality().equals(other.viewUid, viewUid)));
+                const DeepCollectionEquality().equals(other.type, type)));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(type) ^
-      const DeepCollectionEquality().hash(viewUid);
+      runtimeType.hashCode ^ const DeepCollectionEquality().hash(type);
 
   @override
   _$SheetStateCopyWith<_SheetState> get copyWith =>
@@ -142,13 +128,10 @@ class _$_SheetState with DiagnosticableTreeMixin implements _SheetState {
 }
 
 abstract class _SheetState implements SheetManagerState {
-  const factory _SheetState({@required SheetType type, int viewUid}) =
-      _$_SheetState;
+  const factory _SheetState({@required SheetType type}) = _$_SheetState;
 
   @override
   SheetType get type;
-  @override
-  int get viewUid;
   @override
   _$SheetStateCopyWith<_SheetState> get copyWith;
 }
