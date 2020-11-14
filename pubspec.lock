@@ -1068,7 +1068,7 @@ packages:
       name: tec_product_db
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.1.10"
+    version: "1.1.11"
   tec_selectable:
     dependency: transitive
     description:
@@ -1079,9 +1079,9 @@ packages:
   tec_user_account:
     dependency: "direct main"
     description:
-      path: "../shared/tec_user_account"
-      relative: true
-    source: path
+      name: tec_user_account
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
     version: "2.0.11"
   tec_util:
     dependency: "direct main"
@@ -1096,7 +1096,7 @@ packages:
       name: tec_volumes
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.9"
+    version: "1.2.10"
   tec_web_view:
     dependency: "direct main"
     description:

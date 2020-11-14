@@ -9,7 +9,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import 'main_sheet.dart';
 import 'selection_sheet.dart';
-import 'selection_sheet_model.dart';
 
 // must have SheetManagerBloc provided
 class SnapSheet extends StatefulWidget {
