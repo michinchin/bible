@@ -7,16 +7,11 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
-import '../../models/const.dart';
+import '../../models/color_utils.dart';
 import '../../models/ugc/recent_count.dart';
 import '../../models/ugc/ugc_view_data.dart';
 import '../common/common.dart';
 import '../menu/view_actions.dart';
-
-void showUGC(BuildContext context) {
-  context.viewManager
-      ?.add(const ViewManagerEvent.add(type: Const.viewTypeNotes, data: null, position: null));
-}
 
 class ViewableUGC extends Viewable {
   ViewableUGC(String typeName, IconData icon) : super(typeName, icon);
@@ -72,7 +67,7 @@ class _UGCViewState extends State<_UGCView> {
       folderName = widget.folder.title;
     } else {
       folderId = UGCViewData.fromContext(context, widget.state.uid).folderId;
-      folderName = '';
+      folderName = 'My Content';
     }
 
     _load();
@@ -180,7 +175,14 @@ class _UGCViewState extends State<_UGCView> {
 
     if (item is UserItem && item.itemType == UserItemType.folder) {
       folder = item;
+    } else if (item is RecentCount) {
+      folder =
+          UserItem(id: UGCViewData.folderRecent, title: 'Recent', type: UserItemType.folder.index);
     } else if (item is CountItem) {
+      if (item.itemType == UserItemType.bookmark) {
+        folder = UserItem(
+            id: UGCViewData.folderBookmarks, title: 'Bookmarks', type: UserItemType.folder.index);
+      }
       if (item.itemType == UserItemType.bookmark) {
         folder = UserItem(
             id: UGCViewData.folderBookmarks, title: 'Bookmarks', type: UserItemType.folder.index);
@@ -214,12 +216,18 @@ class _UGCViewState extends State<_UGCView> {
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).textColor.withOpacity(0.5);
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+
+    // temp list to shorten consecutive hls of same color
+    List<UserItem> hls;
+
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: MinHeightAppBar(
           appBar: AppBar(
-            centerTitle: false,
-            title: Text(folderName),
+            centerTitle: true,
+            title: Text(folderName, style: TextStyle(color: color)),
             actions: _actions(context),
           ),
         ),
@@ -233,6 +241,7 @@ class _UGCViewState extends State<_UGCView> {
 
               IconData iconData;
               String title, subtitle;
+              var iconColor = color;
 
               if (items[i] is CountItem) {
                 switch ((items[i] as CountItem).itemType) {
@@ -281,38 +290,89 @@ class _UGCViewState extends State<_UGCView> {
                     break;
                   case UserItemType.marginNote:
                     iconData = TecIcons.marginNoteOutline;
-                    title = Reference(book: ui.book, chapter: ui.chapter, verse: ui.verse).label();
+                    title = Reference(
+                            volume: ui.volumeId,
+                            book: ui.book,
+                            chapter: ui.chapter,
+                            verse: ui.verse)
+                        .label();
                     subtitle = ui.info;
                     break;
                   case UserItemType.highlight:
-                    iconData = Icons.view_agenda_outlined;
-                    title = Reference(book: ui.book, chapter: ui.chapter, verse: ui.verse).label();
+                    // is this highlight continued...
+                    if (i + 1 < items.length &&
+                        items[i + 1] is UserItem &&
+                        items[i + 1].itemType == UserItemType.highlight) {
+                      final uiNext = items[i + 1] as UserItem;
+                      if (ui.volumeId == uiNext.volumeId &&
+                          ui.color == uiNext.color &&
+                          ui.book == uiNext.book &&
+                          ui.chapter == uiNext.chapter) {
+                        if (ui.verse == (uiNext.verse - 1)) {
+                          if (hls == null) {
+                            hls = <UserItem>[ui, uiNext];
+                          } else {
+                            hls.add(uiNext);
+                          }
+                        }
+                        else if (ui.verse == (uiNext.verse + 1)) {
+                          // db query returned in reverse order...
+                          if (hls == null) {
+                            hls = <UserItem>[uiNext, ui];
+                          } else {
+                            hls.insert(0, uiNext);
+                          }
+                        }
+                        return Container();
+                      }
+                    }
+
+                    iconData = Icons.view_agenda;
+                    title = Reference(
+                            volume: ui.volumeId,
+                            book: ui.book,
+                            chapter: ui.chapter,
+                            verse: (hls != null) ? hls.first.verse : ui.verse,
+                            endVerse: (hls != null) ? hls.last.verse : ui.verse)
+                        .label();
+
+                    // final highlightType =
+                    // (ui.color == 5 || (ui.color >> 24 > 0)) ? HighlightType.underline : HighlightType.highlight;
+
+                    final color = (ui.color <= 5)
+                        ? defaultColorIntForIndex(ui.color)
+                        : 0xFF000000 | (ui.color & 0xFFFFFF);
+
+                    iconColor = isDarkTheme
+                        ? textColorWith(Color(color), isDarkMode: isDarkTheme)
+                        : highlightColorWith(Color(color), isDarkMode: isDarkTheme);
+
+                    // we have reached the end of consecutive hls, clear the list
+                    hls = null;
                     break;
                   default:
                     break;
                 }
               } else if (items[i] is _DividerItem) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
-                  child: Divider(height: 3, color: Theme.of(context).textColor.withOpacity(0.5)),
+                return const Padding(
+                  padding: EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
+                  child: Divider(height: 1),
                 );
               }
 
               return InkWell(
                 onTap: () => _itemTap(items[i]),
                 child: Padding(
-                  padding: (folderId == UGCViewData.folderHome)
+                  padding: (folderId == UGCViewData.folderHome ||
+                          (items[i] is UserItem && items[i].itemType == UserItemType.folder))
                       ? const EdgeInsets.all(8.0)
-                      : const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
+                      : const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0, bottom: 4.0),
                   child: Padding(
                     padding: const EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
                     child: Row(children: [
                       Padding(
                         padding: const EdgeInsets.only(right: 16.0),
-                        child: Icon(
-                          iconData,
-                          color: Theme.of(context).textColor.withOpacity(0.5),
-                        ),
+                        child: Icon(iconData, color: iconColor),
                       ),
                       if (subtitle != null)
                         Expanded(
@@ -320,17 +380,17 @@ class _UGCViewState extends State<_UGCView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(title,
+                                maxLines: 1,
                                 style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).textColor.withOpacity(0.5))),
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: color,
+                                )),
                             Container(height: 3.0),
                             Text(subtitle,
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    fontSize: 15.0,
-                                    color: Theme.of(context).textColor.withOpacity(0.5))),
+                                style: TextStyle(fontSize: 15.0, color: color)),
                             if (items[i] is UserItem)
                               Padding(
                                 padding: const EdgeInsets.only(top: 4.0),
@@ -341,27 +401,20 @@ class _UGCViewState extends State<_UGCView> {
                                         children: [
                                           const Padding(
                                             padding: EdgeInsets.only(right: 3.0),
-                                            child: Icon(
-                                              Icons.folder_outlined,
-                                              size: 16,
-                                              color: Colors.blue,
-                                            ),
+                                            child: Icon(Icons.folder_outlined,
+                                                size: 16, color: Colors.blue),
                                           ),
-                                          Text(_folders[items[i].parentId].title,
-                                              style: TextStyle(
-                                                fontSize: 14.0,
-                                                color: Theme.of(context).textColor.withOpacity(0.5),
-                                              )),
+                                          Text(
+                                            _folders[items[i].parentId].title,
+                                            style: TextStyle(fontSize: 14.0, color: color),
+                                          ),
                                         ],
                                       ),
                                     Expanded(
                                         child: Text(
                                       tec.shortDate((items[i] as UserItem).modifiedDT),
                                       textAlign: TextAlign.end,
-                                      style: TextStyle(
-                                        fontSize: 14.0,
-                                        color: Theme.of(context).textColor.withOpacity(0.5),
-                                      ),
+                                      style: TextStyle(fontSize: 14.0, color: color),
                                     )),
                                   ],
                                 ),
@@ -372,22 +425,18 @@ class _UGCViewState extends State<_UGCView> {
                         Expanded(
                             child: Text(title,
                                 style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).textColor.withOpacity(0.5)))),
+                                    fontSize: 18.0, fontWeight: FontWeight.bold, color: color))),
                       if (items[i] is CountItem || items[i] is RecentCount)
                         Padding(
                           padding: const EdgeInsets.only(left: 16.0),
                           child: Text(items[i].count.toString(),
                               style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).textColor.withOpacity(0.5))),
+                                  fontSize: 18.0, fontWeight: FontWeight.bold, color: color)),
                         ),
                       if (items[i] is UserItem && items[i].itemType == UserItemType.folder)
                         Icon(
                           Icons.navigate_next,
-                          color: Theme.of(context).textColor.withOpacity(0.5),
+                          color: color,
                         )
                     ]),
                   ),

@@ -48,7 +48,11 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     if (tec.isNotNullOrEmpty(jsonStr)) {
       // tec.dmPrint('loaded ViewManagerState: $jsonStr');
       final json = tec.parseJsonSync(jsonStr);
-      if (json != null) state = ViewManagerState.fromJson(json);
+      if (json != null) {
+        try {
+          state = ViewManagerState.fromJson(json);
+        } catch (_) {}
+      }
     }
     if (state == null || state.views.isEmpty) {
       return ViewManager.defaultState();

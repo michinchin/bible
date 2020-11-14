@@ -9,12 +9,5 @@ part 'view_manager_state.g.dart';
 @freezed
 abstract class ViewManagerState with _$ViewManagerState {
   factory ViewManagerState(List<ViewState> views, int maximizedViewUid, int nextUid) = _Views;
-
-  factory ViewManagerState.fromJson(Map<String, dynamic> json) {
-    ViewManagerState state;
-    try {
-      state = _$ViewManagerStateFromJson(json);
-    } catch (_) {}
-    return state ?? ViewManager.defaultState();
-  }
+  factory ViewManagerState.fromJson(Map<String, dynamic> json) => _$ViewManagerStateFromJson(json);
 }

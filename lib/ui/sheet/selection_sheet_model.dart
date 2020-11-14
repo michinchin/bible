@@ -9,7 +9,6 @@ import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
-import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
@@ -160,9 +159,6 @@ class SelectionSheetModel {
       case 'Share':
         share(context);
         break;
-      case 'More':
-        more(context);
-        break;
       case 'Learn':
         // put define/web search in learn for now
         defineWebSearch(context);
@@ -174,9 +170,6 @@ class SelectionSheetModel {
 
   static void _noColor(BuildContext context) =>
       context.tbloc<SelectionCmdBloc>()?.add(const SelectionCmd.clearStyle());
-
-  static void more(BuildContext context) =>
-      context.tbloc<SheetManagerBloc>()?.add(const SheetEvent.changeSize(SheetSize.medium));
 
   static void deselect(BuildContext c) =>
       c.tbloc<SelectionCmdBloc>()?.add(const SelectionCmd.deselectAll());

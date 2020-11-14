@@ -88,9 +88,9 @@ class _BottomSheet extends StatelessWidget {
       listenWhen: (previous, current) => previous.isTextSelected != current.isTextSelected,
       listener: (context, state) {
         if (state.isTextSelected) {
-          context.tbloc<SheetManagerBloc>()..changeTypeSize(SheetType.selection, SheetSize.medium);
+          context.tbloc<SheetManagerBloc>()..changeType(SheetType.selection);
         } else {
-          context.tbloc<SheetManagerBloc>()..changeTypeSize(SheetType.main, SheetSize.mini);
+          context.tbloc<SheetManagerBloc>()..changeType(SheetType.main);
         }
       },
       child: SnapSheet(body: child),
