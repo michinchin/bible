@@ -9,7 +9,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
-import '../../blocs/view_data/chapter_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/misc_utils.dart';
 import '../../models/rect_utils.dart';
@@ -217,7 +216,7 @@ class ChapterSelection {
 
   bool handleXref(BuildContext context, Reference reference, String text, VerseTag tag, Offset pt) {
     if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
-      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible;
+      final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible();
 
       bible?.xrefsWithHrefProperty(tag.href)?.then((result) {
         if (result?.value?.isEmpty ?? true) {

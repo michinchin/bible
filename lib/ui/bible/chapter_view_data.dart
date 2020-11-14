@@ -4,14 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
-import '../shared_bible_ref_bloc.dart';
-import '../view_manager/view_manager_bloc.dart';
-import 'view_data.dart';
+import '../../blocs/shared_bible_ref_bloc.dart';
+import '../../blocs/view_manager/view_data.dart';
+import '../../blocs/view_manager/view_manager_bloc.dart';
 
-export 'view_data.dart';
-
-const defaultBibleId = 9;
-const defaultBCV = BookChapterVerse(50, 1, 1);
+export '../../blocs/view_manager/view_data.dart';
 
 class ChapterViewDataBloc extends ViewDataBloc {
   ChapterViewDataBloc(ViewManagerBloc vmBloc, int viewUid, ChapterViewData data)
@@ -112,22 +109,6 @@ class ChapterViewData extends ViewData {
       page ?? 0,
       useSharedRef: useSharedRef ?? true,
     );
-  }
-}
-
-extension ChapterViewDataExtOnVolume on Volume {
-  Bible get assocBible => this is Bible
-      ? this as Bible
-      : (VolumesRepository.shared.bibleWithId(assocVolumeId > 0 ? assocVolumeId : defaultBibleId) ??
-          VolumesRepository.shared.bibleWithId(defaultBibleId));
-}
-
-extension on Bible {
-  String titleWithBookAndChapter(int book, int chapter, {bool includeAbbreviation = false}) {
-    if (includeAbbreviation) {
-      return '${nameOfBook(book)} $chapter, $abbreviation';
-    }
-    return '${nameOfBook(book)} $chapter';
   }
 }
 

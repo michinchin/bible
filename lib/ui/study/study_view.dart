@@ -1,12 +1,14 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/view_data/chapter_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../bible/chapter_title.dart';
 import '../bible/chapter_view.dart';
+import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
 import '../library/library.dart';
 import '../menu/view_actions.dart';
@@ -87,10 +89,25 @@ class StudyView extends StatelessWidget {
           body: CustomScrollView(
             slivers: [
               SliverAppBar(
+                // backgroundColor: Colors.orange[100],
                 floating: true,
                 snap: true,
-                expandedHeight: kTextTabBarHeight,
-                title: TabBar(tabs: tabs, isScrollable: true),
+                expandedHeight: 88, // kTextTabBarHeight,
+                //title: Text('hello'),
+                flexibleSpace: OverflowBox(
+                  maxHeight: double.infinity,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      const Text(
+                        'hello',
+                        style: TextStyle(fontSize: 20, color: Colors.grey),
+                      ),
+                      Center(child: TabBar(tabs: tabs, isScrollable: true)),
+                    ],
+                  ),
+                ),
+                elevation: 0,
               ),
               SliverFillRemaining(
                 child: TabBarView(children: tabContents),
@@ -106,6 +123,8 @@ class StudyView extends StatelessWidget {
 class StudyNotes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('NOTES', style: Theme.of(context).textTheme.headline2));
+    return Container(
+        color: Colors.red[100],
+        child: Center(child: Text('NOTES', style: Theme.of(context).textTheme.headline2)));
   }
 }

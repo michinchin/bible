@@ -2,7 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
-import 'view_data/chapter_view_data.dart';
+const defaultBibleId = 9;
+const defaultBCV = BookChapterVerse(50, 1, 1);
 
 const String _prefsKey = 'sharedBibleRef';
 

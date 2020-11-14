@@ -18,7 +18,6 @@ import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/view_data/chapter_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
@@ -27,6 +26,7 @@ import '../library/library.dart';
 import 'chapter_build_helper.dart';
 import 'chapter_selection.dart';
 import 'chapter_view_app_bar.dart';
+import 'chapter_view_data.dart';
 import 'chapter_view_model.dart';
 
 class ViewableBibleChapter extends Viewable {
@@ -87,7 +87,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
     super.initState();
     final viewData = ChapterViewData.fromContext(context, widget.state.uid);
     _volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
-    _bible = _volume.assocBible;
+    _bible = _volume.assocBible();
     _bcvPageZero = viewData.bcv;
   }
 
@@ -150,10 +150,10 @@ class _PageableChapterViewState extends State<PageableChapterView> {
       if (volume == null) return; // --------------------------------------->
     }
 
-    final page = _bcvPageZero.chaptersTo(viewData.bcv, bible: volume.assocBible);
+    final page = _bcvPageZero.chaptersTo(viewData.bcv, bible: volume.assocBible());
     if (page == null) {
       // tec.dmPrint('PageableChapterView._onNewViewData unable to navigate to '
-      //     '${viewData.bcv} in ${volume.assocBible.abbreviation}');
+      //     '${viewData.bcv} in ${volume.assocBible().abbreviation}');
       return; // ----------------------------------------------------------->
     }
 
@@ -161,7 +161,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
       // tec.dmPrint('PageableChapterView._onNewViewData: Volume changed '
       //     'from ${_volume.id} to ${volume.id}.');
       _volume = volume;
-      _bible = volume.assocBible;
+      _bible = volume.assocBible();
     }
 
     if (_pageController != null && _pageController.page.round() != page) {
@@ -201,7 +201,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
       builder: (context, viewData) {
         if (viewData is ChapterViewData) {
           final volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
-          var ref = _bcvPageZero.advancedBy(chapters: index, bible: volume.assocBible);
+          var ref = _bcvPageZero.advancedBy(chapters: index, bible: volume.assocBible());
           if (ref == null) return Container();
           if (ref.book == viewData.bcv.book &&
               ref.chapter == viewData.bcv.chapter &&
@@ -566,7 +566,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
             if (newBcv.book == widget.ref.book && newBcv.chapter == widget.ref.chapter) {
               // tec.dmPrint('Notifying of selections for ${widget.ref}');
               _selection.notifyOfSelections(context);
-              // TODO(ron): Only scroll if the verse changes?
+              // TO-DO(ron): Only scroll if the verse changes?
               if (newBcv.verse > 1 || _scrollController.offset > 0) {
                 tec.dmPrint('ChapterHtml ViewData changed, so scrolling to verse ${newBcv.verse}');
                 _viewModel.scrollToVerse(newBcv.verse, _tecHtmlKey, _scrollController);

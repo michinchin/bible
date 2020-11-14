@@ -5,9 +5,9 @@ import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/view_data/chapter_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
+import '../bible/chapter_view_data.dart';
 import '../common/tec_modal_popup_menu.dart';
 import 'main_menu.dart';
 
@@ -19,13 +19,6 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
       (vmBloc.columnsInRow(0) - 1) == vmBloc.indexOfView(state.uid);
 
   return [
-    // if (state.type == Const.viewTypeChapter)
-    //   IconButton(
-    //     icon: const Icon(SFSymbols.play, size: 20),
-    //     tooltip: 'Play Audio',
-    //     color: Theme.of(context).textColor.withOpacity(0.5),
-    //     onPressed: () {},
-    //   ),
     if ((vmBloc?.countOfInvisibleViews ?? 0) >= 1 && isMaximized)
       IconButton(
         icon: const Icon(SFSymbols.arrow_up_arrow_down_circle, size: 20),
@@ -60,13 +53,6 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
         );
       },
     ),
-    // if (state.type == Const.viewTypeStudy)
-    //   IconButton(
-    //       icon: Icon(platformAwareMoreIcon(context)),
-    //       onPressed: () {
-    //         // TecAutoScroll.stopAutoscroll();
-    //         // showTecModalPopupMenu(context: context, state: state, insets: insets);
-    //       }),
     if (isTopRightView)
       IconButton(
         icon: const Icon(SFSymbols.person_crop_circle),

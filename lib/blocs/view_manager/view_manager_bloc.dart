@@ -12,9 +12,9 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../ui/common/common.dart';
 import '../../ui/common/tec_page_view.dart';
 import '../selection/selection_bloc.dart';
-import '../view_data/view_data.dart';
+import 'view_data.dart';
 
-export '../view_data/view_data.dart';
+export 'view_data.dart';
 
 part 'view_manager.dart';
 part 'view_manager_bloc.freezed.dart';

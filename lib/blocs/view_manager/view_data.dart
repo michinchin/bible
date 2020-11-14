@@ -6,7 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
-import '../view_manager/view_manager_bloc.dart';
+import 'view_manager_bloc.dart';
 
 class ViewDataBloc extends Cubit<ViewData> {
   final ViewManagerBloc vmBloc;

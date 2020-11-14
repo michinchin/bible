@@ -8,13 +8,13 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/search_bloc.dart';
-import '../../blocs/view_data/chapter_view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/user_item_helper.dart';
 import '../common/common.dart';
 import '../library/library.dart';
 import '../nav/nav.dart';
 import '../sheet/selection_sheet_model.dart';
+import 'chapter_view_data.dart';
 
 class ChapterTitle extends StatelessWidget {
   final VolumeType volumeType;

@@ -5,7 +5,7 @@ import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/view_data/chapter_view_data.dart';
+import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
 import 'strongs_build_helper.dart';
 
@@ -18,7 +18,7 @@ Future<void> showStrongsPopup({
   if (strongsId?.isEmpty ?? true) return Future.value();
 
   final volumeId = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
-  final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible;
+  final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible();
   final originalContext = context;
 
   final isDarkTheme = Theme.of(context).brightness == Brightness.dark;

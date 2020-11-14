@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
-import '../../blocs/view_data/view_data.dart';
+import '../../blocs/view_manager/view_data.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 
 class UGCViewData extends ViewData {
