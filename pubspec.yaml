@@ -107,7 +107,10 @@ dependencies:
       url: http://noah.tecarta.com:8100
     version: ^1.0.0-dev.1.0
 
-# dependency_overrides:
+dependency_overrides:
+  tec_user_account:
+    path: ../shared/tec_user_account
+
   # tec_util:
   #   path: ../shared/tec_util
   #  tec_widgets:

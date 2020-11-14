@@ -1,4 +1,3 @@
-import 'package:bible/ui/home/votd_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -7,6 +6,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/notifications/notifications_model.dart';
+import '../home/votd_screen.dart';
 
 Future<void> showNotifications(BuildContext context) async {
   final allowed = await Notifications.shared?.requestPermissions(context) ?? false;

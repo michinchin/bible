@@ -9,6 +9,7 @@ part of 'nav_bloc.dart';
 
 T _$identity<T>(T value) => value;
 
+/// @nodoc
 class _$NavEventTearOff {
   const _$NavEventTearOff();
 
@@ -62,9 +63,11 @@ class _$NavEventTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $NavEvent = _$NavEventTearOff();
 
+/// @nodoc
 mixin _$NavEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
@@ -110,11 +113,13 @@ mixin _$NavEvent {
   });
 }
 
+/// @nodoc
 abstract class $NavEventCopyWith<$Res> {
   factory $NavEventCopyWith(NavEvent value, $Res Function(NavEvent) then) =
       _$NavEventCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class _$NavEventCopyWithImpl<$Res> implements $NavEventCopyWith<$Res> {
   _$NavEventCopyWithImpl(this._value, this._then);
 
@@ -123,6 +128,7 @@ class _$NavEventCopyWithImpl<$Res> implements $NavEventCopyWith<$Res> {
   final $Res Function(NavEvent) _then;
 }
 
+/// @nodoc
 abstract class _$ChangeIndexCopyWith<$Res> {
   factory _$ChangeIndexCopyWith(
           _ChangeIndex value, $Res Function(_ChangeIndex) then) =
@@ -130,6 +136,7 @@ abstract class _$ChangeIndexCopyWith<$Res> {
   $Res call({int index});
 }
 
+/// @nodoc
 class __$ChangeIndexCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
     implements _$ChangeIndexCopyWith<$Res> {
   __$ChangeIndexCopyWithImpl(
@@ -149,6 +156,7 @@ class __$ChangeIndexCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ChangeIndex with DiagnosticableTreeMixin implements _ChangeIndex {
   const _$_ChangeIndex({this.index});
 
@@ -272,12 +280,14 @@ abstract class _ChangeIndex implements NavEvent {
   _$ChangeIndexCopyWith<_ChangeIndex> get copyWith;
 }
 
+/// @nodoc
 abstract class _$SetRefCopyWith<$Res> {
   factory _$SetRefCopyWith(_SetRef value, $Res Function(_SetRef) then) =
       __$SetRefCopyWithImpl<$Res>;
   $Res call({Reference ref});
 }
 
+/// @nodoc
 class __$SetRefCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
     implements _$SetRefCopyWith<$Res> {
   __$SetRefCopyWithImpl(_SetRef _value, $Res Function(_SetRef) _then)
@@ -296,6 +306,7 @@ class __$SetRefCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_SetRef with DiagnosticableTreeMixin implements _SetRef {
   const _$_SetRef({this.ref});
 
@@ -419,6 +430,7 @@ abstract class _SetRef implements NavEvent {
   _$SetRefCopyWith<_SetRef> get copyWith;
 }
 
+/// @nodoc
 abstract class _$OnSearchChangeCopyWith<$Res> {
   factory _$OnSearchChangeCopyWith(
           _OnSearchChange value, $Res Function(_OnSearchChange) then) =
@@ -426,6 +438,7 @@ abstract class _$OnSearchChangeCopyWith<$Res> {
   $Res call({String search});
 }
 
+/// @nodoc
 class __$OnSearchChangeCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
     implements _$OnSearchChangeCopyWith<$Res> {
   __$OnSearchChangeCopyWithImpl(
@@ -445,6 +458,7 @@ class __$OnSearchChangeCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_OnSearchChange
     with DiagnosticableTreeMixin
     implements _OnSearchChange {
@@ -570,6 +584,7 @@ abstract class _OnSearchChange implements NavEvent {
   _$OnSearchChangeCopyWith<_OnSearchChange> get copyWith;
 }
 
+/// @nodoc
 abstract class _$LoadWordSuggestionsCopyWith<$Res> {
   factory _$LoadWordSuggestionsCopyWith(_LoadWordSuggestions value,
           $Res Function(_LoadWordSuggestions) then) =
@@ -577,6 +592,7 @@ abstract class _$LoadWordSuggestionsCopyWith<$Res> {
   $Res call({String search});
 }
 
+/// @nodoc
 class __$LoadWordSuggestionsCopyWithImpl<$Res>
     extends _$NavEventCopyWithImpl<$Res>
     implements _$LoadWordSuggestionsCopyWith<$Res> {
@@ -597,6 +613,7 @@ class __$LoadWordSuggestionsCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_LoadWordSuggestions
     with DiagnosticableTreeMixin
     implements _LoadWordSuggestions {
@@ -723,6 +740,7 @@ abstract class _LoadWordSuggestions implements NavEvent {
   _$LoadWordSuggestionsCopyWith<_LoadWordSuggestions> get copyWith;
 }
 
+/// @nodoc
 abstract class _$ChangeNavViewCopyWith<$Res> {
   factory _$ChangeNavViewCopyWith(
           _ChangeNavView value, $Res Function(_ChangeNavView) then) =
@@ -730,6 +748,7 @@ abstract class _$ChangeNavViewCopyWith<$Res> {
   $Res call({NavViewState state});
 }
 
+/// @nodoc
 class __$ChangeNavViewCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
     implements _$ChangeNavViewCopyWith<$Res> {
   __$ChangeNavViewCopyWithImpl(
@@ -749,6 +768,7 @@ class __$ChangeNavViewCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ChangeNavView with DiagnosticableTreeMixin implements _ChangeNavView {
   const _$_ChangeNavView({this.state});
 
@@ -872,6 +892,7 @@ abstract class _ChangeNavView implements NavEvent {
   _$ChangeNavViewCopyWith<_ChangeNavView> get copyWith;
 }
 
+/// @nodoc
 abstract class _$OnSearchFinishedCopyWith<$Res> {
   factory _$OnSearchFinishedCopyWith(
           _OnSearchFinished value, $Res Function(_OnSearchFinished) then) =
@@ -879,6 +900,7 @@ abstract class _$OnSearchFinishedCopyWith<$Res> {
   $Res call({String search});
 }
 
+/// @nodoc
 class __$OnSearchFinishedCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
     implements _$OnSearchFinishedCopyWith<$Res> {
   __$OnSearchFinishedCopyWithImpl(
@@ -898,6 +920,7 @@ class __$OnSearchFinishedCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_OnSearchFinished
     with DiagnosticableTreeMixin
     implements _OnSearchFinished {
@@ -1023,6 +1046,7 @@ abstract class _OnSearchFinished implements NavEvent {
   _$OnSearchFinishedCopyWith<_OnSearchFinished> get copyWith;
 }
 
+/// @nodoc
 abstract class _$ChangeNavStateCopyWith<$Res> {
   factory _$ChangeNavStateCopyWith(
           _ChangeNavState value, $Res Function(_ChangeNavState) then) =
@@ -1032,6 +1056,7 @@ abstract class _$ChangeNavStateCopyWith<$Res> {
   $NavStateCopyWith<$Res> get state;
 }
 
+/// @nodoc
 class __$ChangeNavStateCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
     implements _$ChangeNavStateCopyWith<$Res> {
   __$ChangeNavStateCopyWithImpl(
@@ -1061,6 +1086,7 @@ class __$ChangeNavStateCopyWithImpl<$Res> extends _$NavEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ChangeNavState
     with DiagnosticableTreeMixin
     implements _ChangeNavState {
@@ -1186,6 +1212,7 @@ abstract class _ChangeNavState implements NavEvent {
   _$ChangeNavStateCopyWith<_ChangeNavState> get copyWith;
 }
 
+/// @nodoc
 class _$NavStateTearOff {
   const _$NavStateTearOff();
 
@@ -1208,9 +1235,11 @@ class _$NavStateTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $NavState = _$NavStateTearOff();
 
+/// @nodoc
 mixin _$NavState {
   NavViewState get navViewState;
   int get tabIndex;
@@ -1222,6 +1251,7 @@ mixin _$NavState {
   $NavStateCopyWith<NavState> get copyWith;
 }
 
+/// @nodoc
 abstract class $NavStateCopyWith<$Res> {
   factory $NavStateCopyWith(NavState value, $Res Function(NavState) then) =
       _$NavStateCopyWithImpl<$Res>;
@@ -1234,6 +1264,7 @@ abstract class $NavStateCopyWith<$Res> {
       List<String> wordSuggestions});
 }
 
+/// @nodoc
 class _$NavStateCopyWithImpl<$Res> implements $NavStateCopyWith<$Res> {
   _$NavStateCopyWithImpl(this._value, this._then);
 
@@ -1267,6 +1298,7 @@ class _$NavStateCopyWithImpl<$Res> implements $NavStateCopyWith<$Res> {
   }
 }
 
+/// @nodoc
 abstract class _$NavStateCopyWith<$Res> implements $NavStateCopyWith<$Res> {
   factory _$NavStateCopyWith(_NavState value, $Res Function(_NavState) then) =
       __$NavStateCopyWithImpl<$Res>;
@@ -1280,6 +1312,7 @@ abstract class _$NavStateCopyWith<$Res> implements $NavStateCopyWith<$Res> {
       List<String> wordSuggestions});
 }
 
+/// @nodoc
 class __$NavStateCopyWithImpl<$Res> extends _$NavStateCopyWithImpl<$Res>
     implements _$NavStateCopyWith<$Res> {
   __$NavStateCopyWithImpl(_NavState _value, $Res Function(_NavState) _then)
@@ -1314,6 +1347,7 @@ class __$NavStateCopyWithImpl<$Res> extends _$NavStateCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_NavState with DiagnosticableTreeMixin implements _NavState {
   const _$_NavState(
       {this.navViewState,

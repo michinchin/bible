@@ -12,6 +12,7 @@ Note _$NoteFromJson(Map<String, dynamic> json) {
   return _Note.fromJson(json);
 }
 
+/// @nodoc
 class _$NoteTearOff {
   const _$NoteTearOff();
 
@@ -22,11 +23,18 @@ class _$NoteTearOff {
       doc: doc,
     );
   }
+
+// ignore: unused_element
+  Note fromJson(Map<String, Object> json) {
+    return Note.fromJson(json);
+  }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $Note = _$NoteTearOff();
 
+/// @nodoc
 mixin _$Note {
   int get id;
   NotusDocument get doc;
@@ -35,12 +43,14 @@ mixin _$Note {
   $NoteCopyWith<Note> get copyWith;
 }
 
+/// @nodoc
 abstract class $NoteCopyWith<$Res> {
   factory $NoteCopyWith(Note value, $Res Function(Note) then) =
       _$NoteCopyWithImpl<$Res>;
   $Res call({int id, NotusDocument doc});
 }
 
+/// @nodoc
 class _$NoteCopyWithImpl<$Res> implements $NoteCopyWith<$Res> {
   _$NoteCopyWithImpl(this._value, this._then);
 
@@ -60,6 +70,7 @@ class _$NoteCopyWithImpl<$Res> implements $NoteCopyWith<$Res> {
   }
 }
 
+/// @nodoc
 abstract class _$NoteCopyWith<$Res> implements $NoteCopyWith<$Res> {
   factory _$NoteCopyWith(_Note value, $Res Function(_Note) then) =
       __$NoteCopyWithImpl<$Res>;
@@ -67,6 +78,7 @@ abstract class _$NoteCopyWith<$Res> implements $NoteCopyWith<$Res> {
   $Res call({int id, NotusDocument doc});
 }
 
+/// @nodoc
 class __$NoteCopyWithImpl<$Res> extends _$NoteCopyWithImpl<$Res>
     implements _$NoteCopyWith<$Res> {
   __$NoteCopyWithImpl(_Note _value, $Res Function(_Note) _then)
@@ -88,6 +100,8 @@ class __$NoteCopyWithImpl<$Res> extends _$NoteCopyWithImpl<$Res>
 }
 
 @JsonSerializable()
+
+/// @nodoc
 class _$_Note with DiagnosticableTreeMixin implements _Note {
   const _$_Note({@required this.id, @required this.doc})
       : assert(id != null),
@@ -155,6 +169,7 @@ abstract class _Note implements Note {
   _$NoteCopyWith<_Note> get copyWith;
 }
 
+/// @nodoc
 class _$NoteEventTearOff {
   const _$NoteEventTearOff();
 
@@ -176,9 +191,11 @@ class _$NoteEventTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $NoteEvent = _$NoteEventTearOff();
 
+/// @nodoc
 mixin _$NoteEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
@@ -208,11 +225,13 @@ mixin _$NoteEvent {
   });
 }
 
+/// @nodoc
 abstract class $NoteEventCopyWith<$Res> {
   factory $NoteEventCopyWith(NoteEvent value, $Res Function(NoteEvent) then) =
       _$NoteEventCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class _$NoteEventCopyWithImpl<$Res> implements $NoteEventCopyWith<$Res> {
   _$NoteEventCopyWithImpl(this._value, this._then);
 
@@ -221,11 +240,13 @@ class _$NoteEventCopyWithImpl<$Res> implements $NoteEventCopyWith<$Res> {
   final $Res Function(NoteEvent) _then;
 }
 
+/// @nodoc
 abstract class _$LoadNoteCopyWith<$Res> {
   factory _$LoadNoteCopyWith(_LoadNote value, $Res Function(_LoadNote) then) =
       __$LoadNoteCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class __$LoadNoteCopyWithImpl<$Res> extends _$NoteEventCopyWithImpl<$Res>
     implements _$LoadNoteCopyWith<$Res> {
   __$LoadNoteCopyWithImpl(_LoadNote _value, $Res Function(_LoadNote) _then)
@@ -235,6 +256,7 @@ class __$LoadNoteCopyWithImpl<$Res> extends _$NoteEventCopyWithImpl<$Res>
   _LoadNote get _value => super._value as _LoadNote;
 }
 
+/// @nodoc
 class _$_LoadNote with DiagnosticableTreeMixin implements _LoadNote {
   const _$_LoadNote();
 
@@ -318,6 +340,7 @@ abstract class _LoadNote implements NoteEvent {
   const factory _LoadNote() = _$_LoadNote;
 }
 
+/// @nodoc
 abstract class _$SaveNoteCopyWith<$Res> {
   factory _$SaveNoteCopyWith(_SaveNote value, $Res Function(_SaveNote) then) =
       __$SaveNoteCopyWithImpl<$Res>;
@@ -326,6 +349,7 @@ abstract class _$SaveNoteCopyWith<$Res> {
   $NoteCopyWith<$Res> get note;
 }
 
+/// @nodoc
 class __$SaveNoteCopyWithImpl<$Res> extends _$NoteEventCopyWithImpl<$Res>
     implements _$SaveNoteCopyWith<$Res> {
   __$SaveNoteCopyWithImpl(_SaveNote _value, $Res Function(_SaveNote) _then)
@@ -354,6 +378,7 @@ class __$SaveNoteCopyWithImpl<$Res> extends _$NoteEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_SaveNote with DiagnosticableTreeMixin implements _SaveNote {
   const _$_SaveNote({this.note});
 
@@ -453,12 +478,14 @@ abstract class _SaveNote implements NoteEvent {
   _$SaveNoteCopyWith<_SaveNote> get copyWith;
 }
 
+/// @nodoc
 abstract class _$DeleteNoteCopyWith<$Res> {
   factory _$DeleteNoteCopyWith(
           _DeleteNote value, $Res Function(_DeleteNote) then) =
       __$DeleteNoteCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class __$DeleteNoteCopyWithImpl<$Res> extends _$NoteEventCopyWithImpl<$Res>
     implements _$DeleteNoteCopyWith<$Res> {
   __$DeleteNoteCopyWithImpl(
@@ -469,6 +496,7 @@ class __$DeleteNoteCopyWithImpl<$Res> extends _$NoteEventCopyWithImpl<$Res>
   _DeleteNote get _value => super._value as _DeleteNote;
 }
 
+/// @nodoc
 class _$_DeleteNote with DiagnosticableTreeMixin implements _DeleteNote {
   const _$_DeleteNote();
 
@@ -556,6 +584,7 @@ NoteManagerState _$NoteManagerStateFromJson(Map<String, dynamic> json) {
   return _Notes.fromJson(json);
 }
 
+/// @nodoc
 class _$NoteManagerStateTearOff {
   const _$NoteManagerStateTearOff();
 
@@ -565,11 +594,18 @@ class _$NoteManagerStateTearOff {
       notes,
     );
   }
+
+// ignore: unused_element
+  NoteManagerState fromJson(Map<String, Object> json) {
+    return NoteManagerState.fromJson(json);
+  }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $NoteManagerState = _$NoteManagerStateTearOff();
 
+/// @nodoc
 mixin _$NoteManagerState {
   List<Note> get notes;
 
@@ -577,6 +613,7 @@ mixin _$NoteManagerState {
   $NoteManagerStateCopyWith<NoteManagerState> get copyWith;
 }
 
+/// @nodoc
 abstract class $NoteManagerStateCopyWith<$Res> {
   factory $NoteManagerStateCopyWith(
           NoteManagerState value, $Res Function(NoteManagerState) then) =
@@ -584,6 +621,7 @@ abstract class $NoteManagerStateCopyWith<$Res> {
   $Res call({List<Note> notes});
 }
 
+/// @nodoc
 class _$NoteManagerStateCopyWithImpl<$Res>
     implements $NoteManagerStateCopyWith<$Res> {
   _$NoteManagerStateCopyWithImpl(this._value, this._then);
@@ -602,6 +640,7 @@ class _$NoteManagerStateCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 abstract class _$NotesCopyWith<$Res>
     implements $NoteManagerStateCopyWith<$Res> {
   factory _$NotesCopyWith(_Notes value, $Res Function(_Notes) then) =
@@ -610,6 +649,7 @@ abstract class _$NotesCopyWith<$Res>
   $Res call({List<Note> notes});
 }
 
+/// @nodoc
 class __$NotesCopyWithImpl<$Res> extends _$NoteManagerStateCopyWithImpl<$Res>
     implements _$NotesCopyWith<$Res> {
   __$NotesCopyWithImpl(_Notes _value, $Res Function(_Notes) _then)
@@ -629,6 +669,8 @@ class __$NotesCopyWithImpl<$Res> extends _$NoteManagerStateCopyWithImpl<$Res>
 }
 
 @JsonSerializable()
+
+/// @nodoc
 class _$_Notes with DiagnosticableTreeMixin implements _Notes {
   _$_Notes(this.notes) : assert(notes != null);
 
@@ -684,6 +726,7 @@ abstract class _Notes implements NoteManagerState {
   _$NotesCopyWith<_Notes> get copyWith;
 }
 
+/// @nodoc
 class _$NoteManagerEventTearOff {
   const _$NoteManagerEventTearOff();
 
@@ -719,9 +762,11 @@ class _$NoteManagerEventTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $NoteManagerEvent = _$NoteManagerEventTearOff();
 
+/// @nodoc
 mixin _$NoteManagerEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
@@ -759,12 +804,14 @@ mixin _$NoteManagerEvent {
   });
 }
 
+/// @nodoc
 abstract class $NoteManagerEventCopyWith<$Res> {
   factory $NoteManagerEventCopyWith(
           NoteManagerEvent value, $Res Function(NoteManagerEvent) then) =
       _$NoteManagerEventCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class _$NoteManagerEventCopyWithImpl<$Res>
     implements $NoteManagerEventCopyWith<$Res> {
   _$NoteManagerEventCopyWithImpl(this._value, this._then);
@@ -774,12 +821,14 @@ class _$NoteManagerEventCopyWithImpl<$Res>
   final $Res Function(NoteManagerEvent) _then;
 }
 
+/// @nodoc
 abstract class _$LoadNotesCopyWith<$Res> {
   factory _$LoadNotesCopyWith(
           _LoadNotes value, $Res Function(_LoadNotes) then) =
       __$LoadNotesCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class __$LoadNotesCopyWithImpl<$Res>
     extends _$NoteManagerEventCopyWithImpl<$Res>
     implements _$LoadNotesCopyWith<$Res> {
@@ -790,6 +839,7 @@ class __$LoadNotesCopyWithImpl<$Res>
   _LoadNotes get _value => super._value as _LoadNotes;
 }
 
+/// @nodoc
 class _$_LoadNotes with DiagnosticableTreeMixin implements _LoadNotes {
   const _$_LoadNotes();
 
@@ -885,6 +935,7 @@ abstract class _LoadNotes implements NoteManagerEvent {
   const factory _LoadNotes() = _$_LoadNotes;
 }
 
+/// @nodoc
 abstract class _$AddToNotesCopyWith<$Res> {
   factory _$AddToNotesCopyWith(
           _AddToNotes value, $Res Function(_AddToNotes) then) =
@@ -894,6 +945,7 @@ abstract class _$AddToNotesCopyWith<$Res> {
   $NoteCopyWith<$Res> get note;
 }
 
+/// @nodoc
 class __$AddToNotesCopyWithImpl<$Res>
     extends _$NoteManagerEventCopyWithImpl<$Res>
     implements _$AddToNotesCopyWith<$Res> {
@@ -924,6 +976,7 @@ class __$AddToNotesCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_AddToNotes with DiagnosticableTreeMixin implements _AddToNotes {
   const _$_AddToNotes(this.note) : assert(note != null);
 
@@ -1035,6 +1088,7 @@ abstract class _AddToNotes implements NoteManagerEvent {
   _$AddToNotesCopyWith<_AddToNotes> get copyWith;
 }
 
+/// @nodoc
 abstract class _$UpdateNoteCopyWith<$Res> {
   factory _$UpdateNoteCopyWith(
           _UpdateNote value, $Res Function(_UpdateNote) then) =
@@ -1044,6 +1098,7 @@ abstract class _$UpdateNoteCopyWith<$Res> {
   $NoteCopyWith<$Res> get note;
 }
 
+/// @nodoc
 class __$UpdateNoteCopyWithImpl<$Res>
     extends _$NoteManagerEventCopyWithImpl<$Res>
     implements _$UpdateNoteCopyWith<$Res> {
@@ -1074,6 +1129,7 @@ class __$UpdateNoteCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_UpdateNote with DiagnosticableTreeMixin implements _UpdateNote {
   const _$_UpdateNote(this.note) : assert(note != null);
 
@@ -1185,6 +1241,7 @@ abstract class _UpdateNote implements NoteManagerEvent {
   _$UpdateNoteCopyWith<_UpdateNote> get copyWith;
 }
 
+/// @nodoc
 abstract class _$RemoveFromNotesCopyWith<$Res> {
   factory _$RemoveFromNotesCopyWith(
           _RemoveFromNotes value, $Res Function(_RemoveFromNotes) then) =
@@ -1192,6 +1249,7 @@ abstract class _$RemoveFromNotesCopyWith<$Res> {
   $Res call({int id});
 }
 
+/// @nodoc
 class __$RemoveFromNotesCopyWithImpl<$Res>
     extends _$NoteManagerEventCopyWithImpl<$Res>
     implements _$RemoveFromNotesCopyWith<$Res> {
@@ -1212,6 +1270,7 @@ class __$RemoveFromNotesCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_RemoveFromNotes
     with DiagnosticableTreeMixin
     implements _RemoveFromNotes {
@@ -1325,12 +1384,14 @@ abstract class _RemoveFromNotes implements NoteManagerEvent {
   _$RemoveFromNotesCopyWith<_RemoveFromNotes> get copyWith;
 }
 
+/// @nodoc
 abstract class _$SaveNotesCopyWith<$Res> {
   factory _$SaveNotesCopyWith(
           _SaveNotes value, $Res Function(_SaveNotes) then) =
       __$SaveNotesCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class __$SaveNotesCopyWithImpl<$Res>
     extends _$NoteManagerEventCopyWithImpl<$Res>
     implements _$SaveNotesCopyWith<$Res> {
@@ -1341,6 +1402,7 @@ class __$SaveNotesCopyWithImpl<$Res>
   _SaveNotes get _value => super._value as _SaveNotes;
 }
 
+/// @nodoc
 class _$_SaveNotes with DiagnosticableTreeMixin implements _SaveNotes {
   const _$_SaveNotes();
 

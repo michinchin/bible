@@ -23,65 +23,22 @@ class SnapSheet extends StatefulWidget {
   _SnapSheetState createState() => _SnapSheetState();
 }
 
-const _headerHeight = 21.0;
+const _headerHeight = 10.0;
 
 class _SnapSheetState extends State<SnapSheet> {
-  ValueNotifier<double> onDragValue;
-  double bottomPadding;
   List<double> snapOffsets;
+  List<Widget> sheets;
+  List<GlobalKey> keys;
 
   @override
   void initState() {
     super.initState();
+    keys = <GlobalKey>[GlobalKey(), GlobalKey()];
+    sheets = <Widget>[MainSheet(key: keys[0]), SelectionSheet(key: keys[1])];
   }
 
   @override
   Widget build(BuildContext context) {
-    List<double> _dragOpacityValue(double value) {
-      // as value goes from one snapping point to the next - adjust opacity
-      // first and last 10% - opacity is 0 or 1.  middle 80% linear from 0 to 1
-
-      final opacities = <double>[];
-
-      final topValue = snapOffsets[1];
-      final bottomValue = snapOffsets[0];
-      final tenPercent = (topValue - bottomValue) * 0.1;
-      final bottomCutOff = bottomValue + tenPercent;
-      final topCutOff = topValue - tenPercent;
-
-      // we're computing opacity of mini, medium would be 1 - mini...
-      // this would need to be tweaked if we add a full screen mode
-      double opacity;
-
-      if (value <= bottomCutOff) {
-        opacity = 1.0;
-      } else if (value >= topCutOff) {
-        opacity = 0.0;
-      } else {
-        opacity = 1 - (value - bottomCutOff) / (topCutOff - bottomCutOff);
-      }
-
-      opacity = math.min(1.0, math.max(opacity, 0.0));
-
-      opacities.add(opacity); // mini sheet
-      // ignore: cascade_invocations
-      opacities.add(1.0 - opacity); // medium sheet
-
-      return opacities;
-    }
-
-    // current sheet size
-    SheetSize _getSheetSize(double d) {
-      // sheet sizes and snaps aren't always exactly the same - effected by device pixel density
-      for (var i = 0; i < snapOffsets.length; i++) {
-        if (d.round() == snapOffsets[i].round()) {
-          return SheetSize.values[i];
-        }
-      }
-
-      return null;
-    }
-
     final size = MediaQuery.of(context).size;
     double maxWidth;
 
@@ -94,6 +51,92 @@ class _SnapSheetState extends State<SnapSheet> {
       maxWidth = 460;
     }
 
+    snapOffsets ??= [_headerHeight, size.height];
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      var changed = false;
+      final offsets = <double>[];
+
+      for (final i in [0, 1]) {
+        if (keys[i].currentContext != null) {
+          final height = (keys[i].currentContext.findRenderObject() as RenderBox)
+              .size
+              .height +
+              _headerHeight +
+              TecScaffoldWrapper.navigationBarPadding;
+          offsets.add(height);
+          if (height != snapOffsets[i]) {
+            changed = true;
+          }
+        }
+      }
+
+      if (changed) {
+        setState(() {
+          snapOffsets = offsets;
+        });
+      }
+    });
+
+    return SafeArea(
+        bottom: false,
+        child: SlidingSheet(
+          maxWidth: maxWidth,
+          elevation: 3,
+          cornerRadius: 15,
+          duration: const Duration(milliseconds: 250),
+          addTopViewPaddingOnFullscreen: true,
+          headerBuilder: (c, s) {
+            return Container(height: 10);
+          },
+          closeOnBackButtonPressed: true,
+          snapSpec: SnapSpec(
+            initialSnap: snapOffsets[0],
+            snappings: snapOffsets,
+            positioning: SnapPositioning.pixelOffset,
+          ),
+          color: Theme.of(context).canvasColor,
+          builder: (c, s) {
+            return Container(
+              height: snapOffsets[1] - _headerHeight,
+              constraints: BoxConstraints.loose(size),
+              child: BlocConsumer<SheetManagerBloc, SheetManagerState>(
+                listener: (c, state) {
+                  // on swipe down from selection sheet, deselect
+                  // SelectionSheetModel.deselect(c);
+                  SheetController.of(c)
+                      .snapToExtent(snapOffsets[(state.type == SheetType.main) ? 0 : 1]);
+                  debugPrint('hi mom');
+                },
+                builder: (c, state) {
+                  return Stack(
+                    children: [
+                      IgnorePointer(
+                        ignoring: state.type == SheetType.selection,
+                        child: Opacity(
+                          opacity: state.type == SheetType.main ? 1.0 : 0,
+                          child: sheets[0],
+                        ),
+                      ),
+                      IgnorePointer(
+                        ignoring: state.type == SheetType.main,
+                        child: Opacity(
+                          opacity: state.type == SheetType.selection ? 1.0 : 0.0,
+                          child: sheets[1],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            );
+          },
+          body: widget.body,
+        ));
+  }
+
+/*
+  Widget bob() {
     return SafeArea(
       bottom: false,
       child: Stack(
@@ -118,30 +161,20 @@ class _SnapSheetState extends State<SnapSheet> {
                 final sheets = <Widget>[];
                 final keys = <GlobalKey>[GlobalKey(), GlobalKey()];
 
-                switch (state.type) {
-                  case SheetType.selection:
-                    sheets.add(SelectionSheet(key: keys[0], sheetSize: SheetSize.mini));
-                    sheets.add(SelectionSheet(key: keys[1], sheetSize: SheetSize.medium));
-                    break;
-                  default:
-                    sheets.add(MainSheet(key: keys[0], sheetSize: SheetSize.mini));
-                    sheets.add(MainSheet(key: keys[1], sheetSize: SheetSize.medium));
-                    break;
-                }
+                sheets.add(MainSheet(key: keys[0]));
+                // ignore: cascade_invocations
+                sheets.add(SelectionSheet(key: keys[1]));
 
                 snapOffsets ??= [_headerHeight, size.height];
 
                 return SlidingSheet(
                   maxWidth: maxWidth,
                   elevation: 3,
-                  closeOnBackdropTap: state.type == SheetType.windows,
                   cornerRadius: 15,
                   duration: const Duration(milliseconds: 250),
                   addTopViewPaddingOnFullscreen: true,
-                  listener: (s) {
-                    onDragValue.value = s.extent;
-                    // debugPrint('${onDragValue.value}');
-                    // need to figure out how to catch a mode change when a full drag happened...
+                  headerBuilder: (c, s) {
+                    return Container(height: 10);
                   },
                   closeOnBackButtonPressed: true,
                   snapSpec: SnapSpec(
@@ -161,13 +194,13 @@ class _SnapSheetState extends State<SnapSheet> {
                   color: Theme.of(context).canvasColor,
                   builder: (c, s) {
                     return BlocBuilder<SheetManagerBloc, SheetManagerState>(
-                        buildWhen: (previous, current) {
+                        buildWhen: (prev, current) {
                       // we never want to "rebuild" the sub-tree on state changes, that is
                       // handled above as we rebuild for each type switch to allow for
                       // different snap settings for the different sheet types
 
                       // might need to adjust snap though...
-                      if (onDragValue.value.round() != snapOffsets[current.size.index].round()) {
+                      if (prev.type != current.type) {
                         SheetController.of(c).snapToExtent(snapOffsets[current.size.index]);
                       }
 
@@ -198,78 +231,44 @@ class _SnapSheetState extends State<SnapSheet> {
 
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             SheetController.of(c).rebuild();
-                            final extent = snapOffsets[
-                                (c.read<SheetManagerBloc>().state.size == SheetSize.mini) ? 0 : 1];
+                            final extent = snapOffsets[(state.size == SheetSize.mini) ? 0 : 1];
                             SheetController.of(c).snapToExtent(extent);
                           });
                         }
                       });
 
-                      return ValueListenableBuilder<double>(
-                          valueListenable: onDragValue ??= ValueNotifier<double>(snapOffsets.first),
-                          builder: (_, value, __) {
-                            final opacities = _dragOpacityValue(value);
-
-                            return Container(
-                              height: snapOffsets[1] - _headerHeight,
-                              constraints: BoxConstraints.loose(size),
-                              child: Stack(
-                                children: [
-                                  IgnorePointer(
-                                    ignoring: opacities[0] == 0,
-                                    child: Opacity(
-                                      opacity: opacities[0],
-                                      child: sheets[0],
-                                    ),
-                                  ),
-                                  IgnorePointer(
-                                    ignoring: opacities[1] == 0,
-                                    child: Opacity(
-                                      opacity: opacities[1],
-                                      child: sheets[1],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          });
-                    });
-                  },
-                  body: widget.body,
-                  headerBuilder: (c, s) {
-                    return InkWell(
-                      onTap: () {
-                        final nextSize =
-                            state.size == SheetSize.mini ? SheetSize.medium : SheetSize.mini;
-                        c.read<SheetManagerBloc>().changeSize(nextSize);
-                      },
-                      child: Padding(
-                        // NOTICE: adjust the _headerHeight variable at the top of this
-                        // class if you adjust this padding
-                        padding: const EdgeInsets.all(8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      return Container(
+                        height: snapOffsets[1] - _headerHeight,
+                        constraints: BoxConstraints.loose(size),
+                        child: Stack(
                           children: [
-                            Container(
-                              height: 5,
-                              width: 30,
-                              decoration: ShapeDecoration(
-                                  color: Theme.of(c).textColor.withOpacity(0.2),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15))),
+                            IgnorePointer(
+                              ignoring: state.type == SheetType.selection,
+                              child: Opacity(
+                                opacity: state.type == SheetType.main ? 1.0 : 0,
+                                child: sheets[0],
+                              ),
+                            ),
+                            IgnorePointer(
+                              ignoring: state.type == SheetType.main,
+                              child: Opacity(
+                                opacity: state.type == SheetType.selection ? 1.0 : 0.0,
+                                child: sheets[1],
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    );
+                      );
+                    });
                   },
+                  body: widget.body,
                 );
               }),
         ],
       ),
     );
   }
+   */
 }
 
 ///

@@ -9,6 +9,7 @@ part of 'margin_notes_bloc.dart';
 
 T _$identity<T>(T value) => value;
 
+/// @nodoc
 class _$MarginNotesEventTearOff {
   const _$MarginNotesEventTearOff();
 
@@ -42,9 +43,11 @@ class _$MarginNotesEventTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $MarginNotesEvent = _$MarginNotesEventTearOff();
 
+/// @nodoc
 mixin _$MarginNotesEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
@@ -78,12 +81,14 @@ mixin _$MarginNotesEvent {
   });
 }
 
+/// @nodoc
 abstract class $MarginNotesEventCopyWith<$Res> {
   factory $MarginNotesEventCopyWith(
           MarginNotesEvent value, $Res Function(MarginNotesEvent) then) =
       _$MarginNotesEventCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class _$MarginNotesEventCopyWithImpl<$Res>
     implements $MarginNotesEventCopyWith<$Res> {
   _$MarginNotesEventCopyWithImpl(this._value, this._then);
@@ -93,6 +98,7 @@ class _$MarginNotesEventCopyWithImpl<$Res>
   final $Res Function(MarginNotesEvent) _then;
 }
 
+/// @nodoc
 abstract class _$UpdateFromDbCopyWith<$Res> {
   factory _$UpdateFromDbCopyWith(
           _UpdateFromDb value, $Res Function(_UpdateFromDb) then) =
@@ -100,6 +106,7 @@ abstract class _$UpdateFromDbCopyWith<$Res> {
   $Res call({Map<int, MarginNote> marginNotes});
 }
 
+/// @nodoc
 class __$UpdateFromDbCopyWithImpl<$Res>
     extends _$MarginNotesEventCopyWithImpl<$Res>
     implements _$UpdateFromDbCopyWith<$Res> {
@@ -122,6 +129,7 @@ class __$UpdateFromDbCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_UpdateFromDb with DiagnosticableTreeMixin implements _UpdateFromDb {
   const _$_UpdateFromDb({@required this.marginNotes})
       : assert(marginNotes != null);
@@ -230,12 +238,14 @@ abstract class _UpdateFromDb implements MarginNotesEvent {
   _$UpdateFromDbCopyWith<_UpdateFromDb> get copyWith;
 }
 
+/// @nodoc
 abstract class _$AddCopyWith<$Res> {
   factory _$AddCopyWith(_Add value, $Res Function(_Add) then) =
       __$AddCopyWithImpl<$Res>;
   $Res call({String text, Reference ref});
 }
 
+/// @nodoc
 class __$AddCopyWithImpl<$Res> extends _$MarginNotesEventCopyWithImpl<$Res>
     implements _$AddCopyWith<$Res> {
   __$AddCopyWithImpl(_Add _value, $Res Function(_Add) _then)
@@ -256,6 +266,7 @@ class __$AddCopyWithImpl<$Res> extends _$MarginNotesEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_Add with DiagnosticableTreeMixin implements _Add {
   const _$_Add({@required this.text, @required this.ref})
       : assert(text != null),
@@ -371,12 +382,14 @@ abstract class _Add implements MarginNotesEvent {
   _$AddCopyWith<_Add> get copyWith;
 }
 
+/// @nodoc
 abstract class _$DeleteCopyWith<$Res> {
   factory _$DeleteCopyWith(_Delete value, $Res Function(_Delete) then) =
       __$DeleteCopyWithImpl<$Res>;
   $Res call({MarginNote marginNote});
 }
 
+/// @nodoc
 class __$DeleteCopyWithImpl<$Res> extends _$MarginNotesEventCopyWithImpl<$Res>
     implements _$DeleteCopyWith<$Res> {
   __$DeleteCopyWithImpl(_Delete _value, $Res Function(_Delete) _then)
@@ -395,6 +408,7 @@ class __$DeleteCopyWithImpl<$Res> extends _$MarginNotesEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_Delete with DiagnosticableTreeMixin implements _Delete {
   const _$_Delete(this.marginNote) : assert(marginNote != null);
 
@@ -501,6 +515,7 @@ abstract class _Delete implements MarginNotesEvent {
   _$DeleteCopyWith<_Delete> get copyWith;
 }
 
+/// @nodoc
 abstract class _$ChangeVolumeIdCopyWith<$Res> {
   factory _$ChangeVolumeIdCopyWith(
           _ChangeVolumeId value, $Res Function(_ChangeVolumeId) then) =
@@ -508,6 +523,7 @@ abstract class _$ChangeVolumeIdCopyWith<$Res> {
   $Res call({int volumeId});
 }
 
+/// @nodoc
 class __$ChangeVolumeIdCopyWithImpl<$Res>
     extends _$MarginNotesEventCopyWithImpl<$Res>
     implements _$ChangeVolumeIdCopyWith<$Res> {
@@ -528,6 +544,7 @@ class __$ChangeVolumeIdCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ChangeVolumeId
     with DiagnosticableTreeMixin
     implements _ChangeVolumeId {
@@ -636,6 +653,7 @@ abstract class _ChangeVolumeId implements MarginNotesEvent {
   _$ChangeVolumeIdCopyWith<_ChangeVolumeId> get copyWith;
 }
 
+/// @nodoc
 class _$ChapterMarginNotesTearOff {
   const _$ChapterMarginNotesTearOff();
 
@@ -653,9 +671,11 @@ class _$ChapterMarginNotesTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $ChapterMarginNotes = _$ChapterMarginNotesTearOff();
 
+/// @nodoc
 mixin _$ChapterMarginNotes {
   int get volumeId;
   int get book;
@@ -666,6 +686,7 @@ mixin _$ChapterMarginNotes {
   $ChapterMarginNotesCopyWith<ChapterMarginNotes> get copyWith;
 }
 
+/// @nodoc
 abstract class $ChapterMarginNotesCopyWith<$Res> {
   factory $ChapterMarginNotesCopyWith(
           ChapterMarginNotes value, $Res Function(ChapterMarginNotes) then) =
@@ -678,6 +699,7 @@ abstract class $ChapterMarginNotesCopyWith<$Res> {
       bool loaded});
 }
 
+/// @nodoc
 class _$ChapterMarginNotesCopyWithImpl<$Res>
     implements $ChapterMarginNotesCopyWith<$Res> {
   _$ChapterMarginNotesCopyWithImpl(this._value, this._then);
@@ -706,6 +728,7 @@ class _$ChapterMarginNotesCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 abstract class _$ChapterMarginNotesCopyWith<$Res>
     implements $ChapterMarginNotesCopyWith<$Res> {
   factory _$ChapterMarginNotesCopyWith(
@@ -720,6 +743,7 @@ abstract class _$ChapterMarginNotesCopyWith<$Res>
       bool loaded});
 }
 
+/// @nodoc
 class __$ChapterMarginNotesCopyWithImpl<$Res>
     extends _$ChapterMarginNotesCopyWithImpl<$Res>
     implements _$ChapterMarginNotesCopyWith<$Res> {
@@ -750,6 +774,7 @@ class __$ChapterMarginNotesCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ChapterMarginNotes
     with DiagnosticableTreeMixin
     implements _ChapterMarginNotes {

@@ -9,6 +9,7 @@ part of 'search_bloc.dart';
 
 T _$identity<T>(T value) => value;
 
+/// @nodoc
 class _$SearchEventTearOff {
   const _$SearchEventTearOff();
 
@@ -47,9 +48,11 @@ class _$SearchEventTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $SearchEvent = _$SearchEventTearOff();
 
+/// @nodoc
 mixin _$SearchEvent {
   @optionalTypeArgs
   Result when<Result extends Object>({
@@ -87,12 +90,14 @@ mixin _$SearchEvent {
   });
 }
 
+/// @nodoc
 abstract class $SearchEventCopyWith<$Res> {
   factory $SearchEventCopyWith(
           SearchEvent value, $Res Function(SearchEvent) then) =
       _$SearchEventCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class _$SearchEventCopyWithImpl<$Res> implements $SearchEventCopyWith<$Res> {
   _$SearchEventCopyWithImpl(this._value, this._then);
 
@@ -101,6 +106,7 @@ class _$SearchEventCopyWithImpl<$Res> implements $SearchEventCopyWith<$Res> {
   final $Res Function(SearchEvent) _then;
 }
 
+/// @nodoc
 abstract class _$RequestedCopyWith<$Res> {
   factory _$RequestedCopyWith(
           _Requested value, $Res Function(_Requested) then) =
@@ -108,6 +114,7 @@ abstract class _$RequestedCopyWith<$Res> {
   $Res call({String search, List<int> translations});
 }
 
+/// @nodoc
 class __$RequestedCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
     implements _$RequestedCopyWith<$Res> {
   __$RequestedCopyWithImpl(_Requested _value, $Res Function(_Requested) _then)
@@ -130,6 +137,7 @@ class __$RequestedCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_Requested with DiagnosticableTreeMixin implements _Requested {
   const _$_Requested({this.search, this.translations});
 
@@ -251,12 +259,14 @@ abstract class _Requested implements SearchEvent {
   _$RequestedCopyWith<_Requested> get copyWith;
 }
 
+/// @nodoc
 abstract class _$SelectionModeCopyWith<$Res> {
   factory _$SelectionModeCopyWith(
           _SelectionMode value, $Res Function(_SelectionMode) then) =
       __$SelectionModeCopyWithImpl<$Res>;
 }
 
+/// @nodoc
 class __$SelectionModeCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
     implements _$SelectionModeCopyWith<$Res> {
   __$SelectionModeCopyWithImpl(
@@ -267,6 +277,7 @@ class __$SelectionModeCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
   _SelectionMode get _value => super._value as _SelectionMode;
 }
 
+/// @nodoc
 class _$_SelectionMode with DiagnosticableTreeMixin implements _SelectionMode {
   const _$_SelectionMode();
 
@@ -363,6 +374,7 @@ abstract class _SelectionMode implements SearchEvent {
   const factory _SelectionMode() = _$_SelectionMode;
 }
 
+/// @nodoc
 abstract class _$ModifySearchResultCopyWith<$Res> {
   factory _$ModifySearchResultCopyWith(
           _ModifySearchResult value, $Res Function(_ModifySearchResult) then) =
@@ -372,6 +384,7 @@ abstract class _$ModifySearchResultCopyWith<$Res> {
   $SearchResultInfoCopyWith<$Res> get searchResult;
 }
 
+/// @nodoc
 class __$ModifySearchResultCopyWithImpl<$Res>
     extends _$SearchEventCopyWithImpl<$Res>
     implements _$ModifySearchResultCopyWith<$Res> {
@@ -404,6 +417,7 @@ class __$ModifySearchResultCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_ModifySearchResult
     with DiagnosticableTreeMixin
     implements _ModifySearchResult {
@@ -519,6 +533,7 @@ abstract class _ModifySearchResult implements SearchEvent {
   _$ModifySearchResultCopyWith<_ModifySearchResult> get copyWith;
 }
 
+/// @nodoc
 abstract class _$FilterBooksCopyWith<$Res> {
   factory _$FilterBooksCopyWith(
           _FilterBooks value, $Res Function(_FilterBooks) then) =
@@ -526,6 +541,7 @@ abstract class _$FilterBooksCopyWith<$Res> {
   $Res call({List<int> excludedBooks});
 }
 
+/// @nodoc
 class __$FilterBooksCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
     implements _$FilterBooksCopyWith<$Res> {
   __$FilterBooksCopyWithImpl(
@@ -547,6 +563,7 @@ class __$FilterBooksCopyWithImpl<$Res> extends _$SearchEventCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_FilterBooks with DiagnosticableTreeMixin implements _FilterBooks {
   const _$_FilterBooks(this.excludedBooks) : assert(excludedBooks != null);
 
@@ -659,6 +676,7 @@ abstract class _FilterBooks implements SearchEvent {
   _$FilterBooksCopyWith<_FilterBooks> get copyWith;
 }
 
+/// @nodoc
 abstract class _$SetScrollIndexCopyWith<$Res> {
   factory _$SetScrollIndexCopyWith(
           _SetScrollIndex value, $Res Function(_SetScrollIndex) then) =
@@ -666,6 +684,7 @@ abstract class _$SetScrollIndexCopyWith<$Res> {
   $Res call({int scrollIndex});
 }
 
+/// @nodoc
 class __$SetScrollIndexCopyWithImpl<$Res>
     extends _$SearchEventCopyWithImpl<$Res>
     implements _$SetScrollIndexCopyWith<$Res> {
@@ -686,6 +705,7 @@ class __$SetScrollIndexCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_SetScrollIndex
     with DiagnosticableTreeMixin
     implements _SetScrollIndex {
@@ -800,6 +820,7 @@ abstract class _SetScrollIndex implements SearchEvent {
   _$SetScrollIndexCopyWith<_SetScrollIndex> get copyWith;
 }
 
+/// @nodoc
 class _$SearchStateTearOff {
   const _$SearchStateTearOff();
 
@@ -828,9 +849,11 @@ class _$SearchStateTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $SearchState = _$SearchStateTearOff();
 
+/// @nodoc
 mixin _$SearchState {
   String get search;
   List<SearchResultInfo> get searchResults;
@@ -845,6 +868,7 @@ mixin _$SearchState {
   $SearchStateCopyWith<SearchState> get copyWith;
 }
 
+/// @nodoc
 abstract class $SearchStateCopyWith<$Res> {
   factory $SearchStateCopyWith(
           SearchState value, $Res Function(SearchState) then) =
@@ -861,6 +885,7 @@ abstract class $SearchStateCopyWith<$Res> {
       bool selectionMode});
 }
 
+/// @nodoc
 class _$SearchStateCopyWithImpl<$Res> implements $SearchStateCopyWith<$Res> {
   _$SearchStateCopyWithImpl(this._value, this._then);
 
@@ -905,6 +930,7 @@ class _$SearchStateCopyWithImpl<$Res> implements $SearchStateCopyWith<$Res> {
   }
 }
 
+/// @nodoc
 abstract class _$SearchStateCopyWith<$Res>
     implements $SearchStateCopyWith<$Res> {
   factory _$SearchStateCopyWith(
@@ -923,6 +949,7 @@ abstract class _$SearchStateCopyWith<$Res>
       bool selectionMode});
 }
 
+/// @nodoc
 class __$SearchStateCopyWithImpl<$Res> extends _$SearchStateCopyWithImpl<$Res>
     implements _$SearchStateCopyWith<$Res> {
   __$SearchStateCopyWithImpl(
@@ -969,6 +996,7 @@ class __$SearchStateCopyWithImpl<$Res> extends _$SearchStateCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_SearchState with DiagnosticableTreeMixin implements _SearchState {
   const _$_SearchState(
       {this.search,
@@ -1104,6 +1132,7 @@ abstract class _SearchState implements SearchState {
   _$SearchStateCopyWith<_SearchState> get copyWith;
 }
 
+/// @nodoc
 class _$SearchResultInfoTearOff {
   const _$SearchResultInfoTearOff();
 
@@ -1125,9 +1154,11 @@ class _$SearchResultInfoTearOff {
   }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $SearchResultInfo = _$SearchResultInfoTearOff();
 
+/// @nodoc
 mixin _$SearchResultInfo {
   SearchResult get searchResult;
   bool get contextExpanded;
@@ -1139,6 +1170,7 @@ mixin _$SearchResultInfo {
   $SearchResultInfoCopyWith<SearchResultInfo> get copyWith;
 }
 
+/// @nodoc
 abstract class $SearchResultInfoCopyWith<$Res> {
   factory $SearchResultInfoCopyWith(
           SearchResultInfo value, $Res Function(SearchResultInfo) then) =
@@ -1152,6 +1184,7 @@ abstract class $SearchResultInfoCopyWith<$Res> {
       Map<int, Context> contextMap});
 }
 
+/// @nodoc
 class _$SearchResultInfoCopyWithImpl<$Res>
     implements $SearchResultInfoCopyWith<$Res> {
   _$SearchResultInfoCopyWithImpl(this._value, this._then);
@@ -1188,6 +1221,7 @@ class _$SearchResultInfoCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 abstract class _$SearchResultInfoCopyWith<$Res>
     implements $SearchResultInfoCopyWith<$Res> {
   factory _$SearchResultInfoCopyWith(
@@ -1203,6 +1237,7 @@ abstract class _$SearchResultInfoCopyWith<$Res>
       Map<int, Context> contextMap});
 }
 
+/// @nodoc
 class __$SearchResultInfoCopyWithImpl<$Res>
     extends _$SearchResultInfoCopyWithImpl<$Res>
     implements _$SearchResultInfoCopyWith<$Res> {
@@ -1241,6 +1276,7 @@ class __$SearchResultInfoCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 class _$_SearchResultInfo extends _SearchResultInfo
     with DiagnosticableTreeMixin {
   const _$_SearchResultInfo(this.searchResult,

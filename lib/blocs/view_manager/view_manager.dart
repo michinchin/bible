@@ -38,6 +38,38 @@ class ViewManager {
     }
   }
 
+  void makeVisibleOrAdd(BuildContext context, final String windowType) {
+    ViewState lastVisibleView;
+
+    for (final view in context.viewManager.state.views) {
+      if (context.viewManager.isViewVisible(view.uid)) {
+        lastVisibleView = view;
+      }
+
+      if (view.type == windowType) {
+        if (!context.viewManager.isViewVisible(view.uid)) {
+          if (context.viewManager.state.maximizedViewUid > 0) {
+            // maximize the existing window...
+            context.viewManager.add(ViewManagerEvent.maximize(view.uid));
+          } else {
+            // move the window from hidden to last visible one...
+            context.viewManager.add(ViewManagerEvent.move(
+                fromPosition: context.viewManager.indexOfView(view.uid),
+                toPosition: context.viewManager.indexOfView(lastVisibleView.uid)));
+          }
+        } else {
+          TecToast.show(context, 'Window is already visible');
+        }
+
+        // this window was already created... now it's visible... return
+        return;
+      }
+    }
+
+    // window not found, add one
+    context.viewManager?.add(ViewManagerEvent.add(type: windowType, data: null, position: null));
+  }
+
   String menuTitleWith({String type, BuildContext context, ViewState state}) {
     assert(tec.isNotNullOrEmpty(type) || (tec.isNotNullOrEmpty(state?.type) && context != null));
     final viewType = type ?? state?.type;

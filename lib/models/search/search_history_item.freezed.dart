@@ -12,6 +12,7 @@ SearchHistoryItem _$SearchHistoryItemFromJson(Map<String, dynamic> json) {
   return _SearchHistoryItem.fromJson(json);
 }
 
+/// @nodoc
 class _$SearchHistoryItemTearOff {
   const _$SearchHistoryItemTearOff();
 
@@ -30,11 +31,18 @@ class _$SearchHistoryItemTearOff {
       modified: modified,
     );
   }
+
+// ignore: unused_element
+  SearchHistoryItem fromJson(Map<String, Object> json) {
+    return SearchHistoryItem.fromJson(json);
+  }
 }
 
+/// @nodoc
 // ignore: unused_element
 const $SearchHistoryItem = _$SearchHistoryItemTearOff();
 
+/// @nodoc
 mixin _$SearchHistoryItem {
   String get search;
   String get volumesFiltered;
@@ -46,6 +54,7 @@ mixin _$SearchHistoryItem {
   $SearchHistoryItemCopyWith<SearchHistoryItem> get copyWith;
 }
 
+/// @nodoc
 abstract class $SearchHistoryItemCopyWith<$Res> {
   factory $SearchHistoryItemCopyWith(
           SearchHistoryItem value, $Res Function(SearchHistoryItem) then) =
@@ -58,6 +67,7 @@ abstract class $SearchHistoryItemCopyWith<$Res> {
       DateTime modified});
 }
 
+/// @nodoc
 class _$SearchHistoryItemCopyWithImpl<$Res>
     implements $SearchHistoryItemCopyWith<$Res> {
   _$SearchHistoryItemCopyWithImpl(this._value, this._then);
@@ -88,6 +98,7 @@ class _$SearchHistoryItemCopyWithImpl<$Res>
   }
 }
 
+/// @nodoc
 abstract class _$SearchHistoryItemCopyWith<$Res>
     implements $SearchHistoryItemCopyWith<$Res> {
   factory _$SearchHistoryItemCopyWith(
@@ -102,6 +113,7 @@ abstract class _$SearchHistoryItemCopyWith<$Res>
       DateTime modified});
 }
 
+/// @nodoc
 class __$SearchHistoryItemCopyWithImpl<$Res>
     extends _$SearchHistoryItemCopyWithImpl<$Res>
     implements _$SearchHistoryItemCopyWith<$Res> {
@@ -135,6 +147,8 @@ class __$SearchHistoryItemCopyWithImpl<$Res>
 }
 
 @JsonSerializable()
+
+/// @nodoc
 class _$_SearchHistoryItem implements _SearchHistoryItem {
   const _$_SearchHistoryItem(
       {@required this.search,
