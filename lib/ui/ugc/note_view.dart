@@ -42,7 +42,7 @@ class __NoteScreenState extends State<_NoteScreen> {
     KeyboardVisibility.onChange.listen(
       (visible) {
         if (visible) {
-          context?.tbloc<SheetManagerBloc>()?.collapse(context);
+          context?.tbloc<SheetManagerBloc>()?.add(SheetEvent.collapse);
         }
       },
     );

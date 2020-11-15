@@ -86,7 +86,12 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
         ),
       ],
     ];
-    return Material(
+    return GestureDetector(
+      onPanUpdate: (details) {
+        if (details.delta.dy > 5) {
+          SelectionSheetModel.deselect(context);
+        }
+      },
       child: BlocBuilder<PrefItemsBloc, PrefItems>(
           cubit: context.tbloc<PrefItemsBloc>(),
           builder: (context, state) {

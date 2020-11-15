@@ -9,7 +9,7 @@ packages:
     source: hosted
     version: "11.0.0"
   analyzer:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: analyzer
       url: "https://pub.dartlang.org"
@@ -915,13 +915,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
-  sliding_sheet:
-    dependency: "direct main"
-    description:
-      name: sliding_sheet
-      url: "http://noah.tecarta.com:8100"
-    source: hosted
-    version: "0.3.10"
   source_gen:
     dependency: transitive
     description:

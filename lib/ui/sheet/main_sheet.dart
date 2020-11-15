@@ -37,7 +37,9 @@ class _MainSheetState extends State<MainSheet> {
               onPressed: () {
                 tec.dmPrint('Tapped button $key');
                 if (key == 'Library') showLibrary(context);
-                if (key == 'Notes') ViewManager.shared.makeVisibleOrAdd(context, Const.viewTypeNotes);
+                if (key == 'Notes') {
+                  ViewManager.shared.makeVisibleOrAdd(context, Const.viewTypeNotes);
+                }
                 if (key == 'Home') showHome(context);
               },
             )

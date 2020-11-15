@@ -226,7 +226,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
     if (bcv != null) {
       // restore the sheet...
       Future.delayed(const Duration(milliseconds: 250), () {
-        context.tbloc<SheetManagerBloc>().restore(context);
+        context.tbloc<SheetManagerBloc>().add(SheetEvent.restore);
       });
 
       final viewData = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData;
@@ -588,7 +588,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
             autoscrollActive: (active) {
               if (active) {
                 tec.dmPrint('ChapterViewHtml: autoscroll is active, collapsing the bottom sheet.');
-                context.tbloc<SheetManagerBloc>().collapse(context);
+                context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
               } else {
                 // tec.dmPrint('ChapterViewHtml autoscrollActive false, restoring the bottom sheet.');
                 // context.tbloc<SheetManagerBloc>().restore(context);
@@ -601,11 +601,11 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                   lastScrollOffset ??= notification.metrics.pixels - scrollBuffer - 1;
                   if (notification.metrics.pixels < (lastScrollOffset - scrollBuffer)) {
                     tec.dmPrint('ChapterViewHtml: scrolled up, restoring the bottom sheet.');
-                    context.tbloc<SheetManagerBloc>().restore(context);
+                    context.tbloc<SheetManagerBloc>().add(SheetEvent.restore);
                     lastScrollOffset = notification.metrics.pixels;
                   } else if (notification.metrics.pixels > (lastScrollOffset + scrollBuffer)) {
                     tec.dmPrint('ChapterViewHtml: scrolled down, collapsing the bottom sheet.');
-                    context.tbloc<SheetManagerBloc>().collapse(context);
+                    context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
                     lastScrollOffset = notification.metrics.pixels;
                   }
                 }

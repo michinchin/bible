@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
-import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
@@ -63,37 +62,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 left: false,
                 right: false,
                 bottom: false,
-                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(builder: (context, state) {
-                  return _BottomSheet(
-                    child: ViewManagerWidget(state: state),
-                  );
-                }),
+                child: Stack(children: [
+                  BlocBuilder<ViewManagerBloc, ViewManagerState>(
+                    builder: (context, state) {
+                      return ViewManagerWidget(state: state);
+                    },
+                  ),
+                  SnapSheet(),
+                ]),
               ),
             ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class _BottomSheet extends StatelessWidget {
-  final Widget child;
-
-  const _BottomSheet({Key key, this.child}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocListener<SelectionBloc, SelectionState>(
-      listenWhen: (previous, current) => previous.isTextSelected != current.isTextSelected,
-      listener: (context, state) {
-        if (state.isTextSelected) {
-          context.tbloc<SheetManagerBloc>()..changeType(SheetType.selection);
-        } else {
-          context.tbloc<SheetManagerBloc>()..changeType(SheetType.main);
-        }
-      },
-      child: SnapSheet(body: child),
     );
   }
 }

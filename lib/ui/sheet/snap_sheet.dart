@@ -1,273 +1,110 @@
-import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sliding_sheet/sliding_sheet.dart';
+import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
+import '../common/common.dart';
 import 'main_sheet.dart';
 import 'selection_sheet.dart';
 
 // must have SheetManagerBloc provided
 class SnapSheet extends StatefulWidget {
-  final Widget body;
-
-  const SnapSheet({
-    @required this.body,
-  }) : assert(body != null);
-
   @override
   _SnapSheetState createState() => _SnapSheetState();
 }
 
-const _headerHeight = 10.0;
-
 class _SnapSheetState extends State<SnapSheet> {
-  List<double> snapOffsets;
   List<Widget> sheets;
-  List<GlobalKey> keys;
 
   @override
   void initState() {
     super.initState();
-    keys = <GlobalKey>[GlobalKey(), GlobalKey()];
-    sheets = <Widget>[MainSheet(key: keys[0]), SelectionSheet(key: keys[1])];
+    sheets = [
+      const _SheetShadow(key: ValueKey(1), child: MainSheet()),
+      const _SheetShadow(key: ValueKey(2), child: SelectionSheet()),
+      Container(),
+    ];
+  }
+
+  static Widget animatedLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
+    return Stack(
+      children: <Widget>[
+        ...previousChildren,
+        if (currentChild != null) currentChild,
+      ],
+      alignment: Alignment.bottomCenter,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    double maxWidth;
-
-    // for phones max width is portrait width
-    if (math.max(size.width, size.height) < 1000) {
-      maxWidth = math.min(size.width, 450);
-    }
-    // for bigger devices max width is 460
-    else {
-      maxWidth = 460;
-    }
-
-    snapOffsets ??= [_headerHeight, size.height];
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      var changed = false;
-      final offsets = <double>[];
-
-      for (final i in [0, 1]) {
-        if (keys[i].currentContext != null) {
-          final height = (keys[i].currentContext.findRenderObject() as RenderBox)
-              .size
-              .height +
-              _headerHeight +
-              TecScaffoldWrapper.navigationBarPadding;
-          offsets.add(height);
-          if (height != snapOffsets[i]) {
-            changed = true;
-          }
+    return BlocListener<SelectionBloc, SelectionState>(
+      listenWhen: (previous, current) => previous.isTextSelected != current.isTextSelected,
+      listener: (context, state) {
+        if (state.isTextSelected) {
+          context.tbloc<SheetManagerBloc>().add(SheetEvent.selection);
+        } else {
+          context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
         }
-      }
-
-      if (changed) {
-        setState(() {
-          snapOffsets = offsets;
-        });
-      }
-    });
-
-    return SafeArea(
-        bottom: false,
-        child: SlidingSheet(
-          maxWidth: maxWidth,
-          elevation: 3,
-          cornerRadius: 15,
-          duration: const Duration(milliseconds: 250),
-          addTopViewPaddingOnFullscreen: true,
-          headerBuilder: (c, s) {
-            return Container(height: 10);
-          },
-          closeOnBackButtonPressed: true,
-          snapSpec: SnapSpec(
-            initialSnap: snapOffsets[0],
-            snappings: snapOffsets,
-            positioning: SnapPositioning.pixelOffset,
+      },
+      child: BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, state) {
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: AnimatedSwitcher(
+            duration: Duration(milliseconds: (state.type == SheetType.selection) ? 250 : 125),
+            layoutBuilder: animatedLayoutBuilder,
+            transitionBuilder: (child, animation) {
+              final offsetAnimation =
+                  Tween<Offset>(begin: const Offset(0.0, 1.0), end: const Offset(0.0, 0.0))
+                      .animate(animation);
+              return SlideTransition(
+                position: offsetAnimation,
+                child: child,
+              );
+            },
+            child: sheets[state.type.index],
           ),
-          color: Theme.of(context).canvasColor,
-          builder: (c, s) {
-            return Container(
-              height: snapOffsets[1] - _headerHeight,
-              constraints: BoxConstraints.loose(size),
-              child: BlocConsumer<SheetManagerBloc, SheetManagerState>(
-                listener: (c, state) {
-                  // on swipe down from selection sheet, deselect
-                  // SelectionSheetModel.deselect(c);
-                  SheetController.of(c)
-                      .snapToExtent(snapOffsets[(state.type == SheetType.main) ? 0 : 1]);
-                  debugPrint('hi mom');
-                },
-                builder: (c, state) {
-                  return Stack(
-                    children: [
-                      IgnorePointer(
-                        ignoring: state.type == SheetType.selection,
-                        child: Opacity(
-                          opacity: state.type == SheetType.main ? 1.0 : 0,
-                          child: sheets[0],
-                        ),
-                      ),
-                      IgnorePointer(
-                        ignoring: state.type == SheetType.main,
-                        child: Opacity(
-                          opacity: state.type == SheetType.selection ? 1.0 : 0.0,
-                          child: sheets[1],
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            );
-          },
-          body: widget.body,
-        ));
+        );
+      }),
+    );
   }
+}
 
-/*
-  Widget bob() {
-    return SafeArea(
-      bottom: false,
-      child: Stack(
-        children: [
-          BlocConsumer<SheetManagerBloc, SheetManagerState>(
-              listener: (c, state) {
-                // on swipe down from selection sheet, deselect
-                SelectionSheetModel.deselect(c);
-              },
-              listenWhen: (p, c) =>
-                  p.type == SheetType.selection &&
-                  c.type == SheetType.selection &&
-                  c.size == SheetSize.mini,
-              buildWhen: (previous, current) {
-                if (previous.type != current.type) {
-                  snapOffsets = [_headerHeight, size.height];
-                }
+class _SheetShadow extends StatelessWidget {
+  final Widget child;
 
-                return (previous.type != current.type);
-              },
-              builder: (c, state) {
-                final sheets = <Widget>[];
-                final keys = <GlobalKey>[GlobalKey(), GlobalKey()];
+  const _SheetShadow({Key key, this.child}) : super(key: key);
 
-                sheets.add(MainSheet(key: keys[0]));
-                // ignore: cascade_invocations
-                sheets.add(SelectionSheet(key: keys[1]));
+  @override
+  Widget build(BuildContext context) {
+    const sheetRadius = Radius.circular(7);
+    const borderRadius = BorderRadius.only(topLeft: sheetRadius, topRight: sheetRadius);
 
-                snapOffsets ??= [_headerHeight, size.height];
-
-                return SlidingSheet(
-                  maxWidth: maxWidth,
-                  elevation: 3,
-                  cornerRadius: 15,
-                  duration: const Duration(milliseconds: 250),
-                  addTopViewPaddingOnFullscreen: true,
-                  headerBuilder: (c, s) {
-                    return Container(height: 10);
-                  },
-                  closeOnBackButtonPressed: true,
-                  snapSpec: SnapSpec(
-                    initialSnap: snapOffsets[state.size.index],
-                    snappings: snapOffsets,
-                    onSnap: (s, snapPosition) {
-                      final sheetSize = _getSheetSize(snapPosition);
-                      if (sheetSize != null) {
-                        final prevSize = state.size.index;
-                        if (sheetSize.index != prevSize) {
-                          context.read<SheetManagerBloc>().changeSize(sheetSize);
-                        }
-                      }
-                    },
-                    positioning: SnapPositioning.pixelOffset,
-                  ),
-                  color: Theme.of(context).canvasColor,
-                  builder: (c, s) {
-                    return BlocBuilder<SheetManagerBloc, SheetManagerState>(
-                        buildWhen: (prev, current) {
-                      // we never want to "rebuild" the sub-tree on state changes, that is
-                      // handled above as we rebuild for each type switch to allow for
-                      // different snap settings for the different sheet types
-
-                      // might need to adjust snap though...
-                      if (prev.type != current.type) {
-                        SheetController.of(c).snapToExtent(snapOffsets[current.size.index]);
-                      }
-
-                      return false;
-                    }, builder: (c, s) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        var changed = false;
-                        final offsets = <double>[];
-
-                        for (final i in [0, 1]) {
-                          if (keys[i].currentContext != null) {
-                            final height = (keys[i].currentContext.findRenderObject() as RenderBox)
-                                    .size
-                                    .height +
-                                _headerHeight +
-                                TecScaffoldWrapper.navigationBarPadding;
-                            offsets.add(height);
-                            if (height != snapOffsets[i]) {
-                              changed = true;
-                            }
-                          }
-                        }
-
-                        if (changed) {
-                          setState(() {
-                            snapOffsets = offsets;
-                          });
-
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            SheetController.of(c).rebuild();
-                            final extent = snapOffsets[(state.size == SheetSize.mini) ? 0 : 1];
-                            SheetController.of(c).snapToExtent(extent);
-                          });
-                        }
-                      });
-
-                      return Container(
-                        height: snapOffsets[1] - _headerHeight,
-                        constraints: BoxConstraints.loose(size),
-                        child: Stack(
-                          children: [
-                            IgnorePointer(
-                              ignoring: state.type == SheetType.selection,
-                              child: Opacity(
-                                opacity: state.type == SheetType.main ? 1.0 : 0,
-                                child: sheets[0],
-                              ),
-                            ),
-                            IgnorePointer(
-                              ignoring: state.type == SheetType.main,
-                              child: Opacity(
-                                opacity: state.type == SheetType.selection ? 1.0 : 0.0,
-                                child: sheets[1],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    });
-                  },
-                  body: widget.body,
-                );
-              }),
+    return Container(
+      decoration: const BoxDecoration(
+        borderRadius: borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 3,
+            spreadRadius: 0,
+          ),
         ],
+        shape: BoxShape.rectangle,
+      ),
+      child: Material(
+        borderRadius: borderRadius,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: child,
+        ),
       ),
     );
   }
-   */
 }
 
 ///

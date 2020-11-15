@@ -41,11 +41,6 @@ dependencies:
   tuple: ^1.0.3
   url_launcher: ^5.7.5
 
-  sliding_sheet:
-    hosted:
-      name: sliding_sheet
-      url: http://noah.tecarta.com:8100
-    version: ^0.3.10
   tec_cache:
     hosted:
       name: tec_cache
@@ -107,14 +102,11 @@ dependencies:
       url: http://noah.tecarta.com:8100
     version: ^1.0.0-dev.1.0
 
-dependency_overrides:
-  analyzer: '0.40.4'
+#dependency_overrides:
   # tec_util:
   #   path: ../shared/tec_util
   #  tec_widgets:
   #    path: ../shared/tec_widgets
-  # sliding_sheet:
-  #   path: ../sliding_sheet
   # tec_html:
   #   path: ../shared/tec_html
   # tec_volumes:
