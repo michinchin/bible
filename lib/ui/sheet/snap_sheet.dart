@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,7 +54,11 @@ class _SnapSheetState extends State<SnapSheet> {
         return Align(
           alignment: Alignment.bottomCenter,
           child: AnimatedSwitcher(
-            duration: Duration(milliseconds: (state.type == SheetType.selection) ? 250 : 125),
+            duration: Duration(
+                milliseconds:
+                    (state.type == SheetType.selection || state.previousType == SheetType.selection)
+                        ? 250
+                        : 125),
             layoutBuilder: animatedLayoutBuilder,
             transitionBuilder: (child, animation) {
               final offsetAnimation =
@@ -84,24 +87,25 @@ class _SheetShadow extends StatelessWidget {
     const sheetRadius = Radius.circular(7);
     const borderRadius = BorderRadius.only(topLeft: sheetRadius, topRight: sheetRadius);
 
-    return Container(
-      decoration: const BoxDecoration(
-        borderRadius: borderRadius,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 3,
-            spreadRadius: 0,
-          ),
-        ],
-        shape: BoxShape.rectangle,
-      ),
-      child: Material(
-        borderRadius: borderRadius,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: child,
-        ),
+    // if we want a sheet with a shadow...
+    // decoration: BoxDecoration(
+    //   borderRadius: borderRadius,
+    //   boxShadow: [
+    //     BoxShadow(
+    //       color:
+    //           (Theme.of(context).brightness == Brightness.dark) ? Colors.white54 : Colors.black26,
+    //       blurRadius: 3,
+    //       spreadRadius: 0,
+    //     ),
+    //   ],
+    //   shape: BoxShape.rectangle,
+    // ),
+
+    return Material(
+      borderRadius: borderRadius,
+      child: Padding(
+        padding: EdgeInsets.only(top: 11, bottom: TecScaffoldWrapper.navigationBarPadding),
+        child: child,
       ),
     );
   }
@@ -207,11 +211,11 @@ class SheetIconButton extends StatelessWidget {
               color: Theme.of(context).textColor.withOpacity(0.5),
               size: 20,
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             TecText(
               text,
               autoSize: true,
-              textScaleFactor: 0.7,
+              textScaleFactor: 0.9,
               style: TextStyle(
                 color: Theme.of(context).textColor.withOpacity(0.5),
               ),

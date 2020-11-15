@@ -45,7 +45,7 @@ Future<void> main() async {
   ViewManager.shared
     ..register(ViewableBibleChapter(Const.viewTypeChapter, FeatherIcons.book))
     ..register(ViewableStudyContent(Const.viewTypeStudy, FeatherIcons.bookOpen))
-    ..register(ViewableUGC(Const.viewTypeNotes, FeatherIcons.edit))
+    ..register(ViewableUGC(Const.viewTypeNotes, FeatherIcons.edit2))
     ..register(ViewableMarginNote(Const.viewTypeMarginNote, TecIcons.marginNoteOutline));
 
   final stopwatch = Stopwatch()..start();
