@@ -217,7 +217,7 @@ class _UGCViewState extends State<_UGCView> {
   @override
   Widget build(BuildContext context) {
     final halfColor = Theme.of(context).textColor.withOpacity(0.5);
-    final color = Theme.of(context).textColor.withOpacity(0.6);
+    final color = Theme.of(context).textColor;
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
 
     // temp list to shorten consecutive hls of same color
@@ -230,6 +230,7 @@ class _UGCViewState extends State<_UGCView> {
             centerTitle: true,
             title: Text(folderName, style: TextStyle(color: halfColor)),
             actions: _actions(context),
+            iconTheme: Theme.of(context).iconTheme.copyWith(color: halfColor),
           ),
         ),
         body: Container(
@@ -388,7 +389,7 @@ class _UGCViewState extends State<_UGCView> {
                                   maxLines: 1,
                                   style: TextStyle(
                                     fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
+                                    // fontWeight: FontWeight.bold,
                                     color: color,
                                   )),
                               Container(height: 3.0),
@@ -430,13 +431,19 @@ class _UGCViewState extends State<_UGCView> {
                           Expanded(
                               child: Text(title,
                                   style: TextStyle(
-                                      fontSize: 18.0, fontWeight: FontWeight.bold, color: color))),
+                                    fontSize: 18.0,
+                                    // fontWeight: FontWeight.bold,
+                                    color: color,
+                                  ))),
                         if (items[i] is CountItem || items[i] is RecentCount)
                           Padding(
                             padding: const EdgeInsets.only(left: 16.0),
                             child: Text(items[i].count.toString(),
                                 style: TextStyle(
-                                    fontSize: 18.0, fontWeight: FontWeight.bold, color: color)),
+                                  fontSize: 18.0,
+                                  // fontWeight: FontWeight.bold,
+                                  color: color,
+                                )),
                           ),
                         if (items[i] is UserItem && items[i].itemType == UserItemType.folder)
                           Icon(
