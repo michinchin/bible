@@ -5,6 +5,7 @@ import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../models/app_settings.dart';
 import '../../models/notifications/notifications_model.dart';
 import '../home/votd_screen.dart';
 
@@ -38,7 +39,7 @@ class _NotificationsViewState extends State<NotificationsView> {
         child: Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text('Notifications'),
+        title: Text('Notifications', style: barTextStyle(context)),
         leading: BackButton(
           onPressed: () async {
             const le = ListEquality<LocalNotification>();
@@ -54,12 +55,18 @@ class _NotificationsViewState extends State<NotificationsView> {
           },
         ),
       ),
-      body: BlocBuilder<NotificationBloc, NotificationState>(
-        builder: (context, state) {
-          final n = state.notifications ?? [];
-          return ListView.builder(
-              itemCount: n.length, itemBuilder: (c, i) => _NotificationTile(n[i]));
-        },
+      body: Container(
+        color: viewBackgroundColor(context),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: BlocBuilder<NotificationBloc, NotificationState>(
+            builder: (context, state) {
+              final n = state.notifications ?? [];
+              return ListView.builder(
+                  itemCount: n.length, itemBuilder: (c, i) => _NotificationTile(n[i]));
+            },
+          ),
+        ),
       ),
     ));
   }
@@ -116,7 +123,7 @@ class __NotificationTileState extends State<_NotificationTile> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   '${tec.hourMinuteDescription(widget.notification.time)}',
-                  style: Theme.of(context).textTheme.headline4,
+                  style: Theme.of(context).textTheme.headline4.copyWith(color: viewTextColor(context)),
                 ),
               ),
             ),
@@ -143,7 +150,7 @@ class __NotificationTileState extends State<_NotificationTile> {
                                         .weekdayListFromBitField(widget.notification.week.bitField)
                                         .contains(day.dayValue)
                                     ? Theme.of(context).accentColor
-                                    : Theme.of(context).textColor)),
+                                    : viewTextColor(context))),
                         onPressed: () {
                           final i = widget.notification.week.days
                               .indexWhere((d) => d.dayValue == day.dayValue);
@@ -157,7 +164,7 @@ class __NotificationTileState extends State<_NotificationTile> {
                                 .weekdayListFromBitField(widget.notification.week.bitField)
                                 .contains(day.dayValue)
                             ? Theme.of(context).accentColor
-                            : Theme.of(context).textColor,
+                            : viewTextColor(context),
                         child: Text(day.shortName[0])),
                   ),
                 )

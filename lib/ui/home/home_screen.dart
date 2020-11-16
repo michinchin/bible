@@ -20,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _startTime = DateTime.now();
+
   @override
   void initState() {
     // if (!kDebugMode)
@@ -29,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void initNotifications() {
     // TODO(abby): on cold start, doesn't open notification on iOS...why?
-    // if cold start - wait longer... 
+    // if cold start - wait longer...
     final delay =
         (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 500 : 1250;
 
@@ -89,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// chose either column or stack - making sure 1st child of column is expanded...
 // class _ColumnStack extends StatelessWidget {
 //   final List<Widget> children;
 //
@@ -96,6 +98,15 @@ class _HomeScreenState extends State<HomeScreen> {
 //
 //   @override
 //   Widget build(BuildContext context) {
-//     return isSmallScreen(context) ? Column(children: children) : Stack(children : children);
+//     if (isSmallScreen(context)) {
+//       if (children.first is! Expanded) {
+//         final child = children.removeAt(0);
+//         children.insert(0, Expanded(child: child));
+//       }
+//
+//       return Column(children: children);
+//     } else {
+//       return Stack(children: children);
+//     }
 //   }
 // }

@@ -9,6 +9,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/app_settings.dart';
 import '../../models/user_item_helper.dart';
 import '../common/common.dart';
 import '../library/library.dart';
@@ -34,7 +35,7 @@ class ChapterTitle extends StatelessWidget {
           final buttonStyle = Theme.of(context)
               .textTheme
               .headline6
-              .copyWith(color: Theme.of(context).textColor.withOpacity(0.5));
+              .copyWith(color: barTextColor(context));
           final autosizeGroup = TecAutoSizeGroup();
 
           final volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
@@ -56,7 +57,7 @@ class ChapterTitle extends StatelessWidget {
                               )
                             : const Icon(FeatherIcons.search),
                         tooltip: 'Search',
-                        color: Theme.of(context).textColor.withOpacity(0.5),
+                        color: barIconColor(context),
                         onPressed: () => _onNavigate(context, viewData, searchView: true))),
               ),
               Flexible(
@@ -77,7 +78,7 @@ class ChapterTitle extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 10.0, right: 10.0),
                 child: Container(
-                  color: Theme.of(context).textColor.withOpacity(0.2),
+                  color: barIconColor(context),
                   width: 1,
                   height: const MinHeightAppBar().preferredSize.height *
                       .55, // 22 * textScaleFactorWith(context),
@@ -162,7 +163,7 @@ class SelectionModeBibleChapterTitle extends StatelessWidget {
     final buttonStyle = Theme.of(context)
         .textTheme
         .headline6
-        .copyWith(color: Theme.of(context).textColor.withOpacity(0.5));
+        .copyWith(color: barTextColor(context));
 
     // ignore: close_sinks
     final vmBloc = context.viewManager;
@@ -176,7 +177,7 @@ class SelectionModeBibleChapterTitle extends StatelessWidget {
             padding: const EdgeInsets.only(right: 8.0),
             icon: const Icon(Icons.close),
             tooltip: 'Search',
-            color: Theme.of(context).textColor.withOpacity(0.5),
+            color: barIconColor(context),
             onPressed: () => SelectionSheetModel.deselect(context)),
       ),
       Expanded(

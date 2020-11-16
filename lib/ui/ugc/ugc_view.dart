@@ -220,7 +220,6 @@ class _UGCViewState extends State<_UGCView> {
 
   @override
   Widget build(BuildContext context) {
-    final halfColor = Theme.of(context).textColor.withOpacity(0.5);
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final color = isDarkTheme ? const Color(0xFFBBBBBB) : Colors.black;
 
@@ -232,14 +231,15 @@ class _UGCViewState extends State<_UGCView> {
         appBar: MinHeightAppBar(
           appBar: AppBar(
             centerTitle: true,
-            title: Text(folderName, style: TextStyle(color: halfColor)),
+            title: Text(folderName, style: TextStyle(color: barTextColor(context))),
             actions: _actions(context),
-            iconTheme: Theme.of(context).iconTheme.copyWith(color: halfColor),
+            iconTheme: Theme.of(context).iconTheme.copyWith(color: barIconColor(context)),
           ),
         ),
         body: Container(
-          color: isDarkTheme ? Colors.black : Colors.white,
+          color: viewBackgroundColor(context),
           child: SafeArea(
+            bottom: false,
             child: ListView.builder(
                 itemCount: items.length + 1,
                 itemBuilder: (c, i) {

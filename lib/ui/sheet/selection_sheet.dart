@@ -6,6 +6,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../models/app_settings.dart';
 import '../../models/color_utils.dart';
 import '../../models/pref_item.dart';
 import '../../ui/sheet/snap_sheet.dart';
@@ -128,6 +129,15 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
               SelectionSheetModel.pickColorButton(editMode: editMode, onEditMode: _onEditMode),
               const SizedBox(width: 5)
             ];
+
+            final size = MediaQuery.of(context).size;
+            final landscapePhone = isSmallScreen(context) && (size.width > size.height);
+            var numItems = colors.length;
+
+            if (landscapePhone) {
+              numItems += miniChildren.length;
+            }
+
             return Padding(
               padding: const EdgeInsets.only(top: 5),
               child: Column(
@@ -139,32 +149,54 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
-                        itemCount: colors.length,
-                        itemBuilder: (c, i) => colors[i],
+                        itemCount: numItems,
+                        itemBuilder: (c, i) {
+                          if (landscapePhone) {
+                            if (i == 0) {
+                              return Padding(
+                                  padding: EdgeInsets.only(left: 5), child: miniChildren[i]);
+                            }
+                            if (i < miniChildren.length) {
+                              return miniChildren[i];
+                            }
+                            return colors[i - miniChildren.length];
+                          } else {
+                            return colors[i];
+                          }
+                        },
                         separatorBuilder: (c, i) {
                           // don't put a divider after the last element...
-                          if (i < colors.length - 2) {
-                            return const VerticalDivider(color: Colors.transparent, width: 15);
-                          } else {
+                          if (landscapePhone) {
+                            if (i < miniChildren.length - 1) {
+                              return const VerticalDivider(color: Colors.transparent, width: 25);
+                            }
+                            if (i == miniChildren.length - 1) {
+                              return VerticalDivider(color: barTextColor(context), width: 40);
+                            }
+                            if (i < numItems - 2) {
+                              return const VerticalDivider(color: Colors.transparent, width: 15);
+                            }
                             return Container();
+                          } else {
+                            return (i < colors.length - 2)
+                                ? const VerticalDivider(color: Colors.transparent, width: 15)
+                                : Container();
                           }
                         },
                       )),
-                  Padding(
-                      // bottom padding is handled by TecScaffoldWrapper
-                      padding: const EdgeInsets.only(left: 10, right: 10, top: 15),
-                      child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            for (final child in miniChildren)
-                              Expanded(
-                                child: child,
-                              ),
-                            // Expanded(
-                            //   child: SelectionSheetModel.defineButton(context),
-                            // )
-                          ])),
+                  if (!landscapePhone)
+                    Padding(
+                        // bottom padding is handled by TecScaffoldWrapper
+                        padding: const EdgeInsets.only(left: 10, right: 10, top: 15),
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              for (final child in miniChildren)
+                                Expanded(
+                                  child: child,
+                                ),
+                            ])),
                 ],
               ),
             );
@@ -265,7 +297,7 @@ class _ColorPickerButton extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final formattedColor =
         isDarkMode ? textColorWith(color, isDarkMode: true) : highlightColorWith(color);
-    final borderColor = isDarkMode ? Colors.transparent : Colors.grey.withOpacity(0.5);
+    final borderColor = isDarkMode ? Colors.transparent : Colors.grey.withOpacity(0.6);
     return InkWell(
       customBorder: const CircleBorder(),
       onLongPress: () {

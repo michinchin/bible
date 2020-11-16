@@ -86,7 +86,46 @@ class AppSettings {
 }
 
 ///
+/// Get color for text in main views
+///
+Color viewBackgroundColor(BuildContext context) {
+  final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+  return isDarkTheme ? Colors.black : Colors.white;
+}
+
+///
+/// Get color for text in main views
+///
+Color viewTextColor(BuildContext context) {
+  final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+  return isDarkTheme ? const Color(0xFFBBBBBB) : Colors.black;
+}
+
+TextStyle viewTextStyle(BuildContext context) {
+  return TextStyle(color: barTextColor(context));
+}
+
+///
+/// Get app/nav bar color for text
+///
+Color barTextColor(BuildContext context) {
+  return Theme.of(context).textColor.withOpacity(0.75);
+}
+
+TextStyle barTextStyle(BuildContext context) {
+  return TextStyle(color: barTextColor(context));
+}
+
+///
+/// Get app/nav bar color for icons
+///
+Color barIconColor(BuildContext context) {
+  return Theme.of(context).textColor.withOpacity(0.6);
+}
+
+///
 /// Checks to see if this is a small screen
+///
 bool isSmallScreen(BuildContext context) {
   final size = MediaQuery.of(context).size;
   return (math.max(size.width, size.height) < 1004);

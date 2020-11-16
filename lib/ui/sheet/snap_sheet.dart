@@ -190,7 +190,7 @@ class SelectionSheetButton extends StatelessWidget {
                 textScaleFactor: 0.9,
                 maxLines: 1,
                 style: Theme.of(context).textTheme.caption.copyWith(
-                      color: Theme.of(context).textColor.withOpacity(0.5),
+                      color: Theme.of(context).textColor.withOpacity(0.6),
                     ),
               ),
             ]))
@@ -217,7 +217,7 @@ class SheetIconButton extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: Theme.of(context).textColor.withOpacity(0.5),
+              color: barIconColor(context),
               size: 20,
             ),
             const SizedBox(height: 4),
@@ -226,7 +226,7 @@ class SheetIconButton extends StatelessWidget {
               autoSize: true,
               textScaleFactor: 0.9,
               style: TextStyle(
-                color: Theme.of(context).textColor.withOpacity(0.5),
+                color: barTextColor(context),
               ),
             ),
           ],
