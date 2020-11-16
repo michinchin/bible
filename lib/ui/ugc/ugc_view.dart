@@ -125,7 +125,8 @@ class _UGCViewState extends State<_UGCView> {
 
         if (folders.isNotEmpty) {
           _items.add(_DividerItem());
-          items.addAll(folders);
+          // ignore: cascade_invocations
+          _items.addAll(folders);
         }
         break;
 
