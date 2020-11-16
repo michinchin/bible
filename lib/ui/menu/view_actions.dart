@@ -6,6 +6,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../bible/chapter_view_data.dart';
 import '../common/tec_modal_popup_menu.dart';
@@ -22,7 +23,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
     if ((vmBloc?.countOfInvisibleViews ?? 0) >= 1 && isMaximized)
       IconButton(
         icon: const Icon(SFSymbols.arrow_up_arrow_down_circle, size: 20),
-        color: Theme.of(context).textColor.withOpacity(0.5),
+        color: barIconColor(context),
         onPressed: () {
           ViewState view;
           if (vmBloc.indexOfView(vmBloc.state.maximizedViewUid) == vmBloc.state.views.length - 1) {
@@ -37,7 +38,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
     IconButton(
       icon: const Icon(SFSymbols.square_stack, size: 20),
       tooltip: 'View Menu',
-      color: Theme.of(context).textColor.withOpacity(0.5),
+      color: barIconColor(context),
       onPressed: () {
         TecAutoScroll.stopAutoscroll();
         showTecModalPopupMenu(
@@ -57,7 +58,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
       IconButton(
         icon: const Icon(SFSymbols.person_crop_circle),
         tooltip: 'Main Menu',
-        color: Theme.of(context).textColor.withOpacity(0.5),
+        color: barIconColor(context),
         onPressed: () => showMainMenu(context),
       ),
   ];

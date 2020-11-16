@@ -4,13 +4,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
-import 'package:tec_widgets/tec_widgets.dart';
+import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/content_settings.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
@@ -43,8 +43,8 @@ class BCVTabView extends StatelessWidget {
                 indicator:
                     BubbleTabIndicator(color: tabColors[navBloc.state.tabIndex].withOpacity(0.5)),
                 controller: tabController,
-                labelColor: Theme.of(context).textColor.withOpacity(0.7),
-                unselectedLabelColor: Theme.of(context).textColor.withOpacity(0.7),
+                labelColor: barTextColor(context),
+                unselectedLabelColor: barTextColor(context),
                 tabs: [
                   const Tab(text: 'BOOK'),
                   const Tab(text: 'CHAPTER'),
@@ -77,9 +77,7 @@ class _ChapterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final textColor =
-        isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
+    final textColor = barTextColor(context);
     final bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
 
     final ref = context.tbloc<NavBloc>().state.ref;
@@ -115,9 +113,7 @@ class _ChapterView extends StatelessWidget {
 class _VerseView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final textColor =
-        isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
+    final textColor = barTextColor(context);
     final bible = VolumesRepository.shared.bibleWithId(9);
 
     final ref = context.tbloc<NavBloc>().state.ref;
@@ -164,9 +160,7 @@ class _BookView extends StatelessWidget {
       final nextBook = bible.bookAfter(book);
       book = (nextBook == book ? 0 : nextBook);
     }
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final textColor =
-        isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
+    final textColor = barTextColor(context);
 
     final ot = bookNames.keys.takeWhile(bible.isOTBook).toList();
     final nt = bookNames.keys.where(bible.isNTBook).toList();

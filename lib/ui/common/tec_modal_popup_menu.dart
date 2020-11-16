@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../models/app_settings.dart';
 import 'tec_modal_popup.dart';
 
 const tecartaBlue = Color(0xff4a7dee);
@@ -54,7 +55,8 @@ TableRow tecModalPopupMenuItem(
   bool scaleFont = false,
 }) {
   final scale = scaleFactorWith(context, maxScaleFactor: 1.2);
-  final color = Theme.of(context).textColor.withOpacity(onTap == null ? 0.2 : 0.5);
+  final color =
+      (onTap == null) ? Theme.of(context).textColor.withOpacity(0.2) : barTextColor(context);
   final iconSize = 24.0 * scale;
 
   void Function() _onTap() => onTap == null
@@ -79,7 +81,11 @@ TableRow tecModalPopupMenuItem(
                 padding: EdgeInsets.fromLTRB(4 + rowPadding, 0, 14, 0),
                 child: icon == null
                     ? SizedBox(width: iconSize)
-                    : Icon(icon, color: color, size: iconSize),
+                    : Icon(icon,
+                        color: (onTap == null)
+                            ? Theme.of(context).textColor.withOpacity(0.2)
+                            : barIconColor(context),
+                        size: iconSize),
               ),
               Expanded(
                 child: Column(
@@ -180,9 +186,8 @@ class TecTitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final color = isDarkTheme ? Colors.white : Colors.black;
-    var textStyle = TextStyle(color: color.withOpacity(.5), fontSize: 20, fontWeight: FontWeight.w500);
+    var textStyle =
+        TextStyle(color: barTextColor(context), fontSize: 20, fontWeight: FontWeight.w500);
     if (style != null) textStyle = textStyle.merge(style);
 
     return Material(
@@ -220,7 +225,7 @@ class TecTitleBar extends StatelessWidget {
                   icon: const Icon(Icons.close),
                   padding: EdgeInsets.zero,
                   splashRadius: 12,
-                  color: textStyle.color,
+                  color: barIconColor(context),
                   tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   onPressed: () => Navigator.of(context, rootNavigator: true).maybePop(),
                 ),

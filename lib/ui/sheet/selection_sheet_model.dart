@@ -74,7 +74,7 @@ class SelectionSheetModel {
       {bool forUnderline = false, double radius = 20}) {
     final borderColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.grey.withOpacity(0.5)
-        : Colors.grey;
+        : Colors.grey.withOpacity(0.75);
     return forUnderline
         ? InkWell(
             customBorder: const CircleBorder(),
