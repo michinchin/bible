@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -8,8 +9,10 @@ import '../../models/const.dart';
 import '../../models/home/dotd.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/interstitial.dart';
+import '../common/common.dart';
 import 'day_card.dart';
 import 'home.dart';
+import 'votd_screen.dart';
 
 Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
   await Interstitial.init(context, productId: devo.productId, adUnitId: Const.prefNativeAdId);
@@ -20,25 +23,31 @@ Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
 class _DotdScreen extends StatelessWidget {
   final Dotd devo;
   const _DotdScreen(this.devo);
+  // bottomNavigationBar: BottomHomeBar(),
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(),
+    return TecImageAppBarScaffold(
+        imageUrl: devo.imageUrl(AppSettings.shared.env),
+        backgroundColor:
+            Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
+        imageAspectRatio: imageAspectRatio,
+        //  scrollController: scrollController,
         floatingActionButton: BottomHomeFab(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        bottomNavigationBar: BottomHomeBar(),
-        body: Column(
-          children: [
-            TecImage(
-              url: devo.imageUrl(AppSettings.shared.env),
-              colorBlendMode: BlendMode.softLight,
-              color:
-                  Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white24,
-            ),
-            Text(devo.title),
-            Text(devo.intro)
-          ],
-        ));
+        // bottomNavigationBar: BottomHomeBar(),
+        childBuilder: (c, i) => FutureBuilder<String>(
+            future: devo.html(AppSettings.shared.env),
+            builder: (c, snapshot) {
+              if (snapshot.hasData) {
+                return TecHtml(
+                  snapshot.data,
+                  baseUrl: '',
+                  // baseUrl: devo.volume?.baseUrl,
+                  textScaleFactor: textScaleFactorWith(c),
+                );
+              }
+              return const LoadingIndicator();
+            }));
   }
 }
 
@@ -73,7 +82,10 @@ class _DotdsScreen extends StatelessWidget {
     return TecScaffoldWrapper(
         child: Scaffold(
       appBar: AppBar(
-        title: Text('${tec.today.year} Devotionals Of The Day'),
+        title: const TecText(
+          'Devotional Of The Day',
+          autoSize: true,
+        ),
       ),
       body: Scrollbar(
         child: ScrollablePositionedList.builder(

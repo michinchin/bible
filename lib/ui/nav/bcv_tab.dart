@@ -80,7 +80,7 @@ class _ChapterView extends StatelessWidget {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor =
         isDarkTheme ? Theme.of(context).textColor : Theme.of(context).textColor.withOpacity(0.7);
-    final bible = VolumesRepository.shared.bibleWithId(9);
+    final bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
 
     final ref = context.tbloc<NavBloc>().state.ref;
     final chapters = bible.chaptersIn(book: ref.book);

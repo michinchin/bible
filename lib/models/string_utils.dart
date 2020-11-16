@@ -1,4 +1,6 @@
-// ignore_for_file: unused_element
+import 'package:flutter/foundation.dart';
+
+import 'package:equatable/equatable.dart';
 
 extension TecExtOnString on String {
   ///
@@ -9,7 +11,7 @@ extension TecExtOnString on String {
   /// not counted. For example, if the string is 'cat dog', and [toIndex] is 0, 1, or 2, the
   /// function returns 0. If [toIndex] is 3, 4, 5, or 6, the function returns 1. If [toIndex]
   /// is 7 or null, the function returns 2.
-  /// 
+  ///
   /// See: http://www.unicode.org/reports/tr29/#Word_Boundaries
   ///
   int countOfWords({int toIndex}) {
@@ -58,6 +60,108 @@ extension TecExtOnString on String {
     }
     return i;
   }
+
+  ///
+  /// Returns the index in the string after the last character of the match,
+  /// or -1 if no match was found.
+  ///
+  /// If [start] is used, it must be non-negative and not greater than
+  /// [length].
+  ///
+  int indexAfter(Pattern pattern, [int start]) {
+    var i = -1;
+    if (pattern is String) {
+      i = indexOf(pattern, start ?? 0);
+      if (i >= 0) {
+        i += pattern.length;
+      }
+    } else if (pattern is RegExp) {
+      var string = this;
+      if (start != null && start != 0) {
+        string = string.substring(start);
+      }
+      final match = pattern.firstMatch(string);
+      if (match != null) {
+        i = match.end + (start ?? 0);
+      }
+    }
+    return i;
+  }
+
+  ///
+  /// Returns the range of the first delimited substring, starting at [start],
+  /// or null if none is found.
+  ///
+  Range rangeOfDelimitedSubstring({
+    int start = 0,
+    bool includeDelimiters = true,
+    List<Pattern> delimiters = const ['{{', '}}'],
+  }) {
+    assert(delimiters != null && delimiters.length >= 2);
+    final i = start ?? 0;
+    if (i >= 0 && i < length) {
+      var startIndex = includeDelimiters ? indexOf(delimiters[0], i) : indexAfter(delimiters[0], i);
+      if (startIndex >= 0) {
+        final substringStart = startIndex;
+        var endIndex = includeDelimiters
+            ? indexAfter(delimiters[1], indexAfter(delimiters[0], i))
+            : indexOf(delimiters[1], substringStart);
+        while (endIndex > 0) {
+          startIndex = includeDelimiters
+              ? indexOf(delimiters[0], startIndex + 1)
+              : indexAfter(delimiters[0], startIndex);
+          if (startIndex >= 0 &&
+              ((includeDelimiters && startIndex < endIndex) ||
+                  (!includeDelimiters && startIndex <= endIndex))) {
+            endIndex = includeDelimiters
+                ? indexAfter(delimiters[1], endIndex)
+                : indexOf(delimiters[1], endIndex + 1);
+          } else {
+            return Range(substringStart, endIndex);
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  ///
+  /// Returns true iff the given index is in a delimited substring.
+  ///
+  bool isInDelimitedSubstring(
+    int i, {
+    List<Pattern> delimiters = const ['{{', '}}'],
+  }) {
+    if (i < 0 || i > length) {
+      assert(false);
+    } else {
+      var previousRangeEnd = 0;
+      Range range;
+      while ((range = rangeOfDelimitedSubstring(
+            start: previousRangeEnd,
+            includeDelimiters: false,
+            delimiters: delimiters,
+          )) !=
+          null) {
+        if (i >= range.start && i <= range.end) return true;
+        previousRangeEnd = range.end + 1;
+      }
+    }
+    return false;
+  }
+}
+
+@immutable
+class Range extends Equatable {
+  const Range(this.start, this.end);
+  final int start;
+  final int end;
+
+  @override
+  List<Object> get props => [start, end];
+
+  @override
+  String toString() => '[$start, $end]';
 }
 
 extension<T> on Set<T> {
@@ -66,6 +170,8 @@ extension<T> on Set<T> {
     return Set.of(this)..removeAll(items);
   }
 }
+
+// ignore_for_file: unused_element
 
 bool _isNonWordChar(int codeUnit) => _nonWordChars.contains(codeUnit);
 

@@ -41,4 +41,53 @@ void main() {
     expect([5, 6, 9, 10].missingValues(), [7, 8]);
     expect([5, 7, 8, 10].missingValues(), [6, 9]);
   });
+
+  test('test rangeOfDelimitedSubstring where includeDelimiters == false', () {
+    /*************************/
+    _includeDelimiters = false;
+    /*************************/
+
+    expect('{{}}'.rangeOfDS(), const Range(2, 2));
+    expect('a b c {{ d {{ e }} f {{ g }}'.rangeOfDS(), null);
+    expect('a b c {{ d {{ e }} f {{ g }} h }} i j'.rangeOfDS(), const Range(8, 31));
+    expect('a b c {{ d {{ e {{ f }} g }} h }} i j'.rangeOfDS(), const Range(8, 31));
+    expect('abc <<>> def'.rangeOfDS(delimiters: ['<', '>']), const Range(5, 7));
+    expect('abc <<>><> def'.rangeOfDS(start: 6, delimiters: ['<', '>']), const Range(9, 9));
+  });
+
+  test('test rangeOfDelimitedSubstring where includeDelimiters == true', () {
+    /*************************/
+    _includeDelimiters = true;
+    /*************************/
+
+    expect('{{}}'.rangeOfDS(), const Range(0, 4));
+    expect('a b c {{ d {{ e }} f {{ g }}'.rangeOfDS(), null);
+    expect('a b c {{ d {{ e }} f {{ g }} h }} i j'.rangeOfDS(), const Range(6, 33));
+    expect('a b c {{ d {{ e {{ f }} g }} h }} i j'.rangeOfDS(), const Range(6, 33));
+    expect('abc <<>> def'.rangeOfDS(delimiters: ['<', '>']), const Range(4, 8));
+    expect('abc <<>><> def'.rangeOfDS(start: 6, delimiters: ['<', '>']), const Range(8, 10));
+  });
+
+  test('test isInDelimitedSubstring', () {
+    expect('<>'.isInDelimitedSubstring(0, delimiters: ['<', '>']), false);
+    expect('<>'.isInDelimitedSubstring(1, delimiters: ['<', '>']), true);
+    expect('<>'.isInDelimitedSubstring(2, delimiters: ['<', '>']), false);
+  });
+}
+
+const _delimiters = <Pattern>['{{', '}}'];
+var _includeDelimiters = false;
+
+extension TestStringExt on String {
+  Range rangeOfDS({
+    int start = 0,
+    bool includeDelimiters,
+    List<Pattern> delimiters = _delimiters,
+  }) {
+    return rangeOfDelimitedSubstring(
+      start: start,
+      includeDelimiters: includeDelimiters ?? _includeDelimiters,
+      delimiters: delimiters,
+    );
+  }
 }

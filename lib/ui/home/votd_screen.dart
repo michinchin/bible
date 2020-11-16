@@ -4,7 +4,6 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
 import '../../models/home/interstitial.dart';
@@ -103,13 +102,13 @@ class __VotdScreenState extends State<_VotdScreen> {
                   children: [
                     TecText(
                       res,
-                      style: cardSubtitleCompactStyle,
+                      style: cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
                       textAlign: TextAlign.end,
                     ),
                     const SizedBox(height: 5),
                     TecText(
                       ref.label(),
-                      style: cardTitleCompactStyle,
+                      style: cardTitleCompactStyle.copyWith(color: Theme.of(context).textColor),
                       textAlign: TextAlign.end,
                     ),
                   ],
@@ -148,7 +147,10 @@ class _VotdsScreen extends StatelessWidget {
     return TecScaffoldWrapper(
         child: Scaffold(
       appBar: AppBar(
-        title: Text('${tec.today.year} Verses Of The Day'),
+        title: const TecText(
+          'Verse Of The Day',
+          autoSize: true,
+        ),
       ),
       body: Scrollbar(
         child: ScrollablePositionedList.builder(
@@ -180,9 +182,9 @@ Bible currentBibleFromContext(BuildContext context) {
   Bible bible;
   if (view != null) {
     final viewData = ChapterViewData.fromContext(context, view);
-    bible = VolumesRepository.shared.bibleWithId(viewData.volumeId);
+    bible = VolumesRepository.shared.volumeWithId(viewData.volumeId).assocBible();
   } else {
-    bible = VolumesRepository.shared.bibleWithId(defaultBibleId);
+    bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
   }
   return bible;
 }

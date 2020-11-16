@@ -12,27 +12,72 @@ import 'dotd.dart';
 class Dotds {
   Dotds({
     @required List<Dotd> data,
+    @required Map<int, Dotd> specials,
+    @required Map<String, HtmlCommand> commands,
   })  : assert(data != null),
+        assert(specials != null),
+        assert(commands != null),
+        specials = Map<int, Dotd>.unmodifiable(specials),
+        commands = Map<String, HtmlCommand>.unmodifiable(commands),
         data = List<Dotd>.unmodifiable(data);
 
   ///
   /// Ordered list of devotionals for the whole year.
   ///
   final List<Dotd> data;
+  final Map<int, Dotd> specials;
+  final Map<String, HtmlCommand> commands;
 
   /// Returns a Dotd object from parsing the given JSON.
   factory Dotds.fromJson(Map<String, dynamic> json) {
-    final d = <Dotd>[];
-    final a = tec.as<List<dynamic>>(json['data']);
-    for (final b in a) {
-      if (b is List<dynamic>) {
-        final devo = Dotd.fromJson(b);
+    String formatCommandString(String commands) {
+      final c = commands.replaceAll(RegExp('[{}]+'), '');
+      var command = '';
+      if (c.contains('shared')) {
+        final index = c.indexOf('.');
+        command = c.substring(index + 1, c.length);
+      }
+      return command;
+    }
+
+    final data = tec.as<List<dynamic>>(json['data']);
+    final specials = tec.as<Map<String, dynamic>>(json['specials']);
+    final commands = tec.as<Map<String, dynamic>>(json['shared']);
+
+    // commands
+    final commandMap = <String, HtmlCommand>{};
+    for (final c in commands.keys) {
+      final command = tec.as<List<dynamic>>(commands[c]);
+      if (command != null) {
+        commandMap[c] = HtmlCommand.fromJson(command);
+      }
+    }
+
+    // data
+    final devos = <Dotd>[];
+    for (final d in data) {
+      if (d is List<dynamic>) {
+        final devo = Dotd.fromJson(d);
         if (devo != null) {
-          d.add(devo);
+          final c = formatCommandString(devo.commands);
+          final command = commandMap[c];
+          if (command != null) {
+            devos.add(devo.copyWith(command: command));
+          } else {
+            devos.add(devo);
+          }
         }
       }
     }
-    return Dotds(data: d);
+
+    // specials
+    final sDevos = <int, Dotd>{};
+    for (final s in specials.keys) {
+      final special = tec.as<List<dynamic>>(specials[s]);
+      sDevos[int.parse(s)] = Dotd.fromJson(special);
+    }
+
+    return Dotds(data: devos, specials: sDevos, commands: commandMap);
   }
 
   /// Fetches the devotional-of-the-day data.
@@ -47,14 +92,17 @@ class Dotds {
     if (json != null) {
       return Dotds.fromJson(json);
     } else {
-      return Dotds(data: const []);
+      return Dotds(data: const [], specials: const {}, commands: const {});
     }
   }
 
   /// Returns the devotional for the given date.
   Dotd devoForDate(DateTime date) {
     if (date != null && tec.isNotNullOrEmpty(data)) {
-      final i = tec.indexForDay(tec.dayOfTheYear(date), year: date.year, length: data.length);
+      final i = indexForDate(date);
+      if (specials.containsKey(i)) {
+        return specials[i];
+      }
       return data[i];
     }
     return null;
