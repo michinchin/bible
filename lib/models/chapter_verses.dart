@@ -35,7 +35,18 @@ class ChapterVerses {
     return ChapterVerses.fromJson(json);
   }
 
-  static String formatForShare(List<Reference> refs, Map<int, String> verses) {
+  static String formatVerse(Map<int, VerseText> verse) {
+    final buffer = StringBuffer();
+    for (final v in verse.keys) {
+      if (v != verse.keys.first) {
+        buffer.write(' [$v] ');
+      }
+      buffer.write('${verse[v].text}');
+    }
+    return buffer.toString();
+  }
+
+  static String formatForShare(List<Reference> refs, Map<int, VerseText> verses) {
     final buffer = StringBuffer();
     for (final ref in refs) {
       final label = ref.label();
@@ -43,7 +54,7 @@ class ChapterVerses {
       var firstVerse = true;
       for (final verseNum in ref.verses) {
         final verseNumString = (firstVerse) ? '' : ' [$verseNum] ';
-        buffer..write(verseNumString)..write(verses[verseNum]);
+        buffer..write(verseNumString)..write(verses[verseNum].text);
         firstVerse = false;
       }
       if (ref != refs.last) {

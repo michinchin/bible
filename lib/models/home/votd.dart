@@ -1,9 +1,9 @@
-import 'dart:collection';
-
 import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_env/tec_env.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
+
+import '../chapter_verses.dart';
 
 class VotdEntry {
   final String imageUrl;
@@ -31,21 +31,10 @@ class VotdEntry {
         refAndVerse.value != null &&
         tec.isNotNullOrEmpty(refAndVerse.value.verseText)) {
       final verseText = refAndVerse.value.verseText;
-      return tec.ErrorOrValue(refAndVerse.error, _formatVerse(verseText));
+      return tec.ErrorOrValue(refAndVerse.error, ChapterVerses.formatVerse(verseText));
     } else {
       return tec.ErrorOrValue(refAndVerse.error, '');
     }
-  }
-
-  String _formatVerse(LinkedHashMap<int, VerseText> verse) {
-    final buffer = StringBuffer();
-    for (final v in verse.keys) {
-      if (v != verse.keys.first) {
-        buffer.write(' [$v] ');
-      }
-      buffer.write('${verse[v].text}');
-    }
-    return buffer.toString();
   }
 }
 

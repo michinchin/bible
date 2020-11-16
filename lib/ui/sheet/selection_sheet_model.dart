@@ -1,3 +1,4 @@
+import 'package:bible/ui/bible/chapter_view_data.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -191,16 +192,15 @@ class SelectionSheetModel {
   static Future<String> _shareText(BuildContext c, {int uid}) async {
     final bloc = c.viewManager; //ignore: close_sinks
     final views = bloc.visibleViewsWithSelections.toList();
-    final verses = <String, ChapterVerses>{};
     final buffer = StringBuffer('');
 
-    Future<void> writeRef(Reference ref) async {
-      final key = '${ref.book} ${ref.chapter}';
-      if (verses[key] == null) {
-        verses[key] = await ChapterVerses.fetch(refForChapter: ref);
-      }
+    Future<void> writeRef(Reference ref, int bibleId) async {
+      // final key = '${ref.book} ${ref.chapter}';
+
+      final v = await VolumesRepository.shared.bibleWithId(bibleId).referenceAndVerseTextWith(ref);
+      final verses = v.value.verseText;
       final copyWithLink = c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
-      final verse = ChapterVerses.formatForShare([ref], verses[key].data);
+      final verse = ChapterVerses.formatForShare([ref], verses);
       buffer.write(verse);
       if (copyWithLink) {
         buffer.write(await TecShare.shareLink(ref));
@@ -209,12 +209,14 @@ class SelectionSheetModel {
 
     if (uid != null) {
       final ref = tec.as<Reference>(bloc.selectionObjectWithViewUid(uid));
-      await writeRef(ref);
+      final bible = ChapterViewData.fromContext(c, uid)?.volumeId;
+      await writeRef(ref, bible);
     } else {
-      for (final v in views) {
-        final ref = tec.as<Reference>(bloc.selectionObjectWithViewUid(v));
-        await writeRef(ref);
-        if (v != views.last) {
+      for (final vuid in views) {
+        final ref = tec.as<Reference>(bloc.selectionObjectWithViewUid(vuid));
+        final bible = ChapterViewData.fromContext(c, vuid)?.volumeId;
+        await writeRef(ref, bible);
+        if (vuid != views.last) {
           buffer.writeln('\n');
         }
       }
