@@ -206,9 +206,10 @@ extension AppExtOnThemeData on ThemeData {
   /// Returns a copy of this ThemeData with the appBarTheme.textTheme updated the given [color].
   ///
   TextTheme copyOfAppBarTextThemeWithColor(Color color) =>
-      appBarTheme.textTheme?.apply(bodyColor: color) ??
-      // primaryTextTheme?.apply(bodyColor: color) ??
-      TextTheme(headline6: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w500));
+      (appBarTheme.textTheme ?? primaryTextTheme)
+          // .copyWith(headline6: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500))
+          .apply(bodyColor: color)
+          .apply(displayColor: color);
 }
 
 ///
