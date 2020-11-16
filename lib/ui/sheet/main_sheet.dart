@@ -5,7 +5,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
 import '../../ui/sheet/snap_sheet.dart';
-import '../home/home.dart';
+import '../home/today.dart';
 import '../library/library.dart';
 
 class MainSheet extends StatefulWidget {
@@ -40,7 +40,7 @@ class _MainSheetState extends State<MainSheet> {
                 if (key == 'Notes') {
                   ViewManager.shared.makeVisibleOrAdd(context, Const.viewTypeNotes);
                 }
-                if (key == 'Home') showHome(context);
+                if (key == 'Home') showTodayScreen(context);
               },
             )
         ],

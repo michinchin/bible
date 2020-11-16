@@ -130,7 +130,6 @@ class _VerseView extends StatelessWidget {
         for (var i = 1; i <= verses; i++) ...[
           _PillButton(
             onPressed: () {
-              // TODO(abby): manually assigning end verse...probably shouldn't do this
               final updatedRef = ref.copyWith(verse: i, endVerse: i);
               context.tbloc<NavBloc>().add(NavEvent.setRef(ref: updatedRef));
               Navigator.of(context).maybePop(updatedRef);

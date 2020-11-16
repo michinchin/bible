@@ -19,7 +19,7 @@ class DayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const height = 100.0;
+    const height = 80.0;
     final scale = scaleFactorWith(context);
     final textScale = textScaleFactorWith(context);
     final heading = TecText(
@@ -89,15 +89,12 @@ class DayCard extends StatelessWidget {
           ),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(16.0 * scale),
+              padding: EdgeInsets.all(10.0 * scale),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 8.0 * scale),
-                    child: heading,
-                  ),
-                  intro
+                  heading,
+                  intro,
                 ],
               ),
             ),

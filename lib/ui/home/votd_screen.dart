@@ -13,7 +13,6 @@ import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
 import '../library/library.dart';
 import 'day_card.dart';
-import 'home.dart';
 
 Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
   await Interstitial.init(context, adUnitId: Const.prefNativeAdId);
@@ -47,6 +46,14 @@ class __VotdScreenState extends State<_VotdScreen> {
     });
   }
 
+  Future<void> onRefTap() async {
+    final vol =
+        await selectVolumeInLibrary(context, title: 'Select Bible', selectedVolume: _bible.id);
+    if (vol != null) {
+      setBible(VolumesRepository.shared.volumeWithId(vol).assocBible());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return TecImageAppBarScaffold(
@@ -55,38 +62,8 @@ class __VotdScreenState extends State<_VotdScreen> {
           Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
       imageAspectRatio: imageAspectRatio,
       //  scrollController: scrollController,
-      floatingActionButton: BottomHomeFab(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       // bottomNavigationBar: BottomHomeBar(),
-      actions: [
-        FlatButton(
-          child: Row(children: [
-            TecText(
-              _bible.abbreviation,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    offset: Offset(1.0, 1.0),
-                    blurRadius: 1.0,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-            ),
-            const TecIcon(Icon(Icons.arrow_drop_down),
-                color: Colors.white, shadowColor: Colors.black),
-          ]),
-          onPressed: () async {
-            final vol = await selectVolumeInLibrary(context,
-                title: 'Select Bible', selectedVolume: _bible.id);
-            if (vol != null) {
-              setBible(VolumesRepository.shared.volumeWithId(vol).assocBible());
-            }
-          },
-        ),
-      ],
       childBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
         future: widget.votd.getFormattedVerse(_bible),
         builder: (context, snapshot) {
@@ -102,13 +79,19 @@ class __VotdScreenState extends State<_VotdScreen> {
                     TecText(
                       res,
                       style: cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
-                      textAlign: TextAlign.end,
+                      textAlign: TextAlign.left,
                     ),
                     const SizedBox(height: 5),
-                    TecText(
-                      ref.label(),
-                      style: cardTitleCompactStyle.copyWith(color: Theme.of(context).textColor),
-                      textAlign: TextAlign.end,
+                    FlatButton(
+                      padding: EdgeInsets.zero,
+                      child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        TecText(ref.label(),
+                            style:
+                                cardTitleCompactStyle.copyWith(color: Theme.of(context).textColor)),
+                        const TecIcon(Icon(Icons.arrow_drop_down),
+                            color: Colors.white, shadowColor: Colors.black),
+                      ]),
+                      onPressed: onRefTap,
                     ),
                   ],
                 ),
