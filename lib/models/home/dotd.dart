@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:tec_env/tec_env.dart';
-
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_volumes/tec_volumes.dart';
+
+import '../string_utils.dart';
 
 ///
 /// DevoRes - Devotional from devo of the days
@@ -14,6 +16,7 @@ class Dotd {
   final String intro;
   final String imageName;
   final String commands;
+  final HtmlCommand command;
 
   const Dotd({
     @required this.title,
@@ -22,6 +25,7 @@ class Dotd {
     @required this.imageName,
     @required this.productId,
     @required this.resourceId,
+    this.command,
   });
 
   /// Returns a copy of this object with optional tweaks.
@@ -32,6 +36,7 @@ class Dotd {
     String commands,
     int productId,
     int resourceId,
+    HtmlCommand command,
   }) {
     return Dotd(
       title: title ?? this.title,
@@ -40,6 +45,7 @@ class Dotd {
       imageName: imageName ?? this.imageName,
       productId: productId ?? this.productId,
       resourceId: resourceId ?? this.resourceId,
+      command: command ?? this.command,
     );
   }
 
@@ -65,7 +71,63 @@ class Dotd {
 
   /// Returns the hero tag for the image.
   String get heroTagForImage => '$hashCode-$imageName';
+
+  /// Returns image url
   String imageUrl(TecEnv env) => 'https://${env.streamServer}/${env.apiVersion}/votd/$imageName';
+
+  Volume get volume => VolumesRepository.shared.volumeWithId(productId);
+
+  /// Returns html, from remote or local
+  Future<String> html(TecEnv env) async {
+    final res = await volume.resourceWithId(resourceId);
+    if (res != null && res.error == null) {
+      String html;
+      final fileUrl = volume.fileUrlForResource(res.value);
+      if (fileUrl.startsWith('http')) {
+        html = await tec.utf8StringFromHttpRequest(tec.HttpRequestType.get, url: fileUrl);
+      } else {
+        html = tec.getTextFromFile(fileUrl);
+      }
+      return formattedHtml(html, env);
+    }
+    return '';
+  }
+
+  String formattedHtml(String html, TecEnv env) {
+    if (command != null) {
+      var formattedHtml = html;
+      for (final each in command.commands) {
+        if (tec.as<String>(each[0]) == 'html.remove') {
+          if (tec.as<List>(each).length == 3) {
+            final startsWith = tec.as<String>(each[1]);
+            final endsWith = tec.as<String>(each[2]);
+            while (formattedHtml.contains(startsWith)) {
+              final range =
+                  formattedHtml.rangeOfDelimitedSubstring(delimiters: [startsWith, endsWith]);
+              if (range != null) {
+                formattedHtml = formattedHtml.replaceRange(range.start, range.end, '');
+              }
+            }
+          }
+        }
+      }
+      return _stylizedHtml(formattedHtml, env);
+    }
+    return _stylizedHtml(html, env);
+  }
+
+  String _stylizedHtml(String html, TecEnv env) {
+    if (html.isNotEmpty) {
+      if (env.darkMode) {
+        return html.replaceFirst('</head>',
+            '<style> html { -webkit-text-size-adjust: none; } body { background-color: #000000; color: #bbbbbb; } </style></head>');
+      } else {
+        return html.replaceFirst(
+            '</head>', '<style> html { -webkit-text-size-adjust: none; } </style></head>');
+      }
+    }
+    return html;
+  }
 
   /// Asynchronously returns a new DevoRes from a JSON list.
   factory Dotd.fromJson(List<dynamic> list) {
@@ -90,6 +152,19 @@ class Dotd {
         resourceId: resourceId,
         imageName: imageName,
       );
+    }
+    return null;
+  }
+}
+
+class HtmlCommand {
+  List commands;
+  HtmlCommand(this.commands);
+
+  factory HtmlCommand.fromJson(List<dynamic> list) {
+    if (list[0] == 'commands') {
+      final commands = tec.as<List>(list[1]);
+      return HtmlCommand(commands);
     }
     return null;
   }

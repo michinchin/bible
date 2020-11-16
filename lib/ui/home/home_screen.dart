@@ -19,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _startTime = DateTime.now();
   @override
   void initState() {
     // if (!kDebugMode)
@@ -27,7 +28,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void initNotifications() {
-    Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
+    // TODO(abby): on cold start, doesn't open notification on iOS...why?
+    // if cold start - wait longer... 
+    final delay =
+        (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 500 : 1250;
+
+    Future.delayed(Duration(milliseconds: delay), () {
+      // resend the notification
+      Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         final granted = await Notifications.shared?.requestPermissions(context);

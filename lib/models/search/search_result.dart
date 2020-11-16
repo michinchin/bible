@@ -214,7 +214,7 @@ String _formatRefs(String query) {
     final shortRef = arr[0].group(0);
     if (Const.extraBookNames.containsKey(shortRef)) {
       final bookId = Const.extraBookNames[shortRef];
-      final fullBookName = VolumesRepository.shared.bibleWithId(9).nameOfBook(bookId);
+      final fullBookName = VolumesRepository.shared.bibleWithId(Const.defaultBible).nameOfBook(bookId);
       final fixedQuery = query.replaceAll(shortRef, fullBookName);
 
       return fixedQuery;

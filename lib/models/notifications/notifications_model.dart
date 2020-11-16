@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../navigation_service.dart';
 import '../../ui/home/home.dart';
 import '../app_settings.dart';
+import '../const.dart';
 import '../home/dotds.dart';
 import '../home/votd.dart';
 
@@ -30,7 +30,7 @@ class NotificationsModel extends NotificationsHelper {
               time: DateTime.now().applied(const TimeOfDay(hour: 8, minute: 0)),
               enabled: false),
         ]) {
-    bible = VolumesRepository.shared.bibleWithId(defaultBibleId);
+    bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
   }
 
   @override
@@ -78,6 +78,7 @@ class NotificationsModel extends NotificationsHelper {
   Future<void> handlePayload(String payload) async {
     final uri = Uri.parse(payload);
     final type = NotificationConsts.getType(payload);
+
     switch (type) {
       case NotificationType.votd:
         final date = DateTime.parse(uri.pathSegments[0]);
