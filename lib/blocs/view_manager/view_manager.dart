@@ -46,7 +46,7 @@ class ViewManager {
     }
   }
 
-  void makeVisibleOrAdd(BuildContext context, final String windowType) {
+  void makeVisibleOrAdd(BuildContext context, final String viewType) {
     ViewState lastVisibleView;
 
     for (final view in context.viewManager.state.views) {
@@ -54,28 +54,28 @@ class ViewManager {
         lastVisibleView = view;
       }
 
-      if (view.type == windowType) {
+      if (view.type == viewType) {
         if (!context.viewManager.isViewVisible(view.uid)) {
           if (context.viewManager.state.maximizedViewUid > 0) {
-            // maximize the existing window...
+            // Maximize the existing view...
             context.viewManager.add(ViewManagerEvent.maximize(view.uid));
           } else {
-            // move the window from hidden to last visible one...
+            // Move the view from hidden to last visible one...
             context.viewManager.add(ViewManagerEvent.move(
                 fromPosition: context.viewManager.indexOfView(view.uid),
                 toPosition: context.viewManager.indexOfView(lastVisibleView.uid)));
           }
         } else {
-          TecToast.show(context, 'Window is already visible');
+          TecToast.show(context, 'View is already visible');
         }
 
-        // this window was already created... now it's visible... return
+        // This view was already created... now it's visible... return.
         return;
       }
     }
 
-    // window not found, add one
-    context.viewManager?.add(ViewManagerEvent.add(type: windowType, data: null, position: null));
+    // View not found, add one.
+    context.viewManager?.add(ViewManagerEvent.add(type: viewType, data: null, position: null));
   }
 
   String menuTitleWith({String type, BuildContext context, ViewState state}) {

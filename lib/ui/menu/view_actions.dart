@@ -78,7 +78,7 @@ List<TableRow> _buildMenuItemsForViewWithState(
   final items = <TableRow>[];
 
   if ((vmBloc?.state?.views?.length ?? 0) > 1) {
-    items.add(tecModalPopupMenuDivider(menuContext, title: 'Window options'));
+    items.add(tecModalPopupMenuDivider(menuContext, title: 'View options'));
 
     if (isMaximized) {
       items.add(tecModalPopupMenuItem(
