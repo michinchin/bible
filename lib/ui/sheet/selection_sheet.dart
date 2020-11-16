@@ -141,8 +141,14 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
                         scrollDirection: Axis.horizontal,
                         itemCount: colors.length,
                         itemBuilder: (c, i) => colors[i],
-                        separatorBuilder: (c, i) =>
-                            const VerticalDivider(color: Colors.transparent, width: 15),
+                        separatorBuilder: (c, i) {
+                          // don't put a divider after the last element...
+                          if (i < colors.length - 2) {
+                            return const VerticalDivider(color: Colors.transparent, width: 15);
+                          } else {
+                            return Container();
+                          }
+                        },
                       )),
                   Padding(
                       // bottom padding is handled by TecScaffoldWrapper

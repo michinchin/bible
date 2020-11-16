@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -81,6 +83,13 @@ class AppSettings {
       unawaited(userAccount.syncUserDb<void>(itemTypes: userAccount.itemTypesToSync));
     }
   }
+}
+
+///
+/// Checks to see if this is a small screen
+bool isSmallScreen(BuildContext context) {
+  final size = MediaQuery.of(context).size;
+  return (math.max(size.width, size.height) < 1004);
 }
 
 ///

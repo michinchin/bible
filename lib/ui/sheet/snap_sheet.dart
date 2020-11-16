@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,7 +8,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../common/common.dart';
+import '../../models/app_settings.dart';
 import 'main_sheet.dart';
 import 'selection_sheet.dart';
 
@@ -84,28 +86,35 @@ class _SheetShadow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final maxWidth = isSmallScreen(context) ? size.width : math.min(size.width, 592.0);
+
     const sheetRadius = Radius.circular(7);
     const borderRadius = BorderRadius.only(topLeft: sheetRadius, topRight: sheetRadius);
 
-    // if we want a sheet with a shadow...
-    // decoration: BoxDecoration(
-    //   borderRadius: borderRadius,
-    //   boxShadow: [
-    //     BoxShadow(
-    //       color:
-    //           (Theme.of(context).brightness == Brightness.dark) ? Colors.white54 : Colors.black26,
-    //       blurRadius: 3,
-    //       spreadRadius: 0,
-    //     ),
-    //   ],
-    //   shape: BoxShape.rectangle,
-    // ),
+    final decoration = Theme.of(context).brightness == Brightness.dark
+        ? null
+        : const BoxDecoration(
+            borderRadius: borderRadius,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 3,
+                spreadRadius: 0,
+              ),
+            ],
+            shape: BoxShape.rectangle,
+          );
 
-    return Material(
-      borderRadius: borderRadius,
-      child: Padding(
-        padding: EdgeInsets.only(top: 11, bottom: TecScaffoldWrapper.navigationBarPadding),
-        child: child,
+    return Container(
+      width: maxWidth,
+      decoration: decoration,
+      child: Material(
+        borderRadius: borderRadius,
+        child: Padding(
+          padding: EdgeInsets.only(top: 11, bottom: TecScaffoldWrapper.navigationBarPadding),
+          child: child,
+        ),
       ),
     );
   }

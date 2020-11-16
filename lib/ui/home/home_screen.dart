@@ -78,3 +78,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+// class _ColumnStack extends StatelessWidget {
+//   final List<Widget> children;
+//
+//   const _ColumnStack({Key key, this.children}) : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return isSmallScreen(context) ? Column(children: children) : Stack(children : children);
+//   }
+// }
