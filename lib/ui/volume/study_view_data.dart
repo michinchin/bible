@@ -28,7 +28,9 @@ class StudyViewData extends ChapterViewData {
     BookChapterVerse bcv,
     int page, {
     @required bool useSharedRef,
-  }) : super(volumeId, bcv, page, useSharedRef: useSharedRef);
+  })  : assert(volumeId != null && volumeId >= 1000 && volumeId < 7000),
+        assert(bcv != null && page != null),
+        super(volumeId, bcv, page, useSharedRef: useSharedRef);
 
   @override
   StudyViewData copyWith({

@@ -15,7 +15,7 @@ import '../common/common.dart';
 void showTextSettingsDialog(BuildContext context) {
   showModalBottomSheet<void>(
     context: context,
-    barrierColor: Colors.black12,
+    barrierColor: barrierColorWithContext(context),
     builder: (context) => _TextSettings(),
   );
 }

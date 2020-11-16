@@ -25,7 +25,8 @@ class ViewableUGC extends Viewable {
   String menuTitle({BuildContext context, ViewState state}) => 'Notes';
 
   @override
-  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) =>
+  Future<ViewData> dataForNewView(
+          {BuildContext context, int currentViewId, Map<String, dynamic> options}) =>
       Future.value(const UGCViewData(UGCViewData.folderHome));
 }
 
@@ -363,7 +364,8 @@ class _UGCViewState extends State<_UGCView> {
                     }
                   } else if (items[i] is _DividerItem) {
                     return Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
+                      padding:
+                          const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
                       child: Divider(
                         height: 1,
                         color: color,

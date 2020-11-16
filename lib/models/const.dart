@@ -4,8 +4,7 @@ import 'package:tec_util/tec_util.dart';
 class Const {
   static const appNameForUA = 'tecarta_bible';
 
-  static const viewTypeChapter = 'BibleChapter';
-  static const viewTypeStudy = 'StudyView';
+  static const viewTypeVolume = 'BibleChapter';
   static const viewTypeNotes = 'NotesView';
   static const viewTypeMarginNote = 'MarginNoteView';
 

@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'view_manager_bloc.dart';
 import 'view_state.dart';
 
 part 'view_manager_state.freezed.dart';

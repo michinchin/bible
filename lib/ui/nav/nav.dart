@@ -190,7 +190,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       searchController: _searchController);
 
   void _moreButton() => showModalBottomSheet<void>(
-      barrierColor: Colors.black12,
+      barrierColor: barrierColorWithContext(context),
       elevation: 10,
       shape: const RoundedRectangleBorder(
           borderRadius:

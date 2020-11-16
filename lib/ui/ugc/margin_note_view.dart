@@ -38,7 +38,8 @@ class ViewableMarginNote extends Viewable {
   }
 
   @override
-  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) =>
+  Future<ViewData> dataForNewView(
+          {BuildContext context, int currentViewId, Map<String, dynamic> options}) =>
       Future.value(const ViewData());
 }
 

@@ -22,46 +22,10 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
-import '../library/library.dart';
 import 'chapter_build_helper.dart';
 import 'chapter_selection.dart';
-import 'chapter_view_app_bar.dart';
 import 'chapter_view_data.dart';
 import 'chapter_view_model.dart';
-
-class ViewableBibleChapter extends Viewable {
-  ViewableBibleChapter(String typeName, IconData icon) : super(typeName, icon);
-
-  @override
-  Widget builder(BuildContext context, ViewState state, Size size) {
-    return PageableChapterView(state: state, size: size);
-  }
-
-  @override
-  String menuTitle({BuildContext context, ViewState state}) {
-    return state?.uid == null
-        ? 'Bible'
-        : ChapterViewData.fromContext(context, state.uid).bookNameChapterAndAbbr;
-  }
-
-  @override
-  Future<ViewData> dataForNewView({BuildContext context, int currentViewId}) async {
-    final bibleId = await selectVolume(context,
-        title: 'Select Bible Translation',
-        filter: const VolumesFilter(
-          volumeType: VolumeType.bible,
-        ));
-    // tec.dmPrint('selected $bibleId');
-
-    if (bibleId != null) {
-      final previous = ChapterViewData.fromContext(context, currentViewId);
-      assert(previous != null);
-      return previous.copyWith(volumeId: bibleId);
-    }
-
-    return null;
-  }
-}
 
 class PageableChapterView extends StatefulWidget {
   final ViewState state;
@@ -85,52 +49,33 @@ class _PageableChapterViewState extends State<PageableChapterView> {
   void initState() {
     // tec.dmPrint('_PageableChapterViewState initState for ${widget.state.uid} size ${widget.size}');
     super.initState();
-    final viewData = ChapterViewData.fromContext(context, widget.state.uid);
+    final viewData = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData;
     _volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
     _bible = _volume.assocBible();
     _bcvPageZero = viewData.bcv;
   }
 
   @override
-  Widget build(BuildContext context) => MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => ChapterViewDataBloc(
-              context.viewManager,
-              widget.state.uid,
-              ChapterViewData.fromContext(context, widget.state.uid),
-            ),
+  Widget build(BuildContext context) => MultiBlocListener(
+        listeners: [
+          BlocListener<ChapterViewDataBloc, ViewData>(
+            // Only listen for when the volume, book, chapter, or verse changes.
+            listenWhen: (a, b) =>
+                a.asChapterViewData.volumeId != b.asChapterViewData.volumeId ||
+                a.asChapterViewData.bcv != b.asChapterViewData.bcv,
+            listener: (context, viewData) => _onNewViewData(viewData.asChapterViewData),
           ),
+          BlocListener<SharedBibleRefBloc, BookChapterVerse>(listener: _sharedBibleRefChanged),
         ],
-        child: BlocListener<ChapterViewDataBloc, ViewData>(
-          // Only listen for when the volume, book, chapter, or verse changes.
-          listenWhen: (a, b) =>
-              a.asChapterViewData.volumeId != b.asChapterViewData.volumeId ||
-              a.asChapterViewData.bcv != b.asChapterViewData.bcv,
-          listener: (context, viewData) => _onNewViewData(viewData.asChapterViewData),
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: MinHeightAppBar(
-              appBar: ChapterViewAppBar(
-                volumeType: _volume is Bible ? VolumeType.bible : VolumeType.studyContent,
-                viewState: widget.state,
-                size: widget.size,
-              ),
-            ),
-            body: BlocListener<SharedBibleRefBloc, BookChapterVerse>(
-              listener: _onSharedBibleRefListener,
-              child: PageableView(
-                state: widget.state,
-                size: widget.size,
-                controllerBuilder: () {
-                  _pageController = TecPageController(initialPage: 0);
-                  return _pageController;
-                },
-                pageBuilder: _buildPage,
-                onPageChanged: _onPageChanged,
-              ),
-            ),
-          ),
+        child: PageableView(
+          state: widget.state,
+          size: widget.size,
+          controllerBuilder: () {
+            _pageController = TecPageController(initialPage: 0);
+            return _pageController;
+          },
+          pageBuilder: _buildPage,
+          onPageChanged: _onPageChanged,
         ),
       );
 
@@ -174,7 +119,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
   ///
   /// This is called when the shared bible reference changes.
   ///
-  Future<void> _onSharedBibleRefListener(BuildContext context, BookChapterVerse sharedRef) async {
+  Future<void> _sharedBibleRefChanged(BuildContext context, BookChapterVerse sharedRef) async {
     if (!_animatingToPage && mounted && _pageController != null && _bible != null) {
       final viewDataBloc = context.tbloc<ChapterViewDataBloc>();
       final viewData = viewDataBloc.state.asChapterViewData;
@@ -611,7 +556,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                 }
                 return false;
               },
-              child: CupertinoScrollbar(
+              child: Scrollbar(
                 child: SingleChildScrollView(
                   controller: _scrollController,
                   child: TecHtml(

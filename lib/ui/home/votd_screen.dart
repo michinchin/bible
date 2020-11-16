@@ -4,6 +4,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
 import '../../models/home/interstitial.dart';
@@ -78,12 +79,10 @@ class __VotdScreenState extends State<_VotdScreen> {
                 color: Colors.white, shadowColor: Colors.black),
           ]),
           onPressed: () async {
-            final vol = await selectVolume(context,
-                title: 'Select Bible',
-                filter: VolumesFilter(volumeType: _bible.type),
-                selectedVolume: _bible.id);
+            final vol = await selectVolumeInLibrary(context,
+                title: 'Select Bible', selectedVolume: _bible.id);
             if (vol != null) {
-              setBible(VolumesRepository.shared.bibleWithId(vol));
+              setBible(VolumesRepository.shared.volumeWithId(vol).assocBible());
             }
           },
         ),
@@ -173,18 +172,14 @@ class _VotdsScreen extends StatelessWidget {
 
 Bible currentBibleFromContext(BuildContext context) {
   // find bible translation from views
-  final view = context
-      .tbloc<ViewManagerBloc>()
-      .state
-      .views
-      .firstWhere((v) => v.type == Const.viewTypeChapter, orElse: () => null)
-      ?.uid;
-  Bible bible;
-  if (view != null) {
-    final viewData = ChapterViewData.fromContext(context, view);
-    bible = VolumesRepository.shared.volumeWithId(viewData.volumeId).assocBible();
-  } else {
-    bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
-  }
+  final bible = VolumesRepository.shared.bibleWithId(((context.viewManager.state.views
+              .firstWhere(
+                  (v) =>
+                      v.type == Const.viewTypeVolume &&
+                      isBibleId(ChapterViewData.fromContext(context, v.uid)?.volumeId),
+                  orElse: () => null)
+              ?.chapterDataWith(context))
+          ?.volumeId) ??
+      defaultBibleId);
   return bible;
 }

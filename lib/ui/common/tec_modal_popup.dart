@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 
 enum TecPopupAnimationType { fadeScale, slide }
 
+Color barrierColorWithContext(BuildContext context) =>
+    CupertinoDynamicColor.resolve(_kModalBarrierColor, context);
+
 /// Shows a modal popup that is positioned based on [alignment] and
 /// [edgeInsets], and is animated when opening and closing based on
 /// [animationType].
@@ -56,7 +59,7 @@ Future<T> showTecModalPopup<T>({
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator ?? true).push(
     _TecModalPopupRoute<T>(
-      barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
+      barrierColor: barrierColor ?? barrierColorWithContext(context),
       barrierLabel: 'Dismiss',
       builder: builder,
       alignment: alignment ?? Alignment.bottomCenter,
@@ -81,6 +84,7 @@ class TecPopupSheet extends StatelessWidget {
   final EdgeInsets padding;
   final double bgOpacity;
   final double bgBlur;
+  final bool makeScrollable;
 
   ///
   /// Creates a [TecPopupSheet].
@@ -93,6 +97,7 @@ class TecPopupSheet extends StatelessWidget {
     this.padding = const EdgeInsets.all(14),
     this.bgOpacity = 0.75,
     this.bgBlur = 20.0,
+    this.makeScrollable = true,
   })  : assert(child != null),
         super(key: key);
 
@@ -121,7 +126,12 @@ class TecPopupSheet extends StatelessWidget {
               // child: Container(width: 300, height: 300, color: Colors.white.withOpacity(0.7)),
               child: Container(
                 color: CupertinoDynamicColor.resolve(bgColor, context),
-                child: _PopupSheetContent(child: child, title: title, padding: padding),
+                child: _PopupSheetContent(
+                  child: child,
+                  title: title,
+                  padding: padding,
+                  makeScrollable: makeScrollable,
+                ),
               ),
             ),
           ),
@@ -138,7 +148,7 @@ class TecPopupSheet extends StatelessWidget {
 /// Barrier color for a Cupertino modal barrier.
 /// Extracted from https://developer.apple.com/design/resources/.
 const Color _kModalBarrierColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x22000000), // Color(0x33000000),
+  color: Color(0x33000000),
   darkColor: Color(0x7A000000),
 );
 
@@ -296,21 +306,20 @@ extension on EdgeInsetsGeometry {
   }
 }
 
-///
-/// [TecPopupSheet] content
-///
 class _PopupSheetContent extends StatelessWidget {
   final Widget child;
   final Widget title;
-  final ScrollController scrollController;
   final EdgeInsets padding;
+  final bool makeScrollable;
+  final ScrollController scrollController;
 
   const _PopupSheetContent({
     Key key,
     @required this.child,
     this.title,
-    this.scrollController,
     this.padding,
+    this.makeScrollable = true,
+    this.scrollController,
   }) : super(key: key);
 
   @override
@@ -326,29 +335,29 @@ class _PopupSheetContent extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             title,
-            Flexible(child: scrollableChild()),
+            Flexible(child: makeScrollable ? _scrollableChild() : _child()),
           ],
         );
       }
-      return scrollableChild();
+      return makeScrollable ? _scrollableChild() : _child();
     }
   }
 
-  Widget scrollableChild() {
-    return CupertinoScrollbar(
-      child: SingleChildScrollView(
-        controller: scrollController,
-        child: Padding(
-          padding: padding ?? const EdgeInsets.all(14),
-          child: DefaultTextStyle(
-            style: _kPopupSheetContentStyle,
-            textAlign: TextAlign.center,
-            child: child,
-          ),
+  Widget _scrollableChild() => Scrollbar(
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: _child(),
         ),
-      ),
-    );
-  }
+      );
+
+  Widget _child() => Padding(
+        padding: padding ?? const EdgeInsets.all(14),
+        child: DefaultTextStyle(
+          style: _kPopupSheetContentStyle,
+          textAlign: TextAlign.center,
+          child: child,
+        ),
+      );
 }
 
 const TextStyle _kPopupSheetContentStyle = TextStyle(

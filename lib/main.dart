@@ -25,13 +25,12 @@ import 'models/app_settings.dart';
 import 'models/const.dart';
 import 'models/iap/iap.dart';
 import 'navigation_service.dart';
-import 'ui/bible/chapter_view.dart';
 import 'ui/common/common.dart';
 import 'ui/common/tec_modal_popup_menu.dart';
 import 'ui/home/home_screen.dart';
-import 'ui/study/study_view.dart';
 import 'ui/ugc/margin_note_view.dart';
 import 'ui/ugc/ugc_view.dart';
+import 'ui/volume/volume_view.dart';
 
 const _appTitle = 'Tecarta Bible';
 
@@ -41,10 +40,9 @@ const _appTitle = 'Tecarta Bible';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  ViewManager.defaultViewType = Const.viewTypeChapter;
+  ViewManager.defaultViewType = Const.viewTypeVolume;
   ViewManager.shared
-    ..register(ViewableBibleChapter(Const.viewTypeChapter, FeatherIcons.book))
-    ..register(ViewableStudyContent(Const.viewTypeStudy, FeatherIcons.bookOpen))
+    ..register(ViewableVolume(Const.viewTypeVolume, FeatherIcons.book))
     ..register(ViewableUGC(Const.viewTypeNotes, FeatherIcons.edit2))
     ..register(ViewableMarginNote(Const.viewTypeMarginNote, TecIcons.marginNoteOutline));
 
