@@ -1,3 +1,7 @@
+import 'package:bible/blocs/sheet/pref_items_bloc.dart';
+import 'package:bible/models/chapter_verses.dart';
+import 'package:bible/models/pref_item.dart';
+import 'package:bible/models/search/tec_share.dart';
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -54,6 +58,28 @@ class __VotdScreenState extends State<_VotdScreen> {
     }
   }
 
+  Future<void> share() async {
+    final copyWithLink = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    if (!copyWithLink) {
+      final text = await tecShowProgressDlg<tec.ErrorOrValue<ReferenceAndVerseText>>(
+        context: context,
+        title: 'Preparing to share...',
+        future: _bible.referenceAndVerseTextWith(widget.votd.ref),
+      );
+      if (text.value.error == null && text.value.value != null) {
+        final toShare =
+            ChapterVerses.formatForShare([text.value.value.reference], text.value.value.verseText);
+        TecShare.share(toShare);
+      }
+    } else {
+      final text = await _bible.referenceAndVerseTextWith(widget.votd.ref);
+      if (text.error == null && text.value != null) {
+        final toShare = ChapterVerses.formatForShare([text.value.reference], text.value.verseText);
+        await TecShare.shareWithLink(toShare, text.value.reference);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return TecImageAppBarScaffold(
@@ -63,7 +89,15 @@ class __VotdScreenState extends State<_VotdScreen> {
       imageAspectRatio: imageAspectRatio,
       //  scrollController: scrollController,
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      // bottomNavigationBar: BottomHomeBar(),
+      actions: [
+        IconButton(
+            icon: TecIcon(
+              Icon(Icons.share),
+              color: Colors.white,
+              shadowColor: Colors.black,
+            ),
+            onPressed: share)
+      ],
       childBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
         future: widget.votd.getFormattedVerse(_bible),
         builder: (context, snapshot) {

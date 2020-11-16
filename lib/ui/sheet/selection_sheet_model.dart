@@ -200,7 +200,7 @@ class SelectionSheetModel {
       final v = await VolumesRepository.shared.bibleWithId(bibleId).referenceAndVerseTextWith(ref);
       final verses = v.value.verseText;
       final copyWithLink = c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
-      final verse = ChapterVerses.formatForShare([ref], verses);
+      final verse = ChapterVerses.formatForShare([v.value.reference], verses);
       buffer.write(verse);
       if (copyWithLink) {
         buffer.write(await TecShare.shareLink(ref));

@@ -31,7 +31,10 @@ class VotdEntry {
         refAndVerse.value != null &&
         tec.isNotNullOrEmpty(refAndVerse.value.verseText)) {
       final verseText = refAndVerse.value.verseText;
-      return tec.ErrorOrValue(refAndVerse.error, ChapterVerses.formatVerse(verseText));
+      return tec.ErrorOrValue(
+          refAndVerse.error,
+          ChapterVerses.formatForShare([refAndVerse.value.reference], verseText,
+              includeRef: false));
     } else {
       return tec.ErrorOrValue(refAndVerse.error, '');
     }
