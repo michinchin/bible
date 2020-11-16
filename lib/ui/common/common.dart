@@ -130,7 +130,8 @@ IconData platformAwareMoreIcon(BuildContext context) {
 ///
 class ListLabel extends StatelessWidget {
   final String label;
-  const ListLabel(this.label);
+  final TextStyle style;
+  const ListLabel(this.label, {this.style});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -139,7 +140,7 @@ class ListLabel extends StatelessWidget {
         child: TecText(
           label,
           autoSize: true,
-          style: Theme.of(context).textTheme.caption,
+          style: style ?? Theme.of(context).textTheme.caption,
         ));
   }
 }

@@ -55,7 +55,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
     final nonDebounceStream = events.where((event) {
       return (event is! _OnSearchChange);
     });
-    
+
     // debounce request streams
     final debounceStream = events.where((event) {
       return (event is _OnSearchChange);
@@ -240,7 +240,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
     var ref = state.ref.copyWith(book: bookId);
     if (state.ref.book != bookId) {
       // if changed book, init with first chapter
-      ref = ref.copyWith(chapter: 1);
+      ref = ref.copyWith(chapter: 1, verse: 1, endVerse: 1);
     }
     add(NavEvent.changeState(
         state.copyWith(ref: ref, tabIndex: NavTabs.chapter.index, search: bookName)));

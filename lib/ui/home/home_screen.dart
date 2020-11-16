@@ -22,14 +22,13 @@ class _HomeScreenState extends State<HomeScreen> {
   final _startTime = DateTime.now();
   @override
   void initState() {
-    // if (!kDebugMode)
-    initNotifications();
+    if (!kDebugMode) initNotifications();
     super.initState();
   }
 
   void initNotifications() {
     // TODO(abby): on cold start, doesn't open notification on iOS...why?
-    // if cold start - wait longer... 
+    // if cold start - wait longer...
     final delay =
         (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 500 : 1250;
 
