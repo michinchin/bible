@@ -79,7 +79,7 @@ List<TableRow> _buildMenuItemsForViewWithState(
   final items = <TableRow>[];
 
   if ((vmBloc?.state?.views?.length ?? 0) > 1) {
-    items.add(tecModalPopupMenuDivider(menuContext, title: 'Window options'));
+    items.add(tecModalPopupMenuDivider(menuContext, title: 'View options'));
 
     if (isMaximized) {
       items.add(tecModalPopupMenuItem(
@@ -103,7 +103,7 @@ List<TableRow> _buildMenuItemsForViewWithState(
       }));
     }
 
-    if ({Const.viewTypeChapter, Const.viewTypeStudy}.contains(state.type)) {
+    if (state.type == Const.viewTypeVolume) {
       items.add(tecModalPopupMenuItem(
         menuContext,
         useSharedRef ? Icons.link_off_outlined : Icons.link_outlined,
@@ -192,15 +192,28 @@ Iterable<TableRow> _generateOffScreenItems(BuildContext menuContext, int viewUid
 Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
   assert(menuContext != null && viewUid != null);
   final vm = ViewManager.shared;
-  return vm.types.map<TableRow>((type) {
+  return vm.types.expand<TableRow>((type) {
     // Types that cannot be created from the menu return `null` for the menu title.
     final title = vm.menuTitleWith(type: type);
-    if (title == null) return TableRow(children: [Container(), Container()]);
+    if (title == null) return [];
 
-    return tecModalPopupMenuItem(menuContext, vm.iconWithType(type), '$title', () async {
-      tec.dmPrint('Adding new view of type $type.');
-      await vm.onAddView(menuContext, type, currentViewId: viewUid);
-      await Navigator.of(menuContext).maybePop();
-    });
+    TableRow row({String title, IconData icon, String tab}) =>
+        tecModalPopupMenuItem(menuContext, icon ?? vm.iconWithType(type), '$title', () async {
+          tec.dmPrint('Adding new view of type $type.');
+          await vm.onAddView(menuContext, type,
+              currentViewId: viewUid, options: tab == null ? null : <String, dynamic>{'tab': tab});
+          await Navigator.of(menuContext).maybePop();
+        });
+
+    if (type == Const.viewTypeVolume) {
+      return [
+        row(title: 'Bible', icon: FeatherIcons.bookOpen, tab: 'Bible'),
+        row(title: 'Study Bible', icon: FeatherIcons.bookOpen, tab: 'Study'),
+        row(title: 'Commentary', icon: FeatherIcons.bookOpen, tab: 'Commentaries'),
+        row(title: 'Devotional', icon: FeatherIcons.bookOpen, tab: 'Devotional'),
+      ];
+    } else {
+      return [row(title: title)];
+    }
   });
 }

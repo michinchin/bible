@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
@@ -15,12 +16,34 @@ class TodayScreen extends StatelessWidget {
     return SafeArea(
         child: Container(
             padding: const EdgeInsets.only(top: 10),
-            height: dayCardHeight(context),
-            child: Row(children: [Expanded(child: _VotdCard()), Expanded(child: _DotdCard())])));
+            child: ListView(children: [
+              const _Label('Verse of the Day'),
+              const SizedBox(height: 5),
+              Container(height: dayCardHeight(context), child: _VotdCard()),
+              const SizedBox(height: 5),
+              const _Label('Devotional of the Day'),
+              const SizedBox(height: 5),
+              Container(height: dayCardHeight(context), child: _DotdCard()),
+            ])));
   }
 }
 
-double dayCardHeight(BuildContext c) => 200;
+double dayCardHeight(BuildContext c) => 300;
+
+class _Label extends StatelessWidget {
+  final String text;
+  const _Label(this.text);
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: ListLabel(
+        '$text: ${tec.shortDate(tec.today)}',
+        style: cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
+      ),
+    );
+  }
+}
 
 class _DotdCard extends StatelessWidget {
   @override
@@ -32,6 +55,7 @@ class _DotdCard extends StatelessWidget {
           final dotd = snapshot.data?.devoForDate(DateTime.now());
           return _HomeCard(
             title: dotd.title,
+            subtitle: dotd.intro,
             onImageTap: () => showDotdScreen(context, dotd),
             imageUrl: dotd.imageUrl(AppSettings.shared.env),
             onMoreTap: () => showAllDotd(context, snapshot.data),
@@ -51,12 +75,23 @@ class _VotdCard extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final votd = snapshot.data.forDateTime(DateTime.now());
-          return _HomeCard(
-            title: votd.ref.label(),
-            onImageTap: () => showVotdScreen(context, votd),
-            imageUrl: votd.imageUrl,
-            onMoreTap: () => showAllVotd(context, snapshot.data),
-          );
+          return FutureBuilder<tec.ErrorOrValue<String>>(
+              future: votd.getFormattedVerse(currentBibleFromContext(context)),
+              builder: (context, s) {
+                if (s.hasData && s.data.error == null) {
+                  final subtitle = s.data.value;
+                  return _HomeCard(
+                    title: votd.ref.label(),
+                    subtitle: subtitle,
+                    onImageTap: () => showVotdScreen(context, votd),
+                    imageUrl: votd.imageUrl,
+                    onMoreTap: () => showAllVotd(context, snapshot.data),
+                  );
+                }
+                return const Center(
+                  child: LoadingIndicator(),
+                );
+              });
         }
         return const Center(child: LoadingIndicator());
       },
@@ -66,56 +101,68 @@ class _VotdCard extends StatelessWidget {
 
 class _HomeCard extends StatelessWidget {
   final String title;
+  final String subtitle;
   final VoidCallback onImageTap;
   final String imageUrl;
   final VoidCallback onMoreTap;
   const _HomeCard(
       {@required this.title,
+      @required this.subtitle,
       @required this.onImageTap,
       @required this.imageUrl,
       @required this.onMoreTap});
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          flex: 2,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: TecCard(
-              elevation: 0,
-              padding: 0,
-              color: Theme.of(context).cardColor,
-              onTap: onImageTap,
-              builder: (c) => TecImage(
-                height: dayCardHeight(c),
-                url: imageUrl,
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: TecText(
-                  title,
-                  autoSize: true,
-                  style: cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
-                  textScaleFactor: textScaleFactorWith(context),
-                  maxLines: 1,
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        child: TecCard(
+          padding: 0,
+          color: Theme.of(context).cardColor,
+          builder: (c) => Column(children: [
+            Stack(children: [
+              InkWell(
+                onTap: onImageTap,
+                child: TecImage(
+                  color: Colors.black12,
+                  colorBlendMode: BlendMode.colorBurn,
+                  url: imageUrl,
                 ),
               ),
-              InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: onMoreTap,
-                  child: Icon(SFSymbols.ellipsis_circle, color: Theme.of(context).textColor)),
-            ],
-          ),
-        ),
-      ],
-    );
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: TecText(
+                        title,
+                        style: cardTitleCompactStyle.copyWith(color: Colors.white, fontSize: 40),
+                        textScaleFactor: textScaleFactorWith(context),
+                        maxLines: 2,
+                      ),
+                    ),
+                    InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: onMoreTap,
+                        child: Icon(SFSymbols.ellipsis_circle, color: Theme.of(context).textColor)),
+                  ],
+                ),
+              ),
+            ]),
+            const Divider(color: Colors.transparent),
+            InkWell(
+                onTap: onImageTap,
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: TecText(
+                      subtitle,
+                      style: cardSubtitleCompactStyle.copyWith(color: Colors.white),
+                      textScaleFactor: textScaleFactorWith(context),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ))),
+          ]),
+        ));
   }
 }

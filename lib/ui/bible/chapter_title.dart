@@ -15,6 +15,7 @@ import '../common/common.dart';
 import '../library/library.dart';
 import '../nav/nav.dart';
 import '../sheet/selection_sheet_model.dart';
+import '../volume/study_view_data.dart';
 import 'chapter_view_data.dart';
 
 class ChapterTitle extends StatelessWidget {
@@ -95,8 +96,6 @@ class ChapterTitle extends StatelessWidget {
                     maxLines: 1,
                     style: buttonStyle,
                   ),
-                  // onPressed: () =>
-                  //     onNavigate(context, viewData, initialIndex: NavTabs.translation.index),
                   onPressed: () => _onSelectVolume(context, viewData),
                 ),
               ),
@@ -136,20 +135,29 @@ class ChapterTitle extends StatelessWidget {
 
   Future<void> _onSelectVolume(BuildContext context, ChapterViewData viewData) async {
     TecAutoScroll.stopAutoscroll();
-    final volumeTypeName = volumeType == VolumeType.bible
-        ? 'Bible'
-        : volumeType == VolumeType.studyContent
-            ? 'Study Content'
-            : 'Something';
-    final volumeId = await selectVolume(context,
-        title: 'Select $volumeTypeName',
-        filter: VolumesFilter(volumeType: volumeType),
-        selectedVolume: viewData.volumeId);
 
-    final newViewData =
-        context.tbloc<ChapterViewDataBloc>().state.asChapterViewData.copyWith(volumeId: volumeId);
-    tec.dmPrint('ChapterTitle _onSelectVolume updating with new data: $newViewData');
-    await context.tbloc<ChapterViewDataBloc>().update(context, newViewData);
+    final volumeId = await selectVolumeInLibrary(context,
+        title: 'Switch To...', selectedVolume: viewData.volumeId);
+
+    ChapterViewData newViewData;
+    if (volumeId != null) {
+      final previous = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData;
+      assert(previous != null);
+      if (isBibleId(volumeId)) {
+        newViewData =
+            ChapterViewData(volumeId, previous.bcv, 0, useSharedRef: previous.useSharedRef);
+      } else if (isStudyVolumeId(volumeId)) {
+        newViewData =
+            StudyViewData(0, volumeId, previous.bcv, 0, useSharedRef: previous.useSharedRef);
+      } else {
+        assert(false);
+      }
+    }
+
+    if (newViewData != null) {
+      tec.dmPrint('ChapterTitle _onSelectVolume updating with new data: $newViewData');
+      await context.tbloc<ChapterViewDataBloc>().update(context, newViewData);
+    }
   }
 }
 

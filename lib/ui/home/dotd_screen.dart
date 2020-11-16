@@ -11,7 +11,6 @@ import '../../models/home/dotds.dart';
 import '../../models/home/interstitial.dart';
 import '../common/common.dart';
 import 'day_card.dart';
-import 'home.dart';
 import 'votd_screen.dart';
 
 Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
@@ -31,10 +30,7 @@ class _DotdScreen extends StatelessWidget {
         backgroundColor:
             Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
         imageAspectRatio: imageAspectRatio,
-        //  scrollController: scrollController,
-        floatingActionButton: BottomHomeFab(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        // bottomNavigationBar: BottomHomeBar(),
         childBuilder: (c, i) => FutureBuilder<String>(
             future: devo.html(AppSettings.shared.env),
             builder: (c, snapshot) {

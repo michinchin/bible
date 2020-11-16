@@ -23,8 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // if (!kDebugMode)
-    initNotifications();
+    if (!kDebugMode) initNotifications();
     super.initState();
   }
 

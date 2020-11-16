@@ -11,11 +11,12 @@ import '../models/app_settings.dart';
 enum IsLicensedOpt { any, all }
 
 ///
-/// Given a set of volume ids, this Bloc's state will be `true` iff `any` (or optionally `all`)
-/// of the given volumes are fully licensed.
+/// This Bloc's state will be `null` initially, and then change to `true` if
+/// `any` (or optionally `all`) of the given volumes are fully licensed,
+/// otherwise it will change to `false`.
 ///
-/// This Bloc listens for license changes in the TecUserAccount UserDb, and auto-updates if
-/// there are changes.
+/// This Bloc listens for license changes in the TecUserAccount UserDb, and
+/// auto-updates if there are changes.
 ///
 class IsLicensedBloc extends tec.SafeBloc<bool, bool> {
   final Set<int> _setOfIds;
@@ -32,7 +33,7 @@ class IsLicensedBloc extends tec.SafeBloc<bool, bool> {
   })  : assert(volumeIds != null && volumeIds.isNotEmpty),
         assert(option != null && checkPremium != null && checkUnlimited != null),
         _setOfIds = volumeIds?.toSet() ?? {},
-        super(false) {
+        super(null) {
     _userDbChangeSubscription =
         AppSettings.shared.userAccount.userDbChangeStream.listen(_userDbChangeListener);
     _refresh();
@@ -57,6 +58,7 @@ class IsLicensedBloc extends tec.SafeBloc<bool, bool> {
   }
 
   Future<void> _refresh() async {
+    // Future.delayed(const Duration(seconds: 1), () async {
     if (isClosed) return;
     final owned = await AppSettings.shared.userAccount.userDb.fullyLicensedVolumesInList(
       _setOfIds,
@@ -64,5 +66,6 @@ class IsLicensedBloc extends tec.SafeBloc<bool, bool> {
       checkUnlimited: checkUnlimited,
     );
     add(option == IsLicensedOpt.any ? owned.isNotEmpty : owned.length == _setOfIds.length);
+    // });
   }
 }

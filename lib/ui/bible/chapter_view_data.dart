@@ -115,3 +115,8 @@ class ChapterViewData extends ViewData {
 extension ChapterViewDataExtOnViewData on ViewData {
   ChapterViewData get asChapterViewData => this as ChapterViewData;
 }
+
+extension ViewManagerExtOnViewState on ViewState {
+  ChapterViewData chapterDataWith(BuildContext context) =>
+      ChapterViewData.fromContext(context, uid);
+}

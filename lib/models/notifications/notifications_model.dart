@@ -3,7 +3,7 @@ import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../navigation_service.dart';
-import '../../ui/home/home.dart';
+import '../../ui/home/today.dart';
 import '../app_settings.dart';
 import '../const.dart';
 import '../home/dotds.dart';

@@ -31,22 +31,22 @@ class ViewManager {
 
   IconData iconWithType(String type) => _types[type]?.icon;
 
-  Future<void> onAddView(BuildContext context, String type, {int currentViewId}) async {
-    // await Navigator.of(context).maybePop();
+  Future<void> onAddView(BuildContext context, String type,
+      {int currentViewId, Map<String, dynamic> options}) async {
     final vmBloc = context.viewManager; // ignore: close_sinks
     assert(vmBloc != null);
     var position = vmBloc?.indexOfView(currentViewId);
     if (position != null && (!vmBloc.isFull || position < vmBloc.countOfVisibleViews - 1)) {
       position += 1;
     }
-    final viewData =
-        await _types[type]?.dataForNewView(context: context, currentViewId: currentViewId);
+    final viewData = await _types[type]
+        ?.dataForNewView(context: context, currentViewId: currentViewId, options: options);
     if (viewData != null) {
       vmBloc?.add(ViewManagerEvent.add(type: type, position: position, data: viewData.toString()));
     }
   }
 
-  void makeVisibleOrAdd(BuildContext context, final String windowType) {
+  void makeVisibleOrAdd(BuildContext context, final String viewType) {
     ViewState lastVisibleView;
 
     for (final view in context.viewManager.state.views) {
@@ -54,28 +54,28 @@ class ViewManager {
         lastVisibleView = view;
       }
 
-      if (view.type == windowType) {
+      if (view.type == viewType) {
         if (!context.viewManager.isViewVisible(view.uid)) {
           if (context.viewManager.state.maximizedViewUid > 0) {
-            // maximize the existing window...
+            // Maximize the existing view...
             context.viewManager.add(ViewManagerEvent.maximize(view.uid));
           } else {
-            // move the window from hidden to last visible one...
+            // Move the view from hidden to last visible one...
             context.viewManager.add(ViewManagerEvent.move(
                 fromPosition: context.viewManager.indexOfView(view.uid),
                 toPosition: context.viewManager.indexOfView(lastVisibleView.uid)));
           }
         } else {
-          TecToast.show(context, 'Window is already visible');
+          TecToast.show(context, 'View is already visible');
         }
 
-        // this window was already created... now it's visible... return
+        // This view was already created... now it's visible... return.
         return;
       }
     }
 
-    // window not found, add one
-    context.viewManager?.add(ViewManagerEvent.add(type: windowType, data: null, position: null));
+    // View not found, add one.
+    context.viewManager?.add(ViewManagerEvent.add(type: viewType, data: null, position: null));
   }
 
   String menuTitleWith({String type, BuildContext context, ViewState state}) {
@@ -117,9 +117,11 @@ abstract class Viewable {
   ///
   /// Returns the view data for new views of this type. Can return `null` to just
   /// use defaults. If [context] and [currentViewId] are not null, [currentViewId]
-  /// is the id of the view the 'Add <this-type>' menu was selected in.
+  /// is the id of the view the 'Add <this-type>' menu was selected in. The
+  /// [options] parameter is optional and specific to the Viewable type.
   ///
-  Future<ViewData> dataForNewView({BuildContext context, int currentViewId});
+  Future<ViewData> dataForNewView(
+      {BuildContext context, int currentViewId, Map<String, dynamic> options});
 }
 
 //
@@ -129,7 +131,7 @@ abstract class Viewable {
 Widget _defaultScaffoldBuilder(BuildContext context, ViewState state, Size size) => Scaffold(
       appBar: MinHeightAppBar(
         appBar: AppBar(
-          title: Text(ViewManager.shared.menuTitleWith(context: context, state: state)),
+          title: Text(ViewManager.shared.menuTitleWith(context: context, state: state) ?? ''),
           // leading: widget.state.viewIndex > 0
           //     ? null
           //     : IconButton(

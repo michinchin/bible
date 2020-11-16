@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,79 +20,162 @@ import 'volumes_filter_sheet.dart';
 
 export 'volumes_bloc.dart' show VolumesFilter;
 
-void showLibrary(BuildContext context) {
-  Navigator.of(context, rootNavigator: true).push<void>(
-    MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (context) => _TabbedLibraryScreen(
-        closeLibrary: () => Navigator.of(context, rootNavigator: true).maybePop(),
-      ),
-    ),
-  );
+void showLibrary(BuildContext context, {String initialTabPrefix}) {
+  _showLibrary(context: context, initialTabPrefix: initialTabPrefix);
 }
 
-Future<int> selectVolume(
+Future<int> selectVolumeInLibrary(
   BuildContext context, {
   String title,
-  VolumesFilter filter,
+  String initialTabPrefix,
   int selectedVolume,
   bool scrollToSelectedVolume = true,
 }) {
-  return Navigator.of(context, rootNavigator: true).push<int>(
-    MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (context) => _LibraryScreen(
-        title: title,
-        filter: filter,
-        selectedVolumes: selectedVolume == null ? [] : [selectedVolume],
-        scrollToSelectedVolumes: scrollToSelectedVolume,
-      ),
-    ),
+  return _showLibrary<int>(
+    context: context,
+    title: title,
+    initialTabPrefix: initialTabPrefix,
+    selectedVolumes: selectedVolume == null ? [] : [selectedVolume],
+    scrollToSelectedVolumes: scrollToSelectedVolume,
+    whenTappedPopWithVolumeId: true,
   );
 }
 
-Future<List<int>> selectVolumes(
+Future<List<int>> selectVolumesInLibrary(
   BuildContext context, {
   String title,
-  VolumesFilter filter,
+  String initialTabPrefix,
   Iterable<int> selectedVolumes,
   bool scrollToSelectedVolumes = true,
 }) {
-  return Navigator.of(context, rootNavigator: true).push<List<int>>(
-    MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (context) => _LibraryScreen(
-        title: title,
-        filter: filter,
-        selectedVolumes: selectedVolumes ?? [],
-        scrollToSelectedVolumes: scrollToSelectedVolumes,
-        allowMultipleSelections: true,
+  return _showLibrary<List<int>>(
+    context: context,
+    title: title,
+    initialTabPrefix: initialTabPrefix,
+    selectedVolumes: selectedVolumes ?? [],
+    scrollToSelectedVolumes: scrollToSelectedVolumes,
+    allowMultipleSelections: true,
+  );
+}
+
+@immutable
+class LibraryTab {
+  final String title;
+  final VolumesFilter filter;
+  final String prefsKey;
+
+  const LibraryTab({@required this.title, @required this.filter, this.prefsKey})
+      : assert(title != null && filter != null);
+}
+
+//
+// PRIVATE STUFF
+//
+
+Future<T> _showLibrary<T extends Object>({
+  @required BuildContext context,
+  String title,
+  String initialTabPrefix,
+  Iterable<int> selectedVolumes = const {},
+  bool scrollToSelectedVolumes = true,
+  bool whenTappedPopWithVolumeId = false,
+  bool allowMultipleSelections = false,
+}) {
+  return showTecDialog<T>(
+    context: context,
+    useRootNavigator: true,
+    padding: EdgeInsets.zero,
+    maxWidth: 500,
+    maxHeight: (MediaQuery.of(context)?.size?.height ?? 700) - 40,
+    makeScrollable: false,
+    builder: (context) => Navigator(
+      onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+        settings: settings,
+        builder: (context) => BlocProvider<IsLicensedBloc>(
+          create: (context) => IsLicensedBloc(
+              volumeIds: VolumesRepository.shared.volumeIdsWithType(VolumeType.anyType)),
+          child: BlocBuilder<IsLicensedBloc, bool>(
+            builder: (context, hasLicensedVolumes) {
+              // if `hasLicensedVolumes` is null, just return spinner.
+              if (hasLicensedVolumes == null) return const Center(child: LoadingIndicator());
+
+              final tabs = _tabs(hasLicensedVolumes: hasLicensedVolumes);
+              final initialIndex = tec.isNullOrEmpty(initialTabPrefix)
+                  ? 0
+                  : math.max(0, tabs.indexWhere((t) => t.title.startsWith(initialTabPrefix)));
+              return _LibraryScaffold(
+                tabs: tabs,
+                initialTabIndex: initialIndex,
+                title: title,
+                selectedVolumes: selectedVolumes,
+                scrollToSelectedVolumes: scrollToSelectedVolumes,
+                whenTappedPopWithVolumeId: whenTappedPopWithVolumeId,
+                allowMultipleSelections: allowMultipleSelections,
+              );
+            },
+          ),
+        ),
       ),
     ),
   );
 }
 
-class _LibraryScreen extends StatefulWidget {
-  final String title;
-  final VolumesFilter filter;
-  final Iterable<int> selectedVolumes;
-  final bool scrollToSelectedVolumes;
-  final bool allowMultipleSelections;
+List<LibraryTab> _tabs({bool hasLicensedVolumes}) => [
+      if (hasLicensedVolumes)
+        const LibraryTab(
+            title: 'Purchased',
+            filter: VolumesFilter(ownershipStatus: OwnershipStatus.owned),
+            prefsKey: 'purchased'),
+      for (final id in VolumesRepository.shared.categoryIds()) _tabFromCategory(id),
+    ];
 
-  const _LibraryScreen({
-    Key key,
-    this.title,
-    this.filter,
-    this.selectedVolumes = const [],
-    this.scrollToSelectedVolumes = true,
-    this.allowMultipleSelections = false,
-  }) : super(key: key);
-
-  @override
-  _LibraryScreenState createState() => _LibraryScreenState();
+LibraryTab _tabFromCategory(int categoryId) {
+  final category = VolumesRepository.shared.categoryWithId(categoryId);
+  if (category != null) {
+    return LibraryTab(
+        title: _tweakedName(category.name),
+        filter: VolumesFilter(category: categoryId),
+        prefsKey: category.name);
+  }
+  return null;
 }
 
-class _LibraryScreenState extends State<_LibraryScreen> {
+String _tweakedName(String name) {
+  switch (name) {
+    case 'Bible Translations':
+      return 'Bibles';
+    default:
+      return name;
+  }
+}
+
+class _LibraryScaffold extends StatefulWidget {
+  final List<LibraryTab> tabs;
+  final int initialTabIndex;
+  final String title;
+  final Iterable<int> selectedVolumes;
+  final bool scrollToSelectedVolumes;
+  final bool whenTappedPopWithVolumeId;
+  final bool allowMultipleSelections;
+
+  const _LibraryScaffold({
+    Key key,
+    @required this.tabs,
+    this.initialTabIndex,
+    this.title,
+    this.selectedVolumes = const {},
+    this.scrollToSelectedVolumes = true,
+    this.whenTappedPopWithVolumeId = false,
+    this.allowMultipleSelections = false,
+  })  : assert(tabs != null),
+        assert(!whenTappedPopWithVolumeId == false || !allowMultipleSelections),
+        super(key: key);
+
+  @override
+  _LibraryScaffoldState createState() => _LibraryScaffoldState();
+}
+
+class _LibraryScaffoldState extends State<_LibraryScaffold> {
   final _selectedVolumes = <int>{};
 
   @override
@@ -103,144 +187,99 @@ class _LibraryScreenState extends State<_LibraryScreen> {
   @override
   Widget build(BuildContext context) {
     return TecScaffoldWrapper(
-      child: Scaffold(
-        appBar: MinHeightAppBar(
-          appBar: AppBar(
-            leading:
-                CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop()),
-            title: tec.isNullOrEmpty(widget.title) ? null : Text(widget.title),
-            actions: !widget.allowMultipleSelections
-                ? null
-                : [
-                    CupertinoButton(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: Text(
-                        'Done',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headline6
-                            .copyWith(color: Theme.of(context).accentColor),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context, rootNavigator: true)
-                            .maybePop<List<int>>(_selectedVolumes.toList());
-                      },
-                    ),
-                  ],
-          ),
-        ),
-        body: _VolumesView(
-          type: _ViewType.store,
-          filter: widget.filter,
-          selectedVolumes: _selectedVolumes,
-          scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
-          allowMultipleSelections: widget.allowMultipleSelections,
-          onTapVolume: widget.allowMultipleSelections
-              ? null
-              : (id) {
-                  Navigator.of(context, rootNavigator: true).maybePop<int>(id);
-                },
-        ),
-      ),
-    );
-  }
-}
-
-class _TabbedLibraryScreen extends StatelessWidget {
-  final VoidCallback closeLibrary;
-
-  const _TabbedLibraryScreen({Key key, this.closeLibrary}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider<IsLicensedBloc>(
-      create: (context) =>
-          IsLicensedBloc(volumeIds: VolumesRepository.shared.volumeIdsWithType(VolumeType.anyType)),
-      child: BlocBuilder<IsLicensedBloc, bool>(
-        builder: (context, hasLicensedVolumes) {
-          final tabs = [
-            const Tab(text: 'Bibles'),
-            if (hasLicensedVolumes) const Tab(text: 'Purchased'),
-            const Tab(text: 'Store'),
-          ];
-          final tabContents = <Widget>[
-            const _VolumesView(type: _ViewType.bibles),
-            if (hasLicensedVolumes) const _VolumesView(type: _ViewType.purchased),
-            const _VolumesView(type: _ViewType.store)
-          ];
-          return TecScaffoldWrapper(
-            child: DefaultTabController(
-              length: tabs.length,
+      child: widget.tabs.length > 1
+          ? DefaultTabController(
+              initialIndex: widget.initialTabIndex ?? 0,
+              length: widget.tabs.length,
               child: Scaffold(
-                appBar: MinHeightAppBar(
-                  appBar: AppBar(
-                    leading: CloseButton(onPressed: closeLibrary),
-                    // leading: BackButton(onPressed: closeLibrary),
-                    title: const Text('Library'),
-                    bottom: TabBar(tabs: tabs),
+                appBar: _appBar(
+                  bottom: TabBar(
+                    isScrollable: true,
+                    tabs: widget.tabs.map((t) => Tab(text: t.title)).toList(),
                   ),
                 ),
-                body: TabBarView(children: tabContents),
+                body: TabBarView(children: widget.tabs.map(_widgetFromTab).toList()),
               ),
-            ),
-          );
-        },
-      ),
+            )
+          : Scaffold(appBar: _appBar(), body: _widgetFromTab(widget.tabs.first)),
     );
   }
-}
 
-enum _ViewType { bibles, purchased, store }
+  Widget _widgetFromTab(LibraryTab t) => _VolumesView(
+        filter: t.filter,
+        kvsKey: t.prefsKey,
+        selectedVolumes: _selectedVolumes,
+        scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
+        allowMultipleSelections: widget.allowMultipleSelections,
+        onTapVolume: widget.whenTappedPopWithVolumeId
+            ? (id) {
+                Navigator.of(context, rootNavigator: true).maybePop<int>(id);
+              }
+            : null,
+      );
+
+  PreferredSizeWidget _appBar({PreferredSizeWidget bottom}) => MinHeightAppBar(
+        appBar: AppBar(
+          leading:
+              CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop()),
+          title: Text(tec.isNullOrEmpty(widget.title) ? 'Library' : widget.title),
+          actions: widget.allowMultipleSelections
+              ? [
+                  CupertinoButton(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: Text(
+                      'Done',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline6
+                          .copyWith(color: Theme.of(context).accentColor),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true)
+                          .maybePop<List<int>>(_selectedVolumes.toList());
+                    },
+                  ),
+                ]
+              : null,
+          bottom: bottom,
+        ),
+      );
+}
 
 typedef _TappedVolumeFunc = void Function(int volume);
 
 class _VolumesView extends StatelessWidget {
-  final _ViewType type;
   final VolumesFilter filter;
+  final String kvsKey;
   final Set<int> selectedVolumes;
   final bool scrollToSelectedVolumes;
   final bool allowMultipleSelections;
   final _TappedVolumeFunc onTapVolume;
-  final VoidCallback onDone;
 
   const _VolumesView({
     Key key,
-    this.type,
     this.filter,
+    this.kvsKey,
     this.selectedVolumes = const {},
     this.scrollToSelectedVolumes = true,
     this.allowMultipleSelections = false,
     this.onTapVolume,
-    this.onDone,
   }) : super(key: key);
-
-  VolumesFilter _filterForType(_ViewType type) {
-    switch (type) {
-      case _ViewType.bibles:
-        return const VolumesFilter(volumeType: VolumeType.bible);
-      case _ViewType.purchased:
-        return const VolumesFilter(ownershipStatus: OwnershipStatus.owned);
-      default:
-        return const VolumesFilter();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<VolumesBloc>(
       create: (context) => VolumesBloc(
-        key: filter != null ? null : '_library$type',
-        kvStore: filter != null ? null : tec.MemoryKVStore.shared, // tec.Prefs.shared,
-        defaultFilter: filter ?? _filterForType(type),
+        key: tec.isNullOrEmpty(kvsKey) ? null : '_library_$kvsKey',
+        kvStore: tec.isNullOrEmpty(kvsKey) ? null : tec.MemoryKVStore.shared, // tec.Prefs.shared,
+        defaultFilter: filter,
       )..refresh(),
       child: BlocBuilder<VolumesBloc, VolumesState>(
         builder: (context, state) => _VolumesList(
-          type: type,
           selectedVolumes: selectedVolumes,
           scrollToSelectedVolumes: scrollToSelectedVolumes,
           allowMultipleSelections: allowMultipleSelections,
           onTapVolume: onTapVolume,
-          onDone: onDone,
         ),
       ),
     );
@@ -248,21 +287,17 @@ class _VolumesView extends StatelessWidget {
 }
 
 class _VolumesList extends StatefulWidget {
-  final _ViewType type;
   final Set<int> selectedVolumes;
   final bool scrollToSelectedVolumes;
   final bool allowMultipleSelections;
   final _TappedVolumeFunc onTapVolume;
-  final VoidCallback onDone;
 
   const _VolumesList({
     Key key,
-    this.type,
     this.selectedVolumes,
     this.scrollToSelectedVolumes = true,
     this.allowMultipleSelections = false,
     this.onTapVolume,
-    this.onDone,
   }) : super(key: key);
 
   @override

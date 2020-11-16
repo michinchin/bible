@@ -18,6 +18,7 @@ Future<T> showTecDialog<T extends Object>({
   double maxWidth,
   double maxHeight,
   EdgeInsets padding = const EdgeInsets.all(20),
+  bool makeScrollable = true,
 }) {
   var windowSize = Size.zero;
   if (maxWidth != null || maxHeight != null) {
@@ -35,6 +36,7 @@ Future<T> showTecDialog<T extends Object>({
         return TecPopupSheet(
           margin: const EdgeInsets.all(32),
           padding: padding, // EdgeInsets.zero,
+          makeScrollable: makeScrollable ?? true,
           child: Material(
             color: Colors.transparent,
             child: Container(

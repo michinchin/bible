@@ -532,3 +532,7 @@ typedef PageableViewOnPageChanged = void Function(BuildContext context, ViewStat
 extension ViewManagerExtOnBuildContext on BuildContext {
   ViewManagerBloc get viewManager => BlocProvider.of<ViewManagerBloc>(this);
 }
+
+extension ViewManagerExtOnViewState on ViewState {
+  ViewData dataWith(BuildContext context) => ViewData.fromContext(context, uid);
+}

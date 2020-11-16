@@ -4,6 +4,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
 import '../../models/home/interstitial.dart';
@@ -12,7 +13,6 @@ import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
 import '../library/library.dart';
 import 'day_card.dart';
-import 'home.dart';
 
 Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
   await Interstitial.init(context, adUnitId: Const.prefNativeAdId);
@@ -46,6 +46,14 @@ class __VotdScreenState extends State<_VotdScreen> {
     });
   }
 
+  Future<void> onRefTap() async {
+    final vol =
+        await selectVolumeInLibrary(context, title: 'Select Bible', selectedVolume: _bible.id);
+    if (vol != null) {
+      setBible(VolumesRepository.shared.volumeWithId(vol).assocBible());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return TecImageAppBarScaffold(
@@ -54,40 +62,8 @@ class __VotdScreenState extends State<_VotdScreen> {
           Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
       imageAspectRatio: imageAspectRatio,
       //  scrollController: scrollController,
-      floatingActionButton: BottomHomeFab(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       // bottomNavigationBar: BottomHomeBar(),
-      actions: [
-        FlatButton(
-          child: Row(children: [
-            TecText(
-              _bible.abbreviation,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    offset: Offset(1.0, 1.0),
-                    blurRadius: 1.0,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-            ),
-            const TecIcon(Icon(Icons.arrow_drop_down),
-                color: Colors.white, shadowColor: Colors.black),
-          ]),
-          onPressed: () async {
-            final vol = await selectVolume(context,
-                title: 'Select Bible',
-                filter: VolumesFilter(volumeType: _bible.type),
-                selectedVolume: _bible.id);
-            if (vol != null) {
-              setBible(VolumesRepository.shared.bibleWithId(vol));
-            }
-          },
-        ),
-      ],
       childBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
         future: widget.votd.getFormattedVerse(_bible),
         builder: (context, snapshot) {
@@ -103,13 +79,19 @@ class __VotdScreenState extends State<_VotdScreen> {
                     TecText(
                       res,
                       style: cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
-                      textAlign: TextAlign.end,
+                      textAlign: TextAlign.left,
                     ),
                     const SizedBox(height: 5),
-                    TecText(
-                      ref.label(),
-                      style: cardTitleCompactStyle.copyWith(color: Theme.of(context).textColor),
-                      textAlign: TextAlign.end,
+                    FlatButton(
+                      padding: EdgeInsets.zero,
+                      child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        TecText(ref.label(),
+                            style:
+                                cardTitleCompactStyle.copyWith(color: Theme.of(context).textColor)),
+                        const TecIcon(Icon(Icons.arrow_drop_down),
+                            color: Colors.white, shadowColor: Colors.black),
+                      ]),
+                      onPressed: onRefTap,
                     ),
                   ],
                 ),
@@ -173,18 +155,14 @@ class _VotdsScreen extends StatelessWidget {
 
 Bible currentBibleFromContext(BuildContext context) {
   // find bible translation from views
-  final view = context
-      .tbloc<ViewManagerBloc>()
-      .state
-      .views
-      .firstWhere((v) => v.type == Const.viewTypeChapter, orElse: () => null)
-      ?.uid;
-  Bible bible;
-  if (view != null) {
-    final viewData = ChapterViewData.fromContext(context, view);
-    bible = VolumesRepository.shared.volumeWithId(viewData.volumeId).assocBible();
-  } else {
-    bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
-  }
+  final bible = VolumesRepository.shared.bibleWithId(((context.viewManager.state.views
+              .firstWhere(
+                  (v) =>
+                      v.type == Const.viewTypeVolume &&
+                      isBibleId(ChapterViewData.fromContext(context, v.uid)?.volumeId),
+                  orElse: () => null)
+              ?.chapterDataWith(context))
+          ?.volumeId) ??
+      defaultBibleId);
   return bible;
 }
