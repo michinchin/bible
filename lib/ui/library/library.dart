@@ -31,10 +31,16 @@ Future<int> selectVolumeInLibrary(
   int selectedVolume,
   bool scrollToSelectedVolume = true,
 }) {
+  var tabPrefix = initialTabPrefix;
+  if (tec.isNullOrEmpty(tabPrefix) && selectedVolume != null) {
+    final vp = VolumesRepository.shared;
+    tabPrefix = vp.categoryWithId(vp.categoryWithVolume(selectedVolume))?.name;
+  }
+
   return _showLibrary<int>(
     context: context,
     title: title,
-    initialTabPrefix: initialTabPrefix,
+    initialTabPrefix: tabPrefix,
     selectedVolumes: selectedVolume == null ? [] : [selectedVolume],
     scrollToSelectedVolumes: scrollToSelectedVolume,
     whenTappedPopWithVolumeId: true,
