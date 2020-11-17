@@ -34,7 +34,7 @@ Future<int> selectVolumeInLibrary(
   var tabPrefix = initialTabPrefix;
   if (tec.isNullOrEmpty(tabPrefix) && selectedVolume != null) {
     final vp = VolumesRepository.shared;
-    tabPrefix = vp.categoryWithId(vp.categoryWithVolume(selectedVolume))?.name;
+    tabPrefix = _tweakedName(vp.categoryWithId(vp.categoryWithVolume(selectedVolume))?.name);
   }
 
   return _showLibrary<int>(
