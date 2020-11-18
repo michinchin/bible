@@ -10,6 +10,7 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/notifications/notifications_model.dart';
 import '../sheet/snap_sheet.dart';
+import 'votd_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key key}) : super(key: key);
@@ -43,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final granted = await Notifications.shared?.requestPermissions(context);
         if (granted) {
           NotificationBloc.init(NotificationsModel.shared);
+          NotificationsModel.shared.bible = currentBibleFromContext(context);
         }
       }
     });

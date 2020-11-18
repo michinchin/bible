@@ -17,36 +17,41 @@ class Dotd {
   final String imageName;
   final String commands;
   final HtmlCommand command;
+  final int year;
+  final int ordinalDay;
 
-  const Dotd({
-    @required this.title,
-    @required this.intro,
-    @required this.commands,
-    @required this.imageName,
-    @required this.productId,
-    @required this.resourceId,
-    this.command,
-  });
+  const Dotd(
+      {@required this.title,
+      @required this.intro,
+      @required this.commands,
+      @required this.imageName,
+      @required this.productId,
+      @required this.resourceId,
+      this.command,
+      this.year,
+      this.ordinalDay});
 
   /// Returns a copy of this object with optional tweaks.
-  Dotd copyWith({
-    String title,
-    String intro,
-    String imageName,
-    String commands,
-    int productId,
-    int resourceId,
-    HtmlCommand command,
-  }) {
+  Dotd copyWith(
+      {String title,
+      String intro,
+      String imageName,
+      String commands,
+      int productId,
+      int resourceId,
+      HtmlCommand command,
+      int year,
+      int ordinalDay}) {
     return Dotd(
-      title: title ?? this.title,
-      intro: intro ?? this.intro,
-      commands: commands ?? this.commands,
-      imageName: imageName ?? this.imageName,
-      productId: productId ?? this.productId,
-      resourceId: resourceId ?? this.resourceId,
-      command: command ?? this.command,
-    );
+        title: title ?? this.title,
+        intro: intro ?? this.intro,
+        commands: commands ?? this.commands,
+        imageName: imageName ?? this.imageName,
+        productId: productId ?? this.productId,
+        resourceId: resourceId ?? this.resourceId,
+        command: command ?? this.command,
+        year: year ?? this.year,
+        ordinalDay: ordinalDay ?? this.ordinalDay);
   }
 
   /// Returns a new dotd from parsing devo-of-the-day JSON.
@@ -73,7 +78,7 @@ class Dotd {
   String get heroTagForImage => '$hashCode-$imageName';
 
   /// Returns image url
-  String imageUrl(TecEnv env) => 'https://${env.streamServer}/${env.apiVersion}/votd/$imageName';
+  String get imageUrl => '${tec.streamUrl}/votd/$imageName';
 
   Volume get volume => VolumesRepository.shared.volumeWithId(productId);
 

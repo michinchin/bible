@@ -1,4 +1,3 @@
-import 'package:bible/ui/bible/chapter_view_data.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +14,7 @@ import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/tec_share.dart';
+import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
 import 'compare_verse.dart';
 import 'snap_sheet.dart';

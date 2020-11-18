@@ -3,7 +3,6 @@ import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../models/app_settings.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/votd.dart';
 import '../common/common.dart';
@@ -19,11 +18,11 @@ class TodayScreen extends StatelessWidget {
             child: ListView(children: [
               const _Label('Verse of the Day'),
               const SizedBox(height: 5),
-              Container(height: dayCardHeight(context), child: _VotdCard()),
+              _VotdCard(),
               const SizedBox(height: 5),
               const _Label('Devotional of the Day'),
               const SizedBox(height: 5),
-              Container(height: dayCardHeight(context), child: _DotdCard()),
+              _DotdCard(),
             ])));
   }
 }
@@ -49,7 +48,7 @@ class _DotdCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Dotds>(
-      future: Dotds.fetch(AppSettings.shared.env),
+      future: Dotds.fetch(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final dotd = snapshot.data?.devoForDate(DateTime.now());
@@ -57,7 +56,7 @@ class _DotdCard extends StatelessWidget {
             title: dotd.title,
             subtitle: dotd.intro,
             onImageTap: () => showDotdScreen(context, dotd),
-            imageUrl: dotd.imageUrl(AppSettings.shared.env),
+            imageUrl: dotd.imageUrl,
             onMoreTap: () => showAllDotd(context, snapshot.data),
           );
         }
@@ -71,7 +70,7 @@ class _VotdCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Votd>(
-      future: Votd.fetch(AppSettings.shared.env),
+      future: Votd.fetch(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final votd = snapshot.data.forDateTime(DateTime.now());
@@ -139,25 +138,24 @@ class _HomeCard extends StatelessWidget {
                         title,
                         style: cardTitleCompactStyle.copyWith(color: Colors.white, fontSize: 40),
                         textScaleFactor: textScaleFactorWith(context),
-                        maxLines: 2,
+                        maxLines: 3,
                       ),
                     ),
                     InkWell(
                         customBorder: const CircleBorder(),
                         onTap: onMoreTap,
-                        child: Icon(SFSymbols.ellipsis_circle, color: Theme.of(context).textColor)),
+                        child: const Icon(SFSymbols.ellipsis_circle, color: Colors.white)),
                   ],
                 ),
               ),
             ]),
-            const Divider(color: Colors.transparent),
             InkWell(
                 onTap: onImageTap,
                 child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    padding: const EdgeInsets.all(16),
                     child: TecText(
                       subtitle,
-                      style: cardSubtitleCompactStyle.copyWith(color: Colors.white),
+                      style: cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
                       textScaleFactor: textScaleFactorWith(context),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,

@@ -9,6 +9,7 @@ import '../../models/const.dart';
 import '../../models/home/dotd.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/interstitial.dart';
+import '../../models/home/saves.dart';
 import '../common/common.dart';
 import 'day_card.dart';
 import 'votd_screen.dart';
@@ -19,20 +20,44 @@ Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
   await Interstitial.show(context);
 }
 
-class _DotdScreen extends StatelessWidget {
+class _DotdScreen extends StatefulWidget {
   final Dotd devo;
   const _DotdScreen(this.devo);
-  // bottomNavigationBar: BottomHomeBar(),
+
+  @override
+  __DotdScreenState createState() => __DotdScreenState();
+}
+
+class __DotdScreenState extends State<_DotdScreen> {
   @override
   Widget build(BuildContext context) {
     return TecImageAppBarScaffold(
-        imageUrl: devo.imageUrl(AppSettings.shared.env),
+        actions: [
+          FutureBuilder<OtdSaves>(
+            future: OtdSaves.fetch(),
+            builder: (c, s) => IconButton(
+                icon: TecIcon(
+                  Icon(s.hasData &&
+                          s.data.hasItem(dotdType, widget.devo.year, widget.devo.ordinalDay)
+                      ? Icons.bookmark
+                      : Icons.bookmark_border),
+                  color: Colors.white,
+                  shadowColor: Colors.black,
+                ),
+                onPressed: () async {
+                  await s.data?.saveOtd(
+                      cardTypeId: dotdType, year: widget.devo.year, day: widget.devo.ordinalDay);
+                  setState(() {});
+                }),
+          )
+        ],
+        imageUrl: widget.devo.imageUrl,
         backgroundColor:
             Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
         imageAspectRatio: imageAspectRatio,
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         childBuilder: (c, i) => FutureBuilder<String>(
-            future: devo.html(AppSettings.shared.env),
+            future: widget.devo.html(AppSettings.shared.env),
             builder: (c, snapshot) {
               if (snapshot.hasData) {
                 return TecHtml(
@@ -93,7 +118,7 @@ class _DotdsScreen extends StatelessWidget {
                 date: days[i],
                 title: dotds[i].title,
                 body: dotds[i].intro,
-                imageUrl: dotds[i].imageUrl(AppSettings.shared.env),
+                imageUrl: dotds[i].imageUrl,
                 onTap: () => showDotdScreen(context, dotds[i]))),
       ),
     ));

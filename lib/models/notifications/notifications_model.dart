@@ -4,7 +4,6 @@ import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../navigation_service.dart';
 import '../../ui/home/today.dart';
-import '../app_settings.dart';
 import '../const.dart';
 import '../home/dotds.dart';
 import '../home/votd.dart';
@@ -35,8 +34,8 @@ class NotificationsModel extends NotificationsHelper {
 
   @override
   Future<void> scheduleNotificationsForFuture(LocalNotification n) async {
-    shared.dotds ??= await Dotds.fetch(AppSettings.shared.env);
-    shared.votds ??= await Votd.fetch(AppSettings.shared.env);
+    shared.dotds ??= await Dotds.fetch();
+    shared.votds ??= await Votd.fetch();
     await super.scheduleNotificationsForFuture(n);
   }
 

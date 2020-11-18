@@ -154,7 +154,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
                           if (landscapePhone) {
                             if (i == 0) {
                               return Padding(
-                                  padding: EdgeInsets.only(left: 5), child: miniChildren[i]);
+                                  padding: const EdgeInsets.only(left: 5), child: miniChildren[i]);
                             }
                             if (i < miniChildren.length) {
                               return miniChildren[i];
