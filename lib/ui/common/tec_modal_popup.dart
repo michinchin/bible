@@ -95,8 +95,8 @@ class TecPopupSheet extends StatelessWidget {
     this.title,
     this.margin = const EdgeInsets.all(8),
     this.padding = const EdgeInsets.all(14),
-    this.bgOpacity = 1.0,
-    this.bgBlur = 20.0,
+    this.bgOpacity = 1, // maybe try 0.90,
+    this.bgBlur = 5.0,
     this.makeScrollable = true,
   })  : assert(child != null),
         super(key: key);
@@ -104,8 +104,8 @@ class TecPopupSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bgColor = CupertinoDynamicColor.withBrightness(
-      color: const Color(0xFFFFFFFF).withOpacity(bgOpacity),
-      darkColor: Colors.grey[900].withOpacity(bgOpacity),
+      color: const Color(0xFFFFFFFF).withOpacity(bgOpacity), // originally F9F9F9
+      darkColor: Colors.grey[900].withOpacity(bgOpacity), // originally 252525
     );
 
     // return Container(width: 10, height: 10, color: Colors.red.withOpacity(0.5));
@@ -254,6 +254,9 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
 
           var align = alignment;
           if (offset != null) {
+            // Convert the [offset], which is in points (logical pixels), to an `Alignment`,
+            // where -1 represents the leading edge, 0 represents the center, and 1 represents
+            // the trailing edge.
             final cx = constraints.maxWidth / 2;
             final cy = constraints.maxHeight / 2;
             final x = ((offset.dx - safeAreaInsets.left) - cx) / cx;
@@ -264,14 +267,21 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
 
           var padding = edgeInsets;
           if (padding != EdgeInsets.zero) {
-            // alignment.x == 0 && alignment.y == 0 is center, don't remove the padding
-            // is this code correct? alignment goes from -1 to 1...
-            if (alignment.x < 0.5 && alignment.x > 0) {
+            // The left edge of the view is -1, the right edge is 1, the center is 0.
+            // So, if the alignment is in the left 25% of the view, let the popup extend
+            // as far to the right as it needs to, else if it's in the right 25%, let it
+            // extend as far left as it needs to.
+            if (alignment.x < -0.5) {
               padding = padding._copyWith(right: 0);
             } else if (alignment.x > 0.5) {
               padding = padding._copyWith(left: 0);
             }
-            if (alignment.y < 0.5 && alignment.y > 0) {
+
+            // The top edge of the view is -1, the bottom edge is 1, the center is 0.
+            // So, if the alignment is in the top 25% of the view, let the popup extend
+            // as far down as it needs to, else if it's in the bottom 25%, let it extend
+            // as far up as it needs to.
+            if (alignment.y < -0.5) {
               padding = padding._copyWith(bottom: 0);
             } else if (alignment.y > 0.5) {
               padding = padding._copyWith(top: 0);

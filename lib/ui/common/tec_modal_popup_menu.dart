@@ -80,9 +80,7 @@ TableRow tecModalPopupMenuItem(
                 padding: EdgeInsets.fromLTRB(4 + rowPadding, 0, 14, 0),
                 child: icon == null
                     ? SizedBox(width: iconSize)
-                    : Icon(icon,
-                        color: color,
-                        size: iconSize),
+                    : Icon(icon, color: color, size: iconSize),
               ),
               Expanded(
                 child: Column(
@@ -140,10 +138,7 @@ TableRow tecModalPopupMenuDivider(BuildContext context, {String title, double ro
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                TecText(title,
-                    style: const TextStyle(
-                      fontSize: 13,
-                    )),
+                TecText(title, style: const TextStyle(fontSize: 13)),
                 const Expanded(child: Divider(indent: 10, thickness: 1))
               ],
             ),

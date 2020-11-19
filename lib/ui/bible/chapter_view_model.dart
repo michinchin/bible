@@ -422,8 +422,11 @@ class ChapterViewModel {
                     // color: Colors.red,
                     constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
                     child: GestureDetector(
-                      child: TecHtml('<span style="font-size: ${style.fontSize * 1.2}px;">${footnoteHtml.value}</span>',
-                          baseUrl: '', selectable: false),
+                      child: TecHtml(
+                          '<span style="font-size: '
+                          '${style.fontSize * 1.2}px;">${footnoteHtml.value}</span>',
+                          baseUrl: '',
+                          selectable: false),
                       onTap: () => Navigator.of(context).maybePop(),
                     ),
                   ),

@@ -12,9 +12,6 @@ import '../common/common.dart';
 import '../common/tec_modal_popup.dart';
 import '../common/tec_modal_popup_menu.dart';
 
-enum XrefUiOption { flat, cards }
-const _xrefUiOption = XrefUiOption.flat;
-
 Future<void> showXrefsPopup({
   @required BuildContext context,
   @required Reference reference,
@@ -54,26 +51,14 @@ Future<void> showXrefsPopup({
                 )
               : null,
           child: Material(
-            color: _xrefUiOption == XrefUiOption.flat ? null : Colors.transparent,
             child: Container(
-              color: Theme.of(context).dialogBackgroundColor,
               constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
               child: Column(children: [
                 ...xrefs.expand((xref) {
-                  final card = _XrefWidget(
-                    xref: xref,
-                    padding: EdgeInsets.all(_xrefUiOption == XrefUiOption.flat ? dblPad : padding),
-                  );
-                  final widgets = firstCard || _xrefUiOption == XrefUiOption.cards
+                  final card = _XrefWidget(xref: xref, padding: EdgeInsets.all(dblPad));
+                  final widgets = firstCard
                       ? [card]
-                      : [
-                          Divider(
-                              thickness: 1,
-                              height: _xrefUiOption == XrefUiOption.flat ? 1 : dblPad,
-                              indent: dblPad,
-                              endIndent: dblPad),
-                          card
-                        ];
+                      : [Divider(thickness: 1, height: 1, indent: dblPad, endIndent: dblPad), card];
                   firstCard = false;
                   return widgets;
                 }),
@@ -107,26 +92,21 @@ class _XrefWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final scale = textScaleFactorWith(context);
     final volumeId = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
     final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible();
-    final bgColor = Theme.of(context).dialogBackgroundColor;
-    final txStyle = TextStyle(color: Theme.of(context).textColor);
 
     return _Card(
-      color: bgColor, // _xrefUiOption == XrefUiOption.flat ? Colors.transparent : bgColor,
-      elevation: _xrefUiOption == XrefUiOption.flat ? 0 : 3,
-      padding: _xrefUiOption == XrefUiOption.flat
-          ? EdgeInsets.zero
-          : const EdgeInsets.only(left: 8, top: 2, right: 8, bottom: 8),
+      color: Colors.transparent,
+      elevation: 0,
+      padding: EdgeInsets.zero,
       cornerRadius: 0,
       child: Container(
         padding: padding ?? const EdgeInsets.all(8),
         child: TecText.rich(TextSpan(children: [
           TextSpan(
               text: '${bible.nameOfBook(xref.book)} ${xref.chapter}:${xref.verse}  ',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textColor)),
-          TextSpan(text: xref.text, style: txStyle),
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: xref.text),
         ])),
       ),
       onTap: () {
