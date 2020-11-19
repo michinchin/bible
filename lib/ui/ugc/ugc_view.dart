@@ -361,11 +361,11 @@ class _UGCViewState extends State<_UGCView> {
                         break;
                     }
                   } else if (items[i] is _DividerItem) {
-                    return const Padding(
-                      padding: EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
                       child: Divider(
                         height: 1,
-                        // color: color,
+                        color: Theme.of(context).textColor,
                       ),
                     );
                   }

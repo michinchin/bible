@@ -107,6 +107,14 @@ double contentTextScaleFactorWith(BuildContext context) {
   return scale;
 }
 
+///
+/// Returns the font size for the current text scale factor for content
+/// (e.g. Bible or study content HTML).
+///
+double contentFontSizeWith(BuildContext context) {
+  return 12 * contentFontSizeWith(context);
+}
+
 //
 // PRIVATE STUFF
 //

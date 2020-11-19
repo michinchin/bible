@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:bible/models/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -94,6 +95,7 @@ class _XrefWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final volumeId = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
     final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible();
+    final fontSize = 12 * contentTextScaleFactorWith(context);
 
     return _Card(
       color: Colors.transparent,
@@ -105,8 +107,9 @@ class _XrefWidget extends StatelessWidget {
         child: TecText.rich(TextSpan(children: [
           TextSpan(
               text: '${bible.nameOfBook(xref.book)} ${xref.chapter}:${xref.verse}  ',
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: xref.text),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize)),
+
+          TextSpan(text: xref.text, style: TextStyle(fontSize: fontSize)),
         ])),
       ),
       onTap: () {
