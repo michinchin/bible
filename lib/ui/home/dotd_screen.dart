@@ -10,6 +10,7 @@ import '../../models/home/dotd.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/interstitial.dart';
 import '../../models/home/saves.dart';
+import '../../models/search/tec_share.dart';
 import '../common/common.dart';
 import 'day_card.dart';
 import 'votd_screen.dart';
@@ -29,10 +30,21 @@ class _DotdScreen extends StatefulWidget {
 }
 
 class __DotdScreenState extends State<_DotdScreen> {
+  Future<void> share() async {
+    TecShare.share(await widget.devo.shareText());
+  }
+
   @override
   Widget build(BuildContext context) {
     return TecImageAppBarScaffold(
         actions: [
+          IconButton(
+              icon: const TecIcon(
+                Icon(Icons.share),
+                color: Colors.white,
+                shadowColor: Colors.black,
+              ),
+              onPressed: share),
           FutureBuilder<OtdSaves>(
             future: OtdSaves.fetch(),
             builder: (c, s) => IconButton(
@@ -49,7 +61,7 @@ class __DotdScreenState extends State<_DotdScreen> {
                       cardTypeId: dotdType, year: widget.devo.year, day: widget.devo.ordinalDay);
                   setState(() {});
                 }),
-          )
+          ),
         ],
         imageUrl: widget.devo.imageUrl,
         backgroundColor:

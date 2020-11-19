@@ -3,6 +3,7 @@ import 'package:tec_env/tec_env.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
+import '../const.dart';
 import '../string_utils.dart';
 
 ///
@@ -81,6 +82,19 @@ class Dotd {
   String get imageUrl => '${tec.streamUrl}/votd/$imageName';
 
   Volume get volume => VolumesRepository.shared.volumeWithId(productId);
+
+  Future<String> shortLink() async {
+    String url;
+    if (imageName.isNotEmpty) {
+      final image = '${imageName.split('.')[0]}.html';
+      url = '${Const.tecartaBibleLink}$image?volume=$productId&resid=$resourceId';
+    } else {
+      url = '${Const.tecartaBibleLink}share/$productId/$resourceId';
+    }
+    return tec.shortenUrl(url);
+  }
+
+  Future<String> shareText() async => 'Devotional of the Day\n$title\n${await shortLink()}';
 
   /// Returns html, from remote or local
   Future<String> html(TecEnv env) async {
