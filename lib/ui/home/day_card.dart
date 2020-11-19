@@ -49,16 +49,13 @@ class DayCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(15),
             child: Stack(
               children: [
-                Hero(
-                  tag: title,
-                  child: TecImage(
-                    width: height,
-                    height: height,
-                    fit: BoxFit.cover,
-                    url: imageUrl,
-                    colorBlendMode: BlendMode.darken,
-                    color: Colors.black26,
-                  ),
+                TecImage(
+                  width: height,
+                  height: height,
+                  fit: BoxFit.cover,
+                  url: imageUrl,
+                  colorBlendMode: BlendMode.darken,
+                  color: Colors.black26,
                 ),
                 Container(
                   height: height,

@@ -1,14 +1,15 @@
-import 'dart:collection';
-
 import 'package:tec_cache/tec_cache.dart';
-import 'package:tec_env/tec_env.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
+
+import '../chapter_verses.dart';
 
 class VotdEntry {
   final String imageUrl;
   final String refs;
-  VotdEntry({this.imageUrl, this.refs});
+  final int year;
+  final int ordinalDay;
+  VotdEntry({this.imageUrl, this.refs, this.year, this.ordinalDay});
 
   Reference get ref {
     final hrefs = refs.split(';').map<Reference>((href) => Reference.fromHref(href)).toList();
@@ -31,21 +32,13 @@ class VotdEntry {
         refAndVerse.value != null &&
         tec.isNotNullOrEmpty(refAndVerse.value.verseText)) {
       final verseText = refAndVerse.value.verseText;
-      return tec.ErrorOrValue(refAndVerse.error, _formatVerse(verseText));
+      return tec.ErrorOrValue(
+          refAndVerse.error,
+          ChapterVerses.formatForShare([refAndVerse.value.reference], verseText,
+              includeRef: false));
     } else {
       return tec.ErrorOrValue(refAndVerse.error, '');
     }
-  }
-
-  String _formatVerse(LinkedHashMap<int, VerseText> verse) {
-    final buffer = StringBuffer();
-    for (final v in verse.keys) {
-      if (v != verse.keys.first) {
-        buffer.write(' [$v] ');
-      }
-      buffer.write('${verse[v].text}');
-    }
-    return buffer.toString();
   }
 }
 
@@ -62,13 +55,13 @@ class Votd {
     return Votd(data: data, specials: specials);
   }
 
-  static Future<Votd> fetch(TecEnv env) async {
-    final year = DateTime.now().year;
-    final hostAndPath = '${env.streamServerAndVersion}/home';
-    final fileName = 'votd-$year.json';
+  static Future<Votd> fetch({int year}) async {
+    final y = year ?? DateTime.now().year;
+    final hostAndPath = '${tec.streamUrl}/home';
+    final fileName = 'votd-$y.json';
     final json = await TecCache().jsonFromUrl(
-        url: 'https://$hostAndPath/$fileName',
-        cachedPath: '$hostAndPath/$fileName',
+        url: '$hostAndPath/$fileName',
+        cachedPath: '${hostAndPath.replaceAll('https://', '')}/$fileName',
         bundlePath: 'assets/$fileName');
 
     if (json != null) {
@@ -78,16 +71,23 @@ class Votd {
     }
   }
 
+  int ordinalDay(DateTime time) =>
+      tec.indexForDay(tec.dayOfTheYear(time), year: time.year, length: data.length);
+
   VotdEntry forDateTime(DateTime time) {
     final ordinalDay =
         tec.indexForDay(tec.dayOfTheYear(time), year: time.year, length: data.length);
     if (tec.isNotNullOrEmpty(specials) && tec.isNotNullOrEmpty(data)) {
-      final isSpecial = tec.isNullOrEmpty(specials['$ordinalDay']);
-      final image = tec.as<String>(isSpecial ? data[ordinalDay][1] : specials['$ordinalDay'][1]);
-      final refs = tec.as<String>(isSpecial ? data[ordinalDay][0] : specials['$ordinalDay'][0]);
+      final isSpecial = tec.isNullOrEmpty(specials['${ordinalDay + 1}']);
+      final image =
+          tec.as<String>(isSpecial ? data[ordinalDay][1] : specials['${ordinalDay + 1}'][1]);
+      final refs =
+          tec.as<String>(isSpecial ? data[ordinalDay][0] : specials['${ordinalDay + 1}'][0]);
       return VotdEntry(
         imageUrl: '${tec.streamUrl}/votd/$image',
         refs: refs,
+        year: time.year,
+        ordinalDay: ordinalDay,
       );
     }
     return null;

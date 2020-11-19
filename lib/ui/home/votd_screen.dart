@@ -5,10 +5,15 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/shared_bible_ref_bloc.dart';
+import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/chapter_verses.dart';
 import '../../models/const.dart';
 import '../../models/home/interstitial.dart';
+import '../../models/home/saves.dart';
 import '../../models/home/votd.dart';
+import '../../models/pref_item.dart';
+import '../../models/search/tec_share.dart';
 import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
 import '../library/library.dart';
@@ -54,6 +59,28 @@ class __VotdScreenState extends State<_VotdScreen> {
     }
   }
 
+  Future<void> share() async {
+    final copyWithLink = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    if (!copyWithLink) {
+      final text = await tecShowProgressDlg<tec.ErrorOrValue<ReferenceAndVerseText>>(
+        context: context,
+        title: 'Preparing to share...',
+        future: _bible.referenceAndVerseTextWith(widget.votd.ref),
+      );
+      if (text.value.error == null && text.value.value != null) {
+        final toShare =
+            ChapterVerses.formatForShare([text.value.value.reference], text.value.value.verseText);
+        TecShare.share(toShare);
+      }
+    } else {
+      final text = await _bible.referenceAndVerseTextWith(widget.votd.ref);
+      if (text.error == null && text.value != null) {
+        final toShare = ChapterVerses.formatForShare([text.value.reference], text.value.verseText);
+        await TecShare.shareWithLink(toShare, text.value.reference);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return TecImageAppBarScaffold(
@@ -63,7 +90,31 @@ class __VotdScreenState extends State<_VotdScreen> {
       imageAspectRatio: imageAspectRatio,
       //  scrollController: scrollController,
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      // bottomNavigationBar: BottomHomeBar(),
+      actions: [
+        IconButton(
+            icon: const TecIcon(
+              Icon(Icons.share),
+              color: Colors.white,
+              shadowColor: Colors.black,
+            ),
+            onPressed: share),
+        FutureBuilder<OtdSaves>(
+          future: OtdSaves.fetch(),
+          builder: (c, s) => IconButton(
+              icon: TecIcon(
+                Icon(s.hasData && s.data.hasItem(votdType, widget.votd.year, widget.votd.ordinalDay)
+                    ? Icons.bookmark
+                    : Icons.bookmark_border),
+                color: Colors.white,
+                shadowColor: Colors.black,
+              ),
+              onPressed: () async {
+                await s.data?.saveOtd(
+                    cardTypeId: votdType, year: widget.votd.year, day: widget.votd.ordinalDay);
+                setState(() {});
+              }),
+        ),
+      ],
       childBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
         future: widget.votd.getFormattedVerse(_bible),
         builder: (context, snapshot) {
@@ -88,8 +139,7 @@ class __VotdScreenState extends State<_VotdScreen> {
                         TecText(ref.label(),
                             style:
                                 cardTitleCompactStyle.copyWith(color: Theme.of(context).textColor)),
-                        const TecIcon(Icon(Icons.arrow_drop_down),
-                            color: Colors.white, shadowColor: Colors.black),
+                        Icon(Icons.arrow_drop_down, color: Theme.of(context).textColor),
                       ]),
                       onPressed: onRefTap,
                     ),
@@ -128,10 +178,12 @@ class _VotdsScreen extends StatelessWidget {
 
     return TecScaffoldWrapper(
         child: Scaffold(
-      appBar: AppBar(
-        title: const TecText(
-          'Verse Of The Day',
-          autoSize: true,
+      appBar: MinHeightAppBar(
+        appBar: AppBar(
+          title: const TecText(
+            'Verse Of The Day',
+            autoSize: true,
+          ),
         ),
       ),
       body: Scrollbar(

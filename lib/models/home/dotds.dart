@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:tec_cache/tec_cache.dart';
-import 'package:tec_env/tec_env.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 import 'dotd.dart';
@@ -81,13 +80,13 @@ class Dotds {
   }
 
   /// Fetches the devotional-of-the-day data.
-  static Future<Dotds> fetch(TecEnv env) async {
-    final year = DateTime.now().year;
-    final fileName = 'devo-$year.json';
-    final hostAndPath = '${env.streamServerAndVersion}/home';
+  static Future<Dotds> fetch({int year}) async {
+    final y = year ?? DateTime.now().year;
+    final fileName = 'devo-$y.json';
+    final hostAndPath = '${tec.streamUrl}/home';
     final json = await TecCache().jsonFromUrl(
-        url: 'https://$hostAndPath/$fileName',
-        cachedPath: '$hostAndPath/$fileName',
+        url: '$hostAndPath/$fileName',
+        cachedPath: '${hostAndPath.replaceAll('https://', '')}/$fileName',
         bundlePath: 'assets/$fileName');
     if (json != null) {
       return Dotds.fromJson(json);
@@ -100,10 +99,10 @@ class Dotds {
   Dotd devoForDate(DateTime date) {
     if (date != null && tec.isNotNullOrEmpty(data)) {
       final i = indexForDate(date);
-      if (specials.containsKey(i)) {
-        return specials[i];
+      if (specials.containsKey(i + 1)) {
+        return specials[i + 1];
       }
-      return data[i];
+      return data[i].copyWith(year: date.year, ordinalDay: i);
     }
     return null;
   }

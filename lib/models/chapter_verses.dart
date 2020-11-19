@@ -35,15 +35,27 @@ class ChapterVerses {
     return ChapterVerses.fromJson(json);
   }
 
-  static String formatForShare(List<Reference> refs, Map<int, String> verses) {
+  static String formatForShare(List<Reference> refs, Map<int, VerseText> verses,
+      {bool includeRef = true}) {
     final buffer = StringBuffer();
     for (final ref in refs) {
-      final label = ref.label();
-      buffer.write('$label\n');
+      if (includeRef) {
+        final label = ref.label();
+        buffer.writeln(label);
+      }
       var firstVerse = true;
-      for (final verseNum in ref.verses) {
-        final verseNumString = (firstVerse) ? '' : ' [$verseNum] ';
-        buffer..write(verseNumString)..write(verses[verseNum]);
+      for (final verseNum in verses.keys) {
+        var verseNumString = '';
+        if (!firstVerse) {
+          verseNumString += '[$verseNum';
+          final endVerse = verses[verseNum].endVerse;
+          if (verseNum < endVerse) {
+            verseNumString += '-$endVerse] ';
+          } else {
+            verseNumString += '] ';
+          }
+        }
+        buffer..write(verseNumString)..write(verses[verseNum].text);
         firstVerse = false;
       }
       if (ref != refs.last) {
