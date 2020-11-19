@@ -154,7 +154,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
                           if (landscapePhone) {
                             if (i == 0) {
                               return Padding(
-                                  padding: EdgeInsets.only(left: 5), child: miniChildren[i]);
+                                  padding: const EdgeInsets.only(left: 5), child: miniChildren[i]);
                             }
                             if (i < miniChildren.length) {
                               return miniChildren[i];
@@ -171,7 +171,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
                               return const VerticalDivider(color: Colors.transparent, width: 25);
                             }
                             if (i == miniChildren.length - 1) {
-                              return VerticalDivider(color: barTextColor(context), width: 40);
+                              return VerticalDivider(color: Theme.of(context).appBarTheme.textTheme.headline6.color, width: 40);
                             }
                             if (i < numItems - 2) {
                               return const VerticalDivider(color: Colors.transparent, width: 15);

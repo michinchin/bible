@@ -42,6 +42,7 @@ class _SearchFilterView extends StatefulWidget {
   final Iterable<int> selectedVolumes;
   final Iterable<int> selectedBooks;
   final TextEditingController searchController;
+
   const _SearchFilterView(
       {this.filter, this.selectedVolumes, this.selectedBooks, this.searchController});
 
@@ -208,7 +209,6 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
                             IconButton(
                               icon: Icon(
                                 _gridView ? Icons.format_list_bulleted : FeatherIcons.grid,
-                                color: Theme.of(context).textColor.withOpacity(0.5),
                               ),
                               onPressed: _gridViewToggle,
                             ),
@@ -216,7 +216,7 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
                                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                 decoration: BoxDecoration(
                                     border: Border.all(
-                                        color: Theme.of(context).textColor.withOpacity(0.5)),
+                                        color: Theme.of(context).textColor),
                                     color: Theme.of(context).canvasColor,
                                     borderRadius: BorderRadius.circular(5)),
                                 child: DropdownButton<String>(
@@ -258,6 +258,7 @@ class _VolumeFilter extends StatefulWidget {
   final Set<int> selectedVolumes;
   final bool gridView;
   final bool priorityTranslationMode;
+
   const _VolumeFilter(this.filter, this.selectedVolumes,
       {this.gridView, this.priorityTranslationMode = false});
 
@@ -267,6 +268,7 @@ class _VolumeFilter extends StatefulWidget {
 
 class __VolumeFilterState extends State<_VolumeFilter> {
   List<int> _priorityTranslationList;
+
   PrefItemsBloc prefBloc() => context.tbloc<PrefItemsBloc>();
 
   @override
@@ -420,7 +422,9 @@ class __VolumeFilterState extends State<_VolumeFilter> {
 class _BookFilter extends StatefulWidget {
   final Set<int> selectedBooks;
   final bool gridView;
+
   const _BookFilter(this.selectedBooks, {this.gridView});
+
   @override
   __BookFilterState createState() => __BookFilterState();
 }
@@ -434,8 +438,10 @@ class __BookFilterState extends State<_BookFilter> {
   final ntId = -1;
 
   List<SearchResultInfo> searchResults;
+
   // ignore: prefer_collection_literals
   final bookNames = LinkedHashMap<int, String>();
+
   // ignore: prefer_collection_literals
   final bookResults = LinkedHashMap<int, int>();
   Bible bible;

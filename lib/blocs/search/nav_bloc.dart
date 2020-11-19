@@ -185,7 +185,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
               search: s,
             );
           }
-        } else if (!s.startsWith(selectedBook) || s.length == selectedBook.length) {
+        } else if (!s.toLowerCase().startsWith(selectedBook.toLowerCase()) /*|| s.length == selectedBook.length */) {
           currState = currState.copyWith(tabIndex: NavTabs.book.index, search: '');
         } else {
           add(NavEvent.loadWordSuggestions(search: s));

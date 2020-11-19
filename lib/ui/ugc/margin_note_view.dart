@@ -310,11 +310,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
           centerTitle: false,
           title: (_item == null)
               ? null
-              : Text(_title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headline6
-                      .copyWith(color: Theme.of(context).textColor.withOpacity(0.5))),
+              : Text(_title),
           leading: (!_editMode)
               ? null
               : IconButton(
@@ -328,7 +324,6 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
                     icon: const Icon(FeatherIcons.trash2),
                     tooltip: 'Delete Note',
                     onPressed: _deleteNoteDialog,
-                    color: Theme.of(context).textColor.withOpacity(0.5),
                   ),
                 ]
               : defaultActionsBuilder(context, widget.state, widget.size),
@@ -340,9 +335,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
               children: [
                 Expanded(
                   child: Container(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.black
-                        : Colors.white,
+                    color: Theme.of(context).backgroundColor,
                     padding: EdgeInsets.only(left: 16, right: 16, bottom: _editMode ? 0 : 85),
                     child: ZefyrEditor(
                       controller: _controller,

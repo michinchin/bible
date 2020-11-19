@@ -74,7 +74,9 @@ Future<Reference> showBibleSearch(BuildContext context, Reference ref, {String s
 class Nav extends StatefulWidget {
   /// if set to `true`, will focus `TextField` immediately when no search results present
   final bool searchView;
+
   const Nav({this.searchView});
+
   @override
   _NavState createState() => _NavState();
 }
@@ -289,7 +291,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             alignment: Alignment.centerLeft,
             child: Text(
               '$length',
-              style: Theme.of(context).textTheme.bodyText1,
+              style: Theme.of(context).appBarTheme.textTheme.bodyText1,
             ));
       } else if (s == NavViewState.searchResults && _searchResultsTabController.index == 0) {
         return const Text('History');
@@ -299,27 +301,34 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             autofocus: widget.searchView && ss.searchResults.isEmpty,
             onChanged: (s) => navBloc().add(NavEvent.onSearchChange(search: s)),
             onSubmitted: (s) => onSubmit(query: s),
+            style: Theme.of(context).appBarTheme.textTheme.bodyText1,
             decoration: InputDecoration(
                 border: InputBorder.none,
-                suffixIcon: s == NavViewState.searchSuggestions
-                    ? IconButton(
-                        color: Theme.of(context).textColor,
-                        icon: const Icon(Icons.cancel_outlined),
-                        onPressed: () {
-                          _searchController.clear();
-                          navBloc().add(const NavEvent.onSearchChange(search: ''));
-                        })
-                    : null,
+                // suffixIcon: s == NavViewState.searchSuggestions
+                //     ? IconButton(
+                //         color: Theme.of(context).appBarTheme.actionsIconTheme.color,
+                //         icon: const Icon(Icons.cancel_outlined),
+                //         onPressed: () {
+                //           _searchController.clear();
+                //           navBloc().add(const NavEvent.onSearchChange(search: ''));
+                //         })
+                //     : Container(width: 1),
                 hintText: 'Enter references or keywords',
-                hintStyle: const TextStyle(fontStyle: FontStyle.italic)),
+                hintStyle: Theme.of(context)
+                    .appBarTheme
+                    .textTheme
+                    .bodyText1
+                    .copyWith(fontStyle: FontStyle.italic)),
             controller: _searchController);
       }
     }
 
     List<Widget> appBarActions(BuildContext c, NavState s, SearchState ss) {
+      List<Widget> actions;
+
       if (s.navViewState == NavViewState.bcvTabs) {
         if (s.tabIndex != NavTabs.book.index) {
-          return [
+          actions = [
             FlatButton(
                 child: Text(
                   'GO',
@@ -329,7 +338,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           ];
         } else {
           final hasSearchResults = c.tbloc<SearchBloc>().state.searchResults.isNotEmpty;
-          return [
+          actions = [
             IconButton(
                 icon: hasSearchResults
                     ? const IconWithNumberBadge(
@@ -347,20 +356,34 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         }
       } else if (s.navViewState == NavViewState.searchResults) {
         if (ss.selectionMode) {
-          return [
+          actions = [
             IconButton(icon: const Icon(Icons.copy, size: 20), onPressed: _onSelectionCopied),
             IconButton(
                 icon: const Icon(FeatherIcons.share2, size: 20), onPressed: _onSelectionShared)
           ];
         } else if (_searchResultsTabController.index == 1) {
-          return [
+          actions = [
             if (ss.filteredResults.isNotEmpty)
               IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),
             IconButton(icon: const Icon(Icons.filter_list), onPressed: _filter)
           ];
         }
+      } else if (s.navViewState == NavViewState.searchSuggestions) {
+        actions = [
+          IconButton(
+              color: Theme.of(context).appBarTheme.actionsIconTheme.color,
+              icon: const Icon(Icons.cancel_outlined),
+              onPressed: () {
+                _searchController.clear();
+                navBloc().add(const NavEvent.onSearchChange(search: ''));
+                if (s.tabIndex != NavTabs.book.index) {
+                  navBloc().add(NavEvent.changeTabIndex(index: NavTabs.book.index));
+                }
+              })
+        ];
       }
-      return [];
+
+      return actions;
     }
 
     return BlocConsumer<NavBloc, NavState>(
@@ -375,14 +398,15 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         child: BlocBuilder<SearchBloc, SearchState>(
           builder: (c, ss) => Scaffold(
               appBar: AppBar(
-                elevation: 5,
-                backgroundColor: Theme.of(context).cardColor,
                 title: titleAppBar(c, s.navViewState, ss),
                 titleSpacing: 0,
                 leading: leadingAppBarIcon(c, s.navViewState, ss),
                 actions: appBarActions(c, s, ss),
               ),
-              body: body(s.navViewState)),
+              body: Container(
+                color: Theme.of(context).dialogBackgroundColor,
+                child: body(s.navViewState),
+              )),
         ),
       ),
     );

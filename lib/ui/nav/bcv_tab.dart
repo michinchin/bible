@@ -6,11 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_volumes/tec_volumes.dart';
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/content_settings.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
-import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
@@ -43,8 +43,8 @@ class BCVTabView extends StatelessWidget {
                 indicator:
                     BubbleTabIndicator(color: tabColors[navBloc.state.tabIndex].withOpacity(0.5)),
                 controller: tabController,
-                labelColor: barTextColor(context),
-                unselectedLabelColor: barTextColor(context),
+                labelColor: Theme.of(context).textColor,
+                unselectedLabelColor: Theme.of(context).textColor,
                 tabs: [
                   const Tab(text: 'BOOK'),
                   const Tab(text: 'CHAPTER'),
@@ -77,7 +77,7 @@ class _ChapterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = barTextColor(context);
+    final textColor = Theme.of(context).textColor;
     final bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
 
     final ref = context.tbloc<NavBloc>().state.ref;
@@ -113,7 +113,7 @@ class _ChapterView extends StatelessWidget {
 class _VerseView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final textColor = barTextColor(context);
+    final textColor = Theme.of(context).textColor;
     final bible = VolumesRepository.shared.bibleWithId(9);
 
     final ref = context.tbloc<NavBloc>().state.ref;
@@ -160,7 +160,7 @@ class _BookView extends StatelessWidget {
       final nextBook = bible.bookAfter(book);
       book = (nextBook == book ? 0 : nextBook);
     }
-    final textColor = barTextColor(context);
+    final textColor = Theme.of(context).textColor;
 
     final ot = bookNames.keys.takeWhile(bible.isOTBook).toList();
     final nt = bookNames.keys.where(bible.isNTBook).toList();

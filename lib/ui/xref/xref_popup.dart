@@ -56,6 +56,7 @@ Future<void> showXrefsPopup({
           child: Material(
             color: _xrefUiOption == XrefUiOption.flat ? null : Colors.transparent,
             child: Container(
+              color: Theme.of(context).dialogBackgroundColor,
               constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
               child: Column(children: [
                 ...xrefs.expand((xref) {
@@ -109,25 +110,22 @@ class _XrefWidget extends StatelessWidget {
     // final scale = textScaleFactorWith(context);
     final volumeId = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
     final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible();
-
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDarkTheme ? Colors.black : Colors.white;
-    final txColor = isDarkTheme ? const Color(0xFF999999) : const Color(0xFF333333);
-    final txStyle = TextStyle(color: txColor);
+    final bgColor = Theme.of(context).dialogBackgroundColor;
+    final txStyle = TextStyle(color: Theme.of(context).textColor);
 
     return _Card(
-      color: _xrefUiOption == XrefUiOption.flat ? Colors.transparent : bgColor,
+      color: bgColor, // _xrefUiOption == XrefUiOption.flat ? Colors.transparent : bgColor,
       elevation: _xrefUiOption == XrefUiOption.flat ? 0 : 3,
       padding: _xrefUiOption == XrefUiOption.flat
           ? EdgeInsets.zero
           : const EdgeInsets.only(left: 8, top: 2, right: 8, bottom: 8),
-      cornerRadius: 8,
+      cornerRadius: 0,
       child: Container(
         padding: padding ?? const EdgeInsets.all(8),
         child: TecText.rich(TextSpan(children: [
           TextSpan(
               text: '${bible.nameOfBook(xref.book)} ${xref.chapter}:${xref.verse}  ',
-              style: TextStyle(fontWeight: FontWeight.bold, color: txColor)),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textColor)),
           TextSpan(text: xref.text, style: txStyle),
         ])),
       ),

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../models/app_settings.dart';
 import 'tec_modal_popup.dart';
 
 const tecartaBlue = Color(0xff4a7dee);
@@ -55,8 +54,8 @@ TableRow tecModalPopupMenuItem(
   bool scaleFont = false,
 }) {
   final scale = scaleFactorWith(context, maxScaleFactor: 1.2);
-  final color =
-      (onTap == null) ? Theme.of(context).textColor.withOpacity(0.2) : barTextColor(context);
+  final themeColor = Theme.of(context).textColor;
+  final color = (onTap == null) ? themeColor.withOpacity(0.2) : themeColor;
   final iconSize = 24.0 * scale;
 
   void Function() _onTap() => onTap == null
@@ -82,9 +81,7 @@ TableRow tecModalPopupMenuItem(
                 child: icon == null
                     ? SizedBox(width: iconSize)
                     : Icon(icon,
-                        color: (onTap == null)
-                            ? Theme.of(context).textColor.withOpacity(0.2)
-                            : barIconColor(context),
+                        color: color,
                         size: iconSize),
               ),
               Expanded(
@@ -144,10 +141,8 @@ TableRow tecModalPopupMenuDivider(BuildContext context, {String title, double ro
               mainAxisSize: MainAxisSize.min,
               children: [
                 TecText(title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
-                      // fontWeight: FontWeight.w600,
-                      color: Theme.of(context).textColor.withOpacity(0.5),
                     )),
                 const Expanded(child: Divider(indent: 10, thickness: 1))
               ],
@@ -187,7 +182,7 @@ class TecTitleBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var textStyle =
-        TextStyle(color: barTextColor(context), fontSize: 20, fontWeight: FontWeight.w500);
+        TextStyle(color: Theme.of(context).textColor, fontSize: 20, fontWeight: FontWeight.w500);
     if (style != null) textStyle = textStyle.merge(style);
 
     return Material(
@@ -225,7 +220,7 @@ class TecTitleBar extends StatelessWidget {
                   icon: const Icon(Icons.close),
                   padding: EdgeInsets.zero,
                   splashRadius: 12,
-                  color: barIconColor(context),
+                  color: Theme.of(context).textColor,
                   tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   onPressed: () => Navigator.of(context, rootNavigator: true).maybePop(),
                 ),

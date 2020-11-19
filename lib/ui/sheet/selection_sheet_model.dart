@@ -72,9 +72,7 @@ class SelectionSheetModel {
 
   static Widget noColorButton(BuildContext context,
       {bool forUnderline = false, double radius = 20}) {
-    final borderColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.grey.withOpacity(0.5)
-        : Colors.grey.withOpacity(0.75);
+    final borderColor = Theme.of(context).appBarTheme.textTheme.headline6.color;
     return forUnderline
         ? InkWell(
             customBorder: const CircleBorder(),

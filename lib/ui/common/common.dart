@@ -131,7 +131,9 @@ IconData platformAwareMoreIcon(BuildContext context) {
 class ListLabel extends StatelessWidget {
   final String label;
   final TextStyle style;
+
   const ListLabel(this.label, {this.style});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -153,13 +155,19 @@ extension AppExtOnThemeData on ThemeData {
   /// Returns a copy of this theme with app customizations.
   ///
   ThemeData copyWithAppTheme() {
+    final bodyColor =
+        brightness == Brightness.light ? Colors.grey[800] : const Color(0xFFBBBBBB);
+
     return copyWith(
-      // primaryColor: brightness == Brightness.light ? primaryColor : primaryColor,
       accentColor: brightness == Brightness.light ? accentColor : Colors.blue,
       bottomSheetTheme:
           bottomSheetTheme.copyWith(elevation: defaultElevation, shape: bottomSheetShape),
       appBarTheme: tecAppBarTheme(),
       tabBarTheme: tecTabBarTheme(),
+      textTheme: textTheme.apply(bodyColor: bodyColor, displayColor: bodyColor),
+      iconTheme: iconTheme.copyWith(color: bodyColor),
+      dialogBackgroundColor: brightness == Brightness.light ? Colors.grey[100] : Colors.grey[900],
+      backgroundColor: brightness == Brightness.light ? Colors.white : Colors.black,
     );
   }
 
@@ -167,10 +175,9 @@ extension AppExtOnThemeData on ThemeData {
   /// Returns our special [AppBarTheme].
   ///
   AppBarTheme tecAppBarTheme() {
-    final barColor = canvasColor;
-    // final barColor = theme.appBarTheme.color ?? theme.primaryColor;
-    final brightness = ThemeData.estimateBrightnessForColor(barColor);
-    final barTextColor = brightness == Brightness.light ? Colors.grey[700] : Colors.white;
+    final brightness = ThemeData.estimateBrightnessForColor(canvasColor);
+    final barColor = brightness == Brightness.light ? Colors.grey[50] : Colors.grey[850];
+    final barTextColor = brightness == Brightness.light ? Colors.grey[800] : Colors.grey[300];
     return appBarTheme.copyWith(
       brightness: brightness,
       color: barColor,
@@ -205,11 +212,14 @@ extension AppExtOnThemeData on ThemeData {
   ///
   /// Returns a copy of this ThemeData with the appBarTheme.textTheme updated the given [color].
   ///
-  TextTheme copyOfAppBarTextThemeWithColor(Color color) =>
-      (appBarTheme.textTheme ?? primaryTextTheme)
-          // .copyWith(headline6: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500))
-          .apply(bodyColor: color)
-          .apply(displayColor: color);
+  TextTheme copyOfAppBarTextThemeWithColor(Color color) {
+    final theme = (appBarTheme.textTheme ?? primaryTextTheme)
+        // .copyWith(headline6: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500))
+        .apply(bodyColor: color)
+        .apply(displayColor: color);
+
+    return theme.copyWith(headline6: theme.headline6.copyWith(fontSize: 20));
+  }
 }
 
 ///
@@ -246,6 +256,7 @@ class IconWithNumberBadge extends StatelessWidget {
   final IconData icon;
   final int value;
   final Color color;
+
   const IconWithNumberBadge({this.icon, this.value, this.color});
 
   @override

@@ -222,7 +222,6 @@ class _UGCViewState extends State<_UGCView> {
   @override
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    final color = isDarkTheme ? const Color(0xFFBBBBBB) : Colors.black;
 
     // temp list to shorten consecutive hls of same color
     List<UserItem> hls;
@@ -232,13 +231,12 @@ class _UGCViewState extends State<_UGCView> {
         appBar: MinHeightAppBar(
           appBar: AppBar(
             centerTitle: true,
-            title: Text(folderName, style: TextStyle(color: barTextColor(context))),
+            title: Text(folderName),
             actions: _actions(context),
-            iconTheme: Theme.of(context).iconTheme.copyWith(color: barIconColor(context)),
           ),
         ),
         body: Container(
-          color: viewBackgroundColor(context),
+          color: Theme.of(context).backgroundColor,
           child: SafeArea(
             bottom: false,
             child: ListView.builder(
@@ -251,7 +249,7 @@ class _UGCViewState extends State<_UGCView> {
 
                   IconData iconData;
                   String title, subtitle;
-                  var iconColor = color;
+                  Color iconColor;
 
                   if (items[i] is CountItem) {
                     switch ((items[i] as CountItem).itemType) {
@@ -363,12 +361,11 @@ class _UGCViewState extends State<_UGCView> {
                         break;
                     }
                   } else if (items[i] is _DividerItem) {
-                    return Padding(
-                      padding:
-                          const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
+                    return const Padding(
+                      padding: EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
                       child: Divider(
                         height: 1,
-                        color: color,
+                        // color: color,
                       ),
                     );
                   }
@@ -392,18 +389,12 @@ class _UGCViewState extends State<_UGCView> {
                                 child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(title,
-                                    maxLines: 1,
-                                    style: TextStyle(
-                                      fontSize: 18.0,
-                                      // fontWeight: FontWeight.bold,
-                                      color: color,
-                                    )),
+                                Text(title, maxLines: 1, style: const TextStyle(fontSize: 18.0)),
                                 Container(height: 3.0),
                                 Text(subtitle,
                                     maxLines: 3,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(fontSize: 15.0, color: color)),
+                                    style: const TextStyle(fontSize: 15.0)),
                                 if (items[i] is UserItem)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4.0),
@@ -419,7 +410,7 @@ class _UGCViewState extends State<_UGCView> {
                                               ),
                                               Text(
                                                 _folders[items[i].parentId].title,
-                                                style: TextStyle(fontSize: 14.0, color: color),
+                                                style: const TextStyle(fontSize: 14.0),
                                               ),
                                             ],
                                           ),
@@ -427,7 +418,7 @@ class _UGCViewState extends State<_UGCView> {
                                             child: Text(
                                           tec.shortDate((items[i] as UserItem).modifiedDT),
                                           textAlign: TextAlign.end,
-                                          style: TextStyle(fontSize: 14.0, color: color),
+                                          style: const TextStyle(fontSize: 14.0),
                                         )),
                                       ],
                                     ),
@@ -435,27 +426,16 @@ class _UGCViewState extends State<_UGCView> {
                               ],
                             ))
                           else if (title != null)
-                            Expanded(
-                                child: Text(title,
-                                    style: TextStyle(
-                                      fontSize: 18.0,
-                                      // fontWeight: FontWeight.bold,
-                                      color: color,
-                                    ))),
+                            Expanded(child: Text(title, style: const TextStyle(fontSize: 18.0))),
                           if (items[i] is CountItem || items[i] is RecentCount)
                             Padding(
                               padding: const EdgeInsets.only(left: 16.0),
                               child: Text(items[i].count.toString(),
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    // fontWeight: FontWeight.bold,
-                                    color: color,
-                                  )),
+                                  style: const TextStyle(fontSize: 18.0)),
                             ),
                           if (items[i] is UserItem && items[i].itemType == UserItemType.folder)
-                            Icon(
+                            const Icon(
                               Icons.navigate_next,
-                              color: color,
                             )
                         ]),
                       ),

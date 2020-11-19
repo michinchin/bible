@@ -28,12 +28,11 @@ class SettingsView extends StatelessWidget {
       child: Scaffold(
           appBar: MinHeightAppBar(
             appBar: AppBar(
-              elevation: 0,
-              title: Text('Settings', style: TextStyle(color: barTextColor(context))),
+              title: const Text('Settings'),
             ),
           ),
           body: Container(
-              color: viewBackgroundColor(context),
+              color: Theme.of(context).dialogBackgroundColor,
               child: SafeArea(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,9 +44,9 @@ class SettingsView extends StatelessWidget {
                           title: 'Account',
                           icon: FeatherIcons.user,
                           trailing: FlatButton.icon(
-                            textColor: barTextColor(context),
-                            icon: const Text('Sync now'),
-                            label: Icon(Icons.sync, color: barIconColor(context)),
+                            icon: Text('Sync now',
+                                style: TextStyle(color: Theme.of(context).textColor)),
+                            label: Icon(Icons.sync, color: Theme.of(context).textColor),
                             onPressed: () => TecToast.show(context, 'Not yet implemented'),
                           ),
                         ),
@@ -69,7 +68,7 @@ class SettingsView extends StatelessWidget {
 
 List<Widget> readTiles(BuildContext context) {
   final prefBloc = context.tbloc<PrefItemsBloc>(); //ignore: close_sinks
-  final color = viewTextColor(context);
+  final color = Theme.of(context).textColor;
   final textStyle = TextStyle(fontSize: 15, color: color);
 
   return [
@@ -127,7 +126,7 @@ class _TitleSettingTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final titleWidget = Text(
       title,
-      style: TextStyle(fontSize: 18.0, color: barTextColor(context)),
+      style: const TextStyle(fontSize: 18.0),
     );
     return Padding(
       padding: const EdgeInsets.only(left: 15),
@@ -138,7 +137,6 @@ class _TitleSettingTile extends StatelessWidget {
               Icon(
                 icon,
                 size: 25,
-                color: barIconColor(context),
               ),
               const VerticalDivider(color: Colors.transparent),
               titleWidget,

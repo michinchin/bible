@@ -9,12 +9,10 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../../models/app_settings.dart';
 import '../../models/user_item_helper.dart';
 import '../common/common.dart';
 import '../library/library.dart';
 import '../nav/nav.dart';
-import '../sheet/selection_sheet_model.dart';
 import '../volume/study_view_data.dart';
 import 'chapter_view_data.dart';
 
@@ -33,10 +31,7 @@ class ChapterTitle extends StatelessWidget {
         if (viewData is ChapterViewData) {
           const minFontSize = 10.0;
           const buttonPadding = EdgeInsets.only(top: 16.0, bottom: 16.0);
-          final buttonStyle = Theme.of(context)
-              .textTheme
-              .headline6
-              .copyWith(color: barTextColor(context));
+          final buttonStyle = Theme.of(context).appBarTheme.textTheme.headline6;
           final autosizeGroup = TecAutoSizeGroup();
 
           final volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
@@ -58,7 +53,6 @@ class ChapterTitle extends StatelessWidget {
                               )
                             : const Icon(FeatherIcons.search),
                         tooltip: 'Search',
-                        color: barIconColor(context),
                         onPressed: () => _onNavigate(context, viewData, searchView: true))),
               ),
               Flexible(
@@ -79,7 +73,7 @@ class ChapterTitle extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 10.0, right: 10.0),
                 child: Container(
-                  color: barIconColor(context),
+                  color: Theme.of(context).appBarTheme.textTheme.headline6.color,
                   width: 1,
                   height: const MinHeightAppBar().preferredSize.height *
                       .55, // 22 * textScaleFactorWith(context),
@@ -161,42 +155,3 @@ class ChapterTitle extends StatelessWidget {
   }
 }
 
-class SelectionModeBibleChapterTitle extends StatelessWidget {
-  final int uid;
-  const SelectionModeBibleChapterTitle(this.uid);
-  @override
-  Widget build(BuildContext context) {
-    const minFontSize = 10.0;
-    final autosizeGroup = TecAutoSizeGroup();
-    final buttonStyle = Theme.of(context)
-        .textTheme
-        .headline6
-        .copyWith(color: barTextColor(context));
-
-    // ignore: close_sinks
-    final vmBloc = context.viewManager;
-
-    final ref = tec.as<Reference>(vmBloc.selectionObjectWithViewUid(uid));
-    return Row(children: [
-      Container(
-        padding: EdgeInsets.zero,
-        width: 32.0,
-        child: IconButton(
-            padding: const EdgeInsets.only(right: 8.0),
-            icon: const Icon(Icons.close),
-            tooltip: 'Search',
-            color: barIconColor(context),
-            onPressed: () => SelectionSheetModel.deselect(context)),
-      ),
-      Expanded(
-        child: TecAutoSizeText(
-          ref.label(),
-          minFontSize: minFontSize,
-          group: autosizeGroup,
-          maxLines: 1,
-          style: buttonStyle,
-        ),
-      ),
-    ]);
-  }
-}

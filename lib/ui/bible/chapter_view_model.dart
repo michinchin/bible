@@ -422,7 +422,8 @@ class ChapterViewModel {
                     // color: Colors.red,
                     constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
                     child: GestureDetector(
-                      child: TecHtml(footnoteHtml.value, baseUrl: '', selectable: false),
+                      child: TecHtml('<span style="font-size: ${style.fontSize * 1.2}px;">${footnoteHtml.value}</span>',
+                          baseUrl: '', selectable: false),
                       onTap: () => Navigator.of(context).maybePop(),
                     ),
                   ),
@@ -476,6 +477,7 @@ class ChapterViewModel {
 class _KeyAndPos {
   final GlobalKey key;
   final double pos;
+
   _KeyAndPos(this.key, this.pos);
 }
 
@@ -509,7 +511,8 @@ Future<tec.ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int ch
       final html = StringBuffer();
       for (final note in result.value) {
         if (html.isNotEmpty) html.writeln('<p> </p>');
-        html.writeln('<div class="v" id="${note.verse}" end="${note.endVerse}">${note.textData}</div>');
+        html.writeln(
+            '<div class="v" id="${note.verse}" end="${note.endVerse}">${note.textData}</div>');
       }
       if (html.isEmpty) {
         html.writeln('<p>Study notes are not available for this chapter.</p>');

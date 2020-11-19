@@ -30,6 +30,7 @@ const searchThemeColor = Colors.orange;
 class SearchAndHistoryView extends StatelessWidget {
   final TextEditingController searchController;
   final TabController tabController;
+
   const SearchAndHistoryView(this.searchController, this.tabController);
 
   @override
@@ -37,6 +38,7 @@ class SearchAndHistoryView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        backgroundColor: Theme.of(context).dialogBackgroundColor,
         automaticallyImplyLeading: false,
         flexibleSpace: Center(
           child: TabBar(
@@ -44,14 +46,17 @@ class SearchAndHistoryView extends StatelessWidget {
               isScrollable: true,
               indicatorSize: TabBarIndicatorSize.label,
               indicator: BubbleTabIndicator(color: searchThemeColor.withOpacity(0.5)),
-              labelColor: Theme.of(context).textColor.withOpacity(0.7),
-              unselectedLabelColor: Theme.of(context).textColor.withOpacity(0.7),
+              labelColor: Theme.of(context).textColor,
+              unselectedLabelColor: Theme.of(context).textColor,
               tabs: const [Tab(child: Text('HISTORY')), Tab(child: Text('SEARCH RESULTS'))]),
         ),
       ),
-      body: TabBarView(
-          controller: tabController,
-          children: [HistoryView(searchController, tabController), SearchResultsView()]),
+      body: Container(
+        color: Theme.of(context).dialogBackgroundColor,
+        child: TabBarView(
+            controller: tabController,
+            children: [HistoryView(searchController, tabController), SearchResultsView()]),
+      ),
     );
   }
 }
@@ -59,6 +64,7 @@ class SearchAndHistoryView extends StatelessWidget {
 class HistoryView extends StatefulWidget {
   final TextEditingController searchController;
   final TabController tabController;
+
   const HistoryView(this.searchController, this.tabController);
 
   @override
@@ -123,7 +129,8 @@ class _HistoryViewState extends State<HistoryView> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                            const ListLabel('Navigation History'),
+                            ListLabel('Navigation History',
+                                style: Theme.of(context).textTheme.bodyText1),
                             Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Icon(Icons.chevron_right,
@@ -160,7 +167,8 @@ class _HistoryViewState extends State<HistoryView> {
                               padding: const EdgeInsets.symmetric(vertical: 8.0),
                               child:
                                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                const ListLabel('Search History'),
+                                ListLabel('Search History',
+                                    style: Theme.of(context).textTheme.bodyText1),
                                 Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Icon(Icons.chevron_right,
@@ -171,7 +179,8 @@ class _HistoryViewState extends State<HistoryView> {
                           ListTile(
                             dense: true,
                             leading: const Icon(Icons.search),
-                            title: Text(searchHistoryItem.search),
+                            title: Text(searchHistoryItem.search,
+                                style: Theme.of(context).textTheme.bodyText1),
                             onTap: () => _onSearchTap(c, searchHistoryItem),
                           )
                       ]),
@@ -185,7 +194,9 @@ class _HistoryViewState extends State<HistoryView> {
 
 class _SearchHistoryView extends StatelessWidget {
   final List<SearchHistoryItem> searchHistory;
+
   const _SearchHistoryView(this.searchHistory);
+
   @override
   Widget build(BuildContext context) {
     String _subtitle(int i) {
@@ -221,7 +232,9 @@ class _SearchHistoryView extends StatelessWidget {
 
 class _NavHistoryView extends StatelessWidget {
   final List<Reference> navHistory;
+
   const _NavHistoryView(this.navHistory);
+
   @override
   Widget build(BuildContext context) {
     String _subtitle(int i) {
@@ -347,27 +360,30 @@ class _SearchResultsViewState extends State<SearchResultsView> {
           return SafeArea(
             bottom: false,
             child: Scaffold(
-              body: ScrollablePositionedList.separated(
-                itemCount: results.length + 1,
-                itemScrollController: scrollController,
-                itemPositionsListener: positionListener,
-                separatorBuilder: (c, i) {
-                  if (i == 0) {
-                    // if sized box has height: 0, causes errors in scrollable list
-                    // see: https://stackoverflow.com/questions/63352010/failed-assertion-line-556-pos-15-scrolloffsetcorrection-0-0-is-not-true
-                    return const SizedBox(height: 1);
-                  }
-                  i--;
-                  return const Divider(height: 5);
-                },
-                itemBuilder: (c, i) {
-                  if (i == 0) {
-                    return SearchResultsLabel(results.map((r) => r.searchResult).toList());
-                  }
-                  i--;
-                  final res = results[i];
-                  return _SearchResultCard(res);
-                },
+              body: Container(
+                color: Theme.of(context).dialogBackgroundColor,
+                child: ScrollablePositionedList.separated(
+                  itemCount: results.length + 1,
+                  itemScrollController: scrollController,
+                  itemPositionsListener: positionListener,
+                  separatorBuilder: (c, i) {
+                    if (i == 0) {
+                      // if sized box has height: 0, causes errors in scrollable list
+                      // see: https://stackoverflow.com/questions/63352010/failed-assertion-line-556-pos-15-scrolloffsetcorrection-0-0-is-not-true
+                      return const SizedBox(height: 1);
+                    }
+                    i--;
+                    return const Divider(height: 5);
+                  },
+                  itemBuilder: (c, i) {
+                    if (i == 0) {
+                      return SearchResultsLabel(results.map((r) => r.searchResult).toList());
+                    }
+                    i--;
+                    final res = results[i];
+                    return _SearchResultCard(res);
+                  },
+                ),
               ),
             ),
           );
@@ -377,6 +393,7 @@ class _SearchResultsViewState extends State<SearchResultsView> {
 
 class _SearchResultCard extends StatefulWidget {
   final SearchResultInfo res;
+
   const _SearchResultCard(this.res);
 
   @override
@@ -606,7 +623,9 @@ class __SearchResultCardState extends State<_SearchResultCard> {
 class _TranslationSelector extends StatefulWidget {
   final SearchResultInfo res;
   final Function(int) changeTranslation;
+
   const _TranslationSelector(this.res, this.changeTranslation);
+
   @override
   __TranslationSelectorState createState() => __TranslationSelectorState();
 }
@@ -675,7 +694,8 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
               textScaleFactor: contentTextScaleFactorWith(context),
             ),
             textColor: textColor,
-            color: buttonColor, //currently chosen, pass tag
+            color: buttonColor,
+            //currently chosen, pass tag
             onPressed: () => _changeTranslation(i),
           ),
         ),

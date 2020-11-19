@@ -95,7 +95,7 @@ class TecPopupSheet extends StatelessWidget {
     this.title,
     this.margin = const EdgeInsets.all(8),
     this.padding = const EdgeInsets.all(14),
-    this.bgOpacity = 0.75,
+    this.bgOpacity = 1.0,
     this.bgBlur = 20.0,
     this.makeScrollable = true,
   })  : assert(child != null),
@@ -104,8 +104,8 @@ class TecPopupSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bgColor = CupertinoDynamicColor.withBrightness(
-      color: const Color(0xFFFFFFFF).withOpacity(bgOpacity), // originally F9F9F9
-      darkColor: const Color(0xFF252525).withOpacity(bgOpacity), // originally 252525
+      color: const Color(0xFFFFFFFF).withOpacity(bgOpacity),
+      darkColor: Colors.grey[900].withOpacity(bgOpacity),
     );
 
     // return Container(width: 10, height: 10, color: Colors.red.withOpacity(0.5));
@@ -264,12 +264,13 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
 
           var padding = edgeInsets;
           if (padding != EdgeInsets.zero) {
-            if (alignment.x < 0.5) {
+            // alignment.x == 0 && alignment.y == 0 is center, don't remove the padding
+            if (alignment.x < 0.5 && alignment.x > 0) {
               padding = padding._copyWith(right: 0);
             } else if (alignment.x > 0.5) {
               padding = padding._copyWith(left: 0);
             }
-            if (alignment.y < 0.5) {
+            if (alignment.y < 0.5 && alignment.y > 0) {
               padding = padding._copyWith(bottom: 0);
             } else if (alignment.y > 0.5) {
               padding = padding._copyWith(top: 0);

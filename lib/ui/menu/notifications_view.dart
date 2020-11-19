@@ -5,7 +5,6 @@ import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../models/app_settings.dart';
 import '../../models/notifications/notifications_model.dart';
 import '../home/votd_screen.dart';
 
@@ -38,8 +37,7 @@ class _NotificationsViewState extends State<NotificationsView> {
     return TecScaffoldWrapper(
         child: Scaffold(
       appBar: AppBar(
-        elevation: 0,
-        title: Text('Notifications', style: barTextStyle(context)),
+        title: const Text('Notifications'),
         leading: BackButton(
           onPressed: () async {
             const le = ListEquality<LocalNotification>();
@@ -56,7 +54,7 @@ class _NotificationsViewState extends State<NotificationsView> {
         ),
       ),
       body: Container(
-        color: viewBackgroundColor(context),
+        color: Theme.of(context).dialogBackgroundColor,
         child: Padding(
           padding: const EdgeInsets.only(top: 8.0),
           child: BlocBuilder<NotificationBloc, NotificationState>(
@@ -123,7 +121,7 @@ class __NotificationTileState extends State<_NotificationTile> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   '${tec.hourMinuteDescription(widget.notification.time)}',
-                  style: Theme.of(context).textTheme.headline4.copyWith(color: viewTextColor(context)),
+                  style: Theme.of(context).textTheme.headline4,
                 ),
               ),
             ),
@@ -150,7 +148,7 @@ class __NotificationTileState extends State<_NotificationTile> {
                                         .weekdayListFromBitField(widget.notification.week.bitField)
                                         .contains(day.dayValue)
                                     ? Theme.of(context).accentColor
-                                    : viewTextColor(context))),
+                                    : Theme.of(context).textColor)),
                         onPressed: () {
                           final i = widget.notification.week.days
                               .indexWhere((d) => d.dayValue == day.dayValue);
@@ -164,7 +162,7 @@ class __NotificationTileState extends State<_NotificationTile> {
                                 .weekdayListFromBitField(widget.notification.week.bitField)
                                 .contains(day.dayValue)
                             ? Theme.of(context).accentColor
-                            : viewTextColor(context),
+                            : Theme.of(context).textColor,
                         child: Text(day.shortName[0])),
                   ),
                 )

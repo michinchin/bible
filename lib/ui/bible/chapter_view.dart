@@ -341,7 +341,7 @@ class _ChapterViewState extends State<_ChapterView> {
     }
 
     return Container(
-      color: isDarkTheme ? Colors.black : Colors.white,
+      color: Theme.of(context).backgroundColor,
       child: MultiBlocProvider(
         providers: [
           BlocProvider(

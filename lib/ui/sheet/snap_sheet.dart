@@ -120,44 +120,6 @@ class _SheetShadow extends StatelessWidget {
   }
 }
 
-///
-/// Shared Widgets across different sheets
-///
-class SheetButton extends StatelessWidget {
-  final String text;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  const SheetButton({@required this.text, @required this.icon, @required this.onPressed})
-      : assert(text != null),
-        assert(icon != null),
-        assert(onPressed != null);
-
-  @override
-  Widget build(BuildContext context) {
-    return ButtonTheme(
-        height: 50,
-        child: OutlineButton.icon(
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          label: TecText(
-            text,
-            autoSize: true,
-            textScaleFactor: 0.8,
-            style: TextStyle(
-              color: Theme.of(context).textColor.withOpacity(0.8),
-            ),
-          ),
-          icon: Icon(
-            icon,
-            size: 18,
-            color: Theme.of(context).textColor.withOpacity(0.8),
-          ),
-          onPressed: onPressed,
-        ));
-  }
-}
-
 class SelectionSheetButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
@@ -168,14 +130,10 @@ class SelectionSheetButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget iconButton() =>
-        // Padding(
-        // padding: const EdgeInsets.all(5),
-        // child:
         Icon(
           icon,
-          color: Colors.grey,
+          color: Theme.of(context).appBarTheme.textTheme.headline6.color,
           size: 20,
-          // ),
         );
     return (title != null)
         ? InkWell(
@@ -217,17 +175,15 @@ class SheetIconButton extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: barIconColor(context),
               size: 20,
+              color: Theme.of(context).appBarTheme.textTheme.headline6.color,
             ),
             const SizedBox(height: 4),
             TecText(
               text,
               autoSize: true,
               textScaleFactor: 0.9,
-              style: TextStyle(
-                color: barTextColor(context),
-              ),
+              style: Theme.of(context).appBarTheme.textTheme.button,
             ),
           ],
         ),
