@@ -265,6 +265,7 @@ class _TecModalPopupRoute<T> extends PopupRoute<T> {
           var padding = edgeInsets;
           if (padding != EdgeInsets.zero) {
             // alignment.x == 0 && alignment.y == 0 is center, don't remove the padding
+            // is this code correct? alignment goes from -1 to 1...
             if (alignment.x < 0.5 && alignment.x > 0) {
               padding = padding._copyWith(right: 0);
             } else if (alignment.x > 0.5) {
