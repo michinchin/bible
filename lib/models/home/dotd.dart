@@ -136,6 +136,16 @@ class Dotd {
   }
 
   String _stylizedHtml(String html, TecEnv env) {
+    final s = StringBuffer();
+      // ..write('<html lang="${volume.language}">\n'
+      //     '<head>\n'
+      //     '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n'
+      //     '<meta name="viewport" content="initial-scale = 1.0,maximum-scale = 1.0">\n'
+      //     '<style> html { -webkit-text-size-adjust: none; } </style>')
+      // ..write('<link rel="stylesheet" type="text/css" href="bible_vendor.css" />\n')
+      // ..write('<link rel="stylesheet" type="text/css" href="strongs.css" />\n')
+      // ..write('</head>');
+
     if (html.isNotEmpty) {
       if (env.darkMode) {
         return html.replaceFirst('</head>',
@@ -145,7 +155,9 @@ class Dotd {
             '</head>', '<style> html { -webkit-text-size-adjust: none; } </style></head>');
       }
     }
-    return html;
+    s.write('$html\n\n');
+
+    return s.toString();
   }
 
   /// Asynchronously returns a new DevoRes from a JSON list.

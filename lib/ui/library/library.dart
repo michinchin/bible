@@ -435,7 +435,7 @@ class _VolumesListState extends State<_VolumesList> {
                                 widget.onTapVolume(volume.id);
                               }
                             }
-                          : () => _pushDetailView(context, volume),
+                          : () => showVolumeDetailView(context, volume),
                     );
                   },
                 );
@@ -448,7 +448,7 @@ class _VolumesListState extends State<_VolumesList> {
   }
 }
 
-void _pushDetailView(BuildContext context, Volume volume) {
+void showVolumeDetailView(BuildContext context, Volume volume) {
   Navigator.of(context)
       .push<void>(MaterialPageRoute(builder: (context) => VolumeDetail(volume: volume)));
 }
@@ -484,7 +484,7 @@ class _VolumeActionButton extends StatelessWidget {
           icon: const Icon(Icons.check_circle),
           iconSize: 32,
           color: Colors.green,
-          onPressed: () => _pushDetailView(context, volume));
+          onPressed: () => showVolumeDetailView(context, volume));
     } else if (item == null ||
         item.status == DownloadStatus.undefined ||
         item.status == DownloadStatus.failed ||
@@ -502,7 +502,7 @@ class _VolumeActionButton extends StatelessWidget {
             icon: Icon(platformAwareMoreIcon(context)),
             iconSize: 32,
             color: color,
-            onPressed: () => _pushDetailView(context, volume));
+            onPressed: () => showVolumeDetailView(context, volume));
       }
     } else if (item.status == DownloadStatus.running) {
       return Stack(

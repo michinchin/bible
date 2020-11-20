@@ -12,6 +12,8 @@ import '../../models/home/interstitial.dart';
 import '../../models/home/saves.dart';
 import '../../models/search/tec_share.dart';
 import '../common/common.dart';
+import '../library/library.dart';
+import '../library/volume_image.dart';
 import 'day_card.dart';
 import 'votd_screen.dart';
 
@@ -36,51 +38,103 @@ class __DotdScreenState extends State<_DotdScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return TecImageAppBarScaffold(
-        actions: [
-          IconButton(
-              icon: const TecIcon(
-                Icon(Icons.share),
-                color: Colors.white,
-                shadowColor: Colors.black,
-              ),
-              onPressed: share),
-          FutureBuilder<OtdSaves>(
-            future: OtdSaves.fetch(),
-            builder: (c, s) => IconButton(
-                icon: TecIcon(
-                  Icon(s.hasData &&
-                          s.data.hasItem(dotdType, widget.devo.year, widget.devo.ordinalDay)
-                      ? Icons.bookmark
-                      : Icons.bookmark_border),
+    const imageWidth = 70.0;
+    return TecScaffoldWrapper(
+      child: TecImageAppBarScaffold(
+          actions: [
+            IconButton(
+                icon: const TecIcon(
+                  Icon(Icons.share),
                   color: Colors.white,
                   shadowColor: Colors.black,
                 ),
-                onPressed: () async {
-                  await s.data?.saveOtd(
-                      cardTypeId: dotdType, year: widget.devo.year, day: widget.devo.ordinalDay);
-                  setState(() {});
-                }),
-          ),
-        ],
-        imageUrl: widget.devo.imageUrl,
-        backgroundColor:
-            Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
-        imageAspectRatio: imageAspectRatio,
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        childBuilder: (c, i) => FutureBuilder<String>(
-            future: widget.devo.html(AppSettings.shared.env),
-            builder: (c, snapshot) {
-              if (snapshot.hasData) {
-                return TecHtml(
-                  snapshot.data,
-                  baseUrl: '',
-                  // baseUrl: devo.volume?.baseUrl,
-                  textScaleFactor: textScaleFactorWith(c),
-                );
-              }
-              return const LoadingIndicator();
-            }));
+                onPressed: share),
+            FutureBuilder<OtdSaves>(
+              future: OtdSaves.fetch(),
+              builder: (c, s) => IconButton(
+                  icon: TecIcon(
+                    Icon(s.hasData &&
+                            s.data.hasItem(dotdType, widget.devo.year, widget.devo.ordinalDay)
+                        ? Icons.bookmark
+                        : Icons.bookmark_border),
+                    color: Colors.white,
+                    shadowColor: Colors.black,
+                  ),
+                  onPressed: () async {
+                    await s.data?.saveOtd(
+                        cardTypeId: dotdType, year: widget.devo.year, day: widget.devo.ordinalDay);
+                    setState(() {});
+                  }),
+            ),
+          ],
+          imageUrl: widget.devo.imageUrl,
+          backgroundColor:
+              Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
+          imageAspectRatio: imageAspectRatio,
+          floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+          childBuilder: (c, i) => FutureBuilder<String>(
+              future: widget.devo.html(AppSettings.shared.env),
+              builder: (c, snapshot) {
+                if (snapshot.hasData) {
+                  return Column(children: [
+                    TecHtml(snapshot.data,
+                        baseUrl: '',
+                        // widget.devo.volume.baseUrl,
+                        selectable: false),
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      onTap: () => showVolumeDetailView(context, widget.devo.volume),
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: TecCard(
+                                  cornerRadius: 10,
+                                  builder: (c) => VolumeImage(
+                                    volume: widget.devo.volume,
+                                    width: imageWidth,
+                                  ),
+                                ),
+                              ),
+                              const VerticalDivider(color: Colors.transparent),
+                              Expanded(
+                                child: TecText.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: '${widget.devo.volume.name}\n',
+                                        style: cardTitleCompactStyle.copyWith(
+                                            color: Theme.of(context).textColor),
+                                      ),
+                                      TextSpan(
+                                        text: 'by ${widget.devo.volume.author}\n',
+                                        style: cardSubtitleCompactStyle.copyWith(
+                                            color: Theme.of(context).textColor),
+                                      ),
+                                      // WidgetSpan(
+                                      //     child: RaisedButton(
+                                      //   color: Theme.of(context).cardColor,
+                                      //   child: const Text('Learn More'),
+                                      //   onPressed: () =>
+                                      //       showVolumeDetailView(context, widget.devo.volume),
+                                      // ))
+                                    ],
+                                  ),
+                                  autoSize: true,
+                                ),
+                              )
+                            ],
+                          )),
+                    ),
+                    const Divider(height: 50, color: Colors.transparent)
+                  ]);
+                }
+                return const LoadingIndicator();
+              })),
+    );
   }
 }
 
