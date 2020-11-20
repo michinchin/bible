@@ -7,7 +7,7 @@ void main() {
   test('String.countOfWords in bible_chapter_view.dart', () {
     expect(''.countOfWords(), 0);
     expect('dog cat rabbit'.countOfWords(), 3);
-    expect('  dog  cat  rabbit  '.countOfWords(), 3);
+    expect("  dog  cat's  rabbit  ".countOfWords(), 3);
     expect('  dog  cat  rabbit  '.countOfWords(toIndex: 2), 0);
     expect('  dog  cat  rabbit  '.countOfWords(toIndex: 3), 0);
     expect('  dog  cat  rabbit  '.countOfWords(toIndex: 4), 0);
@@ -22,6 +22,12 @@ void main() {
     expect('  dog  cat  rabbit'.countOfWords(toIndex: 18), 3);
     expect('  dog  cat  rabbit'.countOfWords(), 3);
     expect('"dog'.countOfWords(toIndex: 1), 0);
+
+    // ASCII Punctuation, except the single quote char, which is a valid word char.
+    expect('!"#\$%&()*+,-./:;<=>?@[\\]^_`{|}~'.countOfWords(), 0);
+
+    // Non-word smart quote chars.
+    expect('‘“”'.countOfWords(), 0);
   });
 
   test('String.indexAtEndOfWord in bible_chapter_view.dart', () {

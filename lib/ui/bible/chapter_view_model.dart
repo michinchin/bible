@@ -63,21 +63,24 @@ class ChapterViewModel {
     TextStyle selectedTextStyle, {
     bool isDarkTheme,
   }) {
-    if (tag is VerseTag && tag.isInFootnote) {
-      if (tag.href != _currentFootnoteHref) {
-        _currentFootnoteHref = tag.href;
+    if (tag is VerseTag) {
+      // Note, `v` will be `null` if not in a verse.
+      final v = tag.verse;
 
-        // Assign a unique key for this footnote.
-        final key = '${tag.verse}-${tag.word}';
-        _widgetKeys[key] ??= GlobalKey();
-        return _footnoteSpan(context, style, tag, _widgetKeys[key], isDarkTheme);
+      if (tag.isInFootnote) {
+        if (tag.href != _currentFootnoteHref) {
+          _currentFootnoteHref = tag.href;
+
+          // Assign a unique key for this footnote.
+          final key = '$v-${tag.word}';
+          _widgetKeys[key] ??= GlobalKey();
+          return _footnoteSpan(context, style, tag, _widgetKeys[key], isDarkTheme);
+        }
+
+        return null;
       }
 
-      return null;
-    }
-
-    if (tag is VerseTag) {
-      final recognizer = tag.verse == null ? null : TapGestureRecognizer();
+      final recognizer = (v == null ? null : TapGestureRecognizer());
       if (recognizer != null) {
         recognizer
           ..onTapDown = (details) {
@@ -94,12 +97,12 @@ class ChapterViewModel {
       final spans = <InlineSpan>[];
 
       // Margin note icons are placed before the first "inVerse" span of a verse...
-      if (tag.verse != null && _marginNoteVerse != tag.verse && tag.isInVerse) {
-        _marginNoteVerse = tag.verse;
+      if (v != null && _marginNoteVerse != v && tag.isInVerse) {
+        _marginNoteVerse = v;
 
         if (marginNotes().hasMarginNoteForVerse(_marginNoteVerse)) {
           // Assign a unique key for this margin note.
-          final key = 'mn${tag.verse}';
+          final key = 'mn$v';
           _widgetKeys[key] ??= GlobalKey();
           spans.add(_marginNoteSpan(context, style, tag, _widgetKeys[key], isDarkTheme));
         }
@@ -107,119 +110,135 @@ class ChapterViewModel {
 
       // Add a widget with a global key at the start of each verse so we can determine
       // the scroll position of each verse.
-      if (tag.verse != null && tag.isInVerse && !_verses.containsKey(tag.verse)) {
-        _verses[tag.verse] = _KeyAndPos(GlobalKey(), null);
+      if (v != null && tag.isInVerse && !_verses.containsKey(v)) {
+        _verses[v] = _KeyAndPos(GlobalKey(), null);
         spans.add(TaggableWidgetSpan(
           alignment: PlaceholderAlignment.top,
           childWidth: 1,
-          child: SizedBox(key: _verses[tag.verse].key, width: 1, height: 1),
+          child: SizedBox(key: _verses[v].key, width: 1, height: 1),
         ));
       }
 
       var textStyle = style;
+      var currentWord = tag.word;
+      final endWord = math.max(currentWord, currentWord + tec.countOfWordsInString(text) - 1);
+      var remainingText = text;
 
       // If in xref, add xref styling to the span:
-      if (tag.isInXref) {
-        textStyle = textStyle.merge(TextStyle(
-            decoration: TextDecoration.underline,
-            decorationStyle: TextDecorationStyle.dotted,
-            decorationColor: textStyle.color ?? Colors.blueAccent));
+      if (tag.isInXref && tec.isNotNullOrEmpty(tag.href)) {
+        // We don't want leading spaces to have the xref style...
+        if (_prevTagXrefHref != tag.href) {
+          final index = remainingText.indexAtWord(1);
+          if (index > 0) {
+            final t = remainingText.substring(0, index);
+            remainingText = remainingText.substring(index);
+            spans.add(TaggableTextSpan(text: t, style: style, tag: tag, recognizer: recognizer));
+          }
+        }
+
+        _prevTagXrefHref = tag.href;
+
+        if (remainingText.isNotEmpty) {
+          textStyle = textStyle.merge(TextStyle(
+              decoration: TextDecoration.underline,
+              decorationStyle: TextDecorationStyle.dotted,
+              decorationColor: textStyle.color ?? Colors.blueAccent));
+        }
+      } else {
+        _prevTagXrefHref = '';
       }
 
-      // If not in trial mode, and this whole verse is selected, just
-      // return a span with the selected text style.
-      if (!selection.isInTrialMode && selection.hasVerse(tag.verse)) {
-        final textSpan = TaggableTextSpan(
-            text: text,
-            style: tag.isInVerse ? _merge(textStyle, selectedTextStyle) : textStyle,
-            tag: tag,
-            recognizer: recognizer);
-        if (spans.isEmpty) {
-          return textSpan;
-        } else {
-          spans.add(textSpan);
-          return TextSpan(children: spans, recognizer: recognizer);
-        }
-      } else if (tag.verse != null) {
-        final v = tag.verse;
-        var currentWord = tag.word;
-        final endWord = math.max(currentWord, currentWord + tec.countOfWordsInString(text) - 1);
-        var remainingText = text;
-
-        ///
-        /// Local func that returns a new span from the `remainingText` up
-        /// to and including the given [word], with the given [style]. And
-        /// also updates `currentWord` and `remainingText` appropriately.
-        ///
-        InlineSpan _spanToWord(int word, TextStyle textStyle) {
-          final wordCount = (word - currentWord) + 1;
-          final endIndex = remainingText.indexAtEndOfWord(wordCount);
-          if (endIndex > 0 && endIndex <= remainingText.length) {
-            final span = TaggableTextSpan(
-                text: remainingText.substring(0, endIndex),
-                style: textStyle,
-                tag: tag.copyWith(word: currentWord),
-                recognizer: recognizer);
-            remainingText = remainingText.substring(endIndex);
-            currentWord += wordCount;
-            return span;
+      if (remainingText.isNotEmpty) {
+        // If not in trial mode, and this whole verse is selected, just
+        // return a span with the selected text style.
+        if (!selection.isInTrialMode && selection.hasVerse(v)) {
+          final textSpan = TaggableTextSpan(
+              text: remainingText,
+              style: tag.isInVerse ? _merge(textStyle, selectedTextStyle) : textStyle,
+              tag: tag,
+              recognizer: recognizer);
+          if (spans.isEmpty) {
+            return textSpan;
           } else {
-            tec.dmPrint('ERROR in _spanToWord! tag: $tag, word: $word, '
-                'wordCount: $wordCount, endIndex: $endIndex, currentWord: $currentWord, '
-                'remainingText: "$remainingText", text: "$text"');
-            assert(false);
-            return const TextSpan(text: 'FAILED!');
+            spans.add(textSpan);
+            return TextSpan(children: spans, recognizer: recognizer);
           }
-        }
-
-        // Iterate through all the highlights for the words in the tag...
-        for (final highlight
-            in highlights().highlightsForVerse(v, startWord: tag.word, endWord: endWord)) {
-          final hlStartWord = highlight.ref.startWordForVerse(v);
-          final hlEndWord = highlight.ref.endWordForVerse(v);
-
-          // If there are one or more words before the highlight, add them with the default style.
-          if (currentWord < hlStartWord) {
-            spans.add(_spanToWord(hlStartWord - 1, textStyle));
-          }
-
-          var hlStyle = textStyle;
-          if (tag.isInVerse ||
-              highlight.ref.word != Reference.minWord ||
-              highlight.ref.endWord != Reference.maxWord) {
-            final color = Color(highlight.color ?? 0xfff8f888);
-            if (highlight.highlightType == HighlightType.underline) {
-              hlStyle = _merge(
-                  hlStyle,
-                  TextStyle(
-                      decoration: TextDecoration.underline,
-                      decorationColor: textColorWith(color, isDarkMode: isDarkTheme),
-                      decorationThickness: 2));
+        } else if (v != null) {
+          ///
+          /// Local func that returns a new span from the `remainingText` up
+          /// to and including the given [word], with the given [style]. And
+          /// also updates `currentWord` and `remainingText` appropriately.
+          ///
+          InlineSpan _spanToWord(int word, TextStyle textStyle) {
+            final wordCount = (word - currentWord) + 1;
+            final endIndex = remainingText.indexAtEndOfWord(wordCount);
+            if (endIndex > 0 && endIndex <= remainingText.length) {
+              final span = TaggableTextSpan(
+                  text: remainingText.substring(0, endIndex),
+                  style: textStyle,
+                  tag: tag.copyWith(word: currentWord),
+                  recognizer: recognizer);
+              remainingText = remainingText.substring(endIndex);
+              currentWord += wordCount;
+              return span;
             } else {
-              hlStyle = _merge(
-                  hlStyle,
-                  isDarkTheme
-                      ? TextStyle(color: textColorWith(color, isDarkMode: isDarkTheme))
-                      : TextStyle(
-                          backgroundColor: highlightColorWith(color, isDarkMode: isDarkTheme)));
+              tec.dmPrint('ERROR in _spanToWord! tag: $tag, word: $word, '
+                  'wordCount: $wordCount, endIndex: $endIndex, currentWord: $currentWord, '
+                  'remainingText: "$remainingText", text: "$text"');
+              assert(false);
+              return const TextSpan(text: 'FAILED!');
             }
           }
 
-          // Add the highlight words with the highlight style.
-          spans.add(_spanToWord(hlEndWord, hlStyle));
-        }
+          // Iterate through all the highlights for the words in the tag...
+          for (final highlight
+              in highlights().highlightsForVerse(v, startWord: tag.word, endWord: endWord)) {
+            final hlStartWord = highlight.ref.startWordForVerse(v);
+            final hlEndWord = highlight.ref.endWordForVerse(v);
 
-        // If there is still text left, add it with the default style.
-        if (remainingText.isNotEmpty) {
-          spans.add(TaggableTextSpan(
-              text: remainingText,
-              style: textStyle,
-              tag: tag.copyWith(word: currentWord),
-              recognizer: recognizer));
-        }
+            // If there are one or more words before the highlight, add them with the default style.
+            if (currentWord < hlStartWord) {
+              spans.add(_spanToWord(hlStartWord - 1, textStyle));
+            }
 
-        return spans.length == 1 ? spans.first : TextSpan(children: spans, recognizer: recognizer);
+            var hlStyle = textStyle;
+            if (tag.isInVerse ||
+                highlight.ref.word != Reference.minWord ||
+                highlight.ref.endWord != Reference.maxWord) {
+              final color = Color(highlight.color ?? 0xfff8f888);
+              if (highlight.highlightType == HighlightType.underline) {
+                hlStyle = _merge(
+                    hlStyle,
+                    TextStyle(
+                        decoration: TextDecoration.underline,
+                        decorationColor: textColorWith(color, isDarkMode: isDarkTheme),
+                        decorationThickness: 2));
+              } else {
+                hlStyle = _merge(
+                    hlStyle,
+                    isDarkTheme
+                        ? TextStyle(color: textColorWith(color, isDarkMode: isDarkTheme))
+                        : TextStyle(
+                            backgroundColor: highlightColorWith(color, isDarkMode: isDarkTheme)));
+              }
+            }
+
+            // Add the highlight words with the highlight style.
+            spans.add(_spanToWord(hlEndWord, hlStyle));
+          }
+
+          // If there is still text left, add it with the default style.
+          if (remainingText.isNotEmpty) {
+            spans.add(TaggableTextSpan(
+                text: remainingText,
+                style: textStyle,
+                tag: tag.copyWith(word: currentWord),
+                recognizer: recognizer));
+          }
+        }
       }
+
+      return spans.length == 1 ? spans.first : TextSpan(children: spans, recognizer: recognizer);
     }
 
     return TextSpan(text: text, style: style);
@@ -283,6 +302,8 @@ class ChapterViewModel {
   Stopwatch _tapDownStopwatch;
   Object _tapDownTag;
   Offset _tapGlobalPosition;
+
+  var _prevTagXrefHref = '';
 
   void _onTappedSpanWithTag(BuildContext context, Object tag) {
     if (tag is VerseTag) {

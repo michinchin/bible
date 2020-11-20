@@ -37,9 +37,10 @@ extension TecExtOnString on String {
   }
 
   ///
-  /// Returns the index at the end of the given word.
+  /// Returns the index where the given word starts (or ends, if [start]
+  /// is `false`). Note, the first word is word 1, and so on.
   ///
-  int indexAtEndOfWord(int word) {
+  int indexAtWord(int word, {bool start = true}) {
     if (word == null || word <= 0) return 0;
     var wordCount = 0;
     var isInWord = false;
@@ -50,15 +51,24 @@ extension TecExtOnString on String {
       if (isInWord) {
         if (isNonWordChar) {
           isInWord = false;
-          if (word == wordCount) return i;
+          if (word == wordCount && !start) return i;
         }
       } else if (!isNonWordChar) {
         wordCount++;
+        if (word == wordCount && start) return i;
         isInWord = true;
       }
       i++;
     }
     return i;
+  }
+
+  ///
+  /// Returns the index immediately after the given word. Note, the first
+  /// word is word 1, and so on.
+  ///
+  int indexAtEndOfWord(int word) {
+    return indexAtWord(word, start: false);
   }
 
   ///
@@ -174,11 +184,11 @@ extension<T> on Set<T> {
 // ignore_for_file: unused_element
 
 bool _isNonWordChar(int codeUnit) => _nonWordChars.contains(codeUnit);
-
 final _nonWordChars =
-    _whitespace.union(_asciiPunctuation).subtracting([_apostrophe]).union(_nonWordQuotes);
+    _whitespace.union(_asciiPunctuation).subtracting([_sglQuote]).union(_nonWordQuotes);
 
-const _apostrophe = _sglQuote;
+bool _isApostrophe(int codeUnit) => _apostrophes.contains(codeUnit);
+const _apostrophes = <int>{_sglQuote, _sglQtRgt};
 
 const _sglQuote = 0x0027; // ' single quote, apostrophe
 const _sglQtLft = 0x2018; // ‘ left single quote
