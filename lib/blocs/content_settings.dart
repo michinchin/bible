@@ -50,7 +50,7 @@ class ContentSettingsBloc extends Cubit<ContentSettings> {
   ContentSettingsBloc()
       : super(ContentSettings(
           textScaleFactor:
-              tec.Prefs.shared.getDouble(Const.prefContentTextScaleFactor, defaultValue: 1.2),
+              tec.Prefs.shared.getDouble(Const.prefContentTextScaleFactor, defaultValue: 1.35),
           fontName: tec.Prefs.shared.getString(Const.prefContentFontName, defaultValue: ''),
         ));
 

@@ -23,6 +23,7 @@ import '../../models/search/tec_share.dart';
 import '../../models/search/verse.dart';
 import '../../models/user_item_helper.dart';
 import '../common/common.dart';
+import '../home/votd_screen.dart';
 import '../sheet/compare_verse.dart';
 
 const searchThemeColor = Colors.orange;
@@ -92,9 +93,6 @@ class _HistoryViewState extends State<HistoryView> {
     widget.tabController.animateTo(1);
   }
 
-  void _onNavHistoryTap(BuildContext c, Reference ref, int volume) =>
-      Navigator.of(c).maybePop<Reference>(ref?.copyWith(volume: volume));
-
   Future<List<dynamic>> _future() => Future.wait<List<dynamic>>(
       [UserItemHelper.navHistoryItemsFromDb(), UserItemHelper.searchHistoryItemsFromDb()]);
 
@@ -123,7 +121,8 @@ class _HistoryViewState extends State<HistoryView> {
                           final ref = await Navigator.of(c).push(MaterialPageRoute<Reference>(
                               builder: (c) => _NavHistoryView(navHistory)));
                           if (ref != null) {
-                            _onNavHistoryTap(c, ref, context.tbloc<NavBloc>().state.ref.volume);
+                            await Navigator.of(context).maybePop<Reference>(
+                                ref?.copyWith(volume: context.tbloc<NavBloc>().state.ref.volume));
                           }
                         },
                         child: Padding(
@@ -141,18 +140,7 @@ class _HistoryViewState extends State<HistoryView> {
                       ),
                       ...ListTile.divideTiles(context: context, tiles: [
                         for (final navHistoryItem in navHistory.take(5))
-                          ListTile(
-                            dense: true,
-                            leading: const Icon(Icons.history),
-                            // remove translation from label
-                            title: Text(navHistoryItem
-                                .label()
-                                .split(' ')
-                                .take(navHistoryItem.label().split(' ').length - 1)
-                                .join(' ')),
-                            onTap: () => _onNavHistoryTap(
-                                c, navHistoryItem, context.tbloc<NavBloc>().state.ref.volume),
-                          )
+                          _NavHistoryTile(navHistoryItem),
                       ]),
                       InkWell(
                           onTap: () async {
@@ -189,6 +177,37 @@ class _HistoryViewState extends State<HistoryView> {
           }
           return const Center(child: Text('Unable to load currently'));
         });
+  }
+}
+
+class _NavHistoryTile extends StatelessWidget {
+  final Reference navHistoryItem;
+  const _NavHistoryTile(this.navHistoryItem);
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+        dense: true,
+        leading: const Icon(Icons.history),
+        // remove translation from label
+        title: Text(
+            navHistoryItem
+                .label()
+                .split(' ')
+                .take(navHistoryItem.label().split(' ').length - 1)
+                .join(' '),
+            style: const TextStyle(fontWeight: FontWeight.w500)),
+        subtitle: FutureBuilder<tec.ErrorOrValue<ReferenceAndVerseText>>(
+          future: currentBibleFromContext(context).referenceAndVerseTextWith(navHistoryItem),
+          builder: (c, s) {
+            if (s.hasData) {
+              final verseText = s.data.value.verseText.values.map((v) => v.text).join(' ');
+              return Text(verseText);
+            }
+            return Container();
+          },
+        ),
+        onTap: () => Navigator.of(context).maybePop<Reference>(
+            navHistoryItem?.copyWith(volume: context.tbloc<NavBloc>().state.ref.volume)));
   }
 }
 
