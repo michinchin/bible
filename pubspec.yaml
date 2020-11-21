@@ -85,7 +85,7 @@ dependencies:
     hosted:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
-    version: ^2.0.17
+    version: ^2.0.20
   tec_native_ad:
     hosted:
       name: tec_native_ad
