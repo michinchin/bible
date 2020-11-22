@@ -153,6 +153,7 @@ class ChapterViewModel {
     if (text.isNotEmpty) {
       // If not in trial mode, and the whole verse is selected...
       if (!selection.isInTrialMode && selection.hasVerse(tag.verse)) {
+        _clearPreviousHighlightValues();
         return [_spanForSelectedVerse(tag, text, textStyle, selectedTextStyle, recognizer)];
       } else if (tag.verse != null) {
         return _spansForHighlights(tag, text, textStyle, recognizer, isDarkTheme: isDarkTheme);
@@ -282,14 +283,19 @@ class ChapterViewModel {
       // If there are one or more words before the highlight, add them with the default style.
       if (currentWord < hlStartWord) {
         spans.add(_spanToWord(hlStartWord - 1, textStyle));
+        _clearPreviousHighlightValues();
       }
 
       var hlStyle = textStyle;
+      HighlightType _highlightType;
+      int _highlightColor;
       if (tag.isInVerse ||
           hl.ref.word != Reference.minWord ||
           hl.ref.endWord != Reference.maxWord) {
-        final color = Color(hl.color ?? 0xfff8f888);
-        if (hl.highlightType == HighlightType.underline) {
+        _highlightType = hl.highlightType;
+        _highlightColor = hl.color ?? 0xfff8f888;
+        final color = Color(_highlightColor);
+        if (_highlightType == HighlightType.underline) {
           hlStyle = _merge(
               hlStyle,
               TextStyle(
@@ -305,8 +311,29 @@ class ChapterViewModel {
         }
       }
 
-      // Add the highlight words with the highlight style.
-      spans.add(_spanToWord(hlEndWord, hlStyle));
+      // If the highlight type or color changed, we don't want leading spaces
+      // to be highlighted.
+      if (_highlightType != null &&
+          (_highlightType != _prevHighlightType || _highlightColor != _prevHighlightColor)) {
+        final index = remainingText.indexAtWord(1);
+        if (index > 0) {
+          final whitespace = remainingText.substring(0, index);
+          remainingText = remainingText.substring(index);
+          spans.add(TaggableTextSpan(
+              text: whitespace,
+              style: textStyle,
+              tag: tag.copyWith(word: currentWord),
+              recognizer: recognizer));
+          _clearPreviousHighlightValues();
+        }
+      }
+
+      if (remainingText.isNotEmpty) {
+        // Add the highlight words with the highlight style.
+        spans.add(_spanToWord(hlEndWord, hlStyle));
+        _prevHighlightType = _highlightType;
+        _prevHighlightColor = _highlightColor;
+      }
     }
 
     // If there is still text left, add it with the default style.
@@ -316,10 +343,19 @@ class ChapterViewModel {
           style: textStyle,
           tag: tag.copyWith(word: currentWord),
           recognizer: recognizer));
+      _clearPreviousHighlightValues();
     }
 
     return spans;
   }
+
+  void _clearPreviousHighlightValues() {
+    _prevHighlightType = null;
+    _prevHighlightColor = null;
+  }
+
+  HighlightType _prevHighlightType;
+  int _prevHighlightColor;
 
   void scrollToVerse(
     int verse,
