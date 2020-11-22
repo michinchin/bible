@@ -159,6 +159,13 @@ extension TecExtOnString on String {
     }
     return false;
   }
+
+  ///
+  /// Returns a new string with useless HTML spans removed.
+  ///
+  String despanified() => replaceAllMapped(_despanifyRegEx, (m) => m[1]);
+
+  static final _despanifyRegEx = RegExp(r'<span>([^<]*)</span>');
 }
 
 @immutable
