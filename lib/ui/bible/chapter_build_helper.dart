@@ -83,7 +83,7 @@ class ChapterBuildHelper {
           (attrs.className == 'v' || attrs.className.startsWith('v '))) {
         final verse = int.tryParse(id);
         if (verse != null) {
-          if (verse <= _currentVerse && _isBibleId(volume)) {
+          if (verse <= _currentVerse && isBibleId(volume)) {
             tec.dmPrint('ERROR: new verse # ($id) is <= previous verse # ($_currentVerse)');
             assert(false);
           }
@@ -93,7 +93,7 @@ class ChapterBuildHelper {
           _currentWord = 0;
           _currentEndVerse = int.tryParse(attrs['end'] ?? '');
 
-          if (verse == 1 && _isBibleId(volume)) {
+          if (verse == 1 && isBibleId(volume)) {
             _currentWord++; // The old app has a chapter number, which is counted as a word.
           }
         }
@@ -185,5 +185,3 @@ class ChapterBuildHelper {
           return name == 'h5';
         };
 }
-
-bool _isBibleId(int id) => id != null && id < 1000;

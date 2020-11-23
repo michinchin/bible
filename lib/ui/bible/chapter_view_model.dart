@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -23,6 +24,8 @@ import '../../models/string_utils.dart';
 import '../common/common.dart';
 import 'chapter_selection.dart';
 import 'verse_tag.dart';
+
+const _despanifyChapterHtml = true;
 
 ///
 /// ChapterViewModel
@@ -54,6 +57,7 @@ class ChapterViewModel {
 
   ///
   /// Returns a TextSpan, WidgetSpan, or `null` for the given HTML text node.
+  /// If `null` is returned, the text node will be ignored.
   ///
   InlineSpan spanForText(
     BuildContext context,
@@ -61,67 +65,33 @@ class ChapterViewModel {
     TextStyle style,
     Object tag,
     TextStyle selectedTextStyle, {
-    bool isDarkTheme,
+    @required bool isDarkTheme,
   }) {
     if (tag is VerseTag) {
+      if (tag.isInFootnote) {
+        return _spanForFootnote(context, tag, style, isDarkTheme: isDarkTheme);
+      }
+
+      // This function builds a list of zero or more spans.
+      final spans = <InlineSpan>[];
+
       // Note, `v` will be `null` if not in a verse.
       final v = tag.verse;
-
-      if (tag.isInFootnote) {
-        if (tag.href != _currentFootnoteHref) {
-          _currentFootnoteHref = tag.href;
-
-          // Assign a unique key for this footnote.
-          final key = '$v-${tag.word}';
-          _widgetKeys[key] ??= GlobalKey();
-          return _footnoteSpan(context, style, tag, _widgetKeys[key], isDarkTheme);
-        }
-
-        return null;
-      }
-
-      final recognizer = (v == null ? null : TapGestureRecognizer());
-      if (recognizer != null) {
-        recognizer
-          ..onTapDown = (details) {
-            _tapDownStopwatch = Stopwatch()..start();
-            _tapDownTag = tag;
-          }
-          ..onTapUp = (details) {
-            _tapGlobalPosition = details?.globalPosition;
-          }
-          ..onTap = () => _onTappedSpanWithTag(context, tag);
-      }
-
-      // We're building a list of one or more spans...
-      final spans = <InlineSpan>[];
 
       // Margin note icons are placed before the first "inVerse" span of a verse...
       if (v != null && _marginNoteVerse != v && tag.isInVerse) {
         _marginNoteVerse = v;
-
-        if (marginNotes().hasMarginNoteForVerse(_marginNoteVerse)) {
-          // Assign a unique key for this margin note.
-          final key = 'mn$v';
-          _widgetKeys[key] ??= GlobalKey();
-          spans.add(_marginNoteSpan(context, style, tag, _widgetKeys[key], isDarkTheme));
-        }
+        spans.addAll(_spansForMarginNote(context, tag, style, isDarkTheme: isDarkTheme));
       }
 
-      // Add a widget with a global key at the start of each verse so we can determine
-      // the scroll position of each verse.
+      // Add a widget span with a global key at the start of each verse so we can
+      // determine the scroll position of each verse.
       if (v != null && tag.isInVerse && !_verses.containsKey(v)) {
-        _verses[v] = _KeyAndPos(GlobalKey(), null);
-        spans.add(TaggableWidgetSpan(
-          alignment: PlaceholderAlignment.top,
-          childWidth: 1,
-          child: SizedBox(key: _verses[v].key, width: 1, height: 1),
-        ));
+        spans.add(_widgetSpanWithKeyForVerse(tag.verse));
       }
 
+      final recognizer = _recognizerWith(context, tag);
       var textStyle = style;
-      var currentWord = tag.word;
-      final endWord = math.max(currentWord, currentWord + tec.countOfWordsInString(text) - 1);
       var remainingText = text;
 
       // If in xref, add xref styling to the span:
@@ -130,9 +100,14 @@ class ChapterViewModel {
         if (_prevTagXrefHref != tag.href) {
           final index = remainingText.indexAtWord(1);
           if (index > 0) {
-            final t = remainingText.substring(0, index);
+            final whitespace = remainingText.substring(0, index);
             remainingText = remainingText.substring(index);
-            spans.add(TaggableTextSpan(text: t, style: style, tag: tag, recognizer: recognizer));
+            final wsSpans = _spansForText(tag, whitespace, style, selectedTextStyle, recognizer,
+                isDarkTheme: isDarkTheme);
+            if (wsSpans.length > 1) {
+              tec.dmPrint('_spansForText returned ${wsSpans.length} spans for "$whitespace"!');
+            }
+            spans.addAll(wsSpans);
           }
         }
 
@@ -149,100 +124,238 @@ class ChapterViewModel {
       }
 
       if (remainingText.isNotEmpty) {
-        // If not in trial mode, and this whole verse is selected, just
-        // return a span with the selected text style.
-        if (!selection.isInTrialMode && selection.hasVerse(v)) {
-          final textSpan = TaggableTextSpan(
-              text: remainingText,
-              style: tag.isInVerse ? _merge(textStyle, selectedTextStyle) : textStyle,
-              tag: tag,
-              recognizer: recognizer);
-          if (spans.isEmpty) {
-            return textSpan;
-          } else {
-            spans.add(textSpan);
-            return TextSpan(children: spans, recognizer: recognizer);
-          }
-        } else if (v != null) {
-          ///
-          /// Local func that returns a new span from the `remainingText` up
-          /// to and including the given [word], with the given [style]. And
-          /// also updates `currentWord` and `remainingText` appropriately.
-          ///
-          InlineSpan _spanToWord(int word, TextStyle textStyle) {
-            final wordCount = (word - currentWord) + 1;
-            final endIndex = remainingText.indexAtEndOfWord(wordCount);
-            if (endIndex > 0 && endIndex <= remainingText.length) {
-              final span = TaggableTextSpan(
-                  text: remainingText.substring(0, endIndex),
-                  style: textStyle,
-                  tag: tag.copyWith(word: currentWord),
-                  recognizer: recognizer);
-              remainingText = remainingText.substring(endIndex);
-              currentWord += wordCount;
-              return span;
-            } else {
-              tec.dmPrint('ERROR in _spanToWord! tag: $tag, word: $word, '
-                  'wordCount: $wordCount, endIndex: $endIndex, currentWord: $currentWord, '
-                  'remainingText: "$remainingText", text: "$text"');
-              assert(false);
-              return const TextSpan(text: 'FAILED!');
-            }
-          }
-
-          // Iterate through all the highlights for the words in the tag...
-          for (final highlight
-              in highlights().highlightsForVerse(v, startWord: tag.word, endWord: endWord)) {
-            final hlStartWord = highlight.ref.startWordForVerse(v);
-            final hlEndWord = highlight.ref.endWordForVerse(v);
-
-            // If there are one or more words before the highlight, add them with the default style.
-            if (currentWord < hlStartWord) {
-              spans.add(_spanToWord(hlStartWord - 1, textStyle));
-            }
-
-            var hlStyle = textStyle;
-            if (tag.isInVerse ||
-                highlight.ref.word != Reference.minWord ||
-                highlight.ref.endWord != Reference.maxWord) {
-              final color = Color(highlight.color ?? 0xfff8f888);
-              if (highlight.highlightType == HighlightType.underline) {
-                hlStyle = _merge(
-                    hlStyle,
-                    TextStyle(
-                        decoration: TextDecoration.underline,
-                        decorationColor: textColorWith(color, isDarkMode: isDarkTheme),
-                        decorationThickness: 2));
-              } else {
-                hlStyle = _merge(
-                    hlStyle,
-                    isDarkTheme
-                        ? TextStyle(color: textColorWith(color, isDarkMode: isDarkTheme))
-                        : TextStyle(
-                            backgroundColor: highlightColorWith(color, isDarkMode: isDarkTheme)));
-              }
-            }
-
-            // Add the highlight words with the highlight style.
-            spans.add(_spanToWord(hlEndWord, hlStyle));
-          }
-
-          // If there is still text left, add it with the default style.
-          if (remainingText.isNotEmpty) {
-            spans.add(TaggableTextSpan(
-                text: remainingText,
-                style: textStyle,
-                tag: tag.copyWith(word: currentWord),
-                recognizer: recognizer));
-          }
-        }
+        spans.addAll(_spansForText(tag, remainingText, textStyle, selectedTextStyle, recognizer,
+            isDarkTheme: isDarkTheme));
       }
 
-      return spans.length == 1 ? spans.first : TextSpan(children: spans, recognizer: recognizer);
+      return spans.isEmpty
+          ? null
+          : spans.length == 1
+              ? spans.first
+              : TextSpan(children: spans, recognizer: recognizer);
     }
 
     return TextSpan(text: text, style: style);
   }
+
+  //
+  // PRIVATE STUFF
+  //
+
+  Iterable<InlineSpan> _spansForText(
+    VerseTag tag,
+    String text,
+    TextStyle textStyle,
+    TextStyle selectedTextStyle,
+    TapGestureRecognizer recognizer, {
+    @required bool isDarkTheme,
+  }) {
+    if (text.isNotEmpty) {
+      // If not in trial mode, and the whole verse is selected...
+      if (!selection.isInTrialMode && selection.hasVerse(tag.verse)) {
+        _clearPreviousHighlightValues();
+        return [_spanForSelectedVerse(tag, text, textStyle, selectedTextStyle, recognizer)];
+      } else if (tag.verse != null) {
+        return _spansForHighlights(tag, text, textStyle, recognizer, isDarkTheme: isDarkTheme);
+      }
+    }
+    return [];
+  }
+
+  TapGestureRecognizer _recognizerWith(BuildContext context, VerseTag tag) {
+    final recognizer = (tag.verse == null ? null : TapGestureRecognizer());
+    if (recognizer != null) {
+      recognizer
+        ..onTapDown = (details) {
+          _tapDownStopwatch = Stopwatch()..start();
+          _tapDownTag = tag;
+        }
+        ..onTapUp = (details) {
+          globalOffsetOfTap = details?.globalPosition;
+        }
+        ..onTap = () => onTapHandler(context, tag);
+    }
+    return recognizer;
+  }
+
+  Iterable<InlineSpan> _spansForMarginNote(
+    BuildContext context,
+    VerseTag tag,
+    TextStyle textStyle, {
+    @required bool isDarkTheme,
+  }) {
+    if (marginNotes().hasMarginNoteForVerse(_marginNoteVerse)) {
+      // Assign a unique key for this margin note.
+      final key = 'mn${tag.verse}';
+      _widgetKeys[key] ??= GlobalKey();
+      return [_marginNoteSpan(context, textStyle, tag, _widgetKeys[key], isDarkTheme)];
+    }
+    return [];
+  }
+
+  InlineSpan _widgetSpanWithKeyForVerse(int verse) {
+    _verses[verse] = _KeyAndPos(GlobalKey(), null);
+    return TaggableWidgetSpan(
+      alignment: PlaceholderAlignment.top,
+      childWidth: 1,
+      child: SizedBox(key: _verses[verse].key, width: 1, height: 1),
+    );
+  }
+
+  InlineSpan _spanForFootnote(
+    BuildContext context,
+    VerseTag tag,
+    TextStyle textStyle, {
+    @required bool isDarkTheme,
+  }) {
+    if (tag.href != _currentFootnoteHref) {
+      _currentFootnoteHref = tag.href;
+
+      // Assign a unique key for this footnote.
+      final key = '${tag.verse}-${tag.word}';
+      _widgetKeys[key] ??= GlobalKey();
+      return _footnoteSpan(context, textStyle, tag, _widgetKeys[key], isDarkTheme);
+    }
+
+    return null;
+  }
+
+  InlineSpan _spanForSelectedVerse(
+    VerseTag tag,
+    String text,
+    TextStyle textStyle,
+    TextStyle selectedTextStyle,
+    TapGestureRecognizer recognizer,
+  ) {
+    return TaggableTextSpan(
+        text: text,
+        style: tag.isInVerse ? _merge(textStyle, selectedTextStyle) : textStyle,
+        tag: tag,
+        recognizer: recognizer);
+  }
+
+  Iterable<InlineSpan> _spansForHighlights(
+    VerseTag tag,
+    String text,
+    TextStyle textStyle,
+    TapGestureRecognizer recognizer, {
+    @required bool isDarkTheme,
+  }) {
+    final spans = <InlineSpan>[];
+    final v = tag.verse;
+    var currentWord = tag.word;
+    final endWord = math.max(currentWord, currentWord + tec.countOfWordsInString(text) - 1);
+    var remainingText = text;
+
+    ///
+    /// Local func that returns a new span from the `remainingText` up
+    /// to and including the given [word], with the given [style]. And
+    /// also updates `currentWord` and `remainingText` appropriately.
+    ///
+    InlineSpan _spanToWord(int word, TextStyle textStyle) {
+      final wordCount = (word - currentWord) + 1;
+      final endIndex = remainingText.indexAtEndOfWord(wordCount);
+      if (endIndex > 0 && endIndex <= remainingText.length) {
+        final span = TaggableTextSpan(
+            text: remainingText.substring(0, endIndex),
+            style: textStyle,
+            tag: tag.copyWith(word: currentWord),
+            recognizer: recognizer);
+        remainingText = remainingText.substring(endIndex);
+        currentWord += wordCount;
+        return span;
+      } else {
+        final errorMsg = 'ERROR in _spanToWord($word)! tag: $tag, '
+            'wordCount: $wordCount, endIndex: $endIndex, currentWord: $currentWord, '
+            'remainingText.length: ${remainingText.length}, '
+            'remainingText: "${jsonEncode(remainingText)}" ';
+        tec.dmPrint(errorMsg);
+        assert(false);
+        return const TextSpan(text: '');
+      }
+    }
+
+    // Iterate through all the highlights for the words in the tag...
+    for (final hl in highlights().highlightsForVerse(v, startWord: tag.word, endWord: endWord)) {
+      final hlStartWord = hl.ref.startWordForVerse(v);
+      final hlEndWord = hl.ref.endWordForVerse(v);
+
+      // If there are one or more words before the highlight, add them with the default style.
+      if (currentWord < hlStartWord) {
+        spans.add(_spanToWord(hlStartWord - 1, textStyle));
+        _clearPreviousHighlightValues();
+      }
+
+      var hlStyle = textStyle;
+      HighlightType _highlightType;
+      int _highlightColor;
+      if (tag.isInVerse ||
+          hl.ref.word != Reference.minWord ||
+          hl.ref.endWord != Reference.maxWord) {
+        _highlightType = hl.highlightType;
+        _highlightColor = hl.color ?? 0xfff8f888;
+        final color = Color(_highlightColor);
+        if (_highlightType == HighlightType.underline) {
+          hlStyle = _merge(
+              hlStyle,
+              TextStyle(
+                  decoration: TextDecoration.underline,
+                  decorationColor: textColorWith(color, isDarkMode: isDarkTheme),
+                  decorationThickness: 2));
+        } else {
+          hlStyle = _merge(
+              hlStyle,
+              isDarkTheme
+                  ? TextStyle(color: textColorWith(color, isDarkMode: isDarkTheme))
+                  : TextStyle(backgroundColor: highlightColorWith(color, isDarkMode: isDarkTheme)));
+        }
+      }
+
+      // If the highlight type or color changed, we don't want leading spaces
+      // to be highlighted.
+      if (_highlightType != null &&
+          (_highlightType != _prevHighlightType || _highlightColor != _prevHighlightColor)) {
+        final index = remainingText.indexAtWord(1);
+        if (index > 0) {
+          final whitespace = remainingText.substring(0, index);
+          remainingText = remainingText.substring(index);
+          spans.add(TaggableTextSpan(
+              text: whitespace,
+              style: textStyle,
+              tag: tag.copyWith(word: currentWord),
+              recognizer: recognizer));
+          _clearPreviousHighlightValues();
+        }
+      }
+
+      if (remainingText.isNotEmpty) {
+        // Add the highlight words with the highlight style.
+        spans.add(_spanToWord(hlEndWord, hlStyle));
+        _prevHighlightType = _highlightType;
+        _prevHighlightColor = _highlightColor;
+      }
+    }
+
+    // If there is still text left, add it with the default style.
+    if (remainingText.isNotEmpty) {
+      spans.add(TaggableTextSpan(
+          text: remainingText,
+          style: textStyle,
+          tag: tag.copyWith(word: currentWord),
+          recognizer: recognizer));
+      _clearPreviousHighlightValues();
+    }
+
+    return spans;
+  }
+
+  void _clearPreviousHighlightValues() {
+    _prevHighlightType = null;
+    _prevHighlightColor = null;
+  }
+
+  HighlightType _prevHighlightType;
+  int _prevHighlightColor;
 
   void scrollToVerse(
     int verse,
@@ -281,10 +394,6 @@ class ChapterViewModel {
     return null;
   }
 
-  //
-  // PRIVATE STUFF
-  //
-
   // Maintain a list of keys for footnotes and margin notes.
   final _widgetKeys = <String, GlobalKey>{};
 
@@ -301,14 +410,14 @@ class ChapterViewModel {
 
   Stopwatch _tapDownStopwatch;
   Object _tapDownTag;
-  Offset _tapGlobalPosition;
+  Offset globalOffsetOfTap;
 
   var _prevTagXrefHref = '';
 
-  void _onTappedSpanWithTag(BuildContext context, Object tag) {
-    if (tag is VerseTag) {
-      var handledTap = false;
+  void onTapHandler([BuildContext context, Object tag]) {
+    var handledTap = false;
 
+    if (tag is VerseTag) {
       // Was it a long press on an xref?
       if (!handledTap &&
           // !hasSelection &&
@@ -320,35 +429,42 @@ class ChapterViewModel {
         final verseTag = _tapDownTag as VerseTag;
         final reference =
             Reference(volume: volume, book: book, chapter: chapter, verse: verseTag.verse);
-        handledTap = selection.handleXref(context, reference, null, verseTag, _tapGlobalPosition);
+        handledTap = selection.handleXref(context, reference, null, verseTag, globalOffsetOfTap);
       }
+    }
 
-      // Was the tap near a margin note or footnote widget?
-      // Note, `_tapGlobalPosition` is set in the `onTapUp` handler.
-      if (!handledTap && selection.isEmpty && _tapGlobalPosition != null) {
-        final pt = _tapGlobalPosition;
+    // If something is selected, and this is a bible, toggle verse selection.
+    if (!handledTap && selection.isNotEmpty && tag is VerseTag && isBibleId(volume)) {
+      handledTap = true;
+      selection.toggleVerse(context, tag.verse);
+    }
 
-        for (final key in _widgetKeys.keys) {
-          final rect = globalRectOfWidgetWithKey(_widgetKeys[key])?.inflate(16);
-          if (rect != null) {
-            // If the tap is above the widget, don't bother checking the rest of the widgets.
-            if (pt.dy < rect.top) break;
+    // Was the tap near a margin note or footnote widget?
+    // Note, `globalOffsetOfTap` is set in the `onTapUp` handler.
+    if (!handledTap && globalOffsetOfTap != null) {
+      final pt = globalOffsetOfTap;
+      for (final key in _widgetKeys.keys) {
+        final rect = globalRectOfWidgetWithKey(_widgetKeys[key])?.inflate(16);
+        if (rect != null) {
+          // If the tap is above the widget, don't bother checking the rest of the widgets.
+          if (pt.dy < rect.top) break;
 
-            // If the tap is in the rect...
-            if (rect.contains(pt)) {
-              if (_widgetKeys[key].currentWidget is GestureDetector) {
-                // This is a widget hit. Execute the tap...
-                (_widgetKeys[key].currentWidget as GestureDetector).onTap();
-                handledTap = true;
-                break;
-              }
+          // If the tap is in the rect...
+          if (rect.contains(pt)) {
+            if (_widgetKeys[key].currentWidget is GestureDetector) {
+              // This is a widget hit. Execute the tap...
+              (_widgetKeys[key].currentWidget as GestureDetector).onTap();
+              handledTap = true;
+              break;
             }
           }
         }
       }
+    }
 
-      // If the tap hasn't been handled yet and this is a bible, toggle verse selection.
-      if (!handledTap && volume < 1000) selection.toggleVerse(context, tag.verse);
+    // If the tap hasn't been handled yet and this is a bible, toggle verse selection.
+    if (!handledTap && tag is VerseTag && isBibleId(volume)) {
+      selection.toggleVerse(context, tag.verse);
     }
 
     _tapDownStopwatch?.stop();
@@ -405,9 +521,9 @@ class ChapterViewModel {
               ),
             ),
           ),
-          onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
+          onTapUp: (details) => globalOffsetOfTap = details?.globalPosition,
           onTap: _onPress,
-          onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
+          onLongPressStart: (details) => globalOffsetOfTap = details?.globalPosition,
           onLongPress: _onPress,
         ),
       ),
@@ -432,7 +548,7 @@ class ChapterViewModel {
           return showTecModalPopup<void>(
             useRootNavigator: true,
             context: context,
-            offset: _tapGlobalPosition,
+            offset: globalOffsetOfTap,
             builder: (context) {
               final maxWidth = math.min(320.0, MediaQuery.of(context).size.width);
               return TecPopupSheet(
@@ -488,9 +604,9 @@ class ChapterViewModel {
             ),
           ),
         ),
-        onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
+        onTapUp: (details) => globalOffsetOfTap = details?.globalPosition,
         onTap: _onPress,
-        onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
+        onLongPressStart: (details) => globalOffsetOfTap = details?.globalPosition,
         onLongPress: _onPress,
       ),
     );
@@ -525,7 +641,14 @@ TextStyle _merge(TextStyle s1, TextStyle s2) => s1 == null
 ///
 Future<tec.ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int chapter) async {
   if (volume is Bible) {
-    return volume.chapterHtmlWith(book, chapter);
+    final result = await volume.chapterHtmlWith(book, chapter);
+    if (!_despanifyChapterHtml || tec.isNullOrEmpty(result.value)) return result;
+    final html = result.value.despanified();
+    tec.dmPrint('Despanifying HTML for ${volume.abbreviation} '
+        '${volume.assocBible().nameOfBook(book)} $chapter reduced size by '
+        '${100 - (100 * html.length ~/ result.value.length)}%, '
+        '${result.value.length - html.length} chars!');
+    return tec.ErrorOrValue(null, html);
   } else {
     final result = await volume.resourcesWithBook(book, chapter, ResourceType.studyNote);
     assert(result != null);

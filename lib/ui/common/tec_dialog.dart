@@ -23,7 +23,7 @@ Future<T> showTecDialog<T extends Object>({
   var windowSize = Size.zero;
   if (maxWidth != null || maxHeight != null) {
     assert(debugCheckHasMediaQuery(context));
-    windowSize = (MediaQuery.of(context, nullOk: true)?.size ?? Size.zero);
+    windowSize = (MediaQuery.of(context)?.size ?? Size.zero);
   }
 
   if ((maxWidth == null || maxWidth + 40.0 <= windowSize.width) &&
