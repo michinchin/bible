@@ -171,9 +171,9 @@ class ChapterViewModel {
           _tapDownTag = tag;
         }
         ..onTapUp = (details) {
-          _tapGlobalPosition = details?.globalPosition;
+          globalOffsetOfTap = details?.globalPosition;
         }
-        ..onTap = () => _onTappedSpanWithTag(context, tag);
+        ..onTap = () => onTapHandler(context, tag);
     }
     return recognizer;
   }
@@ -410,14 +410,14 @@ class ChapterViewModel {
 
   Stopwatch _tapDownStopwatch;
   Object _tapDownTag;
-  Offset _tapGlobalPosition;
+  Offset globalOffsetOfTap;
 
   var _prevTagXrefHref = '';
 
-  void _onTappedSpanWithTag(BuildContext context, Object tag) {
-    if (tag is VerseTag) {
-      var handledTap = false;
+  void onTapHandler([BuildContext context, Object tag]) {
+    var handledTap = false;
 
+    if (tag is VerseTag) {
       // Was it a long press on an xref?
       if (!handledTap &&
           // !hasSelection &&
@@ -429,35 +429,42 @@ class ChapterViewModel {
         final verseTag = _tapDownTag as VerseTag;
         final reference =
             Reference(volume: volume, book: book, chapter: chapter, verse: verseTag.verse);
-        handledTap = selection.handleXref(context, reference, null, verseTag, _tapGlobalPosition);
+        handledTap = selection.handleXref(context, reference, null, verseTag, globalOffsetOfTap);
       }
+    }
 
-      // Was the tap near a margin note or footnote widget?
-      // Note, `_tapGlobalPosition` is set in the `onTapUp` handler.
-      if (!handledTap && selection.isEmpty && _tapGlobalPosition != null) {
-        final pt = _tapGlobalPosition;
+    // If something is selected, and this is a bible, toggle verse selection.
+    if (!handledTap && selection.isNotEmpty && tag is VerseTag && isBibleId(volume)) {
+      handledTap = true;
+      selection.toggleVerse(context, tag.verse);
+    }
 
-        for (final key in _widgetKeys.keys) {
-          final rect = globalRectOfWidgetWithKey(_widgetKeys[key])?.inflate(16);
-          if (rect != null) {
-            // If the tap is above the widget, don't bother checking the rest of the widgets.
-            if (pt.dy < rect.top) break;
+    // Was the tap near a margin note or footnote widget?
+    // Note, `globalOffsetOfTap` is set in the `onTapUp` handler.
+    if (!handledTap && globalOffsetOfTap != null) {
+      final pt = globalOffsetOfTap;
+      for (final key in _widgetKeys.keys) {
+        final rect = globalRectOfWidgetWithKey(_widgetKeys[key])?.inflate(16);
+        if (rect != null) {
+          // If the tap is above the widget, don't bother checking the rest of the widgets.
+          if (pt.dy < rect.top) break;
 
-            // If the tap is in the rect...
-            if (rect.contains(pt)) {
-              if (_widgetKeys[key].currentWidget is GestureDetector) {
-                // This is a widget hit. Execute the tap...
-                (_widgetKeys[key].currentWidget as GestureDetector).onTap();
-                handledTap = true;
-                break;
-              }
+          // If the tap is in the rect...
+          if (rect.contains(pt)) {
+            if (_widgetKeys[key].currentWidget is GestureDetector) {
+              // This is a widget hit. Execute the tap...
+              (_widgetKeys[key].currentWidget as GestureDetector).onTap();
+              handledTap = true;
+              break;
             }
           }
         }
       }
+    }
 
-      // If the tap hasn't been handled yet and this is a bible, toggle verse selection.
-      if (!handledTap && volume < 1000) selection.toggleVerse(context, tag.verse);
+    // If the tap hasn't been handled yet and this is a bible, toggle verse selection.
+    if (!handledTap && tag is VerseTag && isBibleId(volume)) {
+      selection.toggleVerse(context, tag.verse);
     }
 
     _tapDownStopwatch?.stop();
@@ -514,9 +521,9 @@ class ChapterViewModel {
               ),
             ),
           ),
-          onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
+          onTapUp: (details) => globalOffsetOfTap = details?.globalPosition,
           onTap: _onPress,
-          onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
+          onLongPressStart: (details) => globalOffsetOfTap = details?.globalPosition,
           onLongPress: _onPress,
         ),
       ),
@@ -541,7 +548,7 @@ class ChapterViewModel {
           return showTecModalPopup<void>(
             useRootNavigator: true,
             context: context,
-            offset: _tapGlobalPosition,
+            offset: globalOffsetOfTap,
             builder: (context) {
               final maxWidth = math.min(320.0, MediaQuery.of(context).size.width);
               return TecPopupSheet(
@@ -597,9 +604,9 @@ class ChapterViewModel {
             ),
           ),
         ),
-        onTapUp: (details) => _tapGlobalPosition = details?.globalPosition,
+        onTapUp: (details) => globalOffsetOfTap = details?.globalPosition,
         onTap: _onPress,
-        onLongPressStart: (details) => _tapGlobalPosition = details?.globalPosition,
+        onLongPressStart: (details) => globalOffsetOfTap = details?.globalPosition,
         onLongPress: _onPress,
       ),
     );
