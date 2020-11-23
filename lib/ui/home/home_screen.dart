@@ -67,18 +67,16 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               color: Theme.of(context).canvasColor,
               child: TecScaffoldWrapper(
-                child: Scaffold(
-                  // resizeToAvoidBottomInset: false,
-                  floatingActionButton: TecFab(),
-                  body: SafeArea(
-                      left: false,
-                      right: false,
-                      bottom: false,
-                      child:
-                          BlocBuilder<ViewManagerBloc, ViewManagerState>(builder: (context, state) {
-                        return ViewManagerWidget(state: state);
-                      })),
-                ),
+                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(builder: (context, state) {
+                  return Scaffold(
+                      // resizeToAvoidBottomInset: false,
+                      floatingActionButton: TecFab(state.views.first),
+                      body: SafeArea(
+                          left: false,
+                          right: false,
+                          bottom: false,
+                          child: ViewManagerWidget(state: state)));
+                }),
               ),
             )));
   }

@@ -201,8 +201,8 @@ class FABIcon {
 }
 
 class TecFab extends StatelessWidget {
-  // final ViewState state;
-  const TecFab();
+  final ViewState state;
+  const TecFab(this.state);
   @override
   Widget build(BuildContext context) {
     // void _onSwitchViews(ViewManagerBloc vmBloc, int viewUid, ViewState view) {
@@ -218,10 +218,7 @@ class TecFab extends StatelessWidget {
     //   }
     // }
 
-    List<FABIcon> offScreenViews(
-      BuildContext menuContext,
-    ) {
-      //  int viewUid) {
+    List<FABIcon> offScreenViews(BuildContext menuContext, int viewUid) {
       // ignore: close_sinks
       final vmBloc = menuContext.viewManager;
       final vm = ViewManager.shared;
@@ -248,7 +245,7 @@ class TecFab extends StatelessWidget {
     return ExpandableFAB(
       icons: offScreenViews(
         context,
-        // context.viewManager.indexOfView(state.uid),
+        context.viewManager.indexOfView(state.uid),
       ),
       backgroundColor: tecartaBlue,
       mainIcon: TecIcons.tecartabiblelogo,
