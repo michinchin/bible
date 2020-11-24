@@ -168,7 +168,9 @@ class SheetIconButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        // customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         onTap: onPressed,
         child: Column(
           mainAxisSize: MainAxisSize.min,
