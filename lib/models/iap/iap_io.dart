@@ -44,7 +44,12 @@ class InAppPurchases {
   StreamSubscription<List<PurchaseDetails>> _subscription;
 
   Future<ProductDetails> detailsWithProduct(String productId) async {
-    final response = await InAppPurchaseConnection.instance.queryProductDetails({productId});
+    ProductDetailsResponse response;
+    try {
+      response = await InAppPurchaseConnection.instance.queryProductDetails({productId});
+    } catch (e) {
+      tec.dmPrint('InAppPurchases detailsWithProduct($productId) error: $e');
+    }
     return (response?.productDetails?.isEmpty ?? true) ? null : response.productDetails.first;
   }
 

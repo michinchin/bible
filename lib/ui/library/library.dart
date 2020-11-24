@@ -20,10 +20,23 @@ import 'volumes_filter_sheet.dart';
 
 export 'volumes_bloc.dart' show VolumesFilter;
 
+///
+/// Shows the Library, and if [initialTabPrefix] is provided, the Library
+/// is opened to the tab that starts with [initialTabPrefix].
+///
 void showLibrary(BuildContext context, {String initialTabPrefix}) {
   _showLibrary(context: context, initialTabPrefix: initialTabPrefix);
 }
 
+///
+/// Shows the Library with the given [title] and returns the ID of the
+/// Volume that was selected, or `null` if the Library is closed without
+/// a volume having been selected.
+///
+/// If [selectedVolume] is not null, the Library is opened to the tab that
+/// contains the Volume, and if [scrollToSelectedVolume] is `true` (the
+/// default), the Volume is auto-scrolled into view.
+///
 Future<int> selectVolumeInLibrary(
   BuildContext context, {
   String title,
@@ -47,6 +60,10 @@ Future<int> selectVolumeInLibrary(
   );
 }
 
+///
+/// Shows the Library with the given [title] and returns the list of the IDs
+/// of Volumes that were selected, if any.
+///
 Future<List<int>> selectVolumesInLibrary(
   BuildContext context, {
   String title,
@@ -64,6 +81,18 @@ Future<List<int>> selectVolumesInLibrary(
   );
 }
 
+///
+/// Pushes a `VolumeDetail` view for the given [volume] on the `Navigator` of
+/// the current [context].
+///
+void showDetailViewForVolume(BuildContext context, Volume volume) {
+  Navigator.of(context)
+      .push<void>(MaterialPageRoute(builder: (context) => VolumeDetail(volume: volume)));
+}
+
+///
+/// The [title], [filter], and [prefsKey] for a Library tab.
+///
 @immutable
 class LibraryTab {
   final String title;
@@ -92,7 +121,7 @@ Future<T> _showLibrary<T extends Object>({
     useRootNavigator: true,
     padding: EdgeInsets.zero,
     maxWidth: 500,
-    maxHeight: (MediaQuery.of(context)?.size?.height ?? 700) - 40,
+    maxHeight: math.max(500.0, (MediaQuery.of(context)?.size?.height ?? 700) - 40),
     makeScrollable: false,
     builder: (context) => Navigator(
       onGenerateRoute: (settings) => TecPageRoute<dynamic>(
@@ -211,17 +240,25 @@ class _LibraryScaffoldState extends State<_LibraryScaffold> {
     );
   }
 
-  Widget _widgetFromTab(LibraryTab t) => _VolumesView(
-        filter: t.filter,
-        kvsKey: t.prefsKey,
-        selectedVolumes: _selectedVolumes,
-        scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
-        allowMultipleSelections: widget.allowMultipleSelections,
-        onTapVolume: widget.whenTappedPopWithVolumeId
-            ? (id) {
-                Navigator.of(context, rootNavigator: true).maybePop<int>(id);
-              }
-            : null,
+  Widget _widgetFromTab(LibraryTab t) => BlocProvider<VolumesBloc>(
+        create: (context) => VolumesBloc(
+          key: tec.isNullOrEmpty(t.prefsKey) ? null : '_library_${t.prefsKey}',
+          kvStore:
+              tec.isNullOrEmpty(t.prefsKey) ? null : tec.MemoryKVStore.shared, // tec.Prefs.shared,
+          defaultFilter: t.filter,
+        )..refresh(),
+        child: BlocBuilder<VolumesBloc, VolumesState>(
+          builder: (context, state) => _VolumesList(
+            selectedVolumes: _selectedVolumes,
+            scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
+            allowMultipleSelections: widget.allowMultipleSelections,
+            onTapVolume: widget.whenTappedPopWithVolumeId
+                ? (id) {
+                    Navigator.of(context, rootNavigator: true).maybePop<int>(id);
+                  }
+                : null,
+          ),
+        ),
       );
 
   PreferredSizeWidget _appBar({PreferredSizeWidget bottom}) => MinHeightAppBar(
@@ -252,51 +289,11 @@ class _LibraryScaffoldState extends State<_LibraryScaffold> {
       );
 }
 
-typedef _TappedVolumeFunc = void Function(int volume);
-
-class _VolumesView extends StatelessWidget {
-  final VolumesFilter filter;
-  final String kvsKey;
-  final Set<int> selectedVolumes;
-  final bool scrollToSelectedVolumes;
-  final bool allowMultipleSelections;
-  final _TappedVolumeFunc onTapVolume;
-
-  const _VolumesView({
-    Key key,
-    this.filter,
-    this.kvsKey,
-    this.selectedVolumes = const {},
-    this.scrollToSelectedVolumes = true,
-    this.allowMultipleSelections = false,
-    this.onTapVolume,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider<VolumesBloc>(
-      create: (context) => VolumesBloc(
-        key: tec.isNullOrEmpty(kvsKey) ? null : '_library_$kvsKey',
-        kvStore: tec.isNullOrEmpty(kvsKey) ? null : tec.MemoryKVStore.shared, // tec.Prefs.shared,
-        defaultFilter: filter,
-      )..refresh(),
-      child: BlocBuilder<VolumesBloc, VolumesState>(
-        builder: (context, state) => _VolumesList(
-          selectedVolumes: selectedVolumes,
-          scrollToSelectedVolumes: scrollToSelectedVolumes,
-          allowMultipleSelections: allowMultipleSelections,
-          onTapVolume: onTapVolume,
-        ),
-      ),
-    );
-  }
-}
-
 class _VolumesList extends StatefulWidget {
   final Set<int> selectedVolumes;
   final bool scrollToSelectedVolumes;
   final bool allowMultipleSelections;
-  final _TappedVolumeFunc onTapVolume;
+  final void Function(int volume) onTapVolume;
 
   const _VolumesList({
     Key key,
@@ -313,7 +310,7 @@ class _VolumesList extends StatefulWidget {
 class _VolumesListState extends State<_VolumesList> {
   TextEditingController _textEditingController;
   final _scrollController = ItemScrollController();
-  Timer _debounce;
+  Timer _debounceTimer;
   bool _scrollToVolume;
 
   @override
@@ -352,15 +349,15 @@ class _VolumesListState extends State<_VolumesList> {
   void dispose() {
     _textEditingController?.removeListener(_searchListener);
     _textEditingController?.dispose();
-    _debounce?.cancel();
-    _debounce = null;
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
     super.dispose();
   }
 
   void _searchListener() {
     if (!mounted) return;
-    if (_debounce?.isActive ?? false) _debounce.cancel();
-    _debounce = Timer(
+    if (_debounceTimer?.isActive ?? false) _debounceTimer.cancel();
+    _debounceTimer = Timer(
       const Duration(milliseconds: 300),
       () {
         if (mounted) {
@@ -393,64 +390,62 @@ class _VolumesListState extends State<_VolumesList> {
     final textScaleFactor = textScaleFactorWith(context);
     final padding = (12.0 * textScaleFactor).roundToDouble();
 
-    return Column(
-      children: [
-        TecSearchField(
-          padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
-          textEditingController: _textEditingController,
-          onSubmit: (s) => _searchListener(),
-          suffixIcon: showFilter
-              ? IconButton(
-                  tooltip: 'filters',
-                  icon: const Icon(Icons.filter_list),
-                  onPressed: () => showVolumesFilterSheet(context))
-              : null,
-        ),
-        Expanded(
-          child: Scrollbar(
-            child: ScrollablePositionedList.builder(
-              padding: MediaQuery.of(context)?.padding,
-              itemScrollController: _scrollController,
-              itemCount: bloc.state.volumes.length,
-              itemBuilder: (context, index) {
-                final volume = bloc.state.volumes[index];
-                return BlocBuilder<DownloadsBloc, DownloadsState>(
-                  buildWhen: (previous, current) =>
-                      previous.items[volume.id] != current.items[volume.id],
-                  builder: (context, downloads) {
-                    return VolumeCard(
-                      isCompact: widget.onTapVolume != null || widget.allowMultipleSelections,
-                      volume: volume,
-                      trailing: !widget.allowMultipleSelections
-                          ? _VolumeActionButton(volume: volume)
-                          : Checkbox(
-                              value: widget.selectedVolumes.contains(volume.id),
-                              onChanged: (checked) => _toggle(volume.id),
-                            ),
-                      onTap: widget.onTapVolume != null || widget.allowMultipleSelections
-                          ? () {
-                              if (widget.allowMultipleSelections) {
-                                _toggle(volume.id);
-                              } else {
-                                widget.onTapVolume(volume.id);
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          TecSearchField(
+            padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
+            textEditingController: _textEditingController,
+            onSubmit: (s) => _searchListener(),
+            suffixIcon: showFilter
+                ? IconButton(
+                    tooltip: 'filters',
+                    icon: const Icon(Icons.filter_list),
+                    onPressed: () => showVolumesFilterSheet(context))
+                : null,
+          ),
+          Expanded(
+            child: Scrollbar(
+              child: ScrollablePositionedList.builder(
+                padding: MediaQuery.of(context)?.padding,
+                itemScrollController: _scrollController,
+                itemCount: bloc.state.volumes.length,
+                itemBuilder: (context, index) {
+                  final volume = bloc.state.volumes[index];
+                  return BlocBuilder<DownloadsBloc, DownloadsState>(
+                    buildWhen: (previous, current) =>
+                        previous.items[volume.id] != current.items[volume.id],
+                    builder: (context, downloads) {
+                      return VolumeCard(
+                        isCompact: widget.onTapVolume != null || widget.allowMultipleSelections,
+                        volume: volume,
+                        trailing: !widget.allowMultipleSelections
+                            ? _VolumeActionButton(volume: volume)
+                            : Checkbox(
+                                value: widget.selectedVolumes.contains(volume.id),
+                                onChanged: (checked) => _toggle(volume.id),
+                              ),
+                        onTap: widget.onTapVolume != null || widget.allowMultipleSelections
+                            ? () {
+                                if (widget.allowMultipleSelections) {
+                                  _toggle(volume.id);
+                                } else {
+                                  widget.onTapVolume(volume.id);
+                                }
                               }
-                            }
-                          : () => showVolumeDetailView(context, volume),
-                    );
-                  },
-                );
-              },
+                            : () => showDetailViewForVolume(context, volume),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
-}
-
-void showVolumeDetailView(BuildContext context, Volume volume) {
-  Navigator.of(context)
-      .push<void>(MaterialPageRoute(builder: (context) => VolumeDetail(volume: volume)));
 }
 
 class _VolumeActionButton extends StatelessWidget {
@@ -484,7 +479,7 @@ class _VolumeActionButton extends StatelessWidget {
           icon: const Icon(Icons.check_circle),
           iconSize: 32,
           color: Colors.green,
-          onPressed: () => showVolumeDetailView(context, volume));
+          onPressed: () => showDetailViewForVolume(context, volume));
     } else if (item == null ||
         item.status == DownloadStatus.undefined ||
         item.status == DownloadStatus.failed ||
@@ -502,7 +497,7 @@ class _VolumeActionButton extends StatelessWidget {
             icon: Icon(platformAwareMoreIcon(context)),
             iconSize: 32,
             color: color,
-            onPressed: () => showVolumeDetailView(context, volume));
+            onPressed: () => showDetailViewForVolume(context, volume));
       }
     } else if (item.status == DownloadStatus.running) {
       return Stack(
