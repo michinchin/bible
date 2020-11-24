@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class TecSearchField extends StatefulWidget implements PreferredSizeWidget {
   final void Function(String) onSubmit;
   final TextEditingController textEditingController;
+  final FocusNode focusNode;
   final Widget suffixIcon;
   final EdgeInsets padding;
 
@@ -11,12 +12,13 @@ class TecSearchField extends StatefulWidget implements PreferredSizeWidget {
     Key key,
     this.onSubmit,
     this.textEditingController,
+    this.focusNode,
     this.suffixIcon,
     this.padding,
   }) : super(key: key);
 
   @override
-  Size get preferredSize => AppBar().preferredSize;
+  Size get preferredSize => Size.fromHeight(AppBar().preferredSize.height + 12.0);
 
   @override
   _TecSearchFieldState createState() => _TecSearchFieldState();
@@ -45,6 +47,7 @@ class _TecSearchFieldState extends State<TecSearchField> {
         child: Stack(
           children: <Widget>[
             TextField(
+              focusNode: widget.focusNode,
               autocorrect: false,
               controller: widget.textEditingController,
               decoration: InputDecoration(

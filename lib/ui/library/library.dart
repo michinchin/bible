@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -309,14 +310,17 @@ class _VolumesList extends StatefulWidget {
 
 class _VolumesListState extends State<_VolumesList> {
   TextEditingController _textEditingController;
+  FocusNode _focusNode;
   final _scrollController = ItemScrollController();
   Timer _debounceTimer;
   bool _scrollToVolume;
+  bool _searchFieldHasFocus = false;
 
   @override
   void initState() {
     super.initState();
     _textEditingController = TextEditingController()..addListener(_searchListener);
+    _focusNode = FocusNode()..addListener(_focusNodeListener);
     _scrollToVolume = widget.scrollToSelectedVolumes && widget.selectedVolumes.isNotEmpty;
     if (_scrollToVolume) _scrollToVolumeAfterBuild();
   }
@@ -349,8 +353,15 @@ class _VolumesListState extends State<_VolumesList> {
   void dispose() {
     _textEditingController?.removeListener(_searchListener);
     _textEditingController?.dispose();
+    _textEditingController = null;
+
+    _focusNode?.removeListener(_focusNodeListener);
+    _focusNode?.dispose();
+    _focusNode = null;
+
     _debounceTimer?.cancel();
     _debounceTimer = null;
+
     super.dispose();
   }
 
@@ -372,6 +383,15 @@ class _VolumesListState extends State<_VolumesList> {
     );
   }
 
+  void _focusNodeListener() {
+    if (!mounted) return;
+    final hasFocus = (_focusNode?.hasFocus ?? false);
+    if (_searchFieldHasFocus != hasFocus) {
+      if (!hasFocus) _textEditingController?.clear();
+      setState(() => _searchFieldHasFocus = hasFocus);
+    }
+  }
+
   void _refresh([VoidCallback fn]) {
     if (mounted) setState(fn ?? () {});
   }
@@ -390,20 +410,68 @@ class _VolumesListState extends State<_VolumesList> {
     final textScaleFactor = textScaleFactorWith(context);
     final padding = (12.0 * textScaleFactor).roundToDouble();
 
+    final showSearch = _searchFieldHasFocus;
+    const animationDuration = Duration(milliseconds: 300);
+    final topBarHeight = AppBar().preferredSize.height + 12.0;
+
+    final barTextColor =
+        Theme.of(context).brightness == Brightness.light ? Colors.grey[800] : Colors.grey[300];
+
     return SafeArea(
       bottom: false,
       child: Column(
         children: [
-          TecSearchField(
-            padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
-            textEditingController: _textEditingController,
-            onSubmit: (s) => _searchListener(),
-            suffixIcon: showFilter
-                ? IconButton(
-                    tooltip: 'filters',
-                    icon: const Icon(Icons.filter_list),
-                    onPressed: () => showVolumesFilterSheet(context))
-                : null,
+          Stack(
+            children: [
+              AnimatedOpacity(
+                duration: animationDuration,
+                opacity: showSearch ? 0 : 1,
+                // height: showSearch ? 0 : topBarHeight,
+                child: IgnorePointer(
+                  ignoring: showSearch,
+                  child: Row(
+                    children: [
+                      SizedBox(width: padding, height: topBarHeight),
+                      IconButton(
+                          tooltip: 'search',
+                          icon: const Icon(Icons.search),
+                          onPressed: () => _focusNode.requestFocus()),
+                      Theme(
+                        data: Theme.of(context).copyWith(accentColor: barTextColor),
+                        child: TecPopupMenuButton<int>(
+                          title: '',
+                          values: {0: 'Title ↓', 1: 'Recent ↓'} as LinkedHashMap<int, String>,
+                          currentValue: 0,
+                          defaultValue: 0,
+                          defaultName: 'Any',
+                          onSelectValue: (value) {},
+                        ),
+                      ),
+                      Expanded(child: Container()),
+                      if (showFilter)
+                        IconButton(
+                            tooltip: 'filters',
+                            icon: const Icon(Icons.filter_list),
+                            onPressed: () => showVolumesFilterSheet(context)),
+                    ],
+                  ),
+                ),
+              ),
+              AnimatedOpacity(
+                duration: animationDuration,
+                opacity: showSearch ? 1 : 0,
+                // height: showSearch ? topBarHeight : 0,
+                child: IgnorePointer(
+                  ignoring: !showSearch,
+                  child: TecSearchField(
+                    padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
+                    textEditingController: _textEditingController,
+                    focusNode: _focusNode,
+                    onSubmit: (s) => _searchListener(),
+                  ),
+                ),
+              ),
+            ],
           ),
           Expanded(
             child: Scrollbar(
