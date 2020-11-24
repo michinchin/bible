@@ -9,7 +9,7 @@ import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/notifications/notifications_model.dart';
-import '../sheet/snap_sheet.dart';
+import 'expandable_fab.dart';
 import 'votd_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -58,36 +58,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return MultiBlocProvider(
-      providers: [
-        BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
-        BlocProvider<SelectionCmdBloc>(create: (context) => SelectionCmdBloc()),
-        BlocProvider<SheetManagerBloc>(create: (context) => SheetManagerBloc()),
-      ],
-      child: TecSystemUiOverlayWidget(
-        AppSettings.shared.overlayStyle(context),
-        child: Container(
-          color: Theme.of(context).canvasColor,
-          child: TecScaffoldWrapper(
-            child: Scaffold(
-              // resizeToAvoidBottomInset: false,
-              body: SafeArea(
-                left: false,
-                right: false,
-                bottom: false,
-                child: Stack(children: [
-                  BlocBuilder<ViewManagerBloc, ViewManagerState>(
-                    builder: (context, state) {
-                      return ViewManagerWidget(state: state);
-                    },
-                  ),
-                  SnapSheet(),
-                ]),
+        providers: [
+          BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
+          BlocProvider<SelectionCmdBloc>(create: (context) => SelectionCmdBloc()),
+          BlocProvider<SheetManagerBloc>(create: (context) => SheetManagerBloc()),
+        ],
+        child: TecSystemUiOverlayWidget(AppSettings.shared.overlayStyle(context),
+            child: Container(
+              color: Theme.of(context).canvasColor,
+              child: TecScaffoldWrapper(
+                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(builder: (context, state) {
+                  return Scaffold(
+                      // resizeToAvoidBottomInset: false,
+                      floatingActionButton: TecFab(state.views.first),
+                      body: SafeArea(
+                          left: false,
+                          right: false,
+                          bottom: false,
+                          child: ViewManagerWidget(state: state)));
+                }),
               ),
-            ),
-          ),
-        ),
-      ),
-    );
+            )));
   }
 }
 

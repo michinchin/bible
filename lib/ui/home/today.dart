@@ -1,3 +1,4 @@
+import 'package:bible/ui/common/tec_modal_popup_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -29,7 +30,7 @@ Future<void> showVotdFromNotification(BuildContext context, DateTime date) async
     await showVotdScreen(context, votds.forDateTime(date));
   } else {
     unawaited(showAllVotd(context, votds, scrollToDateTime: date));
-    unawaited(showVotdScreen(context, votds.forDateTime(date)));
+    await showVotdScreen(context, votds.forDateTime(date));
   }
 }
 
@@ -67,9 +68,14 @@ class _TodayState extends State<Today> {
         // child: DefaultTabController(
         // length: tabs.length,
         child: Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context).pop(),
+        backgroundColor: Theme.of(context).cardColor,
+        child: const Icon(TecIcons.tecartabiblelogo, color: tecartaBlue),
+      ),
       appBar: MinHeightAppBar(
         appBar: AppBar(
-          // automaticallyImplyLeading: false,
+          automaticallyImplyLeading: false,
           centerTitle: false,
           title: const Text('Today'),
           actions: [
