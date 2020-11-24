@@ -138,6 +138,7 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
   }
 
   Widget closeFab() => FloatingActionButton(
+        mini: true,
         backgroundColor: widget.backgroundColor,
         child: AnimatedBuilder(
             animation: _controller,
@@ -146,6 +147,7 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
                   alignment: FractionalOffset.center,
                   child: Icon(
                     _controller.isDismissed ? widget.mainIcon : Icons.close,
+                    size: 15,
                     color: Theme.of(context).cardColor,
                   ),
                 )),
@@ -177,12 +179,10 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
         alignment: screenReaderOn ? Alignment.bottomRight : null,
         padding: screenReaderOn ? const EdgeInsets.only(bottom: 30) : null,
         child: FloatingActionButton(
+            mini: true,
             elevation: 0,
             backgroundColor: widget.backgroundColor,
-            child: Icon(
-              widget.mainIcon,
-              color: Colors.white,
-            ),
+            child: Icon(widget.mainIcon, color: Colors.white, size: 15),
             onPressed: () {
               _insertOverlayEntry();
               _controller.forward();

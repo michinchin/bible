@@ -70,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: BlocBuilder<ViewManagerBloc, ViewManagerState>(builder: (context, state) {
                   return Scaffold(
                       // resizeToAvoidBottomInset: false,
+                      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
                       floatingActionButton: TecFab(state.views.first),
                       body: SafeArea(
                           left: false,
