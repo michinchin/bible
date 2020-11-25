@@ -1,9 +1,9 @@
+import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import 'tec_dialog.dart';
 import 'tec_tab_indicator.dart';
 
 export 'tec_dialog.dart';
@@ -155,8 +155,7 @@ extension AppExtOnThemeData on ThemeData {
   /// Returns a copy of this theme with app customizations.
   ///
   ThemeData copyWithAppTheme() {
-    final bodyColor =
-        brightness == Brightness.light ? Colors.grey[800] : const Color(0xFFBBBBBB);
+    final bodyColor = brightness == Brightness.light ? Colors.grey[800] : const Color(0xFFBBBBBB);
 
     return copyWith(
       accentColor: brightness == Brightness.light ? accentColor : Colors.blue,
@@ -320,3 +319,15 @@ class TecTextStyle extends TextStyle {
           height: height,
         );
 }
+
+Future<dynamic> showScreen<T>(
+        {@required BuildContext context,
+        @required Widget Function(BuildContext) builder,
+        bool useRootNavigator = true}) =>
+    showTecDialog<T>(
+        context: context,
+        useRootNavigator: useRootNavigator,
+        padding: EdgeInsets.zero,
+        maxWidth: 500,
+        maxHeight: 600,
+        builder: builder);
