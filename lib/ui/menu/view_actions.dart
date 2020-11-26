@@ -43,7 +43,7 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
           insets: vmBloc.insetsOfView(state.uid),
           alignment: Alignment.topRight,
           minWidth: 125,
-          menuItemsBuilder: (menuContext) => _buildMenuItemsForViewWithState(
+          menuItemsBuilder: (menuContext) => buildMenuItemsForViewWithState(
             state,
             context: context,
             menuContext: menuContext,
@@ -52,15 +52,16 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
       },
     ),
     if (isTopRightView)
-      IconButton(
-        icon: const Icon(SFSymbols.person_crop_circle),
-        tooltip: 'Main Menu',
-        onPressed: () => showMainMenu(context),
-      ),
+      const SizedBox(width: 40),
+      // IconButton(
+      //   icon: const Icon(SFSymbols.person_crop_circle),
+      //   tooltip: 'Main Menu',
+      //   onPressed: () => showMainMenu(context),
+      // ),
   ];
 }
 
-List<TableRow> _buildMenuItemsForViewWithState(
+List<TableRow> buildMenuItemsForViewWithState(
   ViewState state, {
   BuildContext context,
   BuildContext menuContext,

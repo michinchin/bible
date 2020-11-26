@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bloc_test/bloc_test.dart';
@@ -15,12 +15,25 @@ class ViewableTest extends Viewable {
   }
 
   @override
+  Widget floatingTitleBuilder(BuildContext context, ViewState state, Size size) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: double.infinity, minHeight: double.infinity),
+      color: Colors.red,
+    );
+  }
+
+  @override
   String menuTitle({BuildContext context, ViewState state}) => 'test';
 
   @override
   Future<ViewData> dataForNewView(
           {BuildContext context, int currentViewId, Map<String, dynamic> options}) =>
       Future.value(const ViewData());
+
+  @override
+  ViewDataBloc createViewDataBloc(BuildContext context, ViewState state) {
+    return ViewDataBloc(context.viewManager, state.uid, ViewData.fromContext(context, state.uid));
+  }
 }
 
 void main() {

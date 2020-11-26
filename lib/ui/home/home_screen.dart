@@ -9,6 +9,7 @@ import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/notifications/notifications_model.dart';
+import '../menu/main_menu.dart';
 import 'expandable_fab.dart';
 import 'votd_screen.dart';
 
@@ -58,28 +59,50 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return MultiBlocProvider(
-        providers: [
-          BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
-          BlocProvider<SelectionCmdBloc>(create: (context) => SelectionCmdBloc()),
-          BlocProvider<SheetManagerBloc>(create: (context) => SheetManagerBloc()),
-        ],
-        child: TecSystemUiOverlayWidget(AppSettings.shared.overlayStyle(context),
-            child: Container(
-              color: Theme.of(context).canvasColor,
-              child: TecScaffoldWrapper(
-                child: BlocBuilder<ViewManagerBloc, ViewManagerState>(builder: (context, state) {
-                  return Scaffold(
-                      // resizeToAvoidBottomInset: false,
-                      floatingActionButton: TecFab(state.views.first),
-                      body: SafeArea(
-                          left: false,
-                          right: false,
-                          bottom: false,
-                          child: ViewManagerWidget(state: state)));
-                }),
-              ),
-            )));
+      providers: [
+        BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
+        BlocProvider<SelectionCmdBloc>(create: (context) => SelectionCmdBloc()),
+        BlocProvider<SheetManagerBloc>(create: (context) => SheetManagerBloc()),
+      ],
+      child: TecSystemUiOverlayWidget(
+        AppSettings.shared.overlayStyle(context),
+        child: TecScaffoldWrapper(
+          child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+            builder: (context, state) {
+              return Scaffold(
+                // resizeToAvoidBottomInset: false,
+                floatingActionButton: TecFab(state.views.first),
+                body: Container(
+                  color: Theme.of(context).backgroundColor,
+                  child: SafeArea(
+                    left: false,
+                    right: false,
+                    bottom: false,
+                    child: ViewManagerWidget(
+                      state: state,
+                      mainMenuButtonBuilder: (_) => MainMenuFab(),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
+}
+
+class MainMenuFab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => FloatingActionButton(
+        elevation: 4,
+        mini: true,
+        heroTag: null,
+        child: const Icon(Icons.person),
+        backgroundColor: tecartaBlue,
+        onPressed: () => showMainMenu(context),
+      );
 }
 
 // chose either column or stack - making sure 1st child of column is expanded...

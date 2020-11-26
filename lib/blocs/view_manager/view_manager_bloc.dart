@@ -63,15 +63,22 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   final tec.KeyValueStore _kvStore;
   final GlobalKey _globalKey;
 
+  // ignore_for_file: prefer_final_fields
+
+  final _blocs = <int, ViewDataBloc>{};
+  ViewDataBloc dataBlocWithView(int uid) => _blocs[uid];
+
   /// List of ViewRect objects, one for each open view.
-  var _viewRects = <ViewRect>[]; // ignore: prefer_final_fields
-  var _lastBuildHadMaxedView = false; // ignore: prefer_final_fields
+  var _viewRects = <ViewRect>[];
+
+  /// The uid of the previous build's maximized view, or zero if none.
+  var _prevBuildMaxedViewUid = 0;
 
   /// Rows and columns of the open views that fit in the view manager.
-  List<List<ViewState>> _rows = []; // ignore: prefer_final_fields
+  List<List<ViewState>> _rows = [];
 
   /// List of the open views that did not fit in `_rows`.
-  List<ViewState> _overflow = []; // ignore: prefer_final_fields
+  List<ViewState> _overflow = [];
 
   ///
   /// Returns the view manager rect in global coordinates.
@@ -84,13 +91,13 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   /// If we're running on a phone or a small app window, limit number of views to 2.
   ///
   bool get numViewsLimited => _numViewsLimited;
-  var _numViewsLimited = false; // ignore: prefer_final_fields
+  var _numViewsLimited = false;
 
   ///
-  /// Returns the size of the view manager rectangle.
+  /// Returns the size of the view manager view.
   ///
   Size get size => _size;
-  var _size = Size.zero; // ignore: prefer_final_fields
+  var _size = Size.zero;
 
   ///
   /// Is the view manager full of views? True, if another view cannot fit on the screen,
@@ -98,7 +105,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   /// in the case with iPad multitasking, the app window size changes.
   ///
   bool get isFull => _isFull;
-  bool _isFull = false; // ignore: prefer_final_fields
+  bool _isFull = false;
 
   ///
   /// Returns the number of rows currently displayed.
@@ -445,17 +452,22 @@ class ViewRect {
 ///
 class ViewManagerWidget extends StatelessWidget {
   final ViewManagerState state;
+  final WidgetBuilder mainMenuButtonBuilder;
 
-  const ViewManagerWidget({Key key, this.state}) : super(key: key);
+  const ViewManagerWidget({Key key, this.state, this.mainMenuButtonBuilder}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // tec.dmPrint('ViewManagerWidget build()');
-    return LayoutBuilder(
-      builder: (context, constraints) => _VMViewStack(
-        key: context.viewManager?._globalKey,
-        vmState: state,
-        constraints: constraints,
+    return SafeArea(
+      bottom: false,
+      child: LayoutBuilder(
+        builder: (context, constraints) => _VMViewStack(
+          key: context.viewManager?._globalKey,
+          vmState: state,
+          constraints: constraints,
+          mainMenuButtonBuilder: mainMenuButtonBuilder,
+        ),
       ),
     );
   }

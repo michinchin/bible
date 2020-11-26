@@ -25,6 +25,11 @@ class ViewableMarginNote extends Viewable {
       _MarginNoteView(state: state, size: size);
 
   @override
+  Widget floatingTitleBuilder(BuildContext context, ViewState state, Size size) {
+    return Container();
+  }
+
+  @override
   String menuTitle({BuildContext context, ViewState state}) {
     if (state?.uid != null) {
       final json = context.viewManager?.dataWithView(state.uid);
@@ -41,6 +46,11 @@ class ViewableMarginNote extends Viewable {
   Future<ViewData> dataForNewView(
           {BuildContext context, int currentViewId, Map<String, dynamic> options}) =>
       Future.value(const ViewData());
+
+  @override
+  ViewDataBloc createViewDataBloc(BuildContext context, ViewState state) {
+    return ViewDataBloc(context.viewManager, state.uid, ViewData.fromContext(context, state.uid));
+  }
 }
 
 class _MarginNoteView extends StatefulWidget {
@@ -308,9 +318,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
       appBar: MinHeightAppBar(
         appBar: AppBar(
           centerTitle: false,
-          title: (_item == null)
-              ? null
-              : Text(_title),
+          title: (_item == null) ? null : Text(_title),
           leading: (!_editMode)
               ? null
               : IconButton(

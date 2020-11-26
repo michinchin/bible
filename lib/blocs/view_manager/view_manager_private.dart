@@ -1,10 +1,17 @@
 part of 'view_manager_bloc.dart';
 
+const _useFloatingTitles = true;
+
 const bool _showViewPadding = true;
 const _viewPaddingSize = .5;
 const _viewPaddingColorLight = Color(0xffdddddd);
 const _viewPaddingColorDark = Color(0xff222222);
-const _viewResizeAnimationDuration = Duration(milliseconds: 300);
+
+const _viewResizeAnimationDuration = Duration(milliseconds: 500);
+const _viewResizeAnimationCurve = Curves.easeInCubic;
+
+// Copied from flutter/lib/src/material/app_bar.dart
+const double _kMaxTitleTextScaleFactor = 1.34;
 
 ///
 /// Stack of managed views.
@@ -12,8 +19,10 @@ const _viewResizeAnimationDuration = Duration(milliseconds: 300);
 class _VMViewStack extends StatefulWidget {
   final BoxConstraints constraints;
   final ViewManagerState vmState;
+  final WidgetBuilder mainMenuButtonBuilder;
 
-  const _VMViewStack({Key key, this.constraints, this.vmState}) : super(key: key);
+  const _VMViewStack({Key key, this.constraints, this.vmState, this.mainMenuButtonBuilder})
+      : super(key: key);
 
   @override
   _VMViewStackState createState() => _VMViewStackState();
@@ -22,85 +31,106 @@ class _VMViewStack extends StatefulWidget {
 class _VMViewStackState extends State<_VMViewStack> {
   @override
   Widget build(BuildContext context) {
-    final portraitHeight = math.max(widget.constraints.maxWidth, widget.constraints.maxHeight);
-    final portraitWidth = math.min(widget.constraints.maxWidth, widget.constraints.maxHeight);
+    final constraints = widget.constraints;
 
-    final bloc = context.viewManager;
-    assert(bloc != null);
+    final vmBloc = context.viewManager;
+    assert(vmBloc != null);
 
-    if (portraitHeight < 950.0 && portraitWidth < 500) {
-      // This is a phone or small app window, so only allow 2 views.
-      _minSize = math.max(
-          ((math.max(widget.constraints.maxWidth, widget.constraints.maxHeight)) / 2.0)
-              .floorToDouble(),
-          244);
-      bloc?._numViewsLimited = true;
-    } else {
-      // This is a larger window or tablet.
-      _minSize = 300;
-      bloc?._numViewsLimited = false;
+    final sizeChanged = ((vmBloc?._size ?? Size.zero) != constraints.biggest);
+    if (sizeChanged) tec.dmPrint('ViewManager size changed to ${constraints.biggest}');
+
+    vmBloc?._size = constraints.biggest;
+
+    final wasVisibleTextSelected = (vmBloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
+
+    var mqData = MediaQuery.of(context);
+    mqData = mqData.copyWith(
+        textScaleFactor: math.min(mqData.textScaleFactor, _kMaxTitleTextScaleFactor));
+    final floatingTitleHeight = _useFloatingTitles ? mqData.textScaleFactor * 36.0 : 0.0;
+    final topOffset =
+        floatingTitleHeight == 0.0 ? 0.0 : (floatingTitleHeight / 2.0).roundToDouble();
+
+    final rect =
+        Rect.fromLTWH(0, topOffset, constraints.maxWidth, constraints.maxHeight - topOffset);
+
+    {
+      final portraitHeight = math.max(rect.width, rect.height);
+      final portraitWidth = math.min(constraints.maxWidth, constraints.maxHeight);
+      if (portraitHeight < 950.0 && portraitWidth < 500) {
+        // This is a phone or small app window, so only allow 2 views.
+        _minSize = math.max((portraitHeight / 2.0).floorToDouble(), 244 - topOffset);
+        vmBloc?._numViewsLimited = true;
+      } else {
+        // This is a larger window or tablet.
+        _minSize = 300;
+        vmBloc?._numViewsLimited = false;
+      }
     }
 
-    final sizeChanged = ((bloc?._size ?? Size.zero) != widget.constraints.biggest);
-    if (sizeChanged) tec.dmPrint('ViewManager size changed to ${widget.constraints.biggest}');
-
-    bloc?._size = widget.constraints.biggest;
-
-    final wasVisibleTextSelected = (bloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
-
-    // Build and update the rows, which updates `bloc._rows`, `._overflow`, and `._isFull`.
-    final countOfOnScreenViews = bloc?._rows?.totalItems ?? 0;
-    _buildRows(bloc, _Size.ideal, widget.vmState, widget.constraints)..balance(widget.constraints);
-    final countOfOnScreenViewsChanged = (countOfOnScreenViews != (bloc?._rows?.totalItems ?? 0));
+    // Build and update the rows, which updates `vmBloc._rows`, `._overflow`, and `._isFull`.
+    final countOfOnScreenViews = vmBloc?._rows?.totalItems ?? 0;
+    _buildRows(vmBloc, _SizeOpt.ideal, widget.vmState, rect.width, rect.height)
+      ..balance(rect.width);
+    final countOfOnScreenViewsChanged = (countOfOnScreenViews != (vmBloc?._rows?.totalItems ?? 0));
 
     // Is there a maximized view?
     var maximizedView = widget.vmState.views
         .firstWhere((e) => e.uid == widget.vmState.maximizedViewUid, orElse: () => null);
 
-    // tec.dmPrint('_VMViewStack build, maximizedView: ${maximizedView?.uid ?? 'none'}');
+    tec.dmPrint('_VMViewStack build, maximizedView: ${maximizedView?.uid ?? 'none'}');
 
     // Is there a view with keyboard focus?
     var viewWithKeyboardFocus = widget.vmState.views
-        .firstWhere((e) => e.uid == bloc?._viewWithKeyboardFocus, orElse: () => null);
+        .firstWhere((e) => e.uid == vmBloc?._viewWithKeyboardFocus, orElse: () => null);
     if (viewWithKeyboardFocus != null && maximizedView != null) {
       maximizedView = viewWithKeyboardFocus;
       viewWithKeyboardFocus = null;
     }
 
     final thisBuildHasMaxedView = (maximizedView != null);
-    final lastBuildHadMaxedView = bloc?._lastBuildHadMaxedView ?? thisBuildHasMaxedView;
+    final lastBuildHadMaxedView = (vmBloc?._prevBuildMaxedViewUid ?? 0) != 0;
 
     // Build the view widgets.
     final viewRects = <ViewRect>[];
-    final children = bloc?._rows?.toViewWidgetList(
-      widget.constraints,
-      maximizedView,
-      viewWithKeyboardFocus,
-      bloc?._overflow,
-      viewRects,
-      sizeChanged || countOfOnScreenViewsChanged || lastBuildHadMaxedView != thisBuildHasMaxedView
+    final children = vmBloc?._rows?.toViewWidgetList(
+      context: context,
+      constraints: constraints,
+      floatingTitleMQData: mqData,
+      rect: rect,
+      prevBuildMaxedViewUid: vmBloc?._prevBuildMaxedViewUid ?? 0,
+      maximizedView: maximizedView,
+      viewWithKeyboardFocus: viewWithKeyboardFocus,
+      overflowViews: vmBloc?._overflow,
+      rects: viewRects,
+      animationDuration: sizeChanged ||
+              countOfOnScreenViewsChanged ||
+              lastBuildHadMaxedView != thisBuildHasMaxedView
           ? _viewResizeAnimationDuration
           : null,
-      numViewsLimited: bloc?.numViewsLimited ?? true,
-      lastBuildHadMaxedView: lastBuildHadMaxedView,
+      numViewsLimited: vmBloc?.numViewsLimited ?? true,
+      floatingTitleHeight: floatingTitleHeight,
+      mainMenuButtonBuilder: widget.mainMenuButtonBuilder,
     );
-    bloc?._viewRects = viewRects;
-    bloc?._lastBuildHadMaxedView = thisBuildHasMaxedView;
+    vmBloc?._viewRects = viewRects;
+    vmBloc?._prevBuildMaxedViewUid = maximizedView?.uid ?? 0;
 
-    // If this build has a maxed view, but the last one didn't, rebuild again after the
-    // view resize animation finishes -- because, for a nicer and smoother maximize
-    // animation, we only animate the view that is maximized, but after the animation is
-    // finished, we still want to update the size of all the other views, so that if they
-    // are switched to, they are already full screen.)
-    if (thisBuildHasMaxedView && !lastBuildHadMaxedView) {
-      Future.delayed(_viewResizeAnimationDuration, () => setState(() {}));
+    // If this build has a maxed view, but the last one didn't, or vice versa, rebuild
+    // again after the resize animation finishes. Because, for a nicer and smoother
+    // animation, only the view that is maximized or minimized is animated, and after
+    // the animation the other views need to be rebuilt so they are sized and layered
+    // correctly.
+    if (lastBuildHadMaxedView != thisBuildHasMaxedView) {
+      Future.delayed(_viewResizeAnimationDuration, () {
+        tec.dmPrint('_VMViewStack refreshing after maximize/minimize.');
+        setState(() {});
+      });
     }
 
     // If the state of visible selected text changed, call _updateSelectionBloc after the build.
-    final isVisibleTextSelected = (bloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
+    final isVisibleTextSelected = (vmBloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
     if (wasVisibleTextSelected != isVisibleTextSelected) {
       WidgetsBinding.instance
-          .addPostFrameCallback((timeStamp) => bloc?._updateSelectionBloc(context));
+          .addPostFrameCallback((timeStamp) => vmBloc?._updateSelectionBloc(context));
     }
 
     return Theme(
@@ -183,11 +213,11 @@ class _ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
                 ? _viewPaddingColorDark
                 : _viewPaddingColorLight,
             padding: s.isMaximized || (s.rowCount == 1 && s.colCount == 1)
-                ? EdgeInsets.zero
+                ? const EdgeInsets.only(top: _viewPaddingSize)
                 : EdgeInsets.only(
                     left: s.col == 0 ? 0 : _viewPaddingSize,
                     right: s.col == s.colCount - 1 ? 0 : _viewPaddingSize,
-                    top: s.row == 0 ? 0 : _viewPaddingSize,
+                    top: /* s.row == 0 ? 0 : */ _viewPaddingSize,
                     bottom: s.row == s.rowCount - 1 ? 0 : _viewPaddingSize,
                   ),
             child: _navigator(),
@@ -198,16 +228,17 @@ class _ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
 ///
 /// Size options, `minimum` or `ideal`.
 ///
-enum _Size { min, ideal }
+enum _SizeOpt { min, ideal }
 
 ///
 /// Builds the rows of views.
 ///
 List<List<ViewState>> _buildRows(
-  ViewManagerBloc bloc,
-  _Size size,
+  ViewManagerBloc vmBloc,
+  _SizeOpt sizeOpt,
   ViewManagerState state,
-  BoxConstraints constraints,
+  double width,
+  double height,
 ) {
   final rows = <List<ViewState>>[];
   var isFull = false;
@@ -215,12 +246,10 @@ List<List<ViewState>> _buildRows(
     // Add another row?
     if (!isFull &&
         (rows.isEmpty ||
-            rows.last.width(constraints, size) + viewState.width(constraints, size) >
-                constraints.maxWidth)) {
+            rows.last.width(width, sizeOpt) + viewState.width(width, sizeOpt) > width)) {
       // If another row won't fit, set `isFull` to true.
       if (rows.isNotEmpty &&
-          rows.height(constraints, size) + viewState.height(constraints, size) >
-              constraints.maxHeight) {
+          rows.height(height, sizeOpt) + viewState.height(height, sizeOpt) > height) {
         isFull = true;
       }
       rows.add(<ViewState>[]);
@@ -229,15 +258,14 @@ List<List<ViewState>> _buildRows(
   }
 
   // If `isFull`, the last row is the row of off screen views (i.e. overflow).
-  bloc?._overflow = isFull ? rows.removeLast() : [];
-  bloc?._rows = rows;
-  bloc?._isFull = isFull ||
+  vmBloc?._overflow = isFull ? rows.removeLast() : [];
+  vmBloc?._rows = rows;
+  vmBloc?._isFull = isFull ||
       (rows.isNotEmpty &&
-          rows.last.width(constraints, size) + _defaultMinWidth(constraints) >
-              constraints.maxWidth &&
-          rows.height(constraints, size) + _defaultMinHeight(constraints) > constraints.maxHeight);
+          rows.last.width(width, sizeOpt) + _defaultMinWidth(width) > width &&
+          rows.height(height, sizeOpt) + _defaultMinHeight(height) > height);
 
-  // tec.dmPrint('ViewManagerBloc.isFull == ${bloc?.isFull}');
+  // tec.dmPrint('ViewManagerBloc.isFull == ${vmBloc?.isFull}');
 
   return rows;
 }
@@ -245,56 +273,56 @@ List<List<ViewState>> _buildRows(
 const _iPhoneSEHeight = 568.0;
 var _minSize = (_iPhoneSEHeight - 20.0) / 2; // 274
 
-const BoxConstraints _defaultConstraints = BoxConstraints(maxWidth: 320, maxHeight: 480);
+const Size _defaultSize = Size(320, 480);
 
 ///
 /// Returns the minimum width for a view that is never less than _minSize,
 /// otherwise it is the width that will fit at least three columns, or more
 /// if each column has a width of at least 400.
 ///
-double _defaultMinWidth(BoxConstraints constraints) => math.max(
+double _defaultMinWidth(double width) => math.max(
     // Make sure each column's width is not less than _minSize.
     _minSize,
     math.min(
       // Allow more than three columns if each column's width is >= 400.0.
       400.0,
       // The maximum width that will allow three columns.
-      ((constraints ?? _defaultConstraints).maxWidth / 3.0).floor().toDouble(),
+      ((width ?? _defaultSize.width) / 3.0).floor().toDouble(),
     ));
 
 ///
 /// Returns the minimum height for a view that is never less than _minSize and
 /// never greater than the height that allows for more than three rows.
 ///
-double _defaultMinHeight(BoxConstraints constraints) => math.max(
+double _defaultMinHeight(double height) => math.max(
       // Make sure each row's height is not less than _minSize.
       _minSize,
       // The maximum height that will allow three rows.
-      ((constraints ?? _defaultConstraints).maxHeight / 3.0).floor().toDouble(),
+      ((height ?? _defaultSize.height) / 3.0).floor().toDouble(),
     );
 
 ///
 /// ViewState extensions.
 ///
 extension _ExtOnViewState on ViewState {
-  double minWidth(BoxConstraints c) => _defaultMinWidth(c);
-  double minHeight(BoxConstraints c) => _defaultMinHeight(c);
-  double idealWidth(BoxConstraints c) => math.max(preferredWidth ?? 0, minWidth(c));
-  double idealHeight(BoxConstraints c) => math.max(preferredHeight ?? 0, minHeight(c));
-  double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
-  double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
+  double minWidth(double w) => _defaultMinWidth(w);
+  double minHeight(double h) => _defaultMinHeight(h);
+  double idealWidth(double w) => math.max(preferredWidth ?? 0, minWidth(w));
+  double idealHeight(double h) => math.max(preferredHeight ?? 0, minHeight(h));
+  double width(double w, _SizeOpt o) => o == _SizeOpt.min ? minWidth(w) : idealWidth(w);
+  double height(double h, _SizeOpt o) => o == _SizeOpt.min ? minHeight(h) : idealHeight(h);
 }
 
 ///
 /// List<ViewState> extensions.
 ///
 extension _ExtOnListOfViewState on List<ViewState> {
-  double minWidth(BoxConstraints c) => fold(0.0, (t, el) => t + el.minWidth(c));
-  double minHeight(BoxConstraints c) => fold(0.0, (t, el) => math.max(t, el.minHeight(c)));
-  double idealWidth(BoxConstraints c) => fold(0.0, (t, el) => t + el.idealWidth(c));
-  double idealHeight(BoxConstraints c) => fold(0.0, (t, el) => math.max(t, el.idealHeight(c)));
-  double width(BoxConstraints c, _Size s) => s == _Size.min ? minWidth(c) : idealWidth(c);
-  double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
+  double minWidth(double w) => fold(0.0, (t, vs) => t + vs.minWidth(w));
+  double minHeight(double h) => fold(0.0, (t, vs) => math.max(t, vs.minHeight(h)));
+  double idealWidth(double w) => fold(0.0, (t, vs) => t + vs.idealWidth(w));
+  double idealHeight(double h) => fold(0.0, (t, vs) => math.max(t, vs.idealHeight(h)));
+  double width(double w, _SizeOpt o) => o == _SizeOpt.min ? minWidth(w) : idealWidth(w);
+  double height(double h, _SizeOpt o) => o == _SizeOpt.min ? minHeight(h) : idealHeight(h);
   String toDebugString() => '[${map<int>((e) => e.uid).join(', ')}]';
 }
 
@@ -304,25 +332,25 @@ extension _ExtOnListOfViewState on List<ViewState> {
 /// List<List<ViewState>> extensions
 ///
 extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
-  double minHeight(BoxConstraints c) => fold(0.0, (t, el) => t + el.minHeight(c));
-  double idealHeight(BoxConstraints c) => fold(0.0, (t, el) => t + el.idealHeight(c));
-  double height(BoxConstraints c, _Size s) => s == _Size.min ? minHeight(c) : idealHeight(c);
-  int get totalItems => fold(0, (t, el) => t + el.length);
+  double minHeight(double h) => fold(0.0, (t, vs) => t + vs.minHeight(h));
+  double idealHeight(double h) => fold(0.0, (t, vs) => t + vs.idealHeight(h));
+  double height(double h, _SizeOpt o) => o == _SizeOpt.min ? minHeight(h) : idealHeight(h);
+  int get totalItems => fold(0, (t, vs) => t + vs.length);
   int itemsInRow(int row) => row < 0 || row >= length ? 0 : this[row].length;
   int get rowCount => length;
 
   ///
   /// Balances rows of items based on the ideal width of each item.
   ///
-  void balance(BoxConstraints constraints) {
+  void balance(double width) {
     // Balance from the bottom up.
     for (var i = length - 2; i >= 0; i--) {
-      while (_balanceRow(i, constraints)) {
+      while (_balanceRow(i, width)) {
         // Row `i` changed, so we need to rebalance the rows after it.
         // Rebalance from row `i + 1` down, until there a no changes.
         var changed = false;
         for (var j = i + 1; j < length - 1; j++) {
-          if (_balanceRow(j, constraints)) {
+          if (_balanceRow(j, width)) {
             changed = true;
           } else {
             // Stop if there were no changes.
@@ -338,7 +366,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
   /// Balances row `i` with the row after it, based on the ideal width of the
   /// items in the two rows.
   ///
-  bool _balanceRow(int i, BoxConstraints constraints) {
+  bool _balanceRow(int i, double width) {
     assert(i != null && i >= 0 && i + 1 < length);
     if (i + 1 >= length) return false;
 
@@ -348,8 +376,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
     // Keep moving the last item in row `i` to the next row until they are in balance.
     while (row1.length > 1) {
-      if (row2.idealWidth(constraints) + row1.last.idealWidth(constraints) <=
-          row1.idealWidth(constraints)) {
+      if (row2.idealWidth(width) + row1.last.idealWidth(width) <= row1.idealWidth(width)) {
         row2.insert(0, row1.removeLast());
         changed = true;
       } else {
@@ -363,15 +390,20 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
   ///
   /// Returns the positioned view widgets.
   ///
-  List<Widget> toViewWidgetList(
-    BoxConstraints constraints,
-    ViewState maximizedView,
-    ViewState viewWithKeyboardFocus,
-    List<ViewState> overflowViews,
-    List<ViewRect> rects,
-    Duration animationDuration, {
-    bool numViewsLimited = false,
-    bool lastBuildHadMaxedView = true,
+  List<Widget> toViewWidgetList({
+    @required BuildContext context,
+    @required BoxConstraints constraints,
+    @required Rect rect,
+    @required int prevBuildMaxedViewUid, // 0 if none.
+    @required ViewState maximizedView,
+    @required ViewState viewWithKeyboardFocus,
+    @required List<ViewState> overflowViews,
+    @required List<ViewRect> rects,
+    @required Duration animationDuration,
+    @required bool numViewsLimited,
+    @required double floatingTitleHeight,
+    @required MediaQueryData floatingTitleMQData,
+    @required WidgetBuilder mainMenuButtonBuilder,
   }) {
     // Cannot have both a `maximizedView` and a `viewWithKeyboardFocus`.
     assert(maximizedView == null || viewWithKeyboardFocus == null);
@@ -379,61 +411,57 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     // The `rects` list must start out empty.
     assert(rects != null && rects.isEmpty);
 
-    // The Rect for maximized views.
-    final maxedRect = Rect.fromLTWH(0, 0, constraints.maxWidth, constraints.maxHeight);
-
     // Note, `maxedView` will be set to `viewWithKeyboardFocus` if it needs to be auto-maximized.
     var maxedView = maximizedView;
 
-    final yExtraPerRow = math.max(0.0, (constraints.maxHeight - idealHeight(constraints)) / length);
-    var yExtra = yExtraPerRow > 0.0 ? 0.0 : constraints.maxHeight - minHeight(constraints);
+    final yExtraPerRow = math.max(0.0, (rect.height - idealHeight(rect.height)) / length);
+    var yExtra = yExtraPerRow > 0.0 ? 0.0 : rect.height - minHeight(rect.height);
 
     final viewStates = <ViewState>[];
 
     // Loop through all the rows, adding a ViewRect to `rects` for each ViewState in the row.
-    var y = 0.0, r = 0;
+    var y = rect.top, r = 0;
     for (final row in this) {
       var x = 0.0;
 
       double height;
       if (yExtraPerRow > 0.0) {
-        height = row.idealHeight(constraints) + yExtraPerRow;
+        height = row.idealHeight(rect.height) + yExtraPerRow;
       } else {
-        final yDelta = math.min(row.idealHeight(constraints) - row.minHeight(constraints), yExtra);
+        final yDelta = math.min(row.idealHeight(rect.height) - row.minHeight(rect.height), yExtra);
         yExtra -= yDelta;
-        height = row.minHeight(constraints) + yDelta;
+        height = row.minHeight(rect.height) + yDelta;
       }
 
-      final xExtraPerItem =
-          math.max(0.0, (constraints.maxWidth - row.idealWidth(constraints)) / row.length);
-      var xExtra = xExtraPerItem > 0.0 ? 0.0 : constraints.maxWidth - row.minWidth(constraints);
+      final xExtraPerItem = math.max(0.0, (rect.width - row.idealWidth(rect.width)) / row.length);
+      var xExtra = xExtraPerItem > 0.0 ? 0.0 : rect.width - row.minWidth(rect.width);
 
       var c = 0;
       for (final state in row) {
         double width;
         if (xExtraPerItem > 0.0) {
-          width = state.idealWidth(constraints) + xExtraPerItem;
+          width = state.idealWidth(rect.width) + xExtraPerItem;
         } else {
           final xDelta =
-              math.min(state.idealWidth(constraints) - state.minWidth(constraints), xExtra);
+              math.min(state.idealWidth(rect.width) - state.minWidth(rect.width), xExtra);
           xExtra -= xDelta;
-          width = state.minWidth(constraints) + xDelta;
+          width = state.minWidth(rect.width) + xDelta;
         }
 
         // Special case for phone sized screens with 2 views in portrait:
         // Reduce the top view height and increase the bottom view height so
         // with the bottom sheet open they have the same visible height.
-        if (numViewsLimited && length == 2 && row.length == 1 && maxedView == null) {
-          final heightAdjust = (TecScaffoldWrapper.navigationBarPadding < 15.0) ? 31.0 : 41.0;
-          height += (r == 0) ? -heightAdjust : heightAdjust;
-        }
+        // if (numViewsLimited && length == 2 && row.length == 1 && maxedView == null) {
+        //   final heightAdjust = (TecScaffoldWrapper.navigationBarPadding < 15.0) ? 31.0 : 41.0;
+        //   height += (r == 0) ? -heightAdjust : heightAdjust;
+        // }
 
         final isMaxed = maxedView?.uid == state.uid;
         final isVisible = isMaxed || maxedView == null;
-        final rect = (isVisible || !lastBuildHadMaxedView) && !isMaxed
+        final vRect = (isVisible || prevBuildMaxedViewUid == 0) && !isMaxed
             ? Rect.fromLTWH(x, y, width, height)
-            : maxedRect;
-        rects.add(ViewRect(uid: state.uid, isVisible: isVisible, row: r, column: c, rect: rect));
+            : rect;
+        rects.add(ViewRect(uid: state.uid, isVisible: isVisible, row: r, column: c, rect: vRect));
         viewStates.add(state);
 
         c++;
@@ -455,13 +483,12 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
           // Update all existing rects, now that a view is maximized.
           for (var i = 0; i < rects.length; i++) {
-            rects[i] = rects[i].copyWith(isVisible: false, rect: maxedRect);
+            rects[i] = rects[i].copyWith(isVisible: false, rect: rect);
           }
         }
 
         final isVisible = maxedView?.uid == state.uid;
-        rects.add(
-            ViewRect(uid: state.uid, isVisible: isVisible, row: r, column: c, rect: maxedRect));
+        rects.add(ViewRect(uid: state.uid, isVisible: isVisible, row: r, column: c, rect: rect));
         viewStates.add(state);
         c++;
       }
@@ -469,9 +496,16 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
     // Create the list of widgets, one for each ViewRect in `rects`.
     var widgets = <Widget>[];
+    final floatingTitles = <Widget>[];
 
     // The maximized view widget, if there is one, must get added to the `widgets` list last.
     Widget maxedViewWidget;
+    Widget maxedFloatingTitleWidget;
+
+    final hasOrHadMaxedView = (maxedView != null || prevBuildMaxedViewUid != 0);
+
+    // ignore: close_sinks
+    final vmBloc = context.viewManager;
 
     for (var i = 0; i < rects.length; i++) {
       final vr = rects[i];
@@ -487,40 +521,103 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
       final mvs = ManagedViewState(
           constraints, state, viewSize, i, vr.row, vr.column, rowCount, colCount, isMaxed);
 
+      final isVisible = (vr.isVisible || (vr.row < rowCount && maxedView != null));
+      final isOrWasMaxed = (isMaxed || (maxedView == null && prevBuildMaxedViewUid == vr.uid));
+      final animate = vr.isVisible && (!hasOrHadMaxedView || isOrWasMaxed);
+
+      vmBloc._blocs[state.uid] ??= ViewManager.shared._createViewDataBloc(context, state);
+
       final widget = AnimatedPositioned(
         // We need a key so when views are removed or reordered the element tree stays in sync.
         key: ValueKey(vr.uid),
-        duration: (vr.isVisible ? animationDuration : null) ?? Duration.zero,
+        duration: (animate ? animationDuration : null) ?? Duration.zero,
+        curve: _viewResizeAnimationCurve,
         left: vr.rect.left,
         top: vr.rect.top,
         width: vr.rect.width,
         height: vr.rect.height,
-        // child: AnimatedOpacity(
-        //   opacity: vr.isVisible ? 1 : 0,
-        //   duration: const Duration(milliseconds: 800),
-        //   child: IgnorePointer(
-        //     ignoring: !vr.isVisible,
-        child: BlocProvider(
-          create: (context) => ManagedViewBloc(mvs),
-          child: _ManagedViewNavigator(mvs),
+        child: Opacity(
+          opacity: isVisible ? 1 : 0,
+          child: BlocProvider(
+            create: (context) => ManagedViewBloc(mvs),
+            child: _ManagedViewNavigator(mvs),
+          ),
         ),
-        //   ),
-        // ),
       );
 
-      if (isMaxed) {
+      Widget floatingTitle;
+      if (floatingTitleHeight > 0) {
+        final isTopRight = vr.row == 0 && vr.column == itemsInRow(vr.row) - 1;
+        final sideInset = floatingTitleHeight * 1.25;
+        final size = Size(vr.rect.width - (isTopRight ? sideInset * 2 : 0.0), floatingTitleHeight);
+        floatingTitle = AnimatedPositioned(
+          key: ValueKey(-vr.uid),
+          duration: (animate ? animationDuration : null) ?? Duration.zero,
+          curve: _viewResizeAnimationCurve,
+          left: vr.rect.left + (isTopRight ? sideInset : 0.0),
+          top: vr.rect.top - (floatingTitleHeight / 2.0),
+          width: size.width,
+          height: size.height,
+          child: Opacity(
+            opacity: isVisible ? 1 : 0,
+            child: MediaQuery(
+              data: floatingTitleMQData,
+              child: ViewManager.shared._buildFloatingTitle(context, state, size),
+            ),
+          ),
+        );
+      }
+
+      if (isOrWasMaxed) {
         // The maximized view widget, if there is one, must get added to the `widgets` list last.
         maxedViewWidget = widget;
+        maxedFloatingTitleWidget = floatingTitle;
       } else {
         widgets.add(widget);
+        if (floatingTitle != null && vr.isVisible) floatingTitles.add(floatingTitle);
       }
     }
 
     // Reverse the widget list because Stack children are ordered bottom to top.
-    widgets = widgets.reversed.toList();
+    widgets = widgets.reversed.toList()..addAll(floatingTitles.reversed);
+
+    // This adds a translucent barrier over the non-maximized views.
+    // widgets.add(
+    //   Positioned(
+    //     key: const ValueKey('barrier'),
+    //     left: rect.left,
+    //     top: rect.top,
+    //     width: rect.width,
+    //     height: rect.height,
+    //     child: AnimatedOpacity(
+    //       opacity: maxedView == null ? 0 : 0.25,
+    //       duration: animationDuration ?? Duration.zero,
+    //       curve: _viewResizeAnimationCurve,
+    //       child: IgnorePointer(child: Container(color: Colors.black)),
+    //     ),
+    //   ),
+    // );
 
     // The maximized view widget, if there is one, must get added to the `widgets` list last.
     if (maxedViewWidget != null) widgets.add(maxedViewWidget);
+    if (maxedFloatingTitleWidget != null) widgets.add(maxedFloatingTitleWidget);
+
+    if (mainMenuButtonBuilder != null) {
+      final fabWidth = floatingTitleHeight;
+      const fabPadding = 8.0;
+      widgets.add(
+        AnimatedPositioned(
+          key: const ValueKey('fab'),
+          duration: animationDuration ?? Duration.zero,
+          curve: _viewResizeAnimationCurve,
+          left: rect.width - fabWidth - fabPadding,
+          top: 0.0,
+          width: fabWidth,
+          height: fabWidth,
+          child: mainMenuButtonBuilder(context),
+        ),
+      );
+    }
 
     return widgets;
   }

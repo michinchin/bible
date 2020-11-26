@@ -22,12 +22,22 @@ class ViewableUGC extends Viewable {
   }
 
   @override
+  Widget floatingTitleBuilder(BuildContext context, ViewState state, Size size) {
+    return Container();
+  }
+
+  @override
   String menuTitle({BuildContext context, ViewState state}) => 'Notes';
 
   @override
   Future<ViewData> dataForNewView(
           {BuildContext context, int currentViewId, Map<String, dynamic> options}) =>
       Future.value(const UGCViewData(UGCViewData.folderHome));
+
+  @override
+  ViewDataBloc createViewDataBloc(BuildContext context, ViewState state) {
+    return ViewDataBloc(context.viewManager, state.uid, ViewData.fromContext(context, state.uid));
+  }
 }
 
 class _DividerItem {}

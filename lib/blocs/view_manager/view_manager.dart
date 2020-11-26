@@ -87,11 +87,18 @@ class ViewManager {
   Widget _buildScaffold(BuildContext context, ViewState state, Size size) =>
       (_types[state.type]?.builder ?? _defaultScaffoldBuilder)(context, state, size);
 
+  Widget _buildFloatingTitle(BuildContext context, ViewState state, Size size) =>
+      (_types[state.type]?.floatingTitleBuilder ?? _defaultFloatingTitleBuilder)(
+          context, state, size);
+
   Widget _buildViewBody(BuildContext context, ViewState state, Size size) =>
       _defaultBodyBuilder(context, state, size);
 
   List<Widget> _buildViewActions(BuildContext context, ViewState state, Size size) =>
       _defaultActionsBuilder(context, state, size);
+
+  ViewDataBloc _createViewDataBloc(BuildContext context, ViewState state) =>
+      (_types[state.type]?.createViewDataBloc ?? _defaultCreateViewDataBloc)(context, state);
 }
 
 ///
@@ -109,6 +116,11 @@ abstract class Viewable {
   Widget builder(BuildContext context, ViewState state, Size size);
 
   ///
+  /// Returns the floating title widget.
+  ///
+  Widget floatingTitleBuilder(BuildContext context, ViewState state, Size size);
+
+  ///
   /// Returns the menu title for the view. If [context] and [state] are null, returns
   /// the title that should be used for creating new views of this type.
   ///
@@ -122,6 +134,11 @@ abstract class Viewable {
   ///
   Future<ViewData> dataForNewView(
       {BuildContext context, int currentViewId, Map<String, dynamic> options});
+
+  ///
+  /// Returns a new view data bloc for the viewable type.
+  ///
+  ViewDataBloc createViewDataBloc(BuildContext context, ViewState state);
 }
 
 //
@@ -144,6 +161,15 @@ Widget _defaultScaffoldBuilder(BuildContext context, ViewState state, Size size)
       ),
       body: ViewManager.shared._buildViewBody(context, state, size),
     );
+
+Widget _defaultFloatingTitleBuilder(BuildContext context, ViewState state, Size size) => Container(
+      constraints: const BoxConstraints(minWidth: double.infinity, minHeight: double.infinity),
+      color: Colors.red,
+    );
+
+ViewDataBloc _defaultCreateViewDataBloc(BuildContext context, ViewState state) {
+  return ViewDataBloc(context.viewManager, state.uid, ViewData.fromContext(context, state.uid));
+}
 
 Widget _defaultBodyBuilder(BuildContext context, ViewState state, Size size) => Container();
 

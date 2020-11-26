@@ -19,7 +19,18 @@ class ViewableVolume extends Viewable {
 
   @override
   Widget builder(BuildContext context, ViewState state, Size size) {
-    return _VolumeViewScaffold(state: state, size: size);
+    return BlocProvider<ChapterViewDataBloc>.value(
+      value: context.viewManager.dataBlocWithView(state.uid) as ChapterViewDataBloc,
+      child: _VolumeViewScaffold(state: state, size: size),
+    );
+  }
+
+  @override
+  Widget floatingTitleBuilder(BuildContext context, ViewState state, Size size) {
+    return BlocProvider<ChapterViewDataBloc>.value(
+      value: context.viewManager.dataBlocWithView(state.uid) as ChapterViewDataBloc,
+      child: VolumeViewPillBar(state: state, size: size),
+    );
   }
 
   @override
@@ -55,6 +66,21 @@ class ViewableVolume extends Viewable {
 
     return null;
   }
+
+  @override
+  ViewDataBloc createViewDataBloc(BuildContext context, ViewState state) {
+    var data = ChapterViewData.fromContext(context, state.uid);
+    if (isBibleId(data.volumeId)) {
+      return ChapterViewDataBloc(context.viewManager, state.uid, data);
+    } else if (isStudyVolumeId(data.volumeId)) {
+      data = StudyViewData.fromContext(context, state.uid);
+      assert(data != null);
+      return StudyViewDataBloc(context.viewManager, state.uid, data as StudyViewData);
+    } else {
+      assert(false);
+    }
+    return null;
+  }
 }
 
 class _VolumeViewScaffold extends StatelessWidget {
@@ -66,27 +92,16 @@ class _VolumeViewScaffold extends StatelessWidget {
         super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
-        create: (context) {
-          var data = ChapterViewData.fromContext(context, state.uid);
-          if (isBibleId(data.volumeId)) {
-            return ChapterViewDataBloc(context.viewManager, state.uid, data);
-          } else if (isStudyVolumeId(data.volumeId)) {
-            data = StudyViewData.fromContext(context, state.uid);
-            assert(data != null);
-            return StudyViewDataBloc(context.viewManager, state.uid, data as StudyViewData);
-          } else {
-            assert(false);
-          }
-        },
-        child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          appBar: _VolumeViewAppBar(state: state, size: size),
-          body: _VolumeViewBody(state: state, size: size),
-        ),
+  Widget build(BuildContext context) => Scaffold(
+        resizeToAvoidBottomInset: false,
+        extendBodyBehindAppBar: true,
+        // appBar: _VolumeViewAppBar(state: state, size: size),
+        // appBar: VolumeViewPillBar(state: state, size: size),
+        body: _VolumeViewBody(state: state, size: size),
       );
 }
 
+// ignore: unused_element
 class _VolumeViewAppBar extends StatelessWidget implements PreferredSizeWidget {
   final ViewState state;
   final Size size;
