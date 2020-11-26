@@ -1,4 +1,3 @@
-import 'package:bible/ui/common/tec_modal_popup_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -7,17 +6,17 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/votd.dart';
 import '../common/common.dart';
+import '../common/tec_modal_popup_menu.dart';
 import 'dotd_screen.dart';
 import 'saves_screen.dart';
 import 'today_screen.dart';
 import 'votd_screen.dart';
 
-Future<void> showTodayScreen(BuildContext context) =>
-    Navigator.of(context, rootNavigator: true).push<void>(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) => Today(),
-      ),
+Future<void> showTodayScreen(BuildContext context) => showScreen<void>(
+      context: context,
+      builder: (context) => Navigator(
+          onGenerateRoute: (settings) =>
+              TecPageRoute<dynamic>(settings: settings, builder: (context) => Today())),
     );
 
 Future<void> showVotdFromNotification(BuildContext context, DateTime date) async {
@@ -69,8 +68,8 @@ class _TodayState extends State<Today> {
         // length: tabs.length,
         child: Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).pop(),
-        backgroundColor: Theme.of(context).cardColor,
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+        backgroundColor: Colors.white,
         child: const Icon(TecIcons.tecartabiblelogo, color: tecartaBlue),
       ),
       appBar: MinHeightAppBar(

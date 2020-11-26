@@ -70,18 +70,15 @@ class _HomeScreenState extends State<HomeScreen> {
           child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
             builder: (context, state) {
               return Scaffold(
-                // resizeToAvoidBottomInset: false,
+                floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
                 floatingActionButton: TecFab(state.views.first),
-                body: Container(
-                  color: Theme.of(context).backgroundColor,
-                  child: SafeArea(
-                    left: false,
-                    right: false,
-                    bottom: false,
-                    child: ViewManagerWidget(
-                      state: state,
-                      mainMenuButtonBuilder: (_) => MainMenuFab(),
-                    ),
+                body: SafeArea(
+                  left: false,
+                  right: false,
+                  bottom: false,
+                  child: ViewManagerWidget(
+                    state: state,
+                    mainMenuButtonBuilder: (_) => MainMenuFab(),
                   ),
                 ),
               );

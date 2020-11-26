@@ -21,8 +21,7 @@ import 'day_card.dart';
 
 Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
   await Interstitial.init(context, adUnitId: Const.prefNativeAdId);
-  await Navigator.of(context, rootNavigator: true)
-      .push<void>(MaterialPageRoute(builder: (c) => _VotdScreen(votd)));
+  await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _VotdScreen(votd)));
   await Interstitial.show(context);
 }
 
