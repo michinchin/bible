@@ -72,13 +72,16 @@ class _HomeScreenState extends State<HomeScreen> {
               return Scaffold(
                 floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
                 floatingActionButton: TecFab(state.views.first),
-                body: SafeArea(
-                  left: false,
-                  right: false,
-                  bottom: false,
-                  child: ViewManagerWidget(
-                    state: state,
-                    mainMenuButtonBuilder: (_) => MainMenuFab(),
+                body: Container(
+                  color: Theme.of(context).backgroundColor,
+                  child: SafeArea(
+                    left: false,
+                    right: false,
+                    bottom: false,
+                    child: ViewManagerWidget(
+                      state: state,
+                      mainMenuButtonBuilder: (_) => MainMenuFab(),
+                    ),
                   ),
                 ),
               );
