@@ -56,25 +56,35 @@ class ActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      alignment: Alignment.center,
-      // color: Colors.red.withOpacity(0.25),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      transitionBuilder: (child, animation) {
+        // return ScaleTransition(scale: animation, child: child);
+        // return SizeTransition(sizeFactor: animation, axis: Axis.horizontal, child: child);
+        return FadeTransition(opacity: animation, child: child);
+      },
       child: Container(
-        decoration: BoxDecoration(
-          color:
-              isDarkTheme ? Theme.of(context).appBarTheme.color : Theme.of(context).backgroundColor,
-          borderRadius: const BorderRadius.all(Radius.circular(90)),
-          boxShadow: elevation == 0
-              ? null
-              : [
-                  BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, elevation - 1),
-                      blurRadius: elevation,
-                      spreadRadius: 1),
-                ],
+        key: ValueKey(items),
+        alignment: Alignment.center,
+        // color: Colors.red.withOpacity(0.25),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDarkTheme
+                ? Theme.of(context).appBarTheme.color
+                : Theme.of(context).backgroundColor,
+            borderRadius: const BorderRadius.all(Radius.circular(90)),
+            boxShadow: elevation == 0
+                ? null
+                : [
+                    BoxShadow(
+                        color: Colors.black26,
+                        offset: Offset(0, elevation - 1),
+                        blurRadius: elevation,
+                        spreadRadius: 1),
+                  ],
+          ),
+          child: LayoutBuilder(builder: _layoutBuilder),
         ),
-        child: LayoutBuilder(builder: _layoutBuilder),
       ),
     );
   }
@@ -108,25 +118,16 @@ class ActionBar extends StatelessWidget {
 
     var i = 0;
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 500),
-      transitionBuilder: (child, animation) {
-        // return ScaleTransition(scale: animation, child: child);
-        // return SizeTransition(sizeFactor: animation, child: child);
-        return FadeTransition(opacity: animation, child: child);
-      },
-      child: Container(
-        key: ValueKey(items),
-        constraints: BoxConstraints.tightFor(height: constraints.maxHeight),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(width: sidePadding),
-            ...actualItems.expand((item) =>
-                item.toWidgets(context, textStyle, scale, i++, actualItems.length, min: min)),
-            SizedBox(width: sidePadding),
-          ],
-        ),
+    return Container(
+      constraints: BoxConstraints.tightFor(height: constraints.maxHeight),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(width: sidePadding),
+          ...actualItems.expand((item) =>
+              item.toWidgets(context, textStyle, scale, i++, actualItems.length, min: min)),
+          SizedBox(width: sidePadding),
+        ],
       ),
     );
   }
