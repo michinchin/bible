@@ -45,12 +45,7 @@ class AppSettings {
   /// OverlayStyle
   ///
   SystemUiOverlayStyle overlayStyle(BuildContext context) {
-    var overlayStyle = isDarkTheme() ? lightOverlayStyle : darkOverlayStyle;
-
-    if (tec.platformIs(tec.Platform.android)) {
-      overlayStyle = overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).canvasColor);
-    }
-
+    final overlayStyle = isDarkTheme() ? lightOverlayStyle : darkOverlayStyle;
     return overlayStyle;
   }
 
