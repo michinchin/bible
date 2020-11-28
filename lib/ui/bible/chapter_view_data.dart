@@ -64,9 +64,10 @@ class ChapterViewData extends ViewData {
     return ChapterViewData.fromJson(context.viewManager?.dataWithView(viewUid));
   }
 
-  String get bookNameAndChapter => (VolumesRepository.shared.bibleWithId(volumeId) ??
-          VolumesRepository.shared.bibleWithId(defaultBibleId))
-      .titleWithBookAndChapter(bcv.book, bcv.chapter);
+  String bookNameAndChapter({bool useShortBookName = false}) =>
+      (VolumesRepository.shared.bibleWithId(volumeId) ??
+              VolumesRepository.shared.bibleWithId(defaultBibleId))
+          .titleWithBookAndChapter(bcv.book, bcv.chapter, useShortBookName: useShortBookName);
 
   String get bookNameChapterAndAbbr {
     final volume = VolumesRepository.shared.volumeWithId(volumeId);

@@ -9,7 +9,6 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
 import '../bible/chapter_view_data.dart';
 import '../common/tec_modal_popup_menu.dart';
-import 'main_menu.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   // ignore: close_sinks
