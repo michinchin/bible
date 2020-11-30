@@ -419,7 +419,7 @@ class _VolumesListState extends State<_VolumesList> {
   @override
   Widget build(BuildContext context) {
     final bloc = context.tbloc<VolumesBloc>(); // ignore: close_sinks
-    final showFilter = (bloc.languages?.length ?? 0) > 1 || (bloc.categories?.length ?? 0) > 1;
+    final showFilter = (bloc.languages?.length ?? 0) > 1 /* || (bloc.categories?.length ?? 0) > 1 */;
 
     var volumes = bloc.state.volumes;
     if (context.tbloc<VolumesSortBloc>().state.sortBy == VolumesSortOpt.recent) {
