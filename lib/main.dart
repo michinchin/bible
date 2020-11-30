@@ -26,7 +26,6 @@ import 'models/const.dart';
 import 'models/iap/iap.dart';
 import 'navigation_service.dart';
 import 'ui/common/common.dart';
-import 'ui/common/tec_modal_popup_menu.dart';
 import 'ui/home/home_screen.dart';
 import 'ui/ugc/margin_note_view.dart';
 import 'ui/ugc/ugc_view.dart';
@@ -53,20 +52,26 @@ Future<void> main() async {
     await Notifications.init(
         prefFirstTimeOpened: Const.prefFirstTimeOpen,
         channelInfo: ChannelInfo(id: 'tec-id', name: 'tec-name', description: 'tec-description'),
-        color: tecartaBlue);
+        color: Const.tecartaBlue);
   }
 
   await tec.Prefs.shared.load();
 
+  final product = tec.platformIs(tec.Platform.web)
+      ? 'WebSite'
+      : '${tec.platformIs(tec.Platform.iOS)
+          ? 'IOS'
+          : 'PLAY'}_TecartaBible';
+
   VolumesRepository.shared = TecVolumesRepository(
-    productsUrl: null,
-    productsBundleKey: null,
+    productsUrl: '${tec.streamUrl}/products-list/$product.json.gz',
+    productsBundleKey: 'assets/products.json',
     bundledProducts: [
       BundledProduct([9], 'assets'),
     ],
   );
 
-  await VolumesRepository.shared.loadProducts(updateLocalVolumes: true);
+  await VolumesRepository.shared.loadProducts(updateLocalVolumes: true, checkForUpdate: true);
 
   await AppSettings.shared.load(appName: 'Bible', itemsToSync: [
     tua.UserItemType.folder,

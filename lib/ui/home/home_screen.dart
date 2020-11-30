@@ -8,6 +8,7 @@ import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
+import '../../models/const.dart';
 import '../../models/notifications/notifications_model.dart';
 import '../menu/main_menu.dart';
 import 'expandable_fab.dart';
@@ -70,8 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
             builder: (context, state) {
               return Scaffold(
-                floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
-                floatingActionButton: TecFab(state.views.first),
+                // floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+                // floatingActionButton: TecFab(state.views.first),
+                // bottomNavigationBar: const TecTabBar(),
                 body: Container(
                   color: Theme.of(context).backgroundColor,
                   child: SafeArea(
@@ -81,6 +83,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ViewManagerWidget(
                       state: state,
                       mainMenuButtonBuilder: (_) => MainMenuFab(),
+                      journalButtonBuilder: (_) => JournalFab(),
+                      switcherButtonBuilder: (_) => TecFab(state.views.first),
                     ),
                   ),
                 ),
@@ -100,7 +104,19 @@ class MainMenuFab extends StatelessWidget {
         mini: true,
         heroTag: null,
         child: const Icon(Icons.person),
-        backgroundColor: tecartaBlue,
+        backgroundColor: Const.tecartaBlue,
+        onPressed: () => showMainMenu(context),
+      );
+}
+
+class JournalFab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => FloatingActionButton(
+        elevation: 4,
+        mini: true,
+        heroTag: null,
+        child: const Icon(Icons.local_library),
+        backgroundColor: Const.tecartaBlue,
         onPressed: () => showMainMenu(context),
       );
 }

@@ -39,7 +39,7 @@ class __NoteScreenState extends State<_NoteScreen> {
   void initState() {
     super.initState();
     _focusNode = FocusNode();
-    KeyboardVisibility.onChange.listen(
+    KeyboardVisibilityController().onChange.listen(
       (visible) {
         if (visible) {
           context?.tbloc<SheetManagerBloc>()?.add(SheetEvent.collapse);

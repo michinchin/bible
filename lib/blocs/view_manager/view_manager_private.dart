@@ -20,8 +20,16 @@ class _VMViewStack extends StatefulWidget {
   final BoxConstraints constraints;
   final ViewManagerState vmState;
   final WidgetBuilder mainMenuButtonBuilder;
+  final WidgetBuilder journalButtonBuilder;
+  final WidgetBuilder switcherButtonBuilder;
 
-  const _VMViewStack({Key key, this.constraints, this.vmState, this.mainMenuButtonBuilder})
+  const _VMViewStack(
+      {Key key,
+      this.constraints,
+      this.vmState,
+      this.mainMenuButtonBuilder,
+      this.journalButtonBuilder,
+      this.switcherButtonBuilder})
       : super(key: key);
 
   @override
@@ -110,6 +118,8 @@ class _VMViewStackState extends State<_VMViewStack> {
       numViewsLimited: vmBloc?.numViewsLimited ?? true,
       floatingTitleHeight: floatingTitleHeight,
       mainMenuButtonBuilder: widget.mainMenuButtonBuilder,
+      journalButtonBuilder: widget.journalButtonBuilder,
+      switcherButtonBuilder: widget.switcherButtonBuilder,
     );
     vmBloc?._viewRects = viewRects;
     vmBloc?._prevBuildMaxedViewUid = maximizedView?.uid ?? 0;
@@ -404,6 +414,8 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     @required double floatingTitleHeight,
     @required MediaQueryData floatingTitleMQData,
     @required WidgetBuilder mainMenuButtonBuilder,
+    @required WidgetBuilder journalButtonBuilder,
+    @required WidgetBuilder switcherButtonBuilder,
   }) {
     // Cannot have both a `maximizedView` and a `viewWithKeyboardFocus`.
     assert(maximizedView == null || viewWithKeyboardFocus == null);
@@ -615,6 +627,40 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           width: fabWidth,
           height: fabWidth,
           child: mainMenuButtonBuilder(context),
+        ),
+      );
+    }
+
+    if (journalButtonBuilder != null) {
+      final fabWidth = floatingTitleHeight;
+      const fabPadding = 8.0;
+      widgets.add(
+        AnimatedPositioned(
+          key: const ValueKey('journal_fab'),
+          duration: animationDuration ?? Duration.zero,
+          curve: _viewResizeAnimationCurve,
+          left: fabPadding,
+          top: 0.0,
+          width: fabWidth,
+          height: fabWidth,
+          child: journalButtonBuilder(context),
+        ),
+      );
+    }
+
+    if (switcherButtonBuilder != null) {
+      final fabWidth = floatingTitleHeight;
+      const fabPadding = 8.0;
+      widgets.add(
+        AnimatedPositioned(
+          key: const ValueKey('switch_fab'),
+          duration: animationDuration ?? Duration.zero,
+          curve: _viewResizeAnimationCurve,
+          left: rect.width - fabWidth - fabPadding,
+          bottom: fabPadding,
+          width: fabWidth,
+          height: fabWidth,
+          child: switcherButtonBuilder(context),
         ),
       );
     }

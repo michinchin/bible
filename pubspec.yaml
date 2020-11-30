@@ -21,7 +21,7 @@ dependencies:
   feather_icons_flutter: ^4.7.4
   flutter_bloc: ^6.1.0
   flutter_downloader: ^1.5.1
-  flutter_keyboard_visibility: ^3.3.0
+  flutter_keyboard_visibility: ^4.0.2
   flutter_sfsymbols: ^1.0.0
   flutter_svg: ^0.19.2+1
   freezed_annotation: ^0.12.0
@@ -45,7 +45,7 @@ dependencies:
     hosted:
       name: tec_cache
       url: http://noah.tecarta.com:8100
-    version: ^1.0.2
+    version: ^2.0.0
   tec_env:
     hosted:
       name: tec_env
@@ -75,7 +75,7 @@ dependencies:
     hosted:
       name: tec_volumes
       url: http://noah.tecarta.com:8100
-    version: ^1.2.11
+    version: ^1.2.13
   tec_web_view:
     hosted:
       name: tec_web_view
@@ -102,13 +102,15 @@ dependencies:
       url: http://noah.tecarta.com:8100
     version: ^1.0.0-dev.1.0
 
-# dependency_overrides:
+#dependency_overrides:
   # tec_html:
   #   path: ../shared/tec_html
   # tec_selectable:
   #   path: ../shared/tec_selectable
   # tec_util:
   #   path: ../shared/tec_util
+  # tec_cache:
+  #   path: ../shared/tec_cache
   # tec_volumes:
   #   path: ../shared/tec_volumes
   # tec_widgets:
@@ -145,3 +147,4 @@ flutter:
     - assets/fonts.json
     - assets/footnote.svg
     - assets/marginNote.svg
+    - assets/products.json

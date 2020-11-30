@@ -49,9 +49,7 @@ class CompareResults {
       @required String translations}) async {
     final _cachedPath = '${book}_${chapter}_${verse}_$translations';
 
-    final tecCache = TecCache();
-
-    final json = await tecCache.jsonFromFile(cachedPath: _cachedPath);
+    final json = await TecCache.shared.jsonFromFile(cachedPath: _cachedPath);
 
     if (tec.isNotNullOrEmpty(json)) {
       return CompareResults.fromJson(tec.as<List<dynamic>>(json['list']));
@@ -67,7 +65,7 @@ class CompareResults {
         },
         completion: (status, json, dynamic error) async {
           if (status == 200) {
-            await tecCache.saveJsonToCache(json: json, cacheUrl: _cachedPath);
+            await TecCache.shared.saveJsonToCache(json: json, cacheUrl: _cachedPath);
             return CompareResults.fromJson(tec.as<List<dynamic>>(json['list']));
           } else {
             return CompareResults(data: []);

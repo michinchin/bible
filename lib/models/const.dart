@@ -1,7 +1,11 @@
+import 'dart:ui';
+
 import 'package:tec_util/tec_util.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class Const {
+  static const tecartaBlue = Color(0xff4a7dee);
+
   static const appNameForUA = 'tecarta_bible';
 
   static const viewTypeVolume = 'BibleChapter';

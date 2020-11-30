@@ -84,7 +84,7 @@ class Dotds {
     final y = year ?? DateTime.now().year;
     final fileName = 'devo-$y.json';
     final hostAndPath = '${tec.streamUrl}/home';
-    final json = await TecCache().jsonFromUrl(
+    final json = await TecCache.shared.jsonFromUrl(
         url: '$hostAndPath/$fileName',
         cachedPath: '${hostAndPath.replaceAll('https://', '')}/$fileName',
         bundlePath: 'assets/$fileName');

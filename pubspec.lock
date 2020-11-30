@@ -341,14 +341,28 @@ packages:
       name: flutter_keyboard_visibility
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.3.0"
+    version: "4.0.2"
+  flutter_keyboard_visibility_platform_interface:
+    dependency: transitive
+    description:
+      name: flutter_keyboard_visibility_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
+  flutter_keyboard_visibility_web:
+    dependency: transitive
+    description:
+      name: flutter_keyboard_visibility_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   flutter_local_notifications:
     dependency: transitive
     description:
       name: flutter_local_notifications
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.1+5"
+    version: "3.0.1+6"
   flutter_local_notifications_platform_interface:
     dependency: transitive
     description:
@@ -496,7 +510,7 @@ packages:
       name: idb_shim
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.12.2"
+    version: "1.12.2+1"
   image_picker:
     dependency: "direct main"
     description:
@@ -1012,7 +1026,7 @@ packages:
       name: tec_cache
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.2"
+    version: "2.0.0"
   tec_crypto:
     dependency: transitive
     description:
@@ -1089,7 +1103,7 @@ packages:
       name: tec_volumes
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.2.11"
+    version: "1.2.13"
   tec_web_view:
     dependency: "direct main"
     description:

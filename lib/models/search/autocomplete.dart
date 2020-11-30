@@ -21,7 +21,6 @@ class AutoComplete {
     final cleanPhrase = optimizePhrase(phrase);
     final suggestions = getSuggestions(cleanPhrase);
     final cacheParam = '${_getCacheKey(cleanPhrase, translationIds)}';
-    final tecCache = TecCache();
 
     if (cleanPhrase.trim().isEmpty) {
       return AutoComplete.fromJson(
@@ -29,7 +28,7 @@ class AutoComplete {
     }
 
     // check cloudfront cache
-    var json = await tecCache.jsonFromUrl(
+    var json = await TecCache.shared.jsonFromUrl(
       url: '${tec.cacheUrl}/$cacheParam',
       connectionTimeout: const Duration(seconds: 10),
     );
@@ -46,7 +45,7 @@ class AutoComplete {
           completion: (status, json, dynamic error) async {
             if (status == 200) {
               // save to tecCache...
-              await tecCache.saveJsonToCache(json: json, cacheUrl: '${tec.cacheUrl}/$cacheParam');
+              await TecCache.shared.saveJsonToCache(json: json, cacheUrl: '${tec.cacheUrl}/$cacheParam');
 
               return json;
             } else {

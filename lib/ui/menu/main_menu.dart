@@ -11,8 +11,6 @@ import 'main_menu_model.dart';
 import 'notifications_view.dart';
 import 'settings.dart';
 
-const tecartaBlue = Color(0xff4a7dee);
-
 Future<void> showMainMenu(BuildContext context) {
   TecAutoScroll.stopAutoscroll();
   return showTecModalPopupMenu(

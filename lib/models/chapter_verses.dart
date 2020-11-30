@@ -22,9 +22,8 @@ class ChapterVerses {
   static Future<ChapterVerses> fetch({Reference refForChapter}) async {
     final cacheParam =
         '${refForChapter.volume}/chapters/${refForChapter.book}_${refForChapter.chapter}';
-    final tecCache = TecCache();
     // check cloudfront cache
-    final json = await tecCache.jsonFromUrl(
+    final json = await TecCache.shared.jsonFromUrl(
       url: '${tec.streamUrl}/$cacheParam.json.gz',
       connectionTimeout: const Duration(seconds: 10),
     );

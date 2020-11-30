@@ -124,11 +124,10 @@ class SearchResults {
       searchWords = (matches.isNotEmpty) ? _formatRefs(currQuery) : cacheWords;
     }
 
-    final tecCache = TecCache();
     final cacheParam = _getCacheKey(cacheWords, translationIds, exact, phrase);
 
     // check cloudfront cache
-    var json = await tecCache.jsonFromUrl(
+    var json = await TecCache.shared.jsonFromUrl(
       url: '${tec.cacheUrl}/$cacheParam.gz',
       connectionTimeout: const Duration(seconds: 10),
     );
@@ -147,7 +146,7 @@ class SearchResults {
           },
           completion: (status, json, dynamic error) async {
             if (status == 200) {
-              await tecCache.saveJsonToCache(
+              await TecCache.shared.saveJsonToCache(
                   json: json, cacheUrl: '${tec.cacheUrl}/$cacheParam.gz');
 
               return json;

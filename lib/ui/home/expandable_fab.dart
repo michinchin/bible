@@ -6,16 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/app_settings.dart';
 import '../../models/const.dart';
-import '../common/tec_modal_popup_menu.dart';
-import '../library/library.dart';
 import '../sheet/snap_sheet.dart';
-import 'today.dart';
 
 class ExpandableFAB extends StatefulWidget {
   final List<FABIcon> icons;
   final IconData mainIcon;
   final Color backgroundColor;
+
   const ExpandableFAB({
     @required this.icons,
     this.mainIcon = FeatherIcons.settings,
@@ -29,6 +28,7 @@ class ExpandableFAB extends StatefulWidget {
 class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   OverlayEntry _overlayEntry;
+
   @override
   void initState() {
     super.initState();
@@ -62,7 +62,9 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
                   : Colors.grey.withOpacity(0.25),
               floatingActionButton: closeFab(),
               floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-              bottomNavigationBar: TecBottomNavBar(_removeOverlayEntry),
+              bottomNavigationBar: TecTabBar(
+                pressedCallback: _removeOverlayEntry,
+              ),
               body: Semantics(
                 container: true,
                 enabled: true,
@@ -97,7 +99,7 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
       crossAxisAlignment: CrossAxisAlignment.end,
       children: List<Widget>.generate(widget.icons.length, (index) {
         final Widget child = Container(
-          height: 30,
+          height: 35 * scaleFactorWith(context),
           padding: const EdgeInsets.only(right: 10),
           alignment: Alignment.centerRight,
           child: ScaleTransition(
@@ -123,14 +125,16 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
                   ],
                 ),
                 child: Text(widget.icons[index].title,
-                    style:
-                        Theme.of(context).textTheme.caption.copyWith(fontWeight: FontWeight.bold)),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyText1
+                        .copyWith(fontSize: contentFontSizeWith(context))),
               ),
             ),
           ),
         );
         return Padding(
-          padding: const EdgeInsets.all(5),
+          padding: const EdgeInsets.only(left: 5, right: 5),
           child: child,
         );
       }).toList(),
@@ -138,7 +142,7 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
   }
 
   Widget closeFab() => FloatingActionButton(
-        mini: true,
+        // mini: true,
         backgroundColor: widget.backgroundColor,
         child: AnimatedBuilder(
             animation: _controller,
@@ -159,6 +163,7 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
           }
         },
       );
+
   void _removeOverlayEntry() {
     _controller.reverse();
     _overlayEntry?.remove();
@@ -180,9 +185,11 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
         padding: screenReaderOn ? const EdgeInsets.only(bottom: 30) : null,
         child: FloatingActionButton(
             mini: true,
-            elevation: 0,
+            elevation: 4,
             backgroundColor: widget.backgroundColor,
-            child: Icon(widget.mainIcon, color: Colors.white, size: 15),
+            heroTag: null,
+            // child: Icon(widget.mainIcon, color: Colors.white, size: 20),
+            child: Icon(widget.mainIcon, color: Colors.white, size: 22),
             onPressed: () {
               _insertOverlayEntry();
               _controller.forward();
@@ -202,7 +209,9 @@ class FABIcon {
 
 class TecFab extends StatelessWidget {
   final ViewState state;
+
   const TecFab(this.state);
+
   @override
   Widget build(BuildContext context) {
     // void _onSwitchViews(ViewManagerBloc vmBloc, int viewUid, ViewState view) {
@@ -247,46 +256,8 @@ class TecFab extends StatelessWidget {
         context,
         context.viewManager.indexOfView(state.uid),
       ),
-      backgroundColor: tecartaBlue,
+      backgroundColor: Const.tecartaBlue,
       mainIcon: TecIcons.tecartabiblelogo,
     );
-  }
-}
-
-class TecBottomNavBar extends StatelessWidget {
-  final VoidCallback removeOverlay;
-  const TecBottomNavBar(this.removeOverlay);
-  @override
-  Widget build(BuildContext context) {
-    final miniViewIcons = {
-      'Home': FeatherIcons.home,
-      'Library': FeatherIcons.book,
-      'Audio': FeatherIcons.play,
-      'Notes': FeatherIcons.edit2
-    };
-    return BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 4.0,
-        child: Padding(
-            padding: const EdgeInsets.only(left: 15, right: 65, top: 15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                for (final key in miniViewIcons.keys)
-                  SheetIconButton(
-                    icon: miniViewIcons[key],
-                    text: key,
-                    onPressed: () {
-                      removeOverlay();
-                      // tec.dmPrint('Tapped button $key');
-                      if (key == 'Library') showLibrary(context);
-                      if (key == 'Notes') {
-                        ViewManager.shared.makeVisibleOrAdd(context, Const.viewTypeNotes);
-                      }
-                      if (key == 'Home') showTodayScreen(context);
-                    },
-                  ),
-              ],
-            )));
   }
 }

@@ -3,9 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../models/const.dart';
 import 'tec_modal_popup.dart';
-
-const tecartaBlue = Color(0xff4a7dee);
 
 Future<void> showTecModalPopupMenu({
   @required BuildContext context,
@@ -112,7 +111,7 @@ TableRow tecModalPopupMenuItem(
           child: getSwitchValue == null
               ? Container(padding: const EdgeInsets.fromLTRB(0, 16, 0, 16))
               : Switch.adaptive(
-                  activeColor: tecartaBlue,
+                  activeColor: Const.tecartaBlue,
                   value: getSwitchValue() ?? false,
                   onChanged: onTap == null ? null : (_) => _onTap()?.call(),
                 ),
@@ -200,7 +199,7 @@ class TecTitleBar extends StatelessWidget {
                               TextSpan(
                                   text: 'Bible',
                                   style: textStyle.copyWith(
-                                      color: tecartaBlue, fontWeight: FontWeight.bold)),
+                                      color: Const.tecartaBlue, fontWeight: FontWeight.bold)),
                             ]),
                           )
                         : Text(title, textAlign: TextAlign.center, style: textStyle)),

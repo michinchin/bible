@@ -1,6 +1,5 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
@@ -35,7 +34,6 @@ class _MainSheetState extends State<MainSheet> {
               text: key,
               icon: miniViewIcons[key],
               onPressed: () {
-                tec.dmPrint('Tapped button $key');
                 if (key == 'Library') showLibrary(context);
                 if (key == 'Notes') {
                   ViewManager.shared.makeVisibleOrAdd(context, Const.viewTypeNotes);

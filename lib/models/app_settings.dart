@@ -107,7 +107,7 @@ double contentTextScaleFactorWith(BuildContext context) {
 /// (e.g. Bible or study content HTML).
 ///
 double contentFontSizeWith(BuildContext context) {
-  return 12 * contentFontSizeWith(context);
+  return 12 * contentTextScaleFactorWith(context);
 }
 
 //

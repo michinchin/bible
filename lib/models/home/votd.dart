@@ -59,7 +59,7 @@ class Votd {
     final y = year ?? DateTime.now().year;
     final hostAndPath = '${tec.streamUrl}/home';
     final fileName = 'votd-$y.json';
-    final json = await TecCache().jsonFromUrl(
+    final json = await TecCache.shared.jsonFromUrl(
         url: '$hostAndPath/$fileName',
         cachedPath: '${hostAndPath.replaceAll('https://', '')}/$fileName',
         bundlePath: 'assets/$fileName');

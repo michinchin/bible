@@ -271,7 +271,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     });
 
     if (_editMode) {
-      keyboardListener = KeyboardVisibility.onChange.listen(
+      keyboardListener = KeyboardVisibilityController().onChange.listen(
         (visible) {
           if (!visible) {
             _toggleEditMode();

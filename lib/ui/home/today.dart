@@ -6,7 +6,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/votd.dart';
 import '../common/common.dart';
-import '../common/tec_modal_popup_menu.dart';
+import '../sheet/snap_sheet.dart';
 import 'dotd_screen.dart';
 import 'saves_screen.dart';
 import 'today_screen.dart';
@@ -67,11 +67,9 @@ class _TodayState extends State<Today> {
         // child: DefaultTabController(
         // length: tabs.length,
         child: Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-        backgroundColor: Colors.white,
-        child: const Icon(TecIcons.tecartabiblelogo, color: tecartaBlue),
-      ),
+      floatingActionButton: TecTabFAB(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      bottomNavigationBar: const TecTabBar(),
       appBar: MinHeightAppBar(
         appBar: AppBar(
           automaticallyImplyLeading: false,

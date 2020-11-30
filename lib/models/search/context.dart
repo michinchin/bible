@@ -33,7 +33,7 @@ class Context {
       }
     }
 
-    final json = await TecCache().jsonFromUrl(
+    final json = await TecCache.shared.jsonFromUrl(
       url: '${tec.streamUrl}/$translation/chapters/${book}_$chapter.json.gz',
     );
     Context context;

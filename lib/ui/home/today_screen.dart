@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../models/const.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/votd.dart';
 import '../common/common.dart';
-import '../common/tec_modal_popup_menu.dart';
 import 'dotd_screen.dart';
 import 'votd_screen.dart';
 
@@ -181,7 +181,7 @@ class _HomeCard extends StatelessWidget {
                                         child: const TecText(
                                           'All',
                                           style: TextStyle(
-                                              fontWeight: FontWeight.bold, color: tecartaBlue),
+                                              fontWeight: FontWeight.bold, color: Const.tecartaBlue),
                                         )),
                                   ),
                                 ],

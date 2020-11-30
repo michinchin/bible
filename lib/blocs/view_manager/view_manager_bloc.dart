@@ -23,7 +23,9 @@ export 'view_manager_state.dart';
 export 'view_state.dart';
 
 part 'view_manager.dart';
+
 part 'view_manager_bloc.freezed.dart';
+
 part 'view_manager_private.dart';
 
 const String _key = 'viewManagerState';
@@ -66,6 +68,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   // ignore_for_file: prefer_final_fields
 
   final _blocs = <int, ViewDataBloc>{};
+
   ViewDataBloc dataBlocWithView(int uid) => _blocs[uid];
 
   /// List of ViewRect objects, one for each open view.
@@ -453,8 +456,16 @@ class ViewRect {
 class ViewManagerWidget extends StatelessWidget {
   final ViewManagerState state;
   final WidgetBuilder mainMenuButtonBuilder;
+  final WidgetBuilder journalButtonBuilder;
+  final WidgetBuilder switcherButtonBuilder;
 
-  const ViewManagerWidget({Key key, this.state, this.mainMenuButtonBuilder}) : super(key: key);
+  const ViewManagerWidget(
+      {Key key,
+      this.state,
+      this.mainMenuButtonBuilder,
+      this.journalButtonBuilder,
+      this.switcherButtonBuilder})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -467,6 +478,8 @@ class ViewManagerWidget extends StatelessWidget {
           vmState: state,
           constraints: constraints,
           mainMenuButtonBuilder: mainMenuButtonBuilder,
+          journalButtonBuilder: journalButtonBuilder,
+          switcherButtonBuilder: switcherButtonBuilder,
         ),
       ),
     );
