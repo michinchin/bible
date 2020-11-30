@@ -19,18 +19,18 @@ const double _kMaxTitleTextScaleFactor = 1.34;
 class _VMViewStack extends StatefulWidget {
   final BoxConstraints constraints;
   final ViewManagerState vmState;
-  final WidgetBuilder mainMenuButtonBuilder;
-  final WidgetBuilder journalButtonBuilder;
-  final WidgetBuilder switcherButtonBuilder;
+  final Widget topLeftWidget;
+  final Widget topRightWidget;
+  final Widget bottomRightWidget;
 
-  const _VMViewStack(
-      {Key key,
-      this.constraints,
-      this.vmState,
-      this.mainMenuButtonBuilder,
-      this.journalButtonBuilder,
-      this.switcherButtonBuilder})
-      : super(key: key);
+  const _VMViewStack({
+    Key key,
+    this.constraints,
+    this.vmState,
+    this.topLeftWidget,
+    this.topRightWidget,
+    this.bottomRightWidget,
+  }) : super(key: key);
 
   @override
   _VMViewStackState createState() => _VMViewStackState();
@@ -117,9 +117,9 @@ class _VMViewStackState extends State<_VMViewStack> {
           : null,
       numViewsLimited: vmBloc?.numViewsLimited ?? true,
       floatingTitleHeight: floatingTitleHeight,
-      mainMenuButtonBuilder: widget.mainMenuButtonBuilder,
-      journalButtonBuilder: widget.journalButtonBuilder,
-      switcherButtonBuilder: widget.switcherButtonBuilder,
+      topLeftWidget: widget.topLeftWidget,
+      topRightWidget: widget.topRightWidget,
+      bottomRightWidget: widget.bottomRightWidget,
     );
     vmBloc?._viewRects = viewRects;
     vmBloc?._prevBuildMaxedViewUid = maximizedView?.uid ?? 0;
@@ -413,9 +413,9 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     @required bool numViewsLimited,
     @required double floatingTitleHeight,
     @required MediaQueryData floatingTitleMQData,
-    @required WidgetBuilder mainMenuButtonBuilder,
-    @required WidgetBuilder journalButtonBuilder,
-    @required WidgetBuilder switcherButtonBuilder,
+    @required Widget topLeftWidget,
+    @required Widget topRightWidget,
+    @required Widget bottomRightWidget,
   }) {
     // Cannot have both a `maximizedView` and a `viewWithKeyboardFocus`.
     assert(maximizedView == null || viewWithKeyboardFocus == null);
@@ -559,19 +559,24 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
       Widget floatingTitle;
       if (floatingTitleHeight > 0) {
+        final isTopLeft = vr.row == 0 && vr.column == 0;
         final isTopRight = vr.row == 0 && vr.column == itemsInRow(vr.row) - 1;
-        final sideInset = floatingTitleHeight * 1.25;
-        final size = Size(vr.rect.width - (isTopRight ? sideInset * 2 : 0.0), floatingTitleHeight);
+        final reduceWidth =
+            (isTopLeft && topLeftWidget != null) || (isTopRight && topRightWidget != null);
+        final sideInset = reduceWidth ? floatingTitleHeight * 1.25 : 0.0;
+        final size = Size(vr.rect.width - (reduceWidth ? sideInset * 2 : 0.0), floatingTitleHeight);
         floatingTitle = AnimatedPositioned(
           key: ValueKey(-vr.uid),
           duration: (animate ? animationDuration : null) ?? Duration.zero,
           curve: _viewResizeAnimationCurve,
-          left: vr.rect.left + (isTopRight ? sideInset : 0.0),
+          left: vr.rect.left + sideInset,
           top: vr.rect.top - (floatingTitleHeight / 2.0),
           width: size.width,
           height: size.height,
-          child: Opacity(
-            opacity: isVisible ? 1 : 0,
+          child: AnimatedOpacity(
+            opacity: vr.isVisible ? 1 : 0,
+            duration: animationDuration ?? Duration.zero,
+            curve: _viewResizeAnimationCurve,
             child: MediaQuery(
               data: floatingTitleMQData,
               child: ViewManager.shared._buildFloatingTitle(context, state, size),
@@ -614,53 +619,48 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     if (maxedViewWidget != null) widgets.add(maxedViewWidget);
     if (maxedFloatingTitleWidget != null) widgets.add(maxedFloatingTitleWidget);
 
-    if (mainMenuButtonBuilder != null) {
-      final fabWidth = floatingTitleHeight;
-      const fabPadding = 8.0;
+    const padding = 8.0;
+    if (topLeftWidget != null) {
       widgets.add(
         AnimatedPositioned(
-          key: const ValueKey('fab'),
+          key: const ValueKey('topLeftWidget'),
           duration: animationDuration ?? Duration.zero,
           curve: _viewResizeAnimationCurve,
-          left: rect.width - fabWidth - fabPadding,
+          left: padding,
           top: 0.0,
-          width: fabWidth,
-          height: fabWidth,
-          child: mainMenuButtonBuilder(context),
+          width: floatingTitleHeight,
+          height: floatingTitleHeight,
+          child: topLeftWidget,
         ),
       );
     }
 
-    if (journalButtonBuilder != null) {
-      final fabWidth = floatingTitleHeight;
-      const fabPadding = 8.0;
+    if (topRightWidget != null) {
       widgets.add(
         AnimatedPositioned(
-          key: const ValueKey('journal_fab'),
+          key: const ValueKey('topRightWidget'),
           duration: animationDuration ?? Duration.zero,
           curve: _viewResizeAnimationCurve,
-          left: fabPadding,
+          left: rect.width - floatingTitleHeight - padding,
           top: 0.0,
-          width: fabWidth,
-          height: fabWidth,
-          child: journalButtonBuilder(context),
+          width: floatingTitleHeight,
+          height: floatingTitleHeight,
+          child: topRightWidget,
         ),
       );
     }
 
-    if (switcherButtonBuilder != null) {
-      final fabWidth = floatingTitleHeight;
-      const fabPadding = 8.0;
+    if (bottomRightWidget != null) {
       widgets.add(
         AnimatedPositioned(
-          key: const ValueKey('switch_fab'),
+          key: const ValueKey('bottomRightWidget'),
           duration: animationDuration ?? Duration.zero,
           curve: _viewResizeAnimationCurve,
-          left: rect.width - fabWidth - fabPadding,
-          bottom: fabPadding,
-          width: fabWidth,
-          height: fabWidth,
-          child: switcherButtonBuilder(context),
+          left: rect.width - floatingTitleHeight - padding,
+          bottom: padding,
+          width: floatingTitleHeight,
+          height: floatingTitleHeight,
+          child: bottomRightWidget,
         ),
       );
     }

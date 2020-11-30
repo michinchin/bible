@@ -82,9 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     bottom: false,
                     child: ViewManagerWidget(
                       state: state,
-                      mainMenuButtonBuilder: (_) => MainMenuFab(),
-                      journalButtonBuilder: (_) => JournalFab(),
-                      switcherButtonBuilder: (_) => TecFab(state.views.first),
+                      topRightWidget: MainMenuFab(),
+                      topLeftWidget: JournalFab(),
+                      bottomRightWidget: TecFab(state.views.first),
                     ),
                   ),
                 ),

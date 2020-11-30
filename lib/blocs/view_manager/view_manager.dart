@@ -149,13 +149,6 @@ Widget _defaultScaffoldBuilder(BuildContext context, ViewState state, Size size)
       appBar: MinHeightAppBar(
         appBar: AppBar(
           title: Text(ViewManager.shared.menuTitleWith(context: context, state: state) ?? ''),
-          // leading: widget.state.viewIndex > 0
-          //     ? null
-          //     : IconButton(
-          //         icon: const Icon(Icons.menu),
-          //         tooltip: 'Main Menu',
-          //         onPressed: () => showMainMenu(context),
-          //       ),
           actions: ViewManager.shared._buildViewActions(context, state, size),
         ),
       ),

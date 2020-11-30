@@ -455,17 +455,17 @@ class ViewRect {
 ///
 class ViewManagerWidget extends StatelessWidget {
   final ViewManagerState state;
-  final WidgetBuilder mainMenuButtonBuilder;
-  final WidgetBuilder journalButtonBuilder;
-  final WidgetBuilder switcherButtonBuilder;
+  final Widget topLeftWidget;
+  final Widget topRightWidget;
+  final Widget bottomRightWidget;
 
-  const ViewManagerWidget(
-      {Key key,
-      this.state,
-      this.mainMenuButtonBuilder,
-      this.journalButtonBuilder,
-      this.switcherButtonBuilder})
-      : super(key: key);
+  const ViewManagerWidget({
+    Key key,
+    this.state,
+    this.topLeftWidget,
+    this.topRightWidget,
+    this.bottomRightWidget,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -477,9 +477,9 @@ class ViewManagerWidget extends StatelessWidget {
           key: context.viewManager?._globalKey,
           vmState: state,
           constraints: constraints,
-          mainMenuButtonBuilder: mainMenuButtonBuilder,
-          journalButtonBuilder: journalButtonBuilder,
-          switcherButtonBuilder: switcherButtonBuilder,
+          topLeftWidget: topLeftWidget,
+          topRightWidget: topRightWidget,
+          bottomRightWidget: bottomRightWidget,
         ),
       ),
     );
