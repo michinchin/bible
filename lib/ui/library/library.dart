@@ -5,6 +5,8 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'package:collection/collection.dart' as collection;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -18,6 +20,7 @@ import 'volume_card.dart';
 import 'volume_detail.dart';
 import 'volumes_bloc.dart';
 import 'volumes_filter_sheet.dart';
+import 'volumes_sort_bloc.dart';
 
 export 'volumes_bloc.dart' show VolumesFilter;
 
@@ -223,41 +226,50 @@ class _LibraryScaffoldState extends State<_LibraryScaffold> {
   @override
   Widget build(BuildContext context) {
     return TecScaffoldWrapper(
-      child: widget.tabs.length > 1
-          ? DefaultTabController(
-              initialIndex: widget.initialTabIndex ?? 0,
-              length: widget.tabs.length,
-              child: Scaffold(
-                appBar: _appBar(
-                  bottom: TabBar(
-                    isScrollable: true,
-                    tabs: widget.tabs.map((t) => Tab(text: t.title)).toList(),
+      child: BlocProvider<VolumesSortBloc>(
+        create: (_) => VolumesSortBloc(),
+        child: widget.tabs.length > 1
+            ? DefaultTabController(
+                initialIndex: widget.initialTabIndex ?? 0,
+                length: widget.tabs.length,
+                child: Scaffold(
+                  appBar: _appBar(
+                    bottom: TabBar(
+                      isScrollable: true,
+                      tabs: widget.tabs.map((t) => Tab(text: t.title)).toList(),
+                    ),
                   ),
+                  body: TabBarView(children: widget.tabs.map(_widgetFromTab).toList()),
                 ),
-                body: TabBarView(children: widget.tabs.map(_widgetFromTab).toList()),
-              ),
-            )
-          : Scaffold(appBar: _appBar(), body: _widgetFromTab(widget.tabs.first)),
+              )
+            : Scaffold(appBar: _appBar(), body: _widgetFromTab(widget.tabs.first)),
+      ),
     );
   }
 
-  Widget _widgetFromTab(LibraryTab t) => BlocProvider<VolumesBloc>(
-        create: (context) => VolumesBloc(
-          key: tec.isNullOrEmpty(t.prefsKey) ? null : '_library_${t.prefsKey}',
-          kvStore:
-              tec.isNullOrEmpty(t.prefsKey) ? null : tec.MemoryKVStore.shared, // tec.Prefs.shared,
-          defaultFilter: t.filter,
-        )..refresh(),
-        child: BlocBuilder<VolumesBloc, VolumesState>(
-          builder: (context, state) => _VolumesList(
-            selectedVolumes: _selectedVolumes,
-            scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
-            allowMultipleSelections: widget.allowMultipleSelections,
-            onTapVolume: widget.whenTappedPopWithVolumeId
-                ? (id) {
-                    Navigator.of(context, rootNavigator: true).maybePop<int>(id);
-                  }
-                : null,
+  Widget _widgetFromTab(LibraryTab t) => BlocBuilder<VolumesSortBloc, VolumesSort>(
+        buildWhen: (previous, current) =>
+            previous.sortBy != current.sortBy || current.sortBy == VolumesSortOpt.recent,
+        builder: (context, sort) => BlocProvider<VolumesBloc>(
+          create: (context) => VolumesBloc(
+            key: tec.isNullOrEmpty(t.prefsKey) ? null : '_library_${t.prefsKey}',
+            kvStore: tec.isNullOrEmpty(t.prefsKey)
+                ? null
+                : tec.MemoryKVStore.shared, // tec.Prefs.shared,
+            defaultFilter: t.filter,
+          )..refresh(),
+          child: BlocBuilder<VolumesBloc, VolumesState>(
+            builder: (context, state) => _VolumesList(
+              selectedVolumes: _selectedVolumes,
+              scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
+              allowMultipleSelections: widget.allowMultipleSelections,
+              onTapVolume: widget.whenTappedPopWithVolumeId
+                  ? (id) {
+                      context.tbloc<VolumesSortBloc>().updateWithVolume(id);
+                      Navigator.of(context, rootNavigator: true).maybePop<int>(id);
+                    }
+                  : null,
+            ),
           ),
         ),
       );
@@ -332,7 +344,9 @@ class _VolumesListState extends State<_VolumesList> {
   }
 
   void _scrollToVolumeAfterBuild() {
-    if (_scrollToVolume && context.tbloc<VolumesBloc>().state.volumes.isNotEmpty) {
+    if (_scrollToVolume &&
+        context.tbloc<VolumesBloc>().state.volumes.isNotEmpty &&
+        context.tbloc<VolumesSortBloc>().state.sortBy == VolumesSortOpt.name) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         if (mounted && _scrollController.isAttached) {
           final index = context
@@ -407,6 +421,14 @@ class _VolumesListState extends State<_VolumesList> {
     final bloc = context.tbloc<VolumesBloc>(); // ignore: close_sinks
     final showFilter = (bloc.languages?.length ?? 0) > 1 || (bloc.categories?.length ?? 0) > 1;
 
+    var volumes = bloc.state.volumes;
+    if (context.tbloc<VolumesSortBloc>().state.sortBy == VolumesSortOpt.recent) {
+      final sortBloc = context.tbloc<VolumesSortBloc>();
+      volumes = List.of(volumes);
+      // Using mergeSort because it is stable (i.e. equal elements remain in the same order).
+      collection.mergeSort<Volume>(volumes, compare: (a, b) => sortBloc.compare(a.id, b.id));
+    }
+
     final textScaleFactor = textScaleFactorWith(context);
     final padding = (12.0 * textScaleFactor).roundToDouble();
 
@@ -441,10 +463,14 @@ class _VolumesListState extends State<_VolumesList> {
                         child: TecPopupMenuButton<int>(
                           title: '',
                           values: {0: 'Title ↓', 1: 'Recent ↓'} as LinkedHashMap<int, String>,
-                          currentValue: 0,
+                          currentValue: context.tbloc<VolumesSortBloc>().state.sortBy.index,
                           defaultValue: 0,
                           defaultName: 'Any',
-                          onSelectValue: (value) {},
+                          onSelectValue: (value) {
+                            context
+                                .tbloc<VolumesSortBloc>()
+                                .updateSortBy(VolumesSortOpt.values[value]);
+                          },
                         ),
                       ),
                       Expanded(child: Container()),
@@ -478,9 +504,9 @@ class _VolumesListState extends State<_VolumesList> {
               child: ScrollablePositionedList.builder(
                 padding: MediaQuery.of(context)?.padding,
                 itemScrollController: _scrollController,
-                itemCount: bloc.state.volumes.length,
+                itemCount: volumes.length,
                 itemBuilder: (context, index) {
-                  final volume = bloc.state.volumes[index];
+                  final volume = volumes[index];
                   return BlocBuilder<DownloadsBloc, DownloadsState>(
                     buildWhen: (previous, current) =>
                         previous.items[volume.id] != current.items[volume.id],
