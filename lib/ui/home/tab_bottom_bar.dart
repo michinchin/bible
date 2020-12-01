@@ -119,7 +119,8 @@ class TecTabBar extends StatelessWidget {
       shape: const CircularNotchedRectangle(),
       notchMargin: 6.0,
       child: Padding(
-        padding: const EdgeInsets.only(left: 15, right: 65, top: 15),
+        padding: EdgeInsets.only(
+            left: 15, right: 65, top: 15, bottom: TecScaffoldWrapper.navigationBarPadding),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
