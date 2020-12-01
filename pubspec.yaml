@@ -15,6 +15,7 @@ dependencies:
   animations: ^1.1.2
   bloc: ^6.1.0
   cached_network_image: ^2.3.3
+  collection: ^1.14.12
   combos: ^1.2.0
   cupertino_icons: ^1.0.1+1
   equatable: ^1.2.5

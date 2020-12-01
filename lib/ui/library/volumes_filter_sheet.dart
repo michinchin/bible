@@ -29,9 +29,9 @@ class VolumesFilterSheet extends StatelessWidget {
     final textScaleFactor = textScaleFactorWith(context);
     final padding = 8 * textScaleFactor;
     final languages = volumesBloc.languages;
-    final categories = volumesBloc.categories;
+    // final categories = volumesBloc.categories;
     final language = volumesBloc.state.filter.language;
-    final category = volumesBloc.state.filter.category;
+    // final category = volumesBloc.state.filter.category;
 
     const animationDuration = Duration(milliseconds: 300);
     final buttonHeight = 16 + (22 * textScaleFactor).roundToDouble();
@@ -66,20 +66,20 @@ class VolumesFilterSheet extends StatelessWidget {
                 },
               ),
             ),
-            AnimatedContainer(
-              duration: animationDuration,
-              height: categories.length > 1 ? buttonHeight : 0,
-              child: TecPopupMenuButton<int>(
-                title: 'Category',
-                values: categories,
-                currentValue: category,
-                defaultValue: 0,
-                defaultName: 'Any',
-                onSelectValue: (value) {
-                  volumesBloc.add(volumesBloc.state.filter.copyWith(category: value));
-                },
-              ),
-            ),
+            // AnimatedContainer(
+            //   duration: animationDuration,
+            //   height: categories.length > 1 ? buttonHeight : 0,
+            //   child: TecPopupMenuButton<int>(
+            //     title: 'Category',
+            //     values: categories,
+            //     currentValue: category,
+            //     defaultValue: 0,
+            //     defaultName: 'Any',
+            //     onSelectValue: (value) {
+            //       volumesBloc.add(volumesBloc.state.filter.copyWith(category: value));
+            //     },
+            //   ),
+            // ),
             AnimatedContainer(
               duration: animationDuration,
               height: volumesBloc.state.filter != volumesBloc.defaultFilter ? buttonHeight : 0,
