@@ -559,8 +559,8 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
 
       Widget floatingTitle;
       if (floatingTitleHeight > 0) {
-        final isTopLeft = vr.row == 0 && vr.column == 0;
-        final isTopRight = vr.row == 0 && vr.column == itemsInRow(vr.row) - 1;
+        final isTopLeft = isOrWasMaxed || (vr.row == 0 && vr.column == 0);
+        final isTopRight = isOrWasMaxed || (vr.row == 0 && vr.column == itemsInRow(vr.row) - 1);
         final reduceWidth =
             (isTopLeft && topLeftWidget != null) || (isTopRight && topRightWidget != null);
         final sideInset = reduceWidth ? floatingTitleHeight * 1.25 : 0.0;
