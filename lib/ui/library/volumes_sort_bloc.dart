@@ -10,7 +10,7 @@ enum VolumesSortOpt { name, recent }
 class VolumesSortBloc extends Cubit<VolumesSort> {
   VolumesSortBloc()
       : super(VolumesSort.fromJson(tec.Prefs.shared.getString('_library_sort_settings')) ??
-            const VolumesSort(VolumesSortOpt.name, []));
+            const VolumesSort(VolumesSortOpt.name, [9, 51, 32, 47, 49, 231, 1017, 1014, 1013]));
 
   void updateSortBy(VolumesSortOpt sortBy) => emit(VolumesSort(sortBy, state.recent));
 
