@@ -3,32 +3,33 @@ import 'dart:ui';
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/tab_manager_bloc.dart';
+import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import 'tab_bottom_bar.dart';
 
-class ExpandableFAB extends StatefulWidget {
-  final List<FABIcon> icons;
+class ReaderFAB extends StatefulWidget {
   final IconData mainIcon;
   final Color backgroundColor;
   final List<TabBottomBarItem> tabs;
 
-  const ExpandableFAB({
-    @required this.icons,
+  const ReaderFAB({
     @required this.tabs,
     this.mainIcon = FeatherIcons.settings,
     this.backgroundColor = Colors.blue,
   });
 
   @override
-  _ExpandableFABState createState() => _ExpandableFABState();
+  _ReaderFABState createState() => _ReaderFABState();
 }
 
-class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProviderStateMixin {
+class _ReaderFABState extends State<ReaderFAB> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   OverlayEntry _overlayEntry;
+  List<FABIcon> _icons;
 
   @override
   void initState() {
@@ -66,7 +67,7 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
               bottomNavigationBar: TecTabBar(
                 tabs: widget.tabs,
                 tabManager: context.tabManager,
-                pressedCallback: _removeOverlayEntry,
+                pressedCallback: _switchedTabs,
               ),
               body: Semantics(
                 container: true,
@@ -100,7 +101,7 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,
-      children: List<Widget>.generate(widget.icons.length, (index) {
+      children: List<Widget>.generate(_icons.length, (index) {
         final Widget child = Container(
           height: 35 * scaleFactorWith(context),
           padding: const EdgeInsets.only(right: 10),
@@ -108,12 +109,12 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
           child: ScaleTransition(
             scale: CurvedAnimation(
               parent: _controller,
-              curve: Interval(0, 1.0 - index / widget.icons.length / 2.0, curve: Curves.easeOut),
+              curve: Interval(0, 1.0 - index / _icons.length / 2.0, curve: Curves.easeOut),
             ),
             child: InkWell(
               onTap: () {
                 _removeOverlayEntry();
-                widget.icons[index].onPressed();
+                _icons[index].onPressed();
               },
               child: Container(
                 padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
@@ -127,7 +128,7 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
                         blurRadius: 5)
                   ],
                 ),
-                child: Text(widget.icons[index].title,
+                child: Text(_icons[index].title,
                     style: Theme.of(context)
                         .textTheme
                         .bodyText1
@@ -166,7 +167,11 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
         },
       );
 
-  void _removeOverlayEntry() {
+  void _switchedTabs() {
+    _removeOverlayEntry(resetReaderTab: false);
+  }
+
+  void _removeOverlayEntry({bool resetReaderTab = true}) {
     _controller.reverse();
     _overlayEntry?.remove();
 
@@ -177,8 +182,13 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
     setState(() {
       _overlayEntry = null;
     });
-  }
 
+    if (resetReaderTab) {
+      // we're currently in overlay tab - it was dismissed but not switched to another tab
+      // reset it back to reader
+      context.tabManager.add(TecTab.reader);
+    }
+  }
 
   @override
   void dispose() {
@@ -198,9 +208,62 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
             heroTag: null,
             child: Icon(widget.mainIcon, color: Colors.white, size: 28),
             onPressed: () {
+              // get the tab bar to paint correct colors on android
+              context.tabManager.add(TecTab.overlay);
+
+              _icons = offScreenViews(context);
               _insertOverlayEntry();
               _controller.forward();
             }));
+  }
+
+  void _onSwitchViews(BuildContext context, ViewState view) {
+    // ignore: close_sinks
+    final vmBloc = context.viewManager;
+
+    if (vmBloc == null) {
+      return;
+    }
+
+    if (vmBloc.state.maximizedViewUid > 0) {
+      vmBloc.add(ViewManagerEvent.maximize(view.uid));
+    } else {
+      // find the last visible window and replace that one... probably need a pop up grid...
+      // TODO(abby): add a dialog to display a grid to allow placement
+      ViewState lastVisible;
+      for (final view in vmBloc.state?.views) {
+        if (vmBloc.isViewVisible(view.uid)) {
+          lastVisible = view;
+        } else {
+          break;
+        }
+      }
+
+      final visiblePosition = vmBloc.indexOfView(lastVisible.uid);
+      final hiddenPosition = vmBloc.indexOfView(view.uid);
+
+      vmBloc.add(ViewManagerEvent.move(fromPosition: hiddenPosition, toPosition: visiblePosition));
+      // ignore: cascade_invocations
+      vmBloc.add(
+          ViewManagerEvent.move(fromPosition: visiblePosition + 1, toPosition: hiddenPosition));
+    }
+  }
+
+  List<FABIcon> offScreenViews(BuildContext context) {
+    final items = <FABIcon>[];
+    for (final view in context.viewManager?.state?.views) {
+      if (!context.viewManager.isViewVisible(view.uid)) {
+        final title = ViewManager.shared.menuTitleWith(context: context, state: view);
+        items.add(FABIcon(
+            title: title,
+            onPressed: () {
+              _removeOverlayEntry();
+              _onSwitchViews(context, view);
+            },
+            iconData: Icons.ac_unit));
+      }
+    }
+    return items;
   }
 }
 

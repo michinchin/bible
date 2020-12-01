@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_widgets/tec_widgets.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
@@ -70,54 +71,70 @@ class _HomeScreenState extends State<HomeScreen> {
         BlocProvider<SheetManagerBloc>(create: (context) => SheetManagerBloc()),
         BlocProvider<TabManagerBloc>(create: (context) => TabManagerBloc()),
       ],
-      child: TecSystemUiOverlayWidget(
-        AppSettings.shared.overlayStyle(context),
-        child: TabBottomBar(
-          tabs: [
-            TabBottomBarItem(
-              tab: TecTab.today,
-              icon: Icons.today_outlined,
-              label: 'Today',
-              widget: Today(),
-            ),
-            TabBottomBarItem(
-              tab: TecTab.library,
-              icon: FeatherIcons.book,
-              label: 'Library',
-              widget: Container(color: Colors.red),
-            ),
-            TabBottomBarItem(
-              tab: TecTab.plans,
-              icon: Icons.next_plan_outlined,
-              label: 'Plans',
-              widget: Container(color: Colors.blue),
-            ),
-            TabBottomBarItem(
-              tab: TecTab.store,
-              icon: Icons.store_outlined,
-              label: 'Store',
-              widget: Container(color: Colors.yellow),
-            ),
-            TabBottomBarItem(
-              tab: TecTab.reader,
-              widget: Stack(
-                children: [
-                  BlocBuilder<ViewManagerBloc, ViewManagerState>(
-                    builder: (context, state) {
-                      return ViewManagerWidget(
-                        state: state,
-                        topRightWidget: MainMenuFab(),
-                        topLeftWidget: JournalFab(),
-                      );
-                    },
-                  ),
-                  SnapSheet(),
-                ],
+      child: BlocBuilder<TabManagerBloc, TabManagerState>(buildWhen: (p, n) {
+        // android needs bottom nav bar color changed in dark mode with non reader tab
+        return tec.platformIs(tec.Platform.android) &&
+            Theme.of(context).brightness == Brightness.dark &&
+            (p.tab == TecTab.reader || n.tab == TecTab.reader) &&
+            (p.tab != n.tab);
+      }, builder: (context, tabState) {
+        var overlayStyle = AppSettings.shared.overlayStyle(context);
+        if (tec.platformIs(tec.Platform.android) &&
+            Theme.of(context).brightness == Brightness.dark) {
+          if (tabState.tab != TecTab.reader) {
+            overlayStyle = overlayStyle.copyWith(
+                systemNavigationBarColor: Theme.of(context).appBarTheme.color);
+          }
+        }
+        return TecSystemUiOverlayWidget(
+          overlayStyle,
+          child: TabBottomBar(
+            tabs: [
+              TabBottomBarItem(
+                tab: TecTab.today,
+                icon: Icons.today_outlined,
+                label: 'Today',
+                widget: Today(),
               ),
-            ),
-          ],
-        ),
-      ),
+              TabBottomBarItem(
+                tab: TecTab.library,
+                icon: FeatherIcons.book,
+                label: 'Library',
+                widget: Container(color: Colors.red),
+              ),
+              TabBottomBarItem(
+                tab: TecTab.plans,
+                icon: Icons.next_plan_outlined,
+                label: 'Plans',
+                widget: Container(color: Colors.blue),
+              ),
+              TabBottomBarItem(
+                tab: TecTab.store,
+                icon: Icons.store_outlined,
+                label: 'Store',
+                widget: Container(color: Colors.yellow),
+              ),
+              TabBottomBarItem(
+                tab: TecTab.reader,
+                widget: Stack(
+                  children: [
+                    BlocBuilder<ViewManagerBloc, ViewManagerState>(
+                      builder: (context, state) {
+                        return ViewManagerWidget(
+                          state: state,
+                          topRightWidget: MainMenuFab(),
+                          topLeftWidget: JournalFab(),
+                        );
+                      },
+                    ),
+                    SnapSheet(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }
@@ -137,15 +154,14 @@ class MainMenuFab extends StatelessWidget {
 class JournalFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FloatingActionButton(
-        elevation: 4,
-        mini: true,
-        heroTag: null,
-        child: const Icon(Icons.local_library, color: Colors.white),
-        backgroundColor: Const.tecartaBlue,
-        onPressed: () {
-          Scaffold.of(context).openDrawer();
-        }
-      );
+      elevation: 4,
+      mini: true,
+      heroTag: null,
+      child: const Icon(Icons.local_library, color: Colors.white),
+      backgroundColor: Const.tecartaBlue,
+      onPressed: () {
+        Scaffold.of(context).openDrawer();
+      });
 }
 
 // chose either column or stack - making sure 1st child of column is expanded...

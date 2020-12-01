@@ -1,4 +1,3 @@
-import 'package:bible/ui/ugc/ugc_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,11 +5,11 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_bloc.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
 import '../../ui/sheet/snap_sheet.dart';
 import '../common/tec_page_route.dart';
-import 'expandable_fab.dart';
+import '../ugc/ugc_view.dart';
+import 'reader_fab.dart';
 
 class TabBottomBarItem {
   final TecTab tab;
@@ -34,7 +33,8 @@ class _TabBottomBarState extends State<TabBottomBar> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TabManagerBloc, TabManagerState>(buildWhen: (p, n) {
-      return p.tab != n.tab;
+      // if the tab didn't change or we're showing the overlay...
+      return p.tab != n.tab && n.tab != TecTab.overlay;
     }, builder: (context, tabState) {
       return Scaffold(
         drawer: const UGCView(),
@@ -48,7 +48,11 @@ class _TabBottomBarState extends State<TabBottomBar> {
                     duration: const Duration(milliseconds: 150),
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 5),
-                      child: _ReaderFAB(tabs: widget.tabs),
+                      child: ReaderFAB(
+                        backgroundColor: Const.tecartaBlue,
+                        mainIcon: TecIcons.tecartabiblelogo,
+                        tabs: widget.tabs,
+                      ),
                     ),
                   );
                 },
@@ -98,57 +102,6 @@ class _TabFAB extends StatelessWidget {
   }
 }
 
-class _ReaderFAB extends StatelessWidget {
-  final List<TabBottomBarItem> tabs;
-
-  const _ReaderFAB({Key key, @required this.tabs}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // void _onSwitchViews(ViewManagerBloc vmBloc, int viewUid, ViewState view) {
-    //   if (vmBloc.state.maximizedViewUid == viewUid) {
-    //     vmBloc?.add(ViewManagerEvent.maximize(view.uid));
-    //   } else {
-    //     final thisViewPos = vmBloc.indexOfView(viewUid);
-    //     final hiddenViewPos = vmBloc.indexOfView(view.uid);
-    //     vmBloc?.add(ViewManagerEvent.move(
-    //         fromPosition: vmBloc.indexOfView(view.uid), toPosition: vmBloc.indexOfView(viewUid)));
-    //     vmBloc
-    //         ?.add(ViewManagerEvent.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos));
-    //   }
-    // }
-
-    List<FABIcon> offScreenViews(BuildContext context) {
-      final vm = ViewManager.shared;
-      final items = <FABIcon>[];
-      for (final view in context.viewManager?.state?.views) {
-        if (!context.viewManager.isViewVisible(view.uid)) {
-          final title = vm.menuTitleWith(context: context, state: view);
-          items.add(FABIcon(
-              title: title,
-              onPressed: () {
-                // for now, don't add functionality
-                // _onSwitchViews(vmBloc, viewUid, view);
-                // Navigator.of(menuContext).maybePop();
-              },
-              iconData: Icons.ac_unit));
-          // items.add(tecModalPopupMenuItem(menuContext, vm.iconWithType(view.type), '$title', () {
-
-          // }));
-        }
-      }
-      return items;
-    }
-
-    return ExpandableFAB(
-      icons: offScreenViews(context),
-      backgroundColor: Const.tecartaBlue,
-      mainIcon: TecIcons.tecartabiblelogo,
-      tabs: tabs,
-    );
-  }
-}
-
 class TecTabBar extends StatelessWidget {
   final VoidCallback pressedCallback;
   final List<TabBottomBarItem> tabs;
@@ -162,6 +115,7 @@ class TecTabBar extends StatelessWidget {
     final tm = (tabManager == null) ? context.tabManager : tabManager;
 
     return BottomAppBar(
+      color: Theme.of(context).appBarTheme.color,
       shape: const CircularNotchedRectangle(),
       notchMargin: 6.0,
       child: Padding(
