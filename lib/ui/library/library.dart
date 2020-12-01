@@ -130,33 +130,67 @@ Future<T> _showLibrary<T extends Object>({
     builder: (context) => Navigator(
       onGenerateRoute: (settings) => TecPageRoute<dynamic>(
         settings: settings,
-        builder: (context) => BlocProvider<IsLicensedBloc>(
-          create: (context) => IsLicensedBloc(
-              volumeIds: VolumesRepository.shared.volumeIdsWithType(VolumeType.anyType)),
-          child: BlocBuilder<IsLicensedBloc, bool>(
-            builder: (context, hasLicensedVolumes) {
-              // if `hasLicensedVolumes` is null, just return spinner.
-              if (hasLicensedVolumes == null) return const Center(child: LoadingIndicator());
-
-              final tabs = _tabs(hasLicensedVolumes: hasLicensedVolumes);
-              final initialIndex = tec.isNullOrEmpty(initialTabPrefix)
-                  ? 0
-                  : math.max(0, tabs.indexWhere((t) => t.title.startsWith(initialTabPrefix)));
-              return _LibraryScaffold(
-                tabs: tabs,
-                initialTabIndex: initialIndex,
-                title: title,
-                selectedVolumes: selectedVolumes,
-                scrollToSelectedVolumes: scrollToSelectedVolumes,
-                whenTappedPopWithVolumeId: whenTappedPopWithVolumeId,
-                allowMultipleSelections: allowMultipleSelections,
-              );
-            },
-          ),
+        builder: (context) => LibraryScaffold(
+          title: title,
+          initialTabPrefix: initialTabPrefix,
+          selectedVolumes: selectedVolumes,
+          scrollToSelectedVolumes: scrollToSelectedVolumes,
+          whenTappedPopWithVolumeId: whenTappedPopWithVolumeId,
+          allowMultipleSelections: allowMultipleSelections,
         ),
       ),
     ),
   );
+}
+
+class LibraryScaffold extends StatelessWidget {
+  final String title;
+  final String initialTabPrefix;
+  final Iterable<int> selectedVolumes;
+  final bool scrollToSelectedVolumes;
+  final bool whenTappedPopWithVolumeId;
+  final bool allowMultipleSelections;
+  final bool showCloseButton;
+
+  const LibraryScaffold({
+    Key key,
+    this.title,
+    this.initialTabPrefix,
+    this.selectedVolumes = const {},
+    this.scrollToSelectedVolumes = true,
+    this.whenTappedPopWithVolumeId = false,
+    this.allowMultipleSelections = false,
+    this.showCloseButton = true,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<IsLicensedBloc>(
+      create: (context) =>
+          IsLicensedBloc(volumeIds: VolumesRepository.shared.volumeIdsWithType(VolumeType.anyType)),
+      child: BlocBuilder<IsLicensedBloc, bool>(
+        builder: (context, hasLicensedVolumes) {
+          // if `hasLicensedVolumes` is null, just return spinner.
+          if (hasLicensedVolumes == null) return const Center(child: LoadingIndicator());
+
+          final tabs = _tabs(hasLicensedVolumes: hasLicensedVolumes);
+          final initialIndex = tec.isNullOrEmpty(initialTabPrefix)
+              ? 0
+              : math.max(0, tabs.indexWhere((t) => t.title.startsWith(initialTabPrefix)));
+          return _Library(
+            tabs: tabs,
+            initialTabIndex: initialIndex,
+            title: title,
+            selectedVolumes: selectedVolumes,
+            scrollToSelectedVolumes: scrollToSelectedVolumes,
+            whenTappedPopWithVolumeId: whenTappedPopWithVolumeId,
+            allowMultipleSelections: allowMultipleSelections,
+            showCloseButton: showCloseButton,
+          );
+        },
+      ),
+    );
+  }
 }
 
 List<LibraryTab> _tabs({bool hasLicensedVolumes}) => [
@@ -188,7 +222,7 @@ String _tweakedName(String name) {
   }
 }
 
-class _LibraryScaffold extends StatefulWidget {
+class _Library extends StatefulWidget {
   final List<LibraryTab> tabs;
   final int initialTabIndex;
   final String title;
@@ -196,8 +230,9 @@ class _LibraryScaffold extends StatefulWidget {
   final bool scrollToSelectedVolumes;
   final bool whenTappedPopWithVolumeId;
   final bool allowMultipleSelections;
+  final bool showCloseButton;
 
-  const _LibraryScaffold({
+  const _Library({
     Key key,
     @required this.tabs,
     this.initialTabIndex,
@@ -206,15 +241,16 @@ class _LibraryScaffold extends StatefulWidget {
     this.scrollToSelectedVolumes = true,
     this.whenTappedPopWithVolumeId = false,
     this.allowMultipleSelections = false,
+    this.showCloseButton = true,
   })  : assert(tabs != null),
         assert(!whenTappedPopWithVolumeId == false || !allowMultipleSelections),
         super(key: key);
 
   @override
-  _LibraryScaffoldState createState() => _LibraryScaffoldState();
+  _LibraryState createState() => _LibraryState();
 }
 
-class _LibraryScaffoldState extends State<_LibraryScaffold> {
+class _LibraryState extends State<_Library> {
   final _selectedVolumes = <int>{};
 
   @override
@@ -234,6 +270,7 @@ class _LibraryScaffoldState extends State<_LibraryScaffold> {
                 length: widget.tabs.length,
                 child: Scaffold(
                   appBar: _appBar(
+                    showCloseButton: widget.showCloseButton,
                     bottom: TabBar(
                       isScrollable: true,
                       tabs: widget.tabs.map((t) => Tab(text: t.title)).toList(),
@@ -242,7 +279,10 @@ class _LibraryScaffoldState extends State<_LibraryScaffold> {
                   body: TabBarView(children: widget.tabs.map(_widgetFromTab).toList()),
                 ),
               )
-            : Scaffold(appBar: _appBar(), body: _widgetFromTab(widget.tabs.first)),
+            : Scaffold(
+                appBar: _appBar(showCloseButton: widget.showCloseButton),
+                body: _widgetFromTab(widget.tabs.first),
+              ),
       ),
     );
   }
@@ -274,10 +314,12 @@ class _LibraryScaffoldState extends State<_LibraryScaffold> {
         ),
       );
 
-  PreferredSizeWidget _appBar({PreferredSizeWidget bottom}) => MinHeightAppBar(
+  PreferredSizeWidget _appBar({PreferredSizeWidget bottom, bool showCloseButton = true}) =>
+      MinHeightAppBar(
         appBar: AppBar(
-          leading:
-              CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop()),
+          leading: showCloseButton
+              ? CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop())
+              : null,
           title: Text(tec.isNullOrEmpty(widget.title) ? 'Library' : widget.title),
           actions: widget.allowMultipleSelections
               ? [

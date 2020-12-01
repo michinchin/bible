@@ -13,6 +13,7 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../models/notifications/notifications_model.dart';
+import '../library/library.dart';
 import '../menu/main_menu.dart';
 import '../sheet/snap_sheet.dart';
 import 'tab_bottom_bar.dart';
@@ -100,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 tab: TecTab.library,
                 icon: FeatherIcons.book,
                 label: 'Library',
-                widget: Container(color: Colors.red),
+                widget: LibraryScaffold(showCloseButton: false),
               ),
               TabBottomBarItem(
                 tab: TecTab.plans,
