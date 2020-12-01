@@ -29,6 +29,7 @@ const imageAspectRatio = 1080.0 / 555.0;
 
 class _VotdScreen extends StatefulWidget {
   final VotdEntry votd;
+
   const _VotdScreen(this.votd);
 
   @override
@@ -120,29 +121,32 @@ class __VotdScreenState extends State<_VotdScreen> {
           if (snapshot.hasData && snapshot.data.error == null) {
             final res = snapshot.data.value;
             final ref = widget.votd.ref.copyWith(volume: _bible.id);
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    TecText(
-                      res,
-                      style: cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
-                      textAlign: TextAlign.left,
-                    ),
-                    const SizedBox(height: 5),
-                    FlatButton(
-                      padding: EdgeInsets.zero,
-                      child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                        TecText(ref.label(),
-                            style:
-                                cardTitleCompactStyle.copyWith(color: Theme.of(context).textColor)),
-                        Icon(Icons.arrow_drop_down, color: Theme.of(context).textColor),
-                      ]),
-                      onPressed: onRefTap,
-                    ),
-                  ],
+            return SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      TecText(
+                        res,
+                        style:
+                            cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
+                        textAlign: TextAlign.left,
+                      ),
+                      const SizedBox(height: 5),
+                      FlatButton(
+                        padding: EdgeInsets.zero,
+                        child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                          TecText(ref.label(),
+                              style: cardTitleCompactStyle.copyWith(
+                                  color: Theme.of(context).textColor)),
+                          Icon(Icons.arrow_drop_down, color: Theme.of(context).textColor),
+                        ]),
+                        onPressed: onRefTap,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -161,6 +165,7 @@ Future<void> showAllVotd(BuildContext context, Votd votd, {DateTime scrollToDate
 class _VotdsScreen extends StatelessWidget {
   final Votd votd;
   final DateTime scrollToDateTime;
+
   const _VotdsScreen(this.votd, {this.scrollToDateTime});
 
   @override
@@ -186,19 +191,20 @@ class _VotdsScreen extends StatelessWidget {
         ),
       ),
       body: Scrollbar(
-        child: ScrollablePositionedList.builder(
-            initialScrollIndex: scrollToDateTime == null
-                ? days.indexOf(tec.today)
-                : days.indexOf(tec.dateOnly(scrollToDateTime)),
-            itemCount: votds.length,
-            itemBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
-                future: votds[i].getFormattedVerse(currentBibleFromContext(context)),
-                builder: (context, snapshot) => DayCard(
-                    date: days[i],
-                    title: votds[i].ref.label(),
-                    body: snapshot.data?.value ?? '',
-                    imageUrl: votds[i].imageUrl,
-                    onTap: () => showVotdScreen(context, votds[i])))),
+        child: SafeArea(
+            child: ScrollablePositionedList.builder(
+                initialScrollIndex: scrollToDateTime == null
+                    ? days.indexOf(tec.today)
+                    : days.indexOf(tec.dateOnly(scrollToDateTime)),
+                itemCount: votds.length,
+                itemBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
+                    future: votds[i].getFormattedVerse(currentBibleFromContext(context)),
+                    builder: (context, snapshot) => DayCard(
+                        date: days[i],
+                        title: votds[i].ref.label(),
+                        body: snapshot.data?.value ?? '',
+                        imageUrl: votds[i].imageUrl,
+                        onTap: () => showVotdScreen(context, votds[i]))))),
       ),
     ));
   }

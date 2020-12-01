@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/home/dotds.dart';
 import '../../models/home/votd.dart';
 import '../common/common.dart';
-import '../sheet/snap_sheet.dart';
 import 'dotd_screen.dart';
 import 'saves_screen.dart';
 import 'today_screen.dart';
@@ -55,21 +53,7 @@ class Today extends StatefulWidget {
 class _TodayState extends State<Today> {
   @override
   Widget build(BuildContext context) {
-    // const tabs = [
-    //   Tab(text: 'Today'),
-    //   Tab(text: 'Explore'),
-    //   Tab(text: 'Study Bibles'),
-    //   Tab(text: 'Commentaries'),
-    // ];
-    // final tabViews = [TodayScreen(), Container(), Container(), Container()];
-
-    return TecScaffoldWrapper(
-        // child: DefaultTabController(
-        // length: tabs.length,
-        child: Scaffold(
-      floatingActionButton: TecTabFAB(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      bottomNavigationBar: const TecTabBar(),
+    return Scaffold(
       appBar: MinHeightAppBar(
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -81,16 +65,9 @@ class _TodayState extends State<Today> {
               onPressed: () => showSaveScreen(context),
             ),
           ],
-          // bottom: const TabBar(
-          //   tabs: tabs,
-          //   isScrollable: true,
-          // ),
         ),
       ),
-      body:
-          // TabBarView(children:
-
-          TodayScreen(),
-    ));
+      body: TodayScreen(),
+    );
   }
 }

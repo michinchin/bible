@@ -76,61 +76,63 @@ class __DotdScreenState extends State<_DotdScreen> {
               future: widget.devo.html(AppSettings.shared.env),
               builder: (c, snapshot) {
                 if (snapshot.hasData) {
-                  return Column(children: [
-                    TecHtml(snapshot.data,
-                        baseUrl: '',
-                        // widget.devo.volume.baseUrl,
-                        selectable: false),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      onTap: () => showDetailViewForVolume(context, widget.devo.volume),
-                      child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: TecCard(
-                                  cornerRadius: 10,
-                                  builder: (c) => VolumeImage(
-                                    volume: widget.devo.volume,
-                                    width: imageWidth,
+                  return SafeArea(
+                    child: Column(children: [
+                      TecHtml(snapshot.data,
+                          baseUrl: '',
+                          // widget.devo.volume.baseUrl,
+                          selectable: false),
+                      InkWell(
+                        splashColor: Colors.transparent,
+                        onTap: () => showDetailViewForVolume(context, widget.devo.volume),
+                        child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: TecCard(
+                                    cornerRadius: 10,
+                                    builder: (c) => VolumeImage(
+                                      volume: widget.devo.volume,
+                                      width: imageWidth,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const VerticalDivider(color: Colors.transparent),
-                              Expanded(
-                                child: TecText.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: '${widget.devo.volume.name}\n',
-                                        style: cardTitleCompactStyle.copyWith(
-                                            color: Theme.of(context).textColor),
-                                      ),
-                                      TextSpan(
-                                        text: 'by ${widget.devo.volume.author}\n',
-                                        style: cardSubtitleCompactStyle.copyWith(
-                                            color: Theme.of(context).textColor),
-                                      ),
-                                      // WidgetSpan(
-                                      //     child: RaisedButton(
-                                      //   color: Theme.of(context).cardColor,
-                                      //   child: const Text('Learn More'),
-                                      //   onPressed: () =>
-                                      //       showVolumeDetailView(context, widget.devo.volume),
-                                      // ))
-                                    ],
+                                const VerticalDivider(color: Colors.transparent),
+                                Expanded(
+                                  child: TecText.rich(
+                                    TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: '${widget.devo.volume.name}\n',
+                                          style: cardTitleCompactStyle.copyWith(
+                                              color: Theme.of(context).textColor),
+                                        ),
+                                        TextSpan(
+                                          text: 'by ${widget.devo.volume.author}\n',
+                                          style: cardSubtitleCompactStyle.copyWith(
+                                              color: Theme.of(context).textColor),
+                                        ),
+                                        // WidgetSpan(
+                                        //     child: RaisedButton(
+                                        //   color: Theme.of(context).cardColor,
+                                        //   child: const Text('Learn More'),
+                                        //   onPressed: () =>
+                                        //       showVolumeDetailView(context, widget.devo.volume),
+                                        // ))
+                                      ],
+                                    ),
+                                    autoSize: true,
                                   ),
-                                  autoSize: true,
-                                ),
-                              )
-                            ],
-                          )),
-                    ),
-                    const Divider(height: 50, color: Colors.transparent)
-                  ]);
+                                )
+                              ],
+                            )),
+                      ),
+                      const Divider(height: 50, color: Colors.transparent)
+                    ]),
+                  );
                 }
                 return const LoadingIndicator();
               })),
@@ -175,7 +177,7 @@ class _DotdsScreen extends StatelessWidget {
         ),
       ),
       body: Scrollbar(
-        child: ScrollablePositionedList.builder(
+        child: SafeArea(child: ScrollablePositionedList.builder(
             initialScrollIndex: scrollToDateTime == null
                 ? days.indexOf(tec.today)
                 : days.indexOf(tec.dateOnly(scrollToDateTime)),
@@ -185,7 +187,7 @@ class _DotdsScreen extends StatelessWidget {
                 title: dotds[i].title,
                 body: dotds[i].intro,
                 imageUrl: dotds[i].imageUrl,
-                onTap: () => showDotdScreen(context, dotds[i]))),
+                onTap: () => showDotdScreen(context, dotds[i])))),
       ),
     ));
   }

@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,10 +9,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../models/app_settings.dart';
-import '../../models/const.dart';
-import '../home/today.dart';
-import '../library/library.dart';
-import 'main_sheet.dart';
 import 'selection_sheet.dart';
 
 // must have SheetManagerBloc provided
@@ -29,7 +24,7 @@ class _SnapSheetState extends State<SnapSheet> {
   void initState() {
     super.initState();
     sheets = [
-      const _SheetShadow(key: ValueKey(1), child: MainSheet()),
+      Container(),
       const _SheetShadow(key: ValueKey(2), child: SelectionSheet()),
       Container(),
     ];
@@ -124,86 +119,6 @@ class _SheetShadow extends StatelessWidget {
   }
 }
 
-enum TecTab { today, library, store, reader }
-
-class _TecTabItem {
-  final IconData icon;
-  final void Function(BuildContext) onPressed;
-  final TecTab tab;
-
-  _TecTabItem(this.tab, this.icon, this.onPressed);
-
-  String get label {
-    switch (tab) {
-      case TecTab.today:
-        return 'Today';
-      case TecTab.library:
-        return 'Library';
-      case TecTab.store:
-        return 'Store';
-      case TecTab.reader:
-        return null;
-    }
-
-    return null;
-  }
-}
-
-class TecTabFAB extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      elevation: 2,
-      onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-      backgroundColor: Const.tecartaBlue,
-      child: const Icon(TecIcons.tecartabiblelogo, color: Colors.white, size: 28),
-    );
-  }
-}
-
-class TecTabBar extends StatelessWidget {
-  final VoidCallback pressedCallback;
-
-  const TecTabBar({this.pressedCallback});
-
-  @override
-  Widget build(BuildContext context) {
-    final icons = [
-      _TecTabItem(TecTab.today, Icons.today_outlined, showTodayScreen),
-      _TecTabItem(TecTab.library, FeatherIcons.book, showLibrary),
-      _TecTabItem(TecTab.store, Icons.store_outlined, null),
-    ];
-
-    // CupertinoTabBar bob;
-    // CupertinoTabView tom;
-
-    return BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 6.0,
-        child: Padding(
-            padding: const EdgeInsets.only(left: 15, right: 65, top: 15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                for (final icon in icons)
-                  SheetIconButton(
-                    icon: icon.icon,
-                    text: icon.label,
-                    onPressed: () {
-                      if (pressedCallback != null) {
-                        pressedCallback();
-                      }
-
-                      if (icon.onPressed != null) {
-                        icon.onPressed(context);
-                      }
-                    },
-                  ),
-              ],
-            )));
-  }
-}
-
 class SelectionSheetButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
@@ -243,11 +158,18 @@ class SheetIconButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String text;
   final IconData icon;
+  final Color color;
 
-  const SheetIconButton({this.onPressed, this.text, this.icon});
+  const SheetIconButton({this.onPressed, this.text, this.icon, this.color});
 
   @override
   Widget build(BuildContext context) {
+    final _iconColor =
+        (color == null) ? Theme.of(context).appBarTheme.textTheme.headline6.color : color;
+    final _textStyle = (color == null)
+        ? Theme.of(context).appBarTheme.textTheme.button
+        : Theme.of(context).appBarTheme.textTheme.button.copyWith(color: color);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -261,14 +183,14 @@ class SheetIconButton extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: Theme.of(context).appBarTheme.textTheme.headline6.color,
+              color: _iconColor,
             ),
             const SizedBox(height: 4),
             TecText(
               text,
               autoSize: true,
               textScaleFactor: 0.9,
-              style: Theme.of(context).appBarTheme.textTheme.button,
+              style: _textStyle,
             ),
           ],
         ),

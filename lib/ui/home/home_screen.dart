@@ -1,3 +1,4 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,12 +7,15 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
+import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../models/notifications/notifications_model.dart';
 import '../menu/main_menu.dart';
-import 'expandable_fab.dart';
+import '../sheet/snap_sheet.dart';
+import 'tab_bottom_bar.dart';
+import 'today.dart';
 import 'votd_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -64,33 +68,54 @@ class _HomeScreenState extends State<HomeScreen> {
         BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
         BlocProvider<SelectionCmdBloc>(create: (context) => SelectionCmdBloc()),
         BlocProvider<SheetManagerBloc>(create: (context) => SheetManagerBloc()),
+        BlocProvider<TabManagerBloc>(create: (context) => TabManagerBloc()),
       ],
       child: TecSystemUiOverlayWidget(
         AppSettings.shared.overlayStyle(context),
-        child: TecScaffoldWrapper(
-          child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-            builder: (context, state) {
-              return Scaffold(
-                // floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-                // floatingActionButton: TecFab(state.views.first),
-                // bottomNavigationBar: const TecTabBar(),
-                body: Container(
-                  color: Theme.of(context).backgroundColor,
-                  child: SafeArea(
-                    left: false,
-                    right: false,
-                    bottom: false,
-                    child: ViewManagerWidget(
-                      state: state,
-                      topRightWidget: MainMenuFab(),
-                      topLeftWidget: JournalFab(),
-                      bottomRightWidget: TecFab(state.views.first),
-                    ),
+        child: TabBottomBar(
+          tabs: [
+            TabBottomBarItem(
+              tab: TecTab.today,
+              icon: Icons.today_outlined,
+              label: 'Today',
+              widget: Today(),
+            ),
+            TabBottomBarItem(
+              tab: TecTab.library,
+              icon: FeatherIcons.book,
+              label: 'Library',
+              widget: Container(color: Colors.red),
+            ),
+            TabBottomBarItem(
+              tab: TecTab.plans,
+              icon: Icons.next_plan_outlined,
+              label: 'Plans',
+              widget: Container(color: Colors.blue),
+            ),
+            TabBottomBarItem(
+              tab: TecTab.store,
+              icon: Icons.store_outlined,
+              label: 'Store',
+              widget: Container(color: Colors.yellow),
+            ),
+            TabBottomBarItem(
+              tab: TecTab.reader,
+              widget: Stack(
+                children: [
+                  BlocBuilder<ViewManagerBloc, ViewManagerState>(
+                    builder: (context, state) {
+                      return ViewManagerWidget(
+                        state: state,
+                        topRightWidget: MainMenuFab(),
+                        topLeftWidget: JournalFab(),
+                      );
+                    },
                   ),
-                ),
-              );
-            },
-          ),
+                  SnapSheet(),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -103,7 +128,7 @@ class MainMenuFab extends StatelessWidget {
         elevation: 4,
         mini: true,
         heroTag: null,
-        child: const Icon(Icons.person),
+        child: const Icon(Icons.person, color: Colors.white),
         backgroundColor: Const.tecartaBlue,
         onPressed: () => showMainMenu(context),
       );
@@ -115,9 +140,11 @@ class JournalFab extends StatelessWidget {
         elevation: 4,
         mini: true,
         heroTag: null,
-        child: const Icon(Icons.local_library),
+        child: const Icon(Icons.local_library, color: Colors.white),
         backgroundColor: Const.tecartaBlue,
-        onPressed: () => showMainMenu(context),
+        onPressed: () {
+          Scaffold.of(context).openDrawer();
+        }
       );
 }
 

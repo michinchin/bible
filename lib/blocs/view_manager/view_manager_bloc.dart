@@ -53,6 +53,14 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       if (json != null) {
         try {
           state = ViewManagerState.fromJson(json);
+
+          // verify all views - if a used view type has been removed - reset the whole state
+          for (final view in state.views) {
+            if (!ViewManager.shared.types.contains(view.type)) {
+              state = null;
+              break;
+            }
+          }
         } catch (_) {}
       }
     }

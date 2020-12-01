@@ -5,49 +5,52 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/color_utils.dart';
 import '../../models/ugc/recent_count.dart';
-import '../../models/ugc/ugc_view_data.dart';
 import '../common/common.dart';
-import '../menu/view_actions.dart';
 
-class ViewableUGC extends Viewable {
-  ViewableUGC(String typeName, IconData icon) : super(typeName, icon);
-
-  @override
-  Widget builder(BuildContext context, ViewState state, Size size) {
-    return _UGCView(state, size);
-  }
-
-  @override
-  Widget floatingTitleBuilder(BuildContext context, ViewState state, Size size) {
-    return Container();
-  }
-
-  @override
-  String menuTitle({BuildContext context, ViewState state}) => 'Notes';
-
-  @override
-  Future<ViewData> dataForNewView(
-          {BuildContext context, int currentViewId, Map<String, dynamic> options}) =>
-      Future.value(const UGCViewData(UGCViewData.folderHome));
-
-  @override
-  ViewDataBloc createViewDataBloc(BuildContext context, ViewState state) {
-    return ViewDataBloc(context.viewManager, state.uid, ViewData.fromContext(context, state.uid));
-  }
-}
+// class ViewableUGC extends Viewable {
+//   ViewableUGC(String typeName, IconData icon) : super(typeName, icon);
+//
+//   @override
+//   Widget builder(BuildContext context, ViewState state, Size size) {
+//     return UGCView(state, size);
+//   }
+//
+//   @override
+//   Widget floatingTitleBuilder(BuildContext context, ViewState state, Size size) {
+//     return Container();
+//   }
+//
+//   @override
+//   String menuTitle({BuildContext context, ViewState state}) => 'Notes';
+//
+//   @override
+//   Future<ViewData> dataForNewView(
+//           {BuildContext context, int currentViewId, Map<String, dynamic> options}) =>
+//       Future.value(const UGCViewData(UGCViewData.folderHome));
+//
+//   @override
+//   ViewDataBloc createViewDataBloc(BuildContext context, ViewState state) {
+//     return ViewDataBloc(context.viewManager, state.uid, ViewData.fromContext(context, state.uid));
+//   }
+// }
 
 class _DividerItem {}
 
-class _UGCView extends StatefulWidget {
+class UGCView extends StatefulWidget {
   final UserItem folder;
-  final ViewState state;
-  final Size size;
 
-  const _UGCView(this.state, this.size, {this.folder});
+  static const folderHome = 1;
+  static const folderRecent = -20;
+  static const folderBookmarks = -1;
+  static const folderNotes = -2;
+  static const folderMarginNotes = -3;
+  static const folderHighlights = -4;
+  static const folderLicenses = -5;
+
+  const UGCView({this.folder});
 
   @override
   _UGCViewState createState() => _UGCViewState();
@@ -55,7 +58,7 @@ class _UGCView extends StatefulWidget {
 
 Map<int, UserItem> _folders;
 
-class _UGCViewState extends State<_UGCView> {
+class _UGCViewState extends State<UGCView> {
   int folderId;
   String folderName;
   List items;
@@ -76,9 +79,10 @@ class _UGCViewState extends State<_UGCView> {
     if (widget.folder != null) {
       folderId = widget.folder.id;
       folderName = widget.folder.title;
-    } else {
-      folderId = UGCViewData.fromContext(context, widget.state.uid).folderId;
-      folderName = 'My Content';
+    }
+    else {
+      folderId = UGCView.folderHome;
+      folderName = 'Journal';
     }
 
     _load();
@@ -94,11 +98,11 @@ class _UGCViewState extends State<_UGCView> {
       }
 
       _folders.putIfAbsent(
-          1, () => UserItem(id: 1, title: 'My Content', type: UserItemType.folder.index));
+          1, () => UserItem(id: 1, title: 'Journal', type: UserItemType.folder.index));
     }
 
     switch (folderId) {
-      case UGCViewData.folderHome:
+      case UGCView.folderHome:
         // get the recent count
         _items.add(RecentCount(await AppSettings.shared.userAccount.userDb
             .getRecentItemCountModifiedAfter(recentDate, ofTypes: recentTypes)));
@@ -109,7 +113,6 @@ class _UGCViewState extends State<_UGCView> {
           UserItemType.bookmark,
           UserItemType.marginNote,
           UserItemType.highlight,
-          UserItemType.license,
         ];
 
         final totals = await AppSettings.shared.userAccount.userDb.getCountOfTypes(ofTypes);
@@ -132,7 +135,7 @@ class _UGCViewState extends State<_UGCView> {
 
         // get the folders
         final folders = await AppSettings.shared.userAccount.userDb
-            .getItemsWithParent(UGCViewData.folderHome, ofTypes: [UserItemType.folder]);
+            .getItemsWithParent(UGCView.folderHome, ofTypes: [UserItemType.folder]);
 
         if (folders.isNotEmpty) {
           _items.add(_DividerItem());
@@ -141,7 +144,7 @@ class _UGCViewState extends State<_UGCView> {
         }
         break;
 
-      case UGCViewData.folderRecent:
+      case UGCView.folderRecent:
         _items.addAll(await AppSettings.shared.userAccount.userDb
             .getRecentItemsModifiedAfter(recentDate, ofTypes: recentTypes));
         break;
@@ -192,40 +195,32 @@ class _UGCViewState extends State<_UGCView> {
       folder = item;
     } else if (item is RecentCount) {
       folder =
-          UserItem(id: UGCViewData.folderRecent, title: 'Recent', type: UserItemType.folder.index);
+          UserItem(id: UGCView.folderRecent, title: 'Recent', type: UserItemType.folder.index);
     } else if (item is CountItem) {
       if (item.itemType == UserItemType.bookmark) {
         folder = UserItem(
-            id: UGCViewData.folderBookmarks, title: 'Bookmarks', type: UserItemType.folder.index);
+            id: UGCView.folderBookmarks, title: 'Bookmarks', type: UserItemType.folder.index);
       }
       if (item.itemType == UserItemType.bookmark) {
         folder = UserItem(
-            id: UGCViewData.folderBookmarks, title: 'Bookmarks', type: UserItemType.folder.index);
+            id: UGCView.folderBookmarks, title: 'Bookmarks', type: UserItemType.folder.index);
       } else if (item.itemType == UserItemType.note) {
         folder =
-            UserItem(id: UGCViewData.folderNotes, title: 'Notes', type: UserItemType.folder.index);
+            UserItem(id: UGCView.folderNotes, title: 'Notes', type: UserItemType.folder.index);
       } else if (item.itemType == UserItemType.marginNote) {
         folder = UserItem(
-            id: UGCViewData.folderMarginNotes,
+            id: UGCView.folderMarginNotes,
             title: 'Margin Notes',
             type: UserItemType.folder.index);
       } else if (item.itemType == UserItemType.highlight) {
         folder = UserItem(
-            id: UGCViewData.folderHighlights, title: 'Highlights', type: UserItemType.folder.index);
+            id: UGCView.folderHighlights, title: 'Highlights', type: UserItemType.folder.index);
       }
     }
 
     if (folder != null) {
-      Navigator.of(context).push(TecPageRoute<_UGCView>(
-          builder: (c) => _UGCView(widget.state, widget.size, folder: folder)));
-    }
-  }
-
-  List<Widget> _actions(BuildContext context) {
-    if (widget.state != null) {
-      return defaultActionsBuilder(context, widget.state, widget.size);
-    } else {
-      return defaultActionsBuilder(context, widget.state, widget.size);
+      Navigator.of(context).push(TecPageRoute<UGCView>(
+          builder: (c) => UGCView(folder: folder)));
     }
   }
 
@@ -242,7 +237,7 @@ class _UGCViewState extends State<_UGCView> {
           appBar: AppBar(
             centerTitle: true,
             title: Text(folderName),
-            actions: _actions(context),
+            // actions: _actions(context),
           ),
         ),
         body: Container(
@@ -278,10 +273,6 @@ class _UGCViewState extends State<_UGCView> {
                       case UserItemType.highlight:
                         iconData = Icons.view_agenda_outlined;
                         title = 'Highlights';
-                        break;
-                      case UserItemType.license:
-                        iconData = Icons.local_library_outlined;
-                        title = 'Licenses';
                         break;
                       default:
                         break;
@@ -383,7 +374,7 @@ class _UGCViewState extends State<_UGCView> {
                   return InkWell(
                     onTap: () => _itemTap(items[i]),
                     child: Padding(
-                      padding: (folderId == UGCViewData.folderHome ||
+                      padding: (folderId == UGCView.folderHome ||
                               (items[i] is UserItem && items[i].itemType == UserItemType.folder))
                           ? const EdgeInsets.all(8.0)
                           : const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0, bottom: 4.0),

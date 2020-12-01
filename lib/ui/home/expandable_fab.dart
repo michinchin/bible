@@ -5,18 +5,19 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
-import '../../models/const.dart';
-import '../sheet/snap_sheet.dart';
+import 'tab_bottom_bar.dart';
 
 class ExpandableFAB extends StatefulWidget {
   final List<FABIcon> icons;
   final IconData mainIcon;
   final Color backgroundColor;
+  final List<TabBottomBarItem> tabs;
 
   const ExpandableFAB({
     @required this.icons,
+    @required this.tabs,
     this.mainIcon = FeatherIcons.settings,
     this.backgroundColor = Colors.blue,
   });
@@ -53,7 +54,7 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
     } else {
       _overlayEntry = OverlayEntry(
           maintainState: true,
-          builder: (context) {
+          builder: (c) {
             return Scaffold(
               primary: false,
               extendBody: false,
@@ -63,6 +64,8 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
               floatingActionButton: closeFab(),
               floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
               bottomNavigationBar: TecTabBar(
+                tabs: widget.tabs,
+                tabManager: context.tabManager,
                 pressedCallback: _removeOverlayEntry,
               ),
               body: Semantics(
@@ -142,7 +145,6 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
   }
 
   Widget closeFab() => FloatingActionButton(
-        // mini: true,
         backgroundColor: widget.backgroundColor,
         child: AnimatedBuilder(
             animation: _controller,
@@ -152,7 +154,7 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
                   child: Icon(
                     _controller.isDismissed ? widget.mainIcon : Icons.close,
                     size: 15,
-                    color: Theme.of(context).cardColor,
+                    color: Colors.white,
                   ),
                 )),
         onPressed: () {
@@ -177,6 +179,13 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
     });
   }
 
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenReaderOn = MediaQuery.of(context).accessibleNavigation;
@@ -184,12 +193,10 @@ class _ExpandableFABState extends State<ExpandableFAB> with SingleTickerProvider
         alignment: screenReaderOn ? Alignment.bottomRight : null,
         padding: screenReaderOn ? const EdgeInsets.only(bottom: 30) : null,
         child: FloatingActionButton(
-            mini: true,
             elevation: 4,
             backgroundColor: widget.backgroundColor,
             heroTag: null,
-            // child: Icon(widget.mainIcon, color: Colors.white, size: 20),
-            child: Icon(widget.mainIcon, color: Colors.white, size: 22),
+            child: Icon(widget.mainIcon, color: Colors.white, size: 28),
             onPressed: () {
               _insertOverlayEntry();
               _controller.forward();
@@ -205,59 +212,4 @@ class FABIcon {
 
   const FABIcon(
       {@required this.onPressed, @required this.iconData, @required this.title, this.colors});
-}
-
-class TecFab extends StatelessWidget {
-  final ViewState state;
-
-  const TecFab(this.state);
-
-  @override
-  Widget build(BuildContext context) {
-    // void _onSwitchViews(ViewManagerBloc vmBloc, int viewUid, ViewState view) {
-    //   if (vmBloc.state.maximizedViewUid == viewUid) {
-    //     vmBloc?.add(ViewManagerEvent.maximize(view.uid));
-    //   } else {
-    //     final thisViewPos = vmBloc.indexOfView(viewUid);
-    //     final hiddenViewPos = vmBloc.indexOfView(view.uid);
-    //     vmBloc?.add(ViewManagerEvent.move(
-    //         fromPosition: vmBloc.indexOfView(view.uid), toPosition: vmBloc.indexOfView(viewUid)));
-    //     vmBloc
-    //         ?.add(ViewManagerEvent.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos));
-    //   }
-    // }
-
-    List<FABIcon> offScreenViews(BuildContext menuContext, int viewUid) {
-      // ignore: close_sinks
-      final vmBloc = menuContext.viewManager;
-      final vm = ViewManager.shared;
-      final items = <FABIcon>[];
-      for (final view in vmBloc?.state?.views) {
-        if (!vmBloc.isViewVisible(view.uid)) {
-          final title = vm.menuTitleWith(context: menuContext, state: view);
-          items.add(FABIcon(
-              title: title,
-              onPressed: () {
-                // for now, don't add functionality
-                // _onSwitchViews(vmBloc, viewUid, view);
-                // Navigator.of(menuContext).maybePop();
-              },
-              iconData: Icons.ac_unit));
-          // items.add(tecModalPopupMenuItem(menuContext, vm.iconWithType(view.type), '$title', () {
-
-          // }));
-        }
-      }
-      return items;
-    }
-
-    return ExpandableFAB(
-      icons: offScreenViews(
-        context,
-        context.viewManager.indexOfView(state.uid),
-      ),
-      backgroundColor: Const.tecartaBlue,
-      mainIcon: TecIcons.tecartabiblelogo,
-    );
-  }
 }
