@@ -110,7 +110,7 @@ class _XrefWidget extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             TextSpan(text: xref.text),
           ]),
-          textScaleFactor: contentTextScaleFactorWith(context),
+          textScaleFactor: .9 * contentTextScaleFactorWith(context),
         ),
       ),
       onTap: () {
