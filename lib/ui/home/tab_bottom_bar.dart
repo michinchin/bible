@@ -7,6 +7,7 @@ import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/const.dart';
 import '../../ui/sheet/snap_sheet.dart';
+import '../common/tec_navigator.dart';
 import '../common/tec_page_route.dart';
 import '../ugc/ugc_view.dart';
 import 'reader_fab.dart';
@@ -71,7 +72,7 @@ class _TabBottomBarState extends State<TabBottomBar> {
                   Visibility(
                     maintainState: true,
                     visible: widget.tabs[i].tab == tabState.tab,
-                    child: Navigator(
+                    child: NavigatorWithHeroController(
                       key: ValueKey(i),
                       onGenerateRoute: (settings) => TecPageRoute<dynamic>(
                         settings: settings,

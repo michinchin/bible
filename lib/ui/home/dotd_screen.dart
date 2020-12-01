@@ -84,7 +84,7 @@ class __DotdScreenState extends State<_DotdScreen> {
                           selectable: false),
                       InkWell(
                         splashColor: Colors.transparent,
-                        onTap: () => showDetailViewForVolume(context, widget.devo.volume),
+                        onTap: () => showDetailViewForVolume(context, widget.devo.volume, 'dotd'),
                         child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Row(

@@ -9,7 +9,7 @@ class VolumeImage extends StatelessWidget {
   final double width;
   final double height;
   final BoxFit fit;
-  final bool heroAnimated;
+  final String heroPrefix;
 
   const VolumeImage({
     Key key,
@@ -17,13 +17,12 @@ class VolumeImage extends StatelessWidget {
     this.width,
     this.height,
     this.fit = BoxFit.fill,
-    this.heroAnimated = true,
+    this.heroPrefix,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final path = '${tec.streamUrl}/covers/${volume.id}.jpg';
-    final heroTag = '${volume.hashCode}-${volume.id}';
     Widget img() => CachedNetworkImage(
           width: width,
           height: height,
@@ -32,6 +31,12 @@ class VolumeImage extends StatelessWidget {
           errorWidget: (context, url, dynamic error) => Container(width: width, height: height),
         );
 
-    return !heroAnimated ? img() : Hero(tag: heroTag, child: img());
+    return tec.isNotNullOrEmpty(heroPrefix)
+        ? Hero(tag: heroTagForVolume(volume, heroPrefix), child: img())
+        : img();
   }
+}
+
+String heroTagForVolume(Volume volume, String prefix) {
+  return '$prefix-volume-${volume.id}';
 }

@@ -16,8 +16,9 @@ import 'volume_image.dart';
 
 class VolumeDetail extends StatefulWidget {
   final Volume volume;
+  final String heroPrefix;
 
-  const VolumeDetail({Key key, this.volume}) : super(key: key);
+  const VolumeDetail({Key key, this.volume, this.heroPrefix}) : super(key: key);
 
   @override
   _VolumeDetailState createState() => _VolumeDetailState();
@@ -51,6 +52,7 @@ class _VolumeDetailState extends State<VolumeDetail> {
               volume: widget.volume,
               textScaleFactor: textScaleFactor,
               padding: padding,
+              heroPrefix: widget.heroPrefix,
             ),
             _VolumeDescription(
               volume: widget.volume,
@@ -68,12 +70,14 @@ class _VolumeCard extends StatelessWidget {
   final Volume volume;
   final double textScaleFactor;
   final double padding;
+  final String heroPrefix;
 
   //final Widget buttons;
   const _VolumeCard({
     this.volume,
     this.textScaleFactor,
     this.padding,
+    this.heroPrefix,
   });
 
   @override
@@ -82,11 +86,21 @@ class _VolumeCard extends StatelessWidget {
       builder: (context, constraints) {
         //final halfPad = (padding / 2.0).roundToDouble();
 
+        tec.dmPrint('_VolumeCard building with hero tag: "${heroTagForVolume(volume, heroPrefix)}"');
+
         final cardHeight = math.min(350.0, (constraints.maxWidth * 0.5).roundToDouble() + 50.0);
 
         final titleStyle = TextStyle(
             fontSize: 16, fontWeight: FontWeight.w700, color: Theme.of(context).textColor);
         final subtitleStyle = TextStyle(fontSize: 14, color: Theme.of(context).textColor);
+
+        Widget image() => TecCard(
+              color: Colors.transparent,
+              padding: 0,
+              elevation: defaultElevation,
+              cornerRadius: 8,
+              builder: (context) => VolumeImage(volume: volume),
+            );
 
         return Padding(
           padding: EdgeInsets.only(right: padding, left: padding),
@@ -112,19 +126,12 @@ class _VolumeCard extends StatelessWidget {
                         children: <Widget>[
                           Padding(
                             padding: EdgeInsets.fromLTRB(padding, 0, padding, padding),
-                            child: Hero(
-                              tag: '${volume.hashCode}-${volume.id}',
-                              child: TecCard(
-                                color: Colors.transparent,
-                                padding: 0,
-                                elevation: defaultElevation,
-                                cornerRadius: 8,
-                                builder: (context) => VolumeImage(
-                                  volume: volume,
-                                  heroAnimated: false,
-                                ),
-                              ),
-                            ),
+                            child: tec.isNotNullOrEmpty(heroPrefix)
+                                ? Hero(
+                                    tag: heroTagForVolume(volume, heroPrefix),
+                                    child: image(),
+                                  )
+                                : image(),
                           ),
                           Expanded(
                             child: Padding(

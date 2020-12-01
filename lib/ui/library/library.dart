@@ -16,6 +16,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/downloads/downloads_bloc.dart';
 import '../../blocs/is_licensed_bloc.dart';
 import '../common/common.dart';
+import '../common/tec_navigator.dart';
 import 'volume_card.dart';
 import 'volume_detail.dart';
 import 'volumes_bloc.dart';
@@ -89,9 +90,9 @@ Future<List<int>> selectVolumesInLibrary(
 /// Pushes a `VolumeDetail` view for the given [volume] on the `Navigator` of
 /// the current [context].
 ///
-void showDetailViewForVolume(BuildContext context, Volume volume) {
-  Navigator.of(context)
-      .push<void>(MaterialPageRoute(builder: (context) => VolumeDetail(volume: volume)));
+void showDetailViewForVolume(BuildContext context, Volume volume, String heroPrefix) {
+  Navigator.of(context).push<void>(MaterialPageRoute(
+      builder: (context) => VolumeDetail(volume: volume, heroPrefix: heroPrefix)));
 }
 
 ///
@@ -127,7 +128,7 @@ Future<T> _showLibrary<T extends Object>({
     maxWidth: 500,
     maxHeight: math.max(500.0, (MediaQuery.of(context)?.size?.height ?? 700) - 40),
     makeScrollable: false,
-    builder: (context) => Navigator(
+    builder: (context) => NavigatorWithHeroController(
       onGenerateRoute: (settings) => TecPageRoute<dynamic>(
         settings: settings,
         builder: (context) => LibraryScaffold(
@@ -137,6 +138,7 @@ Future<T> _showLibrary<T extends Object>({
           scrollToSelectedVolumes: scrollToSelectedVolumes,
           whenTappedPopWithVolumeId: whenTappedPopWithVolumeId,
           allowMultipleSelections: allowMultipleSelections,
+          heroPrefix: 'popup',
         ),
       ),
     ),
@@ -151,6 +153,7 @@ class LibraryScaffold extends StatelessWidget {
   final bool whenTappedPopWithVolumeId;
   final bool allowMultipleSelections;
   final bool showCloseButton;
+  final String heroPrefix;
 
   const LibraryScaffold({
     Key key,
@@ -161,6 +164,7 @@ class LibraryScaffold extends StatelessWidget {
     this.whenTappedPopWithVolumeId = false,
     this.allowMultipleSelections = false,
     this.showCloseButton = true,
+    this.heroPrefix,
   }) : super(key: key);
 
   @override
@@ -181,6 +185,7 @@ class LibraryScaffold extends StatelessWidget {
             tabs: tabs,
             initialTabIndex: initialIndex,
             title: title,
+            heroPrefix: heroPrefix,
             selectedVolumes: selectedVolumes,
             scrollToSelectedVolumes: scrollToSelectedVolumes,
             whenTappedPopWithVolumeId: whenTappedPopWithVolumeId,
@@ -231,6 +236,7 @@ class _Library extends StatefulWidget {
   final bool whenTappedPopWithVolumeId;
   final bool allowMultipleSelections;
   final bool showCloseButton;
+  final String heroPrefix;
 
   const _Library({
     Key key,
@@ -242,6 +248,7 @@ class _Library extends StatefulWidget {
     this.whenTappedPopWithVolumeId = false,
     this.allowMultipleSelections = false,
     this.showCloseButton = true,
+    this.heroPrefix,
   })  : assert(tabs != null),
         assert(!whenTappedPopWithVolumeId == false || !allowMultipleSelections),
         super(key: key);
@@ -300,6 +307,7 @@ class _LibraryState extends State<_Library> {
           )..refresh(),
           child: BlocBuilder<VolumesBloc, VolumesState>(
             builder: (context, state) => _VolumesList(
+              heroPrefix: widget.heroPrefix,
               selectedVolumes: _selectedVolumes,
               scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
               allowMultipleSelections: widget.allowMultipleSelections,
@@ -349,6 +357,7 @@ class _VolumesList extends StatefulWidget {
   final bool scrollToSelectedVolumes;
   final bool allowMultipleSelections;
   final void Function(int volume) onTapVolume;
+  final String heroPrefix;
 
   const _VolumesList({
     Key key,
@@ -356,6 +365,7 @@ class _VolumesList extends StatefulWidget {
     this.scrollToSelectedVolumes = true,
     this.allowMultipleSelections = false,
     this.onTapVolume,
+    this.heroPrefix,
   }) : super(key: key);
 
   @override
@@ -474,72 +484,50 @@ class _VolumesListState extends State<_VolumesList> {
 
     final textScaleFactor = textScaleFactorWith(context);
     final padding = (12.0 * textScaleFactor).roundToDouble();
-
     final showSearch = _searchFieldHasFocus;
-    const animationDuration = Duration(milliseconds: 300);
-    final topBarHeight = AppBar().preferredSize.height + 12.0;
-
     final barTextColor = Theme.of(context).appBarTheme.textTheme.headline6.color;
 
     return SafeArea(
       bottom: false,
       child: Column(
         children: [
-          Stack(
-            children: [
-              AnimatedOpacity(
-                duration: animationDuration,
-                opacity: showSearch ? 0 : 1,
-                // height: showSearch ? 0 : topBarHeight,
-                child: IgnorePointer(
-                  ignoring: showSearch,
-                  child: Row(
-                    children: [
-                      SizedBox(width: padding, height: topBarHeight),
-                      IconButton(
-                          tooltip: 'search',
-                          icon: const Icon(Icons.search),
-                          onPressed: () => _focusNode.requestFocus()),
-                      Theme(
-                        data: Theme.of(context).copyWith(accentColor: barTextColor),
-                        child: TecPopupMenuButton<int>(
-                          title: '',
-                          values: {0: 'Title ↓', 1: 'Recent ↓'} as LinkedHashMap<int, String>,
-                          currentValue: context.tbloc<VolumesSortBloc>().state.sortBy.index,
-                          defaultValue: 0,
-                          defaultName: 'Any',
-                          onSelectValue: (value) {
-                            context
-                                .tbloc<VolumesSortBloc>()
-                                .updateSortBy(VolumesSortOpt.values[value]);
-                          },
-                        ),
-                      ),
-                      Expanded(child: Container()),
-                      if (showFilter)
-                        IconButton(
-                            tooltip: 'filters',
-                            icon: const Icon(Icons.filter_list),
-                            onPressed: () => showVolumesFilterSheet(context)),
-                    ],
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 300),
+            crossFadeState: showSearch ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+            firstChild: TecSearchField(
+              padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
+              textEditingController: _textEditingController,
+              focusNode: _focusNode,
+              onSubmit: (s) => _searchListener(),
+            ),
+            secondChild: Row(
+              children: [
+                // SizedBox(width: padding, height: topBarHeight),
+                IconButton(
+                    tooltip: 'search',
+                    icon: const Icon(Icons.search),
+                    onPressed: () => _focusNode.requestFocus()),
+                Theme(
+                  data: Theme.of(context).copyWith(accentColor: barTextColor),
+                  child: TecPopupMenuButton<int>(
+                    title: '',
+                    values: {0: 'Title ↓', 1: 'Recent ↓'} as LinkedHashMap<int, String>,
+                    currentValue: context.tbloc<VolumesSortBloc>().state.sortBy.index,
+                    defaultValue: 0,
+                    defaultName: 'Any',
+                    onSelectValue: (value) {
+                      context.tbloc<VolumesSortBloc>().updateSortBy(VolumesSortOpt.values[value]);
+                    },
                   ),
                 ),
-              ),
-              AnimatedOpacity(
-                duration: animationDuration,
-                opacity: showSearch ? 1 : 0,
-                // height: showSearch ? topBarHeight : 0,
-                child: IgnorePointer(
-                  ignoring: !showSearch,
-                  child: TecSearchField(
-                    padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
-                    textEditingController: _textEditingController,
-                    focusNode: _focusNode,
-                    onSubmit: (s) => _searchListener(),
-                  ),
-                ),
-              ),
-            ],
+                Expanded(child: Container()),
+                if (showFilter)
+                  IconButton(
+                      tooltip: 'filters',
+                      icon: const Icon(Icons.filter_list),
+                      onPressed: () => showVolumesFilterSheet(context)),
+              ],
+            ),
           ),
           Expanded(
             child: Scrollbar(
@@ -556,8 +544,9 @@ class _VolumesListState extends State<_VolumesList> {
                       return VolumeCard(
                         isCompact: widget.onTapVolume != null || widget.allowMultipleSelections,
                         volume: volume,
+                        heroPrefix: widget.heroPrefix,
                         trailing: !widget.allowMultipleSelections
-                            ? _VolumeActionButton(volume: volume)
+                            ? _VolumeActionButton(volume: volume, heroPrefix: widget.heroPrefix)
                             : Checkbox(
                                 value: widget.selectedVolumes.contains(volume.id),
                                 onChanged: (checked) => _toggle(volume.id),
@@ -570,7 +559,7 @@ class _VolumesListState extends State<_VolumesList> {
                                   widget.onTapVolume(volume.id);
                                 }
                               }
-                            : () => showDetailViewForVolume(context, volume),
+                            : () => showDetailViewForVolume(context, volume, widget.heroPrefix),
                       );
                     },
                   );
@@ -586,8 +575,9 @@ class _VolumesListState extends State<_VolumesList> {
 
 class _VolumeActionButton extends StatelessWidget {
   final Volume volume;
+  final String heroPrefix;
 
-  const _VolumeActionButton({Key key, this.volume}) : super(key: key);
+  const _VolumeActionButton({Key key, this.volume, this.heroPrefix}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -615,7 +605,7 @@ class _VolumeActionButton extends StatelessWidget {
           icon: const Icon(Icons.check_circle),
           iconSize: 32,
           color: Colors.green,
-          onPressed: () => showDetailViewForVolume(context, volume));
+          onPressed: () => showDetailViewForVolume(context, volume, heroPrefix));
     } else if (item == null ||
         item.status == DownloadStatus.undefined ||
         item.status == DownloadStatus.failed ||
@@ -633,7 +623,7 @@ class _VolumeActionButton extends StatelessWidget {
             icon: Icon(platformAwareMoreIcon(context)),
             iconSize: 32,
             color: color,
-            onPressed: () => showDetailViewForVolume(context, volume));
+            onPressed: () => showDetailViewForVolume(context, volume, heroPrefix));
       }
     } else if (item.status == DownloadStatus.running) {
       return Stack(

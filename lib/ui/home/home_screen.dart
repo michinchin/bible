@@ -97,11 +97,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 label: 'Today',
                 widget: Today(),
               ),
-              TabBottomBarItem(
+              const TabBottomBarItem(
                 tab: TecTab.library,
                 icon: FeatherIcons.book,
                 label: 'Library',
-                widget: LibraryScaffold(showCloseButton: false),
+                widget: LibraryScaffold(showCloseButton: false, heroPrefix: 'home'),
               ),
               TabBottomBarItem(
                 tab: TecTab.plans,

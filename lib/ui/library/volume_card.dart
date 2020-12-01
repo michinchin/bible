@@ -8,7 +8,7 @@ import 'volume_image.dart';
 class VolumeCard extends StatelessWidget {
   final Volume volume;
   final VoidCallback onTap;
-  final bool heroAnimated;
+  final String heroPrefix;
   final Widget trailing;
   final bool isCompact;
 
@@ -16,7 +16,7 @@ class VolumeCard extends StatelessWidget {
     Key key,
     @required this.volume,
     this.onTap,
-    this.heroAnimated = true,
+    this.heroPrefix,
     this.trailing,
     this.isCompact = true,
   }) : super(key: key);
@@ -53,7 +53,7 @@ class VolumeCard extends StatelessWidget {
                         width: imgWidth,
                         height: imgHeight,
                         fit: BoxFit.cover,
-                        heroAnimated: heroAnimated,
+                        heroPrefix: heroPrefix,
                       ),
                     ),
                   ),
