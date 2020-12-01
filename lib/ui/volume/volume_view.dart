@@ -94,9 +94,7 @@ class _VolumeViewScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         resizeToAvoidBottomInset: false,
-        extendBodyBehindAppBar: true,
         // appBar: _VolumeViewAppBar(state: state, size: size),
-        // appBar: VolumeViewPillBar(state: state, size: size),
         body: _VolumeViewBody(state: state, size: size),
       );
 }
