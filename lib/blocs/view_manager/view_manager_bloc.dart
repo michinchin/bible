@@ -44,53 +44,6 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
         _globalKey = GlobalKey(),
         super(_initialState(kvStore));
 
-  static ViewManagerState _initialState(tec.KeyValueStore kvStore) {
-    final jsonStr = kvStore?.getString(_key);
-    ViewManagerState state;
-    if (tec.isNotNullOrEmpty(jsonStr)) {
-      // tec.dmPrint('loaded ViewManagerState: $jsonStr');
-      final json = tec.parseJsonSync(jsonStr);
-      if (json != null) {
-        try {
-          state = ViewManagerState.fromJson(json);
-
-          // verify all views - if a used view type has been removed - reset the whole state
-          for (final view in state.views) {
-            if (!ViewManager.shared.types.contains(view.type)) {
-              state = null;
-              break;
-            }
-          }
-        } catch (_) {}
-      }
-    }
-    if (state == null || state.views.isEmpty) {
-      return ViewManager.defaultState();
-    }
-    return state;
-  }
-
-  final tec.KeyValueStore _kvStore;
-  final GlobalKey _globalKey;
-
-  // ignore_for_file: prefer_final_fields
-
-  final _blocs = <int, ViewDataBloc>{};
-
-  ViewDataBloc dataBlocWithView(int uid) => _blocs[uid];
-
-  /// List of ViewRect objects, one for each open view.
-  var _viewRects = <ViewRect>[];
-
-  /// The uid of the previous build's maximized view, or zero if none.
-  var _prevBuildMaxedViewUid = 0;
-
-  /// Rows and columns of the open views that fit in the view manager.
-  List<List<ViewState>> _rows = [];
-
-  /// List of the open views that did not fit in `_rows`.
-  List<ViewState> _overflow = [];
-
   ///
   /// Returns the view manager rect in global coordinates.
   ///
@@ -168,7 +121,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   bool isViewVisible(int uid) => rectOfView(uid)?.isVisible ?? false;
 
   ///
-  /// Returns the [ViewState] of the view with the given [uid], or null if none.
+  /// Returns the [ViewState] of the view with the given [uid], or `null` if none.
   ///
   ViewState stateOfView(int uid) => state.views.firstWhere((e) => e.uid == uid, orElse: () => null);
 
@@ -178,12 +131,12 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   int indexOfView(int uid) => state.views.indexWhere((e) => e.uid == uid);
 
   ///
-  /// Returns the [ViewRect] of the view with the given [uid], or null if none.
+  /// Returns the [ViewRect] of the view with the given [uid], or `null` if none.
   ///
   ViewRect rectOfView(int uid) => _viewRects.firstWhere((e) => e.uid == uid, orElse: () => null);
 
   ///
-  /// Returns the global [Rect] of the view with the given [uid], or null if none.
+  /// Returns the global [Rect] of the view with the given [uid], or `null` if none.
   ///
   Rect globalRectOfView(int uid) {
     final gr = globalRect;
@@ -220,7 +173,13 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
   // Getting and updating view specific data:
 
   ///
-  /// Returns the String data associated with the view with the given [uid] or null if none.
+  /// Returns the `ViewDataBloc` associated with the view with the given [uid], or `null` if none.
+  ///
+  ViewDataBloc dataBlocWithView(int uid) => _blocs[uid];
+  final _blocs = <int, ViewDataBloc>{};
+
+  ///
+  /// Returns the String data associated with the view with the given [uid] or `null` if none.
   ///
   String dataWithView(int uid) => _kvStore?.getString('vm_$uid');
 
@@ -291,7 +250,7 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       _viewsWithSelections.keys.expand((uid) => isViewVisible(uid) ? [uid] : []);
 
   ///
-  /// Returns the selection object for the view with the given [uid], or null if none.
+  /// Returns the selection object for the view with the given [uid], or `null` if none.
   ///
   Object selectionObjectWithViewUid(int uid) => _viewsWithSelections[uid];
 
@@ -312,6 +271,9 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
     // }
     // tec.dmPrint('');
   }
+
+  //-------------------------------------------------------------------------
+  // `mapEventToState` and related functions:
 
   @override
   Stream<ViewManagerState> mapEventToState(ViewManagerEvent event) async* {
@@ -421,6 +383,52 @@ class ViewManagerBloc extends Bloc<ViewManagerEvent, ViewManagerState> {
       state.nextUid,
     );
   }
+
+  //-------------------------------------------------------------------------
+  // Private data and functions
+
+  static ViewManagerState _initialState(tec.KeyValueStore kvStore) {
+    final jsonStr = kvStore?.getString(_key);
+    ViewManagerState state;
+    if (tec.isNotNullOrEmpty(jsonStr)) {
+      // tec.dmPrint('loaded ViewManagerState: $jsonStr');
+      final json = tec.parseJsonSync(jsonStr);
+      if (json != null) {
+        try {
+          state = ViewManagerState.fromJson(json);
+
+          // Verify all views. If a view type has been removed, reset the whole state.
+          for (final view in state.views) {
+            if (!ViewManager.shared.types.contains(view.type)) {
+              state = null;
+              break;
+            }
+          }
+        } catch (_) {}
+      }
+    }
+    if (state == null || state.views.isEmpty) {
+      return ViewManager.defaultState();
+    }
+    return state;
+  }
+
+  final tec.KeyValueStore _kvStore;
+  final GlobalKey _globalKey;
+
+  // ignore_for_file: prefer_final_fields
+
+  /// List of ViewRect objects, one for each open view.
+  var _viewRects = <ViewRect>[];
+
+  /// The uid of the previous build's maximized view, or zero if none.
+  var _prevBuildMaxedViewUid = 0;
+
+  /// Rows and columns of the open views that fit in the view manager.
+  List<List<ViewState>> _rows = [];
+
+  /// List of the open views that did not fit in `_rows`.
+  List<ViewState> _overflow = [];
 }
 
 ///

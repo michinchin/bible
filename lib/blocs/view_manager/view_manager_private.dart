@@ -42,14 +42,19 @@ class _VMViewStackState extends State<_VMViewStack> {
     final constraints = widget.constraints;
 
     final vmBloc = context.viewManager;
-    assert(vmBloc != null);
+    if (vmBloc == null) {
+      throw FlutterError(
+        'ERROR: `context.viewManager` called with a context that does not contain '
+        'a `ViewManagerBloc`. The context used was: $context',
+      );
+    }
 
-    final sizeChanged = ((vmBloc?._size ?? Size.zero) != constraints.biggest);
+    final sizeChanged = (vmBloc._size != constraints.biggest);
     if (sizeChanged) tec.dmPrint('ViewManager size changed to ${constraints.biggest}');
 
-    vmBloc?._size = constraints.biggest;
+    vmBloc._size = constraints.biggest;
 
-    final wasVisibleTextSelected = (vmBloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
+    final wasVisibleTextSelected = (vmBloc.visibleViewsWithSelections?.isNotEmpty ?? false);
 
     var mqData = MediaQuery.of(context);
     mqData = mqData.copyWith(
@@ -67,19 +72,19 @@ class _VMViewStackState extends State<_VMViewStack> {
       if (portraitHeight < 950.0 && portraitWidth < 500) {
         // This is a phone or small app window, so only allow 2 views.
         _minSize = math.max((portraitHeight / 2.0).floorToDouble(), 244 - topOffset);
-        vmBloc?._numViewsLimited = true;
+        vmBloc._numViewsLimited = true;
       } else {
         // This is a larger window or tablet.
         _minSize = 300;
-        vmBloc?._numViewsLimited = false;
+        vmBloc._numViewsLimited = false;
       }
     }
 
     // Build and update the rows, which updates `vmBloc._rows`, `._overflow`, and `._isFull`.
-    final countOfOnScreenViews = vmBloc?._rows?.totalItems ?? 0;
+    final countOfOnScreenViews = vmBloc._rows.totalItems;
     _buildRows(vmBloc, _SizeOpt.ideal, widget.vmState, rect.width, rect.height)
       ..balance(rect.width);
-    final countOfOnScreenViewsChanged = (countOfOnScreenViews != (vmBloc?._rows?.totalItems ?? 0));
+    final countOfOnScreenViewsChanged = (countOfOnScreenViews != vmBloc._rows.totalItems);
 
     // Is there a maximized view?
     var maximizedView = widget.vmState.views
@@ -89,46 +94,47 @@ class _VMViewStackState extends State<_VMViewStack> {
 
     // Is there a view with keyboard focus?
     var viewWithKeyboardFocus = widget.vmState.views
-        .firstWhere((e) => e.uid == vmBloc?._viewWithKeyboardFocus, orElse: () => null);
+        .firstWhere((e) => e.uid == vmBloc._viewWithKeyboardFocus, orElse: () => null);
     if (viewWithKeyboardFocus != null && maximizedView != null) {
       maximizedView = viewWithKeyboardFocus;
       viewWithKeyboardFocus = null;
     }
 
     final thisBuildHasMaxedView = (maximizedView != null);
-    final lastBuildHadMaxedView = (vmBloc?._prevBuildMaxedViewUid ?? 0) != 0;
+    final lastBuildHadMaxedView = vmBloc._prevBuildMaxedViewUid != 0;
 
     // Build the view widgets.
     final viewRects = <ViewRect>[];
-    final children = vmBloc?._rows?.toViewWidgetList(
+    final children = vmBloc._rows.toViewWidgetList(
       context: context,
       constraints: constraints,
       floatingTitleMQData: mqData,
       rect: rect,
-      prevBuildMaxedViewUid: vmBloc?._prevBuildMaxedViewUid ?? 0,
+      prevBuildMaxedViewUid: vmBloc._prevBuildMaxedViewUid,
       maximizedView: maximizedView,
       viewWithKeyboardFocus: viewWithKeyboardFocus,
-      overflowViews: vmBloc?._overflow,
+      overflowViews: vmBloc._overflow,
       rects: viewRects,
       animationDuration: sizeChanged ||
               countOfOnScreenViewsChanged ||
               lastBuildHadMaxedView != thisBuildHasMaxedView
           ? _viewResizeAnimationDuration
           : null,
-      numViewsLimited: vmBloc?.numViewsLimited ?? true,
+      numViewsLimited: vmBloc.numViewsLimited,
       floatingTitleHeight: floatingTitleHeight,
       topLeftWidget: widget.topLeftWidget,
       topRightWidget: widget.topRightWidget,
       bottomRightWidget: widget.bottomRightWidget,
     );
-    vmBloc?._viewRects = viewRects;
-    vmBloc?._prevBuildMaxedViewUid = maximizedView?.uid ?? 0;
+    vmBloc
+      .._viewRects = viewRects
+      .._prevBuildMaxedViewUid = maximizedView?.uid ?? 0;
 
     // If this build has a maxed view, but the last one didn't, or vice versa, rebuild
     // again after the resize animation finishes. Because, for a nicer and smoother
     // animation, only the view that is maximized or minimized is animated, and after
-    // the animation the other views need to be rebuilt so they are sized and layered
-    // correctly.
+    // the animation finishes, the other views need to be rebuilt so they are sized
+    // and layered correctly.
     if (lastBuildHadMaxedView != thisBuildHasMaxedView) {
       Future.delayed(_viewResizeAnimationDuration, () {
         tec.dmPrint('_VMViewStack refreshing after maximize/minimize.');
@@ -137,10 +143,22 @@ class _VMViewStackState extends State<_VMViewStack> {
     }
 
     // If the state of visible selected text changed, call _updateSelectionBloc after the build.
-    final isVisibleTextSelected = (vmBloc?.visibleViewsWithSelections?.isNotEmpty ?? false);
+    final isVisibleTextSelected = (vmBloc.visibleViewsWithSelections.isNotEmpty);
     if (wasVisibleTextSelected != isVisibleTextSelected) {
       WidgetsBinding.instance
-          .addPostFrameCallback((timeStamp) => vmBloc?._updateSelectionBloc(context));
+          .addPostFrameCallback((timeStamp) => vmBloc._updateSelectionBloc(context));
+    }
+
+    // If any view data blocs need to be closed because their matching view was closed...
+    final uidsOfBlocsToClose =
+        vmBloc._blocs.keys.toSet().difference(vmBloc.state.views.map((v) => v.uid).toSet());
+    if (uidsOfBlocsToClose.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        for (final uid in uidsOfBlocsToClose) {
+          tec.dmPrint('ViewManager closing ViewDataBloc for view $uid');
+          vmBloc._blocs.remove(uid).close();
+        }
+      });
     }
 
     return Theme(
