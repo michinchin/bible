@@ -23,11 +23,8 @@ class SavesScreen extends StatelessWidget {
         future: OtdSaves.fetch(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final years = snapshot.data.data
-                .map((s) => s.year)
-                .toSet()
-                .toList()
-                ..sort((a, b) => b.compareTo(a));
+            final years = snapshot.data.data.map((s) => s.year).toSet().toList()
+              ..sort((a, b) => b.compareTo(a));
             return TecScaffoldWrapper(
                 child: TabWrapper(
               appBarTitle: const Text('Saves'),
@@ -117,8 +114,11 @@ class TabWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return tabViews.length <= 1
         ? Scaffold(
+            backgroundColor: Theme.of(context).backgroundColor,
             appBar: MinHeightAppBar(
               appBar: AppBar(
+                elevation: 0,
+                backgroundColor: Colors.transparent,
                 title: appBarTitle,
               ),
             ),
@@ -126,8 +126,11 @@ class TabWrapper extends StatelessWidget {
         : DefaultTabController(
             length: tabViews.length,
             child: Scaffold(
+                backgroundColor: Theme.of(context).backgroundColor,
                 appBar: MinHeightAppBar(
                   appBar: AppBar(
+                    elevation: 0,
+                    backgroundColor: Colors.transparent,
                     title: appBarTitle,
                     bottom: TabBar(
                       tabs: tabs,

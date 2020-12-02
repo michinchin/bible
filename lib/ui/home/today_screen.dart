@@ -118,6 +118,7 @@ class _HomeCard extends StatelessWidget {
               child: TecImage(
                 height: dayCardHeight,
                 color: Colors.black12,
+                colorBlendMode: BlendMode.colorBurn,
                 url: imageUrl,
               ),
             ),
@@ -181,7 +182,8 @@ class _HomeCard extends StatelessWidget {
                                         child: const TecText(
                                           'All',
                                           style: TextStyle(
-                                              fontWeight: FontWeight.bold, color: Const.tecartaBlue),
+                                              fontWeight: FontWeight.bold,
+                                              color: Const.tecartaBlue),
                                         )),
                                   ),
                                 ],

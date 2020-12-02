@@ -82,10 +82,7 @@ class _ReaderFABState extends State<ReaderFAB> with SingleTickerProviderStateMix
                       ),
                     ),
                   ),
-                  Container(
-                      height: double.infinity,
-                      padding: const EdgeInsets.only(bottom: 40),
-                      child: _expandedView()),
+                  Container(padding: const EdgeInsets.only(bottom: 40), child: _expandedView()),
                 ]),
               ),
             );
@@ -97,52 +94,49 @@ class _ReaderFABState extends State<ReaderFAB> with SingleTickerProviderStateMix
 
   Widget _expandedView() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: List<Widget>.generate(_icons.length, (index) {
-        final Widget child = Container(
-          height: 35 * scaleFactorWith(context),
-          padding: const EdgeInsets.only(right: 10),
-          alignment: Alignment.centerRight,
-          child: ScaleTransition(
-            scale: CurvedAnimation(
-              parent: _controller,
-              curve: Interval(0, 1.0 - index / _icons.length / 2.0, curve: Curves.easeOut),
-            ),
-            child: InkWell(
-              onTap: () {
-                _removeOverlayEntry();
-                _icons[index].onPressed();
-              },
-              child: Container(
-                padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(25),
-                  boxShadow: [
-                    boxShadow(
-                        color: isDarkMode ? Colors.black54 : Colors.black38,
-                        offset: const Offset(0, 3),
-                        blurRadius: 5)
-                  ],
+    return ListView(
+        shrinkWrap: true,
+        // mainAxisSize: MainAxisSize.min,
+        // mainAxisAlignment: MainAxisAlignment.end,
+        // crossAxisAlignment: CrossAxisAlignment.end,
+        children: List<Widget>.generate(
+          _icons.length,
+          (index) => Container(
+            padding: const EdgeInsets.only(right: 10),
+            margin: const EdgeInsets.only(top: 10),
+            alignment: Alignment.centerRight,
+            child: ScaleTransition(
+              scale: CurvedAnimation(
+                parent: _controller,
+                curve: Interval(0, 1.0 - index / _icons.length / 2.0, curve: Curves.easeOut),
+              ),
+              child: InkWell(
+                onTap: () {
+                  _removeOverlayEntry();
+                  _icons[index].onPressed();
+                },
+                child: Container(
+                  padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      boxShadow(
+                          color: isDarkMode ? Colors.black54 : Colors.black38,
+                          offset: const Offset(0, 3),
+                          blurRadius: 5)
+                    ],
+                  ),
+                  child: Text(_icons[index].title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyText1
+                          .copyWith(fontSize: contentFontSizeWith(context))),
                 ),
-                child: Text(_icons[index].title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyText1
-                        .copyWith(fontSize: contentFontSizeWith(context))),
               ),
             ),
           ),
-        );
-        return Padding(
-          padding: const EdgeInsets.only(left: 5, right: 5),
-          child: child,
-        );
-      }).toList(),
-    );
+        ).toList());
   }
 
   Widget closeFab() => FloatingActionButton(

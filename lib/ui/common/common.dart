@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -329,5 +330,5 @@ Future<dynamic> showScreen<T>(
         useRootNavigator: useRootNavigator,
         padding: EdgeInsets.zero,
         maxWidth: 500,
-        maxHeight: 600,
+        maxHeight: math.max(500.0, (MediaQuery.of(context)?.size?.height ?? 700) - 40),
         builder: builder);

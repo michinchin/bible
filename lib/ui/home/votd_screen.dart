@@ -182,8 +182,11 @@ class _VotdsScreen extends StatelessWidget {
 
     return TecScaffoldWrapper(
         child: Scaffold(
+      backgroundColor: Theme.of(context).backgroundColor,
       appBar: MinHeightAppBar(
         appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
           title: const TecText(
             'Verse Of The Day',
             autoSize: true,

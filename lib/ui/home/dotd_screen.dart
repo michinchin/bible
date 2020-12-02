@@ -41,101 +41,102 @@ class __DotdScreenState extends State<_DotdScreen> {
     const imageWidth = 70.0;
     return TecScaffoldWrapper(
       child: TecImageAppBarScaffold(
-          actions: [
-            IconButton(
-                icon: const TecIcon(
-                  Icon(Icons.share),
+        actions: [
+          IconButton(
+              icon: const TecIcon(
+                Icon(Icons.share),
+                color: Colors.white,
+                shadowColor: Colors.black,
+              ),
+              onPressed: share),
+          FutureBuilder<OtdSaves>(
+            future: OtdSaves.fetch(),
+            builder: (c, s) => IconButton(
+                icon: TecIcon(
+                  Icon(s.hasData &&
+                          s.data.hasItem(dotdType, widget.devo.year, widget.devo.ordinalDay)
+                      ? Icons.bookmark
+                      : Icons.bookmark_border),
                   color: Colors.white,
                   shadowColor: Colors.black,
                 ),
-                onPressed: share),
-            FutureBuilder<OtdSaves>(
-              future: OtdSaves.fetch(),
-              builder: (c, s) => IconButton(
-                  icon: TecIcon(
-                    Icon(s.hasData &&
-                            s.data.hasItem(dotdType, widget.devo.year, widget.devo.ordinalDay)
-                        ? Icons.bookmark
-                        : Icons.bookmark_border),
-                    color: Colors.white,
-                    shadowColor: Colors.black,
-                  ),
-                  onPressed: () async {
-                    await s.data?.saveOtd(
-                        cardTypeId: dotdType, year: widget.devo.year, day: widget.devo.ordinalDay);
-                    setState(() {});
-                  }),
-            ),
-          ],
-          imageUrl: widget.devo.imageUrl,
-          backgroundColor:
-              Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
-          imageAspectRatio: imageAspectRatio,
-          floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-          childBuilder: (c, i) => FutureBuilder<String>(
-              future: widget.devo.html(AppSettings.shared.env),
-              builder: (c, snapshot) {
-                if (snapshot.hasData) {
-                  return SafeArea(
-                    child: Column(children: [
-                      TecHtml(snapshot.data,
-                          baseUrl: '',
-                          // widget.devo.volume.baseUrl,
-                          selectable: false),
-                      InkWell(
-                        splashColor: Colors.transparent,
-                        onTap: () => showDetailViewForVolume(context, widget.devo.volume, 'dotd'),
-                        child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: TecCard(
-                                    cornerRadius: 10,
-                                    builder: (c) => VolumeImage(
-                                      volume: widget.devo.volume,
-                                      width: imageWidth,
-                                    ),
+                onPressed: () async {
+                  await s.data?.saveOtd(
+                      cardTypeId: dotdType, year: widget.devo.year, day: widget.devo.ordinalDay);
+                  setState(() {});
+                }),
+          ),
+        ],
+        imageUrl: widget.devo.imageUrl,
+        backgroundColor:
+            Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
+        imageAspectRatio: imageAspectRatio,
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        childBuilder: (c, i) => FutureBuilder<String>(
+            future: widget.devo.html(AppSettings.shared.env),
+            builder: (c, snapshot) {
+              if (snapshot.hasData) {
+                return SafeArea(
+                  child: Column(children: [
+                    TecHtml(snapshot.data,
+                        baseUrl: '',
+                        // widget.devo.volume.baseUrl,
+                        selectable: false),
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      onTap: () => showDetailViewForVolume(context, widget.devo.volume, 'dotd'),
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: TecCard(
+                                  cornerRadius: 10,
+                                  builder: (c) => VolumeImage(
+                                    volume: widget.devo.volume,
+                                    width: imageWidth,
                                   ),
                                 ),
-                                const VerticalDivider(color: Colors.transparent),
-                                Expanded(
-                                  child: TecText.rich(
-                                    TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: '${widget.devo.volume.name}\n',
-                                          style: cardTitleCompactStyle.copyWith(
-                                              color: Theme.of(context).textColor),
-                                        ),
-                                        TextSpan(
-                                          text: 'by ${widget.devo.volume.author}\n',
-                                          style: cardSubtitleCompactStyle.copyWith(
-                                              color: Theme.of(context).textColor),
-                                        ),
-                                        // WidgetSpan(
-                                        //     child: RaisedButton(
-                                        //   color: Theme.of(context).cardColor,
-                                        //   child: const Text('Learn More'),
-                                        //   onPressed: () =>
-                                        //       showVolumeDetailView(context, widget.devo.volume),
-                                        // ))
-                                      ],
-                                    ),
-                                    autoSize: true,
+                              ),
+                              const VerticalDivider(color: Colors.transparent),
+                              Expanded(
+                                child: TecText.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: '${widget.devo.volume.name}\n',
+                                        style: cardTitleCompactStyle.copyWith(
+                                            color: Theme.of(context).textColor),
+                                      ),
+                                      TextSpan(
+                                        text: 'by ${widget.devo.volume.author}\n',
+                                        style: cardSubtitleCompactStyle.copyWith(
+                                            color: Theme.of(context).textColor),
+                                      ),
+                                      // WidgetSpan(
+                                      //     child: RaisedButton(
+                                      //   color: Theme.of(context).cardColor,
+                                      //   child: const Text('Learn More'),
+                                      //   onPressed: () =>
+                                      //       showVolumeDetailView(context, widget.devo.volume),
+                                      // ))
+                                    ],
                                   ),
-                                )
-                              ],
-                            )),
-                      ),
-                      const Divider(height: 50, color: Colors.transparent)
-                    ]),
-                  );
-                }
-                return const LoadingIndicator();
-              })),
+                                  autoSize: true,
+                                ),
+                              )
+                            ],
+                          )),
+                    ),
+                    const Divider(height: 50, color: Colors.transparent)
+                  ]),
+                );
+              }
+              return const LoadingIndicator();
+            }),
+      ),
     );
   }
 }
@@ -170,24 +171,30 @@ class _DotdsScreen extends StatelessWidget {
     }
     return TecScaffoldWrapper(
         child: Scaffold(
-      appBar: AppBar(
-        title: const TecText(
-          'Devotional Of The Day',
-          autoSize: true,
+      backgroundColor: Theme.of(context).backgroundColor,
+      appBar: MinHeightAppBar(
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          title: const TecText(
+            'Devotional Of The Day',
+            autoSize: true,
+          ),
         ),
       ),
       body: Scrollbar(
-        child: SafeArea(child: ScrollablePositionedList.builder(
-            initialScrollIndex: scrollToDateTime == null
-                ? days.indexOf(tec.today)
-                : days.indexOf(tec.dateOnly(scrollToDateTime)),
-            itemCount: dotds.length,
-            itemBuilder: (c, i) => DayCard(
-                date: days[i],
-                title: dotds[i].title,
-                body: dotds[i].intro,
-                imageUrl: dotds[i].imageUrl,
-                onTap: () => showDotdScreen(context, dotds[i])))),
+        child: SafeArea(
+            child: ScrollablePositionedList.builder(
+                initialScrollIndex: scrollToDateTime == null
+                    ? days.indexOf(tec.today)
+                    : days.indexOf(tec.dateOnly(scrollToDateTime)),
+                itemCount: dotds.length,
+                itemBuilder: (c, i) => DayCard(
+                    date: days[i],
+                    title: dotds[i].title,
+                    body: dotds[i].intro,
+                    imageUrl: dotds[i].imageUrl,
+                    onTap: () => showDotdScreen(context, dotds[i])))),
       ),
     ));
   }

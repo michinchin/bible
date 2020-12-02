@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/home/dotds.dart';
 import '../../models/home/votd.dart';
@@ -53,21 +54,26 @@ class Today extends StatefulWidget {
 class _TodayState extends State<Today> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: MinHeightAppBar(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          centerTitle: false,
-          title: const Text('Today'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.bookmark_border),
-              onPressed: () => showSaveScreen(context),
-            ),
-          ],
+    return TecScaffoldWrapper(
+      child: Scaffold(
+        backgroundColor: Theme.of(context).backgroundColor,
+        appBar: MinHeightAppBar(
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            automaticallyImplyLeading: false,
+            centerTitle: false,
+            title: const Text('Today'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.bookmark_border),
+                onPressed: () => showSaveScreen(context),
+              ),
+            ],
+          ),
         ),
+        body: TodayScreen(),
       ),
-      body: TodayScreen(),
     );
   }
 }

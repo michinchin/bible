@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final delay =
         (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 500 : 1250;
 
-    Future.delayed(Duration(milliseconds: delay), () {
+    Future.delayed(Duration(milliseconds: delay), () {     
       // resend the notification
       Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
     });
