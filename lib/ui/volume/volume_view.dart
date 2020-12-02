@@ -5,14 +5,11 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../bible/chapter_title.dart';
 import '../bible/chapter_view.dart';
-import '../bible/chapter_view_app_bar.dart';
 import '../bible/chapter_view_data.dart';
-import '../common/common.dart';
 import '../library/library.dart';
-import '../menu/view_actions.dart';
 import 'study_view_data.dart';
+import 'volume_action_bar.dart';
 
 class ViewableVolume extends Viewable {
   ViewableVolume(String typeName, IconData icon) : super(typeName, icon);
@@ -21,7 +18,8 @@ class ViewableVolume extends Viewable {
   Widget builder(BuildContext context, ViewState state, Size size) {
     return BlocProvider<ChapterViewDataBloc>.value(
       value: context.viewManager.dataBlocWithView(state.uid) as ChapterViewDataBloc,
-      child: _VolumeViewScaffold(state: state, size: size),
+      child: Scaffold(
+          resizeToAvoidBottomInset: false, body: PageableChapterView(state: state, size: size)),
     );
   }
 
@@ -29,7 +27,7 @@ class ViewableVolume extends Viewable {
   Widget floatingTitleBuilder(BuildContext context, ViewState state, Size size) {
     return BlocProvider<ChapterViewDataBloc>.value(
       value: context.viewManager.dataBlocWithView(state.uid) as ChapterViewDataBloc,
-      child: VolumeViewPillBar(state: state, size: size),
+      child: VolumeViewActionBar(state: state, size: size),
     );
   }
 
@@ -83,71 +81,6 @@ class ViewableVolume extends Viewable {
   }
 }
 
-class _VolumeViewScaffold extends StatelessWidget {
-  final ViewState state;
-  final Size size;
-
-  const _VolumeViewScaffold({Key key, @required this.state, @required this.size})
-      : assert(state != null && size != null),
-        super(key: key);
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        resizeToAvoidBottomInset: false,
-        // appBar: _VolumeViewAppBar(state: state, size: size),
-        body: _VolumeViewBody(state: state, size: size),
-      );
-}
-
-// ignore: unused_element
-class _VolumeViewAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final ViewState state;
-  final Size size;
-
-  const _VolumeViewAppBar({Key key, @required this.state, @required this.size})
-      : assert(state != null && size != null),
-        super(key: key);
-
-  @override
-  Widget build(BuildContext context) => BlocBuilder<ChapterViewDataBloc, ViewData>(
-        builder: (context, data) {
-          if (data is ChapterViewData) {
-            return ChapterViewAppBar(
-              volumeType: isBibleId(data.volumeId) ? VolumeType.bible : VolumeType.studyContent,
-              viewState: state,
-              size: size,
-            );
-          }
-          throw Exception('VolumeViewAppBar data must be ChapterViewData');
-        },
-      );
-
-  @override
-  Size get preferredSize => const MinHeightAppBar().preferredSize;
-}
-
-class _VolumeViewBody extends StatelessWidget {
-  final ViewState state;
-  final Size size;
-
-  const _VolumeViewBody({Key key, @required this.state, @required this.size})
-      : assert(state != null && size != null),
-        super(key: key);
-
-  @override
-  Widget build(BuildContext context) => PageableChapterView(state: state, size: size);
-
-  // @override
-  // Widget build(BuildContext context) => BlocBuilder<ChapterViewDataBloc, ViewData>(
-  //       builder: (context, data) {
-  //         if (data is ChapterViewData) {
-  //           return Container();
-  //         }
-  //         throw Exception('VolumeViewAppBar data must be ChapterViewData');
-  //       },
-  //     );
-}
-
 class StudyView extends StatelessWidget {
   final ViewState state;
   final Size size;
@@ -181,13 +114,13 @@ class StudyView extends StatelessWidget {
         length: tabs.length,
         child: Scaffold(
           resizeToAvoidBottomInset: false,
-          appBar: MinHeightAppBar(
-            appBar: AppBar(
-              centerTitle: false,
-              title: ChapterTitle(volumeType: VolumeType.studyContent),
-              actions: defaultActionsBuilder(context, state, size),
-            ),
-          ),
+          // appBar: MinHeightAppBar(
+          //   appBar: AppBar(
+          //     centerTitle: false,
+          //     title: ChapterTitle(volumeType: VolumeType.studyContent),
+          //     actions: defaultActionsBuilder(context, state, size),
+          //   ),
+          // ),
           body: CustomScrollView(
             slivers: [
               SliverAppBar(

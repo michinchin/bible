@@ -10,20 +10,20 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/user_item_helper.dart';
+import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
 import '../common/tec_action_bar.dart';
 import '../common/tec_modal_popup_menu.dart';
 import '../library/library.dart';
 import '../menu/view_actions.dart';
 import '../nav/nav.dart';
-import '../volume/study_view_data.dart';
-import 'chapter_view_data.dart';
+import 'study_view_data.dart';
 
-class VolumeViewPillBar extends StatelessWidget {
+class VolumeViewActionBar extends StatelessWidget {
   final ViewState state;
   final Size size;
 
-  const VolumeViewPillBar({Key key, @required this.state, @required this.size})
+  const VolumeViewActionBar({Key key, @required this.state, @required this.size})
       : assert(state != null && size != null),
         super(key: key);
 
@@ -86,94 +86,7 @@ class VolumeViewPillBar extends StatelessWidget {
             ],
           );
         }
-        throw Exception('VolumeViewAppBar data must be ChapterViewData');
-      },
-    );
-  }
-}
-
-class ChapterTitle extends StatelessWidget {
-  final VolumeType volumeType;
-
-  const ChapterTitle({Key key, this.volumeType = VolumeType.anyType})
-      : assert(volumeType == VolumeType.bible || volumeType == VolumeType.studyContent),
-        super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<ChapterViewDataBloc, ViewData>(
-      builder: (context, viewData) {
-        // tec.dmPrint('rebuilding PageableBibleView title with $viewData');
-        if (viewData is ChapterViewData) {
-          const minFontSize = 10.0;
-          const buttonPadding = EdgeInsets.only(top: 16.0, bottom: 16.0);
-          final buttonStyle = Theme.of(context).appBarTheme.textTheme.headline6;
-          final autosizeGroup = TecAutoSizeGroup();
-
-          final volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
-
-          return Row(
-            children: [
-              Container(
-                padding: EdgeInsets.zero,
-                width: 32.0,
-                child: BlocBuilder<SearchBloc, SearchState>(
-                    cubit: context.tbloc<SearchBloc>(),
-                    builder: (c, s) => IconButton(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        iconSize: 20,
-                        icon: s.searchResults.isNotEmpty
-                            ? const IconWithNumberBadge(
-                                color: Colors.orange,
-                                icon: FeatherIcons.search,
-                              )
-                            : const Icon(FeatherIcons.search),
-                        tooltip: 'Search',
-                        onPressed: () => _onNavigate(context, viewData, searchView: true))),
-              ),
-              Flexible(
-                flex: 3,
-                child: CupertinoButton(
-                  minSize: 0,
-                  padding: buttonPadding,
-                  child: TecAutoSizeText(
-                    viewData.bookNameAndChapter(),
-                    minFontSize: minFontSize,
-                    maxLines: 1,
-                    group: autosizeGroup,
-                    style: buttonStyle,
-                  ),
-                  onPressed: () => _onNavigate(context, viewData),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                child: Container(
-                  color: Theme.of(context).appBarTheme.textTheme.headline6.color,
-                  width: 1,
-                  height: const MinHeightAppBar().preferredSize.height *
-                      .55, // 22 * textScaleFactorWith(context),
-                ),
-              ),
-              Flexible(
-                child: CupertinoButton(
-                  minSize: 0,
-                  padding: buttonPadding,
-                  child: TecAutoSizeText(
-                    volume?.abbreviation ?? '',
-                    minFontSize: minFontSize,
-                    group: autosizeGroup,
-                    maxLines: 1,
-                    style: buttonStyle,
-                  ),
-                  onPressed: () => _onSelectVolume(context, viewData),
-                ),
-              ),
-            ],
-          );
-        } else {
-          throw UnsupportedError('ChapterTitle must use ChapterViewData');
-        }
+        throw Exception('VolumeViewActionBar data must be ChapterViewData');
       },
     );
   }
@@ -198,7 +111,7 @@ Future<void> _onNavigate(BuildContext context, ChapterViewData viewData,
           .state
           .asChapterViewData
           .copyWith(bcv: BookChapterVerse.fromRef(ref));
-      tec.dmPrint('ChapterTitle _onNavigate updating with new data: $newViewData');
+      tec.dmPrint('VolumeViewActionBar _onNavigate updating with new data: $newViewData');
       context.tbloc<ChapterViewDataBloc>().update(context, newViewData);
     });
   }
@@ -225,7 +138,7 @@ Future<void> _onSelectVolume(BuildContext context, ChapterViewData viewData) asy
   }
 
   if (newViewData != null) {
-    tec.dmPrint('ChapterTitle _onSelectVolume updating with new data: $newViewData');
+    tec.dmPrint('VolumeViewActionBar _onSelectVolume updating with new data: $newViewData');
     await context.tbloc<ChapterViewDataBloc>().update(context, newViewData);
   }
 }
