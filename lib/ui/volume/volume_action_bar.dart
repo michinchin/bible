@@ -41,7 +41,6 @@ class VolumeViewActionBar extends StatelessWidget {
                 options: ActionBarItemOptions.iconOnly,
                 showTrailingSeparator: false,
                 icon: BlocBuilder<SearchBloc, SearchState>(
-                  cubit: context.tbloc<SearchBloc>(),
                   builder: (c, s) => s.searchResults.isNotEmpty
                       ? const IconWithNumberBadge(color: Colors.orange, icon: Icons.search)
                       : const Icon(Icons.search),
@@ -106,13 +105,9 @@ Future<void> _onNavigate(BuildContext context, ChapterViewData viewData,
 
     // Small delay to allow the nav popup to clean up...
     await Future.delayed(const Duration(milliseconds: 350), () {
-      final newViewData = context
-          .tbloc<ChapterViewDataBloc>()
-          .state
-          .asChapterViewData
-          .copyWith(bcv: BookChapterVerse.fromRef(ref));
+      final newViewData = viewData.copyWith(bcv: BookChapterVerse.fromRef(ref));
       tec.dmPrint('VolumeViewActionBar _onNavigate updating with new data: $newViewData');
-      context.tbloc<ChapterViewDataBloc>().update(context, newViewData);
+      context.read<ChapterViewDataBloc>().update(context, newViewData);
     });
   }
 }
@@ -125,13 +120,12 @@ Future<void> _onSelectVolume(BuildContext context, ChapterViewData viewData) asy
 
   ChapterViewData newViewData;
   if (volumeId != null) {
-    final previous = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData;
-    assert(previous != null);
+    assert(viewData != null);
     if (isBibleId(volumeId)) {
-      newViewData = ChapterViewData(volumeId, previous.bcv, 0, useSharedRef: previous.useSharedRef);
+      newViewData = ChapterViewData(volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
     } else if (isStudyVolumeId(volumeId)) {
       newViewData =
-          StudyViewData(0, volumeId, previous.bcv, 0, useSharedRef: previous.useSharedRef);
+          StudyViewData(0, volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
     } else {
       assert(false);
     }
@@ -139,6 +133,6 @@ Future<void> _onSelectVolume(BuildContext context, ChapterViewData viewData) asy
 
   if (newViewData != null) {
     tec.dmPrint('VolumeViewActionBar _onSelectVolume updating with new data: $newViewData');
-    await context.tbloc<ChapterViewDataBloc>().update(context, newViewData);
+    await context.read<ChapterViewDataBloc>().update(context, newViewData);
   }
 }

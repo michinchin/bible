@@ -115,7 +115,7 @@ class _VMViewStackState extends State<_VMViewStack> {
       viewWithKeyboardFocus: viewWithKeyboardFocus,
       overflowViews: vmBloc._overflow,
       rects: viewRects,
-      animationDuration: sizeChanged ||
+      animationDuration: /* sizeChanged || */
               countOfOnScreenViewsChanged ||
               lastBuildHadMaxedView != thisBuildHasMaxedView
           ? _viewResizeAnimationDuration
