@@ -14,21 +14,23 @@ import 'votd_screen.dart';
 class TodayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final portraitMode = MediaQuery.of(context).orientation == Orientation.portrait;
+    final portraitMode = MediaQuery.of(context).orientation == Orientation.portrait ||
+        (MediaQuery.of(context).size.width > 500 && MediaQuery.of(context).size.height > 500);
     return SafeArea(
-        child: Container(
-            padding: EdgeInsets.only(top: 10, bottom: portraitMode ? 0 : 10),
-            child: ListView(
-                scrollDirection: portraitMode ? Axis.vertical : Axis.horizontal,
-                children: [
-                  _VotdCard(),
-                  const SizedBox(height: 10),
-                  _DotdCard(),
-                  if (portraitMode)
-                    const Divider(color: Colors.transparent)
-                  else
-                    const VerticalDivider(color: Colors.transparent, width: 80)
-                ])));
+      child: Container(
+          color: Theme.of(context).backgroundColor,
+          padding: EdgeInsets.only(top: 10, bottom: portraitMode ? 0 : 10),
+          child:
+              ListView(scrollDirection: portraitMode ? Axis.vertical : Axis.horizontal, children: [
+            _VotdCard(),
+            const SizedBox(height: 10),
+            _DotdCard(),
+            if (portraitMode)
+              const Divider(color: Colors.transparent)
+            else
+              const VerticalDivider(color: Colors.transparent, width: 80)
+          ])),
+    );
   }
 }
 

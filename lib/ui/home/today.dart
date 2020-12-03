@@ -60,7 +60,7 @@ class _TodayState extends State<Today> {
         appBar: MinHeightAppBar(
           appBar: AppBar(
             elevation: 0,
-            backgroundColor: Colors.transparent,
+            backgroundColor: Theme.of(context).appBarTheme.color,
             automaticallyImplyLeading: false,
             centerTitle: false,
             title: const Text('Today'),

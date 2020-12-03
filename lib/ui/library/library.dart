@@ -328,6 +328,7 @@ class _LibraryState extends State<_Library> {
           leading: showCloseButton
               ? CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop())
               : null,
+          automaticallyImplyLeading: false,
           title: Text(tec.isNullOrEmpty(widget.title) ? 'Library' : widget.title),
           actions: widget.allowMultipleSelections
               ? [

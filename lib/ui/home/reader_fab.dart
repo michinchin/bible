@@ -1,24 +1,25 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
+import '../../models/const.dart';
 import 'tab_bottom_bar.dart';
 
 class ReaderFAB extends StatefulWidget {
-  final IconData mainIcon;
+  final Icon mainIcon;
+  final double elevation;
   final Color backgroundColor;
   final List<TabBottomBarItem> tabs;
 
   const ReaderFAB({
     @required this.tabs,
-    this.mainIcon = FeatherIcons.settings,
+    this.mainIcon,
+    this.elevation,
     this.backgroundColor = Colors.blue,
   });
 
@@ -66,7 +67,6 @@ class _ReaderFABState extends State<ReaderFAB> with SingleTickerProviderStateMix
               floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
               bottomNavigationBar: TecTabBar(
                 tabs: widget.tabs,
-                tabManager: context.tabManager,
                 pressedCallback: _switchedTabs,
               ),
               body: Semantics(
@@ -140,17 +140,18 @@ class _ReaderFABState extends State<ReaderFAB> with SingleTickerProviderStateMix
   }
 
   Widget closeFab() => FloatingActionButton(
-        backgroundColor: widget.backgroundColor,
+        backgroundColor: _controller.isDismissed ? widget.backgroundColor : Const.tecartaBlue,
         child: AnimatedBuilder(
             animation: _controller,
             builder: (context, child) => Transform(
                   transform: Matrix4.rotationZ(_controller.value * 0.5 * math.pi),
                   alignment: FractionalOffset.center,
-                  child: Icon(
-                    _controller.isDismissed ? widget.mainIcon : Icons.close,
-                    size: 15,
-                    color: Colors.white,
-                  ),
+                  child: _controller.isDismissed
+                      ? widget.mainIcon
+                      : const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                        ),
                 )),
         onPressed: () {
           if (_controller.isDismissed) {
@@ -177,11 +178,11 @@ class _ReaderFABState extends State<ReaderFAB> with SingleTickerProviderStateMix
       _overlayEntry = null;
     });
 
-    if (resetReaderTab) {
+    // if (resetReaderTab) {
       // we're currently in overlay tab - it was dismissed but not switched to another tab
       // reset it back to reader
-      context.tabManager.add(TecTab.reader);
-    }
+      // context.tabManager.changeTab(TecTab.reader);
+    // }
   }
 
   @override
@@ -197,13 +198,13 @@ class _ReaderFABState extends State<ReaderFAB> with SingleTickerProviderStateMix
         alignment: screenReaderOn ? Alignment.bottomRight : null,
         padding: screenReaderOn ? const EdgeInsets.only(bottom: 30) : null,
         child: FloatingActionButton(
-            elevation: 4,
+            elevation: widget.elevation,
             backgroundColor: widget.backgroundColor,
             heroTag: null,
-            child: Icon(widget.mainIcon, color: Colors.white, size: 28),
+            child: widget.mainIcon,
             onPressed: () {
               // get the tab bar to paint correct colors on android
-              context.tabManager.add(TecTab.overlay);
+              // context.tabManager.changeTab(TecTab.overlay);
 
               _icons = offScreenViews(context);
               _insertOverlayEntry();

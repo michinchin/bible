@@ -4,20 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 enum TecTab { today, library, plans, store, reader, overlay }
 
-class TabManagerState {
-  final TecTab tab;
-  TabManagerState(this.tab);
-}
-
-class TabManagerBloc extends Bloc<TecTab, TabManagerState> {
-  TabManagerBloc() : super(TabManagerState(TecTab.reader));
-
-  @override
-  Stream<TabManagerState> mapEventToState(TecTab event) async* {
-    yield TabManagerState(event);
-  }
+class TabManagerCubit extends Cubit<TecTab> {
+  TabManagerCubit({TecTab tab}) : super(tab ?? TecTab.reader);
+  void changeTab(TecTab tab) => emit(tab);
 }
 
 extension ViewManagerExtOnBuildContext on BuildContext {
-  TabManagerBloc get tabManager => BlocProvider.of<TabManagerBloc>(this);
+  TabManagerCubit get tabManager => BlocProvider.of<TabManagerCubit>(this);
 }
