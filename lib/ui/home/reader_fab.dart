@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
@@ -67,6 +68,7 @@ class _ReaderFABState extends State<ReaderFAB> with SingleTickerProviderStateMix
               floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
               bottomNavigationBar: TecTabBar(
                 tabs: widget.tabs,
+                tabManager: context.tabManager,
                 pressedCallback: _switchedTabs,
               ),
               body: Semantics(
@@ -178,11 +180,11 @@ class _ReaderFABState extends State<ReaderFAB> with SingleTickerProviderStateMix
       _overlayEntry = null;
     });
 
-    // if (resetReaderTab) {
+    if (resetReaderTab) {
       // we're currently in overlay tab - it was dismissed but not switched to another tab
       // reset it back to reader
-      // context.tabManager.changeTab(TecTab.reader);
-    // }
+      context.tabManager.changeTab(TecTab.reader);
+    }
   }
 
   @override
@@ -204,7 +206,7 @@ class _ReaderFABState extends State<ReaderFAB> with SingleTickerProviderStateMix
             child: widget.mainIcon,
             onPressed: () {
               // get the tab bar to paint correct colors on android
-              // context.tabManager.changeTab(TecTab.overlay);
+              context.tabManager.changeTab(TecTab.overlay);
 
               _icons = offScreenViews(context);
               _insertOverlayEntry();

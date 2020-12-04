@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/const.dart';
 import '../../ui/sheet/snap_sheet.dart';
-import '../common/common.dart';
 import '../common/tec_navigator.dart';
 import '../common/tec_page_route.dart';
-import 'home_screen.dart';
+import '../ugc/ugc_view.dart';
+import 'reader_fab.dart';
 
 class TabBottomBarItem {
   final TecTab tab;
@@ -17,74 +18,86 @@ class TabBottomBarItem {
   final String label;
   final Widget widget;
 
-  const TabBottomBarItem({
-    this.tab,
-    this.icon,
-    this.label,
-    this.widget,
-  });
+  const TabBottomBarItem({this.tab, this.icon, this.label, this.widget});
 }
 
-class TabScaffoldWrap extends StatefulWidget {
+class TabBottomBar extends StatefulWidget {
   final List<TabBottomBarItem> tabs;
-  final TecTab currentTab;
 
-  const TabScaffoldWrap({Key key, @required this.tabs, @required this.currentTab})
-      : super(key: key);
+  const TabBottomBar({Key key, @required this.tabs}) : super(key: key);
 
   @override
-  _TabScaffoldWrapState createState() => _TabScaffoldWrapState();
+  _TabBottomBarState createState() => _TabBottomBarState();
 }
 
-class _TabScaffoldWrapState extends State<TabScaffoldWrap> {
+class _TabBottomBarState extends State<TabBottomBar> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TabManagerCubit, TecTab>(buildWhen: (p, n) {
       // if the tab didn't change or we're showing the overlay...
       return p != n && n != TecTab.overlay;
-    }, builder: (context, tab) {
+    }, builder: (context, tabState) {
       return Scaffold(
-        // drawer: const UGCView(),
-        backgroundColor: Colors.transparent,
+        drawer: const UGCView(),
         extendBody: true,
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        floatingActionButton: _TabFAB(),
-        bottomNavigationBar: TecTabBar(
-          tabs: widget.tabs,
-          tabManager: context.tabManager,
-        ),
-        body: Stack(
-          children: [
-            for (var i = 0; i < widget.tabs.length; i++)
-              Visibility(
-                maintainState: true,
-                visible: widget.tabs[i].tab == tab,
-                child: NavigatorWithHeroController(
-                  key: ValueKey(i),
-                  onGenerateRoute: (settings) => TecPageRoute<dynamic>(
-                    settings: settings,
-                    builder: (context) {
-                      return widget.tabs[i].widget;
-                    },
+        floatingActionButton: (tabState == TecTab.reader)
+            ? BlocBuilder<SheetManagerBloc, SheetManagerState>(
+                builder: (context, sheetState) {
+                  return AnimatedOpacity(
+                    opacity: (sheetState.type == SheetType.main) ? 1.0 : 0.3,
+                    duration: const Duration(milliseconds: 150),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: ReaderFAB(
+                        elevation: (sheetState.type == SheetType.main) ? null : 0,
+                        backgroundColor: (sheetState.type == SheetType.main)
+                            ? Const.tecartaBlue
+                            : Theme.of(context).backgroundColor.withOpacity(0),
+                        mainIcon: Icon(TecIcons.tecartabiblelogo,
+                            color: (sheetState.type == SheetType.main)
+                                ? Colors.white
+                                : Theme.of(context).textColor),
+                        tabs: widget.tabs,
+                      ),
+                    ),
+                  );
+                },
+              )
+            : _TabFAB(),
+        bottomNavigationBar: (tabState == TecTab.reader) ? null : TecTabBar(tabs: widget.tabs),
+        body: Container(
+          color: Theme.of(context).backgroundColor,
+          child: Stack(
+            children: [
+              for (var i = 0; i < widget.tabs.length; i++)
+                Visibility(
+                  maintainState: true,
+                  visible: widget.tabs[i].tab == tabState,
+                  child: NavigatorWithHeroController(
+                    key: ValueKey(i),
+                    onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+                      settings: settings,
+                      builder: (context) {
+                        return widget.tabs[i].widget;
+                      },
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       );
     });
   }
 }
 
-// : TecTabBar(tabs: tabs),S
 class _TabFAB extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
       elevation: 2,
-      onPressed: () {
-        Navigator.of(context).pop();
-      },
+      onPressed: () => context.tabManager.changeTab(TecTab.reader),
       backgroundColor: Colors.white,
       child: const Icon(TecIcons.tecartabiblelogo, color: Const.tecartaBlue, size: 28),
     );
@@ -101,10 +114,9 @@ class TecTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // ignore: close_sinks
-    // final tm = (tabManager == null) ? context.tabManager : tabManager;
+    final tm = (tabManager == null) ? context.tabManager : tabManager;
 
     return BottomAppBar(
-      elevation: 10,
       color: Theme.of(context).appBarTheme.color,
       shape: const CircularNotchedRectangle(),
       notchMargin: 6.0,
@@ -119,18 +131,13 @@ class TecTabBar extends StatelessWidget {
                 SheetIconButton(
                   icon: tabItem.icon,
                   text: tabItem.label,
-                  color: tabManager != null
-                      ? (tabManager.state == tabItem.tab ? Const.tecartaBlue : null)
-                      : null,
+                  color: (tm.state == tabItem.tab) ? Const.tecartaBlue : null,
                   onPressed: () {
                     if (pressedCallback != null) {
                       pressedCallback();
                     }
-                    if (tabManager == null) {
-                      showTabView(context: context, tab: tabItem.tab, tabs: tabs);
-                    } else {
-                      tabManager.changeTab(tabItem.tab);
-                    }
+
+                    tm?.changeTab(tabItem.tab);
                   },
                 ),
           ],

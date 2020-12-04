@@ -328,7 +328,6 @@ Future<dynamic> showScreen<T>(
     showTecDialog<T>(
         context: context,
         useRootNavigator: useRootNavigator,
-        makeScrollable: false,
         padding: EdgeInsets.zero,
         maxWidth: 500,
         maxHeight: math.max(500.0, (MediaQuery.of(context)?.size?.height ?? 700) - 40),
