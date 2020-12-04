@@ -49,13 +49,11 @@ class ActionBar extends StatelessWidget {
     Key key,
     @required @required this.items,
     // this.menuItemGroups,
-    this.elevation = 3.0,
+    this.elevation = 4.0,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
       transitionBuilder: (child, animation) {
@@ -67,22 +65,12 @@ class ActionBar extends StatelessWidget {
         key: ValueKey(items),
         alignment: Alignment.center,
         // color: Colors.red.withOpacity(0.25),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDarkTheme
-                ? Theme.of(context).appBarTheme.color
-                : Theme.of(context).backgroundColor,
-            borderRadius: const BorderRadius.all(Radius.circular(90)),
-            boxShadow: elevation == 0
-                ? null
-                : [
-                    BoxShadow(
-                        color: Colors.black26,
-                        offset: Offset(0, elevation - 1),
-                        blurRadius: elevation,
-                        spreadRadius: 1),
-                  ],
-          ),
+        child: Material(
+          elevation: elevation,
+          borderRadius: const BorderRadius.all(Radius.circular(90)),
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).appBarTheme.color
+              : Theme.of(context).backgroundColor,
           child: LayoutBuilder(builder: _layoutBuilder),
         ),
       ),

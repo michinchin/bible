@@ -3,6 +3,7 @@ part of 'view_manager_bloc.dart';
 const _useFloatingTitles = true;
 
 const bool _showViewPadding = true;
+const bool _showTopPadding = false;
 const _viewPaddingSize = 0.5;
 const _viewPaddingColorLight = Color(0xffdddddd);
 const _viewPaddingColorDark = Color(0xff333333);
@@ -116,10 +117,9 @@ class _VMViewStackState extends State<_VMViewStack> {
       overflowViews: vmBloc._overflow,
       rects: viewRects,
       animationDuration: /* sizeChanged || */
-              countOfOnScreenViewsChanged ||
-              lastBuildHadMaxedView != thisBuildHasMaxedView
-          ? _viewResizeAnimationDuration
-          : null,
+          countOfOnScreenViewsChanged || lastBuildHadMaxedView != thisBuildHasMaxedView
+              ? _viewResizeAnimationDuration
+              : null,
       numViewsLimited: vmBloc.numViewsLimited,
       floatingTitleHeight: floatingTitleHeight,
       topLeftWidget: widget.topLeftWidget,
@@ -241,11 +241,15 @@ class _ManagedViewNavigatorState extends State<_ManagedViewNavigator> {
                 ? _viewPaddingColorDark
                 : _viewPaddingColorLight,
             padding: s.isMaximized || (s.rowCount == 1 && s.colCount == 1)
-                ? const EdgeInsets.only(top: _viewPaddingSize * 2.0)
+                ? (_showTopPadding
+                    ? const EdgeInsets.only(top: _viewPaddingSize * 2.0)
+                    : EdgeInsets.zero)
                 : EdgeInsets.only(
                     left: s.col == 0 ? 0 : _viewPaddingSize,
                     right: s.col == s.colCount - 1 ? 0 : _viewPaddingSize,
-                    top: s.row == 0 ? _viewPaddingSize * 2.0 : _viewPaddingSize,
+                    top: s.row == 0
+                        ? (_showTopPadding ? _viewPaddingSize * 2.0 : 0.0)
+                        : _viewPaddingSize,
                     bottom: s.row == s.rowCount - 1 ? 0 : _viewPaddingSize,
                   ),
             child: _navigator(),

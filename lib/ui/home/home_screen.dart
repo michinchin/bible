@@ -146,7 +146,9 @@ class MainMenuFab extends StatelessWidget {
         mini: true,
         heroTag: null,
         child: Icon(FeatherIcons.user, size: 15, color: Theme.of(context).textColor),
-        backgroundColor: Theme.of(context).appBarTheme.color,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).appBarTheme.color
+              : Theme.of(context).backgroundColor,
         onPressed: () => showMainMenu(context),
       );
 }
@@ -158,7 +160,9 @@ class JournalFab extends StatelessWidget {
       mini: true,
       heroTag: null,
       child: Icon(FeatherIcons.bookOpen, size: 15, color: Theme.of(context).textColor),
-      backgroundColor: Theme.of(context).appBarTheme.color,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).appBarTheme.color
+              : Theme.of(context).backgroundColor,
       onPressed: () {
         Scaffold.of(context).openDrawer();
       });
