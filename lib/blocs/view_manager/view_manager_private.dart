@@ -60,7 +60,7 @@ class _VMViewStackState extends State<_VMViewStack> {
     var mqData = MediaQuery.of(context);
     mqData = mqData.copyWith(
         textScaleFactor: math.min(mqData.textScaleFactor, _kMaxTitleTextScaleFactor));
-    final floatingTitleHeight = _useFloatingTitles ? mqData.textScaleFactor * 36.0 : 0.0;
+    final floatingTitleHeight = _useFloatingTitles ? mqData.textScaleFactor * 34.0 : 0.0;
     final topOffset =
         floatingTitleHeight == 0.0 ? 0.0 : (floatingTitleHeight / 2.0).roundToDouble();
 

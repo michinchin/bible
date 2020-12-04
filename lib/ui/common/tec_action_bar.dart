@@ -144,9 +144,9 @@ extension on ActionBarItem {
     Widget separator() => Padding(
           padding: EdgeInsets.symmetric(horizontal: _sepPadding * scale),
           child: Container(
-            color: textStyle.color.withOpacity(0.35),
+            color: textStyle.color.withOpacity(0.2),
             width: _sepWidth,
-            height: 28.0 * scale,
+            height: 34.0 * scale,
           ),
         );
 
@@ -168,8 +168,8 @@ extension on ActionBarItem {
   }
 
   static const _textPadding = 4.0;
-  static const _sepWidth = 0.5;
-  static const _sepPadding = 2.0;
+  static const _sepWidth = 2.25;
+  static const _sepPadding = 4.0;
 
   double width(
     TextStyle textStyle,
