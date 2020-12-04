@@ -1,6 +1,8 @@
 import 'dart:ui' as ui;
 
+import 'package:bible/models/app_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -14,18 +16,19 @@ import 'votd_screen.dart';
 class TodayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final portraitMode = MediaQuery.of(context).orientation == Orientation.portrait;
+    final portraitMode = MediaQuery.of(context).orientation == Orientation.portrait ||
+        (MediaQuery.of(context).size.height > 500 && MediaQuery.of(context).size.width > 500);
     return SafeArea(
         child: Container(
             padding: EdgeInsets.only(top: 10, bottom: portraitMode ? 0 : 10),
             child: ListView(
-                scrollDirection: portraitMode ? Axis.vertical : Axis.horizontal,
+                // scrollDirection: portraitMode ? Axis.vertical : Axis.horizontal,
                 children: [
                   _VotdCard(),
                   const SizedBox(height: 10),
                   _DotdCard(),
                   if (portraitMode)
-                    const Divider(color: Colors.transparent)
+                    const Divider(color: Colors.transparent, height: 40)
                   else
                     const VerticalDivider(color: Colors.transparent, width: 80)
                 ])));
@@ -112,86 +115,103 @@ class _HomeCard extends StatelessWidget {
           elevation: 0,
           padding: 0,
           color: Theme.of(context).cardColor,
-          builder: (c) => Stack(children: [
-            InkWell(
-              onTap: onImageTap,
-              child: TecImage(
-                height: dayCardHeight,
-                color: Colors.black12,
-                colorBlendMode: BlendMode.colorBurn,
-                url: imageUrl,
+          builder: (c) => Stack(
+            children: [
+              Positioned.fill(
+                child: InkWell(
+                  onTap: onImageTap,
+                  child: TecImage(
+                    color: Colors.black12,
+                    colorBlendMode: BlendMode.colorBurn,
+                    url: imageUrl,
+                  ),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Column(
                 children: [
-                  TecText(
-                    type.toUpperCase(),
-                    style: cardSubtitleCompactStyle.copyWith(
-                        color: Colors.white70, fontWeight: FontWeight.w600),
-                  ),
-                  TecText(
-                    title,
-                    style: cardTitleCompactStyle.copyWith(
-                      color: Colors.white,
-                      fontSize: 24,
+                  Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          Expanded(
+                            child: TecText(
+                              type.toUpperCase(),
+                              style: cardSubtitleCompactStyle.copyWith(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 2,
+                              autoSize: true,
+                              textScaleFactor: contentTextScaleFactorWith(c),
+                            ),
+                          ),
+                          InkWell(
+                              onTap: onMoreTap,
+                              child: const Icon(SFSymbols.ellipsis_circle, color: Colors.white)),
+                        ]),
+                        TecText(
+                          title,
+                          style: cardTitleCompactStyle.copyWith(
+                            color: Colors.white,
+                          ),
+                          textScaleFactor: contentTextScaleFactorWith(c),
+                          maxLines: 3,
+                        ),
+                      ],
                     ),
-                    maxLines: 3,
                   ),
+                  const SizedBox(height: 100),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onImageTap,
+                      child: buildBkgFrost(
+                          context,
+                          (context) => Container(
+                                alignment: Alignment.bottomLeft,
+                                padding: const EdgeInsets.all(20),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                        child: TecText(
+                                      subtitle,
+                                      style: cardSubtitleCompactStyle.copyWith(
+                                        color: Colors.white,
+                                      ),
+                                      textScaleFactor: contentTextScaleFactorWith(context),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                    )),
+                                    // const VerticalDivider(
+                                    //   color: Colors.transparent,
+                                    // ),
+                                    // InkWell(
+                                    //   onTap: onMoreTap,
+                                    //   child: Container(
+                                    //       padding: const EdgeInsets.symmetric(
+                                    //           horizontal: 15, vertical: 5),
+                                    //       decoration: const ShapeDecoration(
+                                    //         shape: StadiumBorder(),
+                                    //         color: Colors.white,
+                                    //       ),
+                                    //       child: const TecText(
+                                    //         'All',
+                                    //         style: TextStyle(
+                                    //             fontWeight: FontWeight.bold,
+                                    //             color: Const.tecartaBlue),
+                                    //       )),
+                                    // ),
+                                  ],
+                                ),
+                              )),
+                    ),
+                  )
                 ],
               ),
-            ),
-            Positioned.directional(
-                start: 0,
-                end: 0,
-                bottom: 0,
-                textDirection: TextDirection.rtl,
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onImageTap,
-                    child: buildBkgFrost(
-                        context,
-                        (context) => Container(
-                              alignment: Alignment.bottomLeft,
-                              padding: const EdgeInsets.all(20),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                      child: TecText(
-                                    subtitle,
-                                    style: cardSubtitleCompactStyle.copyWith(color: Colors.white),
-                                    maxLines: 3,
-                                    autoCalcMaxLines: true,
-                                    overflow: TextOverflow.ellipsis,
-                                  )),
-                                  const VerticalDivider(
-                                    color: Colors.transparent,
-                                  ),
-                                  InkWell(
-                                    onTap: onMoreTap,
-                                    child: Container(
-                                        padding:
-                                            const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                                        decoration: const ShapeDecoration(
-                                          shape: StadiumBorder(),
-                                          color: Colors.white,
-                                        ),
-                                        child: const TecText(
-                                          'All',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Const.tecartaBlue),
-                                        )),
-                                  ),
-                                ],
-                              ),
-                            )),
-                  ),
-                ))
-          ]),
+            ],
+          ),
         ));
   }
 }

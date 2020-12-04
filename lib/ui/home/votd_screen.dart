@@ -1,3 +1,4 @@
+import 'package:bible/models/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -132,15 +133,19 @@ class __VotdScreenState extends State<_VotdScreen> {
                         res,
                         style:
                             cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
+                        textScaleFactor: contentTextScaleFactorWith(context),
                         textAlign: TextAlign.left,
                       ),
                       const SizedBox(height: 5),
                       FlatButton(
                         padding: EdgeInsets.zero,
                         child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                          TecText(ref.label(),
-                              style: cardTitleCompactStyle.copyWith(
-                                  color: Theme.of(context).textColor)),
+                          TecText(
+                            ref.label(),
+                            style:
+                                cardTitleCompactStyle.copyWith(color: Theme.of(context).textColor),
+                            textScaleFactor: contentTextScaleFactorWith(context),
+                          ),
                           Icon(Icons.arrow_drop_down, color: Theme.of(context).textColor),
                         ]),
                         onPressed: onRefTap,

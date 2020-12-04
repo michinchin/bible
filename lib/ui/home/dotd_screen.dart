@@ -78,11 +78,12 @@ class __DotdScreenState extends State<_DotdScreen> {
                 child: Column(children: [
                   TecHtml(snapshot.data,
                       baseUrl: '',
+                      textScaleFactor: contentTextScaleFactorWith(c),
                       // widget.devo.volume.baseUrl,
                       selectable: false),
                   InkWell(
                     splashColor: Colors.transparent,
-                    onTap: () => showDetailViewForVolume(context, widget.devo.volume, 'dotd'),
+                    onTap: () => showDetailViewForVolume(c, widget.devo.volume, 'dotd'),
                     child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Row(
@@ -122,6 +123,7 @@ class __DotdScreenState extends State<_DotdScreen> {
                                     // ))
                                   ],
                                 ),
+                                textScaleFactor: contentTextScaleFactorWith(c),
                                 autoSize: true,
                               ),
                             )

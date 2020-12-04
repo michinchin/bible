@@ -293,7 +293,7 @@ class IconWithNumberBadge extends StatelessWidget {
 }
 
 const TextStyle cardTitleCompactStyle = TecTextStyle(
-  fontSize: 18,
+  fontSize: 24,
   fontWeight: FontWeight.w700, // w700 == Bold
 );
 
