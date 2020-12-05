@@ -1,4 +1,3 @@
-import 'package:bible/models/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -8,6 +7,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/app_settings.dart';
 import '../../models/chapter_verses.dart';
 import '../../models/const.dart';
 import '../../models/home/interstitial.dart';
@@ -131,8 +131,7 @@ class __VotdScreenState extends State<_VotdScreen> {
                     children: [
                       TecText(
                         res,
-                        style:
-                            cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
+                        style: cardSubtitleCompactStyle,
                         textScaleFactor: contentTextScaleFactorWith(context),
                         textAlign: TextAlign.left,
                       ),
@@ -142,8 +141,7 @@ class __VotdScreenState extends State<_VotdScreen> {
                         child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                           TecText(
                             ref.label(),
-                            style:
-                                cardTitleCompactStyle.copyWith(color: Theme.of(context).textColor),
+                            style: cardTitleCompactStyle,
                             textScaleFactor: contentTextScaleFactorWith(context),
                           ),
                           Icon(Icons.arrow_drop_down, color: Theme.of(context).textColor),

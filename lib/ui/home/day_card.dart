@@ -21,19 +21,16 @@ class DayCard extends StatelessWidget {
   Widget build(BuildContext context) {
     const height = 80.0;
     final scale = scaleFactorWith(context);
-    final textScale = textScaleFactorWith(context);
     final heading = TecText(
       title,
-      textScaleFactor: textScale,
-      style: cardTitleCompactStyle.copyWith(color: Theme.of(context).textColor),
+      style: cardTitleCompactStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
     final intro = Expanded(
         child: TecText(
       body,
-      style: cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
-      textScaleFactor: textScale,
+      style: cardSubtitleCompactStyle,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     ));

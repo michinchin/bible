@@ -106,13 +106,11 @@ class __DotdScreenState extends State<_DotdScreen> {
                                   children: [
                                     TextSpan(
                                       text: '${widget.devo.volume.name}\n',
-                                      style: cardTitleCompactStyle.copyWith(
-                                          color: Theme.of(context).textColor),
+                                      style: cardTitleCompactStyle,
                                     ),
                                     TextSpan(
-                                      text: 'by ${widget.devo.volume.author}\n',
-                                      style: cardSubtitleCompactStyle.copyWith(
-                                          color: Theme.of(context).textColor),
+                                      text: 'by ${widget.devo.volume.author}',
+                                      style: cardSubtitleCompactStyle,
                                     ),
                                     // WidgetSpan(
                                     //     child: RaisedButton(
@@ -123,8 +121,6 @@ class __DotdScreenState extends State<_DotdScreen> {
                                     // ))
                                   ],
                                 ),
-                                textScaleFactor: contentTextScaleFactorWith(c),
-                                autoSize: true,
                               ),
                             )
                           ],

@@ -293,43 +293,26 @@ class IconWithNumberBadge extends StatelessWidget {
   }
 }
 
-const TextStyle cardTitleCompactStyle = TecTextStyle(
+const TextStyle cardTitleCompactStyle = TextStyle(
   fontSize: 24,
-  fontWeight: FontWeight.w700, // w700 == Bold
+  fontWeight: FontWeight.w700,
 );
 
-const TecTextStyle cardSubtitleCompactStyle = TecTextStyle(
+const TextStyle cardSubtitleCompactStyle = TextStyle(
   fontSize: 15,
-  fontWeight: FontWeight.w400, // w500 == Normal
+  fontWeight: FontWeight.w400,
 );
 
-class TecTextStyle extends TextStyle {
-  const TecTextStyle({
-    double fontSize = 12.0,
-    FontWeight fontWeight,
-    Color color = Colors.black,
-    double letterSpacing,
-    double height,
-  }) : super(
-          inherit: false,
-          color: color,
-          //fontFamily: 'Avenir',
-          fontSize: fontSize,
-          fontWeight: fontWeight,
-          textBaseline: TextBaseline.alphabetic,
-          letterSpacing: letterSpacing,
-          height: height,
-        );
-}
-
-Future<dynamic> showScreen<T>(
-        {@required BuildContext context,
-        @required Widget Function(BuildContext) builder,
-        bool useRootNavigator = true}) =>
+Future<dynamic> showScreen<T>({
+  @required BuildContext context,
+  @required Widget Function(BuildContext) builder,
+  bool useRootNavigator = true,
+}) =>
     showTecDialog<T>(
-        context: context,
-        useRootNavigator: useRootNavigator,
-        padding: EdgeInsets.zero,
-        maxWidth: 500,
-        maxHeight: math.max(500.0, (MediaQuery.of(context)?.size?.height ?? 700) - 40),
-        builder: builder);
+      context: context,
+      useRootNavigator: useRootNavigator,
+      padding: EdgeInsets.zero,
+      maxWidth: 500,
+      maxHeight: math.max(500.0, (MediaQuery.of(context)?.size?.height ?? 700) - 40),
+      builder: builder,
+    );

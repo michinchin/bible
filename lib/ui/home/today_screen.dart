@@ -1,12 +1,11 @@
 import 'dart:ui' as ui;
 
-import 'package:bible/models/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../models/const.dart';
+import '../../models/app_settings.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/votd.dart';
 import '../common/common.dart';
