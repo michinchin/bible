@@ -209,6 +209,8 @@ const _nonWordQuotes = <int>{_sglQtLft, _dblQuote, _dblQtLft, _dblQtRgt};
 
 // const _allQuotes = <int>{_sglQuote, _sglQtLft, _sglQtRgt, _dblQuote, _dblQtLft, _dblQtRgt};
 
+const _nonBreakingHyphen = 0x2011; // ‑ non-breaking hyphen
+
 const _asciiPunctuation = <int>{
   // From: ASCII Punctuation, 0021-007E: https://www.unicode.org/charts/PDF/U0000.pdf
 

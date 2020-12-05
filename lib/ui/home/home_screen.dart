@@ -12,6 +12,7 @@ import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/notifications/notifications_model.dart';
+import '../common/common.dart';
 import '../library/library.dart';
 import '../menu/main_menu.dart';
 import '../sheet/snap_sheet.dart';
@@ -142,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
 class MainMenuFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FloatingActionButton(
-        elevation: 4,
+        elevation: defaultActionBarElevation,
         mini: true,
         heroTag: null,
         child: Icon(FeatherIcons.user, size: 15, color: Theme.of(context).textColor),
@@ -156,7 +157,7 @@ class MainMenuFab extends StatelessWidget {
 class JournalFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FloatingActionButton(
-      elevation: 4,
+      elevation: defaultActionBarElevation,
       mini: true,
       heroTag: null,
       child: Icon(FeatherIcons.bookOpen, size: 15, color: Theme.of(context).textColor),

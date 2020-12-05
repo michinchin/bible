@@ -34,6 +34,7 @@ class VolumeViewActionBar extends StatelessWidget {
         if (viewData is ChapterViewData) {
           final volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
           return ActionBar(
+            elevation: defaultActionBarElevation,
             items: [
               ActionBarItem(
                 title: 'Search',

@@ -64,6 +64,8 @@ class _VMViewStackState extends State<_VMViewStack> {
     final topOffset =
         floatingTitleHeight == 0.0 ? 0.0 : (floatingTitleHeight / 2.0).roundToDouble();
 
+    const widgetViewPadding = 16.0; // * mqData.textScaleFactor;
+
     final rect =
         Rect.fromLTWH(0, topOffset, constraints.maxWidth, constraints.maxHeight - topOffset);
 
@@ -125,6 +127,7 @@ class _VMViewStackState extends State<_VMViewStack> {
       topLeftWidget: widget.topLeftWidget,
       topRightWidget: widget.topRightWidget,
       bottomRightWidget: widget.bottomRightWidget,
+      widgetViewPadding: widgetViewPadding,
     );
     vmBloc
       .._viewRects = viewRects
@@ -438,6 +441,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     @required Widget topLeftWidget,
     @required Widget topRightWidget,
     @required Widget bottomRightWidget,
+    @required double widgetViewPadding,
   }) {
     // Cannot have both a `maximizedView` and a `viewWithKeyboardFocus`.
     assert(maximizedView == null || viewWithKeyboardFocus == null);
@@ -585,7 +589,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
         final isTopRight = isOrWasMaxed || (vr.row == 0 && vr.column == itemsInRow(vr.row) - 1);
         final reduceWidth =
             (isTopLeft && topLeftWidget != null) || (isTopRight && topRightWidget != null);
-        final sideInset = reduceWidth ? floatingTitleHeight * 1.25 : 0.0;
+        final sideInset = reduceWidth ? floatingTitleHeight + widgetViewPadding : 0.0;
         final size = Size(vr.rect.width - (reduceWidth ? sideInset * 2 : 0.0), floatingTitleHeight);
         floatingTitle = AnimatedPositioned(
           key: ValueKey(-vr.uid),
@@ -641,14 +645,13 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
     if (maxedViewWidget != null) widgets.add(maxedViewWidget);
     if (maxedFloatingTitleWidget != null) widgets.add(maxedFloatingTitleWidget);
 
-    const padding = 8.0;
     if (topLeftWidget != null) {
       widgets.add(
         AnimatedPositioned(
           key: const ValueKey('topLeftWidget'),
           duration: animationDuration ?? Duration.zero,
           curve: _viewResizeAnimationCurve,
-          left: padding,
+          left: widgetViewPadding,
           top: 0.0,
           width: floatingTitleHeight,
           height: floatingTitleHeight,
@@ -663,7 +666,7 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           key: const ValueKey('topRightWidget'),
           duration: animationDuration ?? Duration.zero,
           curve: _viewResizeAnimationCurve,
-          left: rect.width - floatingTitleHeight - padding,
+          left: rect.width - floatingTitleHeight - widgetViewPadding,
           top: 0.0,
           width: floatingTitleHeight,
           height: floatingTitleHeight,
@@ -678,8 +681,8 @@ extension _ExtOnListOfListOfViewState on List<List<ViewState>> {
           key: const ValueKey('bottomRightWidget'),
           duration: animationDuration ?? Duration.zero,
           curve: _viewResizeAnimationCurve,
-          left: rect.width - floatingTitleHeight - padding,
-          bottom: padding,
+          left: rect.width - floatingTitleHeight - widgetViewPadding,
+          bottom: widgetViewPadding,
           width: floatingTitleHeight,
           height: floatingTitleHeight,
           child: bottomRightWidget,

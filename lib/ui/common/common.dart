@@ -17,6 +17,7 @@ export 'tec_stream_builder.dart';
 export 'tec_tab_indicator.dart';
 
 const defaultElevation = 3.0;
+const defaultActionBarElevation = 6.0;
 
 ///
 /// Returns a new `EdgeInsets` object based on the given [parentSize] and [childRect].

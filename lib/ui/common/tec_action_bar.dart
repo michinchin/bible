@@ -29,28 +29,14 @@ class ActionBarItem {
   }) : minTitle = minTitle ?? title;
 }
 
-@immutable
-class ActionBarGroup {
-  final String title;
-  final List<ActionBarItem> items;
-
-  const ActionBarGroup(this.title, this.items);
-}
-
 ///
 /// ActionBar
 ///
 class ActionBar extends StatelessWidget {
   final List<ActionBarItem> items;
-  // final List<ActionBarGroup> menuItemGroups;
   final double elevation;
 
-  const ActionBar({
-    Key key,
-    @required @required this.items,
-    // this.menuItemGroups,
-    this.elevation = 4.0,
-  }) : super(key: key);
+  const ActionBar({Key key, @required @required this.items, this.elevation}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +52,7 @@ class ActionBar extends StatelessWidget {
         alignment: Alignment.center,
         // color: Colors.red.withOpacity(0.25),
         child: Material(
-          elevation: elevation,
+          elevation: elevation ?? Theme.of(context).appBarTheme.elevation ?? 4.0,
           borderRadius: const BorderRadius.all(Radius.circular(90)),
           color: Theme.of(context).brightness == Brightness.dark
               ? Theme.of(context).appBarTheme.color
@@ -86,7 +72,7 @@ class ActionBar extends StatelessWidget {
     final cache = _Cache<int, double>();
 
     final scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1.0;
-    final sidePadding = 6.0 * scale;
+    final sidePadding = 8.0 * scale;
     var min = false;
 
     final actualItems = items;
