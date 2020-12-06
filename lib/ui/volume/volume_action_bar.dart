@@ -1,3 +1,4 @@
+import 'package:bible/models/const.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -43,8 +44,9 @@ class VolumeViewActionBar extends StatelessWidget {
                 showTrailingSeparator: false,
                 icon: BlocBuilder<SearchBloc, SearchState>(
                   builder: (c, s) => s.searchResults.isNotEmpty
-                      ? const IconWithNumberBadge(color: Colors.orange, icon: Icons.search)
-                      : const Icon(Icons.search),
+                      ? const IconWithNumberBadge(
+                          color: Const.tecartaBlue, badgeColor: Colors.orange, icon: Icons.search)
+                      : const Icon(Icons.search, color: Const.tecartaBlue),
                 ),
                 onTap: () => _onNavigate(context, viewData, searchView: true),
               ),

@@ -342,7 +342,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             IconButton(
                 icon: hasSearchResults
                     ? const IconWithNumberBadge(
-                        color: Colors.orange, icon: Icons.youtube_searched_for)
+                        badgeColor: Colors.orange, icon: Icons.youtube_searched_for)
                     : const Icon(Icons.youtube_searched_for),
                 onPressed: () {
                   c

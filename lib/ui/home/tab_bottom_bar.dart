@@ -44,21 +44,24 @@ class _TabBottomBarState extends State<TabBottomBar> {
         floatingActionButton: (tabState == TecTab.reader)
             ? BlocBuilder<SheetManagerBloc, SheetManagerState>(
                 builder: (context, sheetState) {
-                  return AnimatedOpacity(
-                    opacity: (sheetState.type == SheetType.main) ? 1.0 : 0.3,
-                    duration: const Duration(milliseconds: 150),
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ReaderFAB(
-                        elevation: (sheetState.type == SheetType.main) ? null : 0,
-                        backgroundColor: (sheetState.type == SheetType.main)
-                            ? Const.tecartaBlue
-                            : Theme.of(context).backgroundColor.withOpacity(0),
-                        mainIcon: Icon(TecIcons.tecartabiblelogo,
-                            color: (sheetState.type == SheetType.main)
-                                ? Colors.white
-                                : Theme.of(context).textColor),
-                        tabs: widget.tabs,
+                  return IgnorePointer(
+                    ignoring: (sheetState.type == SheetType.selection),
+                    child: AnimatedOpacity(
+                      opacity: (sheetState.type == SheetType.main) ? 1.0 : 0,
+                      duration: const Duration(milliseconds: 150),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: ReaderFAB(
+                          elevation: (sheetState.type == SheetType.main) ? null : 0,
+                          backgroundColor: (sheetState.type == SheetType.main)
+                              ? Const.tecartaBlue
+                              : Theme.of(context).backgroundColor.withOpacity(0),
+                          mainIcon: Icon(TecIcons.tecartabiblelogo,
+                              color: (sheetState.type == SheetType.main)
+                                  ? Colors.white
+                                  : Theme.of(context).textColor),
+                          tabs: widget.tabs,
+                        ),
                       ),
                     ),
                   );

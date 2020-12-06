@@ -534,7 +534,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                 context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
               } else {
                 // tec.dmPrint('ChapterViewHtml autoscrollActive false, restoring the bottom sheet.');
-                // context.tbloc<SheetManagerBloc>().restore(context);
+                // context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
               }
             },
             child: NotificationListener<ScrollNotification>(

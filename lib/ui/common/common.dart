@@ -256,21 +256,22 @@ class IconSpan extends FixedWidthWidgetSpan {
 class IconWithNumberBadge extends StatelessWidget {
   final IconData icon;
   final int value;
+  final Color badgeColor;
   final Color color;
 
-  const IconWithNumberBadge({this.icon, this.value, this.color});
+  const IconWithNumberBadge({this.icon, this.value, this.color, this.badgeColor});
 
   @override
   Widget build(BuildContext context) {
     return Stack(children: <Widget>[
-      Icon(icon),
+      Icon(icon, color: color ?? Theme.of(context).textColor),
       Positioned(
         right: 3,
         top: 1,
         child: Container(
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
-            color: color ?? Colors.red,
+            color: badgeColor ?? Colors.red,
             borderRadius: BorderRadius.circular(6),
           ),
           constraints: const BoxConstraints(
