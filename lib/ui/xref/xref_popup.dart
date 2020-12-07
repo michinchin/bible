@@ -8,10 +8,10 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
-import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
 import '../common/tec_modal_popup.dart';
 import '../common/tec_modal_popup_menu.dart';
+import '../volume/volume_view_data_bloc.dart';
 
 Future<void> showXrefsPopup({
   @required BuildContext context,
@@ -37,7 +37,7 @@ Future<void> showXrefsPopup({
       final title = 'verse ${reference.verse}';
       var firstCard = true;
       return BlocProvider.value(
-        value: originalContext.tbloc<ChapterViewDataBloc>(),
+        value: originalContext.tbloc<VolumeViewDataBloc>(),
         child: TecPopupSheet(
           padding: EdgeInsets.zero,
           title: (tec.isNotNullOrEmpty(title))
@@ -93,7 +93,7 @@ class _XrefWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final volumeId = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData.volumeId;
+    final volumeId = context.tbloc<VolumeViewDataBloc>().state.asVolumeViewData.volumeId;
     final bible = VolumesRepository.shared.volumeWithId(volumeId)?.assocBible();
 
     return _Card(
@@ -115,12 +115,12 @@ class _XrefWidget extends StatelessWidget {
       ),
       onTap: () {
         final viewData = context
-            .tbloc<ChapterViewDataBloc>()
+            .tbloc<VolumeViewDataBloc>()
             .state
-            .asChapterViewData
+            .asVolumeViewData
             .copyWith(bcv: BookChapterVerse(xref.book, xref.chapter, xref.verse));
         // tec.dmPrint('Xref updating with new data: $viewData');
-        context.tbloc<ChapterViewDataBloc>().update(context, viewData);
+        context.tbloc<VolumeViewDataBloc>().update(context, viewData);
         Navigator.of(context).maybePop();
       },
     );

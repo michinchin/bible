@@ -4,9 +4,9 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
-import '../bible/chapter_view_data.dart';
+import 'volume_view_data_bloc.dart';
 
-class StudyViewDataBloc extends ChapterViewDataBloc {
+class StudyViewDataBloc extends VolumeViewDataBloc {
   StudyViewDataBloc(ViewManagerBloc vmBloc, int viewUid, StudyViewData data)
       : super(vmBloc, viewUid, data);
 }
@@ -19,7 +19,7 @@ extension StudyViewDataExtOnViewData on ViewData {
 /// StudyViewData
 ///
 @immutable
-class StudyViewData extends ChapterViewData {
+class StudyViewData extends VolumeViewData {
   final int foobar;
 
   const StudyViewData(
@@ -63,7 +63,7 @@ class StudyViewData extends ChapterViewData {
   }
 
   factory StudyViewData.fromJson(Object json) {
-    final sup = ChapterViewData.fromJson(json);
+    final sup = VolumeViewData.fromJson(json);
 
     var foobar = 0;
 

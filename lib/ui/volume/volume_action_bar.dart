@@ -1,4 +1,3 @@
-import 'package:bible/models/const.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +9,8 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/search_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
+import '../../models/const.dart';
 import '../../models/user_item_helper.dart';
-import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
 import '../common/tec_action_bar.dart';
 import '../common/tec_modal_popup_menu.dart';
@@ -19,6 +18,7 @@ import '../library/library.dart';
 import '../menu/view_actions.dart';
 import '../nav/nav.dart';
 import 'study_view_data.dart';
+import 'volume_view_data_bloc.dart';
 
 class VolumeViewActionBar extends StatelessWidget {
   final ViewState state;
@@ -30,9 +30,9 @@ class VolumeViewActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChapterViewDataBloc, ViewData>(
+    return BlocBuilder<VolumeViewDataBloc, ViewData>(
       builder: (context, viewData) {
-        if (viewData is ChapterViewData) {
+        if (viewData is VolumeViewData) {
           final volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
           return ActionBar(
             elevation: defaultActionBarElevation,
@@ -88,13 +88,13 @@ class VolumeViewActionBar extends StatelessWidget {
             ],
           );
         }
-        throw Exception('VolumeViewActionBar data must be ChapterViewData');
+        throw Exception('VolumeViewActionBar data must be VolumeViewData');
       },
     );
   }
 }
 
-Future<void> _onNavigate(BuildContext context, ChapterViewData viewData,
+Future<void> _onNavigate(BuildContext context, VolumeViewData viewData,
     {int initialIndex = 0, bool searchView = false}) async {
   TecAutoScroll.stopAutoscroll();
 
@@ -110,22 +110,22 @@ Future<void> _onNavigate(BuildContext context, ChapterViewData viewData,
     await Future.delayed(const Duration(milliseconds: 350), () {
       final newViewData = viewData.copyWith(bcv: BookChapterVerse.fromRef(ref));
       tec.dmPrint('VolumeViewActionBar _onNavigate updating with new data: $newViewData');
-      context.read<ChapterViewDataBloc>().update(context, newViewData);
+      context.read<VolumeViewDataBloc>().update(context, newViewData);
     });
   }
 }
 
-Future<void> _onSelectVolume(BuildContext context, ChapterViewData viewData) async {
+Future<void> _onSelectVolume(BuildContext context, VolumeViewData viewData) async {
   TecAutoScroll.stopAutoscroll();
 
   final volumeId = await selectVolumeInLibrary(context,
       title: 'Switch To...', selectedVolume: viewData.volumeId);
 
-  ChapterViewData newViewData;
+  VolumeViewData newViewData;
   if (volumeId != null) {
     assert(viewData != null);
     if (isBibleId(volumeId)) {
-      newViewData = ChapterViewData(volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
+      newViewData = VolumeViewData(volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
     } else if (isStudyVolumeId(volumeId)) {
       newViewData =
           StudyViewData(0, volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
@@ -136,6 +136,6 @@ Future<void> _onSelectVolume(BuildContext context, ChapterViewData viewData) asy
 
   if (newViewData != null) {
     tec.dmPrint('VolumeViewActionBar _onSelectVolume updating with new data: $newViewData');
-    await context.read<ChapterViewDataBloc>().update(context, newViewData);
+    await context.read<VolumeViewDataBloc>().update(context, newViewData);
   }
 }

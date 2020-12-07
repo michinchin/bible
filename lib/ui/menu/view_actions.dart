@@ -7,8 +7,8 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
-import '../bible/chapter_view_data.dart';
 import '../common/tec_modal_popup_menu.dart';
+import '../volume/volume_view_data_bloc.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   // ignore: close_sinks
@@ -69,7 +69,7 @@ List<TableRow> buildMenuItemsForViewWithState(
   final vmBloc = context.viewManager;
   final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
 
-  final viewData = ChapterViewData.fromContext(context, state.uid);
+  final viewData = VolumeViewData.fromContext(context, state.uid);
   final useSharedRef = viewData.useSharedRef;
 
   final items = <TableRow>[];
@@ -106,7 +106,7 @@ List<TableRow> buildMenuItemsForViewWithState(
         useSharedRef ? 'Unlink chapter' : 'Link chapter',
         () {
           Navigator.of(menuContext).maybePop();
-          final viewDataBloc = context.tbloc<ChapterViewDataBloc>();
+          final viewDataBloc = context.tbloc<VolumeViewDataBloc>();
           assert(viewDataBloc != null);
           viewDataBloc?.update(context, viewData.copyWith(useSharedRef: !useSharedRef));
         },

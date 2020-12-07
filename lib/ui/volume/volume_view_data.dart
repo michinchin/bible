@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
@@ -10,40 +9,17 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 
 export '../../blocs/view_manager/view_data.dart';
 
-class ChapterViewDataBloc extends ViewDataBloc {
-  ChapterViewDataBloc(ViewManagerBloc vmBloc, int viewUid, ChapterViewData data)
-      : super(vmBloc, viewUid, data);
-
-  @override
-  Future<void> update(
-    BuildContext context,
-    ViewData viewData, {
-    bool updateSharedRef = true,
-  }) async {
-    assert(viewData != null && viewData is ChapterViewData);
-    await super.update(context, viewData);
-    if (updateSharedRef && viewData is ChapterViewData && viewData.useSharedRef) {
-      _isUpdatingSharedBibleRef = true;
-      context.read<SharedBibleRefBloc>()?.update(viewData.bcv);
-      _isUpdatingSharedBibleRef = false;
-    }
-  }
-
-  bool get isUpdatingSharedBibleRef => _isUpdatingSharedBibleRef;
-  var _isUpdatingSharedBibleRef = false;
-}
-
 ///
-/// ChapterViewData
+/// VolumeViewData
 ///
 @immutable
-class ChapterViewData extends ViewData {
+class VolumeViewData extends ViewData {
   final int volumeId;
   final BookChapterVerse bcv;
   final int page;
   final bool useSharedRef;
 
-  const ChapterViewData(
+  const VolumeViewData(
     this.volumeId,
     this.bcv,
     this.page, {
@@ -52,16 +28,16 @@ class ChapterViewData extends ViewData {
         super();
 
   @override
-  ChapterViewData copyWith({int volumeId, BookChapterVerse bcv, bool useSharedRef, int page}) =>
-      ChapterViewData(
+  VolumeViewData copyWith({int volumeId, BookChapterVerse bcv, bool useSharedRef, int page}) =>
+      VolumeViewData(
         volumeId ?? this.volumeId,
         bcv ?? this.bcv,
         page ?? this.page,
         useSharedRef: useSharedRef ?? this.useSharedRef,
       );
 
-  factory ChapterViewData.fromContext(BuildContext context, int viewUid) {
-    return ChapterViewData.fromJson(context.viewManager?.dataWithView(viewUid));
+  factory VolumeViewData.fromContext(BuildContext context, int viewUid) {
+    return VolumeViewData.fromJson(context.viewManager?.dataWithView(viewUid));
   }
 
   String bookNameAndChapter({bool useShortBookName = false}) =>
@@ -90,7 +66,7 @@ class ChapterViewData extends ViewData {
     return json;
   }
 
-  factory ChapterViewData.fromJson(Object json) {
+  factory VolumeViewData.fromJson(Object json) {
     int volumeId;
     BookChapterVerse bcv;
     int page;
@@ -104,7 +80,7 @@ class ChapterViewData extends ViewData {
       useSharedRef = tec.as<bool>(jsonMap['useSharedRef']);
     }
 
-    return ChapterViewData(
+    return VolumeViewData(
       volumeId ?? defaultBibleId,
       bcv ?? defaultBCV,
       page ?? 0,
@@ -113,11 +89,11 @@ class ChapterViewData extends ViewData {
   }
 }
 
-extension ChapterViewDataExtOnViewData on ViewData {
-  ChapterViewData get asChapterViewData => this as ChapterViewData;
+extension VolumeViewDataExtOnViewData on ViewData {
+  VolumeViewData get asVolumeViewData => this as VolumeViewData;
 }
 
 extension ViewManagerExtOnViewState on ViewState {
-  ChapterViewData chapterDataWith(BuildContext context) =>
-      ChapterViewData.fromContext(context, uid);
+  VolumeViewData volumeDataWith(BuildContext context) =>
+      VolumeViewData.fromContext(context, uid);
 }

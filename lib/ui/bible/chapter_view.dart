@@ -22,9 +22,9 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../common/tec_page_view.dart';
+import '../volume/volume_view_data_bloc.dart';
 import 'chapter_build_helper.dart';
 import 'chapter_selection.dart';
-import 'chapter_view_data.dart';
 import 'chapter_view_model.dart';
 
 class PageableChapterView extends StatefulWidget {
@@ -49,7 +49,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
   void initState() {
     // tec.dmPrint('_PageableChapterViewState initState for ${widget.state.uid} size ${widget.size}');
     super.initState();
-    final viewData = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData;
+    final viewData = context.tbloc<VolumeViewDataBloc>().state.asVolumeViewData;
     _volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
     _bible = _volume.assocBible();
     _bcvPageZero = viewData.bcv;
@@ -58,12 +58,12 @@ class _PageableChapterViewState extends State<PageableChapterView> {
   @override
   Widget build(BuildContext context) => MultiBlocListener(
         listeners: [
-          BlocListener<ChapterViewDataBloc, ViewData>(
+          BlocListener<VolumeViewDataBloc, ViewData>(
             // Only listen for when the volume, book, chapter, or verse changes.
             listenWhen: (a, b) =>
-                a.asChapterViewData.volumeId != b.asChapterViewData.volumeId ||
-                a.asChapterViewData.bcv != b.asChapterViewData.bcv,
-            listener: (context, viewData) => _onNewViewData(viewData.asChapterViewData),
+                a.asVolumeViewData.volumeId != b.asVolumeViewData.volumeId ||
+                a.asVolumeViewData.bcv != b.asVolumeViewData.bcv,
+            listener: (context, viewData) => _onNewViewData(viewData.asVolumeViewData),
           ),
           BlocListener<SharedBibleRefBloc, BookChapterVerse>(listener: _sharedBibleRefChanged),
         ],
@@ -80,9 +80,9 @@ class _PageableChapterViewState extends State<PageableChapterView> {
       );
 
   ///
-  /// This is called when the ChapterViewData volume, book, chapter, or verse changes.
+  /// This is called when the VolumeViewData volume, book, chapter, or verse changes.
   ///
-  void _onNewViewData(ChapterViewData viewData) {
+  void _onNewViewData(VolumeViewData viewData) {
     if (!mounted || viewData == null || _volume == null) return;
 
     // tec.dmPrint('PageableChapterView._onNewViewData $viewData');
@@ -121,8 +121,8 @@ class _PageableChapterViewState extends State<PageableChapterView> {
   ///
   Future<void> _sharedBibleRefChanged(BuildContext context, BookChapterVerse sharedRef) async {
     if (!_animatingToPage && mounted && _pageController != null && _bible != null) {
-      final viewDataBloc = context.tbloc<ChapterViewDataBloc>();
-      final viewData = viewDataBloc.state.asChapterViewData;
+      final viewDataBloc = context.tbloc<VolumeViewDataBloc>();
+      final viewData = viewDataBloc.state.asVolumeViewData;
       if (!viewDataBloc.isUpdatingSharedBibleRef &&
           viewData.useSharedRef &&
           viewData.bcv != sharedRef) {
@@ -140,11 +140,11 @@ class _PageableChapterViewState extends State<PageableChapterView> {
   Widget _buildPage(BuildContext context, ViewState _, Size size, int index) {
     final ref = _bcvPageZero.advancedBy(chapters: index, bible: _bible);
     if (ref == null) return null;
-    return BlocBuilder<ChapterViewDataBloc, ViewData>(
-      // When the ChapterViewDataBloc changes, only rebuild if the volume changes.
-      buildWhen: (a, b) => a.asChapterViewData.volumeId != b.asChapterViewData.volumeId,
+    return BlocBuilder<VolumeViewDataBloc, ViewData>(
+      // When the VolumeViewDataBloc changes, only rebuild if the volume changes.
+      buildWhen: (a, b) => a.asVolumeViewData.volumeId != b.asVolumeViewData.volumeId,
       builder: (context, viewData) {
-        if (viewData is ChapterViewData) {
+        if (viewData is VolumeViewData) {
           final volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
           var ref = _bcvPageZero.advancedBy(chapters: index, bible: volume.assocBible());
           if (ref == null) return Container();
@@ -157,7 +157,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
           //     '${_bible.abbreviation} ${ref.toString()}');
           return _BibleChapterView(viewUid: widget.state.uid, size: size, volume: volume, ref: ref);
         } else {
-          throw UnsupportedError('PageableChapterView must use ChapterViewData');
+          throw UnsupportedError('PageableChapterView must use VolumeViewData');
         }
       },
     );
@@ -174,14 +174,14 @@ class _PageableChapterViewState extends State<PageableChapterView> {
         context.tbloc<SheetManagerBloc>().add(SheetEvent.restore);
       });
 
-      final viewData = context.tbloc<ChapterViewDataBloc>().state.asChapterViewData;
+      final viewData = context.tbloc<VolumeViewDataBloc>().state.asVolumeViewData;
       final newData = viewData.copyWith(
           bcv: viewData.bcv.book == bcv.book && viewData.bcv.chapter == bcv.chapter ? null : bcv,
           page: page);
       // tec.dmPrint('PageableChapterView.onPageChanged: updating $viewData with new '
       //     'data: $newData');
       await context
-          .tbloc<ChapterViewDataBloc>()
+          .tbloc<VolumeViewDataBloc>()
           .update(context, newData, updateSharedRef: !_animatingToPage);
     }
   }
@@ -503,9 +503,9 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
         BlocListener<SelectionCmdBloc, SelectionCmd>(
           listener: (context, cmd) => _selection.handleCmd(context, cmd),
         ),
-        BlocListener<ChapterViewDataBloc, ViewData>(
+        BlocListener<VolumeViewDataBloc, ViewData>(
           listener: (context, viewData) {
-            final newBcv = viewData.asChapterViewData.bcv;
+            final newBcv = viewData.asVolumeViewData.bcv;
             if (newBcv.book == widget.ref.book && newBcv.chapter == widget.ref.chapter) {
               // tec.dmPrint('Notifying of selections for ${widget.ref}');
               _selection.notifyOfSelections(context);

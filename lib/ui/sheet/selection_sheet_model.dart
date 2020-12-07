@@ -14,8 +14,8 @@ import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/tec_share.dart';
-import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
+import '../volume/volume_view_data.dart';
 import 'compare_verse.dart';
 import 'snap_sheet.dart';
 
@@ -207,12 +207,12 @@ class SelectionSheetModel {
 
     if (uid != null) {
       final ref = tec.as<Reference>(bloc.selectionObjectWithViewUid(uid));
-      final bible = ChapterViewData.fromContext(c, uid)?.volumeId;
+      final bible = VolumeViewData.fromContext(c, uid)?.volumeId;
       await writeRef(ref, bible);
     } else {
       for (final vuid in views) {
         final ref = tec.as<Reference>(bloc.selectionObjectWithViewUid(vuid));
-        final bible = ChapterViewData.fromContext(c, vuid)?.volumeId;
+        final bible = VolumeViewData.fromContext(c, vuid)?.volumeId;
         await writeRef(ref, bible);
         if (vuid != views.last) {
           buffer.writeln('\n');

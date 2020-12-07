@@ -15,9 +15,9 @@ import '../../models/home/saves.dart';
 import '../../models/home/votd.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/tec_share.dart';
-import '../bible/chapter_view_data.dart';
 import '../common/common.dart';
 import '../library/library.dart';
+import '../volume/volume_view_data.dart';
 import 'day_card.dart';
 
 Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
@@ -222,9 +222,9 @@ Bible currentBibleFromContext(BuildContext context) {
               .firstWhere(
                   (v) =>
                       v.type == Const.viewTypeVolume &&
-                      isBibleId(ChapterViewData.fromContext(context, v.uid)?.volumeId),
+                      isBibleId(VolumeViewData.fromContext(context, v.uid)?.volumeId),
                   orElse: () => null)
-              ?.chapterDataWith(context))
+              ?.volumeDataWith(context))
           ?.volumeId) ??
       defaultBibleId);
   return bible;
