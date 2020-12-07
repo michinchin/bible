@@ -71,6 +71,9 @@ class StudyView extends StatelessWidget {
                               const SizedBox(height: 32),
                               Text(
                                 volume?.name ?? '',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
                                 style: const TextStyle(fontSize: 20),
                               ),
                               Center(
