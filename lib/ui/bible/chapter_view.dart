@@ -28,10 +28,10 @@ import 'chapter_selection.dart';
 import 'chapter_view_model.dart';
 
 class PageableChapterView extends StatefulWidget {
-  final ViewState state;
+  final ViewState viewState;
   final Size size;
 
-  const PageableChapterView({Key key, this.state, this.size}) : super(key: key);
+  const PageableChapterView({Key key, this.viewState, this.size}) : super(key: key);
 
   @override
   _PageableChapterViewState createState() => _PageableChapterViewState();
@@ -47,7 +47,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
 
   @override
   void initState() {
-    // tec.dmPrint('_PageableChapterViewState initState for ${widget.state.uid} size ${widget.size}');
+    // tec.dmPrint('_PageableChapterViewState initState for ${widget.viewState.uid} size ${widget.size}');
     super.initState();
     final viewData = context.tbloc<VolumeViewDataBloc>().state.asVolumeViewData;
     _volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
@@ -68,7 +68,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
           BlocListener<SharedBibleRefBloc, BookChapterVerse>(listener: _sharedBibleRefChanged),
         ],
         child: PageableView(
-          state: widget.state,
+          state: widget.viewState,
           size: widget.size,
           controllerBuilder: () {
             _pageController = TecPageController(initialPage: 0);
@@ -155,7 +155,8 @@ class _PageableChapterViewState extends State<PageableChapterView> {
           }
           // tec.dmPrint('PageableChapterView.pageBuilder: creating ChapterView for '
           //     '${_bible.abbreviation} ${ref.toString()}');
-          return _BibleChapterView(viewUid: widget.state.uid, size: size, volume: volume, ref: ref);
+          return _BibleChapterView(
+              viewUid: widget.viewState.uid, size: size, volume: volume, ref: ref);
         } else {
           throw UnsupportedError('PageableChapterView must use VolumeViewData');
         }

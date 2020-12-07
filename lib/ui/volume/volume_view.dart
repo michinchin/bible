@@ -27,8 +27,8 @@ class ViewableVolume extends Viewable {
               isBibleId(a.asVolumeViewData.volumeId) != isBibleId(b.asVolumeViewData.volumeId),
           builder: (context, viewData) {
             return isBibleId(viewData.asVolumeViewData.volumeId)
-                ? PageableChapterView(state: state, size: size)
-                : StudyView(state: state, size: size);
+                ? PageableChapterView(viewState: state, size: size)
+                : StudyView(viewState: state, size: size, viewData: viewData as VolumeViewData);
           },
         ),
       ),
