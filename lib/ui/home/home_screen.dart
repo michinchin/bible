@@ -40,12 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO(abby): on cold start, doesn't open notification on iOS...why?
     // if cold start - wait longer...
     final delay =
-        (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 500 : 1250;
-
-    Future.delayed(Duration(milliseconds: delay), () {     
-      // resend the notification
-      Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
-    });
+        (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 1250 : 500;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
@@ -53,6 +48,10 @@ class _HomeScreenState extends State<HomeScreen> {
         if (granted) {
           NotificationBloc.init(NotificationsModel.shared);
           NotificationsModel.shared.bible = currentBibleFromContext(context);
+          Future.delayed(Duration(milliseconds: delay), () {
+            // resend the notification
+            Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
+          });
         }
       }
     });
@@ -70,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
         BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
         BlocProvider<SelectionCmdBloc>(create: (context) => SelectionCmdBloc()),
         BlocProvider<SheetManagerBloc>(create: (context) => SheetManagerBloc()),
-        BlocProvider<TabManagerCubit>(create: (context) => TabManagerCubit()),
       ],
       child: BlocBuilder<TabManagerCubit, TecTab>(buildWhen: (p, n) {
         // android needs bottom nav bar color changed in dark mode with non reader tab
@@ -148,8 +146,8 @@ class MainMenuFab extends StatelessWidget {
         heroTag: null,
         child: Icon(FeatherIcons.user, size: 15, color: Theme.of(context).textColor),
         backgroundColor: Theme.of(context).brightness == Brightness.dark
-              ? Theme.of(context).appBarTheme.color
-              : Theme.of(context).backgroundColor,
+            ? Theme.of(context).appBarTheme.color
+            : Theme.of(context).backgroundColor,
         onPressed: () => showMainMenu(context),
       );
 }
@@ -162,8 +160,8 @@ class JournalFab extends StatelessWidget {
       heroTag: null,
       child: Icon(FeatherIcons.bookOpen, size: 15, color: Theme.of(context).textColor),
       backgroundColor: Theme.of(context).brightness == Brightness.dark
-              ? Theme.of(context).appBarTheme.color
-              : Theme.of(context).backgroundColor,
+          ? Theme.of(context).appBarTheme.color
+          : Theme.of(context).backgroundColor,
       onPressed: () {
         Scaffold.of(context).openDrawer();
       });

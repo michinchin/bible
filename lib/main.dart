@@ -20,6 +20,7 @@ import 'blocs/downloads/downloads_bloc.dart';
 import 'blocs/search/search_bloc.dart';
 import 'blocs/shared_bible_ref_bloc.dart';
 import 'blocs/sheet/pref_items_bloc.dart';
+import 'blocs/sheet/tab_manager_bloc.dart';
 import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'models/const.dart';
@@ -58,9 +59,7 @@ Future<void> main() async {
 
   final product = tec.platformIs(tec.Platform.web)
       ? 'WebSite'
-      : '${tec.platformIs(tec.Platform.iOS)
-          ? 'IOS'
-          : 'PLAY'}_TecartaBible';
+      : '${tec.platformIs(tec.Platform.iOS) ? 'IOS' : 'PLAY'}_TecartaBible';
 
   VolumesRepository.shared = TecVolumesRepository(
     productsUrl: '${tec.streamUrl}/products-list/$product.json.gz',
@@ -109,6 +108,7 @@ class App extends StatelessWidget {
         BlocProvider(create: (context) => ContentSettingsBloc()),
         BlocProvider(create: (context) => PrefItemsBloc()),
         BlocProvider(create: (context) => SearchBloc()),
+        BlocProvider<TabManagerCubit>(create: (context) => TabManagerCubit()),
         // BlocProvider(create: (context) => AppEntryCubit())
       ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
