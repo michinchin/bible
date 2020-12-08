@@ -1,6 +1,7 @@
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -13,6 +14,7 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/notifications/notifications_model.dart';
 import '../common/common.dart';
+import '../common/tec_scroll_listener.dart';
 import '../library/library.dart';
 import '../menu/main_menu.dart';
 import '../sheet/snap_sheet.dart';
@@ -117,14 +119,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 tab: TecTab.reader,
                 widget: Stack(
                   children: [
-                    BlocBuilder<ViewManagerBloc, ViewManagerState>(
-                      builder: (context, state) {
-                        return ViewManagerWidget(
-                          state: state,
-                          topRightWidget: MainMenuFab(),
-                          topLeftWidget: JournalFab(),
-                        );
+                    TecScrollListener(
+                      changedDirection: (direction) {
+                        if (direction == ScrollDirection.reverse) {
+                          tec.dmPrint('Calling SheetManagerBloc.add(SheetEvent.restore)');
+                          context.read<SheetManagerBloc>().add(SheetEvent.restore);
+                        } else if (direction == ScrollDirection.forward) {
+                          tec.dmPrint('Calling SheetManagerBloc.add(SheetEvent.collapse)');
+                          context.read<SheetManagerBloc>().add(SheetEvent.collapse);
+                        }
                       },
+                      child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+                        builder: (context, state) {
+                          return ViewManagerWidget(
+                            state: state,
+                            topRightWidget: MainMenuFab(),
+                            topLeftWidget: JournalFab(),
+                          );
+                        },
+                      ),
                     ),
                     SnapSheet(),
                   ],

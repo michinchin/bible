@@ -538,92 +538,73 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                 // context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
               }
             },
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                if (notification is UserScrollNotification) {
-                  const scrollBuffer = 3.0;
-                  lastScrollOffset ??= notification.metrics.pixels - scrollBuffer - 1;
-                  if (notification.metrics.pixels < (lastScrollOffset - scrollBuffer)) {
-                    tec.dmPrint('ChapterViewHtml: scrolled up, restoring the bottom sheet.');
-                    context.tbloc<SheetManagerBloc>().add(SheetEvent.restore);
-                    lastScrollOffset = notification.metrics.pixels;
-                  } else if (notification.metrics.pixels > (lastScrollOffset + scrollBuffer)) {
-                    tec.dmPrint('ChapterViewHtml: scrolled down, collapsing the bottom sheet.');
-                    context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
-                    lastScrollOffset = notification.metrics.pixels;
-                  }
-                }
-                return false;
-              },
-              child: Scrollbar(
-                child: ListView(
-                  controller: _scrollController,
-                  children: <Widget>[
-                    const SizedBox(height: 20),
-                    GestureDetector(
-                      onTapUp: (details) => _viewModel.globalOffsetOfTap = details?.globalPosition,
-                      onTap: () => _viewModel.onTapHandler(),
-                      child: TecHtml(
-                        widget.html,
-                        backgroundColor: Theme.of(context).backgroundColor,
-                        key: _tecHtmlKey,
-                        debugId: debugId,
-                        avoidUsingWidgetSpans: false,
-                        scrollController: _scrollController,
-                        baseUrl: widget.baseUrl,
-                        textScaleFactor: 1.0,
-                        // HTML is already scaled.
-                        textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
-                            ? TextStyle(color: textColor)
-                            : widget.fontName.startsWith('embedded_')
-                                ? TextStyle(
-                                    color: textColor, fontFamily: widget.fontName.substring(9))
-                                : GoogleFonts.getFont(widget.fontName, color: textColor)),
+            child: Scrollbar(
+              child: ListView(
+                controller: _scrollController,
+                children: <Widget>[
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTapUp: (details) => _viewModel.globalOffsetOfTap = details?.globalPosition,
+                    onTap: () => _viewModel.onTapHandler(),
+                    child: TecHtml(
+                      widget.html,
+                      backgroundColor: Theme.of(context).backgroundColor,
+                      key: _tecHtmlKey,
+                      debugId: debugId,
+                      avoidUsingWidgetSpans: false,
+                      scrollController: _scrollController,
+                      baseUrl: widget.baseUrl,
+                      textScaleFactor: 1.0,
+                      // HTML is already scaled.
+                      textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
+                          ? TextStyle(color: textColor)
+                          : widget.fontName.startsWith('embedded_')
+                              ? TextStyle(
+                                  color: textColor, fontFamily: widget.fontName.substring(9))
+                              : GoogleFonts.getFont(widget.fontName, color: textColor)),
 
-                        padding: EdgeInsets.symmetric(
-                          horizontal: (widget.size.width * _marginPercent).roundToDouble(),
-                        ),
-
-                        // Tagging HTML elements:
-                        tagHtmlElement: helper.tagHtmlElement,
-
-                        // Rendering HTML text to a TextSpan:
-                        spanForText: (text, style, tag) {
-                          // If scrolling to a verse > 1, add a post frame callback to do so.
-                          // Note, we do it here, because until `spanForText` has been called,
-                          // the HTML has not be rendered.
-                          if (_scrollToVerse > 1) {
-                            _scrollToVerse = 0;
-                            tec.dmPrint(
-                                'ChapterHtml post build will scroll to verse ${widget.ref.verse}');
-                            WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                              _viewModel.scrollToVerse(
-                                  widget.ref.verse, _tecHtmlKey, _scrollController,
-                                  animated: false);
-                            });
-                          }
-
-                          return _viewModel.spanForText(
-                              context, text, style, tag, selectedTextStyle,
-                              isDarkTheme: isDarkTheme);
-                        },
-
-                        // Word range selection related:
-                        selectable: !_selection.hasVerses,
-                        selectionColor: selectionColor,
-                        showSelection: !_selection.isInTrialMode,
-                        selectionMenuItems: _selection.menuItems(context, _tecHtmlKey),
-                        selectionController: _wordSelectionController,
-
-                        // `versesToShow` related (when viewing a subset of verses in the chapter):
-                        isInitialHtmlElementVisible:
-                            widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
-                        toggleVisibilityWithHtmlElement: helper.toggleVisibility,
-                        shouldSkipHtmlElement: helper.shouldSkip,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: (widget.size.width * _marginPercent).roundToDouble(),
                       ),
+
+                      // Tagging HTML elements:
+                      tagHtmlElement: helper.tagHtmlElement,
+
+                      // Rendering HTML text to a TextSpan:
+                      spanForText: (text, style, tag) {
+                        // If scrolling to a verse > 1, add a post frame callback to do so.
+                        // Note, we do it here, because until `spanForText` has been called,
+                        // the HTML has not be rendered.
+                        if (_scrollToVerse > 1) {
+                          _scrollToVerse = 0;
+                          tec.dmPrint(
+                              'ChapterHtml post build will scroll to verse ${widget.ref.verse}');
+                          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                            _viewModel.scrollToVerse(
+                                widget.ref.verse, _tecHtmlKey, _scrollController,
+                                animated: false);
+                          });
+                        }
+
+                        return _viewModel.spanForText(context, text, style, tag, selectedTextStyle,
+                            isDarkTheme: isDarkTheme);
+                      },
+
+                      // Word range selection related:
+                      selectable: !_selection.hasVerses,
+                      selectionColor: selectionColor,
+                      showSelection: !_selection.isInTrialMode,
+                      selectionMenuItems: _selection.menuItems(context, _tecHtmlKey),
+                      selectionController: _wordSelectionController,
+
+                      // `versesToShow` related (when viewing a subset of verses in the chapter):
+                      isInitialHtmlElementVisible:
+                          widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
+                      toggleVisibilityWithHtmlElement: helper.toggleVisibility,
+                      shouldSkipHtmlElement: helper.shouldSkip,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

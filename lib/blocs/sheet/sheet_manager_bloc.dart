@@ -1,19 +1,23 @@
 import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 enum SheetType { main, selection, hidden }
 
-class SheetManagerState {
+class SheetManagerState extends Equatable {
   final SheetType type;
   final SheetType previousType;
 
-  SheetManagerState(this.type, this.previousType);
+  const SheetManagerState(this.type, this.previousType);
+
+  @override
+  List<Object> get props => [type, previousType];
 }
 
 enum SheetEvent { main, selection, restore, collapse }
 
 class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
-  SheetManagerBloc() : super(SheetManagerState(SheetType.main, SheetType.hidden));
+  SheetManagerBloc() : super(const SheetManagerState(SheetType.main, SheetType.hidden));
 
   @override
   Stream<SheetManagerState> mapEventToState(SheetEvent event) async* {
