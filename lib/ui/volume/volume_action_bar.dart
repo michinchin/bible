@@ -108,7 +108,8 @@ Future<void> _onNavigate(BuildContext context, VolumeViewData viewData,
 
     // Small delay to allow the nav popup to clean up...
     await Future.delayed(const Duration(milliseconds: 350), () {
-      final newViewData = viewData.copyWith(bcv: BookChapterVerse.fromRef(ref));
+      final newViewData =
+          viewData.copyWith(bcv: BookChapterVerse.fromRef(ref), volumeId: ref.volume);
       tec.dmPrint('VolumeViewActionBar _onNavigate updating with new data: $newViewData');
       context.read<VolumeViewDataBloc>().update(context, newViewData);
     });

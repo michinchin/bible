@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
+import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/votd.dart';
 import '../common/common.dart';
@@ -21,7 +22,8 @@ Future<void> showVotdFromNotification(BuildContext context, DateTime date) async
   while (Navigator.of(context).canPop()) {
     Navigator.of(context).pop();
   }
-  unawaited(showTodayScreen(context));
+  context.tabManager?.changeTab(TecTab.today);
+  // unawaited(showTodayScreen(context));
   final votds = await Votd.fetch();
   if (tec.dateOnly(date).isAtSameMomentAs(tec.today)) {
     await showVotdScreen(context, votds.forDateTime(date));
@@ -35,7 +37,8 @@ Future<void> showDotdFromNotification(BuildContext context, DateTime date) async
   while (Navigator.of(context).canPop()) {
     Navigator.of(context).pop();
   }
-  unawaited(showTodayScreen(context));
+  // unawaited(showTodayScreen(context));
+  context.tabManager?.changeTab(TecTab.today);
   final dotds = await Dotds.fetch();
   if (tec.dateOnly(date).isAtSameMomentAs(tec.today)) {
     await showDotdScreen(context, dotds.devoForDate(date));

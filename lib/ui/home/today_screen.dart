@@ -146,7 +146,7 @@ class _HomeCard extends StatelessWidget {
                               ),
                               maxLines: 2,
                               autoSize: true,
-                              textScaleFactor: contentTextScaleFactorWith(c),
+                              // textScaleFactor: contentTextScaleFactorWith(c),
                             ),
                           ),
                           InkWell(
@@ -158,7 +158,7 @@ class _HomeCard extends StatelessWidget {
                           style: cardTitleCompactStyle.copyWith(
                             color: Colors.white,
                           ),
-                          textScaleFactor: contentTextScaleFactorWith(c),
+                          // textScaleFactor: contentTextScaleFactorWith(c),
                           maxLines: 3,
                         ),
                       ],

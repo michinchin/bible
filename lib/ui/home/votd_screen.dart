@@ -121,7 +121,8 @@ class __VotdScreenState extends State<_VotdScreen> {
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data.error == null) {
             final res = snapshot.data.value;
-            final ref = widget.votd.ref.copyWith(volume: _bible.id);
+            final ref = widget.votd.ref;
+            final t = VolumesRepository.shared.bibleWithId(_bible.id);
             return SafeArea(
               child: SingleChildScrollView(
                 child: Padding(
@@ -135,17 +136,24 @@ class __VotdScreenState extends State<_VotdScreen> {
                         textScaleFactor: contentTextScaleFactorWith(context),
                         textAlign: TextAlign.left,
                       ),
-                      const SizedBox(height: 5),
                       FlatButton(
+                        onPressed: () {},
+                        child: TecText(
+                          ref.label(),
+                          style: cardSubtitleCompactStyle.copyWith(
+                              color: Theme.of(context).textColor, fontWeight: FontWeight.w500),
+                          textScaleFactor: contentTextScaleFactorWith(context),
+                        ),
+                      ),
+                      FlatButton.icon(
                         padding: EdgeInsets.zero,
-                        child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                          TecText(
-                            ref.label(),
-                            style: cardTitleCompactStyle,
-                            textScaleFactor: contentTextScaleFactorWith(context),
-                          ),
-                          Icon(Icons.arrow_drop_down, color: Theme.of(context).textColor),
-                        ]),
+                        icon: TecText(
+                          t.name,
+                          style:
+                              cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
+                          // textScaleFactor: contentTextScaleFactorWith(context),
+                        ),
+                        label: Icon(Icons.arrow_drop_down, color: Theme.of(context).textColor),
                         onPressed: onRefTap,
                       ),
                     ],

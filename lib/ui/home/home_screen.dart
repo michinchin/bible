@@ -1,7 +1,6 @@
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -13,6 +12,7 @@ import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/notifications/notifications_model.dart';
 import '../common/common.dart';
+import '../common/tec_scroll_listener.dart';
 import '../library/library.dart';
 import '../menu/main_menu.dart';
 import '../sheet/snap_sheet.dart';
@@ -40,12 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO(abby): on cold start, doesn't open notification on iOS...why?
     // if cold start - wait longer...
     final delay =
-        (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 500 : 1250;
-
-    Future.delayed(Duration(milliseconds: delay), () {
-      // resend the notification
-      Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
-    });
+        (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 1250 : 500;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
@@ -53,6 +48,10 @@ class _HomeScreenState extends State<HomeScreen> {
         if (granted) {
           NotificationBloc.init(NotificationsModel.shared);
           NotificationsModel.shared.bible = currentBibleFromContext(context);
+          Future.delayed(Duration(milliseconds: delay), () {
+            // resend the notification
+            Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
+          });
         }
       }
     });
@@ -117,14 +116,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 label: 'Bible',
                 widget: Stack(
                   children: [
-                    BlocBuilder<ViewManagerBloc, ViewManagerState>(
-                      builder: (context, state) {
-                        return ViewManagerWidget(
-                          state: state,
-                          topRightWidget: MainMenuFab(),
-                          topLeftWidget: JournalFab(),
-                        );
+                    TecScrollListener(
+                      axisDirection: AxisDirection.down,
+                      changedDirection: (direction) {
+                        if (direction == ScrollDirection.reverse) {
+                          context.read<SheetManagerBloc>().add(SheetEvent.restore);
+                        } else if (direction == ScrollDirection.forward) {
+                          context.read<SheetManagerBloc>().add(SheetEvent.collapse);
+                        }
                       },
+                      child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+                        builder: (context, state) {
+                          return ViewManagerWidget(
+                            state: state,
+                            topRightWidget: MainMenuFab(),
+                            topLeftWidget: JournalFab(),
+                          );
+                        },
+                      ),
                     ),
                     SnapSheet(),
                   ],
@@ -178,23 +187,3 @@ class JournalFab extends StatelessWidget {
       });
 }
 
-// chose either column or stack - making sure 1st child of column is expanded...
-// class _ColumnStack extends StatelessWidget {
-//   final List<Widget> children;
-//
-//   const _ColumnStack({Key key, this.children}) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     if (isSmallScreen(context)) {
-//       if (children.first is! Expanded) {
-//         final child = children.removeAt(0);
-//         children.insert(0, Expanded(child: child));
-//       }
-//
-//       return Column(children: children);
-//     } else {
-//       return Stack(children: children);
-//     }
-//   }
-// }

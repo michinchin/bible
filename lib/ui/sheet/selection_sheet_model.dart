@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
@@ -16,6 +17,7 @@ import '../../models/pref_item.dart';
 import '../../models/search/tec_share.dart';
 import '../common/common.dart';
 import '../volume/volume_view_data.dart';
+import '../volume/volume_view_data_bloc.dart';
 import 'compare_verse.dart';
 import 'snap_sheet.dart';
 
@@ -290,7 +292,11 @@ class SelectionSheetModel {
     }
     final bibleId = await showCompareSheet(c, ref);
     if (bibleId != null) {
-      // TODO(abby): change chapter view ref to this translation
+      final bloc = c.viewManager.dataBlocWithView(views.first) as VolumeViewDataBloc;
+      final viewData = bloc.state.asVolumeViewData.copyWith(volumeId: bibleId);
+      await bloc.update(c, viewData);
+      c.tbloc<SelectionCmdBloc>().add(const SelectionCmd.deselectAll());
+      c.tbloc<SheetManagerBloc>().add(SheetEvent.main);
     }
   }
 

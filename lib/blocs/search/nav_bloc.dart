@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
@@ -38,7 +37,6 @@ abstract class NavState with _$NavState {
 class NavBloc extends Bloc<NavEvent, NavState> {
   final Reference initialRef;
   final int initialTabIndex;
-
   NavBloc(this.initialRef, {this.initialTabIndex = 1})
       : super(NavState(
           ref: initialRef ?? Reference.fromHref('50/1/1', volume: 9),
@@ -49,32 +47,33 @@ class NavBloc extends Bloc<NavEvent, NavState> {
           navViewState: NavViewState.bcvTabs,
         ));
 
-  @override
-  // ignore: type_annotate_public_apis
-  Stream<Transition<NavEvent, NavState>> transformEvents(Stream<NavEvent> events, transitionFn) {
-    final nonDebounceStream = events.where((event) {
-      return (event is! _OnSearchChange);
-    });
+  // @override
+  // // ignore: type_annotate_public_apis
+  // Stream<Transition<NavEvent, NavState>> transformEvents(Stream<NavEvent> events, transitionFn) {
+  //   final nonDebounceStream = events.where((event) {
+  //     return (event is! _OnSearchChange);
+  //   });
 
-    // debounce request streams
-    final debounceStream = events.where((event) {
-      return (event is _OnSearchChange);
-    }).debounceTime(const Duration(milliseconds: 250));
+  //   // debounce request streams
+  //   final debounceStream = events.where((event) {
+  //     return (event is _OnSearchChange);
+  //   }).debounceTime(const Duration(milliseconds: 250));
 
-    return super.transformEvents(nonDebounceStream.mergeWith([debounceStream]), transitionFn);
-  }
+  //   return super.transformEvents(nonDebounceStream.mergeWith([debounceStream]), transitionFn);
+  // }
 
-  @override
-  void onTransition(Transition<NavEvent, NavState> transition) {
-    // tec.dmPrint(transition);
-    super.onTransition(transition);
-  }
+  // @override
+  // void onTransition(Transition<NavEvent, NavState> transition) {
+  //   // tec.dmPrint(transition);
+  //   super.onTransition(transition);
+  // }
 
   @override
   Stream<NavState> mapEventToState(NavEvent event) async* {
     if (event is _LoadWordSuggestions) {
       final suggestions = await _loadWordSuggestions(event.search);
-      yield state.copyWith(wordSuggestions: suggestions);
+      yield state.copyWith(
+          wordSuggestions: suggestions, navViewState: NavViewState.searchSuggestions);
     } else {
       final newState = event.when(
           changeNavView: _changeNavView,
@@ -85,6 +84,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
           changeState: _changeState,
           setRef: _setReference);
       // tec.dmPrint('$newState');
+      tec.dmPrint(NavViewState.values[newState.navViewState.index]);
       yield newState;
     }
   }
@@ -93,7 +93,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
   NavState _onSearchChange(String s) {
     // tec.dmPrint('SEARCH CHANGE: $s');
-    var currState = state;
+    var currState = state.copyWith(search: s);
 
     if (s.isNotEmpty && s != null) {
       final bible = VolumesRepository.shared.bibleWithId(state.ref.volume);
@@ -101,7 +101,6 @@ class NavBloc extends Bloc<NavEvent, NavState> {
       final selectedBook = bible.nameOfBook(state.ref.book);
 
       final check = s.toLowerCase();
-
       if (currState.tabIndex == NavTabs.book.index) {
         // book tab
         final endsWithSpaceDigit = lastChar == ' ';
@@ -161,9 +160,10 @@ class NavBloc extends Bloc<NavEvent, NavState> {
         add(NavEvent.loadWordSuggestions(search: s));
 
         currState = currState.copyWith(
-            search: s,
-            bookSuggestions: matches.keys.toList(),
-            navViewState: NavViewState.searchSuggestions);
+          search: s,
+          bookSuggestions: matches.keys.toList(),
+          // navViewState: NavViewState.searchSuggestions
+        );
       } else if (currState.tabIndex == NavTabs.chapter.index) {
         // chapter tab
         currState = currState.copyWith(navViewState: NavViewState.bcvTabs);
@@ -185,11 +185,11 @@ class NavBloc extends Bloc<NavEvent, NavState> {
               search: s,
             );
           }
-        } else if (!s.toLowerCase().startsWith(selectedBook.toLowerCase()) /*|| s.length == selectedBook.length */) {
-          currState = currState.copyWith(tabIndex: NavTabs.book.index, search: '');
-        } else {
+        } else if (!s
+            .toLowerCase()
+            .startsWith(selectedBook.toLowerCase()) /*|| s.length == selectedBook.length */) {
           add(NavEvent.loadWordSuggestions(search: s));
-          currState = currState.copyWith(search: s, navViewState: NavViewState.searchSuggestions);
+          // currState = currState.copyWith(search: s, navViewState: NavViewState.searchSuggestions);
         }
       } else if (currState.tabIndex == NavTabs.verse.index) {
         //verse tab
