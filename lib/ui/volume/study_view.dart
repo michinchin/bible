@@ -7,10 +7,11 @@ import 'package:tec_volumes/tec_volumes.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../bible/chapter_view.dart';
 import '../common/common.dart';
+import '../common/tec_scroll_listener.dart';
 import 'study_view_bloc.dart';
 import 'volume_view_data_bloc.dart';
 
-class StudyView extends StatelessWidget {
+class StudyView extends StatefulWidget {
   final ViewState viewState;
   final Size size;
   final VolumeViewData viewData;
@@ -18,9 +19,16 @@ class StudyView extends StatelessWidget {
   const StudyView({Key key, this.viewState, this.size, this.viewData}) : super(key: key);
 
   @override
+  _StudyViewState createState() => _StudyViewState();
+}
+
+class _StudyViewState extends State<StudyView> {
+  final _scrollController = ScrollController();
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => StudyViewBloc()..updateWithData(viewData),
+      create: (_) => StudyViewBloc()..updateWithData(widget.viewData),
       child: BlocBuilder<StudyViewBloc, StudyViewState>(
         builder: (context, state) {
           if (state.sections == null || state.sections.isEmpty) {
@@ -35,7 +43,11 @@ class StudyView extends StatelessWidget {
             final index = tabTitles.indexOf(title);
             switch (index) {
               case 3:
-                return StudyNotes(viewState: viewState, size: size);
+                return _ScrollConnector(
+                  scrollController: _scrollController,
+                  height: 120,
+                  child: StudyNotes(viewState: widget.viewState, size: widget.size),
+                );
               default:
                 return Center(child: Text(title, style: textStyle));
             }
@@ -55,6 +67,7 @@ class StudyView extends StatelessWidget {
               child: Scaffold(
                 resizeToAvoidBottomInset: false,
                 body: CustomScrollView(
+                  controller: _scrollController,
                   slivers: [
                     SliverAppBar(
                       // backgroundColor: Colors.orange[100],
@@ -101,6 +114,35 @@ class StudyView extends StatelessWidget {
   }
 }
 
+class _ScrollConnector extends StatelessWidget {
+  final Widget child;
+  final double height;
+  final ScrollController scrollController;
+
+  const _ScrollConnector({
+    Key key,
+    @required this.scrollController,
+    @required this.height,
+    @required this.child,
+  })  : assert(scrollController != null && height != null && child != null),
+        super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return TecScrollListener(
+      axisDirection: AxisDirection.down,
+      changedDirection: (direction) {
+        if (direction == ScrollDirection.reverse) {
+          scrollController._scroll(-height);
+        } else if (direction == ScrollDirection.forward) {
+          scrollController._scroll(height);
+        }
+      },
+      child: child,
+    );
+  }
+}
+
 class StudyNotes extends StatelessWidget {
   final ViewState viewState;
   final Size size;
@@ -110,5 +152,11 @@ class StudyNotes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageableChapterView(viewState: viewState, size: size);
+  }
+}
+
+extension on ScrollController {
+  void _scroll(double delta) {
+    animateTo(offset + delta, duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
   }
 }

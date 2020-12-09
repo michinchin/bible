@@ -120,6 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 widget: Stack(
                   children: [
                     TecScrollListener(
+                      axisDirection: AxisDirection.down,
                       changedDirection: (direction) {
                         if (direction == ScrollDirection.reverse) {
                           tec.dmPrint('Calling SheetManagerBloc.add(SheetEvent.restore)');

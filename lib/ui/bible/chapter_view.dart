@@ -441,15 +441,11 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
   final _wordSelectionController = TecSelectableController();
   ChapterSelection _selection;
   ChapterViewModel _viewModel;
-  double lastScrollOffset;
-
   final _tecHtmlKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-
-    lastScrollOffset = 0;
 
     // tec.dmPrint('New ChapterViewModel for ${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}');
 

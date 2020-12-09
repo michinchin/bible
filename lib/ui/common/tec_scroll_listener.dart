@@ -6,9 +6,14 @@ export 'package:flutter/rendering.dart' show ScrollDirection;
 class TecScrollListener extends StatefulWidget {
   final void Function(ScrollDirection direction) changedDirection;
   final Widget child;
+  final AxisDirection axisDirection;
 
-  const TecScrollListener({Key key, @required this.changedDirection, @required this.child})
-      : super(key: key);
+  const TecScrollListener({
+    Key key,
+    @required this.changedDirection,
+    @required this.child,
+    this.axisDirection,
+  }) : super(key: key);
 
   @override
   _TecScrollListenerState createState() => _TecScrollListenerState();
@@ -27,7 +32,9 @@ class _TecScrollListenerState extends State<TecScrollListener> {
   ScrollDirection _previousDirection;
 
   bool _scrollHandler(BuildContext context, ScrollNotification notification) {
-    if (notification is ScrollNotification) {
+    if (notification is ScrollNotification &&
+        (widget.axisDirection == null ||
+            widget.axisDirection == notification.metrics.axisDirection)) {
       final scrollPos = notification.metrics.pixels;
       if (_scrollContext != notification.context) {
         _scrollContext = notification.context;
