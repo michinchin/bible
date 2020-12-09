@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
-import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/nav_bloc.dart';
@@ -104,6 +104,9 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       .map(int.parse)
       .toList();
 
+  Function() _searchListener;
+  Timer _debounce;
+
   @override
   void initState() {
     _searchController = TextEditingController(text: '');
@@ -128,13 +131,27 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
               navBloc().add(NavEvent.changeTabIndex(index: _tabController.index));
             }
           });
+    _searchListener = () {
+      if (_debounce?.isActive ?? false) _debounce.cancel();
+      _debounce = Timer(const Duration(milliseconds: 250), () {
+        if (navBloc().state.search != _searchController.text) {
+          // tec.dmPrint('/nTESTING:${_searchController.text}/n');
+          navBloc().add(NavEvent.onSearchChange(search: _searchController.text));
+        }
+      });
+    };
+    _searchController.addListener(_searchListener);
     super.initState();
   }
 
   @override
-  void deactivate() {
-    // _tabController.dispose();
-    super.deactivate();
+  void dispose() {
+    _tabController.dispose();
+    _searchController
+      ..removeListener(_searchListener)
+      ..dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   void _changeTabController() {
@@ -153,6 +170,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   void onSubmit({String query}) {
     final s = query ?? _searchController.text;
+
     navBloc().add(NavEvent.onSearchFinished(search: s));
     FocusScope.of(context).unfocus();
     if (s.isNotEmpty) {
@@ -297,10 +315,9 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         return const Text('History');
       } else {
         return TextField(
+            onEditingComplete: onSubmit,
             // focus text field when no current search results but coming from magnifying glass
             autofocus: widget.searchView && ss.searchResults.isEmpty,
-            onChanged: (s) => navBloc().add(NavEvent.onSearchChange(search: s)),
-            onSubmitted: (s) => onSubmit(query: s),
             style: Theme.of(context).appBarTheme.textTheme.bodyText1,
             decoration: InputDecoration(
                 border: InputBorder.none,
@@ -397,6 +414,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       builder: (c, s) => TecScaffoldWrapper(
         child: BlocBuilder<SearchBloc, SearchState>(
           builder: (c, ss) => Scaffold(
+              backgroundColor: Theme.of(context).dialogBackgroundColor,
               appBar: AppBar(
                 title: titleAppBar(c, s.navViewState, ss),
                 titleSpacing: 0,

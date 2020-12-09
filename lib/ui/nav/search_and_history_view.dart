@@ -624,9 +624,13 @@ class __SearchResultCardState extends State<_SearchResultCard> {
                           tooltip: 'Share',
                           icon: const Icon(FeatherIcons.share2, size: 20),
                           onPressed: _onShare),
-                      IconButton(
-                          tooltip: 'Open in TecartaBible',
-                          icon: const Icon(TecIcons.tbOutlineLogo),
+                      FlatButton(
+                          textColor: searchThemeColor,
+                          // tooltip: 'Open in TecartaBible',
+                          child: Text(
+                            'Go To',
+                            textScaleFactor: contentTextScaleFactorWith(context),
+                          ),
                           onPressed: _openInTB),
                     ],
                   ),
