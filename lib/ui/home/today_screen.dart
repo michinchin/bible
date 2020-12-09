@@ -18,6 +18,7 @@ class TodayScreen extends StatelessWidget {
     final portraitMode = MediaQuery.of(context).orientation == Orientation.portrait ||
         (MediaQuery.of(context).size.height > 500 && MediaQuery.of(context).size.width > 500);
     return SafeArea(
+        bottom: false,
         child: Container(
             padding: EdgeInsets.only(top: 10, bottom: portraitMode ? 0 : 10),
             child: ListView(
@@ -99,6 +100,7 @@ class _HomeCard extends StatelessWidget {
   final VoidCallback onImageTap;
   final String imageUrl;
   final VoidCallback onMoreTap;
+
   const _HomeCard(
       {@required this.type,
       @required this.title,
@@ -106,6 +108,7 @@ class _HomeCard extends StatelessWidget {
       @required this.onImageTap,
       @required this.imageUrl,
       @required this.onMoreTap});
+
   @override
   Widget build(BuildContext context) {
     return Padding(

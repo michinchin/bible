@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/home/dotds.dart';
 import '../../models/home/saves.dart';
@@ -25,15 +24,14 @@ class SavesScreen extends StatelessWidget {
           if (snapshot.hasData) {
             final years = snapshot.data.data.map((s) => s.year).toSet().toList()
               ..sort((a, b) => b.compareTo(a));
-            return TecScaffoldWrapper(
-                child: TabWrapper(
+            return TabWrapper(
               appBarTitle: const Text('Saves'),
               tabViews: [for (final each in years) _SavedOtds(each, snapshot.data)],
               tabs: [for (final each in years) Tab(text: '$each')],
               emptyList: const Center(
                 child: Text('No results'),
               ),
-            ));
+            );
           } else if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
               appBar: AppBar(),

@@ -8,8 +8,12 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
+import '../../blocs/sheet/tab_manager_cubit.dart';
 import '../../models/app_settings.dart';
+import '../../models/const.dart';
 import 'selection_sheet.dart';
+
+const _selectionSheetKey = 2;
 
 // must have SheetManagerBloc provided
 class SnapSheet extends StatefulWidget {
@@ -23,11 +27,6 @@ class _SnapSheetState extends State<SnapSheet> {
   @override
   void initState() {
     super.initState();
-    sheets = [
-      Container(),
-      const _SheetShadow(key: ValueKey(2), child: SelectionSheet()),
-      Container(),
-    ];
   }
 
   static Widget animatedLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
@@ -42,6 +41,34 @@ class _SnapSheetState extends State<SnapSheet> {
 
   @override
   Widget build(BuildContext context) {
+    sheets ??= [
+      if (isSmallScreen(context))
+        BlocBuilder<TabManagerCubit, TecTab>(
+          builder: (context, tabState) {
+            return AnimatedOpacity(
+              duration: const Duration(milliseconds: 150),
+              opacity: (tabState == TecTab.switcher) ? 0.0 : 1.0,
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 15, bottom: context.fullBottomBarPadding),
+                  child: FloatingActionButton(
+                    backgroundColor: Const.tecartaBlue,
+                    child: const Icon(TecIcons.tecartabiblelogo, color: Colors.white),
+                    onPressed: () {
+                      context.tabManager.changeTab(TecTab.switcher);
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      if (!isSmallScreen(context)) Container(),
+      const _SheetShadow(key: ValueKey(_selectionSheetKey), child: SelectionSheet()),
+      Container(),
+    ];
+
     return BlocListener<SelectionBloc, SelectionState>(
       listenWhen: (previous, current) => previous.isTextSelected != current.isTextSelected,
       listener: (context, state) {
@@ -55,20 +82,22 @@ class _SnapSheetState extends State<SnapSheet> {
         return Align(
           alignment: Alignment.bottomCenter,
           child: AnimatedSwitcher(
-            duration: Duration(
-                milliseconds:
-                    (state.type == SheetType.selection || state.previousType == SheetType.selection)
-                        ? 250
-                        : 125),
+            duration: const Duration(milliseconds: 200),
             layoutBuilder: animatedLayoutBuilder,
             transitionBuilder: (child, animation) {
-              final offsetAnimation =
-                  Tween<Offset>(begin: const Offset(0.0, 1.0), end: const Offset(0.0, 0.0))
-                      .animate(animation);
-              return SlideTransition(
-                position: offsetAnimation,
-                child: child,
-              );
+              final key = child.key as ValueKey<int>;
+              if (key?.value == _selectionSheetKey) {
+                final offsetAnimation =
+                    Tween<Offset>(begin: const Offset(0.0, 1.0), end: const Offset(0.0, 0.0))
+                        .animate(animation);
+                return SlideTransition(
+                  position: offsetAnimation,
+                  child: child,
+                );
+              } else {
+                final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(animation);
+                return FadeTransition(opacity: fadeAnimation, child: child);
+              }
             },
             child: sheets[state.type.index],
           ),
@@ -86,7 +115,7 @@ class _SheetShadow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final maxWidth = isSmallScreen(context) ? size.width : math.min(size.width, 592.0);
+    final maxWidth = math.min(size.width, 1000.0);
 
     const sheetRadius = Radius.circular(7);
     const borderRadius = BorderRadius.only(topLeft: sheetRadius, topRight: sheetRadius);
@@ -111,7 +140,7 @@ class _SheetShadow extends StatelessWidget {
       child: Material(
         borderRadius: borderRadius,
         child: Padding(
-          padding: EdgeInsets.only(top: 11, bottom: TecScaffoldWrapper.navigationBarPadding),
+          padding: EdgeInsets.only(top: 11, bottom: context.fullBottomBarPadding),
           child: child,
         ),
       ),

@@ -147,108 +147,106 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    return TecScaffoldWrapper(
-      child: Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            leadingWidth: 0,
-            automaticallyImplyLeading: false,
-            flexibleSpace: Column(children: [
-              Container(
-                margin: const EdgeInsets.only(top: 10),
-                height: 5,
-                width: 50,
-                decoration: ShapeDecoration(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  color: Colors.grey.withOpacity(0.5),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Row(
-                            mainAxisAlignment: _showPriorityTranslations
-                                ? MainAxisAlignment.spaceBetween
-                                : MainAxisAlignment.start,
-                            children: [
-                              if (_currFilter == 'Translation' && !_showPriorityTranslations)
-                                IconButton(
-                                  icon: const Icon(Icons.error_outline),
-                                  constraints: const BoxConstraints(),
-                                  onPressed: () {
-                                    _togglePriorityTranslations();
-                                    if (_showPriorityTranslations) {
-                                      TecToast.show(context, 'select up to 3 translations');
-                                    }
-                                  },
-                                ),
-                              Text(
-                                  '${_showPriorityTranslations ? priorityTranslationTitle : _currFilter} filter'),
-                              if (_showPriorityTranslations)
-                                FlatButton(
-                                  child: const Text('Done'),
-                                  visualDensity: VisualDensity.compact,
-                                  onPressed: () {
-                                    _togglePriorityTranslations();
-                                    if (_showPriorityTranslations) {
-                                      TecToast.show(context, 'select up to 3 translations');
-                                    }
-                                  },
-                                ),
-                            ]),
-                      ),
-                      if (!_showPriorityTranslations)
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: Icon(
-                                _gridView ? Icons.format_list_bulleted : FeatherIcons.grid,
-                              ),
-                              onPressed: _gridViewToggle,
-                            ),
-                            Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Theme.of(context).textColor),
-                                    color: Theme.of(context).canvasColor,
-                                    borderRadius: BorderRadius.circular(5)),
-                                child: DropdownButton<String>(
-                                    isDense: true,
-                                    value: _currFilter,
-                                    underline: const SizedBox(),
-                                    iconSize: 15,
-                                    style: Theme.of(context).textTheme.caption,
-                                    icon: const Icon(Icons.expand_more),
-                                    items: <String>[
-                                      'Book',
-                                      'Translation',
-                                    ].map((value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(value),
-                                      );
-                                    }).toList(),
-                                    onChanged: _changeFilter)),
-                          ],
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ]),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        leadingWidth: 0,
+        automaticallyImplyLeading: false,
+        flexibleSpace: Column(children: [
+          Container(
+            margin: const EdgeInsets.only(top: 10),
+            height: 5,
+            width: 50,
+            decoration: ShapeDecoration(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              color: Colors.grey.withOpacity(0.5),
+            ),
           ),
-          body: TabBarView(controller: _tabController, children: [
-            _BookFilter(_filteredBooks ?? {}, gridView: _gridView),
-            _VolumeFilter(widget.filter, _selectedVolumes ?? {},
-                gridView: _gridView, priorityTranslationMode: _showPriorityTranslations),
-          ])),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                        mainAxisAlignment: _showPriorityTranslations
+                            ? MainAxisAlignment.spaceBetween
+                            : MainAxisAlignment.start,
+                        children: [
+                          if (_currFilter == 'Translation' && !_showPriorityTranslations)
+                            IconButton(
+                              icon: const Icon(Icons.error_outline),
+                              constraints: const BoxConstraints(),
+                              onPressed: () {
+                                _togglePriorityTranslations();
+                                if (_showPriorityTranslations) {
+                                  TecToast.show(context, 'select up to 3 translations');
+                                }
+                              },
+                            ),
+                          Text(
+                              '${_showPriorityTranslations ? priorityTranslationTitle : _currFilter} filter'),
+                          if (_showPriorityTranslations)
+                            FlatButton(
+                              child: const Text('Done'),
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () {
+                                _togglePriorityTranslations();
+                                if (_showPriorityTranslations) {
+                                  TecToast.show(context, 'select up to 3 translations');
+                                }
+                              },
+                            ),
+                        ]),
+                  ),
+                  if (!_showPriorityTranslations)
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            _gridView ? Icons.format_list_bulleted : FeatherIcons.grid,
+                          ),
+                          onPressed: _gridViewToggle,
+                        ),
+                        Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Theme.of(context).textColor),
+                                color: Theme.of(context).canvasColor,
+                                borderRadius: BorderRadius.circular(5)),
+                            child: DropdownButton<String>(
+                                isDense: true,
+                                value: _currFilter,
+                                underline: const SizedBox(),
+                                iconSize: 15,
+                                style: Theme.of(context).textTheme.caption,
+                                icon: const Icon(Icons.expand_more),
+                                items: <String>[
+                                  'Book',
+                                  'Translation',
+                                ].map((value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                                onChanged: _changeFilter)),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ]),
+      ),
+      body: TabBarView(controller: _tabController, children: [
+        _BookFilter(_filteredBooks ?? {}, gridView: _gridView),
+        _VolumeFilter(widget.filter, _selectedVolumes ?? {},
+            gridView: _gridView, priorityTranslationMode: _showPriorityTranslations),
+      ]),
     );
   }
 }

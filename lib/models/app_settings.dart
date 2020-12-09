@@ -46,7 +46,7 @@ class AppSettings {
   ///
   SystemUiOverlayStyle overlayStyle(BuildContext context) {
     final overlayStyle = isDarkTheme() ? lightOverlayStyle : darkOverlayStyle;
-    return overlayStyle;
+    return overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).appBarTheme.color);
   }
 
   ///

@@ -6,7 +6,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
-import '../../models/app_settings.dart';
 import '../../models/color_utils.dart';
 import '../../models/pref_item.dart';
 import '../../ui/sheet/snap_sheet.dart';
@@ -131,10 +130,10 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
             ];
 
             final size = MediaQuery.of(context).size;
-            final landscapePhone = isSmallScreen(context) && (size.width > size.height);
+            final showOneRow = (size.width > 900);
             var numItems = colors.length;
 
-            if (landscapePhone) {
+            if (showOneRow) {
               numItems += miniChildren.length;
             }
 
@@ -151,7 +150,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
                         scrollDirection: Axis.horizontal,
                         itemCount: numItems,
                         itemBuilder: (c, i) {
-                          if (landscapePhone) {
+                          if (showOneRow) {
                             if (i == 0) {
                               return Padding(
                                   padding: const EdgeInsets.only(left: 5), child: miniChildren[i]);
@@ -166,7 +165,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
                         },
                         separatorBuilder: (c, i) {
                           // don't put a divider after the last element...
-                          if (landscapePhone) {
+                          if (showOneRow) {
                             if (i < miniChildren.length - 1) {
                               return const VerticalDivider(color: Colors.transparent, width: 25);
                             }
@@ -184,7 +183,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
                           }
                         },
                       )),
-                  if (!landscapePhone)
+                  if (!showOneRow)
                     Padding(
                         // bottom padding is handled by TecScaffoldWrapper
                         padding: const EdgeInsets.only(left: 10, right: 10, top: 15),

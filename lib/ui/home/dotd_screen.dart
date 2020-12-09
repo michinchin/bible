@@ -25,6 +25,7 @@ Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
 
 class _DotdScreen extends StatefulWidget {
   final Dotd devo;
+
   const _DotdScreen(this.devo);
 
   @override
@@ -152,7 +153,9 @@ Future<void> showAllDotd(BuildContext context, Dotds dotd, {DateTime scrollToDat
 class _DotdsScreen extends StatelessWidget {
   final Dotds dotd;
   final DateTime scrollToDateTime;
+
   const _DotdsScreen(this.dotd, {this.scrollToDateTime});
+
   @override
   Widget build(BuildContext context) {
     final dotds = <Dotd>[];
@@ -164,8 +167,7 @@ class _DotdsScreen extends StatelessWidget {
       days.add(day);
       dotds.add(dotd.devoForDate(day));
     }
-    return TecScaffoldWrapper(
-        child: Scaffold(
+    return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: MinHeightAppBar(
         appBar: AppBar(
@@ -191,6 +193,6 @@ class _DotdsScreen extends StatelessWidget {
                     imageUrl: dotds[i].imageUrl,
                     onTap: () => showDotdScreen(context, dotds[i])))),
       ),
-    ));
+    );
   }
 }

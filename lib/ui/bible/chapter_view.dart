@@ -527,7 +527,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
           child: TecAutoScroll(
             scrollController: _scrollController,
             allowAutoscroll: () => !context.tbloc<SelectionBloc>().state.isTextSelected,
-            navigationBarPadding: () => TecScaffoldWrapper.navigationBarPadding,
+            navigationBarPadding: () => context.bottomBarPadding,
             autoscrollActive: (active) {
               if (active) {
                 tec.dmPrint('ChapterViewHtml: autoscroll is active, collapsing the bottom sheet.');

@@ -394,20 +394,18 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           _tabController.animateTo(s.tabIndex);
         }
       },
-      builder: (c, s) => TecScaffoldWrapper(
-        child: BlocBuilder<SearchBloc, SearchState>(
-          builder: (c, ss) => Scaffold(
-              appBar: AppBar(
-                title: titleAppBar(c, s.navViewState, ss),
-                titleSpacing: 0,
-                leading: leadingAppBarIcon(c, s.navViewState, ss),
-                actions: appBarActions(c, s, ss),
-              ),
-              body: Container(
-                color: Theme.of(context).dialogBackgroundColor,
-                child: body(s.navViewState),
-              )),
-        ),
+      builder: (c, s) => BlocBuilder<SearchBloc, SearchState>(
+        builder: (c, ss) => Scaffold(
+            appBar: AppBar(
+              title: titleAppBar(c, s.navViewState, ss),
+              titleSpacing: 0,
+              leading: leadingAppBarIcon(c, s.navViewState, ss),
+              actions: appBarActions(c, s, ss),
+            ),
+            body: Container(
+              color: Theme.of(context).dialogBackgroundColor,
+              child: body(s.navViewState),
+            )),
       ),
     );
   }

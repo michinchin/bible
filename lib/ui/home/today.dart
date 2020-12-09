@@ -54,6 +54,7 @@ class _TodayState extends State<Today> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: MinHeightAppBar(
         appBar: AppBar(

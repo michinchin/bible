@@ -268,29 +268,27 @@ class _LibraryState extends State<_Library> {
 
   @override
   Widget build(BuildContext context) {
-    return TecScaffoldWrapper(
-      child: BlocProvider<VolumesSortBloc>(
-        create: (_) => VolumesSortBloc(),
-        child: widget.tabs.length > 1
-            ? DefaultTabController(
-                initialIndex: widget.initialTabIndex ?? 0,
-                length: widget.tabs.length,
-                child: Scaffold(
-                  appBar: _appBar(
-                    showCloseButton: widget.showCloseButton,
-                    bottom: TabBar(
-                      isScrollable: true,
-                      tabs: widget.tabs.map((t) => Tab(text: t.title)).toList(),
-                    ),
+    return BlocProvider<VolumesSortBloc>(
+      create: (_) => VolumesSortBloc(),
+      child: widget.tabs.length > 1
+          ? DefaultTabController(
+              initialIndex: widget.initialTabIndex ?? 0,
+              length: widget.tabs.length,
+              child: Scaffold(
+                appBar: _appBar(
+                  showCloseButton: widget.showCloseButton,
+                  bottom: TabBar(
+                    isScrollable: true,
+                    tabs: widget.tabs.map((t) => Tab(text: t.title)).toList(),
                   ),
-                  body: TabBarView(children: widget.tabs.map(_widgetFromTab).toList()),
                 ),
-              )
-            : Scaffold(
-                appBar: _appBar(showCloseButton: widget.showCloseButton),
-                body: _widgetFromTab(widget.tabs.first),
+                body: TabBarView(children: widget.tabs.map(_widgetFromTab).toList()),
               ),
-      ),
+            )
+          : Scaffold(
+              appBar: _appBar(showCloseButton: widget.showCloseButton),
+              body: _widgetFromTab(widget.tabs.first),
+            ),
     );
   }
 

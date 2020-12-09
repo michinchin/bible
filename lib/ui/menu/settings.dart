@@ -24,44 +24,43 @@ class SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TecScaffoldWrapper(
-      child: Scaffold(
-          appBar: MinHeightAppBar(
-            appBar: AppBar(
-              title: const Text('Settings'),
+    return Scaffold(
+      appBar: MinHeightAppBar(
+        appBar: AppBar(
+          title: const Text('Settings'),
+        ),
+      ),
+      body: Container(
+          color: Theme.of(context).dialogBackgroundColor,
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(height: 10),
+                Expanded(
+                  child: ListView(children: [
+                    _TitleSettingTile(
+                      title: 'Account',
+                      icon: FeatherIcons.user,
+                      trailing: FlatButton.icon(
+                        icon:
+                            Text('Sync now', style: TextStyle(color: Theme.of(context).textColor)),
+                        label: Icon(Icons.sync, color: Theme.of(context).textColor),
+                        onPressed: () => TecToast.show(context, 'Not yet implemented'),
+                      ),
+                    ),
+                    const _TitleSettingTile(title: 'Read', icon: FeatherIcons.bookmark),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 30, bottom: 10),
+                      child: Column(children: readTiles(context)),
+                    ),
+                    const _TitleSettingTile(title: 'Notifications', icon: FeatherIcons.bell),
+                    const _TitleSettingTile(title: 'Audio', icon: FeatherIcons.volume1),
+                  ]),
+                )
+              ],
             ),
-          ),
-          body: Container(
-              color: Theme.of(context).dialogBackgroundColor,
-              child: SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(height: 10),
-                    Expanded(
-                      child: ListView(children: [
-                        _TitleSettingTile(
-                          title: 'Account',
-                          icon: FeatherIcons.user,
-                          trailing: FlatButton.icon(
-                            icon: Text('Sync now',
-                                style: TextStyle(color: Theme.of(context).textColor)),
-                            label: Icon(Icons.sync, color: Theme.of(context).textColor),
-                            onPressed: () => TecToast.show(context, 'Not yet implemented'),
-                          ),
-                        ),
-                        const _TitleSettingTile(title: 'Read', icon: FeatherIcons.bookmark),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 30, bottom: 10),
-                          child: Column(children: readTiles(context)),
-                        ),
-                        const _TitleSettingTile(title: 'Notifications', icon: FeatherIcons.bell),
-                        const _TitleSettingTile(title: 'Audio', icon: FeatherIcons.volume1),
-                      ]),
-                    )
-                  ],
-                ),
-              ))),
+          )),
     );
   }
 }

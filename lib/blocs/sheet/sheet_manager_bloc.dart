@@ -5,15 +5,13 @@ enum SheetType { main, selection, hidden }
 
 class SheetManagerState {
   final SheetType type;
-  final SheetType previousType;
-
-  SheetManagerState(this.type, this.previousType);
+  SheetManagerState(this.type);
 }
 
 enum SheetEvent { main, selection, restore, collapse }
 
 class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
-  SheetManagerBloc() : super(SheetManagerState(SheetType.main, SheetType.hidden));
+  SheetManagerBloc() : super(SheetManagerState(SheetType.main));
 
   @override
   Stream<SheetManagerState> mapEventToState(SheetEvent event) async* {
@@ -21,17 +19,17 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
 
     switch (event) {
       case SheetEvent.main:
-        newState = SheetManagerState(SheetType.main, state.type);
+        newState = SheetManagerState(SheetType.main);
         break;
       case SheetEvent.selection:
-        newState = SheetManagerState(SheetType.selection, state.type);
+        newState = SheetManagerState(SheetType.selection);
         break;
       case SheetEvent.collapse:
         if (state.type == SheetType.selection) {
           // don't allow collapse when in selection mode...
           newState = state;
         } else {
-          newState = SheetManagerState(SheetType.hidden, state.type);
+          newState = SheetManagerState(SheetType.hidden);
         }
         break;
       case SheetEvent.restore:
@@ -39,7 +37,7 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
           // don't allow restore when in selection mode...
           newState = state;
         } else {
-          newState = SheetManagerState(SheetType.main, state.type);
+          newState = SheetManagerState(SheetType.main);
         }
         break;
     }

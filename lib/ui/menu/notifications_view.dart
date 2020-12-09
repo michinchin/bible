@@ -25,6 +25,7 @@ class NotificationsView extends StatefulWidget {
 
 class _NotificationsViewState extends State<NotificationsView> {
   List<LocalNotification> initialNotifications;
+
   @override
   void initState() {
     initialNotifications =
@@ -34,8 +35,7 @@ class _NotificationsViewState extends State<NotificationsView> {
 
   @override
   Widget build(BuildContext context) {
-    return TecScaffoldWrapper(
-        child: Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),
         leading: BackButton(
@@ -66,12 +66,13 @@ class _NotificationsViewState extends State<NotificationsView> {
           ),
         ),
       ),
-    ));
+    );
   }
 }
 
 class _NotificationTile extends StatefulWidget {
   final LocalNotification notification;
+
   const _NotificationTile(this.notification);
 
   @override

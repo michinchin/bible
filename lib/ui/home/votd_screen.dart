@@ -183,8 +183,7 @@ class _VotdsScreen extends StatelessWidget {
       votds.add(votd.forDateTime(day));
     }
 
-    return TecScaffoldWrapper(
-        child: Scaffold(
+    return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: MinHeightAppBar(
         appBar: AppBar(
@@ -198,6 +197,7 @@ class _VotdsScreen extends StatelessWidget {
       ),
       body: Scrollbar(
         child: SafeArea(
+            bottom: false,
             child: ScrollablePositionedList.builder(
                 initialScrollIndex: scrollToDateTime == null
                     ? days.indexOf(tec.today)
@@ -212,7 +212,7 @@ class _VotdsScreen extends StatelessWidget {
                         imageUrl: votds[i].imageUrl,
                         onTap: () => showVotdScreen(context, votds[i]))))),
       ),
-    ));
+    );
   }
 }
 

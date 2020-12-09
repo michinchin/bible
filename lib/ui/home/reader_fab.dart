@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/sheet/tab_manager_bloc.dart';
+import '../../blocs/sheet/tab_manager_cubit.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
@@ -205,9 +205,6 @@ class _ReaderFABState extends State<ReaderFAB> with SingleTickerProviderStateMix
             heroTag: null,
             child: widget.mainIcon,
             onPressed: () {
-              // get the tab bar to paint correct colors on android
-              context.tabManager.changeTab(TecTab.overlay);
-
               _icons = offScreenViews(context);
               _insertOverlayEntry();
               _controller.forward();

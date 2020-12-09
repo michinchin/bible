@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-enum TecTab { today, library, plans, store, reader, overlay }
+enum TecTab { today, library, plans, store, reader, switcher }
 
 class TabManagerCubit extends Cubit<TecTab> {
   TabManagerCubit({TecTab tab}) : super(tab ?? TecTab.reader);

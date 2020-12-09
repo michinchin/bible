@@ -1,14 +1,14 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_widgets/tec_widgets.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/sheet/tab_manager_bloc.dart';
+import '../../blocs/sheet/tab_manager_cubit.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/notifications/notifications_model.dart';
@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final delay =
         (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 500 : 1250;
 
-    Future.delayed(Duration(milliseconds: delay), () {     
+    Future.delayed(Duration(milliseconds: delay), () {
       // resend the notification
       Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
     });
@@ -60,8 +60,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // init the scaffold vars before we try to access them...
-    if (!TecScaffoldWrapper.isMediaQueryReady(context)) {
+    // init the bar padding vars before we try to access them...
+    if (!context.isMediaQueryReady()) {
       return Container();
     }
 
@@ -73,20 +73,16 @@ class _HomeScreenState extends State<HomeScreen> {
         BlocProvider<TabManagerCubit>(create: (context) => TabManagerCubit()),
       ],
       child: BlocBuilder<TabManagerCubit, TecTab>(buildWhen: (p, n) {
-        // android needs bottom nav bar color changed in dark mode with non reader tab
-        return tec.platformIs(tec.Platform.android) &&
-            Theme.of(context).brightness == Brightness.dark &&
-            (p == TecTab.reader || n == TecTab.reader) &&
-            (p != n);
+        return (context.gestureNavigation && (p == TecTab.reader || n == TecTab.reader));
       }, builder: (context, tabState) {
         var overlayStyle = AppSettings.shared.overlayStyle(context);
-        if (tec.platformIs(tec.Platform.android) &&
-            Theme.of(context).brightness == Brightness.dark) {
-          if (tabState != TecTab.reader) {
-            overlayStyle = overlayStyle.copyWith(
-                systemNavigationBarColor: Theme.of(context).appBarTheme.color);
-          }
+
+        // set android gestureNavigation app bar color
+        if (context.gestureNavigation && tabState == TecTab.reader) {
+          overlayStyle =
+              overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).backgroundColor);
         }
+
         return TecSystemUiOverlayWidget(
           overlayStyle,
           child: TabBottomBar(
@@ -117,6 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               TabBottomBarItem(
                 tab: TecTab.reader,
+                icon: isSmallScreen(context) ? null : TecIcons.tecartabiblelogo,
+                label: 'Bible',
                 widget: Stack(
                   children: [
                     BlocBuilder<ViewManagerBloc, ViewManagerState>(
@@ -131,6 +129,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     SnapSheet(),
                   ],
                 ),
+              ),
+              TabBottomBarItem(
+                tab: TecTab.switcher,
+                widget: GestureDetector(
+                    onTap: () {
+                      context.tabManager.changeTab(TecTab.reader);
+                    },
+                    child: Container(
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Colors.black12
+                            : Colors.black38)),
               ),
             ],
           ),
@@ -148,8 +157,8 @@ class MainMenuFab extends StatelessWidget {
         heroTag: null,
         child: Icon(FeatherIcons.user, size: 15, color: Theme.of(context).textColor),
         backgroundColor: Theme.of(context).brightness == Brightness.dark
-              ? Theme.of(context).appBarTheme.color
-              : Theme.of(context).backgroundColor,
+            ? Theme.of(context).appBarTheme.color
+            : Theme.of(context).backgroundColor,
         onPressed: () => showMainMenu(context),
       );
 }
@@ -162,8 +171,8 @@ class JournalFab extends StatelessWidget {
       heroTag: null,
       child: Icon(FeatherIcons.bookOpen, size: 15, color: Theme.of(context).textColor),
       backgroundColor: Theme.of(context).brightness == Brightness.dark
-              ? Theme.of(context).appBarTheme.color
-              : Theme.of(context).backgroundColor,
+          ? Theme.of(context).appBarTheme.color
+          : Theme.of(context).backgroundColor,
       onPressed: () {
         Scaffold.of(context).openDrawer();
       });

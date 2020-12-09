@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/sheet/tab_manager_bloc.dart';
+import '../../blocs/sheet/tab_manager_cubit.dart';
+import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../ui/sheet/snap_sheet.dart';
 import '../common/tec_navigator.dart';
 import '../common/tec_page_route.dart';
 import '../ugc/ugc_view.dart';
-import 'reader_fab.dart';
 
 class TabBottomBarItem {
   final TecTab tab;
@@ -33,65 +32,66 @@ class TabBottomBar extends StatefulWidget {
 class _TabBottomBarState extends State<TabBottomBar> {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TabManagerCubit, TecTab>(buildWhen: (p, n) {
-      // if the tab didn't change or we're showing the overlay...
-      return p != n && n != TecTab.overlay;
-    }, builder: (context, tabState) {
-      return Scaffold(
-        drawer: const UGCView(),
-        extendBody: true,
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        floatingActionButton: (tabState == TecTab.reader)
-            ? BlocBuilder<SheetManagerBloc, SheetManagerState>(
-                builder: (context, sheetState) {
-                  return IgnorePointer(
-                    ignoring: (sheetState.type == SheetType.selection),
-                    child: AnimatedOpacity(
-                      opacity: (sheetState.type == SheetType.main) ? 1.0 : 0,
-                      duration: const Duration(milliseconds: 150),
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 5),
-                        child: ReaderFAB(
-                          elevation: (sheetState.type == SheetType.main) ? null : 0,
-                          backgroundColor: (sheetState.type == SheetType.main)
-                              ? Const.tecartaBlue
-                              : Theme.of(context).backgroundColor.withOpacity(0),
-                          mainIcon: Icon(TecIcons.tecartabiblelogo,
-                              color: (sheetState.type == SheetType.main)
-                                  ? Colors.white
-                                  : Theme.of(context).textColor),
-                          tabs: widget.tabs,
+    return Stack(
+      children: [
+        BlocBuilder<TabManagerCubit, TecTab>(buildWhen: (p, n) {
+          // if the tab didn't change
+          return p != n;
+        }, builder: (context, tabState) {
+          final largeScreen = !isSmallScreen(context);
+          return Scaffold(
+            backgroundColor: Theme.of(context).backgroundColor,
+            extendBody: true,
+            floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+            floatingActionButton: (largeScreen || tabState == TecTab.reader) ? null : _TabFAB(),
+            drawer: const UGCView(),
+            bottomNavigationBar:
+                (!largeScreen && tabState == TecTab.reader) ? null : TecTabBar(tabs: widget.tabs),
+            body: SafeArea(
+              bottom: false,
+              child: Container(
+                color: Theme.of(context).backgroundColor,
+                child: Stack(
+                  children: [
+                    // reader is always on the bottom
+                    for (var i = 0; i < widget.tabs.length; i++)
+                      if (widget.tabs[i].tab == TecTab.reader)
+                        Visibility(
+                          maintainState: true,
+                          visible: true,
+                          child: NavigatorWithHeroController(
+                            key: ValueKey(i),
+                            onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+                              settings: settings,
+                              builder: (context) {
+                                return widget.tabs[i].widget;
+                              },
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                },
-              )
-            : _TabFAB(),
-        bottomNavigationBar: (tabState == TecTab.reader) ? null : TecTabBar(tabs: widget.tabs),
-        body: Container(
-          color: Theme.of(context).backgroundColor,
-          child: Stack(
-            children: [
-              for (var i = 0; i < widget.tabs.length; i++)
-                Visibility(
-                  maintainState: true,
-                  visible: widget.tabs[i].tab == tabState,
-                  child: NavigatorWithHeroController(
-                    key: ValueKey(i),
-                    onGenerateRoute: (settings) => TecPageRoute<dynamic>(
-                      settings: settings,
-                      builder: (context) {
-                        return widget.tabs[i].widget;
-                      },
-                    ),
-                  ),
+                    for (var i = 0; i < widget.tabs.length; i++)
+                      if (widget.tabs[i].tab != TecTab.reader)
+                        Visibility(
+                          maintainState: true,
+                          visible: widget.tabs[i].tab == tabState,
+                          child: NavigatorWithHeroController(
+                            key: ValueKey(i),
+                            onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+                              settings: settings,
+                              builder: (context) {
+                                return widget.tabs[i].widget;
+                              },
+                            ),
+                          ),
+                        ),
+                  ],
                 ),
-            ],
-          ),
-        ),
-      );
-    });
+              ),
+            ),
+          );
+        }),
+      ],
+    );
   }
 }
 
@@ -118,6 +118,14 @@ class TecTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     // ignore: close_sinks
     final tm = (tabManager == null) ? context.tabManager : tabManager;
+    const maxWidth = 500;
+    const fabSpace = 50;
+    var leftPadding = 15.0;
+    var rightPadding = 15.0 + fabSpace;
+
+    if (MediaQuery.of(context).size.width > maxWidth) {
+      rightPadding = leftPadding = (MediaQuery.of(context).size.width - maxWidth) / 2;
+    }
 
     return BottomAppBar(
       color: Theme.of(context).appBarTheme.color,
@@ -125,7 +133,7 @@ class TecTabBar extends StatelessWidget {
       notchMargin: 6.0,
       child: Padding(
         padding: EdgeInsets.only(
-            left: 15, right: 65, top: 15, bottom: TecScaffoldWrapper.navigationBarPadding),
+            left: leftPadding, right: rightPadding, top: 15, bottom: context.bottomBarPadding),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [

@@ -41,6 +41,7 @@ dependencies:
   share: ^0.6.5+3
   tuple: ^1.0.3
   url_launcher: ^5.7.5
+  zefyr: ^1.0.0-dev.2.0
 
   tec_cache:
     hosted:
@@ -97,13 +98,8 @@ dependencies:
       name: tec_notifications
       url: http://noah.tecarta.com:8100
     version: ^0.0.1
-  zefyr:
-    hosted:
-      name: zefyr
-      url: http://noah.tecarta.com:8100
-    version: ^1.0.0-dev.1.0
 
-#dependency_overrides:
+dependency_overrides:
   # tec_html:
   #   path: ../shared/tec_html
   # tec_selectable:
@@ -114,8 +110,11 @@ dependencies:
   #   path: ../shared/tec_cache
   # tec_volumes:
   #   path: ../shared/tec_volumes
-  # tec_widgets:
-  #   path: ../shared/tec_widgets
+ tec_user_account:
+   path: ../shared/tec_user_account
+
+ tec_widgets:
+   path: ../shared/tec_widgets
 
 dev_dependencies:
   flutter_test:

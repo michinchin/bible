@@ -38,29 +38,27 @@ class _VolumeDetailState extends State<VolumeDetail> {
     );
     final padding = (16.0 * textScaleFactor).roundToDouble();
 
-    return TecScaffoldWrapper(
-      child: Scaffold(
-        appBar: MinHeightAppBar(
-          appBar: AppBar(
-            elevation: 0,
-            //title: TecText(volume.name, maxLines: 2, textAlign: TextAlign.center),
+    return Scaffold(
+      appBar: MinHeightAppBar(
+        appBar: AppBar(
+          elevation: 0,
+          //title: TecText(volume.name, maxLines: 2, textAlign: TextAlign.center),
+        ),
+      ),
+      body: ListView(
+        children: [
+          _VolumeCard(
+            volume: widget.volume,
+            textScaleFactor: textScaleFactor,
+            padding: padding,
+            heroPrefix: widget.heroPrefix,
           ),
-        ),
-        body: ListView(
-          children: [
-            _VolumeCard(
-              volume: widget.volume,
-              textScaleFactor: textScaleFactor,
-              padding: padding,
-              heroPrefix: widget.heroPrefix,
-            ),
-            _VolumeDescription(
-              volume: widget.volume,
-              textScaleFactor: textScaleFactor,
-              padding: padding,
-            ),
-          ],
-        ),
+          _VolumeDescription(
+            volume: widget.volume,
+            textScaleFactor: textScaleFactor,
+            padding: padding,
+          ),
+        ],
       ),
     );
   }
@@ -86,7 +84,8 @@ class _VolumeCard extends StatelessWidget {
       builder: (context, constraints) {
         //final halfPad = (padding / 2.0).roundToDouble();
 
-        tec.dmPrint('_VolumeCard building with hero tag: "${heroTagForVolume(volume, heroPrefix)}"');
+        tec.dmPrint(
+            '_VolumeCard building with hero tag: "${heroTagForVolume(volume, heroPrefix)}"');
 
         final cardHeight = math.min(350.0, (constraints.maxWidth * 0.5).roundToDouble() + 50.0);
 
