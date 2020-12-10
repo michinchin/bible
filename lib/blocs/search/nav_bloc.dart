@@ -101,39 +101,51 @@ class NavBloc extends Bloc<NavEvent, NavState> {
       final selectedBook = bible.nameOfBook(state.ref.book);
 
       final check = s.toLowerCase();
-      if (currState.tabIndex == NavTabs.book.index) {
-        // book tab
-        final endsWithSpaceDigit = lastChar == ' ';
-        final matches = <int, String>{};
-        var addCurrentRef = false;
+      // book tab
+      final endsWithSpaceDigit = lastChar == ' ';
+      final matches = <int, String>{};
 
-        final m = RegExp('([0-9]+):?([0-9]+)?').firstMatch(check);
+      final m = RegExp(r'(\w+)? ([0-9]+):?([0-9]+)?').firstMatch(check);
 
-        final ref = state.ref;
+      var ref = state.ref;
 
-        if (m != null) {
-          // the entry is a # or a #: or a #:#?
-          final chapter = int.parse(m.group(1));
-          if (chapter > 0 && chapter <= bible.chaptersIn(book: ref.book)) {
-            var refOk = true;
-
-            // chapter is ok...
-            if (m.group(2) != null) {
-              // check verse
-              final verse = int.parse(m.group(2));
-              if (verse < 0 || verse > bible.versesIn(book: ref.book, chapter: chapter)) {
-                refOk = false;
-              }
+      if (m != null) {
+        var correctBook = false;
+        if (m.group(1) != null) {
+          var book = bible.firstBook;
+          while (book != 0) {
+            final name = bible.nameOfBook(book).toLowerCase();
+            if (name == m.group(1).trim()) {
+              correctBook = true;
+              ref = ref.copyWith(book: book);
+              break;
             }
+            final nextBook = bible.bookAfter(book);
+            book = (nextBook == book ? 0 : nextBook);
+          }
+        } // the entry is a # or a #: or a #:#?
+        if (correctBook) {
+          if (m.group(2) != null) {
+            final chapter = int.parse(m.group(2));
+            if (chapter > 0 && chapter <= bible.chaptersIn(book: ref.book)) {
+              currState = currState.copyWith(tabIndex: NavTabs.verse.index);
+              ref = ref.copyWith(chapter: chapter);
+              // chapter is ok...
+              if (m.group(3) != null) {
+                // check verse
+                final verse = int.parse(m.group(3));
+                if (verse > 0 && verse <= bible.versesIn(book: ref.book, chapter: chapter)) {
+                  currState = currState.copyWith(tabIndex: NavTabs.verse.index);
+                  ref = ref.copyWith(verse: verse, endVerse: verse);
+                }
+              }
 
-            if (refOk) {
-              final b = '${bible.nameOfBook(ref.book)} $check';
-              matches[ref.book] = b;
-              addCurrentRef = true;
+              return currState.copyWith(ref: ref);
             }
           }
         }
-
+      }
+      if (currState.tabIndex == NavTabs.book.index) {
         var book = bible.firstBook;
         while (book != 0) {
           final name = bible.nameOfBook(book).toLowerCase();
@@ -150,7 +162,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
           book = (nextBook == book ? 0 : nextBook);
         }
 
-        if (matches.length == 1 && !addCurrentRef) {
+        if (matches.length == 1) {
           if (endsWithSpaceDigit) {
             return currState.copyWith(
                 ref: state.ref.copyWith(book: matches.keys.first),
@@ -178,7 +190,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
             tec.dmPrint(e.toString());
           }
 
-          if (chapter > 0 && s.trim() == '$selectedBook $chapter:') {
+          if (chapter > 0 && s.toLowerCase().trim() == '${selectedBook.toLowerCase()} $chapter:') {
             return currState.copyWith(
               ref: currState.ref.copyWith(chapter: chapter),
               tabIndex: NavTabs.verse.index,
@@ -194,7 +206,8 @@ class NavBloc extends Bloc<NavEvent, NavState> {
       } else if (currState.tabIndex == NavTabs.verse.index) {
         //verse tab
         // did the colon get deleted...
-        if (!s.startsWith(selectedBook) || s.length <= selectedBook.length) {
+        if (!s.toLowerCase().startsWith(selectedBook.toLowerCase()) ||
+            s.length <= selectedBook.length) {
           currState =
               currState.copyWith(tabIndex: NavTabs.book.index, navViewState: NavViewState.bcvTabs);
         } else if (!s.contains(':')) {
