@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
-import '../../blocs/sheet/tab_manager_bloc.dart';
+import '../../blocs/sheet/tab_manager_cubit.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/votd.dart';
 import '../common/common.dart';

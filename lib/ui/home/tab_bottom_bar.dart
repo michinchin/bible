@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,12 +31,37 @@ class TabBottomBar extends StatefulWidget {
   _TabBottomBarState createState() => _TabBottomBarState();
 }
 
-class _TabBottomBarState extends State<TabBottomBar> {
+class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         BlocBuilder<TabManagerCubit, TecTab>(buildWhen: (p, n) {
+          if (p != n) {
+            if (n == TecTab.switcher) {
+              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                _controller.forward();
+              });
+            }
+            else if (p == TecTab.switcher) {
+              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                _controller.reverse();
+              });
+            }
+          }
+
           // if the tab didn't change
           return p != n;
         }, builder: (context, tabState) {
@@ -43,7 +70,9 @@ class _TabBottomBarState extends State<TabBottomBar> {
             backgroundColor: Theme.of(context).backgroundColor,
             extendBody: true,
             floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-            floatingActionButton: (largeScreen || tabState == TecTab.reader) ? null : _TabFAB(),
+            floatingActionButton: (largeScreen || tabState == TecTab.reader)
+                ? null
+                : ((tabState == TecTab.switcher) ? _CloseFAB(controller: _controller) : _TabFAB()),
             drawer: const UGCView(),
             bottomNavigationBar:
                 (!largeScreen && tabState == TecTab.reader) ? null : TecTabBar(tabs: widget.tabs),
@@ -72,7 +101,7 @@ class _TabBottomBarState extends State<TabBottomBar> {
                     for (var i = 0; i < widget.tabs.length; i++)
                       if (widget.tabs[i].tab != TecTab.reader)
                         Visibility(
-                          maintainState: true,
+                          maintainState: widget.tabs[i].tab != TecTab.switcher,
                           visible: widget.tabs[i].tab == tabState,
                           child: NavigatorWithHeroController(
                             key: ValueKey(i),
@@ -91,6 +120,32 @@ class _TabBottomBarState extends State<TabBottomBar> {
           );
         }),
       ],
+    );
+  }
+}
+
+class _CloseFAB extends StatelessWidget {
+  final AnimationController controller;
+
+  const _CloseFAB({Key key, @required this.controller}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      backgroundColor: Const.tecartaBlue,
+      child: AnimatedBuilder(
+          animation: controller,
+          builder: (context, child) => Transform(
+                transform: Matrix4.rotationZ(controller.value * 0.5 * math.pi),
+                alignment: FractionalOffset.center,
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                ),
+              )),
+      onPressed: () {
+        context.tabManager.changeTab(TecTab.reader);
+      },
     );
   }
 }

@@ -275,6 +275,7 @@ class _LibraryState extends State<_Library> {
               initialIndex: widget.initialTabIndex ?? 0,
               length: widget.tabs.length,
               child: Scaffold(
+                backgroundColor: Theme.of(context).backgroundColor,
                 appBar: _appBar(
                   showCloseButton: widget.showCloseButton,
                   bottom: TabBar(
@@ -286,6 +287,7 @@ class _LibraryState extends State<_Library> {
               ),
             )
           : Scaffold(
+              backgroundColor: Theme.of(context).backgroundColor,
               appBar: _appBar(showCloseButton: widget.showCloseButton),
               body: _widgetFromTab(widget.tabs.first),
             ),
