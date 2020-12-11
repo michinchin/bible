@@ -517,7 +517,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.7+14"
+    version: "0.6.7+15"
   image_picker_platform_interface:
     dependency: transitive
     description:
@@ -1086,10 +1086,10 @@ packages:
   tec_user_account:
     dependency: "direct main"
     description:
-      path: "../shared/tec_user_account"
-      relative: true
-    source: path
-    version: "2.0.11"
+      name: tec_user_account
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
+    version: "2.0.12"
   tec_util:
     dependency: "direct main"
     description:
@@ -1114,9 +1114,9 @@ packages:
   tec_widgets:
     dependency: "direct main"
     description:
-      path: "../shared/tec_widgets"
-      relative: true
-    source: path
+      name: tec_widgets
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
     version: "2.0.21"
   term_glyph:
     dependency: transitive
