@@ -143,6 +143,13 @@ class _HomeCard extends StatelessWidget {
                               style: cardSubtitleCompactStyle.copyWith(
                                 color: Colors.white70,
                                 fontWeight: FontWeight.w600,
+                                shadows: <Shadow>[
+                                  const Shadow(
+                                    offset: Offset(1.0, 1.0),
+                                    blurRadius: 2.0,
+                                    color: Colors.black,
+                                  ),
+                                ],
                               ),
                               maxLines: 2,
                               autoSize: true,
@@ -157,6 +164,13 @@ class _HomeCard extends StatelessWidget {
                           title,
                           style: cardTitleCompactStyle.copyWith(
                             color: Colors.white,
+                            shadows: <Shadow>[
+                              const Shadow(
+                                offset: Offset(1.0, 1.0),
+                                blurRadius: 2.0,
+                                color: Colors.black,
+                              ),
+                            ],
                           ),
                           // textScaleFactor: contentTextScaleFactorWith(c),
                           maxLines: 3,
