@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +61,8 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
 
     if (tabKeys.containsKey(context.tabManager.state)) {
       if (tabKeys[context.tabManager.state].currentWidget is NavigatorWithHeroController) {
-        final navigator = tabKeys[context.tabManager.state].currentWidget as NavigatorWithHeroController;
+        final navigator =
+            tabKeys[context.tabManager.state].currentWidget as NavigatorWithHeroController;
         if (navigator.canPop(tabKeys[context.tabManager.state].currentState)) {
           navigator.pop(tabKeys[context.tabManager.state].currentState);
           return false;
@@ -87,7 +89,8 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
           floatingActionButton: (largeScreen || tabState == TecTab.reader)
               ? null
               : ((tabState == TecTab.switcher) ? _CloseFAB(controller: _controller) : _TabFAB()),
-          drawer: const UGCView(),
+          drawer:
+              SizedBox(width: min((largeScreen) ? 500 : 420, MediaQuery.of(context).size.width), child: const UGCView()),
           bottomNavigationBar:
               (!largeScreen && tabState == TecTab.reader) ? null : TecTabBar(tabs: widget.tabs),
           body: SafeArea(
