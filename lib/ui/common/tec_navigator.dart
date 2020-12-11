@@ -14,20 +14,41 @@ class NavigatorWithHeroController extends StatefulWidget {
 
   @override
   _NavigatorWithHeroControllerState createState() => _NavigatorWithHeroControllerState();
+
+  bool canPop(Object state) {
+    if (state is _NavigatorWithHeroControllerState) {
+      return state.navigator.canPop();
+    }
+
+    return false;
+  }
+
+  void pop(Object state) {
+    if (state is _NavigatorWithHeroControllerState) {
+      state.navigator.pop();
+    }
+  }
 }
 
 class _NavigatorWithHeroControllerState extends State<NavigatorWithHeroController> {
   HeroController _heroController;
+  GlobalKey _navigatorKey;
+
+  NavigatorState get navigator {
+    return _navigatorKey.currentState as NavigatorState;
+  }
 
   @override
   void initState() {
     super.initState();
     _heroController = HeroController(
         createRectTween: (begin, end) => MaterialRectArcTween(begin: begin, end: end));
+    _navigatorKey = GlobalKey();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(observers: [_heroController], onGenerateRoute: widget.onGenerateRoute);
+    return Navigator(
+        key: _navigatorKey, observers: [_heroController], onGenerateRoute: widget.onGenerateRoute);
   }
 }

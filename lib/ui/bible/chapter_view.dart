@@ -172,7 +172,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
     if (bcv != null) {
       // restore the sheet...
       Future.delayed(const Duration(milliseconds: 250), () {
-        context.tbloc<SheetManagerBloc>().add(SheetEvent.restore);
+        context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
       });
 
       final viewData = context.tbloc<VolumeViewDataBloc>().state.asVolumeViewData;
@@ -524,14 +524,12 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
           child: TecAutoScroll(
             scrollController: _scrollController,
             allowAutoscroll: () => !context.tbloc<SelectionBloc>().state.isTextSelected,
-            navigationBarPadding: () => context.bottomBarPadding,
+            navigationBarPadding: () => context.fullBottomBarPadding,
             autoscrollActive: (active) {
               if (active) {
-                tec.dmPrint('ChapterViewHtml: autoscroll is active, collapsing the bottom sheet.');
                 context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
               } else {
-                // tec.dmPrint('ChapterViewHtml autoscrollActive false, restoring the bottom sheet.');
-                // context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
+                context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
               }
             },
             child: Scrollbar(

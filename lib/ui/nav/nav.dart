@@ -24,6 +24,10 @@ const tabColors = [Colors.blue, Colors.orange, Colors.green];
 
 Future<Reference> navigate(BuildContext context, Reference ref,
     {int initialIndex = 0, bool searchView = false}) {
+
+  // dummy tec reference to remove import warning
+  tec.today;
+
   final hasSearchResults = context.tbloc<SearchBloc>().state.searchResults.isNotEmpty;
   return showTecDialog<Reference>(
     context: context,

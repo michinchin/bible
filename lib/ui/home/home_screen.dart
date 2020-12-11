@@ -72,87 +72,97 @@ class _HomeScreenState extends State<HomeScreen> {
         BlocProvider<TabManagerCubit>(create: (context) => TabManagerCubit()),
       ],
       child: BlocBuilder<TabManagerCubit, TecTab>(buildWhen: (p, n) {
+        // android w/gesture nav - reader needs a different overlay style
         return (context.gestureNavigation && (p == TecTab.reader || n == TecTab.reader));
       }, builder: (context, tabState) {
-        var overlayStyle = AppSettings.shared.overlayStyle(context);
+        return BlocBuilder<SheetManagerBloc, SheetManagerState>(buildWhen: (p, n) {
+          // android w/gesture nav - reader needs a different overlay style for selection sheet
+          return (context.gestureNavigation &&
+              tabState == TecTab.reader &&
+              (p.type == SheetType.selection || n.type == SheetType.selection));
+        }, builder: (context, sheetState) {
+          var overlayStyle = AppSettings.shared.overlayStyle(context);
 
-        // set android gestureNavigation app bar color
-        if (context.gestureNavigation && tabState == TecTab.reader) {
-          overlayStyle =
-              overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).backgroundColor);
-        }
+          // set android gestureNavigation app bar color
+          if (context.gestureNavigation &&
+              tabState == TecTab.reader &&
+              sheetState.type != SheetType.selection) {
+            overlayStyle =
+                overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).backgroundColor);
+          }
 
-        return TecSystemUiOverlayWidget(
-          overlayStyle,
-          child: TabBottomBar(
-            tabs: [
-              TabBottomBarItem(
-                tab: TecTab.today,
-                icon: Icons.today_outlined,
-                label: 'Today',
-                widget: Today(),
-              ),
-              const TabBottomBarItem(
-                tab: TecTab.library,
-                icon: FeatherIcons.book,
-                label: 'Library',
-                widget: LibraryScaffold(showCloseButton: false, heroPrefix: 'home'),
-              ),
-              TabBottomBarItem(
-                tab: TecTab.plans,
-                icon: Icons.next_plan_outlined,
-                label: 'Plans',
-                widget: Container(color: Colors.blue),
-              ),
-              TabBottomBarItem(
-                tab: TecTab.store,
-                icon: Icons.store_outlined,
-                label: 'Store',
-                widget: Container(color: Colors.yellow),
-              ),
-              TabBottomBarItem(
-                tab: TecTab.reader,
-                icon: isSmallScreen(context) ? null : TecIcons.tecartabiblelogo,
-                label: 'Bible',
-                widget: Stack(
-                  children: [
-                    TecScrollListener(
-                      axisDirection: AxisDirection.down,
-                      changedDirection: (direction) {
-                        if (direction == ScrollDirection.reverse) {
-                          context.read<SheetManagerBloc>().add(SheetEvent.restore);
-                        } else if (direction == ScrollDirection.forward) {
-                          context.read<SheetManagerBloc>().add(SheetEvent.collapse);
-                        }
-                      },
-                      child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-                        builder: (context, state) {
-                          return ViewManagerWidget(
-                            state: state,
-                            topRightWidget: MainMenuFab(),
-                            topLeftWidget: JournalFab(),
-                          );
-                        },
-                      ),
-                    ),
-                    SnapSheet(),
-                  ],
+          return TecSystemUiOverlayWidget(
+            overlayStyle,
+            child: TabBottomBar(
+              tabs: [
+                TabBottomBarItem(
+                  tab: TecTab.today,
+                  icon: Icons.today_outlined,
+                  label: 'Today',
+                  widget: Today(),
                 ),
-              ),
-              TabBottomBarItem(
-                tab: TecTab.switcher,
-                widget: GestureDetector(
-                    onTap: () {
-                      context.tabManager.changeTab(TecTab.reader);
-                    },
-                    child: Container(
-                        color: Theme.of(context).brightness == Brightness.light
-                            ? Colors.black12
-                            : Colors.black38)),
-              ),
-            ],
-          ),
-        );
+                const TabBottomBarItem(
+                  tab: TecTab.library,
+                  icon: FeatherIcons.book,
+                  label: 'Library',
+                  widget: LibraryScaffold(showCloseButton: false, heroPrefix: 'home'),
+                ),
+                TabBottomBarItem(
+                  tab: TecTab.plans,
+                  icon: Icons.next_plan_outlined,
+                  label: 'Plans',
+                  widget: Container(color: Colors.blue),
+                ),
+                TabBottomBarItem(
+                  tab: TecTab.store,
+                  icon: Icons.store_outlined,
+                  label: 'Store',
+                  widget: Container(color: Colors.yellow),
+                ),
+                TabBottomBarItem(
+                  tab: TecTab.reader,
+                  icon: isSmallScreen(context) ? null : TecIcons.tecartabiblelogo,
+                  label: 'Bible',
+                  widget: Stack(
+                    children: [
+                      TecScrollListener(
+                        axisDirection: AxisDirection.down,
+                        changedDirection: (direction) {
+                          if (direction == ScrollDirection.reverse) {
+                            context.read<SheetManagerBloc>().add(SheetEvent.restore);
+                          } else if (direction == ScrollDirection.forward) {
+                            context.read<SheetManagerBloc>().add(SheetEvent.collapse);
+                          }
+                        },
+                        child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+                          builder: (context, state) {
+                            return ViewManagerWidget(
+                              state: state,
+                              topRightWidget: MainMenuFab(),
+                              topLeftWidget: JournalFab(),
+                            );
+                          },
+                        ),
+                      ),
+                      SnapSheet(),
+                    ],
+                  ),
+                ),
+                TabBottomBarItem(
+                  tab: TecTab.switcher,
+                  widget: GestureDetector(
+                      onTap: () {
+                        context.tabManager.changeTab(TecTab.reader);
+                      },
+                      child: Container(
+                          color: Theme.of(context).brightness == Brightness.light
+                              ? Colors.black12
+                              : Colors.black38)),
+                ),
+              ],
+            ),
+          );
+        });
       }),
     );
   }
@@ -186,4 +196,3 @@ class JournalFab extends StatelessWidget {
         Scaffold.of(context).openDrawer();
       });
 }
-

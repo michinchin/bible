@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/tab_manager_cubit.dart';
+import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../ui/sheet/snap_sheet.dart';
@@ -33,6 +34,7 @@ class TabBottomBar extends StatefulWidget {
 
 class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderStateMixin {
   AnimationController _controller;
+  Map<TecTab, GlobalKey> tabKeys;
 
   @override
   void initState() {
@@ -42,101 +44,245 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
+
+    tabKeys = {};
+
+    for (var i = 0; i < widget.tabs.length; i++) {
+      tabKeys[widget.tabs[i].tab] = GlobalKey();
+    }
+  }
+
+  Future<bool> _onBackPressed() async {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return false;
+    }
+
+    if (tabKeys.containsKey(context.tabManager.state)) {
+      if (tabKeys[context.tabManager.state].currentWidget is NavigatorWithHeroController) {
+        final navigator = tabKeys[context.tabManager.state].currentWidget as NavigatorWithHeroController;
+        if (navigator.canPop(tabKeys[context.tabManager.state].currentState)) {
+          navigator.pop(tabKeys[context.tabManager.state].currentState);
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        BlocBuilder<TabManagerCubit, TecTab>(buildWhen: (p, n) {
-          if (p != n) {
-            if (n == TecTab.switcher) {
-              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                _controller.forward();
-              });
-            }
-            else if (p == TecTab.switcher) {
-              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                _controller.reverse();
-              });
-            }
-          }
-
-          // if the tab didn't change
-          return p != n;
-        }, builder: (context, tabState) {
-          final largeScreen = !isSmallScreen(context);
-          return Scaffold(
-            backgroundColor: Theme.of(context).backgroundColor,
-            extendBody: true,
-            floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-            floatingActionButton: (largeScreen || tabState == TecTab.reader)
-                ? null
-                : ((tabState == TecTab.switcher) ? _CloseFAB(controller: _controller) : _TabFAB()),
-            drawer: const UGCView(),
-            bottomNavigationBar:
-                (!largeScreen && tabState == TecTab.reader) ? null : TecTabBar(tabs: widget.tabs),
-            body: SafeArea(
-              bottom: false,
-              child: Container(
-                color: Theme.of(context).backgroundColor,
-                child: Stack(
-                  children: [
-                    // reader is always on the bottom
-                    for (var i = 0; i < widget.tabs.length; i++)
-                      if (widget.tabs[i].tab == TecTab.reader)
-                        Visibility(
-                          maintainState: true,
-                          visible: true,
-                          child: NavigatorWithHeroController(
-                            key: ValueKey(i),
-                            onGenerateRoute: (settings) => TecPageRoute<dynamic>(
-                              settings: settings,
-                              builder: (context) {
-                                return widget.tabs[i].widget;
-                              },
-                            ),
+    return BlocBuilder<TabManagerCubit, TecTab>(buildWhen: (p, n) {
+      // if the tab didn't change
+      return p != n;
+    }, builder: (context, tabState) {
+      final largeScreen = !isSmallScreen(context);
+      return WillPopScope(
+        onWillPop: _onBackPressed,
+        child: Scaffold(
+          backgroundColor: Theme.of(context).backgroundColor,
+          extendBody: true,
+          floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+          floatingActionButton: (largeScreen || tabState == TecTab.reader)
+              ? null
+              : ((tabState == TecTab.switcher) ? _CloseFAB(controller: _controller) : _TabFAB()),
+          drawer: const UGCView(),
+          bottomNavigationBar:
+              (!largeScreen && tabState == TecTab.reader) ? null : TecTabBar(tabs: widget.tabs),
+          body: SafeArea(
+            top: false,
+            bottom: false,
+            child: Container(
+              color: Theme.of(context).backgroundColor,
+              child: Stack(
+                children: [
+                  // reader is always on the bottom
+                  for (var i = 0; i < widget.tabs.length; i++)
+                    if (widget.tabs[i].tab == TecTab.reader)
+                      Visibility(
+                        maintainState: true,
+                        visible: true,
+                        child: NavigatorWithHeroController(
+                          key: tabKeys[widget.tabs[i].tab],
+                          onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+                            settings: settings,
+                            builder: (context) {
+                              return widget.tabs[i].widget;
+                            },
                           ),
                         ),
-                    for (var i = 0; i < widget.tabs.length; i++)
-                      if (widget.tabs[i].tab != TecTab.reader)
-                        Visibility(
-                          maintainState: widget.tabs[i].tab != TecTab.switcher,
-                          visible: widget.tabs[i].tab == tabState,
-                          child: NavigatorWithHeroController(
-                            key: ValueKey(i),
-                            onGenerateRoute: (settings) => TecPageRoute<dynamic>(
-                              settings: settings,
-                              builder: (context) {
-                                return widget.tabs[i].widget;
-                              },
-                            ),
+                      ),
+                  for (var i = 0; i < widget.tabs.length; i++)
+                    if (widget.tabs[i].tab != TecTab.reader)
+                      Visibility(
+                        maintainState: widget.tabs[i].tab != TecTab.switcher,
+                        visible: widget.tabs[i].tab == tabState,
+                        child: NavigatorWithHeroController(
+                          key: tabKeys[widget.tabs[i].tab],
+                          onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+                            settings: settings,
+                            builder: (context) {
+                              return widget.tabs[i].widget;
+                            },
                           ),
                         ),
-                  ],
-                ),
+                      ),
+                  if (tabState == TecTab.switcher)
+                    Container(
+                      alignment: Alignment.bottomRight,
+                      padding: const EdgeInsets.only(bottom: 40),
+                      child: _ExpandedView(controller: _controller),
+                    ),
+                ],
               ),
             ),
-          );
-        }),
-      ],
-    );
+          ),
+        ),
+      );
+    });
   }
 }
 
-class _CloseFAB extends StatelessWidget {
+class _ExpandedView extends StatefulWidget {
+  final AnimationController controller;
+
+  const _ExpandedView({Key key, this.controller}) : super(key: key);
+
+  @override
+  __ExpandedViewState createState() => __ExpandedViewState();
+}
+
+class __ExpandedViewState extends State<_ExpandedView> {
+  void _onSwitchViews(ViewState view) {
+    // ignore: close_sinks
+    final vmBloc = context.viewManager;
+
+    if (vmBloc == null) {
+      return;
+    }
+
+    if (vmBloc.state.maximizedViewUid > 0) {
+      vmBloc.add(ViewManagerEvent.maximize(view.uid));
+    } else {
+      // find the last visible window and replace that one...
+      ViewState lastVisible;
+      for (final view in vmBloc.state?.views) {
+        if (vmBloc.isViewVisible(view.uid)) {
+          lastVisible = view;
+        } else {
+          break;
+        }
+      }
+
+      final visiblePosition = vmBloc.indexOfView(lastVisible.uid);
+      final hiddenPosition = vmBloc.indexOfView(view.uid);
+
+      vmBloc.add(ViewManagerEvent.move(fromPosition: hiddenPosition, toPosition: visiblePosition));
+      // ignore: cascade_invocations
+      vmBloc.add(
+          ViewManagerEvent.move(fromPosition: visiblePosition + 1, toPosition: hiddenPosition));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final _icons = <_OffscreenView>[];
+
+    // get the offscreen views...
+    for (final view in context.viewManager?.state?.views) {
+      if (!context.viewManager.isViewVisible(view.uid)) {
+        final title = ViewManager.shared.menuTitleWith(context: context, state: view);
+        _icons.add(_OffscreenView(
+          title: title,
+          onPressed: () {
+            context.tabManager.changeTab(TecTab.reader);
+            _onSwitchViews(view);
+          },
+        ));
+      }
+    }
+
+    return ListView(
+        shrinkWrap: true,
+        // mainAxisSize: MainAxisSize.min,
+        // mainAxisAlignment: MainAxisAlignment.end,
+        // crossAxisAlignment: CrossAxisAlignment.end,
+        children: List<Widget>.generate(
+          _icons.length,
+          (index) => Container(
+            padding: const EdgeInsets.only(right: 10),
+            margin: const EdgeInsets.only(top: 10),
+            alignment: Alignment.centerRight,
+            child: ScaleTransition(
+              scale: CurvedAnimation(
+                parent: widget.controller,
+                curve: Interval(0, 1.0 - index / _icons.length / 2.0, curve: Curves.easeOut),
+              ),
+              child: InkWell(
+                onTap: () {
+                  _icons[index].onPressed();
+                },
+                child: Container(
+                  padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      boxShadow(
+                          color: isDarkMode ? Colors.black54 : Colors.black38,
+                          offset: const Offset(0, 3),
+                          blurRadius: 5)
+                    ],
+                  ),
+                  child: Text(_icons[index].title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyText1
+                          .copyWith(fontSize: contentFontSizeWith(context))),
+                ),
+              ),
+            ),
+          ),
+        ).toList());
+  }
+}
+
+class _OffscreenView {
+  final VoidCallback onPressed;
+  final String title;
+
+  const _OffscreenView({@required this.onPressed, @required this.title});
+}
+
+class _CloseFAB extends StatefulWidget {
   final AnimationController controller;
 
   const _CloseFAB({Key key, @required this.controller}) : super(key: key);
+
+  @override
+  __CloseFABState createState() => __CloseFABState();
+}
+
+class __CloseFABState extends State<_CloseFAB> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.reset();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      widget.controller.forward();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
       backgroundColor: Const.tecartaBlue,
       child: AnimatedBuilder(
-          animation: controller,
+          animation: widget.controller,
           builder: (context, child) => Transform(
-                transform: Matrix4.rotationZ(controller.value * 0.5 * math.pi),
+                transform: Matrix4.rotationZ(widget.controller.value * 0.5 * math.pi),
                 alignment: FractionalOffset.center,
                 child: const Icon(
                   Icons.close,
@@ -163,11 +309,10 @@ class _TabFAB extends StatelessWidget {
 }
 
 class TecTabBar extends StatelessWidget {
-  final VoidCallback pressedCallback;
   final List<TabBottomBarItem> tabs;
   final TabManagerCubit tabManager;
 
-  const TecTabBar({@required this.tabs, this.pressedCallback, this.tabManager});
+  const TecTabBar({@required this.tabs, this.tabManager});
 
   @override
   Widget build(BuildContext context) {
@@ -199,10 +344,6 @@ class TecTabBar extends StatelessWidget {
                   text: tabItem.label,
                   color: (tm.state == tabItem.tab) ? Const.tecartaBlue : null,
                   onPressed: () {
-                    if (pressedCallback != null) {
-                      pressedCallback();
-                    }
-
                     tm?.changeTab(tabItem.tab);
                   },
                 ),
