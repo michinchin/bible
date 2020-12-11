@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 enum TecTab { today, library, plans, store, reader, switcher }
 
 class TabManagerCubit extends Cubit<TecTab> {
-  TabManagerCubit({TecTab tab}) : super(tab ?? TecTab.reader);
+  TabManagerCubit({TecTab tab}) : super(tab ?? TecTab.today);
   void changeTab(TecTab tab) => emit(tab);
 }
 

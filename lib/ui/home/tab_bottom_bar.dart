@@ -89,8 +89,11 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
           floatingActionButton: (largeScreen || tabState == TecTab.reader)
               ? null
               : ((tabState == TecTab.switcher) ? _CloseFAB(controller: _controller) : _TabFAB()),
-          drawer:
-              SizedBox(width: min((largeScreen) ? 500 : 420, MediaQuery.of(context).size.width), child: const UGCView()),
+          drawer: (tabState != TecTab.reader)
+              ? null
+              : (SizedBox(
+                  width: min((largeScreen) ? 500 : 420, MediaQuery.of(context).size.width),
+                  child: const UGCView())),
           bottomNavigationBar:
               (!largeScreen && tabState == TecTab.reader) ? null : TecTabBar(tabs: widget.tabs),
           body: SafeArea(

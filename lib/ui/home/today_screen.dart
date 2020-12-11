@@ -141,7 +141,7 @@ class _HomeCard extends StatelessWidget {
                             child: TecText(
                               type.toUpperCase(),
                               style: cardSubtitleCompactStyle.copyWith(
-                                color: Colors.white70,
+                                color: const Color(0xDDFFFFFF),
                                 fontWeight: FontWeight.w600,
                                 shadows: <Shadow>[
                                   const Shadow(
