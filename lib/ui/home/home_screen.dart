@@ -39,10 +39,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void initNotifications() {
     // TODO(abby): on cold start, doesn't open notification on iOS...why?
     // if cold start - wait longer...
-    final delay =
-        (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 1250 : 500;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final delay =
+          (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 500 : 1250;
+
       if (mounted) {
         final granted = await Notifications.shared?.requestPermissions(context);
         if (granted) {

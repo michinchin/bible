@@ -1,3 +1,6 @@
+import 'package:bible/ui/common/tec_navigator.dart';
+import 'package:bible/ui/volume/volume_view_data_bloc.dart';
+import '../../blocs/sheet/tab_manager_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -82,6 +85,16 @@ class __VotdScreenState extends State<_VotdScreen> {
     }
   }
 
+  Future<void> onVerseTap(Reference ref) async {
+    final bloc = context.viewManager; //ignore: close_sinks
+    final views = bloc.state.views.toList();
+    final vbloc = context.viewManager.dataBlocWithView(views.first.uid) as VolumeViewDataBloc;
+    final viewData = vbloc.state.asVolumeViewData
+        .copyWith(bcv: BookChapterVerse.fromRef(ref), volumeId: _bible.id);
+    await vbloc.update(context, viewData);
+    context.tabManager.changeTab(TecTab.reader);
+  }
+
   @override
   Widget build(BuildContext context) {
     return TecImageAppBarScaffold(
@@ -124,6 +137,7 @@ class __VotdScreenState extends State<_VotdScreen> {
             final ref = widget.votd.ref;
             final t = VolumesRepository.shared.bibleWithId(_bible.id);
             return SafeArea(
+              top: false,
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
@@ -137,7 +151,7 @@ class __VotdScreenState extends State<_VotdScreen> {
                         textAlign: TextAlign.left,
                       ),
                       FlatButton(
-                        onPressed: () {},
+                        onPressed: () => onVerseTap(ref),
                         child: TecText(
                           ref.label(),
                           style: cardSubtitleCompactStyle.copyWith(

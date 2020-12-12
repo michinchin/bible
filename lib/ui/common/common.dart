@@ -300,7 +300,7 @@ const TextStyle cardTitleCompactStyle = TextStyle(
 );
 
 const TextStyle cardSubtitleCompactStyle = TextStyle(
-  fontSize: 14,
+  fontSize: 15,
   fontWeight: FontWeight.w400, // w500 == Normal
 );
 

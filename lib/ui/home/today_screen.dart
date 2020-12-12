@@ -15,23 +15,37 @@ import 'votd_screen.dart';
 class TodayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final portraitMode = MediaQuery.of(context).orientation == Orientation.portrait ||
-        (MediaQuery.of(context).size.height > 500 && MediaQuery.of(context).size.width > 500);
+    final portraitMode = MediaQuery.of(context).orientation == Orientation.portrait;
     return SafeArea(
         bottom: false,
-        child: Container(
-            padding: EdgeInsets.only(top: 10, bottom: portraitMode ? 0 : 10),
-            child: ListView(
-                // scrollDirection: portraitMode ? Axis.vertical : Axis.horizontal,
-                children: [
-                  _VotdCard(),
-                  const SizedBox(height: 10),
-                  _DotdCard(),
-                  if (portraitMode)
-                    const Divider(color: Colors.transparent, height: 40)
-                  else
-                    const VerticalDivider(color: Colors.transparent, width: 80)
-                ])));
+        child: ListView(children: [
+          Container(
+              padding: EdgeInsets.only(top: 10, bottom: portraitMode ? 0 : 10),
+              child: isSmallScreen(context) && portraitMode
+                  ? SizedBox(
+                      height: MediaQuery.of(context).size.height - 200,
+                      child: Column(
+                          // scrollDirection: portraitMode ? Axis.vertical : Axis.horizontal,
+                          children: [
+                            Expanded(child: _VotdCard()),
+                            const SizedBox(height: 10),
+                            Expanded(child: _DotdCard()),
+                            if (portraitMode)
+                              const Divider(color: Colors.transparent, height: 40)
+                            else
+                              const VerticalDivider(color: Colors.transparent, width: 80)
+                          ]),
+                    )
+                  : Container(
+                      height: dayCardHeight,
+                      child: Row(
+                        children: [
+                          Expanded(child: _VotdCard()),
+                          Expanded(child: _DotdCard()),
+                        ],
+                      ),
+                    )),
+        ]));
   }
 }
 
@@ -131,97 +145,81 @@ class _HomeCard extends StatelessWidget {
               ),
               Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          Expanded(
-                            child: TecText(
-                              type.toUpperCase(),
-                              style: cardSubtitleCompactStyle.copyWith(
-                                color: const Color(0xDDFFFFFF),
-                                fontWeight: FontWeight.w600,
-                                shadows: <Shadow>[
-                                  const Shadow(
-                                    offset: Offset(1.0, 1.0),
-                                    blurRadius: 2.0,
-                                    color: Colors.black,
-                                  ),
-                                ],
-                              ),
-                              maxLines: 2,
-                              autoSize: true,
-                              // textScaleFactor: contentTextScaleFactorWith(c),
-                            ),
-                          ),
-                          InkWell(
-                              onTap: onMoreTap,
-                              child: const Icon(SFSymbols.ellipsis_circle, color: Colors.white)),
-                        ]),
-                        TecText(
-                          title,
-                          style: cardTitleCompactStyle.copyWith(
-                            color: Colors.white,
-                            shadows: <Shadow>[
-                              const Shadow(
-                                offset: Offset(1.0, 1.0),
-                                blurRadius: 2.0,
-                                color: Colors.black,
-                              ),
-                            ],
-                          ),
-                          // textScaleFactor: contentTextScaleFactorWith(c),
-                          maxLines: 3,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 100),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: onImageTap,
-                      child: buildBkgFrost(
-                          context,
-                          (context) => Container(
-                                alignment: Alignment.bottomLeft,
-                                padding: const EdgeInsets.all(20),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                        child: TecText(
-                                      subtitle,
-                                      style: cardSubtitleCompactStyle.copyWith(
-                                        color: Colors.white,
-                                      ),
-                                      textScaleFactor: contentTextScaleFactorWith(context),
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                    )),
-                                    // const VerticalDivider(
-                                    //   color: Colors.transparent,
-                                    // ),
-                                    // InkWell(
-                                    //   onTap: onMoreTap,
-                                    //   child: Container(
-                                    //       padding: const EdgeInsets.symmetric(
-                                    //           horizontal: 15, vertical: 5),
-                                    //       decoration: const ShapeDecoration(
-                                    //         shape: StadiumBorder(),
-                                    //         color: Colors.white,
-                                    //       ),
-                                    //       child: const TecText(
-                                    //         'All',
-                                    //         style: TextStyle(
-                                    //             fontWeight: FontWeight.bold,
-                                    //             color: Const.tecartaBlue),
-                                    //       )),
-                                    // ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                            Expanded(
+                              child: TecText(
+                                type.toUpperCase(),
+                                style: cardSubtitleCompactStyle.copyWith(
+                                  color: const Color(0xDDFFFFFF),
+                                  fontWeight: FontWeight.w600,
+                                  shadows: <Shadow>[
+                                    const Shadow(
+                                      offset: Offset(1.0, 1.0),
+                                      blurRadius: 2.0,
+                                      color: Colors.black,
+                                    ),
                                   ],
                                 ),
-                              )),
+                                maxLines: 2,
+                                autoSize: true,
+                                // textScaleFactor: contentTextScaleFactorWith(c),
+                              ),
+                            ),
+                            InkWell(
+                                onTap: onMoreTap,
+                                child: const TecIcon(
+                                  Icon(SFSymbols.ellipsis_circle),
+                                  color: Colors.white,
+                                  shadowColor: Colors.black,
+                                )),
+                          ]),
+                          TecText(
+                            title,
+                            style: cardTitleCompactStyle.copyWith(
+                              color: Colors.white,
+                              shadows: <Shadow>[
+                                const Shadow(
+                                  offset: Offset(1.0, 1.0),
+                                  blurRadius: 2.0,
+                                  color: Colors.black,
+                                ),
+                              ],
+                            ),
+                            // textScaleFactor: contentTextScaleFactorWith(c),
+                            maxLines: 3,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  Expanded(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: onImageTap,
+                        child: buildBkgFrost(
+                            context,
+                            (context) => Container(
+                                  alignment: Alignment.bottomLeft,
+                                  padding: const EdgeInsets.all(20),
+                                  child: TecText(
+                                    subtitle,
+                                    style: cardSubtitleCompactStyle.copyWith(
+                                      color: Colors.white,
+                                    ),
+                                    textScaleFactor: contentTextScaleFactorWith(context),
+                                    autoCalcMaxLines: true,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                )),
+                      ),
                     ),
                   )
                 ],

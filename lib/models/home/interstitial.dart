@@ -265,12 +265,11 @@ class _InterstitialState extends State<InterstitialScreen> {
                             padding:
                                 EdgeInsets.only(top: 5.0, left: 15.0, right: 15.0, bottom: 30.0),
                             child: Text(
-                                'Thank you for supporting the Refresh '
-                                'Devotional! To support the app\'s continued '
+                                'Thank you for supporting the TecartaBible '
+                                'App! To support the app\'s continued '
                                 'development, a dismissible ad will occasionally appear '
-                                'after you have read a devotional. Remove all ads '
-                                'by paying a small fee. Get full access to a devotional '
-                                'book by purchasing an in-app license.',
+                                'after you have read a devotional or verse of the day. Remove all ads '
+                                'by paying a small fee.',
                                 style: TextStyle(fontSize: 16.0, height: 1.2)),
                           ),
                         Padding(
