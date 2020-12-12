@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:bible/ui/common/tec_navigator.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_user_account/tec_user_account.dart';
@@ -39,6 +42,21 @@ import '../common/common.dart';
 
 class _DividerItem {}
 
+class UGCViewDrawer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return NavigatorWithHeroController(
+      onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+        settings: settings,
+        builder: (context) {
+          return SizedBox(
+              width: min(420, MediaQuery.of(context).size.width), child: const UGCView());
+        },
+      ),
+    );
+  }
+}
+
 class UGCView extends StatefulWidget {
   final UserItem folder;
 
@@ -79,8 +97,7 @@ class _UGCViewState extends State<UGCView> {
     if (widget.folder != null) {
       folderId = widget.folder.id;
       folderName = widget.folder.title;
-    }
-    else {
+    } else {
       folderId = UGCView.folderHome;
       folderName = 'Journal';
     }
@@ -194,8 +211,7 @@ class _UGCViewState extends State<UGCView> {
     if (item is UserItem && item.itemType == UserItemType.folder) {
       folder = item;
     } else if (item is RecentCount) {
-      folder =
-          UserItem(id: UGCView.folderRecent, title: 'Recent', type: UserItemType.folder.index);
+      folder = UserItem(id: UGCView.folderRecent, title: 'Recent', type: UserItemType.folder.index);
     } else if (item is CountItem) {
       if (item.itemType == UserItemType.bookmark) {
         folder = UserItem(
@@ -205,13 +221,10 @@ class _UGCViewState extends State<UGCView> {
         folder = UserItem(
             id: UGCView.folderBookmarks, title: 'Bookmarks', type: UserItemType.folder.index);
       } else if (item.itemType == UserItemType.note) {
-        folder =
-            UserItem(id: UGCView.folderNotes, title: 'Notes', type: UserItemType.folder.index);
+        folder = UserItem(id: UGCView.folderNotes, title: 'Notes', type: UserItemType.folder.index);
       } else if (item.itemType == UserItemType.marginNote) {
         folder = UserItem(
-            id: UGCView.folderMarginNotes,
-            title: 'Margin Notes',
-            type: UserItemType.folder.index);
+            id: UGCView.folderMarginNotes, title: 'Margin Notes', type: UserItemType.folder.index);
       } else if (item.itemType == UserItemType.highlight) {
         folder = UserItem(
             id: UGCView.folderHighlights, title: 'Highlights', type: UserItemType.folder.index);
@@ -219,8 +232,7 @@ class _UGCViewState extends State<UGCView> {
     }
 
     if (folder != null) {
-      Navigator.of(context).push(TecPageRoute<UGCView>(
-          builder: (c) => UGCView(folder: folder)));
+      Navigator.of(context).push(TecPageRoute<UGCView>(builder: (c) => UGCView(folder: folder)));
     }
   }
 
@@ -230,6 +242,16 @@ class _UGCViewState extends State<UGCView> {
 
     // temp list to shorten consecutive hls of same color
     List<UserItem> hls;
+
+    // NavigatorWithHeroController(
+    //   key: tabKeys[widget.tabs[i].tab],
+    //   onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+    //     settings: settings,
+    //     builder: (context) {
+    //       return widget.tabs[i].widget;
+    //     },
+    //   ),
+    // ),
 
     return Scaffold(
         resizeToAvoidBottomInset: false,
@@ -363,7 +385,8 @@ class _UGCViewState extends State<UGCView> {
                     }
                   } else if (items[i] is _DividerItem) {
                     return Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
+                      padding:
+                          const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
                       child: Divider(
                         height: 1,
                         color: Theme.of(context).textColor,

@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -116,7 +114,9 @@ class _SheetShadow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final maxWidth = math.min(size.width, 1000.0);
+    // make the selection sheet full width
+    // if we shorten the selection sheet, there can be blank areas
+    final maxWidth = size.width; // math.min(size.width, 2000.0);
 
     const sheetRadius = Radius.circular(7);
     const borderRadius = BorderRadius.only(topLeft: sheetRadius, topRight: sheetRadius);

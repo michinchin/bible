@@ -85,7 +85,7 @@ class AppSettings {
 ///
 bool isSmallScreen(BuildContext context) {
   final size = MediaQuery.of(context).size;
-  return (math.max(size.width, size.height) < 1004);
+  return (math.max(size.width, size.height) < 950.0 && math.min(size.width, size.height) < 500);
 }
 
 ///

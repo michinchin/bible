@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_cubit.dart';
 import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
@@ -54,6 +55,12 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
   }
 
   Future<bool> _onBackPressed() async {
+    if (Scaffold.hasDrawer(context) && Scaffold.of(context).isDrawerOpen) {
+      // this will close the drawer and keep state w/o poping to the root
+      Scaffold.of(context).openEndDrawer();
+      return false;
+    }
+
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
       return false;
@@ -89,14 +96,18 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
           floatingActionButton: (largeScreen || tabState == TecTab.reader)
               ? null
               : ((tabState == TecTab.switcher) ? _CloseFAB(controller: _controller) : _TabFAB()),
-          drawer: (tabState != TecTab.reader)
+          drawer: (tabState != TecTab.reader) ? null : UGCViewDrawer(),
+          bottomNavigationBar: (!largeScreen && tabState == TecTab.reader)
               ? null
-              : (SizedBox(
-                  width: min((largeScreen) ? 500 : 420, MediaQuery.of(context).size.width),
-                  child: const UGCView())),
-          bottomNavigationBar:
-              (!largeScreen && tabState == TecTab.reader) ? null : TecTabBar(tabs: widget.tabs),
+              : BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
+                  return Visibility(
+                    visible: (sheetState.type != SheetType.selection),
+                    child: TecTabBar(tabs: widget.tabs),
+                  );
+                }),
           body: SafeArea(
+            left: false,
+            right: false,
             top: false,
             bottom: false,
             child: Container(

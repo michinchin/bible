@@ -9,6 +9,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../models/app_settings.dart';
 import '../../ui/common/common.dart';
 import '../../ui/common/tec_page_view.dart';
 import '../selection/selection_bloc.dart';
@@ -23,9 +24,7 @@ export 'view_manager_state.dart';
 export 'view_state.dart';
 
 part 'view_manager.dart';
-
 part 'view_manager_bloc.freezed.dart';
-
 part 'view_manager_private.dart';
 
 const String _key = 'viewManagerState';
@@ -488,16 +487,18 @@ class ViewManagerWidget extends StatelessWidget {
     // tec.dmPrint('ViewManagerWidget build()');
     return SafeArea(
       bottom: false,
-      child: LayoutBuilder(
-        builder: (context, constraints) => _VMViewStack(
+      child: LayoutBuilder(builder: (context, constraints) {
+        // 65 is the height of the bottomAppBar
+        final heightAdjust = isSmallScreen(context) ? 0 : 65;
+        return _VMViewStack(
           key: context.viewManager?._globalKey,
           vmState: state,
-          constraints: constraints,
+          constraints: constraints.copyWith(maxHeight: constraints.maxHeight - heightAdjust),
           topLeftWidget: topLeftWidget,
           topRightWidget: topRightWidget,
           bottomRightWidget: bottomRightWidget,
-        ),
-      ),
+        );
+      }),
     );
   }
 }
