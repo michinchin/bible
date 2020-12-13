@@ -28,7 +28,7 @@ class ViewableVolume extends Viewable {
           builder: (context, viewData) {
             return isBibleId(viewData.asVolumeViewData.volumeId)
                 ? PageableChapterView(viewState: state, size: size)
-                : StudyView(viewState: state, size: size, viewData: viewData as VolumeViewData);
+                : StudyView(viewState: state, size: size);
           },
         ),
       ),
@@ -85,7 +85,7 @@ class ViewableVolume extends Viewable {
     } else if (isStudyVolumeId(data.volumeId)) {
       data = StudyViewData.fromContext(context, state.uid);
       assert(data != null);
-      return StudyViewDataBloc(context.viewManager, state.uid, data as StudyViewData);
+      return VolumeViewDataBloc(context.viewManager, state.uid, data as StudyViewData);
     } else {
       assert(false);
     }
