@@ -137,10 +137,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                         child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
                           builder: (context, state) {
-                            return ViewManagerWidget(
-                              state: state,
-                              topRightWidget: MainMenuFab(),
-                              topLeftWidget: JournalFab(),
+                            // 65 is the height of the bottomAppBar
+                            final bottomPadding = isSmallScreen(context) ? 0.0 : 65.0;
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: bottomPadding),
+                              child: ViewManagerWidget(
+                                state: state,
+                                topRightWidget: MainMenuFab(),
+                                topLeftWidget: JournalFab(),
+                                // viewPaddingSize: 0.0,
+                                onSelectionChangedInViews: (views) {
+                                  context.read<SelectionBloc>()?.add(SelectionState(
+                                      isTextSelected: views.isNotEmpty,
+                                      viewsWithSelections: views));
+                                },
+                              ),
                             );
                           },
                         ),

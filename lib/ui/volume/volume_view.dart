@@ -21,7 +21,10 @@ class ViewableVolume extends Viewable {
       value: context.viewManager.dataBlocWithView(state.uid) as VolumeViewDataBloc,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: BlocBuilder<VolumeViewDataBloc, ViewData>(
+        body:
+            // Stack(
+            //   children: [
+            BlocBuilder<VolumeViewDataBloc, ViewData>(
           // When the ViewData changes, only rebuild if it changes type (Bible or Study Volume).
           buildWhen: (a, b) =>
               isBibleId(a.asVolumeViewData.volumeId) != isBibleId(b.asVolumeViewData.volumeId),
@@ -31,6 +34,38 @@ class ViewableVolume extends Viewable {
                 : StudyView(viewState: state, size: size);
           },
         ),
+        //     Container(
+        //       height: 44,
+        //       decoration: BoxDecoration(
+        //         color: Colors.white,
+        //         gradient: LinearGradient(
+        //           tileMode: TileMode.clamp,
+        //           begin: const Alignment(0.0, -0.75),
+        //           end: const Alignment(0.0, 1.0),
+        //           colors: [Theme.of(context).backgroundColor, Colors.white.withOpacity(0.0)],
+        //         ),
+        //       ),
+        //     ),
+        //     Positioned(
+        //       bottom: 0.0,
+        //       height: 44,
+        //       left: 0.0,
+        //       right: 0.0,
+        //       child: Container(
+        //         // height: 44,
+        //         decoration: BoxDecoration(
+        //           color: Colors.white,
+        //           gradient: LinearGradient(
+        //             tileMode: TileMode.clamp,
+        //             begin: const Alignment(0.0, -1.0),
+        //             end: const Alignment(0.0, 0.75),
+        //             colors: [Colors.white.withOpacity(0.0), Theme.of(context).backgroundColor],
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ),
     );
   }
