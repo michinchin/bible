@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_views/tec_views.dart';
 
 import '../../blocs/shared_bible_ref_bloc.dart';
-import '../../blocs/view_manager/view_data.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
 
-export '../../blocs/view_manager/view_data.dart';
+export 'package:tec_views/tec_views.dart' show ViewData;
 
 ///
 /// VolumeViewData

@@ -3,8 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-
-import 'package:bible/blocs/view_manager/view_manager_bloc.dart';
+import 'package:tec_views/tec_views.dart';
 
 class ViewableTest extends Viewable {
   ViewableTest(String typeName, IconData icon) : super(typeName, icon);

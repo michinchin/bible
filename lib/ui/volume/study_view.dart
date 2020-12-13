@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../blocs/shared_bible_ref_bloc.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../bible/chapter_view.dart';
 import '../common/common.dart';
 import '../common/tec_scroll_listener.dart';

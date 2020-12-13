@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../bible/chapter_view.dart';
 import '../library/library.dart';
 import 'study_view.dart';

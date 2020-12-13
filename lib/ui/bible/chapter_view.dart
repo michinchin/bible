@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tec_env/tec_env.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -18,10 +19,8 @@ import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
-import '../common/tec_page_view.dart';
 import '../volume/volume_view_data_bloc.dart';
 import 'chapter_build_helper.dart';
 import 'chapter_selection.dart';

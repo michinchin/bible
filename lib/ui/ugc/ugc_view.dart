@@ -1,10 +1,10 @@
 import 'dart:math';
 
-import 'package:bible/ui/common/tec_navigator.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_views/tec_views.dart' show TecPageRoute;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -12,6 +12,7 @@ import '../../models/app_settings.dart';
 import '../../models/color_utils.dart';
 import '../../models/ugc/recent_count.dart';
 import '../common/common.dart';
+import '../common/tec_navigator.dart';
 
 // class ViewableUGC extends Viewable {
 //   ViewableUGC(String typeName, IconData icon) : super(typeName, icon);

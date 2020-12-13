@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -17,7 +18,6 @@ import '../../blocs/content_settings.dart';
 import '../../blocs/highlights/highlights_bloc.dart';
 import '../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/color_utils.dart';
 import '../../models/const.dart';
 import '../../models/string_utils.dart';
