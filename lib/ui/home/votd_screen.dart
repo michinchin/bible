@@ -97,6 +97,7 @@ class __VotdScreenState extends State<_VotdScreen> {
   @override
   Widget build(BuildContext context) {
     return TecImageAppBarScaffold(
+      overlayStyle: AppSettings.shared.overlayStyle(context),
       imageUrl: widget.votd.imageUrl,
       backgroundColor:
           Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,

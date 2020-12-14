@@ -41,6 +41,7 @@ class __DotdScreenState extends State<_DotdScreen> {
   Widget build(BuildContext context) {
     const imageWidth = 70.0;
     return TecImageAppBarScaffold(
+      overlayStyle: AppSettings.shared.overlayStyle(context),
       actions: [
         IconButton(
             icon: const TecIcon(

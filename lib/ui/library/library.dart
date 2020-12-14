@@ -10,7 +10,6 @@ import 'package:collection/collection.dart' as collection;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_views/tec_views.dart' show TecPageRoute;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -130,7 +129,7 @@ Future<T> _showLibrary<T extends Object>({
     maxHeight: math.max(500.0, (MediaQuery.of(context)?.size?.height ?? 700) - 40),
     makeScrollable: false,
     builder: (context) => NavigatorWithHeroController(
-      onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+      onGenerateRoute: (settings) => MaterialPageRoute<dynamic>(
         settings: settings,
         builder: (context) => LibraryScaffold(
           title: title,

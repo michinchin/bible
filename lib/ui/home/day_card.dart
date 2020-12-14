@@ -20,7 +20,7 @@ class DayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const height = 80.0;
-    final scale = scaleFactorWith(context);
+    // final scale = scaleFactorWith(context);
     final heading = TextSpan(
       text: '$title\n',
       style: cardSubtitleCompactStyle.copyWith(fontWeight: FontWeight.bold),

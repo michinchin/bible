@@ -120,7 +120,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                         visible: true,
                         child: NavigatorWithHeroController(
                           key: tabKeys[widget.tabs[i].tab],
-                          onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+                          onGenerateRoute: (settings) => MaterialPageRoute<dynamic>(
                             settings: settings,
                             builder: (context) {
                               return widget.tabs[i].widget;
@@ -135,7 +135,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                         visible: widget.tabs[i].tab == tabState,
                         child: NavigatorWithHeroController(
                           key: tabKeys[widget.tabs[i].tab],
-                          onGenerateRoute: (settings) => TecPageRoute<dynamic>(
+                          onGenerateRoute: (settings) => MaterialPageRoute<dynamic>(
                             settings: settings,
                             builder: (context) {
                               return widget.tabs[i].widget;

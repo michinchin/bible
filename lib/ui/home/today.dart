@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_views/tec_views.dart' show TecPageRoute;
 
 import '../../blocs/sheet/tab_manager_cubit.dart';
 import '../../models/home/dotds.dart';
@@ -16,7 +15,7 @@ Future<void> showTodayScreen(BuildContext context) => showScreen<void>(
       context: context,
       builder: (context) => Navigator(
           onGenerateRoute: (settings) =>
-              TecPageRoute<dynamic>(settings: settings, builder: (context) => Today())),
+              MaterialPageRoute<dynamic>(settings: settings, builder: (context) => Today())),
     );
 
 Future<void> showVotdFromNotification(BuildContext context, DateTime date) async {

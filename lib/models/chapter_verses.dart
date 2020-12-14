@@ -46,7 +46,7 @@ class ChapterVerses {
       for (final verseNum in verses.keys) {
         var verseNumString = '';
         if (!firstVerse) {
-          verseNumString += '[$verseNum';
+          verseNumString += ' [$verseNum';
           final endVerse = verses[verseNum].endVerse;
           if (verseNum < endVerse) {
             verseNumString += '-$endVerse] ';
