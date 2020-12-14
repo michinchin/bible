@@ -9,6 +9,7 @@ import 'package:oktoast/oktoast.dart';
 import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_user_account/tec_user_account.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -21,7 +22,6 @@ import 'blocs/search/search_bloc.dart';
 import 'blocs/shared_bible_ref_bloc.dart';
 import 'blocs/sheet/pref_items_bloc.dart';
 import 'blocs/sheet/tab_manager_cubit.dart';
-import 'blocs/view_manager/view_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'models/const.dart';
 import 'models/iap/iap.dart';

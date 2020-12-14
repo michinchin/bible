@@ -48,7 +48,7 @@ class DayCard extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(10.0),
                 child: TecText.rich(
                   TextSpan(children: [heading, intro]),
                   overflow: TextOverflow.ellipsis,

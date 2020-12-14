@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/search_bloc.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/const.dart';
 import '../../models/user_item_helper.dart';
 import '../common/common.dart';
@@ -17,7 +17,7 @@ import '../common/tec_modal_popup_menu.dart';
 import '../library/library.dart';
 import '../menu/view_actions.dart';
 import '../nav/nav.dart';
-import 'study_view_data.dart';
+import 'study/study_view_data.dart';
 import 'volume_view_data_bloc.dart';
 
 class VolumeViewActionBar extends StatelessWidget {

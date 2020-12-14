@@ -10,7 +10,6 @@ import 'tec_tab_indicator.dart';
 export 'tec_dialog.dart';
 export 'tec_future_builder.dart';
 export 'tec_modal_popup.dart';
-export 'tec_page_route.dart';
 export 'tec_popup_menu_button.dart';
 export 'tec_search_field.dart';
 export 'tec_stream_builder.dart';
@@ -18,78 +17,6 @@ export 'tec_tab_indicator.dart';
 
 const defaultElevation = 3.0;
 const defaultActionBarElevation = 6.0;
-
-///
-/// Returns a new `EdgeInsets` object based on the given [parentSize] and [childRect].
-///
-EdgeInsets insetsFromParentSizeAndChildRect(Size parentSize, Rect childRect) => EdgeInsets.fromLTRB(
-      childRect.left,
-      childRect.top,
-      parentSize.width - childRect.right,
-      parentSize.height - childRect.bottom,
-    );
-
-///
-/// Returns the global rect of the widget with the given [globalKey], or null if none.
-///
-/// Uses [size] if provided, otherwise uses `(renderBox.hasSize ? renderBox.size : Size.zero)`.
-///
-Rect globalRectOfWidgetWithKey(GlobalKey globalKey, [Size size]) {
-  if (globalKey != null) {
-    final renderBox = globalKey.currentContext?.findRenderObject();
-    if (renderBox is RenderBox) {
-      final pt = renderBox.localToGlobal(Offset.zero);
-      final rbSize = size ?? (renderBox.hasSize ? renderBox.size : Size.zero);
-      return Rect.fromLTWH(pt.dx, pt.dy, rbSize.width, rbSize.height);
-    }
-  }
-  return null;
-}
-
-///
-/// Returns the size of the widget with the given [globalKey]. Returns null if a
-/// widget with the key is not found. If the widget was found, but it has not
-/// undergone layout, returns `Size.zero`.
-///
-Size sizeOfWidgetWithKey(GlobalKey globalKey) {
-  if (globalKey != null) {
-    final renderBox = globalKey.currentContext?.findRenderObject();
-    if (renderBox is RenderBox) {
-      if (renderBox.hasSize) return renderBox.size;
-      return Size.zero;
-    }
-  }
-  return null;
-}
-
-///
-/// Returns the global offset of the widget with the given [globalKey], or null
-/// if none.
-///
-/// If [ancestorKey] is non-null, this function converts the given point to the
-/// coordinate system of the ancestor (which must be an ancestor of this render
-/// object) instead of to the global coordinate system.
-///
-/// This method is implemented in terms of `getTransformTo`. If the transform
-/// matrix puts the given `point` on the line at infinity (for instance, when
-/// the transform matrix is the zero matrix), this method returns (NaN, NaN).
-///
-Offset globalOffsetOfWidgetWithKey(GlobalKey globalKey, {GlobalKey ancestorKey}) {
-  if (globalKey != null) {
-    final renderBox = globalKey.currentContext?.findRenderObject();
-    if (renderBox is RenderBox) {
-      if (ancestorKey != null) {
-        final ancestor = ancestorKey.currentContext?.findRenderObject();
-        if (ancestor is RenderObject) {
-          return renderBox.localToGlobal(Offset.zero, ancestor: ancestor);
-        }
-      } else {
-        return renderBox.localToGlobal(Offset.zero);
-      }
-    }
-  }
-  return null;
-}
 
 ///
 /// Shape and border radius to use for bottom sheets.

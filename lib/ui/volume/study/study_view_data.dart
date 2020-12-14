@@ -1,10 +1,10 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/view_manager/view_manager_bloc.dart';
-import 'volume_view_data_bloc.dart';
+import '../volume_view_data_bloc.dart';
 
 class StudyViewDataBloc extends VolumeViewDataBloc {
   StudyViewDataBloc(ViewManagerBloc vmBloc, int viewUid, StudyViewData data)

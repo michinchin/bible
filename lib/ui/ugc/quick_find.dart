@@ -9,14 +9,14 @@ class QuickFind extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
             color: Theme.of(context).backgroundColor,
-            borderRadius: BorderRadius.all(Radius.circular(10))),
+            borderRadius: const BorderRadius.all(Radius.circular(10))),
         child: TextField(
           // onEditingComplete: onSubmit,
           // focus text field when no current search results but coming from magnifying glass
           // autofocus: widget.searchView && ss.searchResults.isEmpty,
           style: Theme.of(context).appBarTheme.textTheme.bodyText1,
           textAlignVertical: TextAlignVertical.center,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             prefixIcon: Icon(Icons.search_outlined),
             border: InputBorder.none,
             suffixIcon: Icon(Icons.cancel_outlined),

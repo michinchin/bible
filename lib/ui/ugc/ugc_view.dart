@@ -1,7 +1,5 @@
 import 'dart:math';
 
-import 'package:bible/ui/common/tec_scroll_listener.dart';
-import 'package:bible/ui/ugc/quick_find.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_user_account/tec_user_account.dart';
@@ -14,6 +12,7 @@ import '../../models/color_utils.dart';
 import '../../models/ugc/recent_count.dart';
 import '../common/common.dart';
 import 'bread_crumb_row.dart';
+import 'quick_find.dart';
 
 class _BreadCrumbItem {}
 

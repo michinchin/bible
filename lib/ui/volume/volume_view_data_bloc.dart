@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:tec_views/tec_views.dart';
+
 import '../../blocs/shared_bible_ref_bloc.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
 import 'volume_view_data.dart';
 
 export 'volume_view_data.dart';

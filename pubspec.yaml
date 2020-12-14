@@ -58,6 +58,16 @@ dependencies:
       name: tec_html
       url: http://noah.tecarta.com:8100
     version: ^3.1.3
+  tec_native_ad:
+    hosted:
+      name: tec_native_ad
+      url: http://noah.tecarta.com:8100
+    version: ^0.0.4
+  tec_notifications:
+    hosted:
+      name: tec_notifications
+      url: http://noah.tecarta.com:8100
+    version: ^0.0.1
   tec_platform_util:
     hosted:
       name: tec_platform_util
@@ -73,6 +83,11 @@ dependencies:
       name: tec_util
       url: http://noah.tecarta.com:8100
     version: ^1.2.26
+  tec_views:
+    hosted:
+      name: tec_views
+      url: http://noah.tecarta.com:8100
+    version: ^1.0.2
   tec_volumes:
     hosted:
       name: tec_volumes
@@ -88,18 +103,8 @@ dependencies:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
     version: ^2.0.21
-  tec_native_ad:
-    hosted:
-      name: tec_native_ad
-      url: http://noah.tecarta.com:8100
-    version: ^0.0.4
-  tec_notifications:
-    hosted:
-      name: tec_notifications
-      url: http://noah.tecarta.com:8100
-    version: ^0.0.1
 
-dependency_overrides:
+# dependency_overrides:
   # tec_html:
   #   path: ../shared/tec_html
   # tec_selectable:

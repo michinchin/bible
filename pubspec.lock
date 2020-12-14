@@ -1097,6 +1097,13 @@ packages:
       url: "http://noah.tecarta.com:8100"
     source: hosted
     version: "1.2.26"
+  tec_views:
+    dependency: "direct main"
+    description:
+      name: tec_views
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
+    version: "1.0.2"
   tec_volumes:
     dependency: "direct main"
     description:

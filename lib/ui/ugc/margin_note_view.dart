@@ -8,11 +8,11 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:quill_delta/quill_delta.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_views/tec_views.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:zefyr/zefyr.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../menu/view_actions.dart';

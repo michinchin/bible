@@ -3,16 +3,15 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_views/tec_views.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_cubit.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../ui/sheet/snap_sheet.dart';
 import '../common/tec_navigator.dart';
-import '../common/tec_page_route.dart';
 import '../ugc/ugc_view.dart';
 
 class TabBottomBarItem {
@@ -55,7 +54,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
 
   Future<bool> _onBackPressed() async {
     if (Scaffold.hasDrawer(context) && Scaffold.of(context).isDrawerOpen) {
-      // this will close the drawer and keep state w/o poping to the root
+      // this will close the drawer and keep state w/o popping to the root
       Scaffold.of(context).openEndDrawer();
       return false;
     }

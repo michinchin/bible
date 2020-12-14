@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
+import 'package:tec_views/tec_views.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_cubit.dart';
-import '../../blocs/view_manager/view_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/notifications/notifications_model.dart';
 import '../common/common.dart';
@@ -137,10 +137,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                         child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
                           builder: (context, state) {
-                            return ViewManagerWidget(
-                              state: state,
-                              topRightWidget: MainMenuFab(),
-                              topLeftWidget: JournalFab(),
+                            // 65 is the height of the bottomAppBar
+                            final bottomPadding = isSmallScreen(context) ? 0.0 : 65.0;
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: bottomPadding),
+                              child: ViewManagerWidget(
+                                state: state,
+                                topRightWidget: MainMenuFab(),
+                                topLeftWidget: JournalFab(),
+                                // viewPaddingSize: 0.0,
+                                onSelectionChangedInViews: (views) {
+                                  context.read<SelectionBloc>()?.add(SelectionState(
+                                      isTextSelected: views.isNotEmpty,
+                                      viewsWithSelections: views));
+                                },
+                              ),
                             );
                           },
                         ),

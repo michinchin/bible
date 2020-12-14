@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+// import 'package:tec_util/tec_util.dart' as tec;
+
 export 'package:flutter/rendering.dart' show ScrollDirection;
 
 class TecScrollListener extends StatefulWidget {
@@ -35,27 +37,41 @@ class _TecScrollListenerState extends State<TecScrollListener> {
     if (notification is ScrollNotification &&
         (widget.axisDirection == null ||
             widget.axisDirection == notification.metrics.axisDirection)) {
-      final scrollPos = notification.metrics.pixels;
-      if (_scrollContext != notification.context) {
-        _scrollContext = notification.context;
-        _lastScrollPos = null;
-      }
-      _lastScrollPos ??= scrollPos;
-      const delta = 10.0;
-      if (scrollPos < _lastScrollPos - delta || scrollPos <= 0.0) {
-        _lastScrollPos = scrollPos;
+      final pos = notification.metrics.pixels;
+      final minPos = (notification.metrics.minScrollExtent ?? 0.0) + 10.0;
+      final maxPos = (notification.metrics.maxScrollExtent ?? double.infinity) - 10.0;
+      if (maxPos <= minPos) {
         if (_previousDirection != ScrollDirection.reverse) {
-          // tec.dmPrint('Calling SheetManagerBloc.add(SheetEvent.restore)');
+          // tec.dmPrint('Sending `reverse`, pos: $pos, minPos: $minPos, maxPos: $maxPos');
           _previousDirection = ScrollDirection.reverse;
           widget.changedDirection(_previousDirection);
         }
-      } else if (scrollPos > 0.0 && scrollPos > _lastScrollPos + delta) {
-        _lastScrollPos = scrollPos;
-        if (_previousDirection != ScrollDirection.forward) {
-          // tec.dmPrint('Calling SheetManagerBloc.add(SheetEvent.collapse)');
-          _previousDirection = ScrollDirection.forward;
-          widget.changedDirection(_previousDirection);
+      } else if (pos < maxPos) {
+        if (_scrollContext != notification.context) {
+          _scrollContext = notification.context;
+          _lastScrollPos = null;
         }
+        _lastScrollPos ??= pos;
+
+        const delta = 10.0;
+        if (pos < _lastScrollPos - delta || pos <= minPos) {
+          _lastScrollPos = pos;
+          if (_previousDirection != ScrollDirection.reverse) {
+            // tec.dmPrint('Sending `reverse`, pos: $pos, minPos: $minPos, maxPos: $maxPos');
+            _previousDirection = ScrollDirection.reverse;
+            widget.changedDirection(_previousDirection);
+          }
+        } else if (pos > _lastScrollPos + delta) {
+          _lastScrollPos = pos;
+          if (_previousDirection != ScrollDirection.forward) {
+            // tec.dmPrint('Sending `forward`, pos: $pos, minPos: $minPos, maxPos: $maxPos');
+            _previousDirection = ScrollDirection.forward;
+            widget.changedDirection(_previousDirection);
+          }
+        }
+      } else {
+        _scrollContext = null;
+        // tec.dmPrint('Ignoring scroll, pos: $pos, minPos: $minPos, maxPos: $maxPos');
       }
     }
 
