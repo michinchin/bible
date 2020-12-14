@@ -35,32 +35,42 @@ class ActionBarItem {
 class ActionBar extends StatelessWidget {
   final List<ActionBarItem> items;
   final double elevation;
+  final Duration animationDuration;
 
-  const ActionBar({Key key, @required @required this.items, this.elevation}) : super(key: key);
+  const ActionBar({
+    Key key,
+    @required @required this.items,
+    this.elevation,
+    this.animationDuration, // = const Duration(milliseconds: 300),
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 500),
-      transitionBuilder: (child, animation) {
-        // return ScaleTransition(scale: animation, child: child);
-        // return SizeTransition(sizeFactor: animation, axis: Axis.horizontal, child: child);
-        return FadeTransition(opacity: animation, child: child);
-      },
-      child: Container(
-        key: ValueKey(items),
-        alignment: Alignment.center,
-        // color: Colors.red.withOpacity(0.25),
-        child: Material(
-          elevation: elevation ?? Theme.of(context).appBarTheme.elevation ?? 4.0,
-          borderRadius: const BorderRadius.all(Radius.circular(90)),
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Theme.of(context).appBarTheme.color
-              : Theme.of(context).backgroundColor,
-          child: LayoutBuilder(builder: _layoutBuilder),
-        ),
-      ),
-    );
+    Widget actionBar() => Container(
+          key: ValueKey(items),
+          alignment: Alignment.center,
+          // color: Colors.red.withOpacity(0.25),
+          child: Material(
+            elevation: elevation ?? Theme.of(context).appBarTheme.elevation ?? 4.0,
+            borderRadius: const BorderRadius.all(Radius.circular(90)),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).appBarTheme.color
+                : Theme.of(context).backgroundColor,
+            child: LayoutBuilder(builder: _layoutBuilder),
+          ),
+        );
+
+    return animationDuration == null
+        ? actionBar()
+        : AnimatedSwitcher(
+            duration: animationDuration,
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            child: actionBar(),
+          );
   }
 
   Widget _layoutBuilder(BuildContext context, BoxConstraints constraints) {
