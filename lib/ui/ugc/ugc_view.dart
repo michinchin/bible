@@ -1,6 +1,7 @@
 import 'dart:math';
 
-import 'package:bible/ui/common/tec_navigator.dart';
+import 'package:bible/ui/common/tec_scroll_listener.dart';
+import 'package:bible/ui/ugc/quick_find.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_user_account/tec_user_account.dart';
@@ -12,54 +13,15 @@ import '../../models/app_settings.dart';
 import '../../models/color_utils.dart';
 import '../../models/ugc/recent_count.dart';
 import '../common/common.dart';
+import 'bread_crumb_row.dart';
 
-// class ViewableUGC extends Viewable {
-//   ViewableUGC(String typeName, IconData icon) : super(typeName, icon);
-//
-//   @override
-//   Widget builder(BuildContext context, ViewState state, Size size) {
-//     return UGCView(state, size);
-//   }
-//
-//   @override
-//   Widget floatingTitleBuilder(BuildContext context, ViewState state, Size size) {
-//     return Container();
-//   }
-//
-//   @override
-//   String menuTitle({BuildContext context, ViewState state}) => 'Notes';
-//
-//   @override
-//   Future<ViewData> dataForNewView(
-//           {BuildContext context, int currentViewId, Map<String, dynamic> options}) =>
-//       Future.value(const UGCViewData(UGCViewData.folderHome));
-//
-//   @override
-//   ViewDataBloc createViewDataBloc(BuildContext context, ViewState state) {
-//     return ViewDataBloc(context.viewManager, state.uid, ViewData.fromContext(context, state.uid));
-//   }
-// }
+class _BreadCrumbItem {}
 
 class _DividerItem {}
 
-class UGCViewDrawer extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return NavigatorWithHeroController(
-      onGenerateRoute: (settings) => TecPageRoute<dynamic>(
-        settings: settings,
-        builder: (context) {
-          return SizedBox(
-              width: min(420, MediaQuery.of(context).size.width), child: const UGCView());
-        },
-      ),
-    );
-  }
-}
+class _QuickFindItem {}
 
 class UGCView extends StatefulWidget {
-  final UserItem folder;
-
   static const folderHome = 1;
   static const folderRecent = -20;
   static const folderBookmarks = -1;
@@ -68,7 +30,7 @@ class UGCView extends StatefulWidget {
   static const folderHighlights = -4;
   static const folderLicenses = -5;
 
-  const UGCView({this.folder});
+  const UGCView({Key key}) : super(key: key);
 
   @override
   _UGCViewState createState() => _UGCViewState();
@@ -77,8 +39,8 @@ class UGCView extends StatefulWidget {
 Map<int, UserItem> _folders;
 
 class _UGCViewState extends State<UGCView> {
-  int folderId;
-  String folderName;
+  List<BreadCrumb> breadCrumbs;
+  int currentFolderId;
   List items;
   final recentDate = DateTime.now().add(const Duration(days: -30));
   final recentTypes = [
@@ -92,31 +54,45 @@ class _UGCViewState extends State<UGCView> {
   void initState() {
     super.initState();
     items = <dynamic>[];
-    _folders ??= <int, UserItem>{};
-
-    if (widget.folder != null) {
-      folderId = widget.folder.id;
-      folderName = widget.folder.title;
-    } else {
-      folderId = UGCView.folderHome;
-      folderName = 'Journal';
-    }
-
-    _load();
+    breadCrumbs = <BreadCrumb>[
+      BreadCrumb(UGCView.folderHome, 'Top'),
+      BreadCrumb(UGCView.folderHome, 'Another Top'),
+      BreadCrumb(UGCView.folderHome, 'Another Top'),
+      BreadCrumb(UGCView.folderHome, 'Another Top'),
+      BreadCrumb(UGCView.folderHome, 'Another Top'),
+      BreadCrumb(UGCView.folderHome, 'Another Top'),
+      BreadCrumb(UGCView.folderHome, 'Another Top'),
+      BreadCrumb(UGCView.folderHome, 'Another Top'),
+      BreadCrumb(UGCView.folderHome, 'Another Top'),
+      BreadCrumb(UGCView.folderHome, 'Another Top'),
+    ];
+    _load(UGCView.folderHome);
   }
 
-  Future<void> _load() async {
+  Future<void> _load(int folderId) async {
+    currentFolderId = folderId;
     final _items = <dynamic>[];
 
-    if (_folders.isEmpty) {
-      for (final ui
-          in await AppSettings.shared.userAccount.userDb.getItemsOfTypes([UserItemType.folder])) {
-        _folders.putIfAbsent(ui.id, () => ui);
-      }
+    // clear any current view...
+    setState(() {
+      items = _items;
+    });
 
-      _folders.putIfAbsent(
-          1, () => UserItem(id: 1, title: 'Journal', type: UserItemType.folder.index));
+    _items.add(_QuickFindItem());
+
+    if (breadCrumbs.length > 1) {
+      _items.add(_BreadCrumbItem());
     }
+
+    _folders ??= <int, UserItem>{};
+
+    for (final ui
+        in await AppSettings.shared.userAccount.userDb.getItemsOfTypes([UserItemType.folder])) {
+      _folders.putIfAbsent(ui.id, () => ui);
+    }
+
+    _folders.putIfAbsent(
+        1, () => UserItem(id: 1, title: 'Journal', type: UserItemType.folder.index));
 
     switch (folderId) {
       case UGCView.folderHome:
@@ -232,7 +208,8 @@ class _UGCViewState extends State<UGCView> {
     }
 
     if (folder != null) {
-      Navigator.of(context).push(TecPageRoute<UGCView>(builder: (c) => UGCView(folder: folder)));
+      breadCrumbs.add(BreadCrumb(folder.id, folder.title));
+      _load(folder.id);
     }
   }
 
@@ -243,265 +220,270 @@ class _UGCViewState extends State<UGCView> {
     // temp list to shorten consecutive hls of same color
     List<UserItem> hls;
 
-    // NavigatorWithHeroController(
-    //   key: tabKeys[widget.tabs[i].tab],
-    //   onGenerateRoute: (settings) => TecPageRoute<dynamic>(
-    //     settings: settings,
-    //     builder: (context) {
-    //       return widget.tabs[i].widget;
-    //     },
-    //   ),
-    // ),
-
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: MinHeightAppBar(
-          appBar: AppBar(
-            centerTitle: true,
-            title: Text(folderName),
-            // actions: _actions(context),
+    return SizedBox(
+      width: min(420, MediaQuery.of(context).size.width),
+      child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: MinHeightAppBar(
+            appBar: AppBar(
+              centerTitle: true,
+              title: const Text('Journal'),
+              leading: InkWell(
+                child: const Icon(Icons.close),
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            ),
           ),
-        ),
-        body: Container(
-          color: Theme.of(context).backgroundColor,
-          child: SafeArea(
-            bottom: false,
-            child: ListView.builder(
-                itemCount: items.length + 1,
-                itemBuilder: (c, i) {
-                  if (i == items.length) {
-                    // padding at the end of the list...
-                    return Container(height: 80);
-                  }
+          body: Container(
+            color: Theme.of(context).backgroundColor,
+            child: SafeArea(
+              bottom: false,
+              child: Material(
+                child: ListView.builder(
+                    itemCount: items.length,
+                    itemBuilder: (c, i) {
+                      IconData iconData;
+                      String title, subtitle;
+                      Color iconColor;
 
-                  IconData iconData;
-                  String title, subtitle;
-                  Color iconColor;
-
-                  if (items[i] is CountItem) {
-                    switch ((items[i] as CountItem).itemType) {
-                      case UserItemType.bookmark:
-                        iconData = FeatherIcons.bookmark;
-                        title = 'Bookmarks';
-                        break;
-                      case UserItemType.note:
-                        iconData = FeatherIcons.edit2;
-                        title = 'Notes';
-                        break;
-                      case UserItemType.marginNote:
-                        iconData = TecIcons.marginNoteOutline;
-                        title = 'Margin Notes';
-                        break;
-                      case UserItemType.highlight:
-                        iconData = Icons.view_agenda_outlined;
-                        title = 'Highlights';
-                        break;
-                      default:
-                        break;
-                    }
-                  } else if (items[i] is RecentCount) {
-                    iconData = Icons.history;
-                    title = 'Recent';
-                  } else if (items[i] is UserItem) {
-                    final ui = items[i] as UserItem;
-                    switch (ui.itemType) {
-                      case UserItemType.folder:
-                        iconData = Icons.folder_outlined;
-                        title = ui.title;
-                        break;
-                      case UserItemType.note:
-                        iconData = Icons.edit_outlined;
-                        title = ui.title;
-                        subtitle = ui.description;
-                        break;
-                      case UserItemType.bookmark:
-                        iconData = FeatherIcons.bookmark;
-                        title = ui.title;
-                        subtitle = ui.description;
-                        break;
-                      case UserItemType.marginNote:
-                        iconData = TecIcons.marginNoteOutline;
-                        title = Reference(
-                                volume: ui.volumeId,
-                                book: ui.book,
-                                chapter: ui.chapter,
-                                verse: ui.verse)
-                            .label();
-                        subtitle = ui.info;
-                        break;
-                      case UserItemType.highlight:
-                        // is this highlight continued...
-                        if (i + 1 < items.length &&
-                            items[i + 1] is UserItem &&
-                            items[i + 1].itemType == UserItemType.highlight) {
-                          final uiNext = items[i + 1] as UserItem;
-                          if (ui.volumeId == uiNext.volumeId &&
-                              ui.color == uiNext.color &&
-                              ui.book == uiNext.book &&
-                              ui.chapter == uiNext.chapter) {
-                            if (ui.verse == (uiNext.verse - 1)) {
-                              if (hls == null) {
-                                hls = <UserItem>[ui, uiNext];
-                              } else {
-                                hls.add(uiNext);
-                              }
-                            } else if (ui.verse == (uiNext.verse + 1)) {
-                              // db query returned in reverse order...
-                              if (hls == null) {
-                                hls = <UserItem>[uiNext, ui];
-                              } else {
-                                hls.insert(0, uiNext);
+                      if (items[i] is CountItem) {
+                        switch ((items[i] as CountItem).itemType) {
+                          case UserItemType.bookmark:
+                            iconData = FeatherIcons.bookmark;
+                            title = 'Bookmarks';
+                            break;
+                          case UserItemType.note:
+                            iconData = FeatherIcons.edit2;
+                            title = 'Notes';
+                            break;
+                          case UserItemType.marginNote:
+                            iconData = TecIcons.marginNoteOutline;
+                            title = 'Margin Notes';
+                            break;
+                          case UserItemType.highlight:
+                            iconData = Icons.view_agenda_outlined;
+                            title = 'Highlights';
+                            break;
+                          default:
+                            break;
+                        }
+                      } else if (items[i] is RecentCount) {
+                        iconData = Icons.history;
+                        title = 'Recent';
+                      } else if (items[i] is UserItem) {
+                        final ui = items[i] as UserItem;
+                        switch (ui.itemType) {
+                          case UserItemType.folder:
+                            iconData = Icons.folder_outlined;
+                            title = ui.title;
+                            break;
+                          case UserItemType.note:
+                            iconData = Icons.edit_outlined;
+                            title = ui.title;
+                            subtitle = ui.description;
+                            break;
+                          case UserItemType.bookmark:
+                            iconData = FeatherIcons.bookmark;
+                            title = ui.title;
+                            subtitle = ui.description;
+                            break;
+                          case UserItemType.marginNote:
+                            iconData = TecIcons.marginNoteOutline;
+                            title = Reference(
+                                    volume: ui.volumeId,
+                                    book: ui.book,
+                                    chapter: ui.chapter,
+                                    verse: ui.verse)
+                                .label();
+                            subtitle = ui.info;
+                            break;
+                          case UserItemType.highlight:
+                            // is this highlight continued...
+                            if (i + 1 < items.length &&
+                                items[i + 1] is UserItem &&
+                                items[i + 1].itemType == UserItemType.highlight) {
+                              final uiNext = items[i + 1] as UserItem;
+                              if (ui.volumeId == uiNext.volumeId &&
+                                  ui.color == uiNext.color &&
+                                  ui.book == uiNext.book &&
+                                  ui.chapter == uiNext.chapter) {
+                                if (ui.verse == (uiNext.verse - 1)) {
+                                  if (hls == null) {
+                                    hls = <UserItem>[ui, uiNext];
+                                  } else {
+                                    hls.add(uiNext);
+                                  }
+                                } else if (ui.verse == (uiNext.verse + 1)) {
+                                  // db query returned in reverse order...
+                                  if (hls == null) {
+                                    hls = <UserItem>[uiNext, ui];
+                                  } else {
+                                    hls.insert(0, uiNext);
+                                  }
+                                }
+                                return Container();
                               }
                             }
-                            return Container();
-                          }
+
+                            iconData = Icons.view_agenda;
+                            title = Reference(
+                                    volume: ui.volumeId,
+                                    book: ui.book,
+                                    chapter: ui.chapter,
+                                    verse: (hls != null) ? hls.first.verse : ui.verse,
+                                    endVerse: (hls != null) ? hls.last.verse : ui.verse)
+                                .label();
+
+                            // final highlightType =
+                            // (ui.color == 5 || (ui.color >> 24 > 0)) ? HighlightType.underline : HighlightType.highlight;
+
+                            final color = (ui.color <= 5)
+                                ? defaultColorIntForIndex(ui.color)
+                                : 0xFF000000 | (ui.color & 0xFFFFFF);
+
+                            iconColor = isDarkTheme
+                                ? textColorWith(Color(color), isDarkMode: isDarkTheme)
+                                : highlightColorWith(Color(color), isDarkMode: isDarkTheme);
+
+                            // we have reached the end of consecutive hls, clear the list
+                            hls = null;
+                            break;
+                          default:
+                            break;
                         }
-
-                        iconData = Icons.view_agenda;
-                        title = Reference(
-                                volume: ui.volumeId,
-                                book: ui.book,
-                                chapter: ui.chapter,
-                                verse: (hls != null) ? hls.first.verse : ui.verse,
-                                endVerse: (hls != null) ? hls.last.verse : ui.verse)
-                            .label();
-
-                        // final highlightType =
-                        // (ui.color == 5 || (ui.color >> 24 > 0)) ? HighlightType.underline : HighlightType.highlight;
-
-                        final color = (ui.color <= 5)
-                            ? defaultColorIntForIndex(ui.color)
-                            : 0xFF000000 | (ui.color & 0xFFFFFF);
-
-                        iconColor = isDarkTheme
-                            ? textColorWith(Color(color), isDarkMode: isDarkTheme)
-                            : highlightColorWith(Color(color), isDarkMode: isDarkTheme);
-
-                        // we have reached the end of consecutive hls, clear the list
-                        hls = null;
-                        break;
-                      default:
-                        break;
-                    }
-                  } else if (items[i] is _DividerItem) {
-                    return Padding(
-                      padding:
-                          const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
-                      child: Divider(
-                        height: 1,
-                        color: Theme.of(context).textColor,
-                      ),
-                    );
-                  }
-
-                  return InkWell(
-                    onTap: () => _itemTap(items[i]),
-                    child: Padding(
-                      padding: (folderId == UGCView.folderHome ||
-                              (items[i] is UserItem && items[i].itemType == UserItemType.folder))
-                          ? const EdgeInsets.all(8.0)
-                          : const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0, bottom: 4.0),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
-                        child: Row(children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 16.0),
-                            child: Icon(iconData, color: iconColor),
+                      } else if (items[i] is _DividerItem) {
+                        return Padding(
+                          padding:
+                              const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
+                          child: Divider(
+                            height: 1,
+                            color: Theme.of(context).textColor,
                           ),
-                          if (subtitle != null)
-                            Expanded(
-                                child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(title, maxLines: 1, style: const TextStyle(fontSize: 18.0)),
-                                Container(height: 3.0),
-                                Text(subtitle,
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 15.0)),
-                                if (items[i] is UserItem)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4.0),
-                                    child: Row(
-                                      children: [
-                                        if ((items[i] as UserItem).parentId > 0)
-                                          Row(
-                                            children: [
-                                              const Padding(
-                                                padding: EdgeInsets.only(right: 3.0),
-                                                child: Icon(Icons.folder_outlined,
-                                                    size: 16, color: Colors.blue),
+                        );
+                      } else if (items[i] is _BreadCrumbItem) {
+                        return BreadCrumbRow(
+                            breadCrumbs: breadCrumbs,
+                            onTap: (crumbNumber) {
+                              breadCrumbs.length = crumbNumber + 1;
+                              _load(breadCrumbs[crumbNumber].id);
+                            });
+                      } else if (items[i] is _QuickFindItem) {
+                        return QuickFind();
+                      }
+
+                      return InkWell(
+                        onTap: () => _itemTap(items[i]),
+                        child: Padding(
+                          padding: (currentFolderId == UGCView.folderHome ||
+                                  (items[i] is UserItem &&
+                                      items[i].itemType == UserItemType.folder))
+                              ? const EdgeInsets.all(8.0)
+                              : const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0, bottom: 4.0),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
+                            child: Row(children: [
+                              Padding(
+                                padding: const EdgeInsets.only(right: 16.0),
+                                child: Icon(iconData, color: iconColor),
+                              ),
+                              if (subtitle != null)
+                                Expanded(
+                                    child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(title,
+                                        maxLines: 1, style: const TextStyle(fontSize: 18.0)),
+                                    Container(height: 3.0),
+                                    Text(subtitle,
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 15.0)),
+                                    if (items[i] is UserItem)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4.0),
+                                        child: Row(
+                                          children: [
+                                            if ((items[i] as UserItem).parentId > 0)
+                                              Row(
+                                                children: [
+                                                  const Padding(
+                                                    padding: EdgeInsets.only(right: 3.0),
+                                                    child: Icon(Icons.folder_outlined,
+                                                        size: 16, color: Colors.blue),
+                                                  ),
+                                                  Text(
+                                                    _folders[items[i].parentId].title,
+                                                    style: const TextStyle(fontSize: 14.0),
+                                                  ),
+                                                ],
                                               ),
-                                              Text(
-                                                _folders[items[i].parentId].title,
-                                                style: const TextStyle(fontSize: 14.0),
-                                              ),
-                                            ],
-                                          ),
-                                        Expanded(
-                                            child: Text(
-                                          tec.shortDate((items[i] as UserItem).modifiedDT),
-                                          textAlign: TextAlign.end,
-                                          style: const TextStyle(fontSize: 14.0),
-                                        )),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ))
-                          else if (title != null)
-                            Expanded(child: Text(title, style: const TextStyle(fontSize: 18.0))),
-                          if (items[i] is CountItem || items[i] is RecentCount)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16.0),
-                              child: Text(items[i].count.toString(),
-                                  style: const TextStyle(fontSize: 18.0)),
-                            ),
-                          if (items[i] is UserItem && items[i].itemType == UserItemType.folder)
-                            const Icon(
-                              Icons.navigate_next,
-                            )
-                        ]),
-                      ),
-                    ),
-                  );
-                }),
+                                            Expanded(
+                                                child: Text(
+                                              tec.shortDate((items[i] as UserItem).modifiedDT),
+                                              textAlign: TextAlign.end,
+                                              style: const TextStyle(fontSize: 14.0),
+                                            )),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ))
+                              else if (title != null)
+                                Expanded(
+                                    child: Text(title, style: const TextStyle(fontSize: 18.0))),
+                              if (items[i] is CountItem || items[i] is RecentCount)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16.0),
+                                  child: Text(items[i].count.toString(),
+                                      style: const TextStyle(fontSize: 18.0)),
+                                ),
+                              if (items[i] is UserItem && items[i].itemType == UserItemType.folder)
+                                const Icon(
+                                  Icons.navigate_next,
+                                )
+                            ]),
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+            ),
+          )
+          // body: ListView.separated(
+          //     itemCount: items.length + 1,
+          //     separatorBuilder: (c, i) => const Divider(),
+          //     itemBuilder: (c, i) {
+          //       if (i == 0) {
+          //         return ListTile(
+          //           title: const Text('Add Note'),
+          //           leading: const Icon(Icons.add),
+          //           onTap: () => Navigator.of(context).push(
+          //             TecPageRoute<NoteView>(
+          //               builder: (c) => noteViewBuilder(c, items.length),
+          //             ),
+          //           ),
+          //         );
+          //       }
+          //       i--;
+          //       return Dismissible(
+          //         key: UniqueKey(),
+          //         background: Container(
+          //           color: Colors.red,
+          //           child: const Icon(Icons.delete),
+          //         ),
+          //         onDismissed: (direction) {
+          //           // bloc.remove(i);
+          //         },
+          //         child: ListTile(
+          //           // first line of note is made to be the title
+          //           title: const Text('title goes here'),
+          //           onTap: () => Navigator.of(context).push(TecPageRoute<NoteView>(
+          //             builder: (c) => noteViewBuilder(c, i),
+          //           )),
+          //         ),
+          //       );
+          //     }),
           ),
-        )
-        // body: ListView.separated(
-        //     itemCount: items.length + 1,
-        //     separatorBuilder: (c, i) => const Divider(),
-        //     itemBuilder: (c, i) {
-        //       if (i == 0) {
-        //         return ListTile(
-        //           title: const Text('Add Note'),
-        //           leading: const Icon(Icons.add),
-        //           onTap: () => Navigator.of(context).push(
-        //             TecPageRoute<NoteView>(
-        //               builder: (c) => noteViewBuilder(c, items.length),
-        //             ),
-        //           ),
-        //         );
-        //       }
-        //       i--;
-        //       return Dismissible(
-        //         key: UniqueKey(),
-        //         background: Container(
-        //           color: Colors.red,
-        //           child: const Icon(Icons.delete),
-        //         ),
-        //         onDismissed: (direction) {
-        //           // bloc.remove(i);
-        //         },
-        //         child: ListTile(
-        //           // first line of note is made to be the title
-        //           title: const Text('title goes here'),
-        //           onTap: () => Navigator.of(context).push(TecPageRoute<NoteView>(
-        //             builder: (c) => noteViewBuilder(c, i),
-        //           )),
-        //         ),
-        //       );
-        //     }),
-        );
+    );
   }
 }

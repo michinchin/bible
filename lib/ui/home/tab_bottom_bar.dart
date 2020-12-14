@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -96,7 +95,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
           floatingActionButton: (largeScreen || tabState == TecTab.reader)
               ? null
               : ((tabState == TecTab.switcher) ? _CloseFAB(controller: _controller) : _TabFAB()),
-          drawer: (tabState != TecTab.reader) ? null : UGCViewDrawer(),
+          drawer: (tabState != TecTab.reader) ? null : const UGCView(),
           bottomNavigationBar: (!largeScreen && tabState == TecTab.reader)
               ? null
               : BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
