@@ -5,10 +5,10 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../bible/chapter_view.dart';
 import '../library/library.dart';
-import 'study_view.dart';
-import 'study_view_data.dart';
+import 'chapter/chapter_view.dart';
+import 'study/study_view.dart';
+import 'study/study_view_data.dart';
 import 'volume_action_bar.dart';
 import 'volume_view_data_bloc.dart';
 

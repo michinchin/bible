@@ -5,14 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/shared_bible_ref_bloc.dart';
-import '../bible/chapter_view.dart';
-import '../common/common.dart';
-import '../common/tec_scroll_listener.dart';
+import '../../../blocs/shared_bible_ref_bloc.dart';
+import '../../common/common.dart';
+import '../../common/tec_scroll_listener.dart';
+import '../chapter/chapter_view.dart';
+import '../volume_view_data_bloc.dart';
 import 'study_res_bloc.dart';
 import 'study_res_view.dart';
 import 'study_view_bloc.dart';
-import 'volume_view_data_bloc.dart';
 
 class StudyView extends StatefulWidget {
   final ViewState viewState;

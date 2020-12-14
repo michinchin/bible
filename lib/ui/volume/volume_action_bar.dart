@@ -17,7 +17,7 @@ import '../common/tec_modal_popup_menu.dart';
 import '../library/library.dart';
 import '../menu/view_actions.dart';
 import '../nav/nav.dart';
-import 'study_view_data.dart';
+import 'study/study_view_data.dart';
 import 'volume_view_data_bloc.dart';
 
 class VolumeViewActionBar extends StatelessWidget {

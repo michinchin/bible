@@ -8,13 +8,13 @@ import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/highlights/highlights_bloc.dart';
-import '../../blocs/selection/selection_bloc.dart';
-import '../../models/misc_utils.dart';
-import '../../models/rect_utils.dart';
-import '../../models/string_utils.dart';
-import '../strongs/strongs_popup.dart';
-import '../xref/xref_popup.dart';
+import '../../../blocs/highlights/highlights_bloc.dart';
+import '../../../blocs/selection/selection_bloc.dart';
+import '../../../models/misc_utils.dart';
+import '../../../models/rect_utils.dart';
+import '../../../models/string_utils.dart';
+import '../../strongs/strongs_popup.dart';
+import '../../xref/xref_popup.dart';
 import 'verse_tag.dart';
 
 const _debugMode = false; // kDebugMode

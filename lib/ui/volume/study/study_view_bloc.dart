@@ -4,7 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import 'volume_view_data.dart';
+import '../volume_view_data.dart';
 
 class StudyViewBloc extends Cubit<StudyViewState> {
   StudyViewBloc() : super(const StudyViewState(0, null));

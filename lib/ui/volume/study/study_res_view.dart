@@ -5,9 +5,9 @@ import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/content_settings.dart';
-import '../../models/app_settings.dart';
-import '../common/common.dart';
+import '../../../blocs/content_settings.dart';
+import '../../../models/app_settings.dart';
+import '../../common/common.dart';
 import 'study_res_bloc.dart';
 
 class StudyResView extends StatelessWidget {
