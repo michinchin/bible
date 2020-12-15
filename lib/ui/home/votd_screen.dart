@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
@@ -96,6 +98,8 @@ class __VotdScreenState extends State<_VotdScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = VolumesRepository.shared.bibleWithId(_bible.id);
+
     return TecImageAppBarScaffold(
       overlayStyle: AppSettings.shared.overlayStyle(context),
       imageUrl: widget.votd.imageUrl,
@@ -128,6 +132,26 @@ class __VotdScreenState extends State<_VotdScreen> {
                 setState(() {});
               }),
         ),
+        FlatButton.icon(
+          padding: EdgeInsets.zero,
+          icon: TecText(
+            t.abbreviation,
+            style: cardSubtitleCompactStyle.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              shadows: <Shadow>[
+                const Shadow(
+                  offset: Offset(1.0, 1.0),
+                  blurRadius: 2.0,
+                  color: Colors.black,
+                ),
+              ],
+            ),
+            // textScaleFactor: contentTextScaleFactorWith(context),
+          ),
+          label: const TecIcon(Icon(Icons.arrow_drop_down), color: Colors.white, shadowColor: Colors.black),
+          onPressed: onRefTap,
+        ),
       ],
       childBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
         future: widget.votd.getFormattedVerse(_bible),
@@ -135,42 +159,32 @@ class __VotdScreenState extends State<_VotdScreen> {
           if (snapshot.hasData && snapshot.data.error == null) {
             final res = snapshot.data.value;
             final ref = widget.votd.ref;
-            final t = VolumesRepository.shared.bibleWithId(_bible.id);
             return SafeArea(
               top: false,
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      TecText(
-                        res,
-                        style: cardSubtitleCompactStyle,
-                        textScaleFactor: contentTextScaleFactorWith(context),
-                        textAlign: TextAlign.left,
-                      ),
-                      FlatButton(
-                        onPressed: () => onVerseTap(ref),
-                        child: TecText(
-                          ref.label(),
+                  child: InkWell(
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    onTap: () => onVerseTap(ref),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        TecText(
+                          res,
+                          style: cardSubtitleCompactStyle,
+                          textScaleFactor: contentTextScaleFactorWith(context),
+                          textAlign: TextAlign.left,
+                        ),
+                        TecText(
+                          ref.copyWith(volume: _bible.id).label(),
                           style: cardSubtitleCompactStyle.copyWith(
                               color: Theme.of(context).textColor, fontWeight: FontWeight.w500),
                           textScaleFactor: contentTextScaleFactorWith(context),
                         ),
-                      ),
-                      FlatButton.icon(
-                        padding: EdgeInsets.zero,
-                        icon: TecText(
-                          t.name,
-                          style:
-                              cardSubtitleCompactStyle.copyWith(color: Theme.of(context).textColor),
-                          // textScaleFactor: contentTextScaleFactorWith(context),
-                        ),
-                        label: Icon(Icons.arrow_drop_down, color: Theme.of(context).textColor),
-                        onPressed: onRefTap,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

@@ -23,17 +23,14 @@ class TodayScreen extends StatelessWidget {
               padding: EdgeInsets.only(top: 10, bottom: portraitMode ? 0 : 10),
               child: isSmallScreen(context) && portraitMode
                   ? SizedBox(
-                      height: MediaQuery.of(context).size.height - 200,
+                      height: dayCardHeight * 2 + 50, //padding = 10+40
                       child: Column(
                           // scrollDirection: portraitMode ? Axis.vertical : Axis.horizontal,
                           children: [
                             Expanded(child: _VotdCard()),
                             const SizedBox(height: 10),
                             Expanded(child: _DotdCard()),
-                            if (portraitMode)
-                              const Divider(color: Colors.transparent, height: 40)
-                            else
-                              const VerticalDivider(color: Colors.transparent, width: 80)
+                            const SizedBox(height: 40)
                           ]),
                     )
                   : Container(
@@ -134,18 +131,17 @@ class _HomeCard extends StatelessWidget {
           builder: (c) => Stack(
             children: [
               Positioned.fill(
-                child: InkWell(
-                  onTap: onImageTap,
-                  child: TecImage(
-                    color: Colors.black12,
-                    colorBlendMode: BlendMode.colorBurn,
-                    url: imageUrl,
-                  ),
+                child: TecImage(
+                  color: Colors.black12,
+                  colorBlendMode: BlendMode.colorBurn,
+                  url: imageUrl,
                 ),
               ),
               Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
+                    flex: 2,
                     child: Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: Column(
@@ -153,6 +149,8 @@ class _HomeCard extends StatelessWidget {
                         children: [
                           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                             Expanded(
+                                child: InkWell(
+                              onTap: onImageTap,
                               child: TecText(
                                 type.toUpperCase(),
                                 style: cardSubtitleCompactStyle.copyWith(
@@ -167,10 +165,10 @@ class _HomeCard extends StatelessWidget {
                                   ],
                                 ),
                                 maxLines: 2,
-                                autoSize: true,
+                                // autoSize: true,
                                 // textScaleFactor: contentTextScaleFactorWith(c),
                               ),
-                            ),
+                            )),
                             InkWell(
                                 onTap: onMoreTap,
                                 child: const TecIcon(
@@ -179,26 +177,30 @@ class _HomeCard extends StatelessWidget {
                                   shadowColor: Colors.black,
                                 )),
                           ]),
-                          TecText(
-                            title,
-                            style: cardTitleCompactStyle.copyWith(
-                              color: Colors.white,
-                              shadows: <Shadow>[
-                                const Shadow(
-                                  offset: Offset(1.0, 1.0),
-                                  blurRadius: 2.0,
-                                  color: Colors.black,
+                          Expanded(
+                            child: InkWell(
+                              onTap: onImageTap,
+                              child: TecText(
+                                title,
+                                style: cardTitleCompactStyle.copyWith(
+                                  color: Colors.white,
+                                  shadows: <Shadow>[
+                                    const Shadow(
+                                      offset: Offset(1.0, 1.0),
+                                      blurRadius: 2.0,
+                                      color: Colors.black,
+                                    ),
+                                  ],
                                 ),
-                              ],
+                                // textScaleFactor: contentTextScaleFactorWith(c),
+                                maxLines: 2,
+                              ),
                             ),
-                            // textScaleFactor: contentTextScaleFactorWith(c),
-                            maxLines: 3,
                           ),
                         ],
                       ),
                     ),
                   ),
-                  const Spacer(),
                   Expanded(
                     child: Material(
                       color: Colors.transparent,
@@ -207,15 +209,13 @@ class _HomeCard extends StatelessWidget {
                         child: buildBkgFrost(
                             context,
                             (context) => Container(
-                                  alignment: Alignment.bottomLeft,
-                                  padding: const EdgeInsets.all(20),
+                                  alignment: Alignment.center,
                                   child: TecText(
                                     subtitle,
-                                    style: cardSubtitleCompactStyle.copyWith(
-                                      color: Colors.white,
-                                    ),
+                                    style: cardSubtitleCompactStyle.copyWith(color: Colors.white),
                                     textScaleFactor: contentTextScaleFactorWith(context),
-                                    autoCalcMaxLines: true,
+                                    maxLines: 3,
+                                    autoSize: true,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 )),
@@ -241,6 +241,7 @@ Widget buildBkgFrost(BuildContext context, WidgetBuilder childBuilder,
         child: BackdropFilter(
             filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
             child: Container(
+              padding: const EdgeInsets.all(15),
               color: Theme.of(context).brightness == Brightness.light
                   ? Colors.grey.withOpacity(0.2)
                   : Colors.black.withOpacity(0.2),
