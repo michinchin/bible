@@ -26,17 +26,13 @@ class _BreadCrumbRowState extends State<BreadCrumbRow> {
   Widget build(BuildContext context) {
     final crumbWidgets = <Widget>[];
     const style = TextStyle(fontSize: 20.0);
-    const textPadding = EdgeInsets.only(top: 8.0, left: 4.0, bottom: 8.0, right: 4.0);
 
     for (var i = 0; i < widget.breadCrumbs.length - 1; i++) {
       crumbWidgets
         ..add(
           InkWell(
-            child: Padding(
-              padding: textPadding,
-              child: Text(widget.breadCrumbs[i].folderName,
-                  style: style.copyWith(fontWeight: FontWeight.bold)),
-            ),
+            child: Text(widget.breadCrumbs[i].folderName,
+                style: style.copyWith(fontWeight: FontWeight.bold)),
             onTap: () {
               if (widget.onTap != null) {
                 widget.onTap(i);
@@ -44,13 +40,14 @@ class _BreadCrumbRowState extends State<BreadCrumbRow> {
             },
           ),
         )
-        ..add(const Icon(Icons.arrow_back_ios_outlined));
+        ..add(const Padding(
+          padding: EdgeInsets.only(left: 4.0, right: 4.0),
+          child: Icon(Icons.arrow_back_ios_outlined),
+        ));
     }
 
-    crumbWidgets.add(Padding(
-      padding: textPadding,
-      child: Text(widget.breadCrumbs[widget.breadCrumbs.length - 1].folderName, style: style),
-    ));
+    crumbWidgets
+        .add(Text(widget.breadCrumbs[widget.breadCrumbs.length - 1].folderName, style: style));
 
     if (widget.breadCrumbs.length != _numberCrumbs) {
       _numberCrumbs = widget.breadCrumbs.length;

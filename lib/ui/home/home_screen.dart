@@ -205,6 +205,7 @@ class JournalFab extends StatelessWidget {
           ? Theme.of(context).appBarTheme.color
           : Theme.of(context).backgroundColor,
       onPressed: () {
+        TecAutoScroll.stopAutoscroll();
         Scaffold.of(context).openDrawer();
       });
 }

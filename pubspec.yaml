@@ -82,7 +82,7 @@ dependencies:
     hosted:
       name: tec_util
       url: http://noah.tecarta.com:8100
-    version: ^1.2.26
+    version: ^1.2.27
   tec_views:
     hosted:
       name: tec_views
@@ -92,7 +92,7 @@ dependencies:
     hosted:
       name: tec_volumes
       url: http://noah.tecarta.com:8100
-    version: ^1.2.13
+    version: ^1.2.14
   tec_web_view:
     hosted:
       name: tec_web_view
