@@ -22,7 +22,11 @@ import 'votd_screen.dart';
 Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
   context.tabManager.add(TecTabEvent.hideTabBar);
   await Interstitial.init(context, productId: devo.productId, adUnitId: Const.prefNativeAdId);
-  await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _DotdScreen(devo)));
+  if (isSmallScreen(context)) {
+    await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _DotdScreen(devo)));
+  } else {
+    await showScreen<void>(context: context, builder: (c) => _DotdScreen(devo));
+  }
   await Interstitial.show(context);
   context.tabManager.add(TecTabEvent.showTabBar);
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:bible/models/app_settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -91,8 +92,13 @@ Future<List<int>> selectVolumesInLibrary(
 /// the current [context].
 ///
 void showDetailViewForVolume(BuildContext context, Volume volume, String heroPrefix) {
-  Navigator.of(context).push<void>(MaterialPageRoute(
-      builder: (context) => VolumeDetail(volume: volume, heroPrefix: heroPrefix)));
+  if (isSmallScreen(context)) {
+    Navigator.of(context).push<void>(MaterialPageRoute(
+        builder: (context) => VolumeDetail(volume: volume, heroPrefix: heroPrefix)));
+  } else {
+    showScreen<void>(
+        context: context, builder: (c) => VolumeDetail(volume: volume, heroPrefix: heroPrefix));
+  }
 }
 
 ///
