@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
@@ -88,9 +89,8 @@ class __DotdScreenState extends State<_DotdScreen> {
                 child: Column(children: [
                   TecHtml(
                     snapshot.data,
-                    baseUrl: '',
+                    baseUrl: VolumesRepository.shared.volumeWithId(widget.devo.productId)?.baseUrl,
                     textScaleFactor: contentTextScaleFactorWith(c),
-                    // widget.devo.volume.baseUrl,
                     selectable: false,
                     onLoadFinished: (_) => _showDevoInfo(),
                   ),
