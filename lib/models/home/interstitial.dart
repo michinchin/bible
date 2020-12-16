@@ -26,12 +26,11 @@ class Interstitial {
     _adStartTime = DateTime.now();
 
     // does this product have ads ?
-    if (!await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(removeAdsVolumeId)) {
+    if (!await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(removeAdsVolumeId) &&
+        !await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(productId)) {
       NativeAdController.instance.loadAds(adUnitId: adUnitId);
       _adUnitId = adUnitId;
-      if (!await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(productId)) {
-        _productId = productId;
-      }
+      _productId = productId;
     } else {
       _productId = -1;
       _adUnitId = '';
@@ -44,8 +43,7 @@ class Interstitial {
 
     // does this product have a license?
     if (await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(removeAdsVolumeId) ||
-        (_productId != -1 &&
-            await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(_productId))) {
+        await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(_productId)) {
       return false;
     }
 

@@ -24,7 +24,7 @@ import '../volume/volume_view_data_bloc.dart';
 import 'day_card.dart';
 
 Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
-  await Interstitial.init(context, adUnitId: Const.prefNativeAdId);
+  await Interstitial.init(context, productId: votd.ref.volume, adUnitId: Const.prefNativeAdId);
   await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _VotdScreen(votd)));
   await Interstitial.show(context);
 }
@@ -148,7 +148,8 @@ class __VotdScreenState extends State<_VotdScreen> {
             ),
             // textScaleFactor: contentTextScaleFactorWith(context),
           ),
-          label: const TecIcon(Icon(Icons.arrow_drop_down), color: Colors.white, shadowColor: Colors.black),
+          label: const TecIcon(Icon(Icons.arrow_drop_down),
+              color: Colors.white, shadowColor: Colors.black),
           onPressed: onRefTap,
         ),
       ],
