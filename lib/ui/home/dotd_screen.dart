@@ -35,15 +35,16 @@ class _DotdScreen extends StatefulWidget {
 
 class __DotdScreenState extends State<_DotdScreen> {
   var _showDevoButton = false;
+  Future<String> _devoHtmlFuture;
+
+  @override
+  void initState() {
+    _devoHtmlFuture = widget.devo.html(AppSettings.shared.env);
+    super.initState();
+  }
 
   Future<void> share() async {
     TecShare.share(await widget.devo.shareText());
-  }
-
-  void _showDevoInfo() {
-    // setState(() {
-      _showDevoButton = true;
-    // });
   }
 
   @override
@@ -82,17 +83,19 @@ class __DotdScreenState extends State<_DotdScreen> {
       imageAspectRatio: imageAspectRatio,
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       childBuilder: (c, i) => FutureBuilder<String>(
-          future: widget.devo.html(AppSettings.shared.env),
+          future: _devoHtmlFuture,
           builder: (c, snapshot) {
             if (snapshot.hasData && snapshot.connectionState == ConnectionState.done) {
               return SafeArea(
+                top: false,
                 child: Column(children: [
                   TecHtml(
                     snapshot.data,
+                    isInitialHtmlElementVisible: false,
                     baseUrl: VolumesRepository.shared.volumeWithId(widget.devo.productId)?.baseUrl,
+                    onLoadFinished: (error) => setState(() => _showDevoButton = true),
                     textScaleFactor: contentTextScaleFactorWith(c),
                     selectable: false,
-                    onLoadFinished: (_) => _showDevoInfo(),
                   ),
                   if (_showDevoButton)
                     InkWell(
