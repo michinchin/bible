@@ -148,6 +148,11 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         modified: DateTime.now());
     await UserItemHelper.saveSearchHistoryItem(s);
   }
+
+  void refresh() {
+    add(const SearchEvent.selectionModeToggle());
+    add(const SearchEvent.selectionModeToggle());
+  }
 }
 
 @freezed

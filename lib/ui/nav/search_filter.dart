@@ -279,10 +279,7 @@ class __VolumeFilterState extends State<_VolumeFilter> {
       prefBloc().add(PrefItemEvent.update(
           prefItem: prefBloc().infoChangedPrefItem(
               PrefItemId.priorityTranslations, _priorityTranslationList.join('|'))));
-      // TODO(abby): kinda hacky way to load res should probably do something else
-      context.tbloc<SearchBloc>()
-        ..add(const SearchEvent.selectionModeToggle())
-        ..add(const SearchEvent.selectionModeToggle());
+      context.tbloc<SearchBloc>().refresh();
     }
     super.deactivate();
   }
