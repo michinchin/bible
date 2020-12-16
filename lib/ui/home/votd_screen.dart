@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
@@ -26,7 +25,8 @@ import 'day_card.dart';
 
 Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
   context.tabManager.add(TecTabEvent.hideTabBar);
-  await Interstitial.init(context, adUnitId: Const.prefNativeAdId);
+  await Interstitial.init(context,
+      productId: currentBibleFromContext(context)?.id, adUnitId: Const.prefNativeAdId);
   await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _VotdScreen(votd)));
   await Interstitial.show(context);
   context.tabManager.add(TecTabEvent.showTabBar);
@@ -133,26 +133,31 @@ class __VotdScreenState extends State<_VotdScreen> {
                 setState(() {});
               }),
         ),
-        FlatButton.icon(
+        ButtonTheme(
+          minWidth: 50,
           padding: EdgeInsets.zero,
-          icon: TecText(
-            t.abbreviation,
-            style: cardSubtitleCompactStyle.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              shadows: <Shadow>[
-                const Shadow(
-                  offset: Offset(1.0, 1.0),
-                  blurRadius: 2.0,
-                  color: Colors.black,
-                ),
-              ],
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          child: FlatButton(
+            child: TecText(
+              t.abbreviation,
+              style: cardSubtitleCompactStyle.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                shadows: <Shadow>[
+                  const Shadow(
+                    offset: Offset(1.0, 1.0),
+                    blurRadius: 2.0,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+              // textScaleFactor: contentTextScaleFactorWith(context),
             ),
-            // textScaleFactor: contentTextScaleFactorWith(context),
+            // label: const TecIcon(Icon(Icons.arrow_drop_down),
+            //     color: Colors.white, shadowColor: Colors.black),
+            onPressed: onRefTap,
           ),
-          label: const TecIcon(Icon(Icons.arrow_drop_down),
-              color: Colors.white, shadowColor: Colors.black),
-          onPressed: onRefTap,
         ),
       ],
       childBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
@@ -179,6 +184,7 @@ class __VotdScreenState extends State<_VotdScreen> {
                           textScaleFactor: contentTextScaleFactorWith(context),
                           textAlign: TextAlign.left,
                         ),
+                        const SizedBox(height: 5),
                         TecText(
                           ref.copyWith(volume: _bible.id).label(),
                           style: cardSubtitleCompactStyle.copyWith(

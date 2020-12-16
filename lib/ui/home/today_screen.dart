@@ -124,34 +124,35 @@ class _HomeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0),
-        child: TecCard(
-          elevation: 0,
-          padding: 0,
-          color: Theme.of(context).cardColor,
-          builder: (c) => Stack(
-            children: [
-              Positioned.fill(
-                child: TecImage(
-                  color: Colors.black12,
-                  colorBlendMode: BlendMode.colorBurn,
-                  url: imageUrl,
+        child: GestureDetector(
+          onTap: onImageTap,
+          behavior: HitTestBehavior.translucent,
+          child: TecCard(
+            elevation: 0,
+            padding: 0,
+            color: Theme.of(context).cardColor,
+            builder: (c) => Stack(
+              children: [
+                Positioned.fill(
+                  child: TecImage(
+                    color: Colors.black12,
+                    colorBlendMode: BlendMode.colorBurn,
+                    url: imageUrl,
+                  ),
                 ),
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                            Expanded(
-                                child: InkWell(
-                              onTap: onImageTap,
-                              child: TecText(
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                              Expanded(
+                                  child: TecText(
                                 type.toUpperCase(),
                                 style: cardSubtitleCompactStyle.copyWith(
                                   color: const Color(0xDDFFFFFF),
@@ -167,19 +168,16 @@ class _HomeCard extends StatelessWidget {
                                 maxLines: 2,
                                 // autoSize: true,
                                 // textScaleFactor: contentTextScaleFactorWith(c),
-                              ),
-                            )),
-                            InkWell(
-                                onTap: onMoreTap,
-                                child: const TecIcon(
-                                  Icon(SFSymbols.ellipsis_circle),
-                                  color: Colors.white,
-                                  shadowColor: Colors.black,
-                                )),
-                          ]),
-                          Expanded(
-                            child: InkWell(
-                              onTap: onImageTap,
+                              )),
+                              InkWell(
+                                  onTap: onMoreTap,
+                                  child: const TecIcon(
+                                    Icon(SFSymbols.ellipsis_circle),
+                                    color: Colors.white,
+                                    shadowColor: Colors.black,
+                                  )),
+                            ]),
+                            Expanded(
                               child: TecText(
                                 title,
                                 style: cardTitleCompactStyle.copyWith(
@@ -196,35 +194,39 @@ class _HomeCard extends StatelessWidget {
                                 maxLines: 2,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: onImageTap,
-                        child: buildBkgFrost(
-                            context,
-                            (context) => Container(
-                                  alignment: Alignment.center,
-                                  child: TecText(
-                                    subtitle,
-                                    style: cardSubtitleCompactStyle.copyWith(color: Colors.white),
-                                    textScaleFactor: contentTextScaleFactorWith(context),
-                                    maxLines: 3,
-                                    autoSize: true,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                )),
+                    ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(15),
+                        bottomRight: Radius.circular(15),
                       ),
-                    ),
-                  )
-                ],
-              ),
-            ],
+                      child: BackdropFilter(
+                        filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                        child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            color: Theme.of(context).brightness == Brightness.light
+                                ? Colors.grey.withOpacity(0.2)
+                                : Colors.black.withOpacity(0.2),
+                            child: Container(
+                              alignment: Alignment.center,
+                              child: TecText(
+                                subtitle,
+                                style: cardSubtitleCompactStyle.copyWith(color: Colors.white),
+                                textScaleFactor: contentTextScaleFactorWith(context),
+                                maxLines: 3,
+                                // autoSize: true,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            )),
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
         ));
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/tab_manager_bloc.dart';
@@ -36,6 +37,15 @@ class _DotdScreen extends StatefulWidget {
 }
 
 class __DotdScreenState extends State<_DotdScreen> {
+  var _showDevoButton = false;
+  Future<String> _devoHtmlFuture;
+
+  @override
+  void initState() {
+    _devoHtmlFuture = widget.devo.html(AppSettings.shared.env);
+    super.initState();
+  }
+
   Future<void> share() async {
     TecShare.share(await widget.devo.shareText());
   }
@@ -75,61 +85,66 @@ class __DotdScreenState extends State<_DotdScreen> {
       imageAspectRatio: imageAspectRatio,
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       childBuilder: (c, i) => FutureBuilder<String>(
-          future: widget.devo.html(AppSettings.shared.env),
+          future: _devoHtmlFuture,
           builder: (c, snapshot) {
-            if (snapshot.hasData) {
+            if (snapshot.hasData && snapshot.connectionState == ConnectionState.done) {
               return SafeArea(
+                top: false,
                 child: Column(children: [
-                  TecHtml(snapshot.data,
-                      baseUrl: '',
-                      textScaleFactor: contentTextScaleFactorWith(c),
-                      // widget.devo.volume.baseUrl,
-                      selectable: false),
-                  InkWell(
-                    splashColor: Colors.transparent,
-                    onTap: () => showDetailViewForVolume(c, widget.devo.volume, 'dotd'),
-                    child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: TecCard(
-                                cornerRadius: 10,
-                                builder: (c) => VolumeImage(
-                                  volume: widget.devo.volume,
-                                  width: imageWidth,
-                                ),
-                              ),
-                            ),
-                            const VerticalDivider(color: Colors.transparent),
-                            Expanded(
-                              child: TecText.rich(
-                                TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: '${widget.devo.volume.name}\n',
-                                      style: cardTitleCompactStyle,
-                                    ),
-                                    TextSpan(
-                                      text: 'by ${widget.devo.volume.author}',
-                                      style: cardSubtitleCompactStyle,
-                                    ),
-                                    // WidgetSpan(
-                                    //     child: RaisedButton(
-                                    //   color: Theme.of(context).cardColor,
-                                    //   child: const Text('Learn More'),
-                                    //   onPressed: () =>
-                                    //       showVolumeDetailView(context, widget.devo.volume),
-                                    // ))
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
-                        )),
+                  TecHtml(
+                    snapshot.data,
+                    isInitialHtmlElementVisible: false,
+                    baseUrl: VolumesRepository.shared.volumeWithId(widget.devo.productId)?.baseUrl,
+                    onLoadFinished: (error) => setState(() => _showDevoButton = true),
+                    textScaleFactor: contentTextScaleFactorWith(c),
+                    selectable: false,
                   ),
+                  if (_showDevoButton)
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      onTap: () => showDetailViewForVolume(c, widget.devo.volume, 'dotd'),
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: TecCard(
+                                  cornerRadius: 10,
+                                  builder: (c) => VolumeImage(
+                                    volume: widget.devo.volume,
+                                    width: imageWidth,
+                                  ),
+                                ),
+                              ),
+                              const VerticalDivider(color: Colors.transparent),
+                              Expanded(
+                                child: TecText.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: '${widget.devo.volume.name}\n',
+                                        style: cardTitleCompactStyle,
+                                      ),
+                                      TextSpan(
+                                        text: 'by ${widget.devo.volume.author}',
+                                        style: cardSubtitleCompactStyle,
+                                      ),
+                                      // WidgetSpan(
+                                      //     child: RaisedButton(
+                                      //   color: Theme.of(context).cardColor,
+                                      //   child: const Text('Learn More'),
+                                      //   onPressed: () =>
+                                      //       showVolumeDetailView(context, widget.devo.volume),
+                                      // ))
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          )),
+                    ),
                   const Divider(height: 50, color: Colors.transparent)
                 ]),
               );
