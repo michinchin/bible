@@ -7,7 +7,7 @@ import 'package:tec_views/tec_views.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/sheet/tab_manager_cubit.dart';
+import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../ui/sheet/snap_sheet.dart';
@@ -53,23 +53,18 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
   }
 
   Future<bool> _onBackPressed() async {
-    if (Scaffold.hasDrawer(context) && Scaffold.of(context).isDrawerOpen) {
-      // this will close the drawer and keep state w/o popping to the root
-      Scaffold.of(context).openEndDrawer();
-      return false;
-    }
-
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
       return false;
     }
 
-    if (tabKeys.containsKey(context.tabManager.state)) {
-      if (tabKeys[context.tabManager.state].currentWidget is NavigatorWithHeroController) {
+    final tab = context.tabManager.state.tab;
+    if (tabKeys.containsKey(tab)) {
+      if (tabKeys[tab].currentWidget is NavigatorWithHeroController) {
         final navigator =
-            tabKeys[context.tabManager.state].currentWidget as NavigatorWithHeroController;
-        if (navigator.canPop(tabKeys[context.tabManager.state].currentState)) {
-          navigator.pop(tabKeys[context.tabManager.state].currentState);
+            tabKeys[tab].currentWidget as NavigatorWithHeroController;
+        if (navigator.canPop(tabKeys[tab].currentState)) {
+          navigator.pop(tabKeys[tab].currentState);
           return false;
         }
       }
@@ -80,9 +75,9 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TabManagerCubit, TecTab>(buildWhen: (p, n) {
-      // if the tab didn't change
-      return p != n;
+    return BlocBuilder<TabManagerBloc, TabManagerState>(buildWhen: (p, n) {
+      // if the tab didn't change (i.e. just showing drawer...)
+      return p.tab != n.tab || p.hideBottomBar != n.hideBottomBar;
     }, builder: (context, tabState) {
       final largeScreen = !isSmallScreen(context);
       return WillPopScope(
@@ -91,11 +86,15 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
           backgroundColor: Theme.of(context).backgroundColor,
           extendBody: true,
           floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-          floatingActionButton: (largeScreen || tabState == TecTab.reader)
-              ? null
-              : ((tabState == TecTab.switcher) ? _CloseFAB(controller: _controller) : _TabFAB()),
-          drawer: (tabState != TecTab.reader) ? null : const UGCView(),
-          bottomNavigationBar: (!largeScreen && tabState == TecTab.reader)
+          floatingActionButton:
+              (tabState.hideBottomBar || largeScreen || tabState.tab == TecTab.reader)
+                  ? null
+                  : ((tabState.tab == TecTab.switcher)
+                      ? _CloseFAB(controller: _controller)
+                      : _TabFAB()),
+          drawer: (tabState.tab != TecTab.reader) ? null : const UGCView(),
+          bottomNavigationBar: (tabState.hideBottomBar ||
+                  (!largeScreen && tabState.tab == TecTab.reader))
               ? null
               : BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
                   return Visibility(
@@ -132,7 +131,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                     if (widget.tabs[i].tab != TecTab.reader)
                       Visibility(
                         maintainState: widget.tabs[i].tab != TecTab.switcher,
-                        visible: widget.tabs[i].tab == tabState,
+                        visible: widget.tabs[i].tab == tabState.tab,
                         child: NavigatorWithHeroController(
                           key: tabKeys[widget.tabs[i].tab],
                           onGenerateRoute: (settings) => MaterialPageRoute<dynamic>(
@@ -143,7 +142,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                           ),
                         ),
                       ),
-                  if (tabState == TecTab.switcher)
+                  if (tabState.tab == TecTab.switcher)
                     Container(
                       alignment: Alignment.bottomRight,
                       padding: const EdgeInsets.only(bottom: 40),
@@ -325,7 +324,7 @@ class _TabFAB extends StatelessWidget {
 
 class TecTabBar extends StatelessWidget {
   final List<TabBottomBarItem> tabs;
-  final TabManagerCubit tabManager;
+  final TabManagerBloc tabManager;
 
   const TecTabBar({@required this.tabs, this.tabManager});
 
@@ -357,7 +356,7 @@ class TecTabBar extends StatelessWidget {
                 SheetIconButton(
                   icon: tabItem.icon,
                   text: tabItem.label,
-                  color: (tm.state == tabItem.tab) ? Const.tecartaBlue : null,
+                  color: (tm.state.tab == tabItem.tab) ? Const.tecartaBlue : null,
                   onPressed: () {
                     tm?.changeTab(tabItem.tab);
                   },

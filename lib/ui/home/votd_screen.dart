@@ -9,7 +9,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
-import '../../blocs/sheet/tab_manager_cubit.dart';
+import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/chapter_verses.dart';
 import '../../models/const.dart';
@@ -25,9 +25,11 @@ import '../volume/volume_view_data_bloc.dart';
 import 'day_card.dart';
 
 Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
+  context.tabManager.add(TecTabEvent.hideTabBar);
   await Interstitial.init(context, adUnitId: Const.prefNativeAdId);
   await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _VotdScreen(votd)));
   await Interstitial.show(context);
+  context.tabManager.add(TecTabEvent.showTabBar);
 }
 
 const imageAspectRatio = 1080.0 / 555.0;
@@ -101,7 +103,6 @@ class __VotdScreenState extends State<_VotdScreen> {
     final t = VolumesRepository.shared.bibleWithId(_bible.id);
 
     return TecImageAppBarScaffold(
-      overlayStyle: AppSettings.shared.overlayStyle(context),
       imageUrl: widget.votd.imageUrl,
       backgroundColor:
           Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
@@ -149,7 +150,8 @@ class __VotdScreenState extends State<_VotdScreen> {
             ),
             // textScaleFactor: contentTextScaleFactorWith(context),
           ),
-          label: const TecIcon(Icon(Icons.arrow_drop_down), color: Colors.white, shadowColor: Colors.black),
+          label: const TecIcon(Icon(Icons.arrow_drop_down),
+              color: Colors.white, shadowColor: Colors.black),
           onPressed: onRefTap,
         ),
       ],

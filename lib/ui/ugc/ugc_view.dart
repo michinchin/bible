@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -45,6 +46,8 @@ class _UGCViewState extends State<UGCView> {
   List<BreadCrumb> breadCrumbs;
   int currentFolderId;
   List items;
+  bool showingSearch;
+  ScrollController listScrollController;
   final recentDate = DateTime.now().add(const Duration(days: -31));
   final recentTypes = [
     UserItemType.note,
@@ -57,27 +60,56 @@ class _UGCViewState extends State<UGCView> {
   void initState() {
     super.initState();
     items = <dynamic>[];
-    breadCrumbs = <BreadCrumb>[BreadCrumb(UGCView.folderHome, 'Top')];
-    _load(UGCView.folderHome);
+    showingSearch = false;
+    breadCrumbs = BreadCrumb.load();
+    listScrollController = ScrollController();
+
+    // maintain scroll position...
+    listScrollController.addListener(() {
+      breadCrumbs.last.scrollOffset = listScrollController.offset;
+    });
+
+    _load(breadCrumbs.last.id, scrollOffset: breadCrumbs.last.scrollOffset);
   }
 
-  Future<void> _search(String s) async {
-    if (s.isEmpty) {
-      unawaited(_load(currentFolderId));
+  @override
+  void dispose() {
+    BreadCrumb.save(breadCrumbs);
+    super.dispose();
+  }
+
+  Future<void> _search(List<String> words, List<UserItemType> searchTypes) async {
+    if (words.isEmpty) {
+      if (showingSearch) {
+        unawaited(_load(currentFolderId));
+      }
       return;
     }
 
-    final _items = <dynamic>[];
+    final _items = await AppSettings.shared.userAccount.userDb
+        .findItemsContaining(words, ofTypes: searchTypes);
 
-    // clear any current view...
-    setState(() {
-      items = _items;
-    });
+    if (_items.isNotEmpty) {
+      showingSearch = true;
+
+      setState(() {
+        items = _items;
+      });
+    } else {
+      if (showingSearch) {
+        setState(() {
+          items = <dynamic>[];
+        });
+      }
+
+      TecToast.show(context, 'No results found!');
+    }
   }
 
-  Future<void> _load(int folderId) async {
+  Future<void> _load(int folderId, {double scrollOffset = 0}) async {
     currentFolderId = folderId;
     final _items = <dynamic>[];
+    showingSearch = false;
 
     // clear any current view...
     setState(() {
@@ -191,6 +223,8 @@ class _UGCViewState extends State<UGCView> {
     setState(() {
       items = _items;
     });
+
+    listScrollController.jumpTo(scrollOffset);
   }
 
   void _itemTap(dynamic item) {
@@ -198,13 +232,18 @@ class _UGCViewState extends State<UGCView> {
 
     if (item is UserItem && item.itemType == UserItemType.folder) {
       folder = item;
+
+      if (breadCrumbs.length == 1 && breadCrumbs.last.id != folder.parentId) {
+        // need to add parent breadcrumbs...
+        var parent = _folders[folder.parentId];
+        while (parent != null && parent.id != 1) {
+          breadCrumbs.insert(1, BreadCrumb(parent.id, parent.title));
+          parent = _folders[parent.parentId];
+        }
+      }
     } else if (item is RecentCount) {
       folder = UserItem(id: UGCView.folderRecent, title: 'Recent', type: UserItemType.folder.index);
     } else if (item is CountItem) {
-      if (item.itemType == UserItemType.bookmark) {
-        folder = UserItem(
-            id: UGCView.folderBookmarks, title: 'Bookmarks', type: UserItemType.folder.index);
-      }
       if (item.itemType == UserItemType.bookmark) {
         folder = UserItem(
             id: UGCView.folderBookmarks, title: 'Bookmarks', type: UserItemType.folder.index);
@@ -220,9 +259,50 @@ class _UGCViewState extends State<UGCView> {
     }
 
     if (folder != null) {
+      breadCrumbs.last.scrollOffset = listScrollController.offset;
       breadCrumbs.add(BreadCrumb(folder.id, folder.title));
       _load(folder.id);
     }
+  }
+
+  String _getDescription(UserItem ui) {
+    String description;
+
+    switch (ui.itemType) {
+      case UserItemType.marginNote:
+        description = ui.info;
+        break;
+
+      default:
+        // bookmark, note
+        description = ui.description;
+        break;
+    }
+
+    return description;
+  }
+
+  void _createNoteFolder() {
+    tecShowSimpleAlertDialog<void>(
+      context: context,
+      content: 'New folder or note?',
+      actions: [
+        FlatButton(
+            child: const Text('Folder'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              TecToast.show(context, 'create folder not implemented yet.');
+            }),
+        FlatButton(
+            child: const Text('Note'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              TecToast.show(context, 'create note not implemented yet.');
+            }),
+      ],
+    );
+    // showTecDialog<Reference>(
+    //     maxWidth: 320, maxHeight: 300, context: context, builder: (c) => CreateNoteFolder());
   }
 
   @override
@@ -236,6 +316,15 @@ class _UGCViewState extends State<UGCView> {
       width: min(420, MediaQuery.of(context).size.width),
       child: Scaffold(
           resizeToAvoidBottomInset: false,
+          floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+          floatingActionButton: Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: FloatingActionButton(
+              child: const Icon(Icons.add),
+              tooltip: 'Create note or folder',
+              onPressed: _createNoteFolder,
+            ),
+          ),
           appBar: MinHeightAppBar(
             appBar: AppBar(
               elevation: 0,
@@ -256,20 +345,26 @@ class _UGCViewState extends State<UGCView> {
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Divider(
+                      height: 1,
+                      color: Theme.of(context).textColor.withOpacity(0.6),
+                    ),
                     if (breadCrumbs.length == 1) QuickFind(onSearch: _search),
                     if (breadCrumbs.length > 1)
                       BreadCrumbRow(
                           breadCrumbs: breadCrumbs,
                           onTap: (crumbNumber) {
                             breadCrumbs.length = crumbNumber + 1;
-                            _load(breadCrumbs[crumbNumber].id);
+                            _load(breadCrumbs[crumbNumber].id,
+                                scrollOffset: breadCrumbs[crumbNumber].scrollOffset);
                           }),
                     Expanded(
                       child: ListView.builder(
+                          controller: listScrollController,
                           itemCount: items.length + 1,
                           itemBuilder: (c, i) {
                             IconData iconData;
-                            String title, subtitle;
+                            String title, description;
                             Color iconColor;
 
                             if (i == items.length) {
@@ -310,12 +405,12 @@ class _UGCViewState extends State<UGCView> {
                                 case UserItemType.note:
                                   iconData = Icons.edit_outlined;
                                   title = ui.title;
-                                  subtitle = ui.description;
+                                  description = _getDescription(ui);
                                   break;
                                 case UserItemType.bookmark:
                                   iconData = FeatherIcons.bookmark;
                                   title = ui.title;
-                                  subtitle = ui.description;
+                                  description = _getDescription(ui);
                                   break;
                                 case UserItemType.marginNote:
                                   iconData = TecIcons.marginNoteOutline;
@@ -325,7 +420,7 @@ class _UGCViewState extends State<UGCView> {
                                           chapter: ui.chapter,
                                           verse: ui.verse)
                                       .label();
-                                  subtitle = ui.info;
+                                  description = _getDescription(ui);
                                   break;
                                 case UserItemType.highlight:
                                   // is this highlight continued...
@@ -405,31 +500,7 @@ class _UGCViewState extends State<UGCView> {
                                       style: const TextStyle(
                                           fontSize: 18.0,
                                           fontStyle: FontStyle.italic,
-                                          fontWeight: FontWeight.w500))
-                                  // isSmallScreen(context)
-                                  //     ? Text(tec.longDate(di.date),
-                                  //         style: const TextStyle(
-                                  //             fontSize: 18.0,
-                                  //             fontStyle: FontStyle.italic,
-                                  //             fontWeight: FontWeight.w500))
-                                  //     : Column(
-                                  //         crossAxisAlignment: CrossAxisAlignment.start,
-                                  //         children: [
-                                  //           Divider(
-                                  //             height: 1,
-                                  //             color: Theme.of(context).textColor,
-                                  //           ),
-                                  //           Padding(
-                                  //             padding: const EdgeInsets.only(top: 12.0),
-                                  //             child: Text(tec.longDate(di.date),
-                                  //                 style: const TextStyle(
-                                  //                     fontSize: 18.0,
-                                  //                     fontStyle: FontStyle.italic,
-                                  //                     fontWeight: FontWeight.w500)),
-                                  //           ),
-                                  //         ],
-                                  //       ),
-                                  );
+                                          fontWeight: FontWeight.w500)));
                             }
 
                             return InkWell(
@@ -448,7 +519,7 @@ class _UGCViewState extends State<UGCView> {
                                       padding: const EdgeInsets.only(right: 13.0),
                                       child: Icon(iconData, color: iconColor),
                                     ),
-                                    if (subtitle != null)
+                                    if (description != null)
                                       Expanded(
                                           child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -456,7 +527,7 @@ class _UGCViewState extends State<UGCView> {
                                           Text(title,
                                               maxLines: 1, style: const TextStyle(fontSize: 18.0)),
                                           Container(height: 3.0),
-                                          Text(subtitle,
+                                          Text(description,
                                               maxLines: 3,
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(fontSize: 15.0)),

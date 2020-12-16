@@ -21,7 +21,7 @@ import 'blocs/downloads/downloads_bloc.dart';
 import 'blocs/search/search_bloc.dart';
 import 'blocs/shared_bible_ref_bloc.dart';
 import 'blocs/sheet/pref_items_bloc.dart';
-import 'blocs/sheet/tab_manager_cubit.dart';
+import 'blocs/sheet/tab_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'models/const.dart';
 import 'models/iap/iap.dart';
@@ -108,7 +108,7 @@ class App extends StatelessWidget {
         BlocProvider(create: (context) => ContentSettingsBloc()),
         BlocProvider(create: (context) => PrefItemsBloc()),
         BlocProvider(create: (context) => SearchBloc()),
-        BlocProvider<TabManagerCubit>(create: (context) => TabManagerCubit()),
+        BlocProvider<TabManagerBloc>(create: (context) => TabManagerBloc()),
         // BlocProvider(create: (context) => AppEntryCubit())
       ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(

@@ -1,11 +1,52 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tec_util/tec_util.dart' as tec;
+
+import 'ugc_view.dart';
 
 class BreadCrumb {
   final String folderName;
   final int id;
+  double scrollOffset;
+  static const prefBreadCrumbs = 'breadcrumbs';
 
-  BreadCrumb(this.id, this.folderName);
+  BreadCrumb(this.id, this.folderName, {this.scrollOffset = 0});
+
+  Map toJson() => <String, dynamic>{
+        'f': folderName,
+        'i': id,
+        's': scrollOffset,
+      };
+
+  factory BreadCrumb.fromJson(Map<String, dynamic> json) {
+    return BreadCrumb(tec.as<int>(json['i']), tec.as<String>(json['f']),
+        scrollOffset: tec.as<double>(json['s']));
+  }
+
+  static List<BreadCrumb> load() {
+    final breadCrumbs = <BreadCrumb>[];
+
+    final json = tec.Prefs.shared.getString(prefBreadCrumbs);
+    if (json != null && json.isNotEmpty) {
+      final crumbs =
+      tec.asList<Map<String, dynamic>>(jsonDecode(json));
+      for (final crumb in crumbs) {
+        breadCrumbs.add(BreadCrumb.fromJson(crumb));
+      }
+    }
+
+    if (breadCrumbs.isEmpty) {
+      breadCrumbs.add(BreadCrumb(UGCView.folderHome, 'Top'));
+    }
+
+    return breadCrumbs;
+  }
+
+  static void save(List<BreadCrumb> breadCrumbs) {
+    tec.Prefs.shared.setString(prefBreadCrumbs, jsonEncode(breadCrumbs));
+  }
 }
 
 class BreadCrumbRow extends StatefulWidget {

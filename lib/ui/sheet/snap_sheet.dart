@@ -6,7 +6,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/sheet/tab_manager_cubit.dart';
+import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import 'selection_sheet.dart';
@@ -41,11 +41,11 @@ class _SnapSheetState extends State<SnapSheet> {
   Widget build(BuildContext context) {
     sheets ??= [
       if (isSmallScreen(context))
-        BlocBuilder<TabManagerCubit, TecTab>(
+        BlocBuilder<TabManagerBloc, TabManagerState>(
           builder: (context, tabState) {
             return AnimatedOpacity(
               duration: const Duration(milliseconds: 150),
-              opacity: (tabState == TecTab.switcher) ? 0.0 : 1.0,
+              opacity: (tabState.tab == TecTab.switcher) ? 0.0 : 1.0,
               child: Align(
                 alignment: Alignment.bottomRight,
                 child: Padding(

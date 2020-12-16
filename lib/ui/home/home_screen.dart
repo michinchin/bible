@@ -8,7 +8,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/sheet/tab_manager_cubit.dart';
+import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/notifications/notifications_model.dart';
 import '../common/common.dart';
@@ -70,24 +70,27 @@ class _HomeScreenState extends State<HomeScreen> {
         BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
         BlocProvider<SelectionCmdBloc>(create: (context) => SelectionCmdBloc()),
         BlocProvider<SheetManagerBloc>(create: (context) => SheetManagerBloc()),
-        BlocProvider<TabManagerCubit>(create: (context) => TabManagerCubit()),
+        BlocProvider<TabManagerBloc>(create: (context) => TabManagerBloc()),
       ],
-      child: BlocBuilder<TabManagerCubit, TecTab>(buildWhen: (p, n) {
+      child: BlocBuilder<TabManagerBloc, TabManagerState>(buildWhen: (p, n) {
         // android w/gesture nav - reader needs a different overlay style
-        return (context.gestureNavigation && (p == TecTab.reader || n == TecTab.reader));
+        return (context.gestureNavigation &&
+            (p.tab == TecTab.reader ||
+                n.tab == TecTab.reader ||
+                p.hideBottomBar != n.hideBottomBar));
       }, builder: (context, tabState) {
         return BlocBuilder<SheetManagerBloc, SheetManagerState>(buildWhen: (p, n) {
           // android w/gesture nav - reader needs a different overlay style for selection sheet
           return (context.gestureNavigation &&
-              tabState == TecTab.reader &&
+              tabState.tab == TecTab.reader &&
               (p.type == SheetType.selection || n.type == SheetType.selection));
         }, builder: (context, sheetState) {
           var overlayStyle = AppSettings.shared.overlayStyle(context);
 
           // set android gestureNavigation app bar color
           if (context.gestureNavigation &&
-              tabState == TecTab.reader &&
-              sheetState.type != SheetType.selection) {
+              (tabState.hideBottomBar ||
+                  (tabState.tab == TecTab.reader && sheetState.type != SheetType.selection))) {
             overlayStyle =
                 overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).backgroundColor);
           }
