@@ -1,7 +1,10 @@
 import 'dart:convert';
 
+import 'package:bible/main.dart';
+import 'package:bible/models/app_settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
 import 'ugc_view.dart';
@@ -11,6 +14,7 @@ class BreadCrumb {
   final int id;
   double scrollOffset;
   static const prefBreadCrumbs = 'breadcrumbs';
+  static const prefBreadCrumbUser = 'breadcrumb_user';
 
   BreadCrumb(this.id, this.folderName, {this.scrollOffset = 0});
 
@@ -28,8 +32,15 @@ class BreadCrumb {
   static List<BreadCrumb> load() {
     final breadCrumbs = <BreadCrumb>[];
 
-    final json = tec.Prefs.shared.getString(prefBreadCrumbs);
-    if (json != null && json.isNotEmpty) {
+    var json = tec.Prefs.shared.getString(prefBreadCrumbs, defaultValue: '');
+    if (json.startsWith('${AppSettings.shared.userAccount.user.userId.toString()}:')) {
+      json = json.substring(AppSettings.shared.userAccount.user.userId.toString().length + 1);
+    }
+    else {
+      json = '';
+    }
+
+    if (json.isNotEmpty) {
       final crumbs =
       tec.asList<Map<String, dynamic>>(jsonDecode(json));
       for (final crumb in crumbs) {
@@ -45,7 +56,8 @@ class BreadCrumb {
   }
 
   static void save(List<BreadCrumb> breadCrumbs) {
-    tec.Prefs.shared.setString(prefBreadCrumbs, jsonEncode(breadCrumbs));
+    tec.Prefs.shared.setString(prefBreadCrumbs,
+        '${AppSettings.shared.userAccount.user.userId}:${jsonEncode(breadCrumbs)}');
   }
 }
 

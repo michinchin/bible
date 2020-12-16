@@ -129,6 +129,13 @@ class _UGCViewState extends State<UGCView> {
           1, () => UserItem(id: 1, title: 'Journal', type: UserItemType.folder.index));
     }
 
+    if (!_folders.containsKey(folderId)) {
+      // we've referenced a non existent folder
+      // drop the crumbs and load the top
+      breadCrumbs.length = 1;
+      currentFolderId = breadCrumbs.last.id;
+    }
+
     switch (folderId) {
       case UGCView.folderHome:
         // get the recent count
