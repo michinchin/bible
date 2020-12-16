@@ -33,8 +33,16 @@ class _DotdScreen extends StatefulWidget {
 }
 
 class __DotdScreenState extends State<_DotdScreen> {
+  var _showDevoButton = false;
+
   Future<void> share() async {
     TecShare.share(await widget.devo.shareText());
+  }
+
+  void _showDevoInfo() {
+    // setState(() {
+      _showDevoButton = true;
+    // });
   }
 
   @override
@@ -75,59 +83,63 @@ class __DotdScreenState extends State<_DotdScreen> {
       childBuilder: (c, i) => FutureBuilder<String>(
           future: widget.devo.html(AppSettings.shared.env),
           builder: (c, snapshot) {
-            if (snapshot.hasData) {
+            if (snapshot.hasData && snapshot.connectionState == ConnectionState.done) {
               return SafeArea(
                 child: Column(children: [
-                  TecHtml(snapshot.data,
-                      baseUrl: '',
-                      textScaleFactor: contentTextScaleFactorWith(c),
-                      // widget.devo.volume.baseUrl,
-                      selectable: false),
-                  InkWell(
-                    splashColor: Colors.transparent,
-                    onTap: () => showDetailViewForVolume(c, widget.devo.volume, 'dotd'),
-                    child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: TecCard(
-                                cornerRadius: 10,
-                                builder: (c) => VolumeImage(
-                                  volume: widget.devo.volume,
-                                  width: imageWidth,
-                                ),
-                              ),
-                            ),
-                            const VerticalDivider(color: Colors.transparent),
-                            Expanded(
-                              child: TecText.rich(
-                                TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: '${widget.devo.volume.name}\n',
-                                      style: cardTitleCompactStyle,
-                                    ),
-                                    TextSpan(
-                                      text: 'by ${widget.devo.volume.author}',
-                                      style: cardSubtitleCompactStyle,
-                                    ),
-                                    // WidgetSpan(
-                                    //     child: RaisedButton(
-                                    //   color: Theme.of(context).cardColor,
-                                    //   child: const Text('Learn More'),
-                                    //   onPressed: () =>
-                                    //       showVolumeDetailView(context, widget.devo.volume),
-                                    // ))
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
-                        )),
+                  TecHtml(
+                    snapshot.data,
+                    baseUrl: '',
+                    textScaleFactor: contentTextScaleFactorWith(c),
+                    // widget.devo.volume.baseUrl,
+                    selectable: false,
+                    onLoadFinished: (_) => _showDevoInfo(),
                   ),
+                  if (_showDevoButton)
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      onTap: () => showDetailViewForVolume(c, widget.devo.volume, 'dotd'),
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: TecCard(
+                                  cornerRadius: 10,
+                                  builder: (c) => VolumeImage(
+                                    volume: widget.devo.volume,
+                                    width: imageWidth,
+                                  ),
+                                ),
+                              ),
+                              const VerticalDivider(color: Colors.transparent),
+                              Expanded(
+                                child: TecText.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: '${widget.devo.volume.name}\n',
+                                        style: cardTitleCompactStyle,
+                                      ),
+                                      TextSpan(
+                                        text: 'by ${widget.devo.volume.author}',
+                                        style: cardSubtitleCompactStyle,
+                                      ),
+                                      // WidgetSpan(
+                                      //     child: RaisedButton(
+                                      //   color: Theme.of(context).cardColor,
+                                      //   child: const Text('Learn More'),
+                                      //   onPressed: () =>
+                                      //       showVolumeDetailView(context, widget.devo.volume),
+                                      // ))
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          )),
+                    ),
                   const Divider(height: 50, color: Colors.transparent)
                 ]),
               );

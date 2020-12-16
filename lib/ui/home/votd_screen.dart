@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
@@ -177,6 +176,7 @@ class __VotdScreenState extends State<_VotdScreen> {
                           textScaleFactor: contentTextScaleFactorWith(context),
                           textAlign: TextAlign.left,
                         ),
+                        const SizedBox(height: 5),
                         TecText(
                           ref.copyWith(volume: _bible.id).label(),
                           style: cardSubtitleCompactStyle.copyWith(

@@ -91,6 +91,8 @@ class DateWithImage extends StatelessWidget {
                   '${tec.shortNameOfWeekday(date.weekday)},'
                   ' ${tec.shortNameOfMonth(date.month)}',
                   autoSize: true,
+                  minFontSize: 8,
+                  maxLines: 1,
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -99,6 +101,7 @@ class DateWithImage extends StatelessWidget {
                 child: TecText(
                   '${date.day}',
                   autoSize: true,
+                  maxLines: 1,
                   style: Theme.of(context).textTheme.headline4.copyWith(color: Colors.white),
                 ),
               ),
