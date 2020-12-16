@@ -45,20 +45,22 @@ class _VolumeDetailState extends State<VolumeDetail> {
           //title: TecText(volume.name, maxLines: 2, textAlign: TextAlign.center),
         ),
       ),
-      body: ListView(
-        children: [
-          _VolumeCard(
-            volume: widget.volume,
-            textScaleFactor: textScaleFactor,
-            padding: padding,
-            heroPrefix: widget.heroPrefix,
-          ),
-          _VolumeDescription(
-            volume: widget.volume,
-            textScaleFactor: textScaleFactor,
-            padding: padding,
-          ),
-        ],
+      body: SafeArea(
+              child: ListView(
+          children: [
+            _VolumeCard(
+              volume: widget.volume,
+              textScaleFactor: textScaleFactor,
+              padding: padding,
+              heroPrefix: widget.heroPrefix,
+            ),
+            _VolumeDescription(
+              volume: widget.volume,
+              textScaleFactor: textScaleFactor,
+              padding: padding,
+            ),
+          ],
+        ),
       ),
     );
   }

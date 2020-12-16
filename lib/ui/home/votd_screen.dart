@@ -27,7 +27,11 @@ Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
   context.tabManager.add(TecTabEvent.hideTabBar);
   await Interstitial.init(context,
       productId: currentBibleFromContext(context)?.id, adUnitId: Const.prefNativeAdId);
-  await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _VotdScreen(votd)));
+  if (isSmallScreen(context)) {
+    await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _VotdScreen(votd)));
+  } else {
+    await showScreen<void>(context: context, builder: (c) => _VotdScreen(votd));
+  }
   await Interstitial.show(context);
   context.tabManager.add(TecTabEvent.showTabBar);
 }
@@ -135,7 +139,7 @@ class __VotdScreenState extends State<_VotdScreen> {
         ),
         ButtonTheme(
           minWidth: 50,
-          padding: EdgeInsets.zero,
+          // padding: EdgeInsets.zero,
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
           child: FlatButton(
@@ -191,6 +195,7 @@ class __VotdScreenState extends State<_VotdScreen> {
                               color: Theme.of(context).textColor, fontWeight: FontWeight.w500),
                           textScaleFactor: contentTextScaleFactorWith(context),
                         ),
+                        const SizedBox(height: 50),
                       ],
                     ),
                   ),
