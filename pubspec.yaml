@@ -72,7 +72,7 @@ dependencies:
     hosted:
       name: tec_user_account
       url: http://noah.tecarta.com:8100
-    version: ^2.0.14
+    version: ^2.0.15
   tec_util:
     hosted:
       name: tec_util
@@ -102,7 +102,7 @@ dependencies:
   url_launcher: ^5.7.5
   zefyr: ^1.0.0-dev.2.0
 
-# dependency_overrides:
+#dependency_overrides:
 # tec_html:
 #   path: ../shared/tec_html
 # tec_selectable:
