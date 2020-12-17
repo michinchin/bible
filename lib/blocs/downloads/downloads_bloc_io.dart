@@ -6,7 +6,7 @@ import 'dart:ui';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:tec_platform_util/tec_platform_util.dart' as tec;
+// import 'package:tec_platform_util/tec_platform_util.dart' as tec;
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 

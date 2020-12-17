@@ -99,7 +99,7 @@ PODS:
   - sqflite (0.0.2):
     - Flutter
     - FMDB (>= 2.7.5)
-  - tec_native_ad (0.0.1):
+  - tec_native_ad (0.0.4):
     - Flutter
     - Google-Mobile-Ads-SDK
   - tec_notifications (0.0.1):
@@ -233,7 +233,7 @@ SPEC CHECKSUMS:
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
-  tec_native_ad: ccac8689f45bbac1e13031a36f2e48c15051a864
+  tec_native_ad: 4c8a39318b673dc0d105a3cc899719a5a09d8dd8
   tec_notifications: 5e2664df69613bc5e490af09fe41810600c189ad
   tec_platform_util: 2fc2b292ec7eddcc80717ae9d28257498b686f59
   tec_web_view: 1fa4ae0861ce5f49367bfdd85385345d2e4e7688

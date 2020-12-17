@@ -541,14 +541,15 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                     onTap: () => _viewModel.onTapHandler(),
                     child: TecHtml(
                       widget.html,
-                      backgroundColor: Theme.of(context).backgroundColor,
+                      baseUrl: widget.baseUrl,
                       key: _tecHtmlKey,
                       debugId: debugId,
+                      backgroundColor: Theme.of(context).backgroundColor,
                       avoidUsingWidgetSpans: false,
+                      allowTextAlignJustify: false,
                       scrollController: _scrollController,
-                      baseUrl: widget.baseUrl,
+                      // The HTML is scaled via CSS.
                       textScaleFactor: 1.0,
-                      // HTML is already scaled.
                       textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
                           ? TextStyle(color: textColor)
                           : widget.fontName.startsWith('embedded_')
