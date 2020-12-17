@@ -41,6 +41,7 @@ class UGCView extends StatefulWidget {
 }
 
 Map<int, UserItem> _folders;
+int _folderUserId;
 
 class _UGCViewState extends State<UGCView> {
   List<BreadCrumb> breadCrumbs;
@@ -116,27 +117,30 @@ class _UGCViewState extends State<UGCView> {
       items = _items;
     });
 
-    _folders ??= <int, UserItem>{};
+    if (_folders == null || _folderUserId != AppSettings.shared.userAccount.user.userId) {
+      _folderUserId = AppSettings.shared.userAccount.user.userId;
+      _folders = <int, UserItem>{};
 
-    // this view can be loaded multiple times... only load folders when necessary
-    if (_folders.isEmpty) {
-      for (final ui
-          in await AppSettings.shared.userAccount.userDb.getItemsOfTypes([UserItemType.folder])) {
-        _folders.putIfAbsent(ui.id, () => ui);
+      // this view can be loaded multiple times... only load folders when necessary
+      if (_folders.isEmpty) {
+        for (final ui
+            in await AppSettings.shared.userAccount.userDb.getItemsOfTypes([UserItemType.folder])) {
+          _folders.putIfAbsent(ui.id, () => ui);
+        }
+
+        _folders.putIfAbsent(
+            1, () => UserItem(id: 1, title: 'Journal', type: UserItemType.folder.index));
       }
-
-      _folders.putIfAbsent(
-          1, () => UserItem(id: 1, title: 'Journal', type: UserItemType.folder.index));
     }
 
-    if (!_folders.containsKey(folderId)) {
+    if (currentFolderId > 0 && !_folders.containsKey(currentFolderId)) {
       // we've referenced a non existent folder
       // drop the crumbs and load the top
       breadCrumbs.length = 1;
       currentFolderId = breadCrumbs.last.id;
     }
 
-    switch (folderId) {
+    switch (currentFolderId) {
       case UGCView.folderHome:
         // get the recent count
         _items.add(RecentCount(await AppSettings.shared.userAccount.userDb
@@ -194,10 +198,10 @@ class _UGCViewState extends State<UGCView> {
         break;
 
       default:
-        if (folderId > 0) {
+        if (currentFolderId > 0) {
           // get the items in this folder
           final folderItems =
-              await AppSettings.shared.userAccount.userDb.getItemsWithParent(folderId);
+              await AppSettings.shared.userAccount.userDb.getItemsWithParent(currentFolderId);
 
           final folders = <UserItem>[];
           final bookmarks = <UserItem>[];
@@ -221,7 +225,7 @@ class _UGCViewState extends State<UGCView> {
         } else {
           // folder id is -type... get the items of that type
           _items.addAll(await AppSettings.shared.userAccount.userDb
-              .getItemsOfTypes([UserItemType.values[-folderId]]));
+              .getItemsOfTypes([UserItemType.values[-currentFolderId]]));
         }
 
         break;
