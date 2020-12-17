@@ -1054,7 +1054,7 @@ packages:
       name: tec_native_ad
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "0.0.4"
+    version: "0.0.5"
   tec_notifications:
     dependency: "direct main"
     description:
