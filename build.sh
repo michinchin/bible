@@ -25,8 +25,8 @@ sed -i '' "s/DEBUG-VERSION/$VERSION-$BUILD_NUMBER/g" lib/version.dart
 
 # web
 echo "building website..."
-# flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true
-flutter build web 
+# see README-Flutter-web.txt
+flutter build web --release 
 
 sed -i '' "s/main.dart./main.dart.${BUILD_NUMBER}./g" build/web/index.html
 sed -i '' "s/flutter_service_worker./flutter_service_worker.${BUILD_NUMBER}./g" build/web/index.html
