@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -33,6 +32,7 @@ class ActionBarItem {
 /// ActionBar
 ///
 class ActionBar extends StatelessWidget {
+  final int viewUid;
   final List<ActionBarItem> items;
   final double elevation;
   final Duration animationDuration;
@@ -40,6 +40,7 @@ class ActionBar extends StatelessWidget {
   const ActionBar({
     Key key,
     @required @required this.items,
+    @required this.viewUid,
     this.elevation,
     this.animationDuration, // = const Duration(milliseconds: 300),
   }) : super(key: key);
@@ -50,14 +51,7 @@ class ActionBar extends StatelessWidget {
           key: ValueKey(items),
           alignment: Alignment.center,
           // color: Colors.red.withOpacity(0.25),
-          child: Material(
-            elevation: elevation ?? Theme.of(context).appBarTheme.elevation ?? 4.0,
-            borderRadius: const BorderRadius.all(Radius.circular(90)),
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Theme.of(context).appBarTheme.color
-                : Theme.of(context).backgroundColor,
-            child: LayoutBuilder(builder: _layoutBuilder),
-          ),
+          child: LayoutBuilder(builder: _layoutBuilder),
         );
 
     return animationDuration == null
@@ -102,18 +96,28 @@ class ActionBar extends StatelessWidget {
 
     var i = 0;
 
-    return Container(
-      constraints: BoxConstraints.tightFor(height: constraints.maxHeight),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(width: sidePadding),
-          ...actualItems.expand((item) =>
-              item.toWidgets(context, textStyle, scale, i++, actualItems.length, min: min)),
-          SizedBox(width: sidePadding),
-        ],
-      ),
-    );
+    final child = Material(
+        elevation: elevation ?? Theme.of(context).appBarTheme.elevation ?? 4.0,
+        borderRadius: const BorderRadius.all(Radius.circular(90)),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).appBarTheme.color
+            : Theme.of(context).backgroundColor,
+        child: Container(
+          constraints: BoxConstraints.tightFor(height: constraints.maxHeight),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: sidePadding),
+              ...actualItems.expand((item) =>
+                  item.toWidgets(context, textStyle, scale, i++, actualItems.length, min: min)),
+              SizedBox(width: sidePadding),
+            ],
+          ),
+        ));
+    return Draggable<int>(
+        data: viewUid,
+        feedback: Opacity(opacity: 0.8, child: child),
+        child: child);
   }
 }
 

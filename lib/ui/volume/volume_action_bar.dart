@@ -35,6 +35,7 @@ class VolumeViewActionBar extends StatelessWidget {
         if (viewData is VolumeViewData) {
           final volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
           return ActionBar(
+            viewUid: state.uid,
             elevation: defaultActionBarElevation,
             items: [
               ActionBarItem(

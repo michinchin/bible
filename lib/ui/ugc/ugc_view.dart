@@ -324,7 +324,7 @@ class _UGCViewState extends State<UGCView> {
     List<UserItem> hls;
 
     return SizedBox(
-      width: min(420, MediaQuery.of(context).size.width),
+      width: min(428, MediaQuery.of(context).size.width),
       child: Scaffold(
           resizeToAvoidBottomInset: false,
           floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,

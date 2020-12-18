@@ -50,13 +50,12 @@ List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size s
         );
       },
     ),
-    if (isTopRightView)
-      const SizedBox(width: 40),
-      // IconButton(
-      //   icon: const Icon(SFSymbols.person_crop_circle),
-      //   tooltip: 'Main Menu',
-      //   onPressed: () => showMainMenu(context),
-      // ),
+    if (isTopRightView) const SizedBox(width: 40),
+    // IconButton(
+    //   icon: const Icon(SFSymbols.person_crop_circle),
+    //   tooltip: 'Main Menu',
+    //   onPressed: () => showMainMenu(context),
+    // ),
   ];
 }
 
