@@ -29,8 +29,10 @@ import 'chapter_view_model.dart';
 class PageableChapterView extends StatefulWidget {
   final ViewState viewState;
   final Size size;
+  final EdgeInsets htmlPadding;
 
-  const PageableChapterView({Key key, this.viewState, this.size}) : super(key: key);
+  const PageableChapterView({Key key, this.viewState, this.size, this.htmlPadding})
+      : super(key: key);
 
   @override
   _PageableChapterViewState createState() => _PageableChapterViewState();
@@ -155,7 +157,12 @@ class _PageableChapterViewState extends State<PageableChapterView> {
           // tec.dmPrint('PageableChapterView.pageBuilder: creating ChapterView for '
           //     '${_bible.abbreviation} ${ref.toString()}');
           return _BibleChapterView(
-              viewUid: widget.viewState.uid, size: size, volume: volume, ref: ref);
+            viewUid: widget.viewState.uid,
+            size: size,
+            volume: volume,
+            ref: ref,
+            padding: widget.htmlPadding,
+          );
         } else {
           throw UnsupportedError('PageableChapterView must use VolumeViewData');
         }
@@ -192,6 +199,7 @@ class _BibleChapterView extends StatefulWidget {
   final Size size;
   final Volume volume;
   final BookChapterVerse ref;
+  final EdgeInsets padding;
 
   const _BibleChapterView({
     Key key,
@@ -199,6 +207,7 @@ class _BibleChapterView extends StatefulWidget {
     @required this.size,
     @required this.volume,
     @required this.ref,
+    this.padding,
   }) : super(key: key);
 
   @override
@@ -242,6 +251,7 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
               ref: widget.ref,
               htmlFragment: htmlFragment,
               size: widget.size,
+              padding: widget.padding,
             );
           });
         } else {
@@ -268,6 +278,7 @@ class _ChapterView extends StatefulWidget {
   final String htmlFragment;
   final Size size;
   final List<String> versesToShow;
+  final EdgeInsets padding;
 
   const _ChapterView({
     Key key,
@@ -277,6 +288,7 @@ class _ChapterView extends StatefulWidget {
     @required this.htmlFragment,
     @required this.size,
     this.versesToShow,
+    this.padding,
   })  : assert(volume != null && htmlFragment != null),
         super(key: key);
 
@@ -391,6 +403,7 @@ class _ChapterViewState extends State<_ChapterView> {
                     fontName: context.tbloc<ContentSettingsBloc>().state.fontName,
                     highlights: highlights,
                     marginNotes: marginNotes,
+                    padding: widget.padding,
                   );
                 } else {
                   // tec.dmPrint('VIEW ${widget.viewUid} waiting for highlights and margin notes');
@@ -416,6 +429,7 @@ class _ChapterHtml extends StatefulWidget {
   final String fontName;
   final ChapterHighlights highlights;
   final ChapterMarginNotes marginNotes;
+  final EdgeInsets padding;
 
   const _ChapterHtml({
     Key key,
@@ -429,6 +443,7 @@ class _ChapterHtml extends StatefulWidget {
     @required this.fontName,
     @required this.highlights,
     @required this.marginNotes,
+    this.padding,
   }) : super(key: key);
 
   @override
@@ -494,6 +509,13 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
     // A new [ChapterBuildHelper] needs to be created for each build...
     final helper = ChapterBuildHelper(widget.volumeId, widget.versesToShow);
 
+    final marginWidth = (widget.size.width * _marginPercent).roundToDouble();
+    var padding = (widget.padding ?? EdgeInsets.zero);
+    padding = padding.copyWith(
+      left: padding.left + marginWidth,
+      right: padding.right + marginWidth,
+    );
+
     return MultiBlocListener(
       listeners: [
         BlocListener<SelectionCmdBloc, SelectionCmd>(
@@ -557,9 +579,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                                   color: textColor, fontFamily: widget.fontName.substring(9))
                               : GoogleFonts.getFont(widget.fontName, color: textColor)),
 
-                      padding: EdgeInsets.symmetric(
-                        horizontal: (widget.size.width * _marginPercent).roundToDouble(),
-                      ),
+                      padding: padding,
 
                       // Tagging HTML elements:
                       tagHtmlElement: helper.tagHtmlElement,

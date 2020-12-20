@@ -11,9 +11,9 @@ import '../../common/common.dart';
 import 'study_res_bloc.dart';
 
 class StudyResView extends StatelessWidget {
-  const StudyResView({
-    Key key,
-  }) : super(key: key);
+  final EdgeInsets padding;
+
+  const StudyResView({Key key, this.padding}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +29,7 @@ class StudyResView extends StatelessWidget {
                       baseUrl: VolumesRepository.shared.volumeWithId(res.volumeId)?.baseUrl,
                       backgroundColor: Theme.of(context).backgroundColor,
                       textScaleFactor: contentTextScaleFactorWith(context),
+                      padding: padding,
                     );
                   },
                 ),
