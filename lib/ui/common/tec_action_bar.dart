@@ -114,10 +114,8 @@ class ActionBar extends StatelessWidget {
             ],
           ),
         ));
-    return Draggable<int>(
-        data: viewUid,
-        feedback: Opacity(opacity: 0.8, child: child),
-        child: child);
+    return LongPressDraggable<int>(
+        data: viewUid, feedback: Opacity(opacity: 0.8, child: child), child: child);
   }
 }
 

@@ -102,7 +102,8 @@ class DragTargetView extends StatelessWidget {
               final isMaximized = context.viewManager?.state?.maximizedViewUid != 0;
               final oneView = !(context.viewManager.countOfVisibleViews == 1 && !isMaximized);
               return Stack(alignment: Alignment.center, children: [
-                Container(
+                AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
                     foregroundDecoration: (state.inRect && !state.sameView)
                         ? BoxDecoration(
                             borderRadius: BorderRadius.circular(50),
@@ -120,7 +121,9 @@ class DragTargetView extends StatelessWidget {
                         },
                         icon: Icons.close,
                       ),
-                      DragViewIcon(onAccept: (_) {}, icon: Icons.visibility_off_outlined),
+                      DragViewIcon(
+                          onAccept: (_) => context.tbloc<DragOverlayCubit>().clear(),
+                          icon: Icons.visibility_off_outlined),
                       if (!isMaximized) ...[
                         DragViewIcon(
                           onAccept: (_) =>
