@@ -6,6 +6,7 @@ import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../../blocs/shared_bible_ref_bloc.dart';
+import '../../../translations.dart';
 import '../../common/common.dart';
 import '../../common/tec_auto_hide_app_bar.dart';
 import '../chapter/chapter_view.dart';
@@ -23,7 +24,7 @@ class StudyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<SharedBibleRefBloc, BookChapterVerse>(
-      listener: _sharedBibleRefChanged,
+      listener: handleSharedBibleRefChange,
       child: BlocProvider(
         create: (_) => StudyViewBloc()
           ..updateWithData(context.read<VolumeViewDataBloc>().state.asVolumeViewData),
@@ -37,49 +38,47 @@ class StudyView extends StatelessWidget {
                 return const Center(child: LoadingIndicator());
               }
 
-              const aboutTitle = 'About';
-              const introTitle = 'Intro';
-              const resourcesTitle = 'Resources';
-              const notesTitle = 'Notes';
-              const titles = [aboutTitle, introTitle, resourcesTitle, notesTitle];
+              final _aboutTitle = 'About'.i18n;
+              final _introTitle = 'Intro'.i18n;
+              final _resourcesTitle = 'Resources'.i18n;
+              final _notesTitle = 'Notes'.i18n;
+              final titles = [_aboutTitle, _introTitle, _resourcesTitle, _notesTitle];
 
               final tabTitles = state.sections.map((e) => titles[e.index]).toList();
               final textStyle = Theme.of(context).textTheme.headline2;
 
               Widget childForTab(String title) {
-                switch (title) {
-                  case aboutTitle:
-                  case introTitle:
-                    return BlocProvider(
-                      create: (_) {
-                        final viewData = context.read<VolumeViewDataBloc>().state.asVolumeViewData;
-                        return StudyResBloc(
-                            volumeId: viewData.volumeId,
-                            book: title == introTitle ? viewData.bcv.book : 0,
-                            chapter: 0,
-                            type: ResourceType.introduction);
+                if (title == _notesTitle) {
+                  return PageableChapterView(
+                      viewState: viewState,
+                      size: size,
+                      htmlPadding: const EdgeInsets.only(top: 50));
+                } else if (title == _aboutTitle || title == _introTitle) {
+                  return BlocProvider(
+                    create: (_) {
+                      final viewData = context.read<VolumeViewDataBloc>().state.asVolumeViewData;
+                      return StudyResBloc(
+                          volumeId: viewData.volumeId,
+                          book: title == _introTitle ? viewData.bcv.book : 0,
+                          chapter: 0,
+                          type: ResourceType.introduction);
+                    },
+                    child: BlocListener<VolumeViewDataBloc, ViewData>(
+                      listener: (context, viewData) {
+                        if (viewData is VolumeViewData) {
+                          context.read<StudyResBloc>().update(
+                              volumeId: viewData.volumeId,
+                              book: title == _introTitle ? viewData.bcv.book : 0);
+                        }
                       },
-                      child: BlocListener<VolumeViewDataBloc, ViewData>(
-                        listener: (context, viewData) {
-                          if (viewData is VolumeViewData) {
-                            // tec.dmPrint('childForTab VolumeViewDataBloc listener volume: '
-                            //     '${viewData.volumeId} book: ${viewData.bcv.book}');
-                            context.read<StudyResBloc>().update(
-                                volumeId: viewData.volumeId,
-                                book: title == introTitle ? viewData.bcv.book : 0);
-                          }
-                        },
-                        child: const StudyResView(padding: EdgeInsets.fromLTRB(0, 70, 0, 50)),
+                      child: StudyResView(
+                        viewSize: size,
+                        padding: const EdgeInsets.fromLTRB(0, 70, 0, 50),
                       ),
-                    );
-                  case notesTitle:
-                    return PageableChapterView(
-                        viewState: viewState,
-                        size: size,
-                        htmlPadding: const EdgeInsets.only(top: 50));
-                  default:
-                    return Center(child: Text(title, style: textStyle));
-                }
+                    ),
+                  );
+                } else if (title == _resourcesTitle) {}
+                return Center(child: Text(title, style: textStyle));
               }
 
               final tabs = tabTitles.map((e) => Tab(text: e)).toList();
@@ -103,21 +102,5 @@ class StudyView extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  ///
-  /// This is called when the shared bible reference changes.
-  ///
-  Future<void> _sharedBibleRefChanged(BuildContext context, BookChapterVerse sharedRef) async {
-    final viewDataBloc = context.read<VolumeViewDataBloc>();
-    final viewData = viewDataBloc.state.asVolumeViewData;
-    if (!viewDataBloc.isUpdatingSharedBibleRef &&
-        viewData.useSharedRef &&
-        viewData.bcv != sharedRef) {
-      final newViewData = viewData.copyWith(bcv: sharedRef);
-      // tec.dmPrint('StudyView shared ref changed to $sharedRef, '
-      //     'calling viewDataBloc.update with $newViewData');
-      await viewDataBloc.update(context, newViewData, updateSharedRef: false);
-    }
   }
 }

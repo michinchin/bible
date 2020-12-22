@@ -11,9 +11,10 @@ import '../../common/common.dart';
 import 'study_res_bloc.dart';
 
 class StudyResView extends StatelessWidget {
+  final Size viewSize;
   final EdgeInsets padding;
 
-  const StudyResView({Key key, this.padding}) : super(key: key);
+  const StudyResView({Key key, this.viewSize, this.padding}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +25,19 @@ class StudyResView extends StatelessWidget {
             : SingleChildScrollView(
                 child: BlocBuilder<ContentSettingsBloc, ContentSettings>(
                   builder: (context, settings) {
+                    final marginWidth = (viewSize.width * _marginPercent).roundToDouble();
+                    var _padding = (padding ?? EdgeInsets.zero);
+                    _padding = padding.copyWith(
+                      left: padding.left + marginWidth,
+                      right: padding.right + marginWidth,
+                    );
+
                     return TecHtml(
                       res.html,
                       baseUrl: VolumesRepository.shared.volumeWithId(res.volumeId)?.baseUrl,
                       backgroundColor: Theme.of(context).backgroundColor,
                       textScaleFactor: contentTextScaleFactorWith(context),
-                      padding: padding,
+                      padding: _padding,
                     );
                   },
                 ),
@@ -38,3 +46,5 @@ class StudyResView extends StatelessWidget {
     );
   }
 }
+
+const _marginPercent = 0.05; // 0.05;

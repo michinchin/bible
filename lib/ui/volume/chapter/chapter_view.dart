@@ -66,7 +66,11 @@ class _PageableChapterViewState extends State<PageableChapterView> {
                 a.asVolumeViewData.bcv != b.asVolumeViewData.bcv,
             listener: (context, viewData) => _onNewViewData(viewData.asVolumeViewData),
           ),
-          BlocListener<SharedBibleRefBloc, BookChapterVerse>(listener: _sharedBibleRefChanged),
+          BlocListener<SharedBibleRefBloc, BookChapterVerse>(listener: (context, sharedRef) {
+            if (!_animatingToPage && mounted && _pageController != null && _bible != null) {
+              handleSharedBibleRefChange(context, sharedRef);
+            }
+          }),
         ],
         child: PageableView(
           state: widget.viewState,
@@ -114,24 +118,6 @@ class _PageableChapterViewState extends State<PageableChapterView> {
       // tec.dmPrint('PageableChapterView._onNewViewData: Page changed '
       //     'from ${_pageController.page.round()} to $page');
       _pageController?.jumpToPage(page);
-    }
-  }
-
-  ///
-  /// This is called when the shared bible reference changes.
-  ///
-  Future<void> _sharedBibleRefChanged(BuildContext context, BookChapterVerse sharedRef) async {
-    if (!_animatingToPage && mounted && _pageController != null && _bible != null) {
-      final viewDataBloc = context.tbloc<VolumeViewDataBloc>();
-      final viewData = viewDataBloc.state.asVolumeViewData;
-      if (!viewDataBloc.isUpdatingSharedBibleRef &&
-          viewData.useSharedRef &&
-          viewData.bcv != sharedRef) {
-        final newViewData = viewData.copyWith(bcv: sharedRef);
-        // tec.dmPrint('PageableChapterView shared ref changed to $sharedRef, '
-        //     'calling viewDataBloc.update with $newViewData');
-        await viewDataBloc.update(context, newViewData, updateSharedRef: false);
-      }
     }
   }
 
