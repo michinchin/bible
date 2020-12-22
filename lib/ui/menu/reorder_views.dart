@@ -91,9 +91,9 @@ class DragTargetView extends StatelessWidget {
           // tec.dmPrint('$b ${state.uid}');
           context.tbloc<DragOverlayCubit>().clear();
           if (b != viewUid) {
-            context.viewManager?.add(ViewManagerEvent.move(
+            context.viewManager?.move(
                 fromPosition: context.viewManager.indexOfView(b),
-                toPosition: context.viewManager.indexOfView(viewUid)));
+                toPosition: context.viewManager.indexOfView(viewUid));
           }
         },
         onMove: (details) => context.tbloc<DragOverlayCubit>().onMove(context, details),
@@ -116,7 +116,7 @@ class DragTargetView extends StatelessWidget {
                       DragViewIcon(
                         onAccept: (_) {
                           context.tbloc<DragOverlayCubit>().clear();
-                          context.viewManager.add(ViewManagerEvent.remove(viewUid));
+                          context.viewManager.remove(viewUid);
                         },
                         icon: Icons.close,
                       ),
@@ -124,13 +124,13 @@ class DragTargetView extends StatelessWidget {
                       if (!isMaximized) ...[
                         DragViewIcon(
                           onAccept: (_) =>
-                              context.viewManager.add(ViewManagerEvent.maximize(viewUid)),
+                              context.viewManager.maximize(viewUid),
                           icon: Icons.fullscreen,
                         ),
                       ] else
                         DragViewIcon(
                           onAccept: (_) =>
-                              context.viewManager.add(const ViewManagerEvent.restore()),
+                              context.viewManager.restore(),
                           icon: Icons.grid_view,
                         )
                     ]

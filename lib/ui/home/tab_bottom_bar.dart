@@ -177,7 +177,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
     }
 
     if (vmBloc.state.maximizedViewUid > 0) {
-      vmBloc.add(ViewManagerEvent.maximize(view.uid));
+      vmBloc.maximize(view.uid);
     } else {
       // find the last visible window and replace that one...
       ViewState lastVisible;
@@ -192,10 +192,9 @@ class __ExpandedViewState extends State<_ExpandedView> {
       final visiblePosition = vmBloc.indexOfView(lastVisible.uid);
       final hiddenPosition = vmBloc.indexOfView(view.uid);
 
-      vmBloc.add(ViewManagerEvent.move(fromPosition: hiddenPosition, toPosition: visiblePosition));
+      vmBloc.move(fromPosition: hiddenPosition, toPosition: visiblePosition);
       // ignore: cascade_invocations
-      vmBloc.add(
-          ViewManagerEvent.move(fromPosition: visiblePosition + 1, toPosition: hiddenPosition));
+      vmBloc.move(fromPosition: visiblePosition + 1, toPosition: hiddenPosition);
     }
   }
 

@@ -86,7 +86,7 @@ List<TableRow> buildMenuItemsForViewWithState(
               : FeatherIcons.minimize2,
           vmBloc.numViewsLimited ? 'Split screen' : 'Restore', () {
         Navigator.of(menuContext).maybePop();
-        vmBloc?.add(const ViewManagerEvent.restore());
+        vmBloc?.restore();
       }));
     } else {
       items.add(tecModalPopupMenuItem(
@@ -94,7 +94,7 @@ List<TableRow> buildMenuItemsForViewWithState(
           vmBloc.numViewsLimited ? Icons.article_outlined : FeatherIcons.maximize2,
           vmBloc.numViewsLimited ? 'Full screen' : 'Maximize', () {
         Navigator.of(menuContext).maybePop();
-        vmBloc?.add(ViewManagerEvent.maximize(state.uid));
+        vmBloc?.maximize(state.uid);
       }));
     }
 
@@ -132,10 +132,10 @@ List<TableRow> buildMenuItemsForViewWithState(
         }
       }
 
-      vmBloc?.add(ViewManagerEvent.remove(state.uid));
+      vmBloc?.remove(state.uid);
 
       if (nextMaxUid > 0) {
-        vmBloc?.add(ViewManagerEvent.maximize(nextMaxUid));
+        vmBloc?.maximize(nextMaxUid);
       }
     }));
   }
@@ -157,13 +157,13 @@ List<TableRow> buildMenuItemsForViewWithState(
 
 void _onSwitchViews(ViewManagerBloc vmBloc, int viewUid, ViewState view) {
   if (vmBloc.state.maximizedViewUid == viewUid) {
-    vmBloc?.add(ViewManagerEvent.maximize(view.uid));
+    vmBloc?.maximize(view.uid);
   } else {
     final thisViewPos = vmBloc.indexOfView(viewUid);
     final hiddenViewPos = vmBloc.indexOfView(view.uid);
-    vmBloc?.add(ViewManagerEvent.move(
-        fromPosition: vmBloc.indexOfView(view.uid), toPosition: vmBloc.indexOfView(viewUid)));
-    vmBloc?.add(ViewManagerEvent.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos));
+    vmBloc?.move(
+        fromPosition: vmBloc.indexOfView(view.uid), toPosition: vmBloc.indexOfView(viewUid));
+    vmBloc?.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos);
   }
 }
 

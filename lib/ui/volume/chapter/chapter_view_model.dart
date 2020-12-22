@@ -487,10 +487,10 @@ class ChapterViewModel {
         final vmBloc = context.viewManager; // ignore: close_sinks
         final position = vmBloc?.indexOfView(viewUid) ?? -1;
         final mn = marginNotes().marginNoteForVerse(tag.verse);
-        vmBloc?.add(ViewManagerEvent.add(
+        vmBloc?.add(
             type: Const.viewTypeMarginNote,
             data: tec.toJsonString(mn.stateJson()),
-            position: position == -1 ? null : position + 1));
+            position: position == -1 ? null : position + 1);
       }
     }
 

@@ -247,7 +247,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
     // just check the userId.  If it's different - close this view w/o saving...
     if (_userId != AppSettings.shared.userAccount.user.userId) {
       // need to close the view...
-      viewManagerBloc?.add(ViewManagerEvent.remove(widget.state.uid));
+      viewManagerBloc?.remove(widget.state.uid);
     }
   }
 
@@ -299,7 +299,7 @@ class __MarginNoteScreenState extends State<_MarginNoteView> {
               await AppSettings.shared.userAccount.userDb.deleteItem(_item);
 
               // close the note view
-              viewManagerBloc?.add(ViewManagerEvent.remove(widget.state.uid));
+              viewManagerBloc?.remove(widget.state.uid);
             },
           ),
           TecDialogButton(
