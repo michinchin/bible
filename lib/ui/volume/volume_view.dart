@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
-import 'package:tec_widgets/tec_widgets.dart';
 
 import '../library/library.dart';
 import '../menu/reorder_views.dart';
@@ -22,7 +21,7 @@ class ViewableVolume extends Viewable {
       providers: [
         BlocProvider<VolumeViewDataBloc>.value(
             value: context.viewManager.dataBlocWithView(state.uid) as VolumeViewDataBloc),
-        BlocProvider<DragOverlayCubit>(create: (_) => DragOverlayCubit())
+        BlocProvider<DragOverlayCubit>(create: (_) => DragOverlayCubit(state.uid))
       ],
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -39,105 +38,7 @@ class ViewableVolume extends Viewable {
                 : StudyView(viewState: state, size: size);
             context.tbloc<DragOverlayCubit>().clear();
 
-            return DragTarget<int>(
-                onWillAccept: (b) {
-                  return true;
-                },
-                onLeave: (b) {
-                  // tec.dmPrint(b);
-                  if (b != state.uid) {
-                    context.tbloc<DragOverlayCubit>().clear();
-                  }
-                },
-                onAccept: (b) {
-                  // tec.dmPrint('$b ${state.uid}');
-                  context.tbloc<DragOverlayCubit>().clear();
-                  if (b != state.uid) {
-                    context.viewManager?.add(ViewManagerEvent.move(
-                        fromPosition: context.viewManager.indexOfView(b),
-                        toPosition: context.viewManager.indexOfView(state.uid)));
-                  }
-                },
-                onMove: (details) =>
-                    context.tbloc<DragOverlayCubit>().onMove(context, details, state.uid),
-                builder: (c, cd, rd) =>
-                    BlocBuilder<DragOverlayCubit, DragOverlayDetails>(builder: (context, s) {
-                      return Container(
-                          foregroundDecoration: s.inRect && !s.sameView
-                              ? BoxDecoration(color: Colors.grey.withOpacity(0.3))
-                              : const BoxDecoration(color: Colors.transparent),
-                          child: s.sameView && s.inRect
-                              ? Stack(alignment: Alignment.center, children: [
-                                  child,
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                    children: [
-                                      DragTarget<int>(
-                                          onAccept: (d) {
-                                            context.tbloc<DragOverlayCubit>().clear();
-                                            context.viewManager
-                                                .add(ViewManagerEvent.remove(state.uid));
-                                          },
-                                          builder: (c, cd, rd) => Card(
-                                                shape: const CircleBorder(),
-                                                elevation: cd.isNotEmpty ? 0 : 10,
-                                                child: CircleAvatar(
-                                                  radius: 50,
-                                                  backgroundColor: cd.isNotEmpty
-                                                      ? Colors.grey.withOpacity(0.5)
-                                                      : Theme.of(context).cardColor,
-                                                  child: Icon(
-                                                    Icons.close,
-                                                    color: Theme.of(context).textColor,
-                                                  ),
-                                                ),
-                                              )),
-                                      DragTarget<int>(
-                                        onWillAccept: (d) => true,
-                                        onAccept: (d) {
-                                          // context.viewManager
-                                          //     .add(ViewManagerEvent.);
-                                        },
-                                        builder: (c, cd, rd) => Card(
-                                          shape: const CircleBorder(),
-                                          elevation: cd.isNotEmpty ? 0 : 10,
-                                          child: CircleAvatar(
-                                            radius: 50,
-                                            backgroundColor: cd.isNotEmpty
-                                                ? Colors.grey.withOpacity(0.5)
-                                                : Theme.of(context).cardColor,
-                                            child: Icon(
-                                              Icons.visibility_off_outlined,
-                                              color: Theme.of(context).textColor,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      DragTarget<int>(
-                                          onWillAccept: (d) => true,
-                                          onAccept: (d) {
-                                            context.viewManager
-                                                .add(ViewManagerEvent.maximize(state.uid));
-                                          },
-                                          builder: (c, cd, rd) => Card(
-                                                shape: const CircleBorder(),
-                                                elevation: cd.isNotEmpty ? 0 : 10,
-                                                child: CircleAvatar(
-                                                  radius: 50,
-                                                  backgroundColor: cd.isNotEmpty
-                                                      ? Colors.grey.withOpacity(0.5)
-                                                      : Theme.of(context).cardColor,
-                                                  child: Icon(
-                                                    Icons.fullscreen,
-                                                    color: Theme.of(context).textColor,
-                                                  ),
-                                                ),
-                                              )),
-                                    ],
-                                  )
-                                ])
-                              : child);
-                    }));
+            return DragTargetView(child: child, viewUid: state.uid);
           },
         ),
 
