@@ -98,6 +98,14 @@ List<TableRow> buildMenuItemsForViewWithState(
       }));
     }
 
+    if ((vmBloc?.countOfVisibleViews ?? 0) > 1) {
+      items.add(tecModalPopupMenuItem(menuContext,
+          vmBloc.numViewsLimited ? Icons.article_outlined : FeatherIcons.eyeOff, 'Hide', () {
+        Navigator.of(menuContext).maybePop();
+        vmBloc?.hide(state.uid);
+      }));
+    }
+
     if (state.type == Const.viewTypeVolume) {
       items.add(tecModalPopupMenuItem(
         menuContext,
@@ -142,7 +150,7 @@ List<TableRow> buildMenuItemsForViewWithState(
 
   if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1)) {
     items.addAll([
-      tecModalPopupMenuDivider(menuContext, title: 'Open existing'),
+      tecModalPopupMenuDivider(menuContext, title: 'Restore'),
       ..._generateOffScreenItems(menuContext, state.uid),
     ]);
   }
@@ -159,11 +167,7 @@ void _onSwitchViews(ViewManagerBloc vmBloc, int viewUid, ViewState view) {
   if (vmBloc.state.maximizedViewUid == viewUid) {
     vmBloc?.maximize(view.uid);
   } else {
-    final thisViewPos = vmBloc.indexOfView(viewUid);
-    final hiddenViewPos = vmBloc.indexOfView(view.uid);
-    vmBloc?.move(
-        fromPosition: vmBloc.indexOfView(view.uid), toPosition: vmBloc.indexOfView(viewUid));
-    vmBloc?.move(fromPosition: thisViewPos + 1, toPosition: hiddenViewPos);
+    vmBloc?.show(view.uid);
   }
 }
 
