@@ -67,6 +67,10 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
           navigator.pop(tabKeys[tab].currentState);
           return false;
         }
+        else if (tab != TecTab.today) {
+          context.tabManager.changeTab(TecTab.today);
+          return false;
+        }
       }
     }
 
