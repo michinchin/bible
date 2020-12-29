@@ -227,7 +227,7 @@ const TextStyle cardTitleCompactStyle = TextStyle(
 );
 
 const TextStyle cardSubtitleCompactStyle = TextStyle(
-  fontSize: 14,
+  fontSize: 13.95, // was 15 - needed to be 7% smaller to match bible text
   fontWeight: FontWeight.w400, // w500 == Normal
 );
 
