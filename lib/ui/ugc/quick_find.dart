@@ -67,10 +67,26 @@ class _QuickFindState extends State<QuickFind> {
     }
   }
 
+  void _clearSearchField() {
+    _lastSearch = null;
+    _controller.clear();
+    if (_focusNode.hasFocus) {
+      _focusNode.unfocus();
+    } else {
+      setState(() {
+        _showSuffix = false;
+      });
+    }
+  }
 
   @override
   void didUpdateWidget(QuickFind oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.search != null && widget.search == null) {
+      // back press on search screen
+      _clearSearchField();
+    }
   }
 
   void _search({bool forceSearch = false}) {
@@ -115,16 +131,7 @@ class _QuickFindState extends State<QuickFind> {
             if (_showSuffix)
               IconButton(
                 icon: Icon(Icons.cancel_outlined, color: textColor),
-                onPressed: () {
-                  _controller.clear();
-                  if (_focusNode.hasFocus) {
-                    _focusNode.unfocus();
-                  } else {
-                    setState(() {
-                      _showSuffix = false;
-                    });
-                  }
-                },
+                onPressed: _clearSearchField,
               ),
             if (_showSuffix)
               IconButton(
