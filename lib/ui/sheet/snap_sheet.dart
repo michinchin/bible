@@ -52,6 +52,7 @@ class _SnapSheetState extends State<SnapSheet> {
                   padding: EdgeInsets.only(right: 15, bottom: context.fullBottomBarPadding),
                   child: FloatingActionButton(
                     elevation: 3,
+                    heroTag: null,
                     backgroundColor: Const.tecartaBlue,
                     child: const Icon(TecIcons.tecartabiblelogo, color: Colors.white),
                     onPressed: () {

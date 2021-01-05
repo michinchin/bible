@@ -72,13 +72,11 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
     final tab = context.tabManager.state.tab;
     if (tabKeys.containsKey(tab)) {
       if (tabKeys[tab].currentWidget is NavigatorWithHeroController) {
-        final navigator =
-            tabKeys[tab].currentWidget as NavigatorWithHeroController;
+        final navigator = tabKeys[tab].currentWidget as NavigatorWithHeroController;
         if (navigator.canPop(tabKeys[tab].currentState)) {
           navigator.pop(tabKeys[tab].currentState);
           return false;
-        }
-        else if (tab != TecTab.today) {
+        } else if (tab != TecTab.today) {
           context.tabManager.changeTab(TecTab.today);
           return false;
         }
@@ -292,6 +290,7 @@ class __CloseFABState extends State<_CloseFAB> {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       backgroundColor: Const.tecartaBlue,
+      heroTag: null,
       child: AnimatedBuilder(
           animation: widget.controller,
           builder: (context, child) => Transform(
@@ -314,6 +313,7 @@ class _TabFAB extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       elevation: 2,
+      heroTag: null,
       onPressed: () => context.tabManager.changeTab(TecTab.reader),
       backgroundColor: Colors.white,
       child: const Icon(TecIcons.tecartabiblelogo, color: Const.tecartaBlue, size: 28),

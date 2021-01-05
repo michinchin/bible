@@ -136,7 +136,7 @@ class _HomeCard extends StatelessWidget {
                 Positioned.fill(
                   child: TecImage(
                     color: Colors.black12,
-                    colorBlendMode: BlendMode.colorBurn,
+                    colorBlendMode: BlendMode.darken,
                     url: imageUrl,
                   ),
                 ),

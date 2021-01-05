@@ -6,7 +6,7 @@ import 'package:tec_util/tec_util.dart';
 class Const {
   static const tecartaBlue = Color(0xff4a7dee);
 
-  static const appNameForUA = 'tecarta_bible';
+  static const appNameForUA = 'Tecarta Bible';
 
   static const viewTypeVolume = 'BibleChapter';
   static const viewTypeNotes = 'NotesView';

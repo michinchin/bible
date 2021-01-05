@@ -122,18 +122,16 @@ class DragTargetView extends StatelessWidget {
                         icon: Icons.close,
                       ),
                       DragViewIcon(
-                          onAccept: (_) => context.tbloc<DragOverlayCubit>().clear(),
+                          onAccept: (_) => context.viewManager.hide(viewUid),
                           icon: Icons.visibility_off_outlined),
                       if (!isMaximized) ...[
                         DragViewIcon(
-                          onAccept: (_) =>
-                              context.viewManager.maximize(viewUid),
+                          onAccept: (_) => context.viewManager.maximize(viewUid),
                           icon: Icons.fullscreen,
                         ),
                       ] else
                         DragViewIcon(
-                          onAccept: (_) =>
-                              context.viewManager.restore(),
+                          onAccept: (_) => context.viewManager.restore(),
                           icon: Icons.grid_view,
                         )
                     ]

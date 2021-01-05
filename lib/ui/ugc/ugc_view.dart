@@ -383,6 +383,7 @@ class _UGCViewState extends State<UGCView> {
               child: const Icon(Icons.add),
               tooltip: 'Create note or folder',
               onPressed: _createNoteFolder,
+              heroTag: null,
             ),
           ),
           appBar: MinHeightAppBar(
