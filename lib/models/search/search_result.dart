@@ -1,11 +1,9 @@
 import 'dart:core';
 
-import 'package:flutter/material.dart';
 import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../ui/nav/search_and_history_view.dart';
 import '../const.dart';
 import 'verse.dart';
 
@@ -242,108 +240,4 @@ String _getCacheKey(String keywords, String translationIds, int exact, int phras
     encoded.write(Const.base64Map[volumeId.toInt()]);
   }
   return '$words${encoded.toString()}_0_0_${phrase}_$exact';
-}
-
-List<TextSpan> searchResTextSpans(
-  String verseText,
-  String words,
-) {
-  final verse = tec.removeDiacritics(verseText);
-
-  final content = <TextSpan>[];
-  // var modPar = verse;
-  var modKeywords = words.trim();
-  var phrase = false, exact = false;
-
-  urlEncodingExceptions.forEach((k, v) => modKeywords = modKeywords.replaceAll(RegExp(k), v));
-
-  // phrase or exact search ?
-  if (modKeywords[0] == '"' || modKeywords[0] == '\'') {
-    if (modKeywords.contains(' ')) {
-      phrase = true;
-    } else {
-      exact = true;
-    }
-
-    // remove trailing quote
-    if (modKeywords.endsWith(modKeywords[0])) {
-      modKeywords = modKeywords.substring(1, modKeywords.length - 1);
-    } else {
-      modKeywords = modKeywords.substring(1);
-    }
-  } else {
-    modKeywords = modKeywords;
-  }
-
-  // l = lowercase
-  // List<String> formattedKeywords, lFormattedKeywords;
-  List<String> lFormattedKeywords;
-
-  if (exact || phrase) {
-    // formattedKeywords = [modKeywords.trim()];
-    lFormattedKeywords = [modKeywords.trim().toLowerCase()];
-  } else {
-//      formattedKeywords = modKeywords.split(' ')
-//        ..sort((s, t) => s.length.compareTo(t.length));
-    lFormattedKeywords = modKeywords.toLowerCase().split(' ');
-  }
-
-  final bold = <int, int>{};
-  final lverse = verse.toLowerCase();
-  final a = 'a'.codeUnitAt(0);
-  final z = 'z'.codeUnitAt(0);
-  lFormattedKeywords.removeWhere((s) => s.isEmpty);
-
-  // find matching words (case insensitive search)
-  for (final keyword in lFormattedKeywords) {
-    var where = -1;
-
-    while ((where = lverse.indexOf(keyword, where + 1)) >= 0) {
-      if (where == 0 || (lverse.codeUnitAt(where - 1) < a) || lverse.codeUnitAt(where - 1) > z) {
-        final length = keyword.length;
-
-        if (length <= 2 && lverse.length > (where + length)) {
-          // match only whole words
-          if (lverse.codeUnitAt(where + length) >= a && lverse.codeUnitAt(where + length) <= z) {
-            continue;
-          }
-        }
-
-        bold[where] = length;
-      }
-    }
-  }
-
-  if (bold.isEmpty) {
-    // no bold - should never happen
-    content.add(TextSpan(text: verse));
-  } else {
-    final boldKeys = bold.keys.toList()..sort((a, b) => a.compareTo(b));
-
-    var lastEnd = 0;
-
-    for (final where in boldKeys) {
-      if (where >= lastEnd) {
-        if (where > 0) {
-          // add any preceding text not bolded...
-          content.add(TextSpan(text: verse.substring(lastEnd, where)));
-        }
-
-        // add the bold text...
-        content.add(TextSpan(
-            text: verse.substring(where, where + bold[where]),
-            style: const TextStyle(
-              // fontWeight: FontWeight.w900,
-              color: searchThemeColor
-              )));
-
-        lastEnd = where + bold[where];
-      }
-    }
-
-    if (lastEnd < verse.length) {
-      content.add(TextSpan(text: verse.substring(lastEnd)));
-    }
-  }
-  return content;
 }

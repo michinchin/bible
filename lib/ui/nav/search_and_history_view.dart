@@ -23,6 +23,7 @@ import '../../models/search/tec_share.dart';
 import '../../models/search/verse.dart';
 import '../../models/user_item_helper.dart';
 import '../common/common.dart';
+import '../common/tec_search_result.dart';
 import '../home/votd_screen.dart';
 import '../sheet/compare_verse.dart';
 
@@ -182,7 +183,9 @@ class _HistoryViewState extends State<HistoryView> {
 
 class _NavHistoryTile extends StatelessWidget {
   final Reference navHistoryItem;
+
   const _NavHistoryTile(this.navHistoryItem);
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -376,6 +379,8 @@ class _SearchResultsViewState extends State<SearchResultsView> {
             );
           }
           final results = state.filteredResults.map(orderByDefaultTranslation).toList();
+          final lFormattedKeywords =
+              TecSearchResult.getLFormattedKeywords(context.tbloc<SearchBloc>().state.search);
           return SafeArea(
             bottom: false,
             child: Scaffold(
@@ -400,7 +405,7 @@ class _SearchResultsViewState extends State<SearchResultsView> {
                     }
                     i--;
                     final res = results[i];
-                    return _SearchResultCard(res);
+                    return _SearchResultCard(res, lFormattedKeywords: lFormattedKeywords);
                   },
                 ),
               ),
@@ -412,8 +417,9 @@ class _SearchResultsViewState extends State<SearchResultsView> {
 
 class _SearchResultCard extends StatefulWidget {
   final SearchResultInfo res;
+  final List<String> lFormattedKeywords;
 
-  const _SearchResultCard(this.res);
+  const _SearchResultCard(this.res, {@required this.lFormattedKeywords});
 
   @override
   __SearchResultCardState createState() => __SearchResultCardState();
@@ -532,22 +538,13 @@ class __SearchResultCardState extends State<_SearchResultCard> {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = widget.res.selected ? searchThemeColor : Theme.of(context).textColor;
-    Widget content() => TecText.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                  text: '${widget.res.label}\n',
-                  style: TextStyle(color: textColor, fontWeight: FontWeight.w500)),
-              WidgetSpan(child: Container(height: 3)),
-              ...searchResTextSpans(
-                widget.res.currentText,
-                context.tbloc<SearchBloc>().state.search,
-              ),
-            ],
-            style: TextStyle(color: textColor),
-          ),
+    Widget content() => TecSearchResult(
+          title: widget.res.label,
+          text: widget.res.currentText,
           textScaleFactor: contentTextScaleFactorWith(context),
+          textColor: widget.res.selected ? searchThemeColor : Theme.of(context).textColor,
+          keywordColor: searchThemeColor,
+          lFormattedKeywords: widget.lFormattedKeywords,
         );
 
     if (!widget.res.expanded) {

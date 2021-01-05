@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -14,6 +13,7 @@ import '../../models/app_settings.dart';
 import '../../models/color_utils.dart';
 import '../../models/ugc/recent_count.dart';
 import '../common/common.dart';
+import '../common/tec_search_result.dart';
 import 'bread_crumb_row.dart';
 import 'quick_find.dart';
 
@@ -33,11 +33,23 @@ class UGCView extends StatefulWidget {
   static const folderMarginNotes = -3;
   static const folderHighlights = -4;
   static const folderLicenses = -5;
+  static const folderSearchResults = -6;
+  static const filterSeparator = 'zZzZ';
 
   const UGCView({Key key}) : super(key: key);
 
   @override
   _UGCViewState createState() => _UGCViewState();
+
+  bool willPop(State<StatefulWidget> state) {
+    if (state is _UGCViewState && state.mounted && state.breadCrumbs.length > 1) {
+      state.breadCrumbs.length = state.breadCrumbs.length - 1;
+      state._load(state.breadCrumbs.last);
+      return true;
+    }
+
+    return false;
+  }
 }
 
 Map<int, UserItem> _folders;
@@ -47,7 +59,7 @@ class _UGCViewState extends State<UGCView> {
   List<BreadCrumb> breadCrumbs;
   int currentFolderId;
   List items;
-  bool showingSearch;
+  List<String> searchWords;
   ScrollController listScrollController;
   final recentDate = DateTime.now().add(const Duration(days: -31));
   final recentTypes = [
@@ -61,7 +73,6 @@ class _UGCViewState extends State<UGCView> {
   void initState() {
     super.initState();
     items = <dynamic>[];
-    showingSearch = false;
     breadCrumbs = BreadCrumb.load();
     listScrollController = ScrollController();
 
@@ -70,7 +81,7 @@ class _UGCViewState extends State<UGCView> {
       breadCrumbs.last.scrollOffset = listScrollController.offset;
     });
 
-    _load(breadCrumbs.last.id, scrollOffset: breadCrumbs.last.scrollOffset);
+    _load(breadCrumbs.last);
   }
 
   @override
@@ -79,10 +90,27 @@ class _UGCViewState extends State<UGCView> {
     super.dispose();
   }
 
-  Future<void> _search(List<String> words, List<UserItemType> searchTypes) async {
+  String _searchTypes(List<UserItemType> searchTypes) {
+    final types = StringBuffer();
+
+    for (final type in searchTypes) {
+      if (types.isNotEmpty) {
+        types.write('-');
+      }
+      types.write(type.index);
+    }
+
+    return types.toString();
+  }
+
+  Future<void> _search(String search, List<UserItemType> searchTypes,
+      {double scrollOffset = 0}) async {
+    final words = TecSearchResult.getLFormattedKeywords(search);
+
     if (words.isEmpty) {
-      if (showingSearch) {
-        unawaited(_load(currentFolderId));
+      if (breadCrumbs.last.id == UGCView.folderSearchResults) {
+        breadCrumbs.length = breadCrumbs.length - 1;
+        unawaited(_load(breadCrumbs.last));
       }
       return;
     }
@@ -90,27 +118,58 @@ class _UGCViewState extends State<UGCView> {
     final _items = await AppSettings.shared.userAccount.userDb
         .findItemsContaining(words, ofTypes: searchTypes);
 
-    if (_items.isNotEmpty) {
-      showingSearch = true;
+    if (breadCrumbs.last.id == UGCView.folderSearchResults) {
+      if (_items.isEmpty) {
+        breadCrumbs.length = breadCrumbs.length - 1;
 
-      setState(() {
-        items = _items;
-      });
-    } else {
-      if (showingSearch) {
         setState(() {
+          searchWords = <String>[];
           items = <dynamic>[];
         });
+      } else {
+        breadCrumbs.last.folderName =
+            '$search${UGCView.filterSeparator}${_searchTypes(searchTypes)}';
       }
+    } else {
+      breadCrumbs.last.scrollOffset = listScrollController.offset;
+      breadCrumbs.add(BreadCrumb(UGCView.folderSearchResults,
+          '$search${UGCView.filterSeparator}${_searchTypes(searchTypes)}'));
+    }
 
+    if (_items.isNotEmpty) {
+      setState(() {
+        searchWords = words;
+        items = _items;
+      });
+
+      listScrollController.jumpTo(scrollOffset);
+    } else {
       TecToast.show(context, 'No results found!');
     }
   }
 
-  Future<void> _load(int folderId, {double scrollOffset = 0}) async {
+  Future<void> _load(BreadCrumb crumb) async {
+    if (crumb.id == UGCView.folderSearchResults) {
+      final index = crumb.folderName.indexOf(UGCView.filterSeparator);
+      if (index > 0) {
+        final search = crumb.folderName.substring(0, index);
+        final searchTypes = <UserItemType>[];
+        for (final type in crumb.folderName.substring(index + 4).split('-')) {
+          searchTypes.add(UserItemType.values[int.parse(type)]);
+        }
+
+        unawaited(_search(search, searchTypes, scrollOffset: crumb.scrollOffset));
+      } else {
+        unawaited(_loadFolder(UGCView.folderHome));
+      }
+    } else {
+      unawaited(_loadFolder(crumb.id, scrollOffset: crumb.scrollOffset));
+    }
+  }
+
+  Future<void> _loadFolder(int folderId, {double scrollOffset = 0}) async {
     currentFolderId = folderId;
     final _items = <dynamic>[];
-    showingSearch = false;
 
     // clear any current view...
     setState(() {
@@ -217,11 +276,7 @@ class _UGCViewState extends State<UGCView> {
             }
           }
 
-          _items.addAll(folders);
-          // ignore: cascade_invocations
-          _items.addAll(bookmarks);
-          // ignore: cascade_invocations
-          _items.addAll(notes);
+          _items..addAll(folders)..addAll(bookmarks)..addAll(notes);
         } else {
           // folder id is -type... get the items of that type
           _items.addAll(await AppSettings.shared.userAccount.userDb
@@ -232,6 +287,7 @@ class _UGCViewState extends State<UGCView> {
     }
 
     setState(() {
+      searchWords = <String>[];
       items = _items;
     });
 
@@ -244,8 +300,8 @@ class _UGCViewState extends State<UGCView> {
     if (item is UserItem && item.itemType == UserItemType.folder) {
       folder = item;
 
-      if (breadCrumbs.length == 1 && breadCrumbs.last.id != folder.parentId) {
-        // need to add parent breadcrumbs...
+      if (breadCrumbs.last.id != folder.parentId) {
+        // folder tap from search ... need to add parent breadcrumbs...
         var parent = _folders[folder.parentId];
         while (parent != null && parent.id != 1) {
           breadCrumbs.insert(1, BreadCrumb(parent.id, parent.title));
@@ -272,25 +328,8 @@ class _UGCViewState extends State<UGCView> {
     if (folder != null) {
       breadCrumbs.last.scrollOffset = listScrollController.offset;
       breadCrumbs.add(BreadCrumb(folder.id, folder.title));
-      _load(folder.id);
+      _loadFolder(folder.id);
     }
-  }
-
-  String _getDescription(UserItem ui) {
-    String description;
-
-    switch (ui.itemType) {
-      case UserItemType.marginNote:
-        description = ui.info;
-        break;
-
-      default:
-        // bookmark, note
-        description = ui.description;
-        break;
-    }
-
-    return description;
   }
 
   void _createNoteFolder() {
@@ -316,6 +355,16 @@ class _UGCViewState extends State<UGCView> {
     //     maxWidth: 320, maxHeight: 300, context: context, builder: (c) => CreateNoteFolder());
   }
 
+  String _getInitSearch() {
+    if (breadCrumbs.last.id == UGCView.folderSearchResults &&
+        breadCrumbs.last.folderName.contains(UGCView.filterSeparator)) {
+      return breadCrumbs.last.folderName
+          .substring(0, breadCrumbs.last.folderName.indexOf(UGCView.filterSeparator));
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
@@ -329,7 +378,7 @@ class _UGCViewState extends State<UGCView> {
           resizeToAvoidBottomInset: false,
           floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
           floatingActionButton: Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
+            padding: EdgeInsets.only(bottom: context.fullBottomBarPadding),
             child: FloatingActionButton(
               child: const Icon(Icons.add),
               tooltip: 'Create note or folder',
@@ -360,14 +409,19 @@ class _UGCViewState extends State<UGCView> {
                       height: 1,
                       color: Theme.of(context).textColor.withOpacity(0.6),
                     ),
-                    if (breadCrumbs.length == 1) QuickFind(onSearch: _search),
-                    if (breadCrumbs.length > 1)
+                    if (breadCrumbs.length == 1 ||
+                        breadCrumbs.last.id == UGCView.folderSearchResults)
+                      QuickFind(
+                        onSearch: _search,
+                        search: _getInitSearch(),
+                      ),
+                    if (breadCrumbs.length > 1 &&
+                        breadCrumbs.last.id != UGCView.folderSearchResults)
                       BreadCrumbRow(
                           breadCrumbs: breadCrumbs,
                           onTap: (crumbNumber) {
                             breadCrumbs.length = crumbNumber + 1;
-                            _load(breadCrumbs[crumbNumber].id,
-                                scrollOffset: breadCrumbs[crumbNumber].scrollOffset);
+                            _load(breadCrumbs.last);
                           }),
                     Expanded(
                       child: ListView.builder(
@@ -416,12 +470,13 @@ class _UGCViewState extends State<UGCView> {
                                 case UserItemType.note:
                                   iconData = Icons.edit_outlined;
                                   title = ui.title;
-                                  description = _getDescription(ui);
+                                  // TODO(mike): when we save new format need to update this info assignment...
+                                  description = ui.info.substring(ui.title.length).trimLeft();
                                   break;
                                 case UserItemType.bookmark:
                                   iconData = FeatherIcons.bookmark;
                                   title = ui.title;
-                                  description = _getDescription(ui);
+                                  description = ui.description;
                                   break;
                                 case UserItemType.marginNote:
                                   iconData = TecIcons.marginNoteOutline;
@@ -431,7 +486,8 @@ class _UGCViewState extends State<UGCView> {
                                           chapter: ui.chapter,
                                           verse: ui.verse)
                                       .label();
-                                  description = _getDescription(ui);
+                                  // TODO(mike): when we save new format need to update this info assignment...
+                                  description = ui.info;
                                   break;
                                 case UserItemType.highlight:
                                   // is this highlight continued...
@@ -525,7 +581,8 @@ class _UGCViewState extends State<UGCView> {
                                         left: 8.0, right: 8.0, top: 4.0, bottom: 4.0),
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
-                                  child: Row(children: [
+                                  child:
+                                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                                     Padding(
                                       padding: const EdgeInsets.only(right: 13.0),
                                       child: Icon(iconData, color: iconColor),
@@ -535,13 +592,15 @@ class _UGCViewState extends State<UGCView> {
                                           child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text(title,
-                                              maxLines: 1, style: const TextStyle(fontSize: 18.0)),
-                                          Container(height: 3.0),
-                                          Text(description,
-                                              maxLines: 3,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(fontSize: 15.0)),
+                                          TecSearchResult(
+                                            textScaleFactor:
+                                                0.9 * contentTextScaleFactorWith(context),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                            text: description,
+                                            title: title,
+                                            lFormattedKeywords: searchWords,
+                                          ),
                                           if (items[i] is UserItem)
                                             Padding(
                                               padding: const EdgeInsets.only(top: 4.0),
@@ -576,8 +635,15 @@ class _UGCViewState extends State<UGCView> {
                                       ))
                                     else if (title != null)
                                       Expanded(
-                                          child:
-                                              Text(title, style: const TextStyle(fontSize: 18.0))),
+                                        child: TecSearchResult(
+                                          textScaleFactor:
+                                              0.9 * contentTextScaleFactorWith(context),
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          text: title,
+                                          lFormattedKeywords: searchWords,
+                                        ),
+                                      ),
                                     if (items[i] is CountItem || items[i] is RecentCount)
                                       Padding(
                                         padding: const EdgeInsets.only(left: 16.0),

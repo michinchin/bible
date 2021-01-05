@@ -12,9 +12,10 @@ import '../common/tec_dialog.dart';
 List<UserItemType> _searchTypes;
 
 class QuickFind extends StatefulWidget {
-  final Function(List<String> words, List<UserItemType> ofTypes) onSearch;
+  final Function(String words, List<UserItemType> ofTypes) onSearch;
+  final String search;
 
-  const QuickFind({Key key, this.onSearch}) : super(key: key);
+  const QuickFind({Key key, this.onSearch, this.search}) : super(key: key);
 
   @override
   _QuickFindState createState() => _QuickFindState();
@@ -45,18 +46,31 @@ class _QuickFindState extends State<QuickFind> {
       });
     });
 
-    _controller.addListener(() {
-      if (_searchTimer != null) {
-        _searchTimer.cancel();
-        _searchTimer = null;
-      }
-
-      _searchTimer = Timer(const Duration(milliseconds: 500), () {
-        if (widget.onSearch != null) {
-          _search();
+    _controller
+      ..addListener(() {
+        if (_searchTimer != null) {
+          _searchTimer.cancel();
+          _searchTimer = null;
         }
+
+        _searchTimer = Timer(const Duration(milliseconds: 500), () {
+          if (widget.onSearch != null) {
+            _search();
+          }
+        });
       });
-    });
+
+    if (widget.search != null) {
+      _lastSearch = widget.search;
+      _controller.text = widget.search;
+      _focusNode.requestFocus();
+    }
+  }
+
+
+  @override
+  void didUpdateWidget(QuickFind oldWidget) {
+    super.didUpdateWidget(oldWidget);
   }
 
   void _search({bool forceSearch = false}) {
@@ -68,30 +82,7 @@ class _QuickFindState extends State<QuickFind> {
 
     _lastSearch = s;
 
-    final words = <String>[];
-
-    if (s.isNotEmpty) {
-      if (s[0] == '"' || s[0] == "'") {
-        // phrase search
-        if (s.endsWith(s[0])) {
-          words.add(s.substring(1, s.length - 1));
-        } else {
-          words.add(s.substring(1));
-        }
-      } else {
-        // word search
-        final _words = s.split(' ');
-        for (final word in _words) {
-          if (word
-              .trim()
-              .isNotEmpty) {
-            words.add(word.trim());
-          }
-        }
-      }
-    }
-
-    widget.onSearch(words, _searchTypes);
+    widget.onSearch(s, _searchTypes);
   }
 
   @override
@@ -145,8 +136,7 @@ class _QuickFindState extends State<QuickFind> {
                   for (final type in _searchTypes) {
                     if (previous.contains(type)) {
                       previous.remove(type);
-                    }
-                    else {
+                    } else {
                       changed = true;
                       break;
                     }
@@ -232,12 +222,10 @@ class __SwitchState extends State<_Switch> {
       onChanged: (value) {
         if (value) {
           _searchTypes.add(widget.type);
-        }
-        else if (_searchTypes.length == 1) {
+        } else if (_searchTypes.length == 1) {
           TecToast.show(context, 'At least one filter required!');
           return;
-        }
-        else {
+        } else {
           _searchTypes.remove(widget.type);
         }
         setState(_updateValue);

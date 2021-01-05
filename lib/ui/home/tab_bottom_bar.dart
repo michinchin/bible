@@ -35,6 +35,7 @@ class TabBottomBar extends StatefulWidget {
 class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Map<TecTab, GlobalKey> tabKeys;
+  GlobalKey ugcViewKey;
 
   @override
   void initState() {
@@ -50,10 +51,20 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
     for (var i = 0; i < widget.tabs.length; i++) {
       tabKeys[widget.tabs[i].tab] = GlobalKey();
     }
+
+    ugcViewKey = GlobalKey();
   }
 
   Future<bool> _onBackPressed() async {
     if (Navigator.of(context).canPop()) {
+      // see if the drawer can go back a folder...
+      if (ugcViewKey.currentWidget != null) {
+        final ugcView = ugcViewKey.currentWidget;
+        if (ugcView is UGCView && ugcView.willPop(ugcViewKey.currentState)) {
+          return false;
+        }
+      }
+
       Navigator.of(context).pop();
       return false;
     }
@@ -96,7 +107,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                   : ((tabState.tab == TecTab.switcher)
                       ? _CloseFAB(controller: _controller)
                       : _TabFAB()),
-          drawer: (tabState.tab != TecTab.reader) ? null : const UGCView(),
+          drawer: (tabState.tab != TecTab.reader) ? null : UGCView(key: ugcViewKey),
           bottomNavigationBar: (tabState.hideBottomBar ||
                   (!largeScreen && tabState.tab == TecTab.reader))
               ? null

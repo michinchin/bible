@@ -1,16 +1,14 @@
 import 'dart:convert';
 
-import 'package:bible/main.dart';
-import 'package:bible/models/app_settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 
+import '../../models/app_settings.dart';
 import 'ugc_view.dart';
 
 class BreadCrumb {
-  final String folderName;
+  String folderName;
   final int id;
   double scrollOffset;
   static const prefBreadCrumbs = 'breadcrumbs';
@@ -81,8 +79,8 @@ class _BreadCrumbRowState extends State<BreadCrumbRow> {
     const style = TextStyle(fontSize: 20.0);
 
     for (var i = 0; i < widget.breadCrumbs.length - 1; i++) {
-      crumbWidgets
-        ..add(
+      if (widget.breadCrumbs[i].id != UGCView.folderSearchResults) {
+        crumbWidgets..add(
           InkWell(
             child: Text(widget.breadCrumbs[i].folderName,
                 style: style.copyWith(fontWeight: FontWeight.bold)),
@@ -92,11 +90,11 @@ class _BreadCrumbRowState extends State<BreadCrumbRow> {
               }
             },
           ),
-        )
-        ..add(const Padding(
+        )..add(const Padding(
           padding: EdgeInsets.only(left: 4.0, right: 4.0),
           child: Icon(Icons.arrow_back_ios_outlined),
         ));
+      }
     }
 
     crumbWidgets

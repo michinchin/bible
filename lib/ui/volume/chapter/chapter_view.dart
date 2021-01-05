@@ -536,7 +536,15 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
               if (active) {
                 context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
               } else {
-                context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
+                // we're priming the scroll listener so the fab shows up
+                // and properly disappears on scroll forward
+                // would also work to set sheet to main and have scroll listener
+                // reset previous position
+                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                  _scrollController
+                    ..jumpTo(_scrollController.offset + 15)
+                    ..jumpTo(_scrollController.offset - 15);
+                });
               }
             },
             child: Scrollbar(

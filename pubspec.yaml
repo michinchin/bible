@@ -38,6 +38,7 @@ dependencies:
   rxdart: ^0.24.1
   scrollable_positioned_list: ^0.1.8
   share: ^0.6.5+3
+  string_validator: ^0.1.4
   tec_cache:
     hosted:
       name: tec_cache
@@ -72,7 +73,7 @@ dependencies:
     hosted:
       name: tec_user_account
       url: http://noah.tecarta.com:8100
-    version: ^2.0.15
+    version: ^2.0.16
   tec_util:
     hosted:
       name: tec_util
@@ -112,6 +113,8 @@ dependencies:
 #   path: ../shared/tec_selectable
 # tec_util:
 #   path: ../shared/tec_util
+# tec_user_account:
+#    path: ../shared/tec_user_account
 # tec_views:
 #   path: ../shared/tec_views
 # tec_volumes:
