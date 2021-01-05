@@ -63,7 +63,7 @@ class _QuickFindState extends State<QuickFind> {
     if (widget.search != null) {
       _lastSearch = widget.search;
       _controller.text = widget.search;
-      _focusNode.requestFocus();
+      _showSuffix = true;
     }
   }
 

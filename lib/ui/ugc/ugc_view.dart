@@ -149,6 +149,22 @@ class _UGCViewState extends State<UGCView> {
   }
 
   Future<void> _load(BreadCrumb crumb) async {
+    if (_folders == null || _folderUserId != AppSettings.shared.userAccount.user.userId) {
+      _folderUserId = AppSettings.shared.userAccount.user.userId;
+      _folders = <int, UserItem>{};
+
+      // this view can be loaded multiple times... only load folders when necessary
+      if (_folders.isEmpty) {
+        for (final ui
+        in await AppSettings.shared.userAccount.userDb.getItemsOfTypes([UserItemType.folder])) {
+          _folders.putIfAbsent(ui.id, () => ui);
+        }
+
+        _folders.putIfAbsent(
+            1, () => UserItem(id: 1, title: 'Journal', type: UserItemType.folder.index));
+      }
+    }
+
     if (crumb.id == UGCView.folderSearchResults) {
       final index = crumb.folderName.indexOf(UGCView.filterSeparator);
       if (index > 0) {
@@ -175,22 +191,6 @@ class _UGCViewState extends State<UGCView> {
     setState(() {
       items = _items;
     });
-
-    if (_folders == null || _folderUserId != AppSettings.shared.userAccount.user.userId) {
-      _folderUserId = AppSettings.shared.userAccount.user.userId;
-      _folders = <int, UserItem>{};
-
-      // this view can be loaded multiple times... only load folders when necessary
-      if (_folders.isEmpty) {
-        for (final ui
-            in await AppSettings.shared.userAccount.userDb.getItemsOfTypes([UserItemType.folder])) {
-          _folders.putIfAbsent(ui.id, () => ui);
-        }
-
-        _folders.putIfAbsent(
-            1, () => UserItem(id: 1, title: 'Journal', type: UserItemType.folder.index));
-      }
-    }
 
     if (currentFolderId > 0 && !_folders.containsKey(currentFolderId)) {
       // we've referenced a non existent folder
@@ -328,7 +328,7 @@ class _UGCViewState extends State<UGCView> {
     if (folder != null) {
       breadCrumbs.last.scrollOffset = listScrollController.offset;
       breadCrumbs.add(BreadCrumb(folder.id, folder.title));
-      _loadFolder(folder.id);
+      _load(breadCrumbs.last);
     }
   }
 
