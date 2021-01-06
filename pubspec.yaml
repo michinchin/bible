@@ -152,3 +152,9 @@ flutter:
     - assets/footnote.svg
     - assets/marginNote.svg
     - assets/products.json
+    - assets/images/photo0.jpg
+    - assets/images/photo1.jpg
+    - assets/images/photo2.jpg
+    - assets/images/photo3.jpg
+    - assets/images/photo4.jpg
+    - assets/images/photoBible.jpg

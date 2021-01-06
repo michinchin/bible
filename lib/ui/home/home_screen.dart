@@ -1,8 +1,9 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -10,11 +11,13 @@ import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
+import '../../models/const.dart';
 import '../../models/notifications/notifications_model.dart';
 import '../common/common.dart';
 import '../common/tec_scroll_listener.dart';
 import '../library/library.dart';
 import '../menu/main_menu.dart';
+import '../onboarding/onboarding.dart';
 import '../sheet/snap_sheet.dart';
 import 'tab_bottom_bar.dart';
 import 'today.dart';
@@ -33,6 +36,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     if (!kDebugMode) initNotifications();
+    if (tec.Prefs.shared.getBool(Const.prefShowOnboarding, defaultValue: true)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if(!kDebugMode)showOnboarding(context);
+      });
+    }
     super.initState();
   }
 

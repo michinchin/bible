@@ -40,6 +40,9 @@ class Const {
   static const prefNotifications = 'notifications';
   static const prefNotificationUpdate = 'notificationUpdate';
 
+  // Onboarding
+  static const prefShowOnboarding = 'showOnboaring';
+
   //------------------------------------------
 
   // Bible
