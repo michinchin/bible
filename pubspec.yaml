@@ -158,3 +158,7 @@ flutter:
     - assets/images/photo3.jpg
     - assets/images/photo4.jpg
     - assets/images/photoBible.jpg
+    - assets/images/viewOpLight.gif
+    - assets/images/viewOpDark.gif
+    - assets/images/moveViewLight.gif
+    - assets/images/moveViewDark.gif

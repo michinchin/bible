@@ -1,3 +1,4 @@
+import 'package:bible/ui/common/common.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../models/const.dart';
 import '../common/tec_modal_popup_menu.dart';
 import '../volume/volume_view_data_bloc.dart';
+import 'help_dialog.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   // ignore: close_sinks
@@ -158,6 +160,13 @@ List<TableRow> buildMenuItemsForViewWithState(
   items.addAll([
     tecModalPopupMenuDivider(menuContext, title: 'Open new'),
     ...generateAddMenuItems(menuContext, state.uid),
+    tecModalPopupMenuDivider(menuContext),
+    tecModalPopupMenuItem(
+      menuContext,
+      Icons.help_outline,
+      'Help',
+      () => showViewHelpDialog(context),
+    )
   ]);
 
   return items;

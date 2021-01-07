@@ -221,6 +221,44 @@ class IconWithNumberBadge extends StatelessWidget {
   }
 }
 
+class PageIndicatorList extends StatelessWidget {
+  final PageController controller;
+  final int position;
+  final int pageLength;
+  final bool darkMode;
+  const PageIndicatorList(this.controller, this.position, this.pageLength, {this.darkMode = true});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget indicator(int i) => GestureDetector(
+          onTap: () => controller.animateToPage(i,
+              duration: const Duration(milliseconds: 250), curve: Curves.easeInOut),
+          child: Container(
+            height: 10,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 50),
+              margin: const EdgeInsets.symmetric(horizontal: 4.0),
+              height: 8.0,
+              width: 8.0,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: darkMode
+                      ? i == position
+                          ? Colors.white
+                          : Colors.grey.withOpacity(0.5)
+                      : i == position
+                          ? Colors.grey
+                          : Colors.grey.withOpacity(0.5)),
+            ),
+          ),
+        );
+
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [for (var i = 0; i < pageLength; i++) indicator(i)]);
+  }
+}
+
 const TextStyle cardTitleCompactStyle = TextStyle(
   fontSize: 24,
   fontWeight: FontWeight.w700,

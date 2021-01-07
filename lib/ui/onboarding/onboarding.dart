@@ -1,3 +1,4 @@
+import 'package:bible/ui/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
@@ -58,34 +59,6 @@ class _OnboardingState extends State<Onboarding> {
     for (var i = 0; i < pageCount; i++) {
       pages.add(_OnboardingPage(i));
     }
-  }
-
-  Widget _indicator(int position, bool isActive) {
-    return GestureDetector(
-      onTap: () => _controller.animateToPage(position,
-          duration: const Duration(milliseconds: 250), curve: Curves.easeInOut),
-      child: Container(
-        height: 10,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          margin: const EdgeInsets.symmetric(horizontal: 4.0),
-          height: 8.0,
-          width: 8.0,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive ? Colors.white : Colors.grey.withOpacity(0.5),
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildPageIndicator() {
-    final list = <Widget>[];
-    for (var i = 0; i < pages.length; i++) {
-      list.add(i == _currentIndex ? _indicator(i, true) : _indicator(i, false));
-    }
-    return list;
   }
 
   Widget _textAndButton() {
@@ -173,10 +146,7 @@ class _OnboardingState extends State<Onboarding> {
                     'Skip',
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   )),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: _buildPageIndicator(),
-              ),
+              PageIndicatorList(_controller, index, pages.length)
             ],
           )),
     );
