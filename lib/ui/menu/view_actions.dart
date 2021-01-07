@@ -1,4 +1,3 @@
-import 'package:bible/ui/common/common.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

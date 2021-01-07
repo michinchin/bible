@@ -548,6 +548,8 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
               }
             },
             child: Scrollbar(
+              controller: _scrollController,
+              thickness: tec.platformName == 'ANDROID' ? 3 : null,
               child: ListView(
                 controller: _scrollController,
                 children: <Widget>[
