@@ -2,6 +2,7 @@ import 'package:bible/ui/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:bible/ui/common/tec_dialog.dart';
 import 'package:tec_widgets/tec_widgets.dart';
+import 'package:video_player/video_player.dart';
 
 void showViewHelpDialog(BuildContext context) =>
     showTecDialog<void>(context: context, makeScrollable: false, builder: (c) => _ViewHelpDialog());
@@ -29,6 +30,7 @@ class __ViewHelpDialogState extends State<_ViewHelpDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final imagePaths = ['assets/images/moveView', 'assets/images/viewOp'];
     return Container(
         height: 500,
         child: Column(
@@ -36,7 +38,12 @@ class __ViewHelpDialogState extends State<_ViewHelpDialog> {
             Expanded(
               child: PageView.builder(
                 controller: _controller,
-                itemBuilder: (c, i) => _HelpPageView(i, _controller),
+                itemBuilder: (c, i) => _HelpPageView(
+                    i,
+                    _controller,
+                    Theme.of(context).brightness == Brightness.light
+                        ? '${imagePaths[i]}Light.mp4'
+                        : '${imagePaths[i]}Dark.mp4'),
               ),
             ),
             PageIndicatorList(_controller, _index, 2,
@@ -46,11 +53,33 @@ class __ViewHelpDialogState extends State<_ViewHelpDialog> {
   }
 }
 
-class _HelpPageView extends StatelessWidget {
+class _HelpPageView extends StatefulWidget {
   final int index;
   final PageController controller;
+  final String videoPath;
 
-  const _HelpPageView(this.index, this.controller);
+  const _HelpPageView(this.index, this.controller, this.videoPath);
+
+  @override
+  __HelpPageViewState createState() => __HelpPageViewState();
+}
+
+class __HelpPageViewState extends State<_HelpPageView> {
+  VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = VideoPlayerController.asset(widget.videoPath)
+      ..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        setState(() {});
+      })
+      ..setPlaybackSpeed(2.0)
+      ..setLooping(true)
+      ..play();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,13 +88,13 @@ class _HelpPageView extends StatelessWidget {
       'Hold and drag the title bar to move views around',
       'Hold and drag to remove, hide, or rearrange views.'
     ];
-    final imagePaths = ['assets/images/moveView', 'assets/images/viewOp'];
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           child: TecText(
-            titles[index],
+            titles[widget.index],
             autoSize: true,
             style:
                 Theme.of(context).textTheme.headline5.copyWith(color: Theme.of(context).textColor),
@@ -74,24 +103,21 @@ class _HelpPageView extends StatelessWidget {
         const SizedBox(height: 20),
         Expanded(
             flex: 20,
-            child: Image.asset(
-              Theme.of(context).brightness == Brightness.light
-                  ? '${imagePaths[index]}Light.gif'
-                  : '${imagePaths[index]}Dark.gif',
-            )),
+            child: AspectRatio(
+                aspectRatio: _controller.value.aspectRatio, child: VideoPlayer(_controller))),
         const SizedBox(height: 20),
         Expanded(
           child: TecText(
-            subtitles[index],
+            subtitles[widget.index],
             autoSize: true,
             style: TextStyle(color: Theme.of(context).textColor),
           ),
         ),
         TecDialogButton(
-          child: Text(index == titles.length - 1 ? 'Done' : 'Continue'),
-          onPressed: () => index == titles.length - 1
+          child: Text(widget.index == titles.length - 1 ? 'Done' : 'Continue'),
+          onPressed: () => widget.index == titles.length - 1
               ? Navigator.of(context).maybePop()
-              : controller.animateToPage(index + 1,
+              : widget.controller.animateToPage(widget.index + 1,
                   duration: const Duration(milliseconds: 150), curve: Curves.easeIn),
         ),
       ],

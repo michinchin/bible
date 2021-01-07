@@ -102,6 +102,7 @@ dependencies:
     version: ^2.0.23
   tuple: ^1.0.3
   url_launcher: ^5.7.5
+  video_player: ^1.0.1
   zefyr: ^1.0.0-dev.2.0
 
 # dependency_overrides:
@@ -158,7 +159,7 @@ flutter:
     - assets/images/photo3.jpg
     - assets/images/photo4.jpg
     - assets/images/photoBible.jpg
-    - assets/images/viewOpLight.gif
-    - assets/images/viewOpDark.gif
-    - assets/images/moveViewLight.gif
-    - assets/images/moveViewDark.gif
+    - assets/images/viewOpLight.mp4
+    - assets/images/viewOpDark.mp4
+    - assets/images/moveViewLight.mp4
+    - assets/images/moveViewDark.mp4
