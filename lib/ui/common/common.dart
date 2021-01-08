@@ -180,6 +180,34 @@ class IconSpan extends FixedWidthWidgetSpan {
         );
 }
 
+class TecScrollbar extends StatelessWidget {
+  final Widget child;
+  final ScrollController controller;
+  final bool isAlwaysShown;
+  final double thickness;
+  final Radius radius;
+
+  const TecScrollbar({
+    Key key,
+    @required this.child,
+    this.controller,
+    this.isAlwaysShown = false,
+    this.thickness,
+    this.radius,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      child: child,
+      controller: controller,
+      isAlwaysShown: isAlwaysShown,
+      thickness: thickness ?? (Theme.of(context).platform == TargetPlatform.android ? 3 : null),
+      radius: radius,
+    );
+  }
+}
+
 class IconWithNumberBadge extends StatelessWidget {
   final IconData icon;
   final int value;

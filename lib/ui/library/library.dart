@@ -536,8 +536,7 @@ class _VolumesListState extends State<_VolumesList> {
             ),
           ),
           Expanded(
-            child:  Scrollbar(
-              thickness: tec.platformName == 'ANDROID' ? 3 : null,
+            child:  TecScrollbar(
               child: ScrollablePositionedList.builder(
                 padding: MediaQuery.of(context)?.padding,
                 itemScrollController: _scrollController,

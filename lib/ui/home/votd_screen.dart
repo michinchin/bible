@@ -244,8 +244,7 @@ class _VotdsScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Scrollbar(
-        thickness: tec.platformName == 'ANDROID' ? 3 : null,
+      body: TecScrollbar(
         child: SafeArea(
             bottom: false,
             child: ScrollablePositionedList.builder(
