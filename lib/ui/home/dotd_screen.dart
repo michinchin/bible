@@ -202,6 +202,7 @@ class _DotdsScreen extends StatelessWidget {
         ),
       ),
       body: Scrollbar(
+        thickness: tec.platformName == 'ANDROID' ? 3 : null,
         child: SafeArea(
             child: ScrollablePositionedList.builder(
                 initialScrollIndex: scrollToDateTime == null

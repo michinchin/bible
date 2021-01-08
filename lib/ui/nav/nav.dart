@@ -32,6 +32,7 @@ Future<Reference> navigate(BuildContext context, Reference ref,
   return showTecDialog<Reference>(
     context: context,
     useRootNavigator: true,
+    makeScrollable: false,
     padding: EdgeInsets.zero,
     maxWidth: 500,
     maxHeight: 600,
@@ -117,9 +118,9 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     final nav3TapEnabled = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
 
-    _searchResultsTabController = TabController(length: 2, initialIndex: 1, vsync: this)
+    _searchResultsTabController = TabController(length: 2, initialIndex: 0, vsync: this)
       ..addListener(() {
-        if (_searchResultsTabController.index == 0) {
+        if (_searchResultsTabController.index == 1) {
           if (searchBloc().state.selectionMode) {
             searchBloc().add(const SearchEvent.selectionModeToggle());
           }
@@ -182,7 +183,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
         ..add(SearchEvent.request(search: s, translations: translations()))
         ..add(const SearchEvent.setScrollIndex(0));
     }
-    _searchResultsTabController.animateTo(1);
+    _searchResultsTabController.animateTo(0);
   }
 
   void _selectionMode() {
@@ -291,7 +292,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     Widget leadingAppBarIcon(BuildContext c, NavViewState s, SearchState ss) {
       if (s == NavViewState.searchResults &&
           ss.selectionMode &&
-          _searchResultsTabController.index == 1) {
+          _searchResultsTabController.index == 0) {
         return CloseButton(onPressed: _selectionMode);
       } else {
         return const CloseButton();
@@ -315,7 +316,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
               '$length',
               style: Theme.of(context).appBarTheme.textTheme.bodyText1,
             ));
-      } else if (s == NavViewState.searchResults && _searchResultsTabController.index == 0) {
+      } else if (s == NavViewState.searchResults && _searchResultsTabController.index == 1) {
         return const Text('History');
       } else {
         return TextField(
@@ -370,7 +371,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                       .tbloc<NavBloc>()
                       .add(const NavEvent.changeNavView(state: NavViewState.searchResults));
                   // default to show history first
-                  _searchResultsTabController.animateTo(0);
+                  _searchResultsTabController.animateTo(1);
                 }),
             IconButton(icon: Icon(platformAwareMoreIcon(context)), onPressed: _moreButton)
           ];
@@ -382,7 +383,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             IconButton(
                 icon: const Icon(FeatherIcons.share2, size: 20), onPressed: _onSelectionShared)
           ];
-        } else if (_searchResultsTabController.index == 1) {
+        } else if (_searchResultsTabController.index == 0) {
           actions = [
             if (ss.filteredResults.isNotEmpty)
               IconButton(icon: const Icon(Icons.check_circle_outline), onPressed: _selectionMode),

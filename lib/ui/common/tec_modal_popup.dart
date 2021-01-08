@@ -1,5 +1,6 @@
 import 'dart:ui' show ImageFilter;
 
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -356,6 +357,8 @@ class _PopupSheetContent extends StatelessWidget {
   }
 
   Widget _scrollableChild() => Scrollbar(
+        controller: scrollController,
+        thickness: tec.platformName == 'ANDROID' ? 3 : null,
         child: SingleChildScrollView(
           controller: scrollController,
           child: _child(),

@@ -50,14 +50,15 @@ class SearchAndHistoryView extends StatelessWidget {
               indicator: BubbleTabIndicator(color: searchThemeColor.withOpacity(0.5)),
               labelColor: Theme.of(context).textColor,
               unselectedLabelColor: Theme.of(context).textColor,
-              tabs: const [Tab(child: Text('HISTORY')), Tab(child: Text('SEARCH RESULTS'))]),
+              tabs: const [Tab(child: Text('SEARCH RESULTS')), Tab(child: Text('HISTORY'))]),
         ),
       ),
       body: Container(
         color: Theme.of(context).dialogBackgroundColor,
-        child: TabBarView(
-            controller: tabController,
-            children: [HistoryView(searchController, tabController), SearchResultsView()]),
+        child: TabBarView(controller: tabController, children: [
+          SearchResultsView(),
+          HistoryView(searchController, tabController),
+        ]),
       ),
     );
   }
@@ -102,16 +103,16 @@ class _HistoryViewState extends State<HistoryView> {
     return FutureBuilder<List<dynamic>>(
         future: _future(),
         builder: (c, s) {
-          if (s.connectionState != ConnectionState.done) {
-            return const LoadingIndicator();
-          }
+          var navHistory = <Reference>[];
+          var searchHistory = <SearchHistoryItem>[];
           if (s.hasError) {
             return const Center(child: Text('Error'));
           }
+
           if (s.hasData) {
-            final navHistory = tec.as<List<Reference>>(s.data[0])
+            navHistory = tec.as<List<Reference>>(s.data[0])
               ..sort((a, b) => b.modified.compareTo(a.modified));
-            final searchHistory = tec.as<List<SearchHistoryItem>>(s.data[1])
+            searchHistory = tec.as<List<SearchHistoryItem>>(s.data[1])
               ..sort((a, b) => b.modified.compareTo(a.modified));
             return searchHistory.isEmpty && navHistory.isEmpty
                 ? const Center(child: Text('Search or navigate to view history'))
@@ -387,7 +388,7 @@ class _SearchResultsViewState extends State<SearchResultsView> {
               body: Container(
                 color: Theme.of(context).dialogBackgroundColor,
                 child: ScrollablePositionedList.separated(
-                  itemCount: results.length + 1,
+                  itemCount: results.length + 2,
                   itemScrollController: scrollController,
                   itemPositionsListener: positionListener,
                   separatorBuilder: (c, i) {
@@ -402,6 +403,8 @@ class _SearchResultsViewState extends State<SearchResultsView> {
                   itemBuilder: (c, i) {
                     if (i == 0) {
                       return SearchResultsLabel(results.map((r) => r.searchResult).toList());
+                    } else if (i == results.length + 1) {
+                      return const SizedBox(height: 30);
                     }
                     i--;
                     final res = results[i];
