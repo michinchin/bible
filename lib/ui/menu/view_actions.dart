@@ -93,8 +93,7 @@ List<TableRow> buildMenuItemsForViewWithState(
     }
 
     if (countOfVisibleViews > 1) {
-      items.add(tecModalPopupMenuItem(menuContext,
-          vmBloc.numViewsLimited ? Icons.article_outlined : FeatherIcons.eyeOff, 'Hide', () {
+      items.add(tecModalPopupMenuItem(menuContext, FeatherIcons.eyeOff, 'Hide', () {
         Navigator.of(menuContext).maybePop();
         vmBloc?.hide(state.uid);
       }));
