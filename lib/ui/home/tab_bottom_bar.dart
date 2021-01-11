@@ -197,16 +197,13 @@ class __ExpandedViewState extends State<_ExpandedView> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final _icons = <_OffscreenView>[];
-
-    // ignore: cascade_invocations
-    _icons.add(_OffscreenView(
-      title: 'Open New...',
-      onPressed: () {
-        context.tabManager.changeTab(TecTab.reader);
-        ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
-      },
-    ));
+    final _icons = <_OffscreenView>[_OffscreenView(
+        title: 'Open New...',
+        onPressed: () {
+          context.tabManager.changeTab(TecTab.reader);
+          ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
+        },
+      )];
 
     // get the offscreen views...
     for (final view in context.viewManager?.state?.views) {

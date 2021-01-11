@@ -16,7 +16,9 @@ import 'strongs_popup.dart';
 ///
 class StrongsBuildHelper {
   TecHtmlTagElementFunc get tagHtmlElement => _tagHtmlElement;
+
   TecHtmlCheckElementFunc get toggleVisibility => null;
+
   TecHtmlCheckElementFunc get shouldSkip => null;
 
   var _isInXref = false;
@@ -87,7 +89,7 @@ String strongsHtmlWithFragment(
   int fontSizePercent = 100,
   String vendorFolder,
 }) {
-  final s = StringBuffer()
+  final buffer = StringBuffer()
     ..write('<!DOCTYPE html>\n'
         '<head>\n'
         '<meta charset="utf-8" />\n'
@@ -101,28 +103,26 @@ String strongsHtmlWithFragment(
     if (!vendorFolder.endsWith('/')) bibleVendorCSS += '/';
   }
   bibleVendorCSS += 'bible_vendor.css';
-  s.write('<link rel="stylesheet" type="text/css" href="$bibleVendorCSS" />\n');
-
-  s.write('<link rel="stylesheet" type="text/css" href="strongs.css" />\n');
+  buffer
+    ..write('<link rel="stylesheet" type="text/css" href="$bibleVendorCSS" />\n')
+    ..write('<link rel="stylesheet" type="text/css" href="strongs.css" />\n');
 
   if (darkTheme) {
-    s.write('<link rel="stylesheet" type="text/css" href="strongs_night.css" />\n');
+    buffer.write('<link rel="stylesheet" type="text/css" href="strongs_night.css" />\n');
   }
 
-  s.write('<title></title>\n</head>\n\n');
+  buffer.write('<title></title>\n</head>\n\n');
 
   final color = (darkTheme ? 'black' : 'white');
 
   final fontSize = (fontSizePercent ?? 100);
-  s.write('<body style="background-color: $color; '
-      // 'margin-left: $marginLeft; margin-right: $marginRight; '
-      // 'padding-top: $marginTop; padding-bottom: $marginBottom; '
-      'font-size: $fontSize%;">\n');
+  buffer
+    ..write('<body style="background-color: $color; '
+        // 'margin-left: $marginLeft; margin-right: $marginRight; '
+        // 'padding-top: $marginTop; padding-bottom: $marginBottom; '
+        'font-size: $fontSize%;">\n')
+    ..write('$htmlFragment\n\n')
+    ..write('</body>\n</html>\n');
 
-  // ignore_for_file: cascade_invocations
-  s.write('$htmlFragment\n\n');
-
-  s.write('</body>\n</html>\n');
-
-  return s.toString();
+  return buffer.toString();
 }

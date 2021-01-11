@@ -156,7 +156,7 @@ class _UGCViewState extends State<UGCView> {
       // this view can be loaded multiple times... only load folders when necessary
       if (_folders.isEmpty) {
         for (final ui
-        in await AppSettings.shared.userAccount.userDb.getItemsOfTypes([UserItemType.folder])) {
+            in await AppSettings.shared.userAccount.userDb.getItemsOfTypes([UserItemType.folder])) {
           _folders.putIfAbsent(ui.id, () => ui);
         }
 
@@ -236,9 +236,9 @@ class _UGCViewState extends State<UGCView> {
             .getItemsWithParent(UGCView.folderHome, ofTypes: [UserItemType.folder]);
 
         if (folders.isNotEmpty) {
-          _items.add(_DividerItem());
-          // ignore: cascade_invocations
-          _items.addAll(folders);
+          _items
+            ..add(_DividerItem())
+            ..addAll(folders);
         }
         break;
 
