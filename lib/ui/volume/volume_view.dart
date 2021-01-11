@@ -4,6 +4,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
+import '../../models/const.dart';
 import '../library/library.dart';
 import '../menu/reorder_views.dart';
 import 'chapter/chapter_view.dart';
@@ -107,7 +108,8 @@ class ViewableVolume extends Viewable {
     // tec.dmPrint('selected $bibleId');
 
     if (volumeId != null) {
-      final previous = VolumeViewData.fromContext(context, currentViewId);
+      final viewUid = currentViewId ?? context.viewManager?.state?.views?.lastWhere((el) => el.type == Const.viewTypeVolume, orElse: () => null)?.uid;
+      final previous = viewUid == null ? VolumeViewData.fromJson(null) : VolumeViewData.fromContext(context, viewUid);
       assert(previous != null);
       if (isBibleId(volumeId)) {
         return VolumeViewData(volumeId, previous.bcv, 0, useSharedRef: previous.useSharedRef);

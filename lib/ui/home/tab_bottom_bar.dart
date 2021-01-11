@@ -156,7 +156,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                     Container(
                       alignment: Alignment.bottomRight,
                       padding: const EdgeInsets.only(bottom: 40),
-                      child: _ExpandedView(controller: _controller),
+                      child: _ExpandedView(controller: _controller, parentContext: context),
                     ),
                 ],
               ),
@@ -170,8 +170,9 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
 
 class _ExpandedView extends StatefulWidget {
   final AnimationController controller;
+  final BuildContext parentContext;
 
-  const _ExpandedView({Key key, this.controller}) : super(key: key);
+  const _ExpandedView({Key key, this.controller, this.parentContext}) : super(key: key);
 
   @override
   __ExpandedViewState createState() => __ExpandedViewState();
@@ -197,6 +198,15 @@ class __ExpandedViewState extends State<_ExpandedView> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final _icons = <_OffscreenView>[];
+
+    // ignore: cascade_invocations
+    _icons.add(_OffscreenView(
+      title: 'Open New...',
+      onPressed: () {
+        context.tabManager.changeTab(TecTab.reader);
+        ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
+      },
+    ));
 
     // get the offscreen views...
     for (final view in context.viewManager?.state?.views) {

@@ -179,7 +179,7 @@ class RenderTecOverflowBox extends RenderProxyBox {
   }
 }
 
-extension TecSizedBoxExtensionOnBoxConstraints on BoxConstraints {
+extension TecOverflowBoxExtOnBoxConstraints on BoxConstraints {
   BoxConstraints enforceIfNotBounded(BoxConstraints constraints) {
     return BoxConstraints(
       minWidth: hasBoundedWidth

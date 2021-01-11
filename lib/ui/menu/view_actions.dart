@@ -74,32 +74,25 @@ List<TableRow> buildMenuItemsForViewWithState(
 
   final items = <TableRow>[];
 
-  if ((vmBloc?.state?.views?.length ?? 0) > 1) {
+  final countOfViews = (vmBloc?.state?.views?.length ?? 0);
+  final countOfVisibleViews = (vmBloc?.countOfVisibleViews ?? 0);
+
+  if (countOfViews > 1) {
     items.add(tecModalPopupMenuDivider(menuContext, title: 'View options'));
 
     if (isMaximized) {
-      items.add(tecModalPopupMenuItem(
-          menuContext,
-          vmBloc.numViewsLimited
-              ? ((MediaQuery.of(context).orientation == Orientation.landscape)
-                  ? Icons.vertical_split_outlined
-                  : Icons.horizontal_split_outlined)
-              : FeatherIcons.minimize2,
-          vmBloc.numViewsLimited ? 'Split screen' : 'Restore', () {
+      items.add(tecModalPopupMenuItem(menuContext, FeatherIcons.minimize2, 'Exit full screen', () {
         Navigator.of(menuContext).maybePop();
         vmBloc?.restore();
       }));
-    } else {
-      items.add(tecModalPopupMenuItem(
-          menuContext,
-          vmBloc.numViewsLimited ? Icons.article_outlined : FeatherIcons.maximize2,
-          vmBloc.numViewsLimited ? 'Full screen' : 'Maximize', () {
+    } else if (countOfVisibleViews > 1) {
+      items.add(tecModalPopupMenuItem(menuContext, FeatherIcons.maximize2, 'Full screen', () {
         Navigator.of(menuContext).maybePop();
         vmBloc?.maximize(state.uid);
       }));
     }
 
-    if ((vmBloc?.countOfVisibleViews ?? 0) > 1) {
+    if (countOfVisibleViews > 1) {
       items.add(tecModalPopupMenuItem(menuContext,
           vmBloc.numViewsLimited ? Icons.article_outlined : FeatherIcons.eyeOff, 'Hide', () {
         Navigator.of(menuContext).maybePop();
@@ -149,17 +142,17 @@ List<TableRow> buildMenuItemsForViewWithState(
     }));
   }
 
-  if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1)) {
-    items.addAll([
-      tecModalPopupMenuDivider(menuContext, title: 'Restore'),
-      ..._generateOffScreenItems(menuContext, state.uid),
-    ]);
-  }
+  // if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1)) {
+  //   items.addAll([
+  //     tecModalPopupMenuDivider(menuContext, title: 'Restore'),
+  //     ..._generateOffScreenItems(menuContext, state.uid),
+  //   ]);
+  // }
 
   items.addAll([
-    tecModalPopupMenuDivider(menuContext, title: 'Open new'),
-    ...generateAddMenuItems(menuContext, state.uid),
-    tecModalPopupMenuDivider(menuContext),
+    // tecModalPopupMenuDivider(menuContext, title: 'Open new'),
+    // ...generateAddMenuItems(menuContext, state.uid),
+    if (countOfViews > 1) tecModalPopupMenuDivider(menuContext),
     tecModalPopupMenuItem(
       menuContext,
       Icons.help_outline,
@@ -179,6 +172,7 @@ void _onSwitchViews(ViewManagerBloc vmBloc, int viewUid, ViewState view) {
   }
 }
 
+// ignore: unused_element
 Iterable<TableRow> _generateOffScreenItems(BuildContext menuContext, int viewUid) {
   // ignore: close_sinks
   final vmBloc = menuContext.viewManager;

@@ -519,7 +519,7 @@ class _VolumesListState extends State<_VolumesList> {
                     title: '',
                     values: {0: 'Title ↓', 1: 'Recent ↓'} as LinkedHashMap<int, String>,
                     currentValue: context.tbloc<VolumesSortBloc>().state.sortBy.index,
-                    defaultValue: 0,
+                    defaultValue: 1,
                     defaultName: 'Any',
                     onSelectValue: (value) {
                       context.tbloc<VolumesSortBloc>().updateSortBy(VolumesSortOpt.values[value]);
