@@ -7,7 +7,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_bloc.dart';
-import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import 'selection_sheet.dart';
 
@@ -40,32 +39,29 @@ class _SnapSheetState extends State<SnapSheet> {
   @override
   Widget build(BuildContext context) {
     sheets ??= [
-      // using fab on large screens now
-      //if (isSmallScreen(context))
-        BlocBuilder<TabManagerBloc, TabManagerState>(
-          builder: (context, tabState) {
-            return AnimatedOpacity(
-              duration: const Duration(milliseconds: 150),
-              opacity: (tabState.tab == TecTab.switcher) ? 0.0 : 1.0,
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: EdgeInsets.only(right: 15, bottom: context.fullBottomBarPadding),
-                  child: FloatingActionButton(
-                    elevation: 3,
-                    heroTag: null,
-                    backgroundColor: Const.tecartaBlue,
-                    child: const Icon(TecIcons.tecartabiblelogo, color: Colors.white),
-                    onPressed: () {
-                      context.tabManager.changeTab(TecTab.switcher);
-                    },
-                  ),
+      BlocBuilder<TabManagerBloc, TabManagerState>(
+        builder: (context, tabState) {
+          return AnimatedOpacity(
+            duration: const Duration(milliseconds: 150),
+            opacity: (tabState.tab == TecTab.switcher) ? 0.0 : 1.0,
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: EdgeInsets.only(right: 15, bottom: context.fullBottomBarPadding),
+                child: FloatingActionButton(
+                  elevation: 3,
+                  heroTag: null,
+                  backgroundColor: Const.tecartaBlue,
+                  child: const Icon(TecIcons.tecartabiblelogo, color: Colors.white),
+                  onPressed: () {
+                    context.tabManager.changeTab(TecTab.switcher);
+                  },
                 ),
               ),
-            );
-          },
-        ),
-      // if (!isSmallScreen(context)) Container(),
+            ),
+          );
+        },
+      ),
       const _SheetShadow(key: ValueKey(_selectionSheetKey), child: SelectionSheet()),
       Container(),
     ];

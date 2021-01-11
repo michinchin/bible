@@ -133,7 +133,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 TabBottomBarItem(
                   tab: TecTab.reader,
-                  icon: null, // isSmallScreen(context) ? null : TecIcons.tecartabiblelogo,
                   label: 'Bible',
                   widget: Stack(
                     children: [
@@ -148,24 +147,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                         child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
                           builder: (context, state) {
-                            // now we're using fab on large screens as well
-                            // 65 is the height of the bottomAppBar
-                            // final bottomPadding = isSmallScreen(context) ? 0.0 : 65.0;
-                            return /* Padding(
-                              padding: EdgeInsets.only(bottom: bottomPadding),
-                              child: */ViewManagerWidget(
-                                state: state,
-                                topRightWidget: MainMenuFab(),
-                                topLeftWidget: JournalFab(),
-                                // viewPaddingSize: 0.0,
-                                // resizeAnimationDuration: const Duration(seconds: 1),
-                                // barrierColor: Colors.red,
-                                onSelectionChangedInViews: (views) {
-                                  context.read<SelectionBloc>()?.add(SelectionState(
-                                      isTextSelected: views.isNotEmpty,
-                                      viewsWithSelections: views));
-                                },
-                              /*),*/
+                            return ViewManagerWidget(
+                              state: state,
+                              topRightWidget: MainMenuFab(),
+                              topLeftWidget: JournalFab(),
+                              onSelectionChangedInViews: (views) {
+                                context.read<SelectionBloc>()?.add(SelectionState(
+                                    isTextSelected: views.isNotEmpty, viewsWithSelections: views));
+                              },
                             );
                           },
                         ),

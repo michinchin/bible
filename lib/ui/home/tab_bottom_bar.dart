@@ -92,23 +92,19 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
       // if the tab didn't change (i.e. just showing drawer...)
       return p.tab != n.tab || p.hideBottomBar != n.hideBottomBar;
     }, builder: (context, tabState) {
-      // removing largeScreen check - using FAB on all devices
-      // final largeScreen = !isSmallScreen(context);
       return WillPopScope(
         onWillPop: _onBackPressed,
         child: Scaffold(
           backgroundColor: Theme.of(context).backgroundColor,
           extendBody: true,
           floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-          floatingActionButton:
-              (tabState.hideBottomBar /* || largeScreen */ || tabState.tab == TecTab.reader)
-                  ? null
-                  : ((tabState.tab == TecTab.switcher)
-                      ? _CloseFAB(controller: _controller)
-                      : _TabFAB()),
+          floatingActionButton: (tabState.hideBottomBar || tabState.tab == TecTab.reader)
+              ? null
+              : ((tabState.tab == TecTab.switcher)
+                  ? _CloseFAB(controller: _controller)
+                  : _TabFAB()),
           drawer: (tabState.tab != TecTab.reader) ? null : UGCView(key: ugcViewKey),
-          bottomNavigationBar: (tabState.hideBottomBar ||
-                  (/* !largeScreen && */ tabState.tab == TecTab.reader))
+          bottomNavigationBar: (tabState.hideBottomBar || (tabState.tab == TecTab.reader))
               ? null
               : BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
                   return Visibility(
