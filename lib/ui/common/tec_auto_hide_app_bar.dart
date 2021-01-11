@@ -80,3 +80,45 @@ class PreferredSizeWidgetWithPadding extends StatelessWidget implements Preferre
   Size get preferredSize =>
       Size.fromHeight(widget.preferredSize.height + padding.top + padding.bottom);
 }
+
+class PreferredSizeColumn extends StatelessWidget implements PreferredSizeWidget {
+  final List<PreferredSizeWidget> children; // = const <Widget>[],
+  final EdgeInsets padding;
+  final MainAxisAlignment mainAxisAlignment; // = MainAxisAlignment.start,
+  final CrossAxisAlignment crossAxisAlignment; // = CrossAxisAlignment.center,
+  final TextDirection textDirection;
+  final VerticalDirection verticalDirection; // = VerticalDirection.down,
+  final TextBaseline textBaseline;
+
+  const PreferredSizeColumn({
+    Key key,
+    @required this.children,
+    this.padding,
+    this.mainAxisAlignment = MainAxisAlignment.start,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
+    this.textDirection,
+    this.verticalDirection = VerticalDirection.down,
+    this.textBaseline,
+  })  : assert(children != null),
+        super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: padding ?? EdgeInsets.zero,
+        child: Column(
+          mainAxisAlignment: mainAxisAlignment,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: crossAxisAlignment,
+          textDirection: textDirection,
+          verticalDirection: verticalDirection,
+          textBaseline: textBaseline,
+          children: children,
+        ),
+      );
+
+  @override
+  Size get preferredSize =>
+      Size.fromHeight(children.fold<double>(0.0, (prev, el) => prev + el.preferredSize.height) +
+          padding.top +
+          padding.bottom);
+}

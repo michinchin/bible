@@ -157,6 +157,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 topRightWidget: MainMenuFab(),
                                 topLeftWidget: JournalFab(),
                                 // viewPaddingSize: 0.0,
+                                // resizeAnimationDuration: const Duration(seconds: 1),
+                                // barrierColor: Colors.red,
                                 onSelectionChangedInViews: (views) {
                                   context.read<SelectionBloc>()?.add(SelectionState(
                                       isTextSelected: views.isNotEmpty,

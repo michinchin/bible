@@ -84,7 +84,7 @@ dependencies:
     hosted:
       name: tec_views
       url: http://noah.tecarta.com:8100
-    version: ^1.0.5
+    version: ^1.0.6
   tec_volumes:
     hosted:
       name: tec_volumes
@@ -106,20 +106,8 @@ dependencies:
   zefyr: ^1.0.0-dev.2.0
 
 # dependency_overrides:
-# tec_cache:
-#   path: ../shared/tec_cache
-# tec_html:
-#   path: ../shared/tec_html
-# tec_selectable:
-#   path: ../shared/tec_selectable
-# tec_util:
-#   path: ../shared/tec_util
-# tec_user_account:
-#    path: ../shared/tec_user_account
-# tec_views:
-#   path: ../shared/tec_views
-# tec_volumes:
-#   path: ../shared/tec_volumes
+#   tec_user_account:
+#     path: ../shared/tec_user_account
 
 dev_dependencies:
   bloc_test: ^7.1.0
