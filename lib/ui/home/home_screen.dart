@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 TabBottomBarItem(
                   tab: TecTab.reader,
-                  icon: isSmallScreen(context) ? null : TecIcons.tecartabiblelogo,
+                  icon: null, // isSmallScreen(context) ? null : TecIcons.tecartabiblelogo,
                   label: 'Bible',
                   widget: Stack(
                     children: [
@@ -148,11 +148,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                         child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
                           builder: (context, state) {
+                            // now we're using fab on large screens as well
                             // 65 is the height of the bottomAppBar
-                            final bottomPadding = isSmallScreen(context) ? 0.0 : 65.0;
-                            return Padding(
+                            // final bottomPadding = isSmallScreen(context) ? 0.0 : 65.0;
+                            return /* Padding(
                               padding: EdgeInsets.only(bottom: bottomPadding),
-                              child: ViewManagerWidget(
+                              child: */ViewManagerWidget(
                                 state: state,
                                 topRightWidget: MainMenuFab(),
                                 topLeftWidget: JournalFab(),
@@ -164,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       isTextSelected: views.isNotEmpty,
                                       viewsWithSelections: views));
                                 },
-                              ),
+                              /*),*/
                             );
                           },
                         ),

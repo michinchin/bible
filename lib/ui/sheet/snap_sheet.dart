@@ -40,7 +40,8 @@ class _SnapSheetState extends State<SnapSheet> {
   @override
   Widget build(BuildContext context) {
     sheets ??= [
-      if (isSmallScreen(context))
+      // using fab on large screens now
+      //if (isSmallScreen(context))
         BlocBuilder<TabManagerBloc, TabManagerState>(
           builder: (context, tabState) {
             return AnimatedOpacity(
@@ -64,7 +65,7 @@ class _SnapSheetState extends State<SnapSheet> {
             );
           },
         ),
-      if (!isSmallScreen(context)) Container(),
+      // if (!isSmallScreen(context)) Container(),
       const _SheetShadow(key: ValueKey(_selectionSheetKey), child: SelectionSheet()),
       Container(),
     ];
