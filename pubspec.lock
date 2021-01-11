@@ -1103,7 +1103,7 @@ packages:
       name: tec_user_account
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.17"
+    version: "2.0.18"
   tec_util:
     dependency: "direct main"
     description:

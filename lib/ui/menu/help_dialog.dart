@@ -1,8 +1,10 @@
-import 'package:bible/ui/common/common.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:bible/ui/common/tec_dialog.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:video_player/video_player.dart';
+
+import '../common/common.dart';
+import '../common/tec_dialog.dart';
 
 void showViewHelpDialog(BuildContext context) =>
     showTecDialog<void>(context: context, makeScrollable: false, builder: (c) => _ViewHelpDialog());
@@ -38,6 +40,7 @@ class __ViewHelpDialogState extends State<_ViewHelpDialog> {
             Expanded(
               child: PageView.builder(
                 controller: _controller,
+                itemCount: imagePaths.length,
                 itemBuilder: (c, i) => _HelpPageView(
                     i,
                     _controller,
@@ -82,6 +85,12 @@ class __HelpPageViewState extends State<_HelpPageView> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final titles = ['Move Views', 'View Actions'];
     final subtitles = [
@@ -101,10 +110,11 @@ class __HelpPageViewState extends State<_HelpPageView> {
           ),
         ),
         const SizedBox(height: 20),
-        Expanded(
-            flex: 20,
-            child: AspectRatio(
-                aspectRatio: _controller.value.aspectRatio, child: VideoPlayer(_controller))),
+        if (!kIsWeb && _controller.value.initialized)
+          Expanded(
+              flex: 20,
+              child: AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio, child: VideoPlayer(_controller))),
         const SizedBox(height: 20),
         Expanded(
           child: TecText(
