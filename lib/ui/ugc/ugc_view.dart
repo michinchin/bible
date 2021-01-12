@@ -15,6 +15,7 @@ import '../../models/ugc/recent_count.dart';
 import '../common/common.dart';
 import '../common/tec_search_result.dart';
 import 'bread_crumb_row.dart';
+import 'create_note_folder.dart';
 import 'quick_find.dart';
 
 class _DividerItem {}
@@ -332,29 +333,6 @@ class _UGCViewState extends State<UGCView> {
     }
   }
 
-  void _createNoteFolder() {
-    tecShowSimpleAlertDialog<void>(
-      context: context,
-      content: 'New folder or note?',
-      actions: [
-        FlatButton(
-            child: const Text('Folder'),
-            onPressed: () {
-              Navigator.of(context).pop();
-              TecToast.show(context, 'create folder not implemented yet.');
-            }),
-        FlatButton(
-            child: const Text('Note'),
-            onPressed: () {
-              Navigator.of(context).pop();
-              TecToast.show(context, 'create note not implemented yet.');
-            }),
-      ],
-    );
-    // showTecDialog<Reference>(
-    //     maxWidth: 320, maxHeight: 300, context: context, builder: (c) => CreateNoteFolder());
-  }
-
   String _getInitSearch() {
     if (breadCrumbs.last.id == UGCView.folderSearchResults &&
         breadCrumbs.last.folderName.contains(UGCView.filterSeparator)) {
@@ -382,7 +360,9 @@ class _UGCViewState extends State<UGCView> {
             child: FloatingActionButton(
               child: const Icon(Icons.add),
               tooltip: 'Create note or folder',
-              onPressed: _createNoteFolder,
+              onPressed: () {
+                showCreateNoteFolder(context);
+              },
               heroTag: null,
             ),
           ),
