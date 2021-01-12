@@ -23,6 +23,7 @@ Future<T> showTecDialog<T extends Object>({
   bool makeScrollable = true,
   Alignment alignment = Alignment.center,
   bool attachedToEdge = false,
+  bool blur = false,
 }) {
   var windowSize = Size.zero;
   if (maxWidth != null || maxHeight != null) {
@@ -34,7 +35,7 @@ Future<T> showTecDialog<T extends Object>({
       (maxHeight == null || maxHeight + 40.0 <= windowSize.height)) {
     return showTecModalPopup<T>(
       context: context,
-      barrierBlur: 5.0,
+      barrierBlur: blur ? 5.0 : null,
       alignment: alignment,
       useRootNavigator: useRootNavigator,
       semanticsDismissible: barrierDismissible,
