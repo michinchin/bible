@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -297,16 +296,19 @@ const TextStyle cardSubtitleCompactStyle = TextStyle(
   fontWeight: FontWeight.w400, // w500 == Normal
 );
 
-Future<dynamic> showScreen<T>({
-  @required BuildContext context,
-  @required Widget Function(BuildContext) builder,
-  bool useRootNavigator = true,
-}) =>
+Future<dynamic> showScreen<T>(
+        {@required BuildContext context,
+        @required Widget Function(BuildContext) builder,
+        bool useRootNavigator = true,
+        bool bottomAttached = false}) =>
     showTecDialog<T>(
       context: context,
       useRootNavigator: useRootNavigator,
       padding: EdgeInsets.zero,
-      maxWidth: 500,
-      maxHeight: math.max(500.0, (MediaQuery.of(context)?.size?.height ?? 700) - 40),
+      maxWidth: MediaQuery.of(context).size.width * 3 / 4,
+      maxHeight: bottomAttached
+          ? MediaQuery.of(context).size.height * 7 / 8
+          : MediaQuery.of(context).size.height / 1.5,
+      bottomAttached: bottomAttached,
       builder: builder,
     );

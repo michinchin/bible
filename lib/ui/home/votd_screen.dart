@@ -27,11 +27,13 @@ Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
   context.tabManager.add(TecTabEvent.hideTabBar);
   await Interstitial.init(context,
       productId: currentBibleFromContext(context)?.id, adUnitId: Const.prefNativeAdId);
+
   if (isSmallScreen(context)) {
     await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _VotdScreen(votd)));
   } else {
     await showScreen<void>(context: context, builder: (c) => _VotdScreen(votd));
   }
+
   await Interstitial.show(context);
   context.tabManager.add(TecTabEvent.showTabBar);
 }
@@ -182,19 +184,25 @@ class __VotdScreenState extends State<_VotdScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        TecText(
-                          res,
-                          style: cardSubtitleCompactStyle,
-                          textScaleFactor: contentTextScaleFactorWith(context),
-                          textAlign: TextAlign.left,
+                        const SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                          child: TecText(
+                            res,
+                            style: cardSubtitleCompactStyle,
+                            textScaleFactor: contentTextScaleFactorWith(context),
+                            textAlign: TextAlign.left,
+                          ),
                         ),
                         const SizedBox(height: 5),
-                        TecText(
-                          ref.copyWith(volume: _bible.id).label(),
-                          style: cardSubtitleCompactStyle.copyWith(
-                              color: Theme.of(context).textColor, fontWeight: FontWeight.w500),
-                          textScaleFactor: contentTextScaleFactorWith(context),
-                        ),
+                        Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                            child: TecText(
+                              ref.copyWith(volume: _bible.id).label(),
+                              style: cardSubtitleCompactStyle.copyWith(
+                                  color: Theme.of(context).textColor, fontWeight: FontWeight.w500),
+                              textScaleFactor: contentTextScaleFactorWith(context),
+                            )),
                         const SizedBox(height: 50),
                       ],
                     ),

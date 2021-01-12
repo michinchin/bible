@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import 'common.dart';
@@ -19,6 +21,7 @@ Future<T> showTecDialog<T extends Object>({
   double maxHeight,
   EdgeInsets padding = const EdgeInsets.all(20),
   bool makeScrollable = true,
+  bool bottomAttached = false,
 }) {
   var windowSize = Size.zero;
   if (maxWidth != null || maxHeight != null) {
@@ -30,13 +33,18 @@ Future<T> showTecDialog<T extends Object>({
       (maxHeight == null || maxHeight + 40.0 <= windowSize.height)) {
     return showTecModalPopup<T>(
       context: context,
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      alignment: bottomAttached ? Alignment.bottomCenter : Alignment.center,
       useRootNavigator: useRootNavigator,
       semanticsDismissible: barrierDismissible,
       builder: (context) {
         return TecPopupSheet(
-          margin: const EdgeInsets.all(32),
+          margin: bottomAttached ? EdgeInsets.zero : const EdgeInsets.all(32),
           padding: padding, // EdgeInsets.zero,
           makeScrollable: makeScrollable ?? true,
+          borderRadius: bottomAttached
+              ? const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12))
+              : BorderRadius.circular(12),
           child: Material(
             color: Colors.transparent,
             child: Container(

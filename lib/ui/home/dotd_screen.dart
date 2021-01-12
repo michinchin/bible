@@ -25,7 +25,8 @@ Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
   if (isSmallScreen(context)) {
     await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _DotdScreen(devo)));
   } else {
-    await showScreen<void>(context: context, builder: (c) => _DotdScreen(devo));
+    await showScreen<void>(
+        context: context, builder: (c) => _DotdScreen(devo), bottomAttached: true);
   }
   await Interstitial.show(context);
   context.tabManager.add(TecTabEvent.showTabBar);

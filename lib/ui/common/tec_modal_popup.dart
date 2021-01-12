@@ -85,6 +85,7 @@ class TecPopupSheet extends StatelessWidget {
   final double bgOpacity;
   final double bgBlur;
   final bool makeScrollable;
+  final BorderRadius borderRadius;
 
   ///
   /// Creates a [TecPopupSheet].
@@ -97,6 +98,7 @@ class TecPopupSheet extends StatelessWidget {
     this.padding = const EdgeInsets.all(14),
     this.bgOpacity = 1, // maybe try 0.90,
     this.bgBlur = 5.0,
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
     this.makeScrollable = true,
   })  : assert(child != null),
         super(key: key);
@@ -120,7 +122,7 @@ class TecPopupSheet extends StatelessWidget {
         child: Container(
           margin: margin ?? const EdgeInsets.all(8),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: borderRadius,
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: bgBlur, sigmaY: bgBlur),
               // child: Container(width: 300, height: 300, color: Colors.white.withOpacity(0.7)),

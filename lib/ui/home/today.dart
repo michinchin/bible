@@ -11,12 +11,12 @@ import 'saves_screen.dart';
 import 'today_screen.dart';
 import 'votd_screen.dart';
 
-Future<void> showTodayScreen(BuildContext context) => showScreen<void>(
-      context: context,
-      builder: (context) => Navigator(
-          onGenerateRoute: (settings) =>
-              MaterialPageRoute<dynamic>(settings: settings, builder: (context) => Today())),
-    );
+// Future<void> showTodayScreen(BuildContext context) => showScreen<void>(
+//       context: context,
+//       builder: (context) => Navigator(
+//           onGenerateRoute: (settings) =>
+//               MaterialPageRoute<dynamic>(settings: settings, builder: (context) => Today())),
+//     );
 
 Future<void> showVotdFromNotification(BuildContext context, DateTime date) async {
   while (Navigator.of(context).canPop()) {

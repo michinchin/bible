@@ -92,11 +92,13 @@ Future<List<int>> selectVolumesInLibrary(
 ///
 void showDetailViewForVolume(BuildContext context, Volume volume, String heroPrefix) {
   if (isSmallScreen(context)) {
-    Navigator.of(context).push<void>(MaterialPageRoute(
+    Navigator.of(context, rootNavigator: true).push<void>(MaterialPageRoute(
         builder: (context) => VolumeDetail(volume: volume, heroPrefix: heroPrefix)));
   } else {
     showScreen<void>(
-        context: context, builder: (c) => VolumeDetail(volume: volume, heroPrefix: heroPrefix));
+        context: context,
+        builder: (c) => VolumeDetail(volume: volume, heroPrefix: heroPrefix),
+        bottomAttached: true);
   }
 }
 
@@ -536,7 +538,7 @@ class _VolumesListState extends State<_VolumesList> {
             ),
           ),
           Expanded(
-            child:  TecScrollbar(
+            child: TecScrollbar(
               child: ScrollablePositionedList.builder(
                 padding: MediaQuery.of(context)?.padding,
                 itemScrollController: _scrollController,
