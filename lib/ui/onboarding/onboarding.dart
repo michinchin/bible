@@ -1,4 +1,3 @@
-import 'package:bible/ui/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
@@ -6,6 +5,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
+import '../common/common.dart';
 
 Future<void> showOnboarding(BuildContext context) async {
   await Navigator.of(context)
