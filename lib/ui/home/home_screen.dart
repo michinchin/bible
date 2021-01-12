@@ -166,13 +166,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 TabBottomBarItem(
                   tab: TecTab.switcher,
                   widget: GestureDetector(
-                      onTap: () {
-                        context.tabManager.changeTab(TecTab.reader);
-                      },
-                      child: Container(
-                          color: Theme.of(context).brightness == Brightness.light
-                              ? Colors.black12
-                              : Colors.black38)),
+                    onTap: () {
+                      context.tabManager.changeTab(TecTab.reader);
+                    },
+                    child: Container(
+                      color: barrierColorWithContext(context),
+                    ),
+                  ),
                 ),
               ],
             ),
