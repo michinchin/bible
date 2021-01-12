@@ -296,11 +296,12 @@ const TextStyle cardSubtitleCompactStyle = TextStyle(
   fontWeight: FontWeight.w400, // w500 == Normal
 );
 
-Future<dynamic> showScreen<T>(
-        {@required BuildContext context,
-        @required Widget Function(BuildContext) builder,
-        bool useRootNavigator = true,
-        bool bottomAttached = false}) =>
+Future<dynamic> showScreen<T>({
+  @required BuildContext context,
+  @required Widget Function(BuildContext) builder,
+  bool useRootNavigator = true,
+  bool bottomAttached = false,
+}) =>
     showTecDialog<T>(
       context: context,
       useRootNavigator: useRootNavigator,
@@ -309,6 +310,7 @@ Future<dynamic> showScreen<T>(
       maxHeight: bottomAttached
           ? MediaQuery.of(context).size.height * 7 / 8
           : MediaQuery.of(context).size.height / 1.5,
-      bottomAttached: bottomAttached,
+      alignment: bottomAttached ? Alignment.bottomCenter : Alignment.center,
+      attachedToEdge: bottomAttached,
       builder: builder,
     );

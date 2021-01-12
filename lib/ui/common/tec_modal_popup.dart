@@ -48,7 +48,7 @@ Future<T> showTecModalPopup<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
   Color barrierColor,
-  ImageFilter filter,
+  double barrierBlur,
   bool useRootNavigator = true,
   bool semanticsDismissible,
   Alignment alignment = Alignment.center,
@@ -66,7 +66,8 @@ Future<T> showTecModalPopup<T>({
       offset: offset,
       edgeInsets: edgeInsets ?? EdgeInsets.zero,
       animationType: animationType ?? TecPopupAnimationType.fadeScale,
-      filter: filter,
+      filter:
+          barrierBlur == null ? null : ImageFilter.blur(sigmaX: barrierBlur, sigmaY: barrierBlur),
       semanticsDismissible: semanticsDismissible,
     ),
   );
@@ -76,6 +77,13 @@ Future<T> showTecModalPopup<T>({
 ///
 /// A [TecPopupSheet] is typically passed as the child widget to
 /// [showTecModalPopup].
+///
+/// Note, [bgBlur] controls the blur of the background directly under the sheet. It does
+/// not affect the blur of the background around the sheet. To control the blur of the
+/// background around the sheet, use the `barrierBlur` parameter of `showTecModalPopup`.
+///
+/// For the blur under the sheet to be visible at all, [bgOpacity] must be less than
+/// 1.0, and the [child] must not be filled with an opaque background.
 ///
 class TecPopupSheet extends StatelessWidget {
   final Widget child;

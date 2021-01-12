@@ -21,7 +21,8 @@ Future<T> showTecDialog<T extends Object>({
   double maxHeight,
   EdgeInsets padding = const EdgeInsets.all(20),
   bool makeScrollable = true,
-  bool bottomAttached = false,
+  Alignment alignment = Alignment.center,
+  bool attachedToEdge = false,
 }) {
   var windowSize = Size.zero;
   if (maxWidth != null || maxHeight != null) {
@@ -33,18 +34,19 @@ Future<T> showTecDialog<T extends Object>({
       (maxHeight == null || maxHeight + 40.0 <= windowSize.height)) {
     return showTecModalPopup<T>(
       context: context,
-      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-      alignment: bottomAttached ? Alignment.bottomCenter : Alignment.center,
+      barrierBlur: 5.0,
+      alignment: alignment,
       useRootNavigator: useRootNavigator,
       semanticsDismissible: barrierDismissible,
+      animationType: alignment == Alignment.center
+          ? TecPopupAnimationType.fadeScale
+          : TecPopupAnimationType.slide,
       builder: (context) {
         return TecPopupSheet(
-          margin: bottomAttached ? EdgeInsets.zero : const EdgeInsets.all(32),
+          margin: _marginWith(align: alignment, attachedToEdge: attachedToEdge),
           padding: padding, // EdgeInsets.zero,
           makeScrollable: makeScrollable ?? true,
-          borderRadius: bottomAttached
-              ? const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12))
-              : BorderRadius.circular(12),
+          borderRadius: _borderRadiusWith(align: alignment, attachedToEdge: attachedToEdge),
           child: Material(
             color: Colors.transparent,
             child: Container(
@@ -65,4 +67,39 @@ Future<T> showTecDialog<T extends Object>({
 
   return Navigator.of(context, rootNavigator: useRootNavigator)
       .push<T>(MaterialPageRoute<T>(builder: builder, fullscreenDialog: true));
+}
+
+BorderRadius _borderRadiusWith({
+  @required Alignment align,
+  @required bool attachedToEdge,
+  Radius radius = const Radius.circular(12),
+}) {
+  return BorderRadius.only(
+    topLeft: attachedToEdge && !(align.isTop || align.isLeft) ? radius : Radius.zero,
+    topRight: attachedToEdge && !(align.isTop || align.isRight) ? radius : Radius.zero,
+    bottomLeft: attachedToEdge && !(align.isBottom || align.isLeft) ? radius : Radius.zero,
+    bottomRight: attachedToEdge && !(align.isBottom || align.isRight) ? radius : Radius.zero,
+  );
+}
+
+EdgeInsets _marginWith({
+  @required Alignment align,
+  @required bool attachedToEdge,
+  double padding = 32.0,
+}) {
+  return EdgeInsets.only(
+    left: attachedToEdge && align.isLeft ? 0.0 : padding,
+    top: attachedToEdge && align.isTop ? 0.0 : padding,
+    right: attachedToEdge && align.isRight ? 0.0 : padding,
+    bottom: attachedToEdge && align.isBottom ? 0.0 : padding,
+  );
+}
+
+extension TecDialogExtOnAlignment on Alignment {
+  bool get isTop => y == -1;
+  bool get isCenterY => y == 0;
+  bool get isBottom => y == 1;
+  bool get isLeft => x == -1;
+  bool get isCenterX => x == 0;
+  bool get isRight => x == 1;
 }
