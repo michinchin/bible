@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:bible/ui/common/tec_modal_popup.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -104,6 +105,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                   ? _CloseFAB(controller: _controller)
                   : _TabFAB()),
           drawer: (tabState.tab != TecTab.reader) ? null : UGCView(key: ugcViewKey),
+          drawerScrimColor: barrierColorWithContext(context),
           bottomNavigationBar: (tabState.hideBottomBar || (tabState.tab == TecTab.reader))
               ? null
               : BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
