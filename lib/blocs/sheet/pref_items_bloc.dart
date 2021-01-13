@@ -192,7 +192,7 @@ class PrefItemsBloc extends Bloc<PrefItemEvent, PrefItems> {
   Stream<PrefItems> mapEventToState(PrefItemEvent event) async* {
     final newState =
         event.when(add: _add, delete: _delete, update: _update, updateItems: _updateItems);
-    tec.dmPrint('Updated to $newState');
+    // tec.dmPrint('Updated to $newState');
     yield newState;
   }
 

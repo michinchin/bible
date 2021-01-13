@@ -121,7 +121,7 @@ Future<void> _onSelectVolume(BuildContext context, VolumeViewData viewData) asyn
   TecAutoScroll.stopAutoscroll();
 
   final volumeId = await selectVolumeInLibrary(context,
-      title: 'Switch To...', selectedVolume: viewData.volumeId);
+      title: 'Switch To', selectedVolume: viewData.volumeId);
 
   VolumeViewData newViewData;
   if (volumeId != null) {

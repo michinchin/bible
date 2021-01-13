@@ -76,10 +76,10 @@ BorderRadius _borderRadiusWith({
   Radius radius = const Radius.circular(12),
 }) {
   return BorderRadius.only(
-    topLeft: attachedToEdge && !(align.isTop || align.isLeft) ? radius : Radius.zero,
-    topRight: attachedToEdge && !(align.isTop || align.isRight) ? radius : Radius.zero,
-    bottomLeft: attachedToEdge && !(align.isBottom || align.isLeft) ? radius : Radius.zero,
-    bottomRight: attachedToEdge && !(align.isBottom || align.isRight) ? radius : Radius.zero,
+    topLeft: !attachedToEdge || !(align.isTop || align.isLeft) ? radius : Radius.zero,
+    topRight: !attachedToEdge || !(align.isTop || align.isRight) ? radius : Radius.zero,
+    bottomLeft: !attachedToEdge || !(align.isBottom || align.isLeft) ? radius : Radius.zero,
+    bottomRight: !attachedToEdge || !(align.isBottom || align.isRight) ? radius : Radius.zero,
   );
 }
 

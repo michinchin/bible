@@ -7,10 +7,16 @@ import 'package:tec_util/tec_util.dart' as tec;
 
 enum VolumesSortOpt { name, recent }
 
+// Popular volumes sorted with most popular first.
+const _popularVolumes = [9, 51, 32, 47, 49, 231, 1017, 1014, 1013];
+
+///
+/// VolumesSortBloc
+/// 
 class VolumesSortBloc extends Cubit<VolumesSort> {
   VolumesSortBloc()
       : super(VolumesSort.fromJson(tec.Prefs.shared.getString('_library_sort_settings')) ??
-            const VolumesSort(VolumesSortOpt.name, [9, 51, 32, 47, 49, 231, 1017, 1014, 1013]));
+            const VolumesSort(VolumesSortOpt.recent, _popularVolumes));
 
   void updateSortBy(VolumesSortOpt sortBy) => emit(VolumesSort(sortBy, state.recent));
 
@@ -33,6 +39,9 @@ class VolumesSortBloc extends Cubit<VolumesSort> {
   }
 }
 
+///
+/// VolumesSort
+/// 
 @immutable
 class VolumesSort extends Equatable {
   final VolumesSortOpt sortBy;
@@ -48,7 +57,7 @@ class VolumesSort extends Equatable {
     if (json is Map<String, dynamic>) {
       return VolumesSort(
         VolumesSortOpt.values[math.min(
-            VolumesSortOpt.values.length - 1, math.max(0, tec.as<int>(json['sortBy']) ?? 0))],
+            VolumesSortOpt.values.length - 1, math.max(0, tec.as<int>(json['sortBy']) ?? 1))],
         tec.asList<int>(json['recent']) ?? [],
       );
     }
