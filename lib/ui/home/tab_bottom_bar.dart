@@ -1,8 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:bible/ui/common/tec_modal_popup.dart';
-import 'package:bible/ui/library/volume_image.dart';
-import 'package:bible/ui/volume/volume_view_data_bloc.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,8 +13,11 @@ import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../ui/sheet/snap_sheet.dart';
+import '../common/tec_modal_popup.dart';
 import '../common/tec_navigator.dart';
+import '../library/volume_image.dart';
 import '../ugc/ugc_view.dart';
+import '../volume/volume_view_data_bloc.dart';
 
 class TabBottomBarItem {
   final TecTab tab;
@@ -417,27 +417,31 @@ class TecTabBar extends StatelessWidget {
       rightPadding = leftPadding = (MediaQuery.of(context).size.width - maxWidth) / 2;
     }
 
-    return BottomAppBar(
-      color: Theme.of(context).appBarTheme.color,
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 6.0,
-      child: Padding(
-        padding: EdgeInsets.only(
-            left: leftPadding, right: rightPadding, top: 15, bottom: context.bottomBarPadding),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            for (final tabItem in tabs)
-              if (tabItem.icon != null)
-                SheetIconButton(
-                  icon: tabItem.icon,
-                  text: tabItem.label,
-                  color: (tm.state.tab == tabItem.tab) ? Const.tecartaBlue : null,
-                  onPressed: () {
-                    tm?.changeTab(tabItem.tab);
-                  },
-                ),
-          ],
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {},
+      child: BottomAppBar(
+        color: Theme.of(context).appBarTheme.color,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 6.0,
+        child: Padding(
+          padding: EdgeInsets.only(
+              left: leftPadding, right: rightPadding),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              for (final tabItem in tabs)
+                if (tabItem.icon != null)
+                  SheetIconButton(
+                    icon: tabItem.icon,
+                    text: tabItem.label,
+                    color: (tm.state.tab == tabItem.tab) ? Const.tecartaBlue : null,
+                    onPressed: () {
+                      tm?.changeTab(tabItem.tab);
+                    },
+                  ),
+            ],
+          ),
         ),
       ),
     );

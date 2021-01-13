@@ -7,6 +7,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_bloc.dart';
+import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import 'selection_sheet.dart';
 
@@ -198,6 +199,7 @@ class SheetIconButton extends StatelessWidget {
         ? Theme.of(context).appBarTheme.textTheme.button
         : Theme.of(context).appBarTheme.textTheme.button.copyWith(color: color);
 
+    final padding = isSmallScreen(context) ? 15.0 : 40.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -205,22 +207,26 @@ class SheetIconButton extends StatelessWidget {
         highlightColor: Colors.transparent,
         // customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         onTap: onPressed,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: _iconColor,
-            ),
-            const SizedBox(height: 4),
-            TecText(
-              text,
-              autoSize: true,
-              textScaleFactor: 0.9,
-              style: _textStyle,
-            ),
-          ],
+        child: Padding(
+          padding: EdgeInsets.only(
+              left: padding, top: 15, right: padding, bottom: context.bottomBarPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: _iconColor,
+              ),
+              const SizedBox(height: 4),
+              TecText(
+                text,
+                autoSize: true,
+                textScaleFactor: 0.9,
+                style: _textStyle,
+              ),
+            ],
+          ),
         ),
       ),
     );
