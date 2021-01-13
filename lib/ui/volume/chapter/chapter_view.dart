@@ -566,62 +566,68 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                     // animation finishes.
                     child: TecOverflowBox(
                       maxWidth: widget.size.width,
-                      child: TecHtml(
-                        widget.html,
-                        baseUrl: widget.baseUrl,
-                        key: _tecHtmlKey,
-                        debugId: debugId,
-                        backgroundColor: Theme.of(context).backgroundColor,
-                        avoidUsingWidgetSpans: false,
-                        allowTextAlignJustify: false,
-                        scrollController: _scrollController,
-                        // The HTML is scaled via CSS.
-                        textScaleFactor: 1.0,
-                        textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
-                            ? TextStyle(color: textColor)
-                            : widget.fontName.startsWith('embedded_')
-                                ? TextStyle(
-                                    color: textColor, fontFamily: widget.fontName.substring(9))
-                                : GoogleFonts.getFont(widget.fontName, color: textColor)),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          // tec.dmPrint('Building TecHtml for ${widget.volumeId} ${widget.ref} '
+                          //     'with size ${constraints.biggest}');
+                          return TecHtml(
+                            widget.html,
+                            baseUrl: widget.baseUrl,
+                            key: _tecHtmlKey,
+                            debugId: debugId,
+                            backgroundColor: Theme.of(context).backgroundColor,
+                            avoidUsingWidgetSpans: false,
+                            allowTextAlignJustify: false,
+                            scrollController: _scrollController,
+                            // The HTML is scaled via CSS.
+                            textScaleFactor: 1.0,
+                            textStyle: _htmlDefaultTextStyle.merge(widget.fontName.isEmpty
+                                ? TextStyle(color: textColor)
+                                : widget.fontName.startsWith('embedded_')
+                                    ? TextStyle(
+                                        color: textColor, fontFamily: widget.fontName.substring(9))
+                                    : GoogleFonts.getFont(widget.fontName, color: textColor)),
 
-                        padding: padding,
+                            padding: padding,
 
-                        // Tagging HTML elements:
-                        tagHtmlElement: helper.tagHtmlElement,
+                            // Tagging HTML elements:
+                            tagHtmlElement: helper.tagHtmlElement,
 
-                        // Rendering HTML text to a TextSpan:
-                        spanForText: (text, style, tag) {
-                          // If scrolling to a verse > 1, add a post frame callback to do so.
-                          // Note, we do it here, because until `spanForText` has been called,
-                          // the HTML has not be rendered.
-                          if (_scrollToVerse > 1) {
-                            _scrollToVerse = 0;
-                            tec.dmPrint(
-                                'ChapterHtml post build will scroll to verse ${widget.ref.verse}');
-                            WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                              _viewModel.scrollToVerse(
-                                  widget.ref.verse, _tecHtmlKey, _scrollController,
-                                  animated: false);
-                            });
-                          }
+                            // Rendering HTML text to a TextSpan:
+                            spanForText: (text, style, tag) {
+                              // If scrolling to a verse > 1, add a post frame callback to do so.
+                              // Note, we do it here, because until `spanForText` has been called,
+                              // the HTML has not be rendered.
+                              if (_scrollToVerse > 1) {
+                                _scrollToVerse = 0;
+                                tec.dmPrint(
+                                    'ChapterHtml post build will scroll to verse ${widget.ref.verse}');
+                                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                  _viewModel.scrollToVerse(
+                                      widget.ref.verse, _tecHtmlKey, _scrollController,
+                                      animated: false);
+                                });
+                              }
 
-                          return _viewModel.spanForText(
-                              context, text, style, tag, selectedTextStyle,
-                              isDarkTheme: isDarkTheme);
+                              return _viewModel.spanForText(
+                                  context, text, style, tag, selectedTextStyle,
+                                  isDarkTheme: isDarkTheme);
+                            },
+
+                            // Word range selection related:
+                            selectable: !_selection.hasVerses,
+                            selectionColor: selectionColor,
+                            showSelection: !_selection.isInTrialMode,
+                            selectionMenuItems: _selection.menuItems(context, _tecHtmlKey),
+                            selectionController: _wordSelectionController,
+
+                            // `versesToShow` related (when viewing a subset of verses in the chapter):
+                            isInitialHtmlElementVisible:
+                                widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
+                            toggleVisibilityWithHtmlElement: helper.toggleVisibility,
+                            shouldSkipHtmlElement: helper.shouldSkip,
+                          );
                         },
-
-                        // Word range selection related:
-                        selectable: !_selection.hasVerses,
-                        selectionColor: selectionColor,
-                        showSelection: !_selection.isInTrialMode,
-                        selectionMenuItems: _selection.menuItems(context, _tecHtmlKey),
-                        selectionController: _wordSelectionController,
-
-                        // `versesToShow` related (when viewing a subset of verses in the chapter):
-                        isInitialHtmlElementVisible:
-                            widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
-                        toggleVisibilityWithHtmlElement: helper.toggleVisibility,
-                        shouldSkipHtmlElement: helper.shouldSkip,
                       ),
                     ),
                   ),

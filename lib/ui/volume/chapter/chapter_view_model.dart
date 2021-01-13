@@ -197,8 +197,8 @@ class ChapterViewModel {
     _verses[verse] = _KeyAndPos(GlobalKey(), null);
     return TaggableWidgetSpan(
       alignment: PlaceholderAlignment.top,
-      childWidth: 1,
-      child: SizedBox(key: _verses[verse].key, width: 1, height: 1),
+      childWidth: 0,
+      child: SizedBox(key: _verses[verse].key, width: 0, height: 0),
     );
   }
 
