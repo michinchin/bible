@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:bible/models/const.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -69,11 +72,16 @@ class _HelpPageView extends StatefulWidget {
 
 class __HelpPageViewState extends State<_HelpPageView> {
   VideoPlayerController _controller;
+  Timer _timer;
 
   @override
   void initState() {
     super.initState();
-
+    _timer = Timer(const Duration(seconds: 2), () {
+      // setState(() {
+      _timer.cancel();
+      // });
+    });
     _controller = VideoPlayerController.asset(widget.videoPath)
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
@@ -92,37 +100,41 @@ class __HelpPageViewState extends State<_HelpPageView> {
 
   @override
   Widget build(BuildContext context) {
-    final titles = ['Move Views', 'View Actions'];
-    final subtitles = [
-      'Hold and drag the title bar to move views around',
-      'Hold and drag to remove, hide, or rearrange views.'
+    final titles = [
+      'Move Views\n(hold and drag title bar to move)',
+      'Close, hide, and make full screen'
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(
-          child: TecText(
-            titles[widget.index],
-            autoSize: true,
-            style:
-                Theme.of(context).textTheme.headline5.copyWith(color: Theme.of(context).textColor),
-          ),
-        ),
-        const SizedBox(height: 20),
         if (!kIsWeb && _controller.value.initialized)
           Expanded(
               flex: 20,
-              child: AspectRatio(
-                  aspectRatio: _controller.value.aspectRatio, child: VideoPlayer(_controller))),
-        const SizedBox(height: 20),
-        Expanded(
-          child: TecText(
-            subtitles[widget.index],
-            autoSize: true,
-            style: TextStyle(color: Theme.of(context).textColor),
-          ),
-        ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  AnimatedOpacity(
+                      opacity: _timer.isActive ? 0.3 : 1,
+                      duration: const Duration(milliseconds: 250),
+                      child: AspectRatio(
+                          aspectRatio: _controller.value.aspectRatio,
+                          child: VideoPlayer(_controller))),
+                  AnimatedOpacity(
+                      opacity: _timer.isActive ? 1 : 0,
+                      duration: const Duration(milliseconds: 250),
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: Text(
+                            titles[widget.index],
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headline5
+                                .copyWith(color: Const.tecartaBlue),
+                          ))),
+                ],
+              )),
         TecDialogButton(
           child: Text(widget.index == titles.length - 1 ? 'Done' : 'Continue'),
           onPressed: () => widget.index == titles.length - 1

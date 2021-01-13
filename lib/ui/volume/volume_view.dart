@@ -102,7 +102,7 @@ class ViewableVolume extends Viewable {
   }) async {
     final volumeId = await selectVolumeInLibrary(
       context,
-      title: 'Open New...',
+      title: 'Open New',
       initialTabPrefix: options == null ? null : tec.as<String>(options['tab']),
     );
     // tec.dmPrint('selected $bibleId');

@@ -1,10 +1,14 @@
 import 'dart:math' as math;
 
 import 'package:bible/ui/common/tec_modal_popup.dart';
+import 'package:bible/ui/library/volume_image.dart';
+import 'package:bible/ui/volume/volume_view_data_bloc.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_views/tec_views.dart';
+import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
@@ -199,78 +203,145 @@ class __ExpandedViewState extends State<_ExpandedView> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final _icons = <_OffscreenView>[_OffscreenView(
-        title: 'Open New...',
-        onPressed: () {
-          context.tabManager.changeTab(TecTab.reader);
-          ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
-        },
-      )];
+    final _icons = <_OffscreenView>[
+      _OffscreenView(
+          title: 'Open New',
+          onPressed: () {
+            context.tabManager.changeTab(TecTab.reader);
+            ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
+          },
+          icon: Container(
+              width: 50,
+              height: 60,
+              // padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Theme.of(context).cardColor,
+                boxShadow: [
+                  boxShadow(
+                      color: isDarkMode ? Colors.black54 : Colors.black38,
+                      offset: const Offset(0, 3),
+                      blurRadius: 5)
+                ],
+              ),
+              child: const Icon(Icons.add, color: Const.tecartaBlue)))
+    ];
 
     // get the offscreen views...
     for (final view in context.viewManager?.state?.views) {
       if (!context.viewManager.isViewVisible(view.uid)) {
         final title = ViewManager.shared.menuTitleWith(context: context, state: view);
+        final vbloc = context.viewManager.dataBlocWithView(view.uid) as VolumeViewDataBloc;
+        final volumeId = vbloc.state.asVolumeViewData.volumeId;
         _icons.add(_OffscreenView(
-          title: title,
-          onPressed: () {
-            context.tabManager.changeTab(TecTab.reader);
-            _onSwitchViews(view);
-          },
-        ));
+            title: title,
+            onPressed: () {
+              context.tabManager.changeTab(TecTab.reader);
+              _onSwitchViews(view);
+            },
+            uid: view.uid,
+            icon: Container(
+              width: 50,
+              height: 60,
+              padding: const EdgeInsets.symmetric(horizontal: 2.5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                boxShadow: [
+                  boxShadow(
+                      color: isDarkMode ? Colors.black54 : Colors.black38,
+                      offset: const Offset(0, 3),
+                      blurRadius: 5)
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: VolumeImage(
+                  volume: VolumesRepository.shared.volumeWithId(volumeId),
+                  fit: BoxFit.fill,
+                ),
+              ),
+            )));
       }
     }
 
-    return ListView(
-        shrinkWrap: true,
-        // mainAxisSize: MainAxisSize.min,
-        // mainAxisAlignment: MainAxisAlignment.end,
-        // crossAxisAlignment: CrossAxisAlignment.end,
-        children: List<Widget>.generate(
-          _icons.length,
-          (index) => Container(
-            padding: const EdgeInsets.only(right: 10),
-            margin: const EdgeInsets.only(top: 10),
-            alignment: Alignment.centerRight,
-            child: ScaleTransition(
-              scale: CurvedAnimation(
-                parent: widget.controller,
-                curve: Interval(0, 1.0 - index / _icons.length / 2.0, curve: Curves.easeOut),
-              ),
-              child: InkWell(
-                onTap: () {
-                  _icons[index].onPressed();
-                },
-                child: Container(
-                  padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      boxShadow(
-                          color: isDarkMode ? Colors.black54 : Colors.black38,
-                          offset: const Offset(0, 3),
-                          blurRadius: 5)
+    return SafeArea(
+      child: ListView(
+          shrinkWrap: true,
+          // mainAxisSize: MainAxisSize.min,
+          // mainAxisAlignment: MainAxisAlignment.end,
+          // crossAxisAlignment: CrossAxisAlignment.end,
+          children: List<Widget>.generate(
+            _icons.length,
+            (index) => Container(
+              padding: const EdgeInsets.only(right: 10),
+              margin: const EdgeInsets.only(top: 10),
+              alignment: Alignment.centerRight,
+              child: ScaleTransition(
+                scale: CurvedAnimation(
+                  parent: widget.controller,
+                  curve: Interval(0, 1.0 - index / _icons.length / 2.0, curve: Curves.easeOut),
+                ),
+                child: Dismissible(
+                  key: ValueKey(_icons[index].title),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (_) {
+                    setState(() {
+                      context.viewManager.remove(_icons[index].uid);
+                    });
+                  },
+                  background: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    alignment: Alignment.centerRight,
+                    // color: Colors.red,
+                    child: const Icon(
+                      FeatherIcons.trash2,
+                      color: Colors.white,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Text(_icons[index].title,
+                            textAlign: TextAlign.end,
+                            style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                fontSize: contentFontSizeWith(context),
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                shadows: [
+                                  const Shadow(
+                                    offset: Offset(1.0, 1.0),
+                                    blurRadius: 5,
+                                    color: Colors.black,
+                                  ),
+                                ])),
+                      ),
+                      const SizedBox(width: 10),
+                      InkWell(
+                        onTap: () {
+                          _icons[index].onPressed();
+                        },
+                        child: _icons[index].icon,
+                      ),
+                      const SizedBox(width: 10),
                     ],
                   ),
-                  child: Text(_icons[index].title,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyText1
-                          .copyWith(fontSize: contentFontSizeWith(context))),
                 ),
               ),
             ),
-          ),
-        ).toList());
+          ).toList()),
+    );
   }
 }
 
 class _OffscreenView {
   final VoidCallback onPressed;
   final String title;
+  final Widget icon;
+  final int uid;
 
-  const _OffscreenView({@required this.onPressed, @required this.title});
+  const _OffscreenView(
+      {@required this.onPressed, @required this.title, @required this.icon, this.uid});
 }
 
 class _CloseFAB extends StatefulWidget {

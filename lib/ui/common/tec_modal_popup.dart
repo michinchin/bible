@@ -158,7 +158,7 @@ class TecPopupSheet extends StatelessWidget {
 /// Barrier color for a Cupertino modal barrier.
 /// Extracted from https://developer.apple.com/design/resources/.
 const Color _kModalBarrierColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x33000000),
+  color: Color(0x7A000000),
   darkColor: Color(0x7A000000),
 );
 
