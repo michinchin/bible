@@ -86,8 +86,9 @@ class ChapterViewModel {
 
       // Add a widget span with a global key at the start of each verse so we can
       // determine the scroll position of each verse.
-      if (v != null && tag.isInVerse && !_verses.containsKey(v)) {
-        spans.add(_widgetSpanWithKeyForVerse(tag.verse));
+      if (v != null && _currentVerse != v && tag.isInVerse) {
+        _currentVerse = v;
+        spans.add(_widgetSpanWithKeyForVerse(tag));
       }
 
       final recognizer = _recognizerWith(context, tag);
@@ -193,12 +194,15 @@ class ChapterViewModel {
     return [];
   }
 
-  InlineSpan _widgetSpanWithKeyForVerse(int verse) {
-    _verses[verse] = _KeyAndPos(GlobalKey(), null);
+  InlineSpan _widgetSpanWithKeyForVerse(VerseTag tag) {
+    final key = 'v${tag.verse}';
+    _widgetKeys[key] ??= GlobalKey();
+    _verses[tag.verse] = _KeyAndPos(_widgetKeys[key], null);
     return TaggableWidgetSpan(
       alignment: PlaceholderAlignment.top,
       childWidth: 0,
-      child: SizedBox(key: _verses[verse].key, width: 0, height: 0),
+      child: SizedBox(key: _verses[tag.verse].key, width: 0, height: 0),
+      tag: tag,
     );
   }
 
@@ -401,6 +405,7 @@ class ChapterViewModel {
   // ignore: prefer_collection_literals
   final _verses = LinkedHashMap<int, _KeyAndPos>();
 
+  int _currentVerse = 0;
   var _marginNoteVerse = 0;
   String _currentFootnoteHref;
 
@@ -495,6 +500,7 @@ class ChapterViewModel {
     }
 
     return TaggableWidgetSpan(
+      tag: tag,
       alignment: PlaceholderAlignment.middle,
       childWidth: widgetWidth,
       child: Transform.translate(
@@ -578,6 +584,7 @@ class ChapterViewModel {
     }
 
     return TaggableWidgetSpan(
+      tag: tag,
       alignment: PlaceholderAlignment.top,
       childWidth: containerWidth,
       child: GestureDetector(

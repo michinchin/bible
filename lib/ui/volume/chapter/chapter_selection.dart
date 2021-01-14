@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:tec_html/tec_html.dart';
@@ -62,6 +63,9 @@ class ChapterSelection {
 
   /// Call to clear all selections, if any.
   void clearAllSelections(BuildContext context) {
+    if (_debugMode) {
+      tec.dmPrint('ChapterSelection.clearAllSelections');
+    }
     _isInTrialMode = false;
     wordSelectionController.deselectAll();
     _clearAllSelectedVerses(context);
@@ -89,17 +93,21 @@ class ChapterSelection {
       _selectionEnd = end.tag is VerseTag ? end : null;
       if (_selectionStart == null || _selectionEnd == null) {
         _selectionStart = _selectionEnd = null;
-        tec.dmPrint('ERROR, EITHER START OR END HAS INVALID TAG!');
-        tec.dmPrint('START: $_selectionStart');
-        tec.dmPrint('END:   $_selectionEnd');
+        tec.dmPrint('ERROR: Either START or END has a tag that is not a VerseTag!');
+        tec.dmPrint('START: $start');
+        tec.dmPrint('END:   $end');
         assert(false);
       } else {
-        // tec.dmPrint('START: $_selectionStart');
-        // tec.dmPrint('END:   $_selectionEnd');
+        // if (_debugMode) {
+        //   tec.dmPrint('START: $_selectionStart');
+        //   tec.dmPrint('END:   $_selectionEnd');
+        // }
       }
     } else {
       _selectionStart = _selectionEnd = null;
-      // tec.dmPrint('No words selected.');
+      // if (_debugMode) {
+      //   tec.dmPrint('No words selected.');
+      // }
     }
 
     notifyOfSelections(context);

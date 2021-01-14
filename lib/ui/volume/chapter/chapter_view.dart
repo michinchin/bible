@@ -562,7 +562,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
 
                     // `TecOverflowBox` makes sure the `TecHtml` widget is not rebuilt
                     // during animated view size changes. It sets the width of `TecHtml`
-                    // to `widget.size.width`, which is the width it will be after the
+                    // to `widget.size.width`, which is the width it will be when the
                     // animation finishes.
                     child: TecOverflowBox(
                       maxWidth: widget.size.width,
