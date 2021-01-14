@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:bible/models/const.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../models/const.dart';
 import '../common/common.dart';
 import '../common/tec_dialog.dart';
 
