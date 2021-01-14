@@ -1,6 +1,7 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -80,105 +81,85 @@ class _HomeScreenState extends State<HomeScreen> {
         BlocProvider<SheetManagerBloc>(create: (context) => SheetManagerBloc()),
         BlocProvider<TabManagerBloc>(create: (context) => TabManagerBloc()),
       ],
-      child: BlocBuilder<TabManagerBloc, TabManagerState>(buildWhen: (p, n) {
-        // android w/gesture nav - reader needs a different overlay style
-        return (context.gestureNavigation &&
-            (p.tab == TecTab.reader ||
-                n.tab == TecTab.reader ||
-                p.hideBottomBar != n.hideBottomBar));
-      }, builder: (context, tabState) {
-        return BlocBuilder<SheetManagerBloc, SheetManagerState>(buildWhen: (p, n) {
-          // android w/gesture nav - reader needs a different overlay style for selection sheet
-          return (context.gestureNavigation &&
-              tabState.tab == TecTab.reader &&
-              (p.type == SheetType.selection || n.type == SheetType.selection));
-        }, builder: (context, sheetState) {
-          var overlayStyle = AppSettings.shared.overlayStyle(context);
-
-          // set android gestureNavigation app bar color
-          if (context.gestureNavigation &&
-              (tabState.hideBottomBar ||
-                  (tabState.tab == TecTab.reader && sheetState.type != SheetType.selection))) {
-            overlayStyle =
-                overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).backgroundColor);
-          }
-
-          return TecSystemUiOverlayWidget(
-            overlayStyle,
-            child: TabBottomBar(
-              tabs: [
-                TabBottomBarItem(
-                  tab: TecTab.today,
-                  icon: Icons.today_outlined,
-                  label: 'Today',
-                  widget: Today(),
-                ),
-                const TabBottomBarItem(
-                  tab: TecTab.library,
-                  icon: FeatherIcons.book,
-                  label: 'Library',
-                  widget: LibraryScaffold(showCloseButton: false, heroPrefix: 'home'),
-                ),
-                TabBottomBarItem(
-                  tab: TecTab.plans,
-                  icon: Icons.next_plan_outlined,
-                  label: 'Plans',
-                  widget: Container(color: Colors.blue),
-                ),
-                TabBottomBarItem(
-                  tab: TecTab.store,
-                  icon: Icons.store_outlined,
-                  label: 'Store',
-                  widget: Container(color: Colors.yellow),
-                ),
-                TabBottomBarItem(
-                  tab: TecTab.reader,
-                  label: 'Bible',
-                  widget: Stack(
-                    children: [
-                      TecScrollListener(
-                        axisDirection: AxisDirection.down,
-                        changedDirection: (direction) {
-                          if (direction == ScrollDirection.reverse) {
-                            context.read<SheetManagerBloc>().add(SheetEvent.restore);
-                          } else if (direction == ScrollDirection.forward) {
-                            context.read<SheetManagerBloc>().add(SheetEvent.collapse);
-                          }
-                        },
-                        child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
-                          builder: (context, state) {
-                            return ViewManagerWidget(
-                              state: state,
-                              topRightWidget: MainMenuFab(),
-                              topLeftWidget: JournalFab(),
-                              onSelectionChangedInViews: (views) {
-                                context.read<SelectionBloc>()?.add(SelectionState(
-                                    isTextSelected: views.isNotEmpty, viewsWithSelections: views));
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                      SnapSheet(),
-                    ],
-                  ),
-                ),
-                TabBottomBarItem(
-                  tab: TecTab.switcher,
-                  widget: GestureDetector(
-                    onTap: () {
-                      context.tabManager.changeTab(TecTab.reader);
-                    },
-                    child: Container(
-                      color: barrierColorWithContext(context),
-                    ),
-                  ),
-                ),
-              ],
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: AppSettings.shared.overlayStyle(context),
+        child: TabBottomBar(
+          tabs: [
+            TabBottomBarItem(
+              tab: TecTab.today,
+              icon: Icons.today_outlined,
+              label: 'Today',
+              widget: Today(),
             ),
-          );
-        });
-      }),
+            const TabBottomBarItem(
+              tab: TecTab.library,
+              icon: FeatherIcons.book,
+              label: 'Library',
+              widget: LibraryScaffold(showCloseButton: false, heroPrefix: 'home'),
+            ),
+            TabBottomBarItem(
+              tab: TecTab.plans,
+              icon: Icons.next_plan_outlined,
+              label: 'Plans',
+              widget: Container(color: Colors.blue),
+            ),
+            TabBottomBarItem(
+              tab: TecTab.store,
+              icon: Icons.store_outlined,
+              label: 'Store',
+              widget: Container(color: Colors.yellow),
+            ),
+            TabBottomBarItem(
+              tab: TecTab.reader,
+              label: 'Bible',
+              widget: Stack(
+                children: [
+                  Builder(builder: (context) {
+                    // a generic builder is needed here so context in changedDirection has
+                    // the SheetManagerBloc - w/o the Builder the context is the passed in
+                    // context that doesn't have the above bloc providers
+                    return TecScrollListener(
+                      axisDirection: AxisDirection.down,
+                      changedDirection: (direction) {
+                        if (direction == ScrollDirection.reverse) {
+                          context.read<SheetManagerBloc>().add(SheetEvent.restore);
+                        } else if (direction == ScrollDirection.forward) {
+                          context.read<SheetManagerBloc>().add(SheetEvent.collapse);
+                        }
+                      },
+                      child: BlocBuilder<ViewManagerBloc, ViewManagerState>(
+                        builder: (context, state) {
+                          return ViewManagerWidget(
+                            state: state,
+                            topRightWidget: MainMenuFab(),
+                            topLeftWidget: JournalFab(),
+                            onSelectionChangedInViews: (views) {
+                              context.read<SelectionBloc>()?.add(SelectionState(
+                                  isTextSelected: views.isNotEmpty, viewsWithSelections: views));
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  }),
+                  SnapSheet(),
+                ],
+              ),
+            ),
+            TabBottomBarItem(
+              tab: TecTab.switcher,
+              widget: GestureDetector(
+                onTap: () {
+                  context.tabManager.changeTab(TecTab.reader);
+                },
+                child: Container(
+                  color: barrierColorWithContext(context),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

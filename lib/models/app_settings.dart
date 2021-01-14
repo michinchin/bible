@@ -44,9 +44,12 @@ class AppSettings {
   ///
   /// OverlayStyle
   ///
-  SystemUiOverlayStyle overlayStyle(BuildContext context) {
+  SystemUiOverlayStyle overlayStyle(BuildContext context, {bool gestureReader = false}) {
     final overlayStyle = isDarkTheme() ? lightOverlayStyle : darkOverlayStyle;
-    return overlayStyle.copyWith(systemNavigationBarColor: Theme.of(context).appBarTheme.color);
+    return overlayStyle.copyWith(
+        systemNavigationBarColor: (gestureReader)
+            ? Theme.of(context).backgroundColor
+            : Theme.of(context).appBarTheme.color);
   }
 
   ///
