@@ -148,7 +148,7 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
     // Local func that returns true if the given volume is a match for the filter.
     bool _matches(vol.Volume v) =>
         // Filter out the Voice translation for now, because it crashes _BibleHtml.
-        (v.id != 201) &&
+        // (v.id != 201) &&
         // Filter by language, if set.
         (filter.language.isEmpty || (v.language == filter.language)) &&
         // Filter by category, if set.
