@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             state: state,
                             topRightWidget: MainMenuFab(),
                             topLeftWidget: JournalFab(),
-                            resizeAnimationDuration: const Duration(milliseconds: 600),
+                            resizeAnimationDuration: const Duration(milliseconds: 400),
                             onSelectionChangedInViews: (views) {
                               context.read<SelectionBloc>()?.add(SelectionState(
                                   isTextSelected: views.isNotEmpty, viewsWithSelections: views));

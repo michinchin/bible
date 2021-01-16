@@ -39,7 +39,7 @@ class DragOverlayCubit extends Cubit<DragOverlayDetails> {
   ) {
     // details.data is uid of current draggable view
     // state.uid is the view you are dragging into
-    final viewRect = context.viewManager.rectOfView(uid).rect;
+    final viewRect = context.viewManager.layoutOfView(uid).rect;
     // final viewRectSelf = context.viewManager.globalRectOfView(tec.as<int>(details.data));
     final inRect = viewRect.contains(details.offset);
     final sameView = details.data == uid;
