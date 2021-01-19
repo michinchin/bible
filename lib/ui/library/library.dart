@@ -228,7 +228,7 @@ LibraryTab _tabFromCategory(int categoryId) {
 String _tweakedName(String name) {
   switch (name) {
     case 'Bible Translations':
-      return 'Bibles';
+      return 'Translations';
     default:
       return name;
   }
