@@ -93,7 +93,7 @@ List<Widget> readTiles(BuildContext context) {
         value: AppSettings.shared.isDarkTheme()),
     _SettingsSwitch(
       secondary: Icon(Icons.link, color: color),
-      title: Text('Include Link in Copy/Share', style: textStyle),
+      title: Text('Include Link with Share', style: textStyle),
       onChanged: () => prefBloc.add(
           PrefItemEvent.update(prefItem: prefBloc.toggledPrefItem(PrefItemId.includeShareLink))),
       value: prefBloc.itemBool(PrefItemId.includeShareLink),
