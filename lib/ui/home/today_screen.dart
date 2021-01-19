@@ -207,14 +207,18 @@ class _HomeCard extends StatelessWidget {
                         filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                         child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                            color: Theme.of(context).brightness == Brightness.light
-                                ? Colors.grey.withOpacity(0.2)
-                                : Colors.black.withOpacity(0.2),
+                            color: Colors.white24,
                             child: Container(
                               alignment: Alignment.center,
                               child: TecText(
                                 subtitle,
-                                style: cardSubtitleCompactStyle.copyWith(color: Colors.white),
+                                style: cardSubtitleCompactStyle
+                                    .copyWith(color: Colors.white, shadows: <Shadow>[
+                                  const Shadow(
+                                      offset: Offset(0.50, 0.50),
+                                      blurRadius: 1.0,
+                                      color: Colors.black),
+                                ]),
                                 textScaleFactor: contentTextScaleFactorWith(context),
                                 maxLines: 3,
                                 // autoSize: true,
