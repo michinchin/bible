@@ -176,20 +176,27 @@ class SelectionSheetModel {
       c.tbloc<SelectionCmdBloc>()?.add(const SelectionCmd.deselectAll());
 
   static Future<void> copy(BuildContext c, {int uid}) async {
-    final copyWithLink = c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
-    if (copyWithLink) {
-      final text = await tecShowProgressDlg<String>(
-        context: c,
-        title: 'Copying to clipboard...',
-        future: _shareText(c, uid: uid),
-      );
-      TecShare.copy(c, text.value);
-    } else {
-      TecShare.copy(c, await _shareText(c, uid: uid));
+    TecShare.copy(c, await _shareText(c, uid: uid, maybeAddLink: false));
+
+    // never include link with copy
+    // final shareWithLink = c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    // if (shareWithLink) {
+    //   final text = await tecShowProgressDlg<String>(
+    //     context: c,
+    //     title: 'Copying to clipboard...',
+    //     future: _shareText(c, uid: uid, maybeAddLink: true),
+    //   );
+    //   TecShare.copy(c, text.value);
+    // } else {
+    //   TecShare.copy(c, await _shareText(c, uid: uid, maybeAddLink: false));
+    // }
+
+    if (c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.closeAfterCopyShare)) {
+      deselect(c);
     }
   }
 
-  static Future<String> _shareText(BuildContext c, {int uid}) async {
+  static Future<String> _shareText(BuildContext c, {int uid, bool maybeAddLink = true}) async {
     final bloc = c.viewManager; //ignore: close_sinks
     final views = bloc.visibleViewsWithSelections.toList();
     final buffer = StringBuffer('');
@@ -199,10 +206,10 @@ class SelectionSheetModel {
 
       final v = await VolumesRepository.shared.bibleWithId(bibleId).referenceAndVerseTextWith(ref);
       final verses = v.value.verseText;
-      final copyWithLink = c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+      final shareWithLink = c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
       final verse = ChapterVerses.formatForShare([v.value.reference], verses);
       buffer.write(verse);
-      if (copyWithLink) {
+      if (maybeAddLink && shareWithLink) {
         buffer.write(await TecShare.shareLink(ref));
       }
     }
@@ -236,7 +243,11 @@ class SelectionSheetModel {
       );
       TecShare.share(text.value);
     } else {
-      TecShare.share(await _shareText(c, uid: uid));
+      TecShare.share(await _shareText(c, uid: uid, maybeAddLink: false));
+    }
+
+    if (c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.closeAfterCopyShare)) {
+      deselect(c);
     }
   }
 

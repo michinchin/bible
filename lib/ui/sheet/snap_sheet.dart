@@ -21,8 +21,6 @@ class SnapSheet extends StatefulWidget {
 }
 
 class _SnapSheetState extends State<SnapSheet> {
-  List<Widget> sheets;
-
   @override
   void initState() {
     super.initState();
@@ -40,38 +38,6 @@ class _SnapSheetState extends State<SnapSheet> {
 
   @override
   Widget build(BuildContext context) {
-    sheets ??= [
-      BlocBuilder<TabManagerBloc, TabManagerState>(
-        builder: (context, tabState) {
-          return AnnotatedRegion<SystemUiOverlayStyle>(
-            value: AppSettings.shared.overlayStyle(context,
-                gestureReader: context.gestureNavigation && tabState.tab == TecTab.reader),
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 150),
-              opacity: (tabState.tab == TecTab.switcher) ? 0.0 : 1.0,
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: EdgeInsets.only(right: 15, bottom: context.fullBottomBarPadding),
-                  child: FloatingActionButton(
-                    elevation: 3,
-                    heroTag: null,
-                    backgroundColor: Const.tecartaBlue,
-                    child: const Icon(TecIcons.tecartabiblelogo, color: Colors.white),
-                    onPressed: () {
-                      context.tabManager.changeTab(TecTab.switcher);
-                    },
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-      const _SheetShadow(key: ValueKey(_selectionSheetKey), child: SelectionSheet()),
-      Container(),
-    ];
-
     return BlocListener<SelectionBloc, SelectionState>(
       listenWhen: (previous, current) => previous.isTextSelected != current.isTextSelected,
       listener: (context, state) {
@@ -82,6 +48,47 @@ class _SnapSheetState extends State<SnapSheet> {
         }
       },
       child: BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, state) {
+        Widget sheet;
+
+        if (state.type == SheetType.main) {
+          sheet = Center(
+            child: BlocBuilder<TabManagerBloc, TabManagerState>(
+              builder: (context, tabState) {
+                return AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: AppSettings.shared.overlayStyle(context,
+                      gestureReader: context.gestureNavigation && tabState.tab == TecTab.reader),
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 150),
+                    opacity: (tabState.tab == TecTab.switcher) ? 0.0 : 1.0,
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 15, bottom: context.fullBottomBarPadding),
+                        child: FloatingActionButton(
+                          elevation: 3,
+                          heroTag: null,
+                          backgroundColor: Const.tecartaBlue,
+                          child: const Icon(TecIcons.tecartabiblelogo, color: Colors.white),
+                          onPressed: () {
+                            context.tabManager.changeTab(TecTab.switcher);
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        } else if (state.type == SheetType.selection) {
+          sheet = const _SheetShadow(key: ValueKey(_selectionSheetKey), child: SelectionSheet());
+        } else {
+          sheet = AnnotatedRegion<SystemUiOverlayStyle>(
+              value: AppSettings.shared
+                  .overlayStyle(context, gestureReader: context.gestureNavigation),
+              child: Container());
+        }
+
         return Align(
           alignment: Alignment.bottomCenter,
           child: AnimatedSwitcher(
@@ -102,7 +109,7 @@ class _SnapSheetState extends State<SnapSheet> {
                 return FadeTransition(opacity: fadeAnimation, child: child);
               }
             },
-            child: sheets[state.type.index],
+            child: sheet,
           ),
         );
       }),
@@ -204,7 +211,7 @@ class SheetIconButton extends StatelessWidget {
         ? Theme.of(context).appBarTheme.textTheme.button
         : Theme.of(context).appBarTheme.textTheme.button.copyWith(color: color);
 
-    final padding = isSmallScreen(context) ? 15.0 : 40.0;
+    final padding = isSmallScreen(context) ? 0.0 : 40.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -226,6 +233,7 @@ class SheetIconButton extends StatelessWidget {
               const SizedBox(height: 4),
               TecText(
                 text,
+                maxLines: 1,
                 autoSize: true,
                 textScaleFactor: 0.9,
                 style: _textStyle,
