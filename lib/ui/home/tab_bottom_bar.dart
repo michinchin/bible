@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -153,7 +152,15 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                           onGenerateRoute: (settings) => MaterialPageRoute<dynamic>(
                             settings: settings,
                             builder: (context) {
-                              return widget.tabs[i].widget;
+                              final child = widget.tabs[i].widget;
+                              if (widget.tabs[i].tab == TecTab.switcher) {
+                                return GestureDetector(
+                                    onTap: () {
+                                      context.tabManager.changeTab(TecTab.reader);
+                                    },
+                                    child: child);
+                              }
+                              return child;
                             },
                           ),
                         ),
@@ -265,71 +272,82 @@ class __ExpandedViewState extends State<_ExpandedView> {
     }
 
     return SafeArea(
-      child: ListView(
-          shrinkWrap: true,
-          // mainAxisSize: MainAxisSize.min,
-          // mainAxisAlignment: MainAxisAlignment.end,
-          // crossAxisAlignment: CrossAxisAlignment.end,
-          children: List<Widget>.generate(
-            _icons.length,
-            (index) => Container(
-              padding: const EdgeInsets.only(right: 10),
-              margin: const EdgeInsets.only(top: 10),
-              alignment: Alignment.centerRight,
-              child: ScaleTransition(
-                scale: CurvedAnimation(
-                  parent: widget.controller,
-                  curve: Interval(0, 1.0 - index / _icons.length / 2.0, curve: Curves.easeOut),
-                ),
-                child: Dismissible(
-                  key: ValueKey(_icons[index].title),
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (_) {
-                    setState(() {
-                      context.viewManager.remove(_icons[index].uid);
-                    });
-                  },
-                  background: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    alignment: Alignment.centerRight,
-                    // color: Colors.red,
-                    child: const Icon(
-                      FeatherIcons.trash2,
-                      color: Colors.white,
-                    ),
+      child: SingleChildScrollView(
+        child: Column(
+            // shrinkWrap: true,
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: List<Widget>.generate(
+              _icons.length,
+              (index) => Container(
+                padding: const EdgeInsets.only(right: 10),
+                margin: const EdgeInsets.only(top: 10),
+                child: ScaleTransition(
+                  scale: CurvedAnimation(
+                    parent: widget.controller,
+                    curve: Interval(0, 1.0 - index / _icons.length / 2.0, curve: Curves.easeOut),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Text(_icons[index].title,
-                            textAlign: TextAlign.end,
-                            style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                fontSize: contentFontSizeWith(context),
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                shadows: [
-                                  const Shadow(
-                                    offset: Offset(1.0, 1.0),
-                                    blurRadius: 5,
-                                    color: Colors.black,
-                                  ),
-                                ])),
+                  child: Dismissible(
+                    key: ValueKey(_icons[index].title),
+                    direction: _icons[index].title == 'Open New'
+                        ? DismissDirection.none
+                        : DismissDirection.endToStart,
+                    onDismissed: (_) {
+                      setState(() {
+                        context.viewManager.remove(_icons[index].uid);
+                      });
+                    },
+                    background: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      alignment: Alignment.centerRight,
+                      // color: Colors.red,
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
                       ),
-                      const SizedBox(width: 10),
-                      InkWell(
-                        onTap: () {
-                          _icons[index].onPressed();
-                        },
-                        child: _icons[index].icon,
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        _icons[index].onPressed();
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: Text(_icons[index].title,
+                                textAlign: TextAlign.end,
+                                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                    fontSize: contentFontSizeWith(context),
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    shadows: [
+                                      const Shadow(
+                                        offset: Offset(1.0, 1.0),
+                                        blurRadius: 5,
+                                        color: Colors.black,
+                                      ),
+                                    ])),
+                          ),
+                          const SizedBox(width: 10),
+                          if (_icons[index].uid != null)
+                            LongPressDraggable(
+                                data: _icons[index].uid,
+                                onDragStarted: () => context.tabManager.changeTab(TecTab.reader),
+                                feedback: _icons[index].icon,
+                                child: _icons[index].icon)
+                          else
+                            _icons[index].icon,
+                          const SizedBox(width: 10),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ).toList()),
+            ).toList()),
+      ),
     );
   }
 }
@@ -425,8 +443,7 @@ class TecTabBar extends StatelessWidget {
         shape: const CircularNotchedRectangle(),
         notchMargin: 6.0,
         child: Padding(
-          padding: EdgeInsets.only(
-              left: leftPadding, right: rightPadding),
+          padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [

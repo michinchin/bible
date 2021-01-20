@@ -308,7 +308,7 @@ Future<dynamic> showScreen<T>({
       padding: EdgeInsets.zero,
       maxWidth: MediaQuery.of(context).size.width * 3 / 4,
       maxHeight: bottomAttached
-          ? MediaQuery.of(context).size.height * 7 / 8
+          ? MediaQuery.of(context).size.height * 2.8 / 3
           : MediaQuery.of(context).size.height / 1.5,
       alignment: bottomAttached ? Alignment.bottomCenter : Alignment.center,
       attachedToEdge: bottomAttached,

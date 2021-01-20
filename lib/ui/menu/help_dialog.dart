@@ -78,9 +78,9 @@ class __HelpPageViewState extends State<_HelpPageView> {
   void initState() {
     super.initState();
     _timer = Timer(const Duration(seconds: 2), () {
-      // setState(() {
-      _timer.cancel();
-      // });
+      setState(() {
+        _timer.cancel();
+      });
     });
     _controller = VideoPlayerController.asset(widget.videoPath)
       ..initialize().then((_) {
@@ -110,31 +110,29 @@ class __HelpPageViewState extends State<_HelpPageView> {
       children: [
         if (!kIsWeb && _controller.value.initialized)
           Expanded(
-              flex: 20,
               child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  AnimatedOpacity(
-                      opacity: _timer.isActive ? 0.3 : 1,
-                      duration: const Duration(milliseconds: 250),
-                      child: AspectRatio(
-                          aspectRatio: _controller.value.aspectRatio,
-                          child: VideoPlayer(_controller))),
-                  AnimatedOpacity(
-                      opacity: _timer.isActive ? 1 : 0,
-                      duration: const Duration(milliseconds: 250),
-                      child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 40),
-                          child: Text(
-                            titles[widget.index],
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headline5
-                                .copyWith(color: Const.tecartaBlue),
-                          ))),
-                ],
-              )),
+            alignment: Alignment.center,
+            children: [
+              AnimatedOpacity(
+                  opacity: _timer.isActive ? 0.3 : 1,
+                  duration: const Duration(milliseconds: 250),
+                  child: AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio, child: VideoPlayer(_controller))),
+              AnimatedOpacity(
+                  opacity: _timer.isActive ? 1 : 0,
+                  duration: const Duration(milliseconds: 250),
+                  child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Text(
+                        titles[widget.index],
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headline5
+                            .copyWith(color: Const.tecartaBlue),
+                      ))),
+            ],
+          )),
         TecDialogButton(
           child: Text(widget.index == titles.length - 1 ? 'Done' : 'Continue'),
           onPressed: () => widget.index == titles.length - 1

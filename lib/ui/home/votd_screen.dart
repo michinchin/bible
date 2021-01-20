@@ -203,7 +203,7 @@ class __VotdScreenState extends State<_VotdScreen> {
                                   color: Theme.of(context).textColor, fontWeight: FontWeight.w500),
                               textScaleFactor: contentTextScaleFactorWith(context),
                             )),
-                        const SizedBox(height: 50),
+                        const SizedBox(height: 300),
                       ],
                     ),
                   ),
