@@ -275,14 +275,15 @@ class _VotdsScreen extends StatelessWidget {
 
 Bible currentBibleFromContext(BuildContext context) {
   // find bible translation from views
-  final bible = VolumesRepository.shared.bibleWithId(((context.viewManager.state.views
-              .firstWhere(
-                  (v) =>
-                      v.type == Const.viewTypeVolume &&
-                      isBibleId(VolumeViewData.fromContext(context, v.uid)?.volumeId),
-                  orElse: () => null)
-              ?.volumeDataWith(context))
-          ?.volumeId) ??
-      defaultBibleId);
+  final viewState = context.viewManager.state.views.firstWhere(
+      (v) =>
+          (context.viewManager?.state?.maximizedViewUid == v.uid) ||
+          (v.type == Const.viewTypeVolume &&
+              isBibleId(VolumeViewData.fromContext(context, v.uid)?.volumeId) &&
+              !context.viewManager.state.hasMaximizedView),
+      orElse: () => null);
+
+  final bible = VolumesRepository.shared
+      .bibleWithId((viewState?.volumeDataWith(context)?.volumeId) ?? defaultBibleId);
   return bible;
 }
