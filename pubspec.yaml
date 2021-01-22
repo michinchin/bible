@@ -72,7 +72,7 @@ dependencies:
     hosted:
       name: tec_user_account
       url: http://noah.tecarta.com:8100
-    version: ^2.0.20
+    version: ^2.0.21
   tec_util:
     hosted:
       name: tec_util
