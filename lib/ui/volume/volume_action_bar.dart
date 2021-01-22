@@ -130,7 +130,7 @@ Future<void> _onSelectVolume(BuildContext context, VolumeViewData viewData) asyn
       newViewData = VolumeViewData(volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
     } else if (isStudyVolumeId(volumeId)) {
       newViewData =
-          StudyViewData(0, volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
+          StudyViewData(volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
     } else {
       assert(false);
     }

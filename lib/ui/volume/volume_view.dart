@@ -26,10 +26,7 @@ class ViewableVolume extends Viewable {
       ],
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body:
-            // Stack(
-            //   children: [
-            BlocBuilder<VolumeViewDataBloc, ViewData>(
+        body: BlocBuilder<VolumeViewDataBloc, ViewData>(
           // When the ViewData changes, only rebuild if it changes type (Bible or Study Volume).
           buildWhen: (a, b) =>
               isBibleId(a.asVolumeViewData.volumeId) != isBibleId(b.asVolumeViewData.volumeId),
@@ -38,43 +35,9 @@ class ViewableVolume extends Viewable {
                 ? PageableChapterView(viewState: state, size: size)
                 : StudyView(viewState: state, size: size);
             context.tbloc<DragOverlayCubit>().clear();
-
             return DragTargetView(child: child, viewUid: state.uid);
           },
         ),
-
-        //     Container(
-        //       height: 44,
-        //       decoration: BoxDecoration(
-        //         color: Colors.white,
-        //         gradient: LinearGradient(
-        //           tileMode: TileMode.clamp,
-        //           begin: const Alignment(0.0, -0.75),
-        //           end: const Alignment(0.0, 1.0),
-        //           colors: [Theme.of(context).backgroundColor, Colors.white.withOpacity(0.0)],
-        //         ),
-        //       ),
-        //     ),
-        //     Positioned(
-        //       bottom: 0.0,
-        //       height: 44,
-        //       left: 0.0,
-        //       right: 0.0,
-        //       child: Container(
-        //         // height: 44,
-        //         decoration: BoxDecoration(
-        //           color: Colors.white,
-        //           gradient: LinearGradient(
-        //             tileMode: TileMode.clamp,
-        //             begin: const Alignment(0.0, -1.0),
-        //             end: const Alignment(0.0, 0.75),
-        //             colors: [Colors.white.withOpacity(0.0), Theme.of(context).backgroundColor],
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ],
-        // ),
       ),
     );
   }
@@ -108,13 +71,18 @@ class ViewableVolume extends Viewable {
     // tec.dmPrint('selected $bibleId');
 
     if (volumeId != null) {
-      final viewUid = currentViewId ?? context.viewManager?.state?.views?.lastWhere((el) => el.type == Const.viewTypeVolume, orElse: () => null)?.uid;
-      final previous = viewUid == null ? VolumeViewData.fromJson(null) : VolumeViewData.fromContext(context, viewUid);
+      final viewUid = currentViewId ??
+          context.viewManager?.state?.views
+              ?.lastWhere((el) => el.type == Const.viewTypeVolume, orElse: () => null)
+              ?.uid;
+      final previous = viewUid == null
+          ? VolumeViewData.fromJson(null)
+          : VolumeViewData.fromContext(context, viewUid);
       assert(previous != null);
       if (isBibleId(volumeId)) {
         return VolumeViewData(volumeId, previous.bcv, 0, useSharedRef: previous.useSharedRef);
       } else if (isStudyVolumeId(volumeId)) {
-        return StudyViewData(0, volumeId, previous.bcv, 0, useSharedRef: previous.useSharedRef);
+        return StudyViewData(volumeId, previous.bcv, 0, useSharedRef: previous.useSharedRef);
       }
       assert(false);
     }

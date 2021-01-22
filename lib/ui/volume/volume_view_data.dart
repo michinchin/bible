@@ -5,6 +5,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 
 import '../../blocs/shared_bible_ref_bloc.dart';
+import 'study/study_view_data.dart';
 
 export 'package:tec_views/tec_views.dart' show ViewData;
 
@@ -36,7 +37,14 @@ class VolumeViewData extends ViewData {
       );
 
   factory VolumeViewData.fromContext(BuildContext context, int viewUid) {
-    return VolumeViewData.fromJson(context.viewManager?.dataWithView(viewUid));
+    final jsonMap = tec.parseJsonSync(context.viewManager?.dataWithView(viewUid));
+
+    // This is kinda a hack, but if the json has a 'studyTab' key, it is `StudyViewData`.
+    if (jsonMap?.containsKey('studyTab') ?? false) {
+      return StudyViewData.fromJson(jsonMap);
+    } else {
+      return VolumeViewData.fromJson(jsonMap);
+    }
   }
 
   String bookNameAndChapter({bool useShortBookName = false}) =>
@@ -93,6 +101,5 @@ extension VolumeViewDataExtOnViewData on ViewData {
 }
 
 extension ViewManagerExtOnViewState on ViewState {
-  VolumeViewData volumeDataWith(BuildContext context) =>
-      VolumeViewData.fromContext(context, uid);
+  VolumeViewData volumeDataWith(BuildContext context) => VolumeViewData.fromContext(context, uid);
 }
