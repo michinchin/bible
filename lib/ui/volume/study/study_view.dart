@@ -119,11 +119,22 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
                             ))
                         .toList();
 
-                    return Scaffold(
-                      resizeToAvoidBottomInset: false,
-                      body: TecAutoHideAppBar(
-                        appBar: appBar,
-                        body: TabBarView(children: tabContents, controller: tabController),
+                    return BlocProvider<TecAutoHideAppBarBloc>(
+                      create: (_) => TecAutoHideAppBarBloc(hide: false),
+                      child: Builder(
+                        builder: (context) {
+                          return Scaffold(
+                            resizeToAvoidBottomInset: false,
+                            body: TecAutoHideAppBar(
+                              appBar: appBar,
+                              body: TabBarView(
+                                physics: const NeverScrollableScrollPhysics(),
+                                children: tabContents,
+                                controller: tabController,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },
