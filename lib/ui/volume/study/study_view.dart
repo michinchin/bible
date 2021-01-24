@@ -105,9 +105,9 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
                       ],
                     );
 
-                    final top = appBar.preferredSize.height;
+                    const top = 80.0; // appBar.preferredSize.height;
                     tec.dmPrint('top padding: $top');
-                    final padding = EdgeInsets.fromLTRB(0, top, 0, 50);
+                    const padding = EdgeInsets.fromLTRB(0, top, 0, 50);
 
                     final tabContents = StudySection.values
                         .map((section) => _TabContent(

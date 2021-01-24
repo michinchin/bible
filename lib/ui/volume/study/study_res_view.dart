@@ -12,6 +12,8 @@ import 'shared_app_bar_bloc.dart';
 import 'study_res_bloc.dart';
 import 'study_res_card.dart';
 
+const _altTopPadding = 130.0;
+
 class StudyResView extends StatelessWidget {
   final Size viewSize;
   final EdgeInsets padding;
@@ -29,7 +31,10 @@ class StudyResView extends StatelessWidget {
             case ResourceType.folder:
             case ResourceType.link:
               tec.dmPrint('StudyResView handled type $type');
-              return _Folder(studyRes: studyRes, viewSize: viewSize, padding: padding);
+              return _Folder(
+                  studyRes: studyRes,
+                  viewSize: viewSize,
+                  padding: studyRes.resId == 0 ? padding : padding.copyWith(top: _altTopPadding));
               break;
 
             case ResourceType.chart:
@@ -43,7 +48,12 @@ class StudyResView extends StatelessWidget {
 
             case ResourceType.article:
             case ResourceType.introduction:
-              return _Article(studyRes: studyRes, viewSize: viewSize, padding: padding);
+              return _Article(
+                  studyRes: studyRes,
+                  viewSize: viewSize,
+                  padding: type == ResourceType.introduction
+                      ? padding
+                      : padding.copyWith(top: _altTopPadding));
               break;
 
             case ResourceType.reference:
@@ -92,6 +102,8 @@ class _Folder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bible = VolumesRepository.shared.volumeWithId(studyRes.volumeId)?.assocBible();
+
     return tec.isNullOrEmpty(studyRes.children)
         ? const Center(child: LoadingIndicator())
         : TecScrollbar(
@@ -100,11 +112,12 @@ class _Folder extends StatelessWidget {
               // physics: const AlwaysScrollableScrollPhysics(),
               itemCount: studyRes.children.length + 1,
               itemBuilder: (context, index) {
-                if (index == 0) return SizedBox(height: studyRes.resId == 0 ? 80 : 130); // padding.top);
+                if (index == 0) return SizedBox(height: padding.top);
                 final res = studyRes.children[index - 1];
                 return StudyResCard(
                   res: res,
                   parent: studyRes.res,
+                  bible: bible,
                   onTap: () => onTap(context, res),
                 );
               },
@@ -158,7 +171,6 @@ class _Article extends StatelessWidget {
                   final marginWidth = (viewSize.width * _marginPercent).roundToDouble();
                   var _padding = (padding ?? EdgeInsets.zero);
                   _padding = padding.copyWith(
-                    top: 130,
                     left: padding.left + marginWidth,
                     right: padding.right + marginWidth,
                   );
