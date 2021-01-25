@@ -109,7 +109,7 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
                     tec.dmPrint('top padding: $top');
                     const padding = EdgeInsets.fromLTRB(0, top, 0, 50);
 
-                    final tabContents = StudySection.values
+                    final tabContents = state.sections
                         .map((section) => _TabContent(
                               viewState: widget.viewState,
                               size: widget.size,
