@@ -91,9 +91,20 @@ class DragTargetView extends StatelessWidget {
           // tec.dmPrint('$b ${state.uid}');
           context.tbloc<DragOverlayCubit>().clear();
           if (b != viewUid) {
-            context.viewManager?.move(
-                fromPosition: context.viewManager.indexOfView(b),
-                toPosition: context.viewManager.indexOfView(viewUid));
+            // ignore: close_sinks
+            final vmBloc = context.viewManager;
+
+            if (vmBloc == null) {
+              return;
+            }
+
+            if (vmBloc.state.maximizedViewUid > 0) {
+              vmBloc.maximize(b);
+            } else {
+              vmBloc.move(
+                  fromPosition: context.viewManager.indexOfView(b),
+                  toPosition: context.viewManager.indexOfView(viewUid));
+            }
           }
         },
         onMove: (details) => context.tbloc<DragOverlayCubit>().onMove(context, details),
