@@ -41,11 +41,12 @@ class DragOverlayCubit extends Cubit<DragOverlayDetails> {
     // state.uid is the view you are dragging into
     final viewRect = context.viewManager.layoutOfView(uid).rect;
     // final viewRectSelf = context.viewManager.globalRectOfView(tec.as<int>(details.data));
-    final inRect = viewRect.contains(details.offset);
+    final inRect = viewRect.withinBoundsOf(details.offset);
     final sameView = details.data == uid;
 
     // tec.dmPrint('View At ${context.viewManager.indexOfView(currentUid)}: $inRect');
-    // tec.dmPrint('inRect:$inRect and sameView:$sameView');
+    // tec.dmPrint('inRect:$inRect and sameView:$sameƒView');
+    // tec.dmPrint('${details.offset} ${viewRect.left}');
 
     emit(state.copyWith(
       inRect: inRect,
@@ -64,14 +65,13 @@ class DragOverlayCubit extends Cubit<DragOverlayDetails> {
         inRect: false, sameView: false,
         // inIcon: false
       ));
-  void leaveRect() => emit(state.copyWith(inRect: false));
+  void leaveRect() => emit(state.copyWith(sameView: false));
 }
 
-// extension RectExtension on Rect {
-//   bool withinBoundsOf(Offset offset) =>
-//       (offset.dx > left && offset.dx < right && offset.dy > top && offset.dy < bottom) ||
-//       !(offset.dx > left && offset.dx < right && offset.dy > top && offset.dy < bottom);
-// }
+extension RectExtension on Rect {
+  bool withinBoundsOf(Offset offset) =>
+      offset.dx + 500 > left && offset.dx < right && offset.dy > top && offset.dy < bottom;
+}
 
 class DragTargetView extends StatelessWidget {
   final Widget child;
@@ -103,7 +103,8 @@ class DragTargetView extends StatelessWidget {
             } else {
               vmBloc.move(
                   fromPosition: context.viewManager.indexOfView(b),
-                  toPosition: context.viewManager.indexOfView(viewUid));
+                  toPosition: context.viewManager.indexOfView(viewUid),
+                  unhide: true);
             }
           }
         },

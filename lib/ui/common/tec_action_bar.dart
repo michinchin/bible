@@ -80,12 +80,11 @@ class ActionBar extends StatelessWidget {
     var min = false;
 
     final actualItems = items;
-    if (actualItems.idealWidth(cache, textStyle, scale) + (sidePadding * 2.0) >
-        constraints.maxWidth) {
+    final idealWidth = actualItems.idealWidth(cache, textStyle, scale) + (sidePadding * 2.0);
+    final minWidth = actualItems.minWidth(cache, textStyle, scale) + (sidePadding * 2.0);
+    if (idealWidth > constraints.maxWidth) {
       min = true;
-      while (actualItems.minWidth(cache, textStyle, scale) + (sidePadding * 2.0) >
-              constraints.maxWidth &&
-          actualItems.length > 1) {
+      while (minWidth > constraints.maxWidth && actualItems.length > 1) {
         final minPriority =
             actualItems.fold<int>(tec.maxSafeInt, (v, item) => math.min(v, item.priority));
         final i = actualItems.indexWhere((item) => item.priority == minPriority);
@@ -115,7 +114,10 @@ class ActionBar extends StatelessWidget {
           ),
         ));
     return LongPressDraggable<int>(
-        data: viewUid, feedback: Opacity(opacity: 0.8, child: child), child: child);
+        data: viewUid,
+        hapticFeedbackOnStart: true,
+        feedback: Opacity(opacity: 0.8, child: child),
+        child: child);
   }
 }
 
