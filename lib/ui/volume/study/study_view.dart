@@ -30,6 +30,7 @@ class StudyView extends StatefulWidget {
 
 class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
   TabController _tabController;
+  var _currentVolumeId = 0;
 
   @override
   void dispose() {
@@ -37,8 +38,22 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  TabController _updateTabController(BuildContext context, {int initialIndex = 0, int length}) {
-    if (_tabController == null || _tabController.length != length) {
+  TabController _updateTabController(
+    BuildContext context, {
+    @required int initialIndex,
+    @required int length,
+    @required int volumeId,
+  }) {
+    assert(initialIndex != null && length != null && volumeId != null);
+    if (_tabController == null || _tabController.length != length || _currentVolumeId != volumeId) {
+      // If the volume changed, we need to clear the shared app bar.
+      if (_currentVolumeId != volumeId) {
+        tec.dmPrint('StudyView: clearing the shared app bar because the volume changed '
+            'from $_currentVolumeId to $volumeId');
+        _currentVolumeId = volumeId;
+        context.tbloc<SharedAppBarBloc>().update(null);
+      }
+
       _tabController?.dispose();
       _tabController = TabController(initialIndex: initialIndex, length: length, vsync: this)
         ..addListener(() {
@@ -75,18 +90,19 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
               final _notesTitle = 'Notes'.i18n;
               final _titles = [_aboutTitle, _introTitle, _resourcesTitle, _notesTitle];
 
-              final tabTitles = state.sections.map((e) => _titles[e.index]).toList();
+              final tabTitles = state.sections.map((e) => _titles[e.index]);
 
-              final tabs = tabTitles.map((e) => Tab(text: e)).toList();
+              final tabs = tabTitles.map((e) => Tab(key: ValueKey(e), text: e)).toList();
 
               return BlocProvider(
                 create: (context) => SharedAppBarBloc(),
                 child: BlocBuilder<SharedAppBarBloc, SharedAppBarState>(
                   builder: (context, appBarState) {
-                    final studyViewData = context.tbloc<VolumeViewDataBloc>().state.asStudyViewData;
-
                     final tabController = _updateTabController(context,
-                        length: tabs.length, initialIndex: studyViewData.studyTab);
+                        initialIndex:
+                            context.tbloc<VolumeViewDataBloc>().state.asStudyViewData.studyTab,
+                        length: tabs.length,
+                        volumeId: state.volumeId);
 
                     final appBar = PreferredSizeColumn(
                       padding: const EdgeInsets.only(top: 20),
@@ -106,11 +122,12 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
                     );
 
                     const top = 80.0; // appBar.preferredSize.height;
-                    tec.dmPrint('top padding: $top');
+                    // tec.dmPrint('top padding: $top');
                     const padding = EdgeInsets.fromLTRB(0, top, 0, 50);
 
                     final tabContents = state.sections
                         .map((section) => _TabContent(
+                              key: ValueKey(section.index),
                               viewState: widget.viewState,
                               size: widget.size,
                               padding: padding,
@@ -121,20 +138,16 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
 
                     return BlocProvider<TecAutoHideAppBarBloc>(
                       create: (_) => TecAutoHideAppBarBloc(hide: false),
-                      child: Builder(
-                        builder: (context) {
-                          return Scaffold(
-                            resizeToAvoidBottomInset: false,
-                            body: TecAutoHideAppBar(
-                              appBar: appBar,
-                              body: TabBarView(
-                                physics: const NeverScrollableScrollPhysics(),
-                                children: tabContents,
-                                controller: tabController,
-                              ),
-                            ),
-                          );
-                        },
+                      child: Scaffold(
+                        resizeToAvoidBottomInset: false,
+                        body: TecAutoHideAppBar(
+                          appBar: appBar,
+                          body: TabBarView(
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: tabContents,
+                            controller: tabController,
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -167,6 +180,8 @@ class _TabContent extends StatelessWidget {
     } else {
       final isIntro = section == StudySection.intros;
       final isResources = section == StudySection.resources;
+
+      // tec.dmPrint('_TabContent building $section');
 
       return BlocProvider<StudyResBloc>(
         create: (_) {
@@ -224,8 +239,11 @@ class _RootFolderNavigator extends StatelessWidget {
         builder: (context) => BlocBuilder<StudyResBloc, StudyRes>(
           builder: (context, studyRes) {
             return Scaffold(
-              // appBar: MinHeightAppBar(appBar: AppBar(elevation: 0)),
-              body: StudyResView(viewSize: viewSize, padding: padding),
+              body: StudyResView(
+                // key: ValueKey(studyRes.valueKey),
+                viewSize: viewSize,
+                padding: padding,
+              ),
             );
           },
         ),

@@ -89,6 +89,8 @@ class StudyRes extends Equatable {
   })  : assert(volumeId != null && volumeId > 0),
         assert(resId != null || (book != null && chapter != null));
 
+  int get valueKey => (volumeId * 100000) + (resId ?? (book * 1000) + chapter);
+
   @override
   List<Object> get props => [volumeId, resId, book, chapter, res, html, error];
 
