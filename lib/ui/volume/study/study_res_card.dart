@@ -217,7 +217,7 @@ class _ReferenceWidget extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(bible.titleWithBookAndChapter(res.book, res.chapter), style: _titleStyle),
+          Text(bible.titleWithResource(res), style: _titleStyle),
           const SizedBox(height: 4),
           Text(res.verseText)
         ],
