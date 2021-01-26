@@ -289,7 +289,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
                     curve: Interval(0, 1.0 - index / _icons.length / 2.0, curve: Curves.easeOut),
                   ),
                   child: Dismissible(
-                    key: ValueKey(index),
+                    key: ValueKey(_icons[index].uid),
                     direction: _icons[index].uid == null
                         ? DismissDirection.none
                         : DismissDirection.endToStart,
@@ -308,9 +308,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
                       ),
                     ),
                     child: InkWell(
-                      onTap: () {
-                        _icons[index].onPressed();
-                      },
+                      onTap: () => _icons[index].onPressed(),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.end,
