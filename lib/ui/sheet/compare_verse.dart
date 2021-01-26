@@ -7,6 +7,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/pref_item.dart';
+import '../../models/reference_ext.dart';
 import '../../models/search/compare_results.dart';
 
 Future<int> showCompareSheet(BuildContext c, Reference ref) async {

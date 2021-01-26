@@ -5,6 +5,8 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../models/reference_ext.dart';
+
 class TecShare {
   static Future<String> shareLink(Reference ref) async {
     var shortUrl = '';

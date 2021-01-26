@@ -4,6 +4,8 @@ import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
+import '../../models/reference_ext.dart';
+
 class MarginNote extends UserItem {
   MarginNote({
     int id,

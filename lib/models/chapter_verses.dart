@@ -3,6 +3,8 @@ import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
+import '../models/reference_ext.dart';
+
 class ChapterVerses {
   Map<int, String> data = {};
   ChapterVerses({this.data});
