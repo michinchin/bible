@@ -12,6 +12,7 @@ import '../../../blocs/content_settings.dart';
 import '../../../models/app_settings.dart';
 import '../../common/common.dart';
 import '../../common/tec_auto_hide_app_bar.dart';
+import '../volume_view_data_bloc.dart';
 import 'shared_app_bar_bloc.dart';
 import 'study_res_bloc.dart';
 import 'study_res_card.dart';
@@ -130,6 +131,16 @@ class _Folder extends StatelessWidget {
   }
 
   void onTap(BuildContext context, Resource res) {
+    if (res.hasType(ResourceType.reference)) {
+      if (res.book != null && res.book > 0 && res.chapter != null && res.chapter > 0) {
+        final viewData = context.read<VolumeViewDataBloc>().state.asVolumeViewData;
+        final bcv = BookChapterVerse(res.book, res.chapter, res.verse ?? 1);
+        final newData = viewData.copyWith(bcv: bcv);
+        context.read<VolumeViewDataBloc>().update(context, newData);
+      }
+      return;
+    }
+
     final appBarBloc = context.read<SharedAppBarBloc>();
     final prevAppBarState = appBarBloc.state;
     appBarBloc.updateWith(
