@@ -18,48 +18,45 @@ class TecAutoHideAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<_BoolBloc>(
-      create: (_) => _BoolBloc(state: true),
-      child: Builder(
-        builder: (context) {
-          return Stack(
-            children: [
-              TecScrollListener(
-                axisDirection: AxisDirection.down,
-                changedDirection: (direction) {
-                  if (direction == ScrollDirection.reverse) {
-                    context.read<_BoolBloc>()?.update(to: true);
-                  } else if (direction == ScrollDirection.forward) {
-                    context.read<_BoolBloc>()?.update(to: false);
-                  }
-                },
-                child: body,
+    return Stack(
+      children: [
+        TecScrollListener(
+          axisDirection: AxisDirection.down,
+          changedDirection: (direction) {
+            if (direction == ScrollDirection.reverse) {
+              context.read<TecAutoHideAppBarBloc>()?.hide(false);
+            } else if (direction == ScrollDirection.forward) {
+              context.read<TecAutoHideAppBarBloc>()?.hide(true);
+            }
+          },
+          child: body,
+        ),
+        BlocBuilder<TecAutoHideAppBarBloc, bool>(
+          builder: (context, hide) {
+            return AnimatedPositioned(
+              top: hide ? -(appBar?.preferredSize?.height ?? 100.0) : 0.0,
+              left: 0.0,
+              right: 0.0,
+              duration: animationDuration ?? const Duration(milliseconds: 300),
+              child: Container(
+                color: Theme.of(context).backgroundColor,
+                child: appBar,
               ),
-              BlocBuilder<_BoolBloc, bool>(
-                builder: (context, show) {
-                  return AnimatedPositioned(
-                    top: show ? 0.0 : -(appBar?.preferredSize?.height ?? 100.0),
-                    left: 0.0,
-                    right: 0.0,
-                    duration: animationDuration ?? const Duration(milliseconds: 300),
-                    child: Container(
-                      color: Theme.of(context).backgroundColor,
-                      child: appBar,
-                    ),
-                  );
-                },
-              ),
-            ],
-          );
-        },
-      ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
 
-class _BoolBloc extends Cubit<bool> {
-  _BoolBloc({bool state}) : super(state);
-  void update({bool to}) => emit(to);
+class TecAutoHideAppBarBloc extends Cubit<bool> {
+  TecAutoHideAppBarBloc({bool hide}) : super(hide);
+
+  // ignore: avoid_positional_boolean_parameters
+  void hide(bool hide) => emit(hide);
+  
+  void toggle() => emit(!state);
 }
 
 class PreferredSizeWidgetWithPadding extends StatelessWidget implements PreferredSizeWidget {

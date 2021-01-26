@@ -7,6 +7,7 @@ import '../../ui/home/today.dart';
 import '../const.dart';
 import '../home/dotds.dart';
 import '../home/votd.dart';
+import '../reference_ext.dart';
 
 class NotificationsModel extends NotificationsHelper {
   Dotds dotds;

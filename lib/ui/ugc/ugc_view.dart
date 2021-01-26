@@ -12,6 +12,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
 import '../../models/color_utils.dart';
+import '../../models/reference_ext.dart';
 import '../../models/ugc/recent_count.dart';
 import '../common/common.dart';
 import '../common/tec_search_result.dart';

@@ -4,6 +4,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import '../../models/home/dotds.dart';
 import '../../models/home/saves.dart';
 import '../../models/home/votd.dart';
+import '../../models/reference_ext.dart';
 import '../common/common.dart';
 import 'day_card.dart';
 import 'dotd_screen.dart';

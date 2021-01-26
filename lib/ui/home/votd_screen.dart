@@ -16,6 +16,7 @@ import '../../models/home/interstitial.dart';
 import '../../models/home/saves.dart';
 import '../../models/home/votd.dart';
 import '../../models/pref_item.dart';
+import '../../models/reference_ext.dart';
 import '../../models/search/tec_share.dart';
 import '../common/common.dart';
 import '../library/library.dart';

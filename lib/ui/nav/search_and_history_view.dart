@@ -16,6 +16,7 @@ import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../models/pref_item.dart';
+import '../../models/reference_ext.dart';
 import '../../models/search/context.dart';
 import '../../models/search/search_history_item.dart';
 import '../../models/search/search_result.dart';
