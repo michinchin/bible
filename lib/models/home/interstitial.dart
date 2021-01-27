@@ -17,8 +17,8 @@ const minMillsBetweenAds = 15 * 60 * 1000; // 1/4 hr
 var _adStartTime = DateTime.now();
 String _adUnitId = '';
 int _productId = -1;
-const removeAdsVolumeId = 7005;
-const removeAdsId = 'inapp.7005';
+const removeAdsVolumeId = 7003;
+const removeAdsId = 'inapp.7003';
 
 class Interstitial {
   static Future<void> init(BuildContext context, {int productId, String adUnitId}) async {
