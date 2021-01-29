@@ -35,63 +35,48 @@ class StudyResView extends StatelessWidget {
       child: BlocBuilder<StudyResBloc, StudyRes>(
         builder: (context, studyRes) {
           final type = studyRes.res?.baseType;
-          switch (type) {
-            case ResourceType.folder:
-            case ResourceType.link:
-              return _Folder(
-                  studyRes: studyRes,
-                  viewSize: viewSize,
-                  padding: studyRes.resId == 0 ? padding : padding.copyWith(top: _altTopPadding));
-              break;
 
-            case ResourceType.article:
-            case ResourceType.introduction:
-              return _Article(
-                  studyRes: studyRes,
-                  viewSize: viewSize,
-                  padding: type == ResourceType.introduction
-                      ? padding
-                      : padding.copyWith(top: _altTopPadding));
-              break;
+          if (type == ResourceType.folder || type == ResourceType.link) {
+            return _Folder(
+                studyRes: studyRes,
+                viewSize: viewSize,
+                padding: studyRes.resId == 0 ? padding : padding.copyWith(top: _altTopPadding));
+          }
 
-            case ResourceType.chart:
-            case ResourceType.map:
-            case ResourceType.image:
-            case ResourceType.video:
-            case ResourceType.interactive:
-            case ResourceType.timeline:
-              {
-                final url = VolumesRepository.shared
-                    .volumeWithId(studyRes.res.volumeId)
-                    .fileUrlForResource(studyRes.res);
-                if (tec.isNotNullOrEmpty(url)) {
-                  // JPG
-                  if (url.endsWith('.jpg')) {
-                    return TecInteractiveViewer(
-                        child: TecImage(url: url), caption: studyRes.res.caption);
-                  }
-
-                  // PDF
-                  if (url.endsWith('.pdf')) {
-                    return TecPdfViewer(url: url, caption: studyRes.res.caption);
-                  }
-                }
+          if (tec.isNotNullOrEmpty(studyRes.res?.filename)) {
+            final url = VolumesRepository.shared
+                .volumeWithId(studyRes.res.volumeId)
+                .fileUrlForResource(studyRes.res);
+            if (tec.isNotNullOrEmpty(url)) {
+              // HTML
+              if (url.endsWith('.html')) {
+                return _Article(
+                    studyRes: studyRes,
+                    viewSize: viewSize,
+                    padding: type == ResourceType.introduction
+                        ? padding
+                        : padding.copyWith(top: _altTopPadding));
               }
-              break;
 
-            case ResourceType.reference:
-            // TO-DO(ron): Handle this case.
+              // JPG
+              if (url.endsWith('.jpg')) {
+                return TecInteractiveViewer(
+                    child: TecImage(url: url), caption: studyRes.res.caption);
+              }
 
-            case ResourceType.studyNote:
-            // TO-DO(ron): Handle this case.
+              // PDF
+              if (url.endsWith('.pdf')) {
+                return TecPdfViewer(url: url, caption: studyRes.res.caption);
+              }
+            }
+          }
 
-            case ResourceType.question:
-            // TO-DO(ron): Handle this case.
+          if (type == ResourceType.studyNote) {
+            // TODO(ron): Handle this case.
+          }
 
-            default:
-              // TO-DO(ron): Handle this case.
-              if (type != null) tec.dmPrint('StudyResView unhandled type $type');
-              break;
+          if (type == ResourceType.question) {
+            // TODO(ron): Handle this case.
           }
 
           if (studyRes.error != null) {
@@ -185,72 +170,6 @@ class _Folder extends StatelessWidget {
   }
 }
 
-class _MoveableStackChild extends StatefulWidget {
-  final double left;
-  final double top;
-  final double right;
-  final double bottom;
-  final double width;
-  final double height;
-  final Widget child;
-
-  const _MoveableStackChild({
-    @required this.child,
-    Key key,
-    this.left,
-    this.top,
-    this.right,
-    this.bottom,
-    this.width,
-    this.height,
-  })  : assert(left == null || right == null || width == null),
-        assert(top == null || bottom == null || height == null),
-        super(key: key);
-
-  @override
-  __MoveableStackChildState createState() => __MoveableStackChildState();
-}
-
-class __MoveableStackChildState extends State<_MoveableStackChild> {
-  double _left;
-  double _top;
-  double _right;
-  double _bottom;
-  double _width;
-  double _height;
-
-  @override
-  void initState() {
-    super.initState();
-    _left = widget.left;
-    _top = widget.top;
-    _right = widget.right;
-    _bottom = widget.bottom;
-    _width = widget.width;
-    _height = widget.height;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: _left,
-      top: _top,
-      right: _right,
-      bottom: _bottom,
-      width: _width,
-      height: _height,
-      child: GestureDetector(
-        onPanUpdate: (pan) {
-          setState(() {
-            if (_bottom != null && _top == null) _bottom = math.min(0.0, _bottom - pan.delta.dy);
-          });
-        },
-        child: widget.child,
-      ),
-    );
-  }
-}
-
 class _Article extends StatelessWidget {
   final StudyRes studyRes;
   final Size viewSize;
@@ -292,3 +211,69 @@ class _Article extends StatelessWidget {
 }
 
 const _marginPercent = 0.05; // 0.05;
+
+class DraggablePositioned extends StatefulWidget {
+  final double left;
+  final double top;
+  final double right;
+  final double bottom;
+  final double width;
+  final double height;
+  final Widget child;
+
+  const DraggablePositioned({
+    @required this.child,
+    Key key,
+    this.left,
+    this.top,
+    this.right,
+    this.bottom,
+    this.width,
+    this.height,
+  })  : assert(left == null || right == null || width == null),
+        assert(top == null || bottom == null || height == null),
+        super(key: key);
+
+  @override
+  _DraggablePositionedState createState() => _DraggablePositionedState();
+}
+
+class _DraggablePositionedState extends State<DraggablePositioned> {
+  double _left;
+  double _top;
+  double _right;
+  double _bottom;
+  double _width;
+  double _height;
+
+  @override
+  void initState() {
+    super.initState();
+    _left = widget.left;
+    _top = widget.top;
+    _right = widget.right;
+    _bottom = widget.bottom;
+    _width = widget.width;
+    _height = widget.height;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: _left,
+      top: _top,
+      right: _right,
+      bottom: _bottom,
+      width: _width,
+      height: _height,
+      child: GestureDetector(
+        onPanUpdate: (pan) {
+          setState(() {
+            if (_bottom != null && _top == null) _bottom = math.min(0.0, _bottom - pan.delta.dy);
+          });
+        },
+        child: widget.child,
+      ),
+    );
+  }
+}
