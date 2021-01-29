@@ -28,6 +28,15 @@
       });
     }
   </script>
+
+  <!-- This script is needed by the native_pdf_renderer plugin. For more information,
+       see: https://pub.dev/packages/native_pdf_renderer -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.4.456/pdf.min.js"></script>
+  <script type="text/javascript">
+    // TO-DO(ron): The following line was crashing the web app, so commented out for now.
+    // pdfjsLib.GlobalWorkerOptions.workerSrc = "//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.4.456/pdf.worker.min.js";
+  </script>
+
   <script src="main.dart.js" type="application/javascript"></script>
 </body>
 </html>

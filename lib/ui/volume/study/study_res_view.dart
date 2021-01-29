@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +13,8 @@ import '../../../blocs/content_settings.dart';
 import '../../../models/app_settings.dart';
 import '../../common/common.dart';
 import '../../common/tec_auto_hide_app_bar.dart';
+import '../../common/tec_interactive_viewer.dart';
+import '../../common/tec_pdf_viewer.dart';
 import '../volume_view_data_bloc.dart';
 import 'shared_app_bar_bloc.dart';
 import 'study_res_bloc.dart';
@@ -57,8 +60,22 @@ class StudyResView extends StatelessWidget {
             case ResourceType.video:
             case ResourceType.interactive:
             case ResourceType.timeline:
-              if (studyRes.res.filename.endsWith('.jpg')) {
-                return _Image(studyRes: studyRes, viewSize: viewSize, padding: padding);
+              {
+                final url = VolumesRepository.shared
+                    .volumeWithId(studyRes.res.volumeId)
+                    .fileUrlForResource(studyRes.res);
+                if (tec.isNotNullOrEmpty(url)) {
+                  // JPG
+                  if (url.endsWith('.jpg')) {
+                    return TecInteractiveViewer(
+                        child: TecImage(url: url), caption: studyRes.res.caption);
+                  }
+
+                  // PDF
+                  if (url.endsWith('.pdf')) {
+                    return TecPdfViewer(url: url, caption: studyRes.res.caption);
+                  }
+                }
               }
               break;
 
@@ -131,6 +148,7 @@ class _Folder extends StatelessWidget {
   }
 
   void onTap(BuildContext context, Resource res) {
+    // If it is a Reference, just update VolumeViewDataBloc with the reference and return.
     if (res.hasType(ResourceType.reference)) {
       if (res.book != null && res.book > 0 && res.chapter != null && res.chapter > 0) {
         final viewData = context.read<VolumeViewDataBloc>().state.asVolumeViewData;
@@ -166,76 +184,6 @@ class _Folder extends StatelessWidget {
     );
   }
 }
-
-class _Image extends StatelessWidget {
-  final StudyRes studyRes;
-  final Size viewSize;
-  final EdgeInsets padding;
-
-  const _Image({Key key, @required this.studyRes, @required this.viewSize, @required this.padding})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final res = studyRes.res;
-    final imageUrl =
-        VolumesRepository.shared.volumeWithId(res.volumeId)?.fileUrlForResource(studyRes.res);
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    return GestureDetector(
-      child: ClipRect(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            InteractiveViewer(
-              boundaryMargin: const EdgeInsets.all(60),
-              minScale: 0.1,
-              maxScale: 4.0,
-              child: Center(child: TecImage(url: imageUrl)), // fit: BoxFit.none),
-            ),
-            if (tec.isNotNullOrEmpty(studyRes.res.caption))
-              BlocBuilder<TecAutoHideAppBarBloc, bool>(
-                builder: (context, hide) {
-                  return AnimatedPositioned(
-                    duration: _duration,
-                    bottom: hide ? -100.0 : 0.0,
-                    right: 0,
-                    left: 0,
-                    child: IgnorePointer(
-                      child: AnimatedOpacity(
-                        duration: _duration,
-                        opacity: hide ? 0 : 1,
-                        child: Material(
-                          //type: MaterialType.transparency,
-                          color: isDarkTheme ? const Color(0xCC333333) : const Color(0xCC666666),
-                          child: SafeArea(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Text(
-                                studyRes.res.caption,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: isDarkTheme
-                                      ? const Color(0xFFAAAAAA)
-                                      : const Color(0xFFFFFFFF),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-          ],
-        ),
-      ),
-      onTap: () => context.read<TecAutoHideAppBarBloc>()?.toggle(),
-    );
-  }
-}
-
-const _duration = Duration(milliseconds: 300);
 
 class _MoveableStackChild extends StatefulWidget {
   final double left;
@@ -326,6 +274,8 @@ class _Article extends StatelessWidget {
                     left: padding.left + marginWidth,
                     right: padding.right + marginWidth,
                   );
+
+                  if (kIsWeb) return Text(studyRes.html);
 
                   return TecHtml(
                     studyRes.html,
