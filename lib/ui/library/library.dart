@@ -3,10 +3,12 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart' as collection;
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
@@ -610,8 +612,8 @@ class _VolumeActionButton extends StatelessWidget {
     if (VolumesRepository.shared.isLocalVolume(volume.id) ||
         (item != null && item.status == DownloadStatus.complete)) {
       return IconButton(
-          icon: const Icon(Icons.check_circle),
-          iconSize: 32,
+          icon: const Icon(SFSymbols.checkmark_alt_circle),
+          // iconSize: 32,
           color: Colors.green,
           onPressed: () => showDetailViewForVolume(context, volume, heroPrefix));
     } else if (item == null ||
@@ -621,16 +623,16 @@ class _VolumeActionButton extends StatelessWidget {
       // If free, or licensed, allow download.
       if (volume.price == 0.0 || context.tbloc<VolumesBloc>().isFullyLicensed(volume.id)) {
         return IconButton(
-            icon: const Icon(Icons.cloud_download),
-            iconSize: 32,
-            color: color,
+            icon: Icon(platformAwareDownloadIcon(context)),
+            // iconSize: 32,
+            color: color, 
             onPressed: () =>
                 _onActionTap(bloc, item ?? DownloadItem(volumeId: volume.id, url: '')));
       } else {
         return IconButton(
             icon: Icon(platformAwareMoreIcon(context)),
-            iconSize: 32,
-            color: color,
+            // iconSize: 32, 
+            // color: color,
             onPressed: () => showDetailViewForVolume(context, volume, heroPrefix));
       }
     } else if (item.status == DownloadStatus.running) {
