@@ -1100,9 +1100,9 @@ packages:
   tec_user_account:
     dependency: "direct main"
     description:
-      name: tec_user_account
-      url: "http://noah.tecarta.com:8100"
-    source: hosted
+      path: "../shared/tec_user_account"
+      relative: true
+    source: path
     version: "2.0.21"
   tec_util:
     dependency: "direct main"

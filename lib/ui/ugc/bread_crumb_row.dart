@@ -27,7 +27,7 @@ class BreadCrumb {
         scrollOffset: tec.as<double>(json['s']));
   }
 
-  static List<BreadCrumb> load() {
+  static Future<List<BreadCrumb>> load() async {
     final breadCrumbs = <BreadCrumb>[];
 
     var json = tec.Prefs.shared.getString(prefBreadCrumbs, defaultValue: '');
@@ -47,7 +47,13 @@ class BreadCrumb {
     }
 
     if (breadCrumbs.isEmpty) {
-      breadCrumbs.add(BreadCrumb(UGCView.folderHome, 'Top'));
+      final topFolder = await AppSettings.shared.userAccount.userDb.getItem(1);
+      if (topFolder == null) {
+        breadCrumbs.add(BreadCrumb(UGCView.folderHome, 'Journal'));
+      }
+      else {
+        breadCrumbs.add(BreadCrumb(UGCView.folderHome, topFolder.title));
+      }
     }
 
     return breadCrumbs;
@@ -103,7 +109,8 @@ class _BreadCrumbRowState extends State<BreadCrumbRow> {
     if (widget.breadCrumbs.length != _numberCrumbs) {
       _numberCrumbs = widget.breadCrumbs.length;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        _controller.jumpTo(_controller.position.maxScrollExtent + 100);
+        // + 100 will show a visible scroll...
+        _controller.jumpTo(_controller.position.maxScrollExtent /* + 100 */);
       });
     }
 

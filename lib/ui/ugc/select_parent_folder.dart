@@ -44,7 +44,7 @@ class __SelectParentFolderState extends State<_SelectParentFolder> {
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: MinHeightAppBar(
         appBar: AppBar(
-          title: Text('Create in: ${currentFolder.title}'),
+          title: Text('Create in ${currentFolder.title}'),
           leading: currentFolder.id == 1
               ? const CloseButton()
               : BackButton(

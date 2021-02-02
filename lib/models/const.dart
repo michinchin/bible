@@ -9,8 +9,7 @@ class Const {
   static const appNameForUA = 'Tecarta Bible';
 
   static const viewTypeVolume = 'BibleChapter';
-  static const viewTypeNotes = 'NotesView';
-  static const viewTypeMarginNote = 'MarginNoteView';
+  static const viewTypeNote = 'NoteView';
 
   //------------------------------------------
   // Ad info:

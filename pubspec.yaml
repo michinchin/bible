@@ -105,9 +105,9 @@ dependencies:
   video_player: ^1.0.1
   zefyr: ^1.0.0-dev.2.0
 
-#dependency_overrides:
-#   tec_user_account:
-#     path: ../shared/tec_user_account
+dependency_overrides:
+   tec_user_account:
+     path: ../shared/tec_user_account
 
 dev_dependencies:
   bloc_test: ^7.1.0

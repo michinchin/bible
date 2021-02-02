@@ -47,7 +47,7 @@ class UGCView extends StatefulWidget {
   bool willPop(State<StatefulWidget> state) {
     if (state is _UGCViewState && state.mounted && state.breadCrumbs.length > 1) {
       state.breadCrumbs.length = state.breadCrumbs.length - 1;
-      state._load(state.breadCrumbs.last);
+      state._load(state.breadCrumbs.last, poppingView: true);
       return true;
     }
 
@@ -73,25 +73,26 @@ class _UGCViewState extends State<UGCView> {
     UserItemType.highlight
   ];
   int numBreadCrumbs;
+  bool _poppingView;
 
   @override
   void initState() {
     super.initState();
     items = <dynamic>[];
-    breadCrumbs = BreadCrumb.load();
-    listScrollController = ScrollController();
     numBreadCrumbs = 0;
+    _poppingView = false;
+    breadCrumbs = [];
 
-    // maintain scroll position...
-    listScrollController.addListener(() {
-      breadCrumbs.last.scrollOffset = listScrollController.offset;
-    });
+    asyncInit();
+  }
 
-    _load(breadCrumbs.last);
+  Future<void> asyncInit() async {
+    breadCrumbs = await BreadCrumb.load();
+
+    await _load(breadCrumbs.last);
 
     _userDbChangeSubscription = AppSettings.shared.userAccount.userDb.changeStream.listen((change) {
-      _folders = null;
-      _load(breadCrumbs.last);
+      _load(breadCrumbs.last, reloadFolders: true);
     });
   }
 
@@ -114,6 +115,27 @@ class _UGCViewState extends State<UGCView> {
     }
 
     return types.toString();
+  }
+
+  String _folderTitle(int folderId) {
+    switch (folderId) {
+      case UGCView.folderRecent:
+        return 'Recent';
+      case UGCView.folderBookmarks:
+        return 'Bookmarks';
+      case UGCView.folderNotes:
+        return 'Notes';
+      case UGCView.folderMarginNotes:
+        return 'Margin notes';
+      case UGCView.folderHighlights:
+        return 'Highlights';
+      case UGCView.folderLicenses:
+        return 'Licenses';
+      case UGCView.folderSearchResults:
+        return _folders[UGCView.folderHome].title;
+    }
+
+    return _folders[folderId].title;
   }
 
   Future<void> _search(String search, List<UserItemType> searchTypes,
@@ -161,8 +183,13 @@ class _UGCViewState extends State<UGCView> {
     }
   }
 
-  Future<void> _load(BreadCrumb crumb) async {
-    if (_folders == null || _folderUserId != AppSettings.shared.userAccount.user.userId) {
+  Future<void> _load(BreadCrumb crumb,
+      {bool poppingView = false, bool reloadFolders = false}) async {
+    _poppingView = poppingView;
+
+    if (_folders == null ||
+        _folderUserId != AppSettings.shared.userAccount.user.userId ||
+        reloadFolders) {
       _folderUserId = AppSettings.shared.userAccount.user.userId;
       _folders = {};
 
@@ -177,6 +204,15 @@ class _UGCViewState extends State<UGCView> {
             1, () => UserItem(id: 1, title: 'Journal', type: UserItemType.folder.index));
       }
     }
+
+    // every load gets a new scroll controller since we're using animated switcher
+    // old and new view coexist on transition
+    listScrollController = ScrollController();
+
+    // maintain scroll position...
+    listScrollController.addListener(() {
+      breadCrumbs.last.scrollOffset = listScrollController.offset;
+    });
 
     if (crumb.id == UGCView.folderSearchResults) {
       final index = crumb.folderName.indexOf(UGCView.filterSeparator);
@@ -299,6 +335,10 @@ class _UGCViewState extends State<UGCView> {
       items = _items;
     });
 
+    if (items.isEmpty) {
+      TecToast.show(context, '${_folderTitle(currentFolderId)} is empty!');
+    }
+
     unawaited(_scrollWhenReady(scrollOffset));
   }
 
@@ -328,19 +368,32 @@ class _UGCViewState extends State<UGCView> {
         }
       }
     } else if (item is RecentCount) {
+      if (item.count == 0) {
+        TecToast.show(context, 'No recently created items');
+        return;
+      }
       folder = UserItem(id: UGCView.folderRecent, title: 'Recent', type: UserItemType.folder.index);
     } else if (item is CountItem) {
+      int folderId;
+
       if (item.itemType == UserItemType.bookmark) {
-        folder = UserItem(
-            id: UGCView.folderBookmarks, title: 'Bookmarks', type: UserItemType.folder.index);
+        folderId = UGCView.folderBookmarks;
       } else if (item.itemType == UserItemType.note) {
-        folder = UserItem(id: UGCView.folderNotes, title: 'Notes', type: UserItemType.folder.index);
+        folderId = UGCView.folderNotes;
       } else if (item.itemType == UserItemType.marginNote) {
-        folder = UserItem(
-            id: UGCView.folderMarginNotes, title: 'Margin Notes', type: UserItemType.folder.index);
+        folderId = UGCView.folderMarginNotes;
       } else if (item.itemType == UserItemType.highlight) {
-        folder = UserItem(
-            id: UGCView.folderHighlights, title: 'Highlights', type: UserItemType.folder.index);
+        folderId = UGCView.folderHighlights;
+      }
+
+      if (folderId != null) {
+        if (item.count == 0) {
+          TecToast.show(context, 'No ${_folderTitle(folderId).toLowerCase()} created yet');
+          return;
+        }
+
+        folder =
+            UserItem(id: folderId, title: _folderTitle(folderId), type: UserItemType.folder.index);
       }
     }
 
@@ -364,441 +417,430 @@ class _UGCViewState extends State<UGCView> {
   @override
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    const maxWidth = 428.0;
 
     // temp list to shorten consecutive hls of same color
     List<UserItem> hls;
 
     return SizedBox(
-      width: min(428, MediaQuery.of(context).size.width),
-      child: AnimatedSwitcher(
-        layoutBuilder: (currentChild, previousChildren) {
-          var before = false;
+      width: min(maxWidth, MediaQuery.of(context).size.width),
+      child: ClipRect(
+        child: AnimatedSwitcher(
+          layoutBuilder: (currentChild, previousChildren) {
+            return Stack(
+              children: <Widget>[
+                if (currentChild != null && _poppingView) currentChild,
+                ...previousChildren,
+                if (currentChild != null && !_poppingView) currentChild,
+              ],
+              alignment: Alignment.center,
+            );
+          },
+          transitionBuilder: (child, animation) {
+            final inOutAnimation =
+                Tween<Offset>(begin: const Offset(1.0, 0.0), end: const Offset(0.0, 0.0))
+                    .animate(animation);
+            final stillAnimation =
+                Tween<Offset>(begin: const Offset(0.0, 0.0), end: const Offset(0.0, 0.0))
+                    .animate(animation);
 
-          if (currentChild != null && previousChildren.isNotEmpty) {
-            var id = -1;
+            Animation<Offset> slideAnimation;
 
-            if (currentChild is SlideTransition) {
-              id = (currentChild.child.key as ValueKey<int>).value;
-            }
-
-            for (final breadCrumb in breadCrumbs) {
-              if (breadCrumb.id == id) {
-                before = true;
-                break;
+            if ((child.key as ValueKey<int>).value == null) {
+              // drawer is opening - first view is not ready
+              slideAnimation = stillAnimation;
+            } else if ((child.key as ValueKey<int>).value == currentFolderId) {
+              // current view
+              if (currentFolderId == 1 && !_poppingView) {
+                // drawer opening - first view ready
+                slideAnimation = stillAnimation;
+              } else if (breadCrumbs.length > numBreadCrumbs) {
+                slideAnimation = inOutAnimation;
+              } else {
+                // going back or same view repainting this view should not slide...
+                slideAnimation = stillAnimation;
               }
-            }
-          }
-
-          return Stack(
-            children: <Widget>[
-              if (currentChild != null && before) currentChild,
-              ...previousChildren,
-              if (currentChild != null && !before) currentChild,
-            ],
-            alignment: Alignment.center,
-          );
-        },
-        transitionBuilder: (child, animation) {
-          final inAnimation =
-              Tween<Offset>(begin: const Offset(1.0, 0.0), end: const Offset(0.0, 0.0))
-                  .animate(animation);
-          final outAnimation =
-              Tween<Offset>(begin: const Offset(1.0, 0.0), end: const Offset(0.0, 0.0))
-                  .animate(animation);
-          final stillAnimation =
-              Tween<Offset>(begin: const Offset(0.0, 0.0), end: const Offset(0.0, 0.0))
-                  .animate(animation);
-
-          Animation<Offset> slideAnimation;
-
-          if ((child.key as ValueKey<int>).value == currentFolderId) {
-            // current view
-            if (breadCrumbs.length > numBreadCrumbs) {
-              slideAnimation = inAnimation;
+              numBreadCrumbs = breadCrumbs.length;
             } else {
-              // going back or same view repainting this view should not slide...
-              slideAnimation = stillAnimation;
-            }
-            numBreadCrumbs = breadCrumbs.length;
-          }
-          else {
-            // view to remove...
-            if (breadCrumbs.length < numBreadCrumbs) {
-              slideAnimation = outAnimation;
-            }
-            else {
-              slideAnimation = stillAnimation;
-            }
-          }
-
-          return SlideTransition(
-            position: slideAnimation,
-            child: child,
-          );
-        },
-        duration: const Duration(milliseconds: 2000),
-        child: Builder(
-            key: ValueKey(currentFolderId),
-            builder: (context) {
-              if (currentFolderId == null) {
-                return Container();
+              // view to remove...
+              if (breadCrumbs.length < numBreadCrumbs) {
+                slideAnimation = inOutAnimation;
+              } else {
+                slideAnimation = stillAnimation;
               }
+            }
 
-              return Scaffold(
-                  resizeToAvoidBottomInset: false,
-                  floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-                  floatingActionButton: Padding(
-                    padding: EdgeInsets.only(bottom: context.fullBottomBarPadding),
-                    child: FloatingActionButton(
-                      child: const Icon(Icons.add),
-                      tooltip: 'Create note or folder',
-                      onPressed: () {
-                        showCreateNoteFolder(context, _folders[currentFolderId]);
-                      },
-                      heroTag: null,
-                    ),
-                  ),
-                  appBar: MinHeightAppBar(
-                    appBar: AppBar(
-                      elevation: 0,
-                      centerTitle: true,
-                      title: Text(_folders[currentFolderId].title),
-                      leading: const BackButton(),
-                    ),
-                  ),
-                  body: Container(
-                    color: Theme.of(context).backgroundColor,
-                    child: SafeArea(
-                      bottom: false,
-                      child: Material(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Divider(
-                              height: 1,
-                              color: Theme.of(context).textColor.withOpacity(0.6),
-                            ),
-                            if (breadCrumbs.length == 1 ||
-                                breadCrumbs.last.id == UGCView.folderSearchResults)
-                              QuickFind(
-                                onSearch: _search,
-                                search: _getInitSearch(),
-                              ),
-                            if (breadCrumbs.length > 1 &&
-                                breadCrumbs.last.id != UGCView.folderSearchResults)
-                              BreadCrumbRow(
-                                  breadCrumbs: breadCrumbs,
-                                  onTap: (crumbNumber) {
-                                    breadCrumbs.length = crumbNumber + 1;
-                                    _load(breadCrumbs.last);
-                                  }),
-                            Expanded(
-                              child: ListView.builder(
-                                  controller: listScrollController,
-                                  itemCount: items.length + 1,
-                                  itemBuilder: (c, i) {
-                                    IconData iconData;
-                                    String title, description;
-                                    Color iconColor;
+            return SlideTransition(
+              position: slideAnimation,
+              child: child,
+            );
+          },
+          duration: const Duration(milliseconds: 200),
+          child: Builder(
+              key: ValueKey(currentFolderId),
+              builder: (context) {
+                if (currentFolderId == null) {
+                  return Container();
+                }
 
-                                    if (i == items.length) {
-                                      return const Padding(padding: EdgeInsets.only(bottom: 20));
-                                    }
-
-                                    if (items[i] is CountItem) {
-                                      switch ((items[i] as CountItem).itemType) {
-                                        case UserItemType.bookmark:
-                                          iconData = FeatherIcons.bookmark;
-                                          title = 'Bookmarks';
-                                          break;
-                                        case UserItemType.note:
-                                          iconData = FeatherIcons.edit2;
-                                          title = 'Notes';
-                                          break;
-                                        case UserItemType.marginNote:
-                                          iconData = TecIcons.marginNoteOutline;
-                                          title = 'Margin Notes';
-                                          break;
-                                        case UserItemType.highlight:
-                                          iconData = Icons.view_agenda_outlined;
-                                          title = 'Highlights';
-                                          break;
-                                        default:
-                                          break;
-                                      }
-                                    } else if (items[i] is RecentCount) {
-                                      iconData = Icons.history;
-                                      title = 'Recent';
-                                    } else if (items[i] is UserItem) {
-                                      final ui = items[i] as UserItem;
-                                      switch (ui.itemType) {
-                                        case UserItemType.folder:
-                                          iconData = Icons.folder_outlined;
-                                          title = ui.title;
-                                          break;
-                                        case UserItemType.note:
-                                          iconData = Icons.edit_outlined;
-                                          title = ui.title;
-                                          // TODO(mike): when we save new format need to update this info assignment...
-                                          description =
-                                              ui.info.substring(ui.title.length).trimLeft();
-                                          break;
-                                        case UserItemType.bookmark:
-                                          iconData = FeatherIcons.bookmark;
-                                          title = ui.title;
-                                          description = ui.description;
-                                          break;
-                                        case UserItemType.marginNote:
-                                          iconData = TecIcons.marginNoteOutline;
-                                          title = Reference(
-                                                  volume: ui.volumeId,
-                                                  book: ui.book,
-                                                  chapter: ui.chapter,
-                                                  verse: ui.verse)
-                                              .label();
-                                          // TODO(mike): when we save new format need to update this info assignment...
-                                          description = ui.info;
-                                          break;
-                                        case UserItemType.highlight:
-                                          // is this highlight continued...
-                                          if (i + 1 < items.length &&
-                                              items[i + 1] is UserItem &&
-                                              items[i + 1].itemType == UserItemType.highlight) {
-                                            final uiNext = items[i + 1] as UserItem;
-                                            if (ui.volumeId == uiNext.volumeId &&
-                                                ui.color == uiNext.color &&
-                                                ui.book == uiNext.book &&
-                                                ui.chapter == uiNext.chapter) {
-                                              if (ui.verse == (uiNext.verse - 1)) {
-                                                if (hls == null) {
-                                                  hls = <UserItem>[ui, uiNext];
-                                                } else {
-                                                  hls.add(uiNext);
-                                                }
-                                                return Container();
-                                              } else if (ui.verse == (uiNext.verse + 1)) {
-                                                // db query returned in reverse order...
-                                                if (hls == null) {
-                                                  hls = <UserItem>[uiNext, ui];
-                                                } else {
-                                                  hls.insert(0, uiNext);
-                                                }
-                                                return Container();
-                                              }
-                                              // else uiNext is in a different range...
-                                            }
-                                          }
-
-                                          iconData = Icons.view_agenda;
-
-                                          title = Reference(
-                                                  volume: ui.volumeId,
-                                                  book: ui.book,
-                                                  chapter: ui.chapter,
-                                                  verse: (hls != null) ? hls.first.verse : ui.verse,
-                                                  endVerse:
-                                                      (hls != null) ? hls.last.verse : ui.verse)
-                                              .label();
-
-                                          // clear any hl range...
-                                          hls = null;
-
-                                          // final highlightType =
-                                          // (ui.color == 5 || (ui.color >> 24 > 0)) ? HighlightType.underline : HighlightType.highlight;
-
-                                          final color = (ui.color <= 5)
-                                              ? defaultColorIntForIndex(ui.color)
-                                              : 0xFF000000 | (ui.color & 0xFFFFFF);
-
-                                          iconColor = isDarkTheme
-                                              ? textColorWith(Color(color), isDarkMode: isDarkTheme)
-                                              : highlightColorWith(Color(color),
-                                                  isDarkMode: isDarkTheme);
-
-                                          // we have reached the end of consecutive hls, clear the list
-                                          hls = null;
-                                          break;
-                                        default:
-                                          break;
-                                      }
-                                    } else if (items[i] is _DividerItem) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
-                                        child: Divider(
-                                          height: 1,
-                                          color: Theme.of(context).textColor,
-                                        ),
-                                      );
-                                    } else if (items[i] is _DateItem) {
-                                      final di = items[i] as _DateItem;
-                                      return Padding(
-                                          padding: const EdgeInsets.only(
-                                              top: 12.0, bottom: 4.0, left: 16.0, right: 16.0),
-                                          child: Text(tec.longDate(di.date),
-                                              style: const TextStyle(
-                                                  fontSize: 18.0,
-                                                  fontStyle: FontStyle.italic,
-                                                  fontWeight: FontWeight.w500)));
-                                    }
-
-                                    final button = InkWell(
-                                      onTap: () => _itemTap(items[i]),
-                                      child: Padding(
-                                        padding: (currentFolderId == UGCView.folderHome ||
-                                                (items[i] is UserItem &&
-                                                    items[i].itemType == UserItemType.folder))
-                                            ? const EdgeInsets.all(8.0)
-                                            : const EdgeInsets.only(
-                                                left: 8.0, right: 8.0, top: 4.0, bottom: 4.0),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              top: 5.0, left: 10.0, right: 10.0),
-                                          child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.only(right: 13.0),
-                                                  child: Icon(iconData, color: iconColor),
-                                                ),
-                                                if (description != null)
-                                                  Expanded(
-                                                      child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      TecSearchResult(
-                                                        textScaleFactor: 0.9 *
-                                                            contentTextScaleFactorWith(context),
-                                                        maxLines: 3,
-                                                        overflow: TextOverflow.ellipsis,
-                                                        text: description,
-                                                        title: title,
-                                                        lFormattedKeywords: searchWords,
-                                                      ),
-                                                      if (items[i] is UserItem)
-                                                        Padding(
-                                                          padding: const EdgeInsets.only(top: 4.0),
-                                                          child: Row(
-                                                            children: [
-                                                              if ((items[i] as UserItem).parentId >
-                                                                  0)
-                                                                Row(
-                                                                  children: [
-                                                                    const Padding(
-                                                                      padding: EdgeInsets.only(
-                                                                          right: 3.0),
-                                                                      child: Icon(
-                                                                          Icons.folder_outlined,
-                                                                          size: 16,
-                                                                          color: Colors.blue),
-                                                                    ),
-                                                                    Text(
-                                                                      _folders[items[i].parentId]
-                                                                          .title,
-                                                                      style: const TextStyle(
-                                                                          fontSize: 14.0),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              if (currentFolderId !=
-                                                                  UGCView.folderRecent)
-                                                                Expanded(
-                                                                    child: Text(
-                                                                  tec.shortDate(
-                                                                      (items[i] as UserItem)
-                                                                          .modifiedDT),
-                                                                  textAlign: TextAlign.end,
-                                                                  style: const TextStyle(
-                                                                      fontSize: 14.0),
-                                                                )),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                    ],
-                                                  ))
-                                                else if (title != null)
-                                                  Expanded(
-                                                    child: TecSearchResult(
-                                                      textScaleFactor:
-                                                          0.9 * contentTextScaleFactorWith(context),
-                                                      maxLines: 3,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      text: title,
-                                                      lFormattedKeywords: searchWords,
-                                                    ),
-                                                  ),
-                                                if (items[i] is CountItem ||
-                                                    items[i] is RecentCount)
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(left: 16.0),
-                                                    child: Text(items[i].count.toString(),
-                                                        style: const TextStyle(fontSize: 18.0)),
-                                                  ),
-                                                if (items[i] is UserItem &&
-                                                    items[i].itemType == UserItemType.folder)
-                                                  const Icon(
-                                                    Icons.navigate_next,
-                                                  )
-                                              ]),
-                                        ),
-                                      ),
-                                    );
-
-                                    if (items[i] is UserItem) {
-                                      var message = '';
-                                      if (items[i].type == UserItemType.folder.index) {
-                                        message +=
-                                            'EVERYTHING stored in this folder will also be deleted. ';
-                                      }
-                                      message += 'This action cannot be undone.';
-                                      return Dismissible(
-                                        key: ValueKey((items[i] as UserItem).id),
-                                        confirmDismiss: (direction) async {
-                                          return tecShowSimpleAlertDialog<bool>(
-                                              context: context,
-                                              title: 'Delete $title?',
-                                              content: message,
-                                              actions: [
-                                                FlatButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop(true);
-                                                    },
-                                                    child: const Text('Delete')),
-                                                FlatButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop(false);
-                                                    },
-                                                    child: const Text('Cancel'))
-                                              ]);
-                                        },
-                                        direction: DismissDirection.endToStart,
-                                        background: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                                          alignment: Alignment.centerRight,
-                                          child: const Icon(
-                                            FeatherIcons.trash2,
-                                            color: Colors.red,
-                                          ),
-                                        ),
-                                        onDismissed: (direction) async {
-                                          setState(() {
-                                            items.removeAt(i);
-                                          });
-                                        },
-                                        child: button,
-                                      );
-                                    } else {
-                                      return button;
-                                    }
-                                  }),
-                            ),
-                          ],
-                        ),
+                return Scaffold(
+                    resizeToAvoidBottomInset: false,
+                    floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+                    floatingActionButton: Padding(
+                      padding: EdgeInsets.only(bottom: context.fullBottomBarPadding),
+                      child: FloatingActionButton(
+                        child: const Icon(Icons.add),
+                        tooltip: 'Create note or folder',
+                        onPressed: () {
+                          showCreateNoteFolder(context, _folders[currentFolderId]);
+                        },
+                        heroTag: null,
                       ),
                     ),
-                  ));
-            }),
+                    appBar: MinHeightAppBar(
+                      appBar: AppBar(
+                        elevation: 0,
+                        centerTitle: true,
+                        title: Text(_folderTitle(currentFolderId)),
+                        leading: const BackButton(),
+                      ),
+                    ),
+                    body: Container(
+                      color: Theme.of(context).backgroundColor,
+                      child: SafeArea(
+                        bottom: false,
+                        child: Material(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Divider(
+                                height: 1,
+                                color: Theme.of(context).textColor.withOpacity(0.6),
+                              ),
+                              if (breadCrumbs.length == 1 ||
+                                  breadCrumbs.last.id == UGCView.folderSearchResults)
+                                QuickFind(
+                                  onSearch: _search,
+                                  search: _getInitSearch(),
+                                ),
+                              if (breadCrumbs.length > 1 &&
+                                  breadCrumbs.last.id != UGCView.folderSearchResults)
+                                BreadCrumbRow(
+                                    breadCrumbs: breadCrumbs,
+                                    onTap: (crumbNumber) {
+                                      breadCrumbs.length = crumbNumber + 1;
+                                      _load(breadCrumbs.last, poppingView: true);
+                                    }),
+                              Expanded(
+                                child: ListView.builder(
+                                    controller: listScrollController,
+                                    itemCount: items.length + 1,
+                                    itemBuilder: (c, i) {
+                                      IconData iconData;
+                                      String title, description;
+                                      Color iconColor;
+
+                                      if (i == items.length) {
+                                        return const Padding(padding: EdgeInsets.only(bottom: 20));
+                                      }
+
+                                      if (items[i] is CountItem) {
+                                        switch ((items[i] as CountItem).itemType) {
+                                          case UserItemType.bookmark:
+                                            iconData = FeatherIcons.bookmark;
+                                            title = 'Bookmarks';
+                                            break;
+                                          case UserItemType.note:
+                                            iconData = FeatherIcons.edit2;
+                                            title = 'Notes';
+                                            break;
+                                          case UserItemType.marginNote:
+                                            iconData = TecIcons.marginNoteOutline;
+                                            title = 'Margin Notes';
+                                            break;
+                                          case UserItemType.highlight:
+                                            iconData = Icons.view_agenda_outlined;
+                                            title = 'Highlights';
+                                            break;
+                                          default:
+                                            break;
+                                        }
+                                      } else if (items[i] is RecentCount) {
+                                        iconData = Icons.history;
+                                        title = 'Recent';
+                                      } else if (items[i] is UserItem) {
+                                        final ui = items[i] as UserItem;
+                                        switch (ui.itemType) {
+                                          case UserItemType.folder:
+                                            iconData = Icons.folder_outlined;
+                                            title = ui.title;
+                                            break;
+                                          case UserItemType.note:
+                                            iconData = Icons.edit_outlined;
+                                            title = ui.title;
+                                            // TODO(mike): when we save new format need to update this info assignment...
+                                            description =
+                                                ui.info.substring(ui.title.length).trimLeft();
+                                            break;
+                                          case UserItemType.bookmark:
+                                            iconData = FeatherIcons.bookmark;
+                                            title = ui.title;
+                                            description = ui.description;
+                                            break;
+                                          case UserItemType.marginNote:
+                                            iconData = TecIcons.marginNoteOutline;
+                                            title = Reference(
+                                                    volume: ui.volumeId,
+                                                    book: ui.book,
+                                                    chapter: ui.chapter,
+                                                    verse: ui.verse)
+                                                .label();
+                                            // TODO(mike): when we save new format need to update this info assignment...
+                                            description = ui.info;
+                                            break;
+                                          case UserItemType.highlight:
+                                            // is this highlight continued...
+                                            if (i + 1 < items.length &&
+                                                items[i + 1] is UserItem &&
+                                                items[i + 1].itemType == UserItemType.highlight) {
+                                              final uiNext = items[i + 1] as UserItem;
+                                              if (ui.volumeId == uiNext.volumeId &&
+                                                  ui.color == uiNext.color &&
+                                                  ui.book == uiNext.book &&
+                                                  ui.chapter == uiNext.chapter) {
+                                                if (ui.verse == (uiNext.verse - 1)) {
+                                                  if (hls == null) {
+                                                    hls = <UserItem>[ui, uiNext];
+                                                  } else {
+                                                    hls.add(uiNext);
+                                                  }
+                                                  return Container();
+                                                } else if (ui.verse == (uiNext.verse + 1)) {
+                                                  // db query returned in reverse order...
+                                                  if (hls == null) {
+                                                    hls = <UserItem>[uiNext, ui];
+                                                  } else {
+                                                    hls.insert(0, uiNext);
+                                                  }
+                                                  return Container();
+                                                }
+                                                // else uiNext is in a different range...
+                                              }
+                                            }
+
+                                            iconData = Icons.view_agenda;
+
+                                            title = Reference(
+                                                    volume: ui.volumeId,
+                                                    book: ui.book,
+                                                    chapter: ui.chapter,
+                                                    verse: (hls != null) ? hls.first.verse : ui.verse,
+                                                    endVerse:
+                                                        (hls != null) ? hls.last.verse : ui.verse)
+                                                .label();
+
+                                            // clear any hl range...
+                                            hls = null;
+
+                                            // final highlightType =
+                                            // (ui.color == 5 || (ui.color >> 24 > 0)) ? HighlightType.underline : HighlightType.highlight;
+
+                                            final color = (ui.color <= 5)
+                                                ? defaultColorIntForIndex(ui.color)
+                                                : 0xFF000000 | (ui.color & 0xFFFFFF);
+
+                                            iconColor = isDarkTheme
+                                                ? textColorWith(Color(color), isDarkMode: isDarkTheme)
+                                                : highlightColorWith(Color(color),
+                                                    isDarkMode: isDarkTheme);
+
+                                            // we have reached the end of consecutive hls, clear the list
+                                            hls = null;
+                                            break;
+                                          default:
+                                            break;
+                                        }
+                                      } else if (items[i] is _DividerItem) {
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                              top: 8.0, bottom: 4.0, left: 16.0, right: 16.0),
+                                          child: Divider(
+                                            height: 1,
+                                            color: Theme.of(context).textColor,
+                                          ),
+                                        );
+                                      } else if (items[i] is _DateItem) {
+                                        final di = items[i] as _DateItem;
+                                        return Padding(
+                                            padding: const EdgeInsets.only(
+                                                top: 12.0, bottom: 4.0, left: 16.0, right: 16.0),
+                                            child: Text(tec.longDate(di.date),
+                                                style: const TextStyle(
+                                                    fontSize: 18.0,
+                                                    fontStyle: FontStyle.italic,
+                                                    fontWeight: FontWeight.w500)));
+                                      }
+
+                                      final button = InkWell(
+                                        onTap: () => _itemTap(items[i]),
+                                        child: Padding(
+                                          padding: (currentFolderId == UGCView.folderHome ||
+                                                  (items[i] is UserItem &&
+                                                      items[i].itemType == UserItemType.folder))
+                                              ? const EdgeInsets.all(8.0)
+                                              : const EdgeInsets.only(
+                                                  left: 8.0, right: 8.0, top: 4.0, bottom: 4.0),
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                top: 5.0, left: 10.0, right: 10.0),
+                                            child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(right: 13.0),
+                                                    child: Icon(iconData, color: iconColor),
+                                                  ),
+                                                  if (description != null)
+                                                    Expanded(
+                                                        child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        TecSearchResult(
+                                                          textScaleFactor: 0.9 *
+                                                              contentTextScaleFactorWith(context),
+                                                          maxLines: 3,
+                                                          overflow: TextOverflow.ellipsis,
+                                                          text: description,
+                                                          title: title,
+                                                          lFormattedKeywords: searchWords,
+                                                        ),
+                                                        if (items[i] is UserItem)
+                                                          Padding(
+                                                            padding: const EdgeInsets.only(top: 4.0),
+                                                            child: Row(
+                                                              children: [
+                                                                if ((items[i] as UserItem).parentId >
+                                                                    0)
+                                                                  Row(
+                                                                    children: [
+                                                                      const Padding(
+                                                                        padding: EdgeInsets.only(
+                                                                            right: 3.0),
+                                                                        child: Icon(
+                                                                            Icons.folder_outlined,
+                                                                            size: 16,
+                                                                            color: Colors.blue),
+                                                                      ),
+                                                                      Text(
+                                                                        _folders[items[i].parentId]
+                                                                            .title,
+                                                                        style: const TextStyle(
+                                                                            fontSize: 14.0),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                if (currentFolderId !=
+                                                                    UGCView.folderRecent)
+                                                                  Expanded(
+                                                                      child: Text(
+                                                                    tec.shortDate(
+                                                                        (items[i] as UserItem)
+                                                                            .modifiedDT),
+                                                                    textAlign: TextAlign.end,
+                                                                    style: const TextStyle(
+                                                                        fontSize: 14.0),
+                                                                  )),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                      ],
+                                                    ))
+                                                  else if (title != null)
+                                                    Expanded(
+                                                      child: TecSearchResult(
+                                                        textScaleFactor:
+                                                            0.9 * contentTextScaleFactorWith(context),
+                                                        maxLines: 3,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        text: title,
+                                                        lFormattedKeywords: searchWords,
+                                                      ),
+                                                    ),
+                                                  if (items[i] is CountItem ||
+                                                      items[i] is RecentCount)
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(left: 16.0),
+                                                      child: Text(items[i].count.toString(),
+                                                          style: const TextStyle(fontSize: 18.0)),
+                                                    ),
+                                                  if (items[i] is UserItem &&
+                                                      items[i].itemType == UserItemType.folder)
+                                                    const Icon(
+                                                      Icons.navigate_next,
+                                                    )
+                                                ]),
+                                          ),
+                                        ),
+                                      );
+
+                                      if (items[i] is UserItem) {
+                                        var message = '';
+                                        if (items[i].type == UserItemType.folder.index) {
+                                          message +=
+                                              'EVERYTHING stored in this folder will also be deleted. ';
+                                        }
+                                        message += 'This action cannot be undone.';
+                                        return Dismissible(
+                                          key: ValueKey((items[i] as UserItem).id),
+                                          confirmDismiss: (direction) async {
+                                            return tecShowSimpleAlertDialog<bool>(
+                                                context: context,
+                                                title: 'Delete $title?',
+                                                content: message,
+                                                actions: [
+                                                  FlatButton(
+                                                      onPressed: () async {
+                                                        Navigator.of(context).pop(true);
+                                                        await AppSettings.shared.userAccount.userDb
+                                                            .deleteItem(items[i] as UserItem);
+                                                      },
+                                                      child: const Text('Delete')),
+                                                  FlatButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop(false);
+                                                      },
+                                                      child: const Text('Cancel'))
+                                                ]);
+                                          },
+                                          direction: DismissDirection.endToStart,
+                                          background: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                                            alignment: Alignment.centerRight,
+                                            child: const Icon(
+                                              FeatherIcons.trash2,
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                          onDismissed: (direction) async {
+                                            setState(() {
+                                              items.removeAt(i);
+                                            });
+                                          },
+                                          child: button,
+                                        );
+                                      } else {
+                                        return button;
+                                      }
+                                    }),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ));
+              }),
+        ),
       ),
     );
   }

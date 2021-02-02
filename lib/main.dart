@@ -28,7 +28,7 @@ import 'models/iap/iap.dart';
 import 'navigation_service.dart';
 import 'ui/common/common.dart';
 import 'ui/home/home_screen.dart';
-import 'ui/ugc/margin_note_view.dart';
+import 'ui/ugc/note_view.dart';
 import 'ui/volume/volume_view.dart';
 
 const _appTitle = 'Tecarta Bible';
@@ -42,8 +42,7 @@ Future<void> main() async {
   ViewManager.defaultViewType = Const.viewTypeVolume;
   ViewManager.shared
     ..register(ViewableVolume(Const.viewTypeVolume, FeatherIcons.book))
-    // ..register(ViewableUGC(Const.viewTypeNotes, FeatherIcons.edit2))
-    ..register(ViewableMarginNote(Const.viewTypeMarginNote, TecIcons.marginNoteOutline));
+    ..register(ViewableNote(Const.viewTypeNote, TecIcons.marginNoteOutline));
 
   final stopwatch = Stopwatch()..start();
 
