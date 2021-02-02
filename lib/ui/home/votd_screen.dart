@@ -178,35 +178,36 @@ class __VotdScreenState extends State<_VotdScreen> {
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () => onVerseTap(ref),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const SizedBox(height: 10),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                          child: TecText(
-                            res,
-                            style: cardSubtitleCompactStyle,
-                            textScaleFactor: contentTextScaleFactorWith(context),
-                            textAlign: TextAlign.left,
-                          ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                        child: TecText(
+                          res,
+                          style: cardSubtitleCompactStyle,
+                          textScaleFactor: contentTextScaleFactorWith(context),
+                          textAlign: TextAlign.left,
                         ),
-                        const SizedBox(height: 5),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      ),
+                      const SizedBox(height: 5),
+                      Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                          child: InkWell(
+                            onTap: () => onVerseTap(ref),
                             child: TecText(
                               ref.copyWith(volume: _bible.id).label(),
                               style: cardSubtitleCompactStyle.copyWith(
-                                  color: Theme.of(context).textColor, fontWeight: FontWeight.w500),
+                                  color: Theme.of(context).textColor,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                  decorationStyle: TextDecorationStyle.dotted),
                               textScaleFactor: contentTextScaleFactorWith(context),
-                            )),
-                        const SizedBox(height: 300),
-                      ],
-                    ),
+                            ),
+                          )),
+                      const SizedBox(height: 300),
+                    ],
                   ),
                 ),
               ),

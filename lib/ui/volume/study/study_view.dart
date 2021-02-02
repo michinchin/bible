@@ -137,7 +137,7 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
                         .toList();
 
                     return BlocProvider<TecAutoHideAppBarBloc>(
-                      create: (_) => TecAutoHideAppBarBloc(hide: false),
+                      create: (_) => TecAutoHideAppBarBloc(),
                       child: Scaffold(
                         resizeToAvoidBottomInset: false,
                         body: TecAutoHideAppBar(
@@ -174,10 +174,13 @@ class _TabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The study notes section uses a `PageableChapterView`.
     if (section == StudySection.notes) {
       return PageableChapterView(
           viewState: viewState, size: size, htmlPadding: const EdgeInsets.only(top: 50));
     } else {
+      // All other study sections use a `StudyResView`.
+
       final isIntro = section == StudySection.intros;
       final isResources = section == StudySection.resources;
 
@@ -186,6 +189,8 @@ class _TabContent extends StatelessWidget {
       return BlocProvider<StudyResBloc>(
         create: (_) {
           final viewData = context.read<VolumeViewDataBloc>().state.asVolumeViewData;
+
+          // TO-DO(Ron): Use the studyViewData.resStack to rebuild the res view stack.
           // final studyViewData = viewData?.asStudyViewData;
 
           if (isResources) {
@@ -236,16 +241,8 @@ class _RootFolderNavigator extends StatelessWidget {
     return NavigatorWithHeroController(
       onGenerateRoute: (settings) => MaterialPageRoute<dynamic>(
         settings: settings,
-        builder: (context) => BlocBuilder<StudyResBloc, StudyRes>(
-          builder: (context, studyRes) {
-            return Scaffold(
-              body: StudyResView(
-                // key: ValueKey(studyRes.valueKey),
-                viewSize: viewSize,
-                padding: padding,
-              ),
-            );
-          },
+        builder: (context) => Scaffold(
+          body: StudyResView(viewSize: viewSize, padding: padding),
         ),
       ),
     );

@@ -85,6 +85,8 @@ PODS:
     - nanopb/encode (= 1.30906.0)
   - nanopb/decode (1.30906.0)
   - nanopb/encode (1.30906.0)
+  - native_pdf_renderer (1.1.0):
+    - Flutter
   - notification_permissions (0.4.4):
     - Flutter
   - path_provider (0.0.1):
@@ -127,6 +129,7 @@ DEPENDENCIES:
   - google_sign_in (from `.symlinks/plugins/google_sign_in/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - in_app_purchase (from `.symlinks/plugins/in_app_purchase/ios`)
+  - native_pdf_renderer (from `.symlinks/plugins/native_pdf_renderer/ios`)
   - notification_permissions (from `.symlinks/plugins/notification_permissions/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission (from `.symlinks/plugins/permission/ios`)
@@ -180,6 +183,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker/ios"
   in_app_purchase:
     :path: ".symlinks/plugins/in_app_purchase/ios"
+  native_pdf_renderer:
+    :path: ".symlinks/plugins/native_pdf_renderer/ios"
   notification_permissions:
     :path: ".symlinks/plugins/notification_permissions/ios"
   path_provider:
@@ -231,6 +236,7 @@ SPEC CHECKSUMS:
   image_picker: 9c3312491f862b28d21ecd8fdf0ee14e601b3f09
   in_app_purchase: 3e2155afa9d03d4fa32d9e62d567885080ce97d6
   nanopb: 59317e09cf1f1a0af72f12af412d54edf52603fc
+  native_pdf_renderer: 3e81ffe3d40668cce75694596201bb9fb0fdb6e9
   notification_permissions: b74860c2967c1579243a675e63cd55e0ae75cef7
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   permission: c186483e23779d53def6b55986323494927c22c8

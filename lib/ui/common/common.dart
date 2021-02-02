@@ -1,6 +1,8 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import 'tec_dialog.dart';
@@ -47,9 +49,22 @@ IconData platformAwareMoreIcon(BuildContext context) {
   switch (Theme.of(context).platform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
-      return Icons.more_horiz;
+      return SFSymbols.ellipsis_circle;
     default:
-      return Icons.more_vert;
+      return FeatherIcons.moreVertical;
+  }
+}
+
+///
+/// Returns an appropriate download icon for specific platform
+///
+IconData platformAwareDownloadIcon(BuildContext context) {
+  switch (Theme.of(context).platform) {
+    case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
+      return SFSymbols.arrow_down_circle;
+    default:
+      return FeatherIcons.download;
   }
 }
 

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +13,8 @@ import '../../../blocs/content_settings.dart';
 import '../../../models/app_settings.dart';
 import '../../common/common.dart';
 import '../../common/tec_auto_hide_app_bar.dart';
+import '../../common/tec_interactive_viewer.dart';
+import '../../common/tec_pdf_viewer.dart';
 import '../volume_view_data_bloc.dart';
 import 'shared_app_bar_bloc.dart';
 import 'study_res_bloc.dart';
@@ -32,49 +35,48 @@ class StudyResView extends StatelessWidget {
       child: BlocBuilder<StudyResBloc, StudyRes>(
         builder: (context, studyRes) {
           final type = studyRes.res?.baseType;
-          switch (type) {
-            case ResourceType.folder:
-            case ResourceType.link:
-              return _Folder(
-                  studyRes: studyRes,
-                  viewSize: viewSize,
-                  padding: studyRes.resId == 0 ? padding : padding.copyWith(top: _altTopPadding));
-              break;
 
-            case ResourceType.article:
-            case ResourceType.introduction:
-              return _Article(
-                  studyRes: studyRes,
-                  viewSize: viewSize,
-                  padding: type == ResourceType.introduction
-                      ? padding
-                      : padding.copyWith(top: _altTopPadding));
-              break;
+          if (type == ResourceType.folder || type == ResourceType.link) {
+            return _Folder(
+                studyRes: studyRes,
+                viewSize: viewSize,
+                padding: studyRes.resId == 0 ? padding : padding.copyWith(top: _altTopPadding));
+          }
 
-            case ResourceType.chart:
-            case ResourceType.map:
-            case ResourceType.image:
-            case ResourceType.video:
-            case ResourceType.interactive:
-            case ResourceType.timeline:
-              if (studyRes.res.filename.endsWith('.jpg')) {
-                return _Image(studyRes: studyRes, viewSize: viewSize, padding: padding);
+          if (tec.isNotNullOrEmpty(studyRes.res?.filename)) {
+            final url = VolumesRepository.shared
+                .volumeWithId(studyRes.res.volumeId)
+                .fileUrlForResource(studyRes.res);
+            if (tec.isNotNullOrEmpty(url)) {
+              // HTML
+              if (url.endsWith('.html')) {
+                return _Article(
+                    studyRes: studyRes,
+                    viewSize: viewSize,
+                    padding: type == ResourceType.introduction
+                        ? padding
+                        : padding.copyWith(top: _altTopPadding));
               }
-              break;
 
-            case ResourceType.reference:
-            // TO-DO(ron): Handle this case.
+              // JPG
+              if (url.endsWith('.jpg')) {
+                return TecInteractiveViewer(
+                    child: TecImage(url: url), caption: studyRes.res.caption);
+              }
 
-            case ResourceType.studyNote:
-            // TO-DO(ron): Handle this case.
+              // PDF
+              if (url.endsWith('.pdf')) {
+                return TecPdfViewer(url: url, caption: studyRes.res.caption);
+              }
+            }
+          }
 
-            case ResourceType.question:
-            // TO-DO(ron): Handle this case.
+          if (type == ResourceType.studyNote) {
+            // TODO(ron): Handle this case.
+          }
 
-            default:
-              // TO-DO(ron): Handle this case.
-              if (type != null) tec.dmPrint('StudyResView unhandled type $type');
-              break;
+          if (type == ResourceType.question) {
+            // TODO(ron): Handle this case.
           }
 
           if (studyRes.error != null) {
@@ -131,6 +133,7 @@ class _Folder extends StatelessWidget {
   }
 
   void onTap(BuildContext context, Resource res) {
+    // If it is a Reference, just update VolumeViewDataBloc with the reference and return.
     if (res.hasType(ResourceType.reference)) {
       if (res.book != null && res.book > 0 && res.chapter != null && res.chapter > 0) {
         final viewData = context.read<VolumeViewDataBloc>().state.asVolumeViewData;
@@ -167,77 +170,49 @@ class _Folder extends StatelessWidget {
   }
 }
 
-class _Image extends StatelessWidget {
+class _Article extends StatelessWidget {
   final StudyRes studyRes;
   final Size viewSize;
   final EdgeInsets padding;
 
-  const _Image({Key key, @required this.studyRes, @required this.viewSize, @required this.padding})
+  const _Article(
+      {Key key, @required this.studyRes, @required this.viewSize, @required this.padding})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final res = studyRes.res;
-    final imageUrl =
-        VolumesRepository.shared.volumeWithId(res.volumeId)?.fileUrlForResource(studyRes.res);
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    return GestureDetector(
-      child: ClipRect(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            InteractiveViewer(
-              boundaryMargin: const EdgeInsets.all(60),
-              minScale: 0.1,
-              maxScale: 4.0,
-              child: Center(child: TecImage(url: imageUrl)), // fit: BoxFit.none),
-            ),
-            if (tec.isNotNullOrEmpty(studyRes.res.caption))
-              BlocBuilder<TecAutoHideAppBarBloc, bool>(
-                builder: (context, hide) {
-                  return AnimatedPositioned(
-                    duration: _duration,
-                    bottom: hide ? -100.0 : 0.0,
-                    right: 0,
-                    left: 0,
-                    child: IgnorePointer(
-                      child: AnimatedOpacity(
-                        duration: _duration,
-                        opacity: hide ? 0 : 1,
-                        child: Material(
-                          //type: MaterialType.transparency,
-                          color: isDarkTheme ? const Color(0xCC333333) : const Color(0xCC666666),
-                          child: SafeArea(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Text(
-                                studyRes.res.caption,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: isDarkTheme
-                                      ? const Color(0xFFAAAAAA)
-                                      : const Color(0xFFFFFFFF),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+    return tec.isNullOrEmpty(studyRes.html)
+        ? const Center(child: LoadingIndicator())
+        : TecScrollbar(
+            child: SingleChildScrollView(
+              child: BlocBuilder<ContentSettingsBloc, ContentSettings>(
+                builder: (context, settings) {
+                  final marginWidth = (viewSize.width * _marginPercent).roundToDouble();
+                  var _padding = (padding ?? EdgeInsets.zero);
+                  _padding = padding.copyWith(
+                    left: padding.left + marginWidth,
+                    right: padding.right + marginWidth,
+                  );
+
+                  if (kIsWeb) return Text(studyRes.html);
+
+                  return TecHtml(
+                    studyRes.html,
+                    baseUrl: VolumesRepository.shared.volumeWithId(studyRes.volumeId)?.baseUrl,
+                    backgroundColor: Theme.of(context).backgroundColor,
+                    textScaleFactor: contentTextScaleFactorWith(context),
+                    padding: _padding,
                   );
                 },
               ),
-          ],
-        ),
-      ),
-      onTap: () => context.read<TecAutoHideAppBarBloc>()?.toggle(),
-    );
+            ),
+          );
   }
 }
 
-const _duration = Duration(milliseconds: 300);
+const _marginPercent = 0.05; // 0.05;
 
-class _MoveableStackChild extends StatefulWidget {
+class DraggablePositioned extends StatefulWidget {
   final double left;
   final double top;
   final double right;
@@ -246,7 +221,7 @@ class _MoveableStackChild extends StatefulWidget {
   final double height;
   final Widget child;
 
-  const _MoveableStackChild({
+  const DraggablePositioned({
     @required this.child,
     Key key,
     this.left,
@@ -260,10 +235,10 @@ class _MoveableStackChild extends StatefulWidget {
         super(key: key);
 
   @override
-  __MoveableStackChildState createState() => __MoveableStackChildState();
+  _DraggablePositionedState createState() => _DraggablePositionedState();
 }
 
-class __MoveableStackChildState extends State<_MoveableStackChild> {
+class _DraggablePositionedState extends State<DraggablePositioned> {
   double _left;
   double _top;
   double _right;
@@ -302,43 +277,3 @@ class __MoveableStackChildState extends State<_MoveableStackChild> {
     );
   }
 }
-
-class _Article extends StatelessWidget {
-  final StudyRes studyRes;
-  final Size viewSize;
-  final EdgeInsets padding;
-
-  const _Article(
-      {Key key, @required this.studyRes, @required this.viewSize, @required this.padding})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return tec.isNullOrEmpty(studyRes.html)
-        ? const Center(child: LoadingIndicator())
-        : TecScrollbar(
-            child: SingleChildScrollView(
-              child: BlocBuilder<ContentSettingsBloc, ContentSettings>(
-                builder: (context, settings) {
-                  final marginWidth = (viewSize.width * _marginPercent).roundToDouble();
-                  var _padding = (padding ?? EdgeInsets.zero);
-                  _padding = padding.copyWith(
-                    left: padding.left + marginWidth,
-                    right: padding.right + marginWidth,
-                  );
-
-                  return TecHtml(
-                    studyRes.html,
-                    baseUrl: VolumesRepository.shared.volumeWithId(studyRes.volumeId)?.baseUrl,
-                    backgroundColor: Theme.of(context).backgroundColor,
-                    textScaleFactor: contentTextScaleFactorWith(context),
-                    padding: _padding,
-                  );
-                },
-              ),
-            ),
-          );
-  }
-}
-
-const _marginPercent = 0.05; // 0.05;

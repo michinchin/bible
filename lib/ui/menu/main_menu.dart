@@ -1,3 +1,4 @@
+import 'package:bible/ui/menu/zendesk_help.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -80,15 +81,16 @@ List<TableRow> _buildMenuItems(
     //   ),
     tecModalPopupMenuDivider(menuContext, rowPadding: rowPadding),
 
-    tecModalPopupMenuItem(menuContext, FeatherIcons.helpCircle, 'Help & Feedback',
-        () => menuModel.emailFeedback(menuContext),
-        subtitle: 'App Features, Support, and FAQs', rowPadding: rowPadding, scaleFont: true),
-    tecModalPopupMenuDivider(menuContext, rowPadding: rowPadding),
-
     tecModalPopupMenuItem(
         menuContext, FeatherIcons.info, 'About', () => menuModel.showAboutDialog(menuContext),
         subtitle: 'App Info, version number, website link',
         rowPadding: rowPadding,
         scaleFont: true),
+        
+    tecModalPopupMenuDivider(menuContext, rowPadding: rowPadding),
+
+    tecModalPopupMenuItem(
+        menuContext, FeatherIcons.helpCircle, 'Help Desk', () => showZendeskHelp(menuContext),
+        subtitle: 'FAQ & Other Help Questions', rowPadding: rowPadding, scaleFont: true),
   ];
 }

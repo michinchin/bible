@@ -51,7 +51,7 @@ class TecAutoHideAppBar extends StatelessWidget {
 }
 
 class TecAutoHideAppBarBloc extends Cubit<bool> {
-  TecAutoHideAppBarBloc({bool hide}) : super(hide);
+  TecAutoHideAppBarBloc({bool hide = false}) : super(hide);
 
   // ignore: avoid_positional_boolean_parameters
   void hide(bool hide) => emit(hide);
