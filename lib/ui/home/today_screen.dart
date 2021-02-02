@@ -210,13 +210,13 @@ class _HomeCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                             color: Colors.white24,
                             child: Container(
-                              alignment: Alignment.center,
+                              alignment: Alignment.centerLeft,
                               child: TecText(
                                 subtitle,
                                 style: cardSubtitleCompactStyle
                                     .copyWith(color: Colors.white, shadows: <Shadow>[
                                   const Shadow(
-                                      offset: Offset(0.50, 0.50),
+                                      offset: Offset(0.6, 0.60),
                                       blurRadius: 1.0,
                                       color: Colors.black),
                                 ]),
