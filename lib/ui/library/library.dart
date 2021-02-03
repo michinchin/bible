@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart' as collection;
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -512,11 +511,7 @@ class _VolumesListState extends State<_VolumesList> {
             ),
             secondChild: Row(
               children: [
-                // SizedBox(width: padding, height: topBarHeight),
-                IconButton(
-                    tooltip: 'search',
-                    icon: const Icon(Icons.search),
-                    onPressed: () => _focusNode.requestFocus()),
+                SizedBox(width: padding / 2),
                 Theme(
                   data: Theme.of(context).copyWith(accentColor: barTextColor),
                   child: TecPopupMenuButton<int>(
@@ -530,7 +525,11 @@ class _VolumesListState extends State<_VolumesList> {
                     },
                   ),
                 ),
-                Expanded(child: Container()),
+                const Spacer(),
+                IconButton(
+                    tooltip: 'search',
+                    icon: const Icon(Icons.search),
+                    onPressed: () => _focusNode.requestFocus()),
                 if (showFilter)
                   IconButton(
                       tooltip: 'filters',
@@ -600,12 +599,13 @@ class _VolumeActionButton extends StatelessWidget {
     final color = Theme.of(context).accentColor;
 
     Widget _progressCircle() => Positioned(
-        left: 8,
-        right: 8,
-        top: 8,
-        bottom: 8,
+        left: 13,
+        right: 13,
+        top: 13,
+        bottom: 13,
         child: CircularProgressIndicator(
           backgroundColor: isDarkTheme ? Colors.grey[800] : Colors.grey[200],
+          strokeWidth: 1.8,
           value: item?.progress ?? 0.0,
         ));
 
@@ -625,13 +625,13 @@ class _VolumeActionButton extends StatelessWidget {
         return IconButton(
             icon: Icon(platformAwareDownloadIcon(context)),
             // iconSize: 32,
-            color: color, 
+            color: color,
             onPressed: () =>
                 _onActionTap(bloc, item ?? DownloadItem(volumeId: volume.id, url: '')));
       } else {
         return IconButton(
             icon: Icon(platformAwareMoreIcon(context)),
-            // iconSize: 32, 
+            // iconSize: 32,
             // color: color,
             onPressed: () => showDetailViewForVolume(context, volume, heroPrefix));
       }
@@ -640,7 +640,8 @@ class _VolumeActionButton extends StatelessWidget {
         children: [
           _progressCircle(),
           IconButton(
-              icon: const Icon(Icons.pause), //.cancel),
+              iconSize: 10,
+              icon: const Icon(SFSymbols.pause_fill), //.cancel),
               color: color,
               onPressed: () => _onActionTap(bloc, item)),
         ],
@@ -650,7 +651,8 @@ class _VolumeActionButton extends StatelessWidget {
         children: [
           _progressCircle(),
           IconButton(
-              icon: const Icon(Icons.play_arrow),
+              iconSize: 10,
+              icon: const Icon(SFSymbols.play_fill),
               color: color,
               onPressed: () => _onActionTap(bloc, item)),
         ],

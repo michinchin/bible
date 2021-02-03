@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_views/tec_views.dart';
-import 'package:tec_volumes/tec_volumes.dart';
+
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
@@ -14,9 +14,7 @@ import '../../models/const.dart';
 import '../../ui/sheet/snap_sheet.dart';
 import '../common/tec_modal_popup.dart';
 import '../common/tec_navigator.dart';
-import '../library/volume_image.dart';
 import '../ugc/ugc_view.dart';
-import '../volume/volume_view_data_bloc.dart';
 
 class TabBottomBarItem {
   final TecTab tab;
@@ -192,21 +190,6 @@ class _ExpandedView extends StatefulWidget {
 }
 
 class __ExpandedViewState extends State<_ExpandedView> {
-  void _onSwitchViews(ViewState view) {
-    // ignore: close_sinks
-    final vmBloc = context.viewManager;
-
-    if (vmBloc == null) {
-      return;
-    }
-
-    if (vmBloc.state.maximizedViewUid > 0) {
-      vmBloc.maximize(view.uid);
-    } else {
-      vmBloc?.show(view.uid);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -233,43 +216,6 @@ class __ExpandedViewState extends State<_ExpandedView> {
               ),
               child: const Icon(Icons.add, color: Const.tecartaBlue)))
     ];
-
-    // get the offscreen views...
-    for (final view in context.viewManager?.state?.views) {
-      if (!context.viewManager.isViewVisible(view.uid)) {
-        final title = ViewManager.shared.menuTitleWith(context: context, state: view);
-        final vbloc = context.viewManager.dataBlocWithView(view.uid) as VolumeViewDataBloc;
-        final volumeId = vbloc.state.asVolumeViewData.volumeId;
-        _icons.add(_OffscreenView(
-            title: title,
-            onPressed: () {
-              context.tabManager.changeTab(TecTab.reader);
-              _onSwitchViews(view);
-            },
-            uid: view.uid,
-            icon: Container(
-              width: 50,
-              height: 60,
-              padding: const EdgeInsets.symmetric(horizontal: 2.5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                boxShadow: [
-                  boxShadow(
-                      color: isDarkMode ? Colors.black54 : Colors.black38,
-                      offset: const Offset(0, 3),
-                      blurRadius: 5)
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(5),
-                child: VolumeImage(
-                  volume: VolumesRepository.shared.volumeWithId(volumeId),
-                  fit: BoxFit.fill,
-                ),
-              ),
-            )));
-      }
-    }
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -329,14 +275,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
                                     ])),
                           ),
                           const SizedBox(width: 10),
-                          if (_icons[index].uid != null)
-                            LongPressDraggable(
-                                data: _icons[index].uid,
-                                onDragStarted: () => context.tabManager.changeTab(TecTab.reader),
-                                feedback: _icons[index].icon,
-                                child: _icons[index].icon)
-                          else
-                            _icons[index].icon,
+                          _icons[index].icon,
                           const SizedBox(width: 10),
                         ],
                       ),
