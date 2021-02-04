@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart' as collection;
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

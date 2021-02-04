@@ -17,6 +17,7 @@ import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../common/common.dart';
 import '../menu/view_actions.dart';
+import 'note_action_bar.dart';
 
 const String _newNoteTitle = '___new___';
 
@@ -29,7 +30,7 @@ class ViewableNote extends Viewable {
 
   @override
   Widget floatingTitleBuilder(BuildContext context, ViewState state, Size size) {
-    return Container();
+    return NoteViewActionBar(state: state, size: size);
   }
 
   @override

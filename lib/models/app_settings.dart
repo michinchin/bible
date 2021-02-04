@@ -88,7 +88,12 @@ class AppSettings {
 ///
 bool isSmallScreen(BuildContext context) {
   final size = MediaQuery.of(context).size;
-  return (math.max(size.width, size.height) < 950.0 && math.min(size.width, size.height) < 500);
+
+  // if any dimension is < 500 - it's a small screen
+  return (math.min(size.width, size.height) < 500);
+
+  // old computation - failed on ipad split screen
+  // return (math.max(size.width, size.height) < 950.0 && math.min(size.width, size.height) < 500);
 }
 
 ///

@@ -5,27 +5,24 @@ import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
-enum ActionBarItemOptions { iconOnly, titleOnly }
-
 @immutable
 class ActionBarItem {
   final String title;
   final Widget icon;
   final VoidCallback onTap;
   final String minTitle;
-  final ActionBarItemOptions options;
   final int priority;
   final bool showTrailingSeparator;
 
   const ActionBarItem({
-    @required this.title,
-    @required this.icon,
-    @required this.onTap,
+    this.title,
+    this.icon,
+    this.onTap,
     String minTitle,
-    this.options = ActionBarItemOptions.iconOnly,
     this.priority = 0,
     this.showTrailingSeparator = true,
-  }) : minTitle = minTitle ?? title;
+  })  : minTitle = minTitle ?? title,
+        assert(title != null || icon != null);
 }
 
 ///
@@ -155,12 +152,14 @@ extension on ActionBarItem {
         minSize: 0,
         // color: Colors.red.withOpacity(0.25),
         padding: EdgeInsets.symmetric(vertical: (4.0 * scale).roundToDouble()),
-        child: options == ActionBarItemOptions.iconOnly
-            ? IconTheme.merge(data: iconTheme, child: icon)
-            : Padding(
-                padding: EdgeInsets.symmetric(horizontal: _textPadding * scale),
-                child: Text(min ? minTitle : title, style: textStyle, maxLines: 1),
-              ),
+        child: Row(children: [
+          if (title != null)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: _textPadding * scale),
+              child: Text(min ? minTitle : title, style: textStyle, maxLines: 1),
+            ),
+          if (icon != null) IconTheme.merge(data: iconTheme, child: icon),
+        ]),
         onPressed: onTap,
       ),
       if (showTrailingSeparator && index < count - 1) separator(),
@@ -180,16 +179,15 @@ extension on ActionBarItem {
   }) {
     var width = 0.0;
 
-    switch (options) {
-      case ActionBarItemOptions.iconOnly:
-        width += _defaultIconSize * scale;
-        break;
-      case ActionBarItemOptions.titleOnly:
-        width += TextSpan(text: min ? minTitle : title, style: textStyle)
-                .createTextPainter(textScaleFactor: scale)
-                .width +
-            (_textPadding * scale * 2);
-        break;
+    if (title != null) {
+      width += TextSpan(text: min ? minTitle : title, style: textStyle)
+              .createTextPainter(textScaleFactor: scale)
+              .width +
+          (_textPadding * scale * 2);
+    }
+
+    if (icon != null) {
+      width += _defaultIconSize * scale;
     }
 
     if (showTrailingSeparator && index < count - 1) {

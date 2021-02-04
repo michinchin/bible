@@ -39,9 +39,14 @@ class VolumeViewActionBar extends StatelessWidget {
             elevation: defaultActionBarElevation,
             items: [
               ActionBarItem(
-                title: 'Search',
+                priority: 4,
+                icon: const Icon(Icons.chevron_left),
+                onTap: () {
+                  TecToast.show(context, 'history goes here');
+                },
+              ),
+              ActionBarItem(
                 priority: 0,
-                options: ActionBarItemOptions.iconOnly,
                 showTrailingSeparator: false,
                 icon: BlocBuilder<SearchBloc, SearchState>(
                   builder: (c, s) => s.searchResults.isNotEmpty
@@ -55,23 +60,12 @@ class VolumeViewActionBar extends StatelessWidget {
                 title: viewData.bookNameAndChapter(),
                 priority: 3,
                 minTitle: viewData.bookNameAndChapter(useShortBookName: true),
-                options: ActionBarItemOptions.titleOnly,
-                icon: const Icon(Icons.book),
                 onTap: () => _onNavigate(context, viewData),
               ),
-              if (tec.isNotNullOrEmpty(volume?.abbreviation))
-                ActionBarItem(
-                  title: volume.abbreviation,
-                  priority: 2,
-                  options: ActionBarItemOptions.titleOnly,
-                  icon: const Icon(Icons.book),
-                  onTap: () => _onSelectVolume(context, viewData),
-                ),
               ActionBarItem(
-                title: 'Menu',
+                title: volume.abbreviation, //_onSelectVolume(context, viewData)
                 priority: 4,
-                options: ActionBarItemOptions.iconOnly,
-                icon: const Icon(FeatherIcons.chevronDown),
+                // icon: const Icon(FeatherIcons.chevronDown),
                 onTap: () {
                   showTecModalPopupMenu(
                     context: context,
@@ -120,8 +114,8 @@ Future<void> _onNavigate(BuildContext context, VolumeViewData viewData,
 Future<void> _onSelectVolume(BuildContext context, VolumeViewData viewData) async {
   TecAutoScroll.stopAutoscroll();
 
-  final volumeId = await selectVolumeInLibrary(context,
-      title: 'Switch To', selectedVolume: viewData.volumeId);
+  final volumeId =
+      await selectVolumeInLibrary(context, title: 'Switch To', selectedVolume: viewData.volumeId);
 
   VolumeViewData newViewData;
   if (volumeId != null) {
@@ -129,8 +123,7 @@ Future<void> _onSelectVolume(BuildContext context, VolumeViewData viewData) asyn
     if (isBibleId(volumeId)) {
       newViewData = VolumeViewData(volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
     } else if (isStudyVolumeId(volumeId)) {
-      newViewData =
-          StudyViewData(volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
+      newViewData = StudyViewData(volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
     } else {
       assert(false);
     }

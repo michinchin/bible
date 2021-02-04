@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:bible/models/help/search_help_bloc.dart';
-import 'package:bible/models/help/zendesk_api.dart';
-import 'package:bible/ui/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_html/tec_html.dart';
+import 'package:tec_util/tec_util.dart' as tec;
+
+import '../../models/help/search_help_bloc.dart';
+import '../../models/help/zendesk_api.dart';
+import '../common/common.dart';
 import 'main_menu_model.dart';
 
 void showZendeskHelp(BuildContext context) =>

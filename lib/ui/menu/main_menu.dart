@@ -1,4 +1,3 @@
-import 'package:bible/ui/menu/zendesk_help.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import '../common/tec_modal_popup_menu.dart';
 import 'main_menu_model.dart';
 import 'notifications_view.dart';
 import 'settings.dart';
+import 'zendesk_help.dart';
 
 Future<void> showMainMenu(BuildContext context) {
   TecAutoScroll.stopAutoscroll();
