@@ -133,6 +133,9 @@ class DragTargetView extends StatelessWidget {
                         },
                         icon: Icons.close,
                       ),
+                      DragViewIcon(
+                          onAccept: (_) => context.viewManager.hide(viewUid),
+                          icon: Icons.visibility_off_outlined),
                       if (!isMaximized) ...[
                         DragViewIcon(
                           onAccept: (_) => context.viewManager.maximize(viewUid),
