@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/help/search_help_bloc.dart';
 import '../../models/help/zendesk_api.dart';
@@ -22,12 +23,13 @@ class ZendeskHelp extends StatefulWidget {
 class _ZendeskHelpState extends State<ZendeskHelp> {
   TextEditingController _searchController;
   Timer _debounceTimer;
-  Future<List<ZendeskSection>> _sections;
+  Future<List<ZendeskSection>> _future;
+  List<ZendeskSection> _sections;
 
   @override
   void initState() {
     _searchController = TextEditingController(text: '')..addListener(_searchListener);
-    _sections = ZendeskApi.fetchSections();
+    _future = ZendeskApi.fetchSections();
     super.initState();
   }
 
@@ -45,6 +47,12 @@ class _ZendeskHelpState extends State<ZendeskHelp> {
     );
   }
 
+  Future<void> _loadArticles(ZendeskSection section) async {
+    _sections[_sections.indexOf(section)] =
+        section.copyWith(articles: await ZendeskApi.fetchArticles(sectionId: section.id));
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,11 +61,13 @@ class _ZendeskHelpState extends State<ZendeskHelp> {
         title: const Text('Help Desk'),
       ),
       body: FutureBuilder<List<ZendeskSection>>(
-          future: _sections,
+          future: _future,
           builder: (c, s) {
             final data = s?.data ?? [];
+            _sections = data;
             if (s.connectionState == ConnectionState.waiting) {
-              return const Center(child: LoadingIndicator());
+              return const Center(
+                  child: Padding(padding: EdgeInsets.all(10), child: LoadingIndicator()));
             }
             return SingleChildScrollView(
                 child: Column(
@@ -66,19 +76,23 @@ class _ZendeskHelpState extends State<ZendeskHelp> {
                 BlocBuilder<SearchHelpBloc, SearchHelpState>(builder: (c, state) {
                   if (_searchController.text.isEmpty) {
                     return Column(children: [
-                      for (final d in data)
+                      for (final s in _sections)
                         ExpansionTile(
                           leading: const Icon(Icons.article),
-                          title: Text(d.name),
+                          title: Text(s.name),
+                          onExpansionChanged: (_) => _loadArticles(s),
                           children: [
-                            for (final a in d.articles)
-                              ListTile(
-                                title: Text(
-                                  a.title,
-                                  style: const TextStyle(color: Colors.blue),
-                                ),
-                                onTap: () => showArticlePage(c, a),
-                              )
+                            if (s.articles == null)
+                              const Padding(padding: EdgeInsets.all(10), child: LoadingIndicator())
+                            else
+                              for (final a in s?.articles ?? <ZendeskArticle>[])
+                                ListTile(
+                                  title: Text(
+                                    a.title,
+                                    style: const TextStyle(color: Colors.blue),
+                                  ),
+                                  onTap: () => showArticlePage(c, a),
+                                )
                           ],
                         )
                     ]);
@@ -124,7 +138,7 @@ class ZendeskArticlePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(article.title),
+        title: TecText(article.title, autoSize: true, maxLines: 2),
       ),
       body: SingleChildScrollView(
         child: TecHtml(

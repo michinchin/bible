@@ -124,7 +124,7 @@ class DragTargetView extends StatelessWidget {
                         : const BoxDecoration(color: Colors.transparent),
                     child: child),
                 if (state.sameView && state.inRect)
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                     if (oneView) ...[
                       DragViewIcon(
                         onAccept: (_) {

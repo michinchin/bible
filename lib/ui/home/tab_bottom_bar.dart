@@ -233,7 +233,6 @@ class __ExpandedViewState extends State<_ExpandedView> {
               ),
               child: const Icon(Icons.add, color: Const.tecartaBlue)))
     ];
-
     // get the offscreen views...
     for (final view in context.viewManager?.state?.views) {
       if (!context.viewManager.isViewVisible(view.uid)) {

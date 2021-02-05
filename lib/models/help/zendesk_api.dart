@@ -34,8 +34,7 @@ class ZendeskApi {
       final sections = <ZendeskSection>[];
       for (final each in json['sections']) {
         final section = ZendeskSection.fromJson(tec.as<Map<dynamic, dynamic>>(each));
-        final articles = await fetchArticles(sectionId: section.id);
-        sections.add(section.copyWith(articles: articles));
+        sections.add(section);
       }
       return sections;
     }

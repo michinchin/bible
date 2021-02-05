@@ -109,7 +109,7 @@ class DownloadsBlocImp extends DownloadsBloc {
 
   @override
   Future<void> deleteDownload(int volumeId) async {
-    // TO-DO(ron): ...
+    // TODO(ron): ...
     // await FlutterDownloader.remove(
     //     taskId: task.taskId, shouldDeleteContent: true);
     // await _prepare();
