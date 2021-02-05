@@ -66,18 +66,21 @@ class VolumeViewActionBar extends StatelessWidget {
                 priority: 4,
                 // icon: const Icon(FeatherIcons.chevronDown),
                 onTap: () {
-                  showTecModalPopupMenu(
-                    context: context,
-                    insets: context.viewManager.insetsOfView(state.uid),
-                    alignment: Alignment.topCenter,
-                    minWidth: 125,
-                    menuItemsBuilder: (menuContext) => buildMenuItemsForViewWithState(
-                      state,
-                      context: context,
-                      menuContext: menuContext,
-                    ),
-                  );
+                  _onSelectVolume(context, viewData);
                 },
+                // onTap: () {
+                //   showTecModalPopupMenu(
+                //     context: context,
+                //     insets: context.viewManager.insetsOfView(state.uid),
+                //     alignment: Alignment.topCenter,
+                //     minWidth: 125,
+                //     menuItemsBuilder: (menuContext) => buildMenuItemsForViewWithState(
+                //       state,
+                //       context: context,
+                //       menuContext: menuContext,
+                //     ),
+                //   );
+                // },
               ),
             ],
           );
