@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:bible/models/user_item_helper.dart';
+import 'package:bible/ui/volume/volume_view_data_bloc.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
@@ -21,6 +24,28 @@ import 'search_filter.dart';
 import 'search_suggestions.dart';
 
 const tabColors = [Colors.blue, Colors.orange, Colors.green];
+
+Future<void> showNavigate(BuildContext context,
+    {int initialIndex = 0, bool searchView = false}) async {
+  TecAutoScroll.stopAutoscroll();
+
+  final ref = await navigate(
+      context, Reference.fromHref('50/1/1', volume: 9),
+      initialIndex: initialIndex, searchView: searchView);
+
+  if (ref != null) {
+    // Save navigation ref to nav history.
+    unawaited(UserItemHelper.saveNavHistoryItem(ref));
+
+    // Small delay to allow the nav popup to clean up...
+    await Future.delayed(const Duration(milliseconds: 350), () {
+      // final newViewData =
+      // viewData.copyWith(bcv: BookChapterVerse.fromRef(ref), volumeId: ref.volume);
+      // tec.dmPrint('VolumeViewActionBar _onNavigate updating with new data: $newViewData');
+      // context.read<VolumeViewDataBloc>().update(context, newViewData);
+    });
+  }
+}
 
 Future<Reference> navigate(BuildContext context, Reference ref,
     {int initialIndex = 0, bool searchView = false}) {

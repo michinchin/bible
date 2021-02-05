@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:bible/ui/nav/nav.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -207,31 +209,55 @@ class __ExpandedViewState extends State<_ExpandedView> {
     }
   }
 
+  _OffscreenView getOffscreenIconView(
+      {@required String title, @required IconData icon, Function(BuildContext context) onPressed}) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return _OffscreenView(
+        title: title,
+        onPressed: () {
+          context.tabManager.changeTab(TecTab.reader);
+          if (onPressed != null) {
+            onPressed(context);
+          }
+        },
+        icon: Container(
+            width: 50,
+            height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Theme.of(context).cardColor,
+              boxShadow: [
+                boxShadow(
+                    color: isDarkMode ? Colors.black54 : Colors.black38,
+                    offset: const Offset(0, 3),
+                    blurRadius: 5)
+              ],
+            ),
+            child: Icon(icon, color: Const.tecartaBlue)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final _icons = <_OffscreenView>[
-      _OffscreenView(
-          title: 'Open New',
-          onPressed: () {
-            context.tabManager.changeTab(TecTab.reader);
-            ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
-          },
-          icon: Container(
-              width: 50,
-              height: 60,
-              // padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).cardColor,
-                boxShadow: [
-                  boxShadow(
-                      color: isDarkMode ? Colors.black54 : Colors.black38,
-                      offset: const Offset(0, 3),
-                      blurRadius: 5)
-                ],
-              ),
-              child: const Icon(Icons.add, color: Const.tecartaBlue)))
+      getOffscreenIconView(title: 'Open New', icon: Icons.add, onPressed: (context) {
+        ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
+      }),
+      getOffscreenIconView(title: 'Search', icon: Icons.search, onPressed: (context) {
+        showNavigate(context, searchView: true);
+      }),
+      getOffscreenIconView(title: 'History', icon: Icons.history, onPressed: (context) {
+        TecToast.show(context, 'need to show history here');
+      }),
+      getOffscreenIconView(title: 'Journal', icon: FeatherIcons.bookOpen, onPressed: (context) {
+        final scaffold = Scaffold.of(context);
+
+        // drawer will be reattached after tab switches back to reader - need to wait for that
+        // grab the scaffold while our context is valid, but wait for the drawer
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          scaffold.openDrawer();
+        });
+      }),
     ];
     // get the offscreen views...
     for (final view in context.viewManager?.state?.views) {

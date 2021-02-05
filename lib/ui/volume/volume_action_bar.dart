@@ -44,17 +44,17 @@ class VolumeViewActionBar extends StatelessWidget {
                   TecToast.show(context, 'history goes here');
                 },
               ),
-              ActionBarItem(
-                priority: 0,
-                showTrailingSeparator: false,
-                icon: BlocBuilder<SearchBloc, SearchState>(
-                  builder: (c, s) => s.searchResults.isNotEmpty
-                      ? const IconWithNumberBadge(
-                          color: Const.tecartaBlue, badgeColor: Colors.orange, icon: Icons.search)
-                      : const Icon(Icons.search, color: Const.tecartaBlue),
-                ),
-                onTap: () => _onNavigate(context, viewData, searchView: true),
-              ),
+              // ActionBarItem(
+              //   priority: 0,
+              //   showTrailingSeparator: false,
+              //   icon: BlocBuilder<SearchBloc, SearchState>(
+              //     builder: (c, s) => s.searchResults.isNotEmpty
+              //         ? const IconWithNumberBadge(
+              //             color: Const.tecartaBlue, badgeColor: Colors.orange, icon: Icons.search)
+              //         : const Icon(Icons.search, color: Const.tecartaBlue),
+              //   ),
+              //   onTap: () => _onNavigate(context, viewData, searchView: true),
+              // ),
               ActionBarItem(
                 title: viewData.bookNameAndChapter(),
                 priority: 3,
