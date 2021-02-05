@@ -353,7 +353,7 @@ class __DefineWebViewState extends State<_DefineWebView> {
 
   @override
   void initState() {
-    url = Uri.https('google.com', '/search', {'q': 'define:${widget.words}'}).toString();
+    url = Uri.https('google.com', '/search', <String, String>{'q': 'define:${widget.words}'}).toString();
     super.initState();
   }
 
