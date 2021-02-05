@@ -290,7 +290,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
                   child: Dismissible(
                     key: ValueKey(_icons[index].uid),
                     direction: _icons[index].uid == null
-                        ? DismissDirection.none
+                        ? null /* DismissDirection.none */
                         : DismissDirection.endToStart,
                     onDismissed: (_) {
                       setState(() {

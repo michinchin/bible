@@ -72,7 +72,8 @@ class ActionBar extends StatelessWidget {
     // Cache for calculated item widths, so the calculation only happens once.
     final cache = _Cache<int, double>();
 
-    final scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1.0;
+    //final scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1.0;
+    final scale = MediaQuery.of(context)?.textScaleFactor ?? 1.0;
     final sidePadding = 8.0 * scale;
     var min = false;
 
