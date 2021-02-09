@@ -1,3 +1,4 @@
+import 'package:bible/ui/menu/notifications_view.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
@@ -28,10 +29,11 @@ class SettingsView extends StatelessWidget {
       appBar: MinHeightAppBar(
         appBar: AppBar(
           title: const Text('Settings'),
+          elevation: 0,
         ),
       ),
       body: Container(
-          color: Theme.of(context).dialogBackgroundColor,
+          color: Theme.of(context).canvasColor,
           child: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,8 +71,17 @@ class SettingsView extends StatelessWidget {
                       padding: const EdgeInsets.only(left: 30, bottom: 10),
                       child: Column(children: readTiles(context)),
                     ),
-                    const _TitleSettingTile(title: 'Notifications', icon: FeatherIcons.bell),
+                    _TitleSettingTile(
+                      title: 'Notifications',
+                      icon: FeatherIcons.bell,
+                      onPressed: () => showNotifications(context),
+                    ),
                     const _TitleSettingTile(title: 'Audio', icon: FeatherIcons.volume1),
+                    _TitleSettingTile(
+                      title: 'About',
+                      icon: FeatherIcons.info,
+                      onPressed: () => menuModel.showAboutDialog(context),
+                    ),
                   ]),
                 )
               ],
@@ -165,9 +176,10 @@ class __SettingsSwitchState extends State<_SettingsSwitch> {
 class _TitleSettingTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final VoidCallback onPressed;
   final Widget trailing;
 
-  const _TitleSettingTile({this.icon, this.title, this.trailing});
+  const _TitleSettingTile({this.icon, this.title, this.trailing, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -175,24 +187,28 @@ class _TitleSettingTile extends StatelessWidget {
       title,
       style: const TextStyle(fontSize: 18.0),
     );
-    return Padding(
-      padding: const EdgeInsets.only(left: 15),
-      child: Column(children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                size: 25,
-              ),
-              const VerticalDivider(color: Colors.transparent),
-              titleWidget,
-            ],
-          ),
-          if (trailing != null) Padding(padding: const EdgeInsets.only(right: 15), child: trailing)
+    return InkWell(
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 15),
+        child: Column(children: [
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 25,
+                ),
+                const VerticalDivider(color: Colors.transparent),
+                titleWidget,
+              ],
+            ),
+            if (trailing != null)
+              Padding(padding: const EdgeInsets.only(right: 15), child: trailing)
+          ]),
+          const Divider(indent: 40),
         ]),
-        const Divider(indent: 40),
-      ]),
+      ),
     );
   }
 }

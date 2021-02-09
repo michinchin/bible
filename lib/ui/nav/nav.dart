@@ -1,14 +1,12 @@
 import 'dart:async';
 
-import 'package:bible/models/user_item_helper.dart';
-import 'package:bible/ui/volume/volume_view_data_bloc.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/search/nav_bloc.dart';
@@ -16,6 +14,7 @@ import '../../blocs/search/search_bloc.dart';
 import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/tec_share.dart';
+import '../../models/user_item_helper.dart';
 import '../common/common.dart';
 import '../library/library.dart';
 import 'bcv_tab.dart';
@@ -29,8 +28,7 @@ Future<void> showNavigate(BuildContext context,
     {int initialIndex = 0, bool searchView = false}) async {
   TecAutoScroll.stopAutoscroll();
 
-  final ref = await navigate(
-      context, Reference.fromHref('50/1/1', volume: 9),
+  final ref = await navigate(context, Reference.fromHref('50/1/1', volume: 9),
       initialIndex: initialIndex, searchView: searchView);
 
   if (ref != null) {
@@ -49,7 +47,6 @@ Future<void> showNavigate(BuildContext context,
 
 Future<Reference> navigate(BuildContext context, Reference ref,
     {int initialIndex = 0, bool searchView = false}) {
-
   // dummy tec reference to remove import warning
   tec.today;
 
@@ -73,7 +70,8 @@ Future<Reference> navigate(BuildContext context, Reference ref,
 }
 
 /// show search with requested search string, returns `Reference` in case of nav
-Future<Reference> showBibleSearch(BuildContext context, Reference ref, {String search = ''}) {
+Future<Reference> showBibleSearch(BuildContext context, Reference ref,
+    {String search = '', bool showHistory = false}) {
   if (search.isNotEmpty) {
     final translations = context
         .tbloc<PrefItemsBloc>()
@@ -94,18 +92,24 @@ Future<Reference> showBibleSearch(BuildContext context, Reference ref, {String s
       padding: EdgeInsets.zero,
       maxWidth: 500,
       maxHeight: 600,
-      builder: (context) => MultiBlocProvider(providers: [
-            BlocProvider<NavBloc>(
-                create: (_) => NavBloc(ref)
-                  ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))),
-          ], child: const Nav(searchView: true)));
+      builder: (context) => MultiBlocProvider(
+              providers: [
+                BlocProvider<NavBloc>(
+                    create: (_) => NavBloc(ref)
+                      ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))),
+              ],
+              child: Nav(
+                searchView: true,
+                showHistory: showHistory,
+              )));
 }
 
 class Nav extends StatefulWidget {
   /// if set to `true`, will focus `TextField` immediately when no search results present
   final bool searchView;
+  final bool showHistory;
 
-  const Nav({this.searchView});
+  const Nav({this.searchView, this.showHistory = false});
 
   @override
   _NavState createState() => _NavState();
@@ -143,15 +147,16 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     final nav3TapEnabled = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
 
-    _searchResultsTabController = TabController(length: 2, initialIndex: 0, vsync: this)
-      ..addListener(() {
-        if (_searchResultsTabController.index == 1) {
-          if (searchBloc().state.selectionMode) {
-            searchBloc().add(const SearchEvent.selectionModeToggle());
-          }
-        }
-        setState(() {});
-      });
+    _searchResultsTabController =
+        TabController(length: 2, initialIndex: widget.showHistory ? 1 : 0, vsync: this)
+          ..addListener(() {
+            if (_searchResultsTabController.index == 1) {
+              if (searchBloc().state.selectionMode) {
+                searchBloc().add(const SearchEvent.selectionModeToggle());
+              }
+            }
+            setState(() {});
+          });
 
     // tab controller that updates position based on navbloc
     _tabController =

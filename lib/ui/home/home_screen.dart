@@ -166,11 +166,14 @@ class MainMenuFab extends StatelessWidget {
         elevation: defaultActionBarElevation,
         mini: true,
         heroTag: null,
-        child: Icon(FeatherIcons.user, size: 15, color: Theme.of(context).textColor),
+        child: Icon(FeatherIcons.chevronRight, size: 15, color: Theme.of(context).textColor),
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? Theme.of(context).appBarTheme.color
             : Theme.of(context).backgroundColor,
-        onPressed: () => showMainMenu(context),
+        onPressed: () {
+          TecToast.show(context, 'Next Chapter');
+          //TODO: forward button functionality
+        },
       );
 }
 
@@ -180,12 +183,14 @@ class JournalFab extends StatelessWidget {
       elevation: defaultActionBarElevation,
       mini: true,
       heroTag: null,
-      child: Icon(FeatherIcons.bookOpen, size: 15, color: Theme.of(context).textColor),
+      child: Icon(FeatherIcons.chevronLeft, size: 15, color: Theme.of(context).textColor),
       backgroundColor: Theme.of(context).brightness == Brightness.dark
           ? Theme.of(context).appBarTheme.color
           : Theme.of(context).backgroundColor,
       onPressed: () {
-        TecAutoScroll.stopAutoscroll();
-        Scaffold.of(context).openDrawer();
+        TecToast.show(context, 'Previous Chapter');
+        // TODO: back button functionality
+        // TecAutoScroll.stopAutoscroll();
+        // Scaffold.of(context).openDrawer();
       });
 }
