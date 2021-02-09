@@ -6,9 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
+import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
+import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
@@ -17,9 +19,10 @@ import '../../models/notifications/notifications_model.dart';
 import '../common/common.dart';
 import '../common/tec_scroll_listener.dart';
 import '../library/library.dart';
-import '../menu/main_menu.dart';
 import '../onboarding/onboarding.dart';
 import '../sheet/snap_sheet.dart';
+import '../volume/volume_view_data.dart';
+import '../volume/volume_view_data_bloc.dart';
 import 'tab_bottom_bar.dart';
 import 'today.dart';
 import 'votd_screen.dart';
@@ -131,8 +134,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         builder: (context, state) {
                           return ViewManagerWidget(
                             state: state,
-                            topRightWidget: MainMenuFab(),
-                            topLeftWidget: JournalFab(),
+                            topLeftWidget: ChangeChapterFab(state, ChapterButton.previous),
+                            topRightWidget: ChangeChapterFab(state, ChapterButton.next),
                             resizeAnimationDuration: const Duration(milliseconds: 400),
                             onSelectionChangedInViews: (views) {
                               context.read<SelectionBloc>()?.add(SelectionState(
@@ -160,37 +163,94 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class MainMenuFab extends StatelessWidget {
+enum ChapterButton { previous, next }
+
+class ChangeChapterFab extends StatefulWidget {
+  final ViewManagerState state;
+  final ChapterButton buttonType;
+  const ChangeChapterFab(this.state, this.buttonType);
   @override
-  Widget build(BuildContext context) => FloatingActionButton(
+  _ChangeChapterFabState createState() => _ChangeChapterFabState();
+}
+
+class _ChangeChapterFabState extends State<ChangeChapterFab> {
+  void _changeChapter() {
+    BookChapterVerse adjustedChapter(BookChapterVerse bcv, Bible bible) {
+      if (widget.buttonType == ChapterButton.previous) {
+        return bcv.advancedBy(chapters: -1, bible: bible, wraparound: true);
+      } else {
+        return bcv.advancedBy(chapters: 1, bible: bible, wraparound: true);
+      }
+    }
+
+    final viewData = widget.state.views.first.volumeDataWith(context);
+    final volumeId = viewData.volumeId;
+    Bible bible;
+
+    if (volumeId != null) {
+      assert(viewData != null);
+      if (isBibleId(volumeId)) {
+        bible = VolumesRepository.shared.bibleWithId(volumeId);
+      } else if (isStudyVolumeId(volumeId)) {
+        bible = VolumesRepository.shared.volumeWithId(volumeId).assocBible();
+      } else {
+        assert(false);
+      }
+    }
+
+    if (bible != null) {
+      if (viewData.useSharedRef) {
+        context.read<SharedBibleRefBloc>().update(adjustedChapter(viewData.bcv, bible));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+        tooltip: '${widget.buttonType == ChapterButton.previous ? 'Previous' : 'Next'} Chapter',
         elevation: defaultActionBarElevation,
         mini: true,
         heroTag: null,
-        child: Icon(FeatherIcons.chevronRight, size: 15, color: Theme.of(context).textColor),
+        child: Icon(
+            widget.buttonType == ChapterButton.previous
+                ? FeatherIcons.chevronLeft
+                : FeatherIcons.chevronRight,
+            size: 15,
+            color: Theme.of(context).textColor),
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? Theme.of(context).appBarTheme.color
             : Theme.of(context).backgroundColor,
-        onPressed: () {
-          TecToast.show(context, 'Next Chapter');
-          //TODO: forward button functionality
-        },
-      );
+        onPressed: _changeChapter);
+  }
 }
 
-class JournalFab extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => FloatingActionButton(
-      elevation: defaultActionBarElevation,
-      mini: true,
-      heroTag: null,
-      child: Icon(FeatherIcons.chevronLeft, size: 15, color: Theme.of(context).textColor),
-      backgroundColor: Theme.of(context).brightness == Brightness.dark
-          ? Theme.of(context).appBarTheme.color
-          : Theme.of(context).backgroundColor,
-      onPressed: () {
-        TecToast.show(context, 'Previous Chapter');
-        // TODO: back button functionality
-        // TecAutoScroll.stopAutoscroll();
-        // Scaffold.of(context).openDrawer();
-      });
-}
+// class MainMenuFab extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) => FloatingActionButton(
+//         elevation: defaultActionBarElevation,
+//         mini: true,
+//         heroTag: null,
+//         child: Icon(FeatherIcons.user, size: 15, color: Theme.of(context).textColor),
+//         backgroundColor: Theme.of(context).brightness == Brightness.dark
+//             ? Theme.of(context).appBarTheme.color
+//             : Theme.of(context).backgroundColor,
+//         onPressed: () => showMainMenu(context),
+//       );
+// }
+
+// class JournalFab extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) => FloatingActionButton(
+//       elevation: defaultActionBarElevation,
+//       mini: true,
+//       heroTag: null,
+//       child: Icon(FeatherIcons.bookOpen, size: 15, color: Theme.of(context).textColor),
+//       backgroundColor: Theme.of(context).brightness == Brightness.dark
+//           ? Theme.of(context).appBarTheme.color
+//           : Theme.of(context).backgroundColor,
+//       onPressed: () {
+//         TecAutoScroll.stopAutoscroll();
+//         Scaffold.of(context).openDrawer();
+//       });
+// }

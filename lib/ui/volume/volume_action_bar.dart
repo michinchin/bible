@@ -1,3 +1,4 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,8 +8,6 @@ import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../blocs/search/search_bloc.dart';
-import '../../models/const.dart';
 import '../../models/user_item_helper.dart';
 import '../common/common.dart';
 import '../common/tec_action_bar.dart';
@@ -37,13 +36,6 @@ class VolumeViewActionBar extends StatelessWidget {
             viewUid: state.uid,
             elevation: defaultActionBarElevation,
             items: [
-              ActionBarItem(
-                priority: 4,
-                icon: const Icon(Icons.chevron_left),
-                onTap: () {
-                  TecToast.show(context, 'history goes here');
-                },
-              ),
               // ActionBarItem(
               //   priority: 0,
               //   showTrailingSeparator: false,
@@ -62,25 +54,28 @@ class VolumeViewActionBar extends StatelessWidget {
                 onTap: () => _onNavigate(context, viewData),
               ),
               ActionBarItem(
-                title: volume.abbreviation, //_onSelectVolume(context, viewData)
+                  title: volume.abbreviation, //_onSelectVolume(context, viewData)
+                  priority: 4,
+                  // icon: const Icon(FeatherIcons.chevronDown),
+                  onTap: () {
+                    _onSelectVolume(context, viewData);
+                  }),
+              ActionBarItem(
                 priority: 4,
-                // icon: const Icon(FeatherIcons.chevronDown),
+                icon: const Icon(FeatherIcons.chevronDown),
                 onTap: () {
-                  _onSelectVolume(context, viewData);
+                  showTecModalPopupMenu(
+                    context: context,
+                    insets: context.viewManager.insetsOfView(state.uid).add(const EdgeInsets.only(top: 20)),
+                    alignment: Alignment.topCenter,
+                    minWidth: 125,
+                    menuItemsBuilder: (menuContext) => buildMenuItemsForViewWithState(
+                      state,
+                      context: context,
+                      menuContext: menuContext,
+                    ),
+                  );
                 },
-                // onTap: () {
-                //   showTecModalPopupMenu(
-                //     context: context,
-                //     insets: context.viewManager.insetsOfView(state.uid),
-                //     alignment: Alignment.topCenter,
-                //     minWidth: 125,
-                //     menuItemsBuilder: (menuContext) => buildMenuItemsForViewWithState(
-                //       state,
-                //       context: context,
-                //       menuContext: menuContext,
-                //     ),
-                //   );
-                // },
               ),
             ],
           );

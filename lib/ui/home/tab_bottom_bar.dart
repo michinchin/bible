@@ -215,6 +215,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
 
   _OffscreenView getOffscreenIconView(
       {@required String title, @required IconData icon, Function(BuildContext context) onPressed}) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return _OffscreenView(
         title: title,
         onPressed: () {
@@ -223,7 +224,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
             onPressed(context);
           }
         },
-        icon: Icon(icon, color: Colors.white));
+        icon: Icon(icon, color: isDarkMode ? Colors.white : Theme.of(context).textColor));
   }
 
   @override
@@ -246,13 +247,6 @@ class __ExpandedViewState extends State<_ExpandedView> {
             showBibleSearch(context, null);
           }),
       getOffscreenIconView(
-          title: 'History',
-          icon: Icons.history,
-          onPressed: (context) {
-            showBibleSearch(context, null, showHistory: true);
-            // TecToast.show(context, 'need to show history here');
-          }),
-      getOffscreenIconView(
           title: 'Journal',
           icon: FeatherIcons.bookOpen,
           onPressed: (context) {
@@ -263,6 +257,13 @@ class __ExpandedViewState extends State<_ExpandedView> {
             WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
               scaffold.openDrawer();
             });
+          }),
+      getOffscreenIconView(
+          title: 'History',
+          icon: Icons.history,
+          onPressed: (context) {
+            showBibleSearch(context, null, showHistory: true);
+            // TecToast.show(context, 'need to show history here');
           }),
       getOffscreenIconView(
           title: 'Account',
@@ -352,7 +353,13 @@ class __ExpandedViewState extends State<_ExpandedView> {
                         decoration: ShapeDecoration(
                           shape:
                               const StadiumBorder(side: BorderSide(color: Colors.white, width: 2)),
-                          color: isDarkMode ? Colors.black54 : Colors.black12,
+                          shadows: [
+                            boxShadow(
+                                color: isDarkMode ? Colors.black54 : Colors.black26,
+                                offset: const Offset(0, 3),
+                                blurRadius: 5)
+                          ],
+                          color: isDarkMode ? Colors.black54 : Theme.of(context).appBarTheme.color,
                         ),
                         child: ScaleTransition(
                           scale: CurvedAnimation(
@@ -376,13 +383,15 @@ class __ExpandedViewState extends State<_ExpandedView> {
                                       maxLines: 1,
                                       style: Theme.of(context).textTheme.bodyText1.copyWith(
                                           fontSize: contentFontSizeWith(context),
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                          // fontWeight: FontWeight.bold,
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : Theme.of(context).textColor,
                                           shadows: [
-                                            const Shadow(
-                                              offset: Offset(1.0, 1.0),
+                                            Shadow(
+                                              offset: const Offset(1, 1),
                                               blurRadius: 5,
-                                              color: Colors.black,
+                                              color: isDarkMode ? Colors.black : Colors.transparent,
                                             ),
                                           ])),
                                 ),
@@ -447,7 +456,12 @@ class __ExpandedViewState extends State<_ExpandedView> {
                                     Container(
                                         decoration: BoxDecoration(
                                           border: Border.all(color: Colors.white, width: 2),
-                                          color: isDarkMode ? Colors.black54 : Colors.black12,
+                                          color: isDarkMode
+                                              ? Colors.black54
+                                              : Theme.of(context).appBarTheme.color,
+                                          boxShadow: [
+                                            boxShadow(offset: const Offset(0, 3), blurRadius: 5)
+                                          ],
                                           shape: BoxShape.circle,
                                         ),
                                         child: IconButton(
