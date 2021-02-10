@@ -23,6 +23,7 @@ flutter clean
 
 sed -i '' "s/DEBUG-VERSION/$VERSION-$BUILD_NUMBER/g" lib/version.dart
 
+# web requires flutter 1.26
 # web
 # see README-Flutter-web.txt
 # echo "building website..."
@@ -52,12 +53,13 @@ sed -i '' "s/DEBUG-VERSION/$VERSION-$BUILD_NUMBER/g" lib/version.dart
 
 #popd
 
+# apk requires flutter 1.26
 # APK
-flutter build apk --release --build-name $VERSION --build-number $BUILD_NUMBER
-cp build/app/outputs/apk/release/app-release.apk ${HTDOCS}/bibles/android/Bible-${BUILD_ID}-${BUILD_NUMBER}.apk
+#flutter build apk --release --build-name $VERSION --build-number $BUILD_NUMBER
+#cp build/app/outputs/apk/release/app-release.apk ${HTDOCS}/bibles/android/Bible-${BUILD_ID}-${BUILD_NUMBER}.apk
 # resign with regular signature
-~/Library/Android/sdk/build-tools/30.0.2/apksigner sign --ks ../tools/build/keystore --ks-key-alias "tecarta apps" --ks-pass pass:Secur1ty --key-pass pass:Secur1ty ${HTDOCS}/bibles/android/Bible-${BUILD_ID}-${BUILD_NUMBER}.apk
-"../tools/build/makeIndex.sh" "Android Products" "${HTDOCS}/bibles/android"
+#~/Library/Android/sdk/build-tools/30.0.2/apksigner sign --ks ../tools/build/keystore --ks-key-alias "tecarta apps" --ks-pass pass:Secur1ty --key-pass pass:Secur1ty ${HTDOCS}/bibles/android/Bible-${BUILD_ID}-${BUILD_NUMBER}.apk
+#"../tools/build/makeIndex.sh" "Android Products" "${HTDOCS}/bibles/android"
 
 # Android 
 flutter build appbundle --build-name $VERSION --build-number $BUILD_NUMBER
