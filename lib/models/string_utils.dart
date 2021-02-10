@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:equatable/equatable.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 extension TecExtOnString on String {
   ///
@@ -166,6 +167,42 @@ extension TecExtOnString on String {
   String despanified() => replaceAllMapped(_despanifyRegEx, (m) => m[1]);
 
   static final _despanifyRegEx = RegExp(r'<span>([^<]*)</span>');
+
+  ///
+  /// Returns a new string with each character converted to its matching Unicode superscript
+  /// character, if there is one.
+  ///
+  /// Note, only ascii numbers ('0' - '9'), lowercase ascii letters (except for 'q'), some
+  /// ascii punctuation ('+', '-', '=', '(', ')') and some greek symbols ('𝛼', '𝛽', '𝛾',
+  /// '𝛿', '𝜀', '𝜃', '𝜄', '𝜙', '𝜒') have a matching Unicode superscript character.
+  ///
+  /// If [firstNormalize] is `true` (defaults to false), the string is first "normalized",
+  /// that is, all diacritics (accents and cedilla) are removed and the string is converted
+  /// to lowercase before it is superscripted.
+  ///
+  /// If [removeNonsuperscriptableChars] is `false`, the default, characters that do not have
+  /// a matching Unicode superscript character are left unchanged, otherwise they are removed.
+  ///
+  String superscripted({bool firstNormalize = false, bool removeNonsuperscriptableChars = false}) {
+    var str = this;
+
+    if (firstNormalize) {
+      str = tec.removeDiacritics(str);
+      str = str.toLowerCase();
+    }
+
+    return String.fromCharCodes(_superscript(
+      str.codeUnits,
+      removeNonsuperscriptableChars: removeNonsuperscriptableChars,
+    ));
+  }
+
+  ///
+  /// Returns a new string with each Unicode superscript character converted to its matching
+  /// regular character (e.g. '²' => '2'). Characters that are not superscripted are left
+  /// unchanged.
+  ///
+  String unsuperscripted() => String.fromCharCodes(_unsuperscript(codeUnits));
 }
 
 @immutable
@@ -180,6 +217,10 @@ class Range extends Equatable {
   @override
   String toString() => '[$start, $end]';
 }
+
+//
+// PRIVATE STUFF
+//
 
 extension<T> on Set<T> {
   Set<T> subtracting(Iterable<T> items) {
@@ -270,6 +311,12 @@ const _asciiPunctuation = <int>{
   0x007E, // ~ tilde
 };
 
+//
+// Whitespace related data and functions.
+//
+
+bool _isWhitespace(int rune) => _whitespace.contains(rune);
+
 // Copied from tec_util string.dart.
 const _whitespace = <int>{
   0x0009, // [␉] horizontal tab
@@ -302,4 +349,140 @@ const _whitespace = <int>{
   0x202F, // [ ] narrow no-break space
   0x205F, // [ ] medium mathematical space
   0x3000, // [　] ideographic space
+};
+
+//
+// Superscript related data and functions.
+//
+
+Map<int, int> _supCodeUnits;
+
+List<int> _superscript(List<int> codeUnits, {bool removeNonsuperscriptableChars = false}) {
+  // Init `_supCodeUnits` from `_sup` if necessary.
+  _supCodeUnits ??= {for (final e in _sup.entries) e.key.codeUnitAt(0): e.value.codeUnitAt(0)};
+
+  final result = <int>[];
+  for (final original in codeUnits) {
+    final sup = _supCodeUnits[original];
+    if (sup != null) {
+      result.add(sup);
+      continue;
+    }
+
+    if (!removeNonsuperscriptableChars) {
+      result.add(original);
+      continue;
+    }
+
+    if (_whitespace.contains(original)) {
+      result.add(original);
+      continue;
+    }
+  }
+
+  return result;
+}
+
+Map<int, int> _unsupCodeUnits;
+
+List<int> _unsuperscript(List<int> codeUnits) {
+  // Init `_unsupCodeUnits` from `_sup` if necessary.
+  _unsupCodeUnits ??= {for (final e in _sup.entries) e.value.codeUnitAt(0): e.key.codeUnitAt(0)};
+
+  final result = <int>[];
+  for (final original in codeUnits) {
+    final sup = _unsupCodeUnits[original];
+    if (sup != null) {
+      result.add(sup);
+      continue;
+    }
+
+    result.add(original);
+  }
+
+  return result;
+}
+
+const _sup = <String, String>{
+  // numbers, e.g. ¹²⋅³⁴
+  '0': '⁰', // '\u2070'
+  '1': '¹', // '\u00B9'
+  '2': '²', // '\u00B2'
+  '3': '³', // '\u00B3'
+  '4': '⁴', // '\u2074'
+  '5': '⁵', // '\u2075'
+  '6': '⁶', // '\u2076'
+  '7': '⁷', // '\u2077'
+  '8': '⁸', // '\u2078'
+  '9': '⁹', // '\u2079'
+
+  // lowercase letters
+  'a': 'ᵃ', // '\u1d43'
+  'b': 'ᵇ', // '\u1d47'
+  'c': 'ᶜ', // '\u1d9c'
+  'd': 'ᵈ', // '\u1d48'
+  'e': 'ᵉ', // '\u1d49'
+  'f': 'ᶠ', // '\u1da0'
+  'g': 'ᵍ', // '\u1d4d'
+  'h': 'ʰ', // '\u02b0'
+  'i': 'ⁱ', // '\u2071'
+  'j': 'ʲ', // '\u02b2'
+  'k': 'ᵏ', // '\u1d4f'
+  'l': 'ˡ', // '\u02e1'
+  'm': 'ᵐ', // '\u1d50'
+  'n': 'ⁿ', // '\u207f'
+  'o': 'ᵒ', // '\u1d52'
+  'p': 'ᵖ', // '\u1d56'
+  'q': 'ᵠ', // no q, so using 'ᵠ' for now.
+  'r': 'ʳ', // '\u02b3'
+  's': 'ˢ', // '\u02e2'
+  't': 'ᵗ', // '\u1d57'
+  'u': 'ᵘ', // '\u1d58'
+  'v': 'ᵛ', // '\u1d5b'
+  'w': 'ʷ', // '\u02b7'
+  'x': 'ˣ', // '\u02e3'
+  'y': 'ʸ', // '\u02b8'
+  'z': 'ᶻ', // '\u1dbb'
+
+  // lowercase math/greek symbols
+  '𝛼': 'ᵅ', // '\u1d45' :alpha
+  '𝛽': 'ᵝ', // '\u1d5d' :beta
+  '𝛾': 'ᵞ', // '\u1d5e' :gamma
+  '𝛿': 'ᵟ', // '\u1d5f' :delta
+  '𝜀': 'ᵋ', // '\u1d4b' :epsilon
+  '𝜃': 'ᶿ', // '\u1dbf' :theta
+  '𝜄': 'ᶥ', // '\u1da5' :iota
+  '𝜒': 'ᵡ', // '\u1d61' :chi
+  '𝜙': 'ᶲ', // '\u1db2' :phi uppercase phi
+
+  // This is commented out because we're using 'ᵠ' for 'p'.
+  // '𝜑': 'ᵠ', // '\u1d60' :psi lowercase phi
+
+  // punctuation
+  '+': '⁺', // '\u207A'
+  '-': '⁻', // '\u207B'
+  '=': '⁼', // '\u207C'
+  '(': '⁽', // '\u207D'
+  ')': '⁾', // '\u207E'
+
+  // not official
+  '.': '⋅', // bullet operator: '∙', dot operator: '⋅', z notation spot '⦁'
+};
+
+const _sub = <String, String>{
+  '0': '₀',
+  '1': '₁',
+  '2': '₂',
+  '3': '₃',
+  '4': '₄',
+  '5': '₅',
+  '6': '₆',
+  '7': '₇',
+  '8': '₈',
+  '9': '₉',
+  '+': '₊',
+  '-': '₋',
+  '=': '₌',
+  '(': '₍',
+  ')': '₎',
 };
