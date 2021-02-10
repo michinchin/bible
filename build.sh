@@ -25,7 +25,7 @@ sed -i '' "s/DEBUG-VERSION/$VERSION-$BUILD_NUMBER/g" lib/version.dart
 
 # web
 # see README-Flutter-web.txt
-echo "building website..."
+# echo "building website..."
 #flutter build web --release 
 
 #sed -i '' "s/main.dart./main.dart.${BUILD_NUMBER}./g" build/web/index.html
