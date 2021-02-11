@@ -97,6 +97,14 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    var bottomPadding = context.fullBottomBarPadding;
+    var addPaddingForCards = false;
+    tec.dmPrint(context.fullBottomBarPadding);
+    if (bottomPadding <= 10) {
+      bottomPadding += 25;
+    } else {
+      addPaddingForCards = true;
+    }
     return BlocBuilder<TabManagerBloc, TabManagerState>(buildWhen: (p, n) {
       // if the tab didn't change (i.e. just showing drawer...)
       return p.tab != n.tab || p.hideBottomBar != n.hideBottomBar;
@@ -116,8 +124,8 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                     ? const SizedBox.shrink()
                     : ((tabState.tab == TecTab.switcher)
                         ? Padding(
-                            padding: const EdgeInsets.only(bottom: 25),
-                            child: _CloseFAB(controller: _controller))
+                            padding: EdgeInsets.only(bottom: bottomPadding),
+                            child: _CloseFAB(controller: _controller, parentContext: context))
                         : _TabFAB()));
           }),
           drawer: (tabState.tab != TecTab.reader) ? null : UGCView(key: ugcViewKey),
@@ -183,6 +191,8 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                   if (tabState.tab == TecTab.switcher)
                     Container(
                       alignment: Alignment.bottomRight,
+                      padding: EdgeInsets.only(
+                          bottom: addPaddingForCards ? bottomPadding * 2 : bottomPadding),
                       child: _ExpandedView(controller: _controller, parentContext: context),
                     ),
                 ],
@@ -205,7 +215,26 @@ class _ExpandedView extends StatefulWidget {
   __ExpandedViewState createState() => __ExpandedViewState();
 }
 
-class __ExpandedViewState extends State<_ExpandedView> {
+class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+  Animation<Offset> _offsetAnimation;
+
+  @override
+  void initState() {
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 650),
+      vsync: this,
+    )..forward();
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(1, 0),
+      end: const Offset(0, 0),
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.bounceInOut,
+    ));
+    super.initState();
+  }
+
   void _onSwitchViews(ViewState view) {
     // ignore: close_sinks
     final vmBloc = context.viewManager;
@@ -219,6 +248,203 @@ class __ExpandedViewState extends State<_ExpandedView> {
     } else {
       vmBloc?.show(view.uid);
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final _covers = <_OffscreenView>[];
+
+    // get the offscreen views...
+    for (final view in context.viewManager?.state?.views) {
+      if (!context.viewManager.isViewVisible(view.uid)) {
+        var title = ViewManager.shared.menuTitleWith(context: context, state: view);
+        final vbloc = context.viewManager.dataBlocWithView(view.uid);
+        int volumeId;
+        if (vbloc != null) {
+          final volumeView = tec.as<VolumeViewDataBloc>(vbloc).state.asVolumeViewData;
+          volumeId = volumeView.volumeId;
+          title = !volumeView.useSharedRef
+              ? '${volumeView.bookNameAndChapter(useShortBookName: true)}\n'
+              : ''
+                  '${VolumesRepository.shared.volumeWithId(volumeId).abbreviation}';
+        }
+        _covers.add(_OffscreenView(
+            title: title,
+            onPressed: () {
+              context.tabManager.changeTab(TecTab.reader);
+              _onSwitchViews(view);
+            },
+            uid: view.uid,
+            icon: Container(
+              height: 100,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                boxShadow: [
+                  boxShadow(
+                      color: isDarkMode ? Colors.black54 : Colors.black26,
+                      offset: const Offset(0, 3),
+                      blurRadius: 5)
+                ],
+              ),
+              child: volumeId != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: VolumeImage(
+                        volume: VolumesRepository.shared.volumeWithId(volumeId),
+                        fit: BoxFit.fill,
+                      ),
+                    )
+                  : Container(),
+            )));
+      }
+    }
+
+    return SafeArea(
+      child: Material(
+          color: Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 80),
+            child: GridView.extent(
+                shrinkWrap: true,
+                maxCrossAxisExtent: 100,
+                mainAxisSpacing: 10,
+                // crossAxisSpacing: 10,
+                children: List<Widget>.generate(
+                    _covers.length,
+                    (index) => SlideTransition(
+                        position: _offsetAnimation,
+                        child: InkWell(
+                          onTap: () => _covers[index].onPressed(),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              if (_covers[index].uid != null)
+                                Flexible(
+                                  flex: 4,
+                                  child: Dismissible(
+                                    key: ValueKey(_covers[index].uid),
+                                    direction: DismissDirection.vertical,
+                                    onDismissed: (_) {
+                                      setState(() {
+                                        context.viewManager.remove(_covers[index].uid);
+                                      });
+                                    },
+                                    background: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                                      alignment: Alignment.centerRight,
+                                      // color: Colors.red,
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    child: LongPressDraggable(
+                                        data: _covers[index].uid,
+                                        onDragStarted: () =>
+                                            context.tabManager.changeTab(TecTab.reader),
+                                        feedback: _covers[index].icon,
+                                        child: _covers[index].icon),
+                                  ),
+                                )
+                              else
+                                _covers[index].icon,
+                              const SizedBox(height: 5),
+                              Flexible(
+                                child: TecText(_covers[index].title,
+                                    autoSize: true,
+                                    textAlign: TextAlign.end,
+                                    style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                        fontSize: contentFontSizeWith(context),
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        shadows: [
+                                          const Shadow(
+                                            offset: Offset(1.0, 1.0),
+                                            blurRadius: 5,
+                                            color: Colors.black,
+                                          ),
+                                        ])),
+                              ),
+                              // const SizedBox(height: 10),
+                            ],
+                          ),
+                        ))).toList()),
+          )),
+    );
+  }
+}
+
+class _OffscreenView {
+  final VoidCallback onPressed;
+  final String title;
+  final Widget icon;
+  final int uid;
+
+  const _OffscreenView(
+      {@required this.onPressed, @required this.title, @required this.icon, this.uid});
+}
+
+class _CloseFAB extends StatefulWidget {
+  final AnimationController controller;
+  final BuildContext parentContext;
+
+  const _CloseFAB({Key key, @required this.controller, @required this.parentContext})
+      : super(key: key);
+
+  @override
+  __CloseFABState createState() => __CloseFABState();
+}
+
+class __CloseFABState extends State<_CloseFAB> with TickerProviderStateMixin {
+  AnimationController _controller;
+  Animation<Offset> _offsetAnimation;
+  Animation<double> _animateIcon;
+  AnimationController _animationController;
+  bool _isOpened = false;
+
+  @override
+  void initState() {
+    _animationController =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 600))
+          ..addListener(() {
+            setState(() {});
+          });
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 650),
+      vsync: this,
+    )..forward();
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: const Offset(0, 0),
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.bounceInOut,
+    ));
+    _animateIcon = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
+    widget.controller.reset();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      widget.controller.forward();
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _animate() {
+    if (!_isOpened) {
+      _animationController.forward();
+    } else {
+      context.tabManager.changeTab(TecTab.reader);
+      _animationController.reverse();
+    }
+    _isOpened = !_isOpened;
   }
 
   _OffscreenView getOffscreenIconView(
@@ -246,9 +472,6 @@ class __ExpandedViewState extends State<_ExpandedView> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final _covers = <_OffscreenView>[];
-
     final _icons = <_OffscreenView>[
       getOffscreenIconView(
           title: 'Search',
@@ -295,238 +518,57 @@ class __ExpandedViewState extends State<_ExpandedView> {
             ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
           }),
     ];
-    // get the offscreen views...
-    for (final view in context.viewManager?.state?.views) {
-      if (!context.viewManager.isViewVisible(view.uid)) {
-        var title = ViewManager.shared.menuTitleWith(context: context, state: view);
-        final vbloc = context.viewManager.dataBlocWithView(view.uid);
-        int volumeId;
-        if (vbloc != null) {
-          final volumeView = tec.as<VolumeViewDataBloc>(vbloc).state.asVolumeViewData;
-          volumeId = volumeView.volumeId;
-          title = !volumeView.useSharedRef
-              ? '${volumeView.bookNameAndChapter(useShortBookName: true)}\n'
-              : ''
-                  '${VolumesRepository.shared.volumeWithId(volumeId).abbreviation}';
-        }
-        _covers.add(_OffscreenView(
-            title: title,
-            onPressed: () {
-              context.tabManager.changeTab(TecTab.reader);
-              _onSwitchViews(view);
-            },
-            uid: view.uid,
-            icon: Container(
-              width: 50,
-              height: 60,
-              padding: const EdgeInsets.symmetric(horizontal: 2.5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                boxShadow: [
-                  boxShadow(
-                      color: isDarkMode ? Colors.black54 : Colors.black26,
-                      offset: const Offset(0, 3),
-                      blurRadius: 5)
-                ],
-              ),
-              child: volumeId != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: VolumeImage(
-                        volume: VolumesRepository.shared.volumeWithId(volumeId),
-                        fit: BoxFit.fill,
-                      ),
-                    )
-                  : Container(),
-            )));
-      }
-    }
 
-    return SafeArea(
-      child: Material(
-          color: Colors.transparent,
-          child: Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 5, bottom: 120),
-                child: SingleChildScrollView(
-                  reverse: true,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      for (var i = 0; i < _icons.length; i++)
-                        ScaleTransition(
-                          scale: CurvedAnimation(
-                            parent: widget.controller,
-                            curve:
-                                Interval(0, 1.0 - i / _icons.length / 2.0, curve: Curves.easeOut),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(child: _icons[i].icon),
-                              const SizedBox(height: 5),
-                              Flexible(
-                                child: TecText(_icons[i].title,
-                                    textAlign: TextAlign.end,
-                                    autoSize: true,
-                                    maxLines: 1,
-                                    style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                        fontSize: contentFontSizeWith(context),
-                                        // fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        shadows: [
-                                          const Shadow(
-                                            offset: Offset(1, 1),
-                                            blurRadius: 5,
-                                            color: Colors.black,
-                                          ),
-                                        ])),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        for (var i = 0; i < _icons.length; i++)
+          SlideTransition(
+            position: _offsetAnimation,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Flexible(child: _icons[i].icon),
+                const SizedBox(height: 5),
+                Flexible(
+                  child: Container(
+                    width: 50,
+                    child: TecText(_icons[i].title,
+                        maxLines: 1,
+                        autoSize: true,
+                        textScaleFactor: 0.9,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyText1.copyWith(
+                            fontSize: contentFontSizeWith(context),
+                            // fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              const Shadow(
+                                offset: Offset(1, 1),
+                                blurRadius: 5,
+                                color: Colors.black,
                               ),
-                              const SizedBox(height: 5),
-                            ],
-                          ),
-                        ),
-                    ],
+                            ])),
                   ),
                 ),
-              ),
-              // const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.only(right: 80, bottom: 35),
-                child: GridView.count(
-                    shrinkWrap: true,
-                    reverse: true,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    crossAxisCount:
-                        MediaQuery.of(context).orientation == Orientation.landscape ? 6 : 4,
-                    children: List<Widget>.generate(
-                        _covers.length,
-                        (index) => Container(
-                            padding: const EdgeInsets.only(left: 10),
-                            margin: const EdgeInsets.only(right: 5),
-                            child: ScaleTransition(
-                              scale: CurvedAnimation(
-                                parent: widget.controller,
-                                curve: Interval(0, 1.0 - index / _covers.length / 2.0,
-                                    curve: Curves.easeOut),
-                              ),
-                              child: InkWell(
-                                onTap: () => _covers[index].onPressed(),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    if (_covers[index].uid != null)
-                                      Flexible(
-                                        flex: 4,
-                                        child: Dismissible(
-                                          key: ValueKey(_covers[index].uid),
-                                          direction: DismissDirection.vertical,
-                                          onDismissed: (_) {
-                                            setState(() {
-                                              context.viewManager.remove(_covers[index].uid);
-                                            });
-                                          },
-                                          background: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                                            alignment: Alignment.centerRight,
-                                            // color: Colors.red,
-                                            child: const Icon(
-                                              Icons.close,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          child: LongPressDraggable(
-                                              data: _covers[index].uid,
-                                              onDragStarted: () =>
-                                                  context.tabManager.changeTab(TecTab.reader),
-                                              feedback: _covers[index].icon,
-                                              child: _covers[index].icon),
-                                        ),
-                                      )
-                                    else
-                                      _covers[index].icon,
-                                    const SizedBox(height: 5),
-                                    Flexible(
-                                      child: TecText(_covers[index].title,
-                                          autoSize: true,
-                                          textAlign: TextAlign.end,
-                                          style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                              fontSize: contentFontSizeWith(context),
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                              shadows: [
-                                                const Shadow(
-                                                  offset: Offset(1.0, 1.0),
-                                                  blurRadius: 5,
-                                                  color: Colors.black,
-                                                ),
-                                              ])),
-                                    ),
-                                    // const SizedBox(height: 10),
-                                  ],
-                                ),
-                              ),
-                            ))).toList()),
-              ),
-            ],
-          )),
-    );
-  }
-}
-
-class _OffscreenView {
-  final VoidCallback onPressed;
-  final String title;
-  final Widget icon;
-  final int uid;
-
-  const _OffscreenView(
-      {@required this.onPressed, @required this.title, @required this.icon, this.uid});
-}
-
-class _CloseFAB extends StatefulWidget {
-  final AnimationController controller;
-
-  const _CloseFAB({Key key, @required this.controller}) : super(key: key);
-
-  @override
-  __CloseFABState createState() => __CloseFABState();
-}
-
-class __CloseFABState extends State<_CloseFAB> {
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.reset();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      widget.controller.forward();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      backgroundColor: Const.tecartaBlue,
-      heroTag: null,
-      child: AnimatedBuilder(
-          animation: widget.controller,
-          builder: (context, child) => Transform(
-                transform: Matrix4.rotationZ(widget.controller.value * 0.5 * math.pi),
-                alignment: FractionalOffset.center,
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                ),
-              )),
-      onPressed: () {
-        context.tabManager.changeTab(TecTab.reader);
-      },
+                const SizedBox(height: 5),
+              ],
+            ),
+          ),
+        FloatingActionButton(
+          child: AnimatedIcon(
+            icon: AnimatedIcons.close_menu,
+            progress: _animateIcon,
+          ),
+          onPressed: () {
+            _animate();
+            context.tabManager.changeTab(TecTab.reader);
+          },
+        ),
+      ],
     );
   }
 }

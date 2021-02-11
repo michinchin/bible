@@ -17,7 +17,8 @@ void showSettings(BuildContext context) =>
     Navigator.of(context, rootNavigator: true).push(MaterialPageRoute<void>(
         builder: (c) => SettingsView(
               menuModel: MainMenuModel(),
-            )));
+            ),
+        fullscreenDialog: true));
 
 class SettingsView extends StatelessWidget {
   final MainMenuModel menuModel;
