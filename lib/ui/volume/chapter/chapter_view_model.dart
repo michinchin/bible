@@ -26,6 +26,7 @@ import 'chapter_selection.dart';
 import 'verse_tag.dart';
 
 const _despanifyChapterHtml = true;
+const _superscriptVerseNumbers = kDebugMode;
 
 ///
 /// ChapterViewModel
@@ -650,11 +651,14 @@ Future<tec.ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int ch
   if (volume is Bible) {
     final result = await volume.chapterHtmlWith(book, chapter);
     if (!_despanifyChapterHtml || tec.isNullOrEmpty(result.value)) return result;
-    final html = result.value.despanified();
+    var html = result.value.despanified();
     tec.dmPrint('Despanifying HTML for ${volume.abbreviation} '
         '${volume.assocBible().nameOfBook(book)} $chapter reduced size by '
         '${100 - (100 * html.length ~/ result.value.length)}%, '
         '${result.value.length - html.length} chars!');
+    if (_superscriptVerseNumbers) {
+      html = html.replaceAllMapped(_verseNumbers, (m) => m[0].superscripted());
+    }
     return tec.ErrorOrValue(null, html);
   } else {
     final result = await volume.resourcesWithBook(book, chapter, ResourceType.studyNote);
@@ -675,3 +679,5 @@ Future<tec.ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int ch
     }
   }
 }
+
+final _verseNumbers = RegExp(r'>(\d+-?\d*)<');
