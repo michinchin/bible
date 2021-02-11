@@ -183,7 +183,7 @@ class _ChangeChapterFabState extends State<ChangeChapterFab> {
       }
     }
 
-    final viewData = widget.state.views.first.volumeDataWith(context);
+    final viewData = widget.state.views.first.volumeDataWith(context); 
     final volumeId = viewData.volumeId;
     Bible bible;
 

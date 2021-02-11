@@ -1,4 +1,5 @@
 import 'package:bible/ui/menu/notifications_view.dart';
+import 'package:bible/ui/menu/zendesk_help.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
@@ -81,6 +82,11 @@ class SettingsView extends StatelessWidget {
                       title: 'About',
                       icon: FeatherIcons.info,
                       onPressed: () => menuModel.showAboutDialog(context),
+                    ),
+                    _TitleSettingTile(
+                      title: 'Help',
+                      icon: FeatherIcons.helpCircle,
+                      onPressed: () => showZendeskHelp(context),
                     ),
                   ]),
                 )

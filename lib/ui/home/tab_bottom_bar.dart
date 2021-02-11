@@ -19,7 +19,6 @@ import '../common/tec_modal_popup.dart';
 import '../common/tec_navigator.dart';
 import '../library/volume_image.dart';
 import '../menu/settings.dart';
-import '../menu/zendesk_help.dart';
 import '../nav/nav.dart';
 import '../ugc/ugc_view.dart';
 import '../volume/volume_view_data_bloc.dart';
@@ -108,18 +107,28 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
           backgroundColor: Theme.of(context).backgroundColor,
           extendBody: true,
           floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-          floatingActionButton: (tabState.hideBottomBar || tabState.tab == TecTab.reader)
-              ? null
-              : ((tabState.tab == TecTab.switcher)
-                  ? _CloseFAB(controller: _controller)
-                  : _TabFAB()),
+          floatingActionButton:
+              BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
+            return Visibility(
+                visible:
+                    (sheetState.type != SheetType.selection && sheetState.type != SheetType.hidden),
+                child: (tabState.hideBottomBar)
+                    ? const SizedBox.shrink()
+                    : ((tabState.tab == TecTab.switcher)
+                        ? Padding(
+                            padding: const EdgeInsets.only(bottom: 25),
+                            child: _CloseFAB(controller: _controller))
+                        : _TabFAB()));
+          }),
           drawer: (tabState.tab != TecTab.reader) ? null : UGCView(key: ugcViewKey),
           drawerScrimColor: barrierColorWithContext(context),
-          bottomNavigationBar: (tabState.hideBottomBar || (tabState.tab == TecTab.reader))
+          bottomNavigationBar: (tabState.hideBottomBar)
               ? null
               : BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
                   return Visibility(
-                    visible: (sheetState.type != SheetType.selection),
+                    visible: (sheetState.type != SheetType.selection &&
+                        sheetState.type != SheetType.hidden &&
+                        tabState.tab != TecTab.switcher),
                     child: TecTabBar(tabs: widget.tabs),
                   );
                 }),
@@ -174,7 +183,6 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                   if (tabState.tab == TecTab.switcher)
                     Container(
                       alignment: Alignment.bottomRight,
-                      padding: const EdgeInsets.only(bottom: 40),
                       child: _ExpandedView(controller: _controller, parentContext: context),
                     ),
                 ],
@@ -224,20 +232,22 @@ class __ExpandedViewState extends State<_ExpandedView> {
             onPressed(context);
           }
         },
-        icon: Icon(icon, color: isDarkMode ? Colors.white : Theme.of(context).textColor));
+        icon: FloatingActionButton(
+            onPressed: () {
+              context.tabManager.changeTab(TecTab.reader);
+              if (onPressed != null) {
+                onPressed(context);
+              }
+            },
+            // mini: true,
+            child: Icon(icon, color: Const.tecartaBlue),
+            backgroundColor: Theme.of(context).cardColor));
   }
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final _covers = <_OffscreenView>[
-      getOffscreenIconView(
-          title: 'Open New',
-          icon: Icons.add,
-          onPressed: (context) {
-            ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
-          }),
-    ];
+    final _covers = <_OffscreenView>[];
 
     final _icons = <_OffscreenView>[
       getOffscreenIconView(
@@ -265,19 +275,25 @@ class __ExpandedViewState extends State<_ExpandedView> {
             showBibleSearch(context, null, showHistory: true);
             // TecToast.show(context, 'need to show history here');
           }),
-      getOffscreenIconView(
-          title: 'Account',
-          icon: FeatherIcons.user,
-          onPressed: (context) {
-            tua.showSignInDlg(
-                context: context,
-                account: AppSettings.shared.userAccount,
-                useRootNavigator: true,
-                appName: Const.appNameForUA);
-          }),
-      getOffscreenIconView(
-          title: 'Help', icon: FeatherIcons.helpCircle, onPressed: showZendeskHelp),
+      // getOffscreenIconView(
+      //     title: 'Account',
+      //     icon: FeatherIcons.user,
+      //     onPressed: (context) {
+      //       tua.showSignInDlg(
+      //           context: context,
+      //           account: AppSettings.shared.userAccount,
+      //           useRootNavigator: true,
+      //           appName: Const.appNameForUA);
+      //     }),
+      // getOffscreenIconView(
+      //     title: 'Help', icon: FeatherIcons.helpCircle, onPressed: showZendeskHelp),
       getOffscreenIconView(title: 'Settings', icon: FeatherIcons.settings, onPressed: showSettings),
+      getOffscreenIconView(
+          title: 'Add View',
+          icon: Icons.add,
+          onPressed: (context) {
+            ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
+          }),
     ];
     // get the offscreen views...
     for (final view in context.viewManager?.state?.views) {
@@ -328,169 +344,138 @@ class __ExpandedViewState extends State<_ExpandedView> {
 
     return SafeArea(
       child: Material(
-        color: Colors.transparent,
-        child: SingleChildScrollView(
-            child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: isSmallScreen(context)
-                  ? 2
-                  : MediaQuery.of(context).orientation == Orientation.landscape
-                      ? 2
-                      : 3,
-              childAspectRatio:
-                  MediaQuery.of(context).orientation == Orientation.landscape ? 6.0 : 3.0,
-              children: [
-                for (var i = 0; i < _icons.length; i++)
-                  InkWell(
-                    child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        decoration: ShapeDecoration(
-                          shape:
-                              const StadiumBorder(side: BorderSide(color: Colors.white, width: 2)),
-                          shadows: [
-                            boxShadow(
-                                color: isDarkMode ? Colors.black54 : Colors.black26,
-                                offset: const Offset(0, 3),
-                                blurRadius: 5)
-                          ],
-                          color: isDarkMode ? Colors.black54 : Theme.of(context).appBarTheme.color,
-                        ),
-                        child: ScaleTransition(
+          color: Colors.transparent,
+          child: Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 5, bottom: 120),
+                child: SingleChildScrollView(
+                  reverse: true,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      for (var i = 0; i < _icons.length; i++)
+                        ScaleTransition(
                           scale: CurvedAnimation(
                             parent: widget.controller,
                             curve:
                                 Interval(0, 1.0 - i / _icons.length / 2.0, curve: Curves.easeOut),
                           ),
-                          child: InkWell(
-                            customBorder: const StadiumBorder(),
-                            onTap: () => _icons[i].onPressed(),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Flexible(child: _icons[i].icon),
-                                const SizedBox(width: 10),
-                                Flexible(
-                                  child: TecText(_icons[i].title,
-                                      textAlign: TextAlign.end,
-                                      autoSize: true,
-                                      maxLines: 1,
-                                      style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                          fontSize: contentFontSizeWith(context),
-                                          // fontWeight: FontWeight.bold,
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : Theme.of(context).textColor,
-                                          shadows: [
-                                            Shadow(
-                                              offset: const Offset(1, 1),
-                                              blurRadius: 5,
-                                              color: isDarkMode ? Colors.black : Colors.transparent,
-                                            ),
-                                          ])),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )),
-                  )
-              ],
-            ),
-            const SizedBox(height: 10),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                  // shrinkWrap: true,
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: List<Widget>.generate(
-                      _covers.length,
-                      (index) => Container(
-                          padding: const EdgeInsets.only(left: 10),
-                          margin: const EdgeInsets.only(right: 5),
-                          child: ScaleTransition(
-                            scale: CurvedAnimation(
-                              parent: widget.controller,
-                              curve: Interval(0, 1.0 - index / _covers.length / 2.0,
-                                  curve: Curves.easeOut),
-                            ),
-                            child: InkWell(
-                              onTap: () => _covers[index].onPressed(),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  if (_covers[index].uid != null)
-                                    Dismissible(
-                                      key: ValueKey(_covers[index].uid),
-                                      direction: DismissDirection.vertical,
-                                      onDismissed: (_) {
-                                        setState(() {
-                                          context.viewManager.remove(_covers[index].uid);
-                                        });
-                                      },
-                                      background: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                                        alignment: Alignment.centerRight,
-                                        // color: Colors.red,
-                                        child: const Icon(
-                                          Icons.close,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      child: LongPressDraggable(
-                                          data: _covers[index].uid,
-                                          onDragStarted: () =>
-                                              context.tabManager.changeTab(TecTab.reader),
-                                          feedback: _covers[index].icon,
-                                          child: _covers[index].icon),
-                                    )
-                                  else
-                                    Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(color: Colors.white, width: 2),
-                                          color: isDarkMode
-                                              ? Colors.black54
-                                              : Theme.of(context).appBarTheme.color,
-                                          boxShadow: [
-                                            boxShadow(offset: const Offset(0, 3), blurRadius: 5)
-                                          ],
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: IconButton(
-                                            onPressed: _covers[index].onPressed,
-                                            icon: _covers[index].icon)),
-                                  const SizedBox(height: 10),
-                                  Flexible(
-                                    child: Text(_covers[index].title,
-                                        textAlign: TextAlign.end,
-                                        style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                            fontSize: contentFontSizeWith(context),
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                            shadows: [
-                                              const Shadow(
-                                                offset: Offset(1.0, 1.0),
-                                                blurRadius: 5,
-                                                color: Colors.black,
-                                              ),
-                                            ])),
-                                  ),
-                                ],
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Flexible(child: _icons[i].icon),
+                              const SizedBox(height: 5),
+                              Flexible(
+                                child: TecText(_icons[i].title,
+                                    textAlign: TextAlign.end,
+                                    autoSize: true,
+                                    maxLines: 1,
+                                    style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                        fontSize: contentFontSizeWith(context),
+                                        // fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        shadows: [
+                                          const Shadow(
+                                            offset: Offset(1, 1),
+                                            blurRadius: 5,
+                                            color: Colors.black,
+                                          ),
+                                        ])),
                               ),
-                            ),
-                          ))).toList()),
-            ),
-          ],
-        )),
-      ),
+                              const SizedBox(height: 5),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              // const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(right: 80, bottom: 35),
+                child: GridView.count(
+                    shrinkWrap: true,
+                    reverse: true,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    crossAxisCount:
+                        MediaQuery.of(context).orientation == Orientation.landscape ? 6 : 4,
+                    children: List<Widget>.generate(
+                        _covers.length,
+                        (index) => Container(
+                            padding: const EdgeInsets.only(left: 10),
+                            margin: const EdgeInsets.only(right: 5),
+                            child: ScaleTransition(
+                              scale: CurvedAnimation(
+                                parent: widget.controller,
+                                curve: Interval(0, 1.0 - index / _covers.length / 2.0,
+                                    curve: Curves.easeOut),
+                              ),
+                              child: InkWell(
+                                onTap: () => _covers[index].onPressed(),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    if (_covers[index].uid != null)
+                                      Flexible(
+                                        flex: 4,
+                                        child: Dismissible(
+                                          key: ValueKey(_covers[index].uid),
+                                          direction: DismissDirection.vertical,
+                                          onDismissed: (_) {
+                                            setState(() {
+                                              context.viewManager.remove(_covers[index].uid);
+                                            });
+                                          },
+                                          background: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                                            alignment: Alignment.centerRight,
+                                            // color: Colors.red,
+                                            child: const Icon(
+                                              Icons.close,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          child: LongPressDraggable(
+                                              data: _covers[index].uid,
+                                              onDragStarted: () =>
+                                                  context.tabManager.changeTab(TecTab.reader),
+                                              feedback: _covers[index].icon,
+                                              child: _covers[index].icon),
+                                        ),
+                                      )
+                                    else
+                                      _covers[index].icon,
+                                    const SizedBox(height: 5),
+                                    Flexible(
+                                      child: TecText(_covers[index].title,
+                                          autoSize: true,
+                                          textAlign: TextAlign.end,
+                                          style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                              fontSize: contentFontSizeWith(context),
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              shadows: [
+                                                const Shadow(
+                                                  offset: Offset(1.0, 1.0),
+                                                  blurRadius: 5,
+                                                  color: Colors.black,
+                                                ),
+                                              ])),
+                                    ),
+                                    // const SizedBox(height: 10),
+                                  ],
+                                ),
+                              ),
+                            ))).toList()),
+              ),
+            ],
+          )),
     );
   }
 }
@@ -552,9 +537,16 @@ class _TabFAB extends StatelessWidget {
     return FloatingActionButton(
       elevation: 2,
       heroTag: null,
-      onPressed: () => context.tabManager.changeTab(TecTab.reader),
-      backgroundColor: Colors.white,
-      child: const Icon(TecIcons.tecartabiblelogo, color: Const.tecartaBlue, size: 28),
+      onPressed: () => context.tabManager.changeTab(
+          context.tabManager.state.tab != TecTab.reader ? TecTab.reader : TecTab.switcher),
+      backgroundColor:
+          context.tabManager.state.tab != TecTab.reader ? Colors.white : Const.tecartaBlue,
+      child: Icon(
+          context.tabManager.state.tab != TecTab.reader
+              ? TecIcons.tecartabiblelogo
+              : TecIcons.tecartabiblelogo,
+          color: context.tabManager.state.tab != TecTab.reader ? Const.tecartaBlue : Colors.white,
+          size: 28),
     );
   }
 }

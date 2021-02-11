@@ -51,35 +51,35 @@ class _SnapSheetState extends State<SnapSheet> {
         Widget sheet;
 
         if (state.type == SheetType.main) {
-          sheet = Center(
-            child: BlocBuilder<TabManagerBloc, TabManagerState>(
-              builder: (context, tabState) {
-                return AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: AppSettings.shared.overlayStyle(context,
-                      gestureReader: context.gestureNavigation && tabState.tab == TecTab.reader),
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 150),
-                    opacity: (tabState.tab == TecTab.switcher) ? 0.0 : 1.0,
-                    child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
-                        padding: EdgeInsets.only(right: 15, bottom: context.fullBottomBarPadding),
-                        child: FloatingActionButton(
-                          elevation: 3,
-                          heroTag: null,
-                          backgroundColor: Const.tecartaBlue,
-                          child: const Icon(TecIcons.tecartabiblelogo, color: Colors.white),
-                          onPressed: () {
-                            context.tabManager.changeTab(TecTab.switcher);
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
+          // sheet = Center(
+          //   child: BlocBuilder<TabManagerBloc, TabManagerState>(
+          //     builder: (context, tabState) {
+          //       return AnnotatedRegion<SystemUiOverlayStyle>(
+          //         value: AppSettings.shared.overlayStyle(context,
+          //             gestureReader: context.gestureNavigation && tabState.tab == TecTab.reader),
+          //         child: AnimatedOpacity(
+          //           duration: const Duration(milliseconds: 150),
+          //           opacity: (tabState.tab == TecTab.switcher) ? 0.0 : 1.0,
+          //           child: Align(
+          //             alignment: Alignment.bottomRight,
+          //             child: Padding(
+          //               padding: EdgeInsets.only(right: 15, bottom: context.fullBottomBarPadding),
+          //               child: FloatingActionButton(
+          //                 elevation: 3,
+          //                 heroTag: null,
+          //                 backgroundColor: Const.tecartaBlue,
+          //                 child: const Icon(TecIcons.tecartabiblelogo, color: Colors.white),
+          //                 onPressed: () {
+          //                   context.tabManager.changeTab(TecTab.switcher);
+          //                 },
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // );
         } else if (state.type == SheetType.selection) {
           sheet = const _SheetShadow(key: ValueKey(_selectionSheetKey), child: SelectionSheet());
         } else {
