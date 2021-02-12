@@ -76,6 +76,13 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
     ));
   }
 
+  @override
+  void dispose() {
+    _closeFABController.dispose();
+    _slideTabController.dispose();
+    super.dispose();
+  }
+
   Future<bool> _onBackPressed() async {
     if (Navigator.of(context).canPop()) {
       // see if the drawer can go back a folder...
@@ -206,8 +213,7 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
                   if (tabState.tab == TecTab.switcher)
                     Container(
                       alignment: Alignment.bottomRight,
-                      padding: EdgeInsets.only(
-                          bottom: addPaddingForCards ? bottomPadding * 2 : bottomPadding),
+                      padding: EdgeInsets.only(bottom: bottomPadding),
                       child: _ExpandedView(controller: _closeFABController, parentContext: context),
                     ),
                 ],
@@ -230,26 +236,7 @@ class _ExpandedView extends StatefulWidget {
   __ExpandedViewState createState() => __ExpandedViewState();
 }
 
-class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  Animation<Offset> _offsetAnimation;
-
-  @override
-  void initState() {
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 650),
-      vsync: this,
-    )..forward();
-    _offsetAnimation = Tween<Offset>(
-      begin: const Offset(1, 0),
-      end: const Offset(0, 0),
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.bounceInOut,
-    ));
-    super.initState();
-  }
-
+class __ExpandedViewState extends State<_ExpandedView> {
   void _onSwitchViews(ViewState view) {
     // ignore: close_sinks
     final vmBloc = context.viewManager;
@@ -269,6 +256,8 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final _covers = <_OffscreenView>[];
+    const bookCoverWidth = 60.0;
+    const bookCoverHeight = 80.0;
 
     // get the offscreen views...
     for (final view in context.viewManager?.state?.views) {
@@ -292,7 +281,8 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
             },
             uid: view.uid,
             icon: Container(
-              height: 100,
+              width: bookCoverWidth,
+              height: bookCoverHeight,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 boxShadow: [
@@ -318,74 +308,85 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
     return SafeArea(
       child: Material(
           color: Colors.transparent,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 80),
-            child: GridView.extent(
-                shrinkWrap: true,
-                maxCrossAxisExtent: 100,
-                mainAxisSpacing: 10,
-                // crossAxisSpacing: 10,
-                children: List<Widget>.generate(
-                    _covers.length,
-                    (index) => SlideTransition(
-                        position: _offsetAnimation,
-                        child: InkWell(
-                          onTap: () => _covers[index].onPressed(),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              if (_covers[index].uid != null)
-                                Flexible(
-                                  flex: 4,
-                                  child: Dismissible(
-                                    key: ValueKey(_covers[index].uid),
-                                    direction: DismissDirection.vertical,
-                                    onDismissed: (_) {
-                                      setState(() {
-                                        context.viewManager.remove(_covers[index].uid);
-                                      });
-                                    },
-                                    background: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                                      alignment: Alignment.centerRight,
-                                      // color: Colors.red,
-                                      child: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    child: LongPressDraggable(
-                                        data: _covers[index].uid,
-                                        onDragStarted: () =>
-                                            context.tabManager.changeTab(TecTab.reader),
-                                        feedback: _covers[index].icon,
-                                        child: _covers[index].icon),
-                                  ),
-                                )
-                              else
-                                _covers[index].icon,
-                              const SizedBox(height: 5),
-                              Flexible(
-                                child: TecText(_covers[index].title,
-                                    autoSize: true,
-                                    textAlign: TextAlign.end,
-                                    style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                        fontSize: contentFontSizeWith(context),
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        shadows: [
-                                          const Shadow(
-                                            offset: Offset(1.0, 1.0),
-                                            blurRadius: 5,
-                                            color: Colors.black,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () => context.tabManager.changeTab(TecTab.reader),
+            child: SingleChildScrollView(
+              child: Container(
+                margin: const EdgeInsets.only(left: 10, right: 110),
+                child: Wrap(
+                    alignment: WrapAlignment.end,
+                    verticalDirection: VerticalDirection.up,
+                    spacing: 30,
+                    runSpacing: 10,
+                    children: List<Widget>.generate(
+                        _covers.length,
+                        (index) => ScaleTransition(
+                            scale: CurvedAnimation(
+                              parent: widget.controller,
+                              curve: Interval(0, 1.0 - index / _covers.length / 2.0,
+                                  curve: Curves.easeOut),
+                            ),
+                            child: InkWell(
+                              onTap: () => _covers[index].onPressed(),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  if (_covers[index].uid != null)
+                                    Flexible(
+                                        flex: 4,
+                                        child: Dismissible(
+                                          key: ValueKey(_covers[index].uid),
+                                          direction: DismissDirection.vertical,
+                                          onDismissed: (_) {
+                                            setState(() {
+                                              context.viewManager.remove(_covers[index].uid);
+                                            });
+                                          },
+                                          background: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                                            alignment: Alignment.centerRight,
+                                            // color: Colors.red,
+                                            child: const Icon(
+                                              Icons.close,
+                                              color: Colors.white,
+                                            ),
                                           ),
-                                        ])),
+                                          child: LongPressDraggable(
+                                              data: _covers[index].uid,
+                                              onDragStarted: () =>
+                                                  context.tabManager.changeTab(TecTab.reader),
+                                              feedback: _covers[index].icon,
+                                              child: _covers[index].icon),
+                                        ))
+                                  else
+                                    _covers[index].icon,
+                                  const SizedBox(height: 5),
+                                  SizedBox(
+                                    width: bookCoverWidth,
+                                    child: TecText(_covers[index].title,
+                                        autoSize: true,
+                                        maxLines: 1,
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                            fontSize: contentFontSizeWith(context),
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            shadows: [
+                                              const Shadow(
+                                                offset: Offset(1.0, 1.0),
+                                                blurRadius: 5,
+                                                color: Colors.black,
+                                              ),
+                                            ])),
+                                  ),
+                                  // const SizedBox(height: 10),
+                                ],
                               ),
-                              // const SizedBox(height: 10),
-                            ],
-                          ),
-                        ))).toList()),
+                            ))).toList()),
+              ),
+            ),
           )),
     );
   }
@@ -412,32 +413,28 @@ class _CloseFAB extends StatefulWidget {
   __CloseFABState createState() => __CloseFABState();
 }
 
-class __CloseFABState extends State<_CloseFAB> with TickerProviderStateMixin {
-  AnimationController _controller;
-  Animation<Offset> _offsetAnimation;
-  Animation<double> _animateIcon;
+class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMixin {
+  Animation<double> _translateButton;
   AnimationController _animationController;
-  bool _isOpened = false;
+  bool _isOpened = true;
+  final _fabHeight = 56.0;
 
   @override
   void initState() {
     _animationController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 600))
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 500))
           ..addListener(() {
             setState(() {});
-          });
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 650),
-      vsync: this,
-    )..forward();
-    _offsetAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: const Offset(0, 0),
+          })
+          ..forward();
+
+    _translateButton = Tween<double>(
+      begin: _fabHeight,
+      end: 0,
     ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.bounceInOut,
+      parent: _animationController,
+      curve: const Interval(0, 1, curve: Curves.easeOut),
     ));
-    _animateIcon = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
     widget.controller.reset();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       widget.controller.forward();
@@ -448,7 +445,6 @@ class __CloseFABState extends State<_CloseFAB> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
-    _controller.dispose();
     super.dispose();
   }
 
@@ -456,15 +452,16 @@ class __CloseFABState extends State<_CloseFAB> with TickerProviderStateMixin {
     if (!_isOpened) {
       _animationController.forward();
     } else {
-      context.tabManager.changeTab(TecTab.reader);
       _animationController.reverse();
+      context.tabManager.changeTab(TecTab.reader);
     }
-    _isOpened = !_isOpened;
+    setState(() {
+      _isOpened = !_isOpened;
+    });
   }
 
   _OffscreenView getOffscreenIconView(
       {@required String title, @required IconData icon, Function(BuildContext context) onPressed}) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return _OffscreenView(
         title: title,
         onPressed: () {
@@ -488,12 +485,7 @@ class __CloseFABState extends State<_CloseFAB> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final _icons = <_OffscreenView>[
-      getOffscreenIconView(
-          title: 'Search',
-          icon: Icons.search,
-          onPressed: (context) {
-            showBibleSearch(context, null);
-          }),
+      getOffscreenIconView(title: 'Settings', icon: FeatherIcons.settings, onPressed: showSettings),
       getOffscreenIconView(
           title: 'Journal',
           icon: FeatherIcons.bookOpen,
@@ -513,6 +505,12 @@ class __CloseFABState extends State<_CloseFAB> with TickerProviderStateMixin {
             showBibleSearch(context, null, showHistory: true);
             // TecToast.show(context, 'need to show history here');
           }),
+      getOffscreenIconView(
+          title: 'Search',
+          icon: Icons.search,
+          onPressed: (context) {
+            showBibleSearch(context, null);
+          }),
       // getOffscreenIconView(
       //     title: 'Account',
       //     icon: FeatherIcons.user,
@@ -525,7 +523,7 @@ class __CloseFABState extends State<_CloseFAB> with TickerProviderStateMixin {
       //     }),
       // getOffscreenIconView(
       //     title: 'Help', icon: FeatherIcons.helpCircle, onPressed: showZendeskHelp),
-      getOffscreenIconView(title: 'Settings', icon: FeatherIcons.settings, onPressed: showSettings),
+
       getOffscreenIconView(
           title: 'Add View',
           icon: Icons.add,
@@ -534,56 +532,59 @@ class __CloseFABState extends State<_CloseFAB> with TickerProviderStateMixin {
           }),
     ];
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        for (var i = 0; i < _icons.length; i++)
-          SlideTransition(
-            position: _offsetAnimation,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Flexible(child: _icons[i].icon),
-                const SizedBox(height: 5),
-                Flexible(
-                  child: Container(
-                    width: 50,
-                    child: TecText(_icons[i].title,
-                        maxLines: 1,
-                        autoSize: true,
-                        textScaleFactor: 0.9,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyText1.copyWith(
-                            fontSize: contentFontSizeWith(context),
-                            // fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              const Shadow(
-                                offset: Offset(1, 1),
-                                blurRadius: 5,
-                                color: Colors.black,
-                              ),
-                            ])),
-                  ),
+    return SingleChildScrollView(
+      reverse: true,
+      child: Column(
+        // mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 40),
+          for (var i = 0; i < _icons.length; i++) ...[
+            Transform(
+                transform: Matrix4.translationValues(
+                  0,
+                  _translateButton.value * i,
+                  0,
                 ),
-                const SizedBox(height: 5),
-              ],
+                child: _icons[i].icon),
+            const SizedBox(height: 5),
+            Transform(
+              transform: Matrix4.translationValues(
+                0,
+                _translateButton.value * i,
+                0,
+              ),
+              child: TecText(
+                _icons[i].title,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                    fontSize: contentFontSizeWith(context),
+                    // fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      const Shadow(
+                        offset: Offset(1, 1),
+                        blurRadius: 5,
+                        color: Colors.black,
+                      ),
+                    ]),
+              ),
             ),
-          ),
-        FloatingActionButton(
-          child: AnimatedIcon(
-            icon: AnimatedIcons.close_menu,
-            progress: _animateIcon,
-          ),
-          onPressed: () {
-            _animate();
-            context.tabManager.changeTab(TecTab.reader);
-          },
-        ),
-      ],
+            const SizedBox(height: 5),
+          ],
+          FloatingActionButton(
+              backgroundColor: Const.tecartaBlue,
+              onPressed: _animate,
+              child: AnimatedBuilder(
+                  animation: widget.controller,
+                  builder: (context, child) => Transform(
+                        transform: Matrix4.rotationZ(widget.controller.value * 0.5 * math.pi),
+                        alignment: FractionalOffset.center,
+                        child: const Icon(Icons.close),
+                      )))
+        ],
+      ),
     );
   }
 }
