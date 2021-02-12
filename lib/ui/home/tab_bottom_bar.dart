@@ -41,8 +41,9 @@ class TabBottomBar extends StatefulWidget {
   _TabBottomBarState createState() => _TabBottomBarState();
 }
 
-class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMixin {
+  AnimationController _closeFABController, _slideTabController;
+  Animation<Offset> _slideTabAnimation;
   Map<TecTab, GlobalKey> tabKeys;
   GlobalKey ugcViewKey;
 
@@ -50,7 +51,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
+    _closeFABController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
@@ -62,6 +63,17 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
     }
 
     ugcViewKey = GlobalKey();
+
+    _slideTabController = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+
+    _slideTabAnimation = Tween<Offset>(begin: const Offset(0.0, 0.0), end: const Offset(0.0, 1.8))
+        .animate(CurvedAnimation(
+      parent: _slideTabController,
+      curve: Curves.easeOut,
+    ));
   }
 
   Future<bool> _onBackPressed() async {
@@ -105,6 +117,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
     } else {
       addPaddingForCards = true;
     }
+
     return BlocBuilder<TabManagerBloc, TabManagerState>(buildWhen: (p, n) {
       // if the tab didn't change (i.e. just showing drawer...)
       return p.tab != n.tab || p.hideBottomBar != n.hideBottomBar;
@@ -118,28 +131,30 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
           floatingActionButton:
               BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
             return Visibility(
-                visible:
-                    (sheetState.type != SheetType.selection && sheetState.type != SheetType.hidden),
-                child: (tabState.hideBottomBar)
-                    ? const SizedBox.shrink()
-                    : ((tabState.tab == TecTab.switcher)
-                        ? Padding(
-                            padding: EdgeInsets.only(bottom: bottomPadding),
-                            child: _CloseFAB(controller: _controller, parentContext: context))
-                        : _TabFAB()));
+                visible: (sheetState.type != SheetType.selection),
+                child: ((tabState.tab == TecTab.switcher)
+                    ? Padding(
+                        padding: EdgeInsets.only(bottom: bottomPadding),
+                        child: _CloseFAB(controller: _closeFABController, parentContext: context))
+                    : SlideTransition(position: _slideTabAnimation, child: _TabFAB())));
           }),
           drawer: (tabState.tab != TecTab.reader) ? null : UGCView(key: ugcViewKey),
           drawerScrimColor: barrierColorWithContext(context),
-          bottomNavigationBar: (tabState.hideBottomBar)
-              ? null
-              : BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
-                  return Visibility(
-                    visible: (sheetState.type != SheetType.selection &&
-                        sheetState.type != SheetType.hidden &&
-                        tabState.tab != TecTab.switcher),
-                    child: TecTabBar(tabs: widget.tabs),
-                  );
-                }),
+          bottomNavigationBar:
+              BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
+            if (sheetState.type == SheetType.hidden) {
+              // slide the tab off the screen...
+              _slideTabController.forward();
+            } else {
+              // slide the tab to normal view...
+              _slideTabController.reverse();
+            }
+            return Visibility(
+              visible: (sheetState.type != SheetType.selection && tabState.tab != TecTab.switcher),
+              child: SlideTransition(
+                  position: _slideTabAnimation, child: TecTabBar(tabs: widget.tabs)),
+            );
+          }),
           body: SafeArea(
             left: false,
             right: false,
@@ -193,7 +208,7 @@ class _TabBottomBarState extends State<TabBottomBar> with SingleTickerProviderSt
                       alignment: Alignment.bottomRight,
                       padding: EdgeInsets.only(
                           bottom: addPaddingForCards ? bottomPadding * 2 : bottomPadding),
-                      child: _ExpandedView(controller: _controller, parentContext: context),
+                      child: _ExpandedView(controller: _closeFABController, parentContext: context),
                     ),
                 ],
               ),
@@ -596,6 +611,7 @@ class _TabFAB extends StatelessWidget {
 class FabIcon extends StatelessWidget {
   final String text;
   final IconData icon;
+
   const FabIcon({this.text, this.icon});
 
   @override
