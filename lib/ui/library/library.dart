@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -388,6 +389,7 @@ class _VolumesListState extends State<_VolumesList> {
   Timer _debounceTimer;
   bool _scrollToVolume;
   bool _searchFieldHasFocus = false;
+  StreamSubscription<bool> _keyboardListener;
 
   @override
   void initState() {
@@ -396,6 +398,11 @@ class _VolumesListState extends State<_VolumesList> {
     _focusNode = FocusNode()..addListener(_focusNodeListener);
     _scrollToVolume = widget.scrollToSelectedVolumes && widget.selectedVolumes.isNotEmpty;
     if (_scrollToVolume) _scrollToVolumeAfterBuild();
+    _keyboardListener = KeyboardVisibilityController().onChange.listen((visible) {
+      if (!visible && _focusNode.hasFocus) {
+        _focusNode.unfocus();
+      }
+    });
   }
 
   @override
@@ -436,6 +443,9 @@ class _VolumesListState extends State<_VolumesList> {
 
     _debounceTimer?.cancel();
     _debounceTimer = null;
+
+    _keyboardListener?.cancel();
+    _keyboardListener = null;
 
     super.dispose();
   }
