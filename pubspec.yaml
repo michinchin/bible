@@ -70,6 +70,12 @@ dependencies:
       name: tec_platform_util
       url: http://noah.tecarta.com:8100
     version: ^1.0.2
+  tec_selectable:
+    # path: ../shared/tec_selectable
+    hosted:
+      name: tec_selectable
+      url: http://noah.tecarta.com:8100
+    version: ^2.1.5
   tec_user_account:
     hosted:
       name: tec_user_account
@@ -107,7 +113,7 @@ dependencies:
   video_player: ^1.0.1
   zefyr: ^1.0.0-dev.2.0
 
-#dependency_overrides:
+# dependency_overrides:
 #   tec_user_account:
 #     path: ../shared/tec_user_account
 
@@ -135,6 +141,9 @@ flutter:
     - family: sficonsets
       fonts:
         - asset: packages/flutter_sfsymbols/fonts/sficonsets.ttf
+    - family: tec_icons
+      fonts:
+        - asset: assets/fonts/tec_icons.ttf
 
   assets:
     - assets/9.sqlite

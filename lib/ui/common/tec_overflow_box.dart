@@ -130,6 +130,7 @@ class RenderTecOverflowBox extends RenderProxyBox {
   */
 
   @override
+  // ignore: override_on_non_overriding_member
   Size computeDryLayout(BoxConstraints constraints) => _computeLayout();
 
   @override

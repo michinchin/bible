@@ -19,6 +19,7 @@ class VerseTag extends Equatable {
   final bool isInVerse;
   final bool isInXref;
   final bool isInFootnote;
+  final bool isInMarginNote;
   final String href;
 
   const VerseTag({
@@ -28,13 +29,15 @@ class VerseTag extends Equatable {
     this.isInVerse = false,
     this.isInXref = false,
     this.isInFootnote = false,
+    this.isInMarginNote = false,
     this.href,
   })  : assert(verse != null &&
             word != null &&
             (endVerse == null || endVerse >= verse) &&
             isInVerse != null &&
             isInXref != null &&
-            isInFootnote != null),
+            isInFootnote != null &&
+            isInMarginNote != null),
         endVerse = endVerse ?? verse;
 
   VerseTag copyWith({
@@ -44,6 +47,7 @@ class VerseTag extends Equatable {
     bool isInVerse,
     bool isInXref,
     bool isInFootnote,
+    bool isInMarginNote,
     String href,
   }) =>
       VerseTag(
@@ -53,11 +57,13 @@ class VerseTag extends Equatable {
         isInVerse: isInVerse ?? this.isInVerse,
         isInXref: isInXref ?? this.isInXref,
         isInFootnote: isInFootnote ?? this.isInFootnote,
+        isInMarginNote: isInMarginNote ?? this.isInMarginNote,
         href: href ?? this.href,
       );
 
   @override
-  List<Object> get props => [verse, word, endVerse, isInVerse, isInXref, isInFootnote, href];
+  List<Object> get props =>
+      [verse, word, endVerse, isInVerse, isInXref, isInFootnote, isInMarginNote, href];
 
   @override
   String toString() {
@@ -66,6 +72,7 @@ class VerseTag extends Equatable {
     if (isInVerse) buf.write(', "inV": true');
     if (isInXref) buf.write(', "inXref": true');
     if (isInFootnote) buf.write(', "inFn": true');
+    if (isInMarginNote) buf.write(', "inMn": true');
     if (href != null) buf.write(', "href": ${jsonEncode(href)}');
     buf.write(' }');
     return buf.toString();

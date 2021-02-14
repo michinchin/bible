@@ -461,6 +461,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
     _wordSelectionController.addListener(() => _selection.onWordSelectionChanged(context));
 
     _viewModel = ChapterViewModel(
+      globalKey: _tecHtmlKey,
       viewUid: widget.viewUid,
       volume: widget.volumeId,
       book: widget.ref.book,
@@ -519,7 +520,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
               // TO-DO(ron): Only scroll if the verse changes?
               if (newBcv.verse > 1 || _scrollController.offset > 0) {
                 tec.dmPrint('ChapterHtml ViewData changed, so scrolling to verse ${newBcv.verse}');
-                _viewModel.scrollToVerse(newBcv.verse, _tecHtmlKey, _scrollController);
+                _viewModel.scrollToVerse(newBcv.verse, _scrollController);
               }
             } else {
               // tec.dmPrint('Ignoring selections in ${widget.ref}');
@@ -557,8 +558,9 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                 children: <Widget>[
                   const SizedBox(height: 20),
                   GestureDetector(
-                    onTapUp: (details) => _viewModel.globalOffsetOfTap = details?.globalPosition,
-                    onTap: () => _viewModel.onTapHandler(),
+                    onTapDown: _viewModel.onTapDownHandler,
+                    onTapUp: _viewModel.onTapUpHandler,
+                    onTap: () => _viewModel.onTapHandler(context),
 
                     // `TecOverflowBox` makes sure the `TecHtml` widget is not rebuilt
                     // during animated view size changes. It sets the width of `TecHtml`
@@ -576,7 +578,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                             key: _tecHtmlKey,
                             debugId: debugId,
                             backgroundColor: Theme.of(context).backgroundColor,
-                            avoidUsingWidgetSpans: false,
+                            // avoidUsingWidgetSpans: true,
                             allowTextAlignJustify: false,
                             scrollController: _scrollController,
                             // The HTML is scaled via CSS.
@@ -604,7 +606,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                                     'ChapterHtml post build will scroll to verse ${widget.ref.verse}');
                                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                                   _viewModel.scrollToVerse(
-                                      widget.ref.verse, _tecHtmlKey, _scrollController,
+                                      widget.ref.verse, _scrollController,
                                       animated: false);
                                 });
                               }
