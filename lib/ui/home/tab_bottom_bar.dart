@@ -118,7 +118,7 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
   Widget build(BuildContext context) {
     var bottomPadding = context.fullBottomBarPadding;
     var addPaddingForCards = false;
-    tec.dmPrint(context.fullBottomBarPadding);
+    // tec.dmPrint('bottom bar padding: ${context.fullBottomBarPadding}');
     if (bottomPadding <= 10) {
       bottomPadding += 25;
     } else {

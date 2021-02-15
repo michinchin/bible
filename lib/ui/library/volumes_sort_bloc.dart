@@ -8,22 +8,24 @@ import 'package:tec_util/tec_util.dart' as tec;
 enum VolumesSortOpt { name, recent }
 
 // Popular volumes sorted with most popular first.
-const _popularVolumes = [9, 51, 32, 47, 49, 231, 1017, 1014, 1013];
+const _popularVolumes = [9, 51, 32, 47, 91, 231, 50, 65, 309, 1017, 1014, 1013];
 
 ///
 /// VolumesSortBloc
-/// 
+///
 class VolumesSortBloc extends Cubit<VolumesSort> {
-  VolumesSortBloc()
-      : super(VolumesSort.fromJson(tec.Prefs.shared.getString('_library_sort_settings')) ??
-            const VolumesSort(VolumesSortOpt.recent, _popularVolumes));
+  final String prefsKey;
+
+  VolumesSortBloc({this.prefsKey = '_library_sort_settings'})
+      : super(VolumesSort.fromJson(tec.Prefs.shared.getString(prefsKey)) ??
+            const VolumesSort(VolumesSortOpt.name, _popularVolumes));
 
   void updateSortBy(VolumesSortOpt sortBy) => emit(VolumesSort(sortBy, state.recent));
 
   void updateWithVolume(int volume) {
     final newState = VolumesSort(
         state.sortBy, state.recent.where((v) => v != volume).toList()..insert(0, volume));
-    tec.Prefs.shared.setString('_library_sort_settings', tec.toJsonString(newState));
+    tec.Prefs.shared.setString(prefsKey, tec.toJsonString(newState));
     // tec.dmPrint('VolumesSortBloc.updateWithVolume($volume => $newState');
     _cache = null;
     emit(newState);
@@ -41,7 +43,7 @@ class VolumesSortBloc extends Cubit<VolumesSort> {
 
 ///
 /// VolumesSort
-/// 
+///
 @immutable
 class VolumesSort extends Equatable {
   final VolumesSortOpt sortBy;

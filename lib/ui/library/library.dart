@@ -51,16 +51,16 @@ Future<int> selectVolumeInLibrary(
   int selectedVolume,
   bool scrollToSelectedVolume = true,
 }) {
-  var tabPrefix = initialTabPrefix;
-  if (tec.isNullOrEmpty(tabPrefix) && selectedVolume != null) {
-    final vp = VolumesRepository.shared;
-    tabPrefix = _tweakedName(vp.categoryWithId(vp.categoryWithVolume(selectedVolume))?.name);
-  }
+  // var tabPrefix = initialTabPrefix;
+  // if (tec.isNullOrEmpty(tabPrefix) && selectedVolume != null) {
+  //   final vp = VolumesRepository.shared;
+  //   tabPrefix = _tweakedName(vp.categoryWithId(vp.categoryWithVolume(selectedVolume))?.name);
+  // }
 
   return _showLibrary<int>(
     context: context,
     title: title,
-    initialTabPrefix: tabPrefix,
+    initialTabPrefix: initialTabPrefix,
     selectedVolumes: selectedVolume == null ? [] : [selectedVolume],
     scrollToSelectedVolumes: scrollToSelectedVolume,
     whenTappedPopWithVolumeId: true,
@@ -208,6 +208,7 @@ class LibraryScaffold extends StatelessWidget {
 }
 
 List<LibraryTab> _tabs({bool hasLicensedVolumes}) => [
+      const LibraryTab(title: 'Recent', filter: VolumesFilter(), prefsKey: 'recent'),
       if (hasLicensedVolumes)
         const LibraryTab(
             title: 'Purchased',
@@ -320,6 +321,7 @@ class _LibraryState extends State<_Library> {
               selectedVolumes: _selectedVolumes,
               scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
               allowMultipleSelections: widget.allowMultipleSelections,
+              alwaysSortByRecent: t.title == 'Recent',
               onTapVolume: widget.whenTappedPopWithVolumeId
                   ? (id) {
                       context.tbloc<VolumesSortBloc>().updateWithVolume(id);
@@ -368,6 +370,7 @@ class _VolumesList extends StatefulWidget {
   final bool allowMultipleSelections;
   final void Function(int volume) onTapVolume;
   final String heroPrefix;
+  final bool alwaysSortByRecent;
 
   const _VolumesList({
     Key key,
@@ -376,6 +379,7 @@ class _VolumesList extends StatefulWidget {
     this.allowMultipleSelections = false,
     this.onTapVolume,
     this.heroPrefix,
+    this.alwaysSortByRecent = false,
   }) : super(key: key);
 
   @override
@@ -494,11 +498,15 @@ class _VolumesListState extends State<_VolumesList> {
         (bloc.languages?.length ?? 0) > 1 /* || (bloc.categories?.length ?? 0) > 1 */;
 
     var volumes = bloc.state.volumes;
-    if (context.tbloc<VolumesSortBloc>().state.sortBy == VolumesSortOpt.recent) {
+    if (widget.alwaysSortByRecent ||
+        context.tbloc<VolumesSortBloc>().state.sortBy == VolumesSortOpt.recent) {
       final sortBloc = context.tbloc<VolumesSortBloc>();
       volumes = List.of(volumes);
       // Using mergeSort because it is stable (i.e. equal elements remain in the same order).
       collection.mergeSort<Volume>(volumes, compare: (a, b) => sortBloc.compare(a.id, b.id));
+      if (widget.alwaysSortByRecent) {
+        volumes = volumes.take(sortBloc.state.recent.length).toList();
+      }
     }
 
     final textScaleFactor = textScaleFactorWith(context);
@@ -522,19 +530,20 @@ class _VolumesListState extends State<_VolumesList> {
             secondChild: Row(
               children: [
                 SizedBox(width: padding / 2),
-                Theme(
-                  data: Theme.of(context).copyWith(accentColor: barTextColor),
-                  child: TecPopupMenuButton<int>(
-                    title: '',
-                    values: {0: 'Title ↓', 1: 'Recent ↓'} as LinkedHashMap<int, String>,
-                    currentValue: context.tbloc<VolumesSortBloc>().state.sortBy.index,
-                    defaultValue: 1,
-                    defaultName: 'Any',
-                    onSelectValue: (value) {
-                      context.tbloc<VolumesSortBloc>().updateSortBy(VolumesSortOpt.values[value]);
-                    },
+                if (!widget.alwaysSortByRecent)
+                  Theme(
+                    data: Theme.of(context).copyWith(accentColor: barTextColor),
+                    child: TecPopupMenuButton<int>(
+                      title: '',
+                      values: {0: 'Title ↓', 1: 'Recent ↓'} as LinkedHashMap<int, String>,
+                      currentValue: context.tbloc<VolumesSortBloc>().state.sortBy.index,
+                      defaultValue: 1,
+                      defaultName: 'Any',
+                      onSelectValue: (value) {
+                        context.tbloc<VolumesSortBloc>().updateSortBy(VolumesSortOpt.values[value]);
+                      },
+                    ),
                   ),
-                ),
                 const Spacer(),
                 IconButton(
                     tooltip: 'search',

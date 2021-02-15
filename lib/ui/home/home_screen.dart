@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!kDebugMode) initNotifications();
     if (tec.Prefs.shared.getBool(Const.prefShowOnboarding, defaultValue: true)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!kDebugMode) showOnboarding(context);
+        /* if (!kDebugMode) */ showOnboarding(context);
       });
     }
     super.initState();
