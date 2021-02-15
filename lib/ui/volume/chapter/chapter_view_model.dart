@@ -26,9 +26,17 @@ import 'verse_tag.dart';
 const _despanifyChapterHtml = true;
 const _superscriptVerseNumbers = kDebugMode;
 
-const _footnoteStyle = TextStyle(fontFamily: 'tec_icons', color: Colors.blue);
-const _marginNoteLightStyle = TextStyle(fontFamily: 'tec_icons', color: Color(0xFFA1090E));
-const _marginNoteDarkStyle = TextStyle(fontFamily: 'tec_icons', color: Color(0xFFFAFAFA));
+const _footnote = '\ue900';
+const _footnoteStyle = TextStyle(fontFamily: 'tec_icons', color: Colors.blue, height: 1);
+
+const _marginNote = '\ue901';
+const _marginNoteLightStyle =
+    TextStyle(fontFamily: 'tec_icons', color: Color(0xFFA1090E), height: 1);
+const _marginNoteDarkStyle =
+    TextStyle(fontFamily: 'tec_icons', color: Color(0xFFFAFAFA), height: 1);
+
+const _space = '\u0020'; // regular space
+const _nbsp = '\u00A0'; // non-breaking space
 
 ///
 /// ChapterViewModel
@@ -80,7 +88,7 @@ class ChapterViewModel {
       if (tag.isInFootnote) {
         if (tag.href != _currentFootnoteHref) {
           _currentFootnoteHref = tag.href;
-          return TaggableTextSpan(tag: tag, text: '\ue900', style: _footnoteStyle);
+          return TaggableTextSpan(tag: tag, text: _footnote, style: _footnoteStyle);
         }
         return null; // Don't display the footnote letter.
       }
@@ -88,14 +96,19 @@ class ChapterViewModel {
       // The rest of the function builds a list of zero or more spans.
       final spans = <InlineSpan>[];
 
-      // If the verse has a margin note, just return the special margin note span.
-      if (v != null && v != _marginNoteVerse && tag.isInVerse) {
+      // If the verse has a margin note, add the special margin note span.
+      if (v != null &&
+          v != _marginNoteVerse &&
+          tag.isInVerse &&
+          text.isNotEmpty &&
+          text != _space &&
+          text != _nbsp) {
         _marginNoteVerse = v;
         if (marginNotes().hasMarginNoteForVerse(_marginNoteVerse)) {
           spans.add(TaggableTextSpan(
               tag: tag.copyWith(isInMarginNote: true),
-              text: '\ue901', // nbsp: '\u00A0'
-              style: isDarkTheme ? _marginNoteDarkStyle : _marginNoteLightStyle));
+              text: '$_marginNote$_nbsp',
+              style: style.merge(isDarkTheme ? _marginNoteDarkStyle : _marginNoteLightStyle)));
         }
       }
 
@@ -163,7 +176,13 @@ class ChapterViewModel {
       // If not in trial mode, and the whole verse is selected...
       if (!selection.isInTrialMode && selection.hasVerse(tag.verse)) {
         _clearPreviousHighlightValues();
-        return [_spanForSelectedVerse(tag, text, textStyle, selectedTextStyle, recognizer)];
+        return [
+          TaggableTextSpan(
+              text: text,
+              style: tag.isInVerse ? _merge(textStyle, selectedTextStyle) : textStyle,
+              tag: tag,
+              recognizer: recognizer)
+        ];
       } else if (tag.verse != null) {
         return _spansForHighlights(tag, text, textStyle, recognizer, isDarkTheme: isDarkTheme);
       }
@@ -177,31 +196,12 @@ class ChapterViewModel {
     final recognizer = (tag.verse == null ? null : TapGestureRecognizer());
     if (recognizer != null) {
       recognizer
-        ..onTapDown = (details) {
-          _tapDownStopwatch = Stopwatch()..start();
-          _tapDownTag = tag;
-        }
-        ..onTapUp = (details) {
-          _globalOffsetOfTapUp = details?.globalPosition;
-        }
+        ..onTapDown = onTapDownHandler
+        ..onTapUp = onTapUpHandler
         ..onTap = () => onTapHandler(context, tag);
     }
     return recognizer;
     */
-  }
-
-  InlineSpan _spanForSelectedVerse(
-    VerseTag tag,
-    String text,
-    TextStyle textStyle,
-    TextStyle selectedTextStyle,
-    TapGestureRecognizer recognizer,
-  ) {
-    return TaggableTextSpan(
-        text: text,
-        style: tag.isInVerse ? _merge(textStyle, selectedTextStyle) : textStyle,
-        tag: tag,
-        recognizer: recognizer);
   }
 
   Iterable<InlineSpan> _spansForHighlights(
@@ -387,19 +387,16 @@ class ChapterViewModel {
   String _currentFootnoteHref;
 
   Stopwatch _tapDownStopwatch;
-  // Object _tapDownTag;
-  // Offset _globalOffsetOfTapDown;
-  Offset _globalOffsetOfTapUp;
+  Offset _globalTapUpOffset;
 
   var _prevTagXrefHref = '';
 
   void onTapDownHandler(TapDownDetails details) {
     _tapDownStopwatch = Stopwatch()..start();
-    // _globalOffsetOfTapDown = details?.globalPosition;
   }
 
   void onTapUpHandler(TapUpDetails details) {
-    _globalOffsetOfTapUp = details?.globalPosition;
+    _globalTapUpOffset = details?.globalPosition;
   }
 
   void onTapHandler(BuildContext context, [Object tag]) {
@@ -409,26 +406,20 @@ class ChapterViewModel {
     if (tag is VerseTag) {
       // Was it a long press on an xref?
       if (!handledTap &&
-          // !hasSelection &&
           tag.isInXref &&
           tec.isNotNullOrEmpty(tag.href) &&
-          _tapDownStopwatch.elapsed.inMilliseconds > 500 &&
-          _tapDownTag is VerseTag &&
-          (_tapDownTag as VerseTag).href == tag.href) {
-        final verseTag = _tapDownTag as VerseTag;
-        final reference =
-            Reference(volume: volume, book: book, chapter: chapter, verse: verseTag.verse);
-        handledTap = selection.handleXref(context, reference, null, verseTag, _globalOffsetOfTapUp);
+          _tapDownStopwatch.elapsed.inMilliseconds > 500) {
+        final reference = Reference(volume: volume, book: book, chapter: chapter, verse: tag.verse);
+        handledTap = selection.handleXref(context, reference, null, tag, _globalTapUpOffset);
       }
     }
     */
 
-    // Handle the tap...
-    // Note, `_globalOffsetOfTapUp` is set in the `onTapUp` handler.
-    if (!handledTap && _globalOffsetOfTapUp != null) {
+    // Handle the tap if the tapDown/Up values are set.
+    if (!handledTap && _globalTapUpOffset != null) {
       final tecHtmlRenderBox = globalKey.currentContext?.findRenderObject();
       if (tecHtmlRenderBox is RenderBox && tecHtmlRenderBox.hasSize) {
-        final pt = _globalOffsetOfTapUp - tecHtmlRenderBox.localToGlobal(Offset.zero);
+        final pt = _globalTapUpOffset - tecHtmlRenderBox.localToGlobal(Offset.zero);
 
         const hitPadding = 12.0;
 
@@ -459,10 +450,10 @@ class ChapterViewModel {
                           if (anchor?.copyInflated(hitPadding)?.containsPoint(pt) ?? false) {
                             if (tag.isInFootnote) {
                               tec.dmPrint('tapped on footnote in verse ${tag.verse}');
-                              _onTapFootnote(tag, context);
+                              _onTapFootnote(context, tag, _globalTapUpOffset);
                             } else if (tag.isInMarginNote) {
                               tec.dmPrint('tapped on margin note in verse ${tag.verse}');
-                              _onTapMarginNote(tag, context);
+                              _onTapMarginNote(context, tag);
                             }
                             return false; // Stop walking the span tree.
                           }
@@ -503,10 +494,10 @@ class ChapterViewModel {
 
     _tapDownStopwatch?.stop();
     _tapDownStopwatch = null;
-    // _tapDownTag = null;
+    _globalTapUpOffset = null;
   }
 
-  void _onTapMarginNote(VerseTag tag, BuildContext context) {
+  void _onTapMarginNote(BuildContext context, VerseTag tag) {
     assert(tag?.isInMarginNote ?? false);
     if (selection.isNotEmpty) {
       TecToast.show(context, 'Clear selection to view margin note');
@@ -524,7 +515,7 @@ class ChapterViewModel {
     }
   }
 
-  Future<void> _onTapFootnote(VerseTag tag, BuildContext context) async {
+  Future<void> _onTapFootnote(BuildContext context, VerseTag tag, Offset offset) async {
     assert(tag?.isInFootnote ?? false);
     final bible = VolumesRepository.shared.bibleWithId(volume);
     final footnoteHtml =
@@ -538,7 +529,7 @@ class ChapterViewModel {
         return showTecModalPopup<void>(
           useRootNavigator: true,
           context: context,
-          offset: _globalOffsetOfTapUp,
+          offset: offset,
           builder: (context) {
             final maxWidth = math.min(320.0, MediaQuery.of(context).size.width);
             return TecPopupSheet(

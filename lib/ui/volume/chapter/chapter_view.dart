@@ -578,7 +578,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                             key: _tecHtmlKey,
                             debugId: debugId,
                             backgroundColor: Theme.of(context).backgroundColor,
-                            // avoidUsingWidgetSpans: true,
+                            avoidUsingWidgetSpans: true,
                             allowTextAlignJustify: false,
                             scrollController: _scrollController,
                             // The HTML is scaled via CSS.
@@ -643,8 +643,8 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
   }
 }
 
-const _lineSpacing = 1.4;
-const _marginPercent = 0.05; // 0.05;
+const _lineSpacing = 1.35; // 1.4;
+const _marginPercent = 0.05;
 
 const TextStyle _htmlDefaultTextStyle = TextStyle(
   inherit: false,
