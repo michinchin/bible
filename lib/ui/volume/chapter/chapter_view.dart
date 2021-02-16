@@ -26,6 +26,7 @@ import '../volume_view_data_bloc.dart';
 import 'chapter_build_helper.dart';
 import 'chapter_selection.dart';
 import 'chapter_view_model.dart';
+// import 'v91_bible_vendor_css.dart';
 
 class PageableChapterView extends StatefulWidget {
   final ViewState viewState;
@@ -605,8 +606,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                                 tec.dmPrint(
                                     'ChapterHtml post build will scroll to verse ${widget.ref.verse}');
                                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                                  _viewModel.scrollToVerse(
-                                      widget.ref.verse, _scrollController,
+                                  _viewModel.scrollToVerse(widget.ref.verse, _scrollController,
                                       animated: false);
                                 });
                               }
@@ -628,6 +628,15 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                                 widget.versesToShow.isEmpty || widget.versesToShow.contains('1'),
                             toggleVisibilityWithHtmlElement: helper.toggleVisibility,
                             shouldSkipHtmlElement: helper.shouldSkip,
+
+                            /*
+                            logStylesheetParsingErrors: true,
+                            futureStringFromUrl: (url) async {
+                              if (widget.volumeId == 91 && url.contains('bible_vendor.css')) {
+                                return v91BibleVendorCss;
+                              }
+                              return tec.textFromUrl(url);
+                            }, */
                           );
                         },
                       ),
