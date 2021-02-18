@@ -4,7 +4,6 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
@@ -89,8 +88,8 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
     context.tabManager.changeTab(TecTab.reader);
     context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
     setState(() {
-      _showSelectViewOverlay = true;
       _viewUid = uid;
+      _showSelectViewOverlay = true;
     });
   }
 
@@ -166,11 +165,9 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
                           parentContext: context,
                           onViewTap: _onViewTap,
                         ))
-                    : SlideTransition(
-                        position: _slideTabAnimation,
-                        child: _showSelectViewOverlay
-                            ? _ExitSelectionFAB(() => onSelectView(null))
-                            : _TabFAB())));
+                    : _showSelectViewOverlay
+                        ? const SizedBox.shrink()
+                        : SlideTransition(position: _slideTabAnimation, child: _TabFAB())));
           }),
           drawer: (tabState.tab != TecTab.reader) ? null : UGCView(key: ugcViewKey),
           drawerScrimColor: barrierColorWithContext(context),
@@ -248,7 +245,37 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
 }
 
 const bookCoverWidth = 60.0;
-const bookCoverHeight = 80.0;
+
+class _VolumeCard extends StatelessWidget {
+  final int volumeId;
+  final Color shadowColor;
+  const _VolumeCard(this.volumeId, {this.shadowColor});
+  @override
+  Widget build(BuildContext context) {
+    const bookCoverHeight = 80.0;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final sColor = shadowColor ?? (isDarkMode ? Colors.black54 : Colors.black26);
+    final volume = VolumesRepository.shared.volumeWithId(volumeId);
+    return Container(
+        width: bookCoverWidth,
+        height: bookCoverHeight,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          boxShadow: [boxShadow(color: sColor, offset: const Offset(0, 3), blurRadius: 5)],
+        ),
+        child: volume != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: volume != null
+                    ? VolumeImage(
+                        volume: volume,
+                        fit: BoxFit.fill,
+                      )
+                    : Container(child: Text('Bible')),
+              )
+            : null);
+  }
+}
 
 class _ExpandedView extends StatefulWidget {
   final AnimationController controller;
@@ -272,16 +299,23 @@ class __ExpandedViewState extends State<_ExpandedView> {
     }
 
     if (vmBloc.state.maximizedViewUid > 0) {
-      vmBloc.maximize(viewUid);
+      vmBloc?.maximize(viewUid);
     } else {
       vmBloc?.show(viewUid);
     }
     context.tabManager.changeTab(TecTab.reader);
   }
 
+  void _onCoverTap(List<_OffscreenView> visibleCovers, _OffscreenView cover) {
+    if (visibleCovers.length <= 1) {
+      _onSwitchViews(cover.uid);
+    } else {
+      widget.onViewTap(cover.uid);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final _covers = <_OffscreenView>[];
     final _visibleCovers = <_OffscreenView>[];
 
@@ -293,13 +327,11 @@ class __ExpandedViewState extends State<_ExpandedView> {
       if (vbloc != null) {
         final volumeView = tec.as<VolumeViewDataBloc>(vbloc).state.asVolumeViewData;
         volumeId = volumeView.volumeId;
-        title = !volumeView.useSharedRef
-            ? '${volumeView.bookNameAndChapter(useShortBookName: true)}\n'
-            : ''
-                '${VolumesRepository.shared.volumeWithId(volumeId).abbreviation}';
+        title =
+            '${!volumeView.useSharedRef ? '${volumeView.bookNameAndChapter(useShortBookName: true)}\n' : ''}${'${VolumesRepository.shared.volumeWithId(volumeId).abbreviation}'}';
       }
       final visible = context.viewManager.isViewVisible(view.uid);
-
+      final child = _VolumeCard(volumeId, shadowColor: visible ? Colors.white : null);
       final cover = _OffscreenView(
           title: title,
           onPressed: () {
@@ -307,47 +339,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
             // _onSwitchViews(view);
           },
           uid: view.uid,
-          icon: Stack(
-            alignment: Alignment.topRight.add(const Alignment(-2.5, -0.5)),
-            children: [
-              Container(
-                width: bookCoverWidth,
-                height: bookCoverHeight,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  boxShadow: [
-                    boxShadow(
-                        color: visible
-                            ? Colors.white
-                            : isDarkMode
-                                ? Colors.black54
-                                : Colors.black26,
-                        offset: const Offset(0, 3),
-                        blurRadius: 5)
-                  ],
-                ),
-                child: volumeId != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(5),
-                        child: VolumeImage(
-                          volume: VolumesRepository.shared.volumeWithId(volumeId),
-                          fit: BoxFit.fill,
-                        ),
-                      )
-                    : Container(),
-              ),
-              if (visible)
-                const CircleAvatar(
-                  radius: 15,
-                  backgroundColor: Const.tecartaBlue,
-                  child: Icon(
-                    FeatherIcons.eye,
-                    size: 15,
-                    color: Colors.white,
-                  ),
-                )
-            ],
-          ));
+          icon: !visible ? child : _StackIcon(child, FeatherIcons.eye));
       if (visible) {
         _visibleCovers.add(cover);
       } else {
@@ -381,17 +373,12 @@ class __ExpandedViewState extends State<_ExpandedView> {
                     return ScaleTransition(
                         scale: CurvedAnimation(
                           parent: widget.controller,
-                          curve: Interval(0, 1.0 - index / _covers.length / 2.0,
+                          curve: Interval(
+                              0, 1.0 - i / (_covers.length + _visibleCovers.length) / 2.0,
                               curve: Curves.easeOut),
                         ),
                         child: InkWell(
-                          onTap: () {
-                            if (_visibleCovers.length == 1) {
-                              _onSwitchViews(cover.uid);
-                            } else {
-                              widget.onViewTap(cover.uid);
-                            }
-                          },
+                          onTap: () => _onCoverTap(_visibleCovers, cover),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -401,6 +388,14 @@ class __ExpandedViewState extends State<_ExpandedView> {
                                     child: Dismissible(
                                       key: ValueKey(cover.uid),
                                       direction: DismissDirection.vertical,
+                                      confirmDismiss: (_) async {
+                                        if (context.viewManager.countOfOpenViews > 1) {
+                                          return true;
+                                        } else {
+                                          TecToast.show(context, 'Cannot remove last');
+                                          return false;
+                                        }
+                                      },
                                       onDismissed: (_) {
                                         setState(() {
                                           context.viewManager.remove(cover.uid);
@@ -435,8 +430,9 @@ class __ExpandedViewState extends State<_ExpandedView> {
                               SizedBox(
                                 width: bookCoverWidth,
                                 child: TecText(cover.title,
-                                    autoSize: true,
+                                    // autoSize: true,
                                     maxLines: 1,
+                                    textScaleFactor: 0.7,
                                     textAlign: TextAlign.center,
                                     style: Theme.of(context).textTheme.bodyText1.copyWith(
                                         fontSize: contentFontSizeWith(context),
@@ -602,78 +598,131 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
     ];
 
     Widget child;
-
-    child = Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: _ExpandedView(
-              onViewTap: widget.onViewTap,
-              controller: widget.controller,
-              parentContext: widget.parentContext),
-        ),
-        Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                  reverse: true,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 40),
-                      for (var i = 0; i < _icons.length; i++) ...[
-                        Transform(
+    List<Widget> children({bool useRow = false}) => [
+          Expanded(
+            child: SingleChildScrollView(
+                scrollDirection: useRow ? Axis.horizontal : Axis.vertical,
+                reverse: true,
+                child: useRow
+                    ? Row(mainAxisSize: MainAxisSize.min, children: [
+                        const SizedBox(width: 40),
+                        for (var i = 0; i < _icons.length; i++) ...[
+                          Transform(
+                              transform: Matrix4.translationValues(
+                                _translateButton.value * i,
+                                0,
+                                0,
+                              ),
+                              child: _icons[i].icon),
+                          const SizedBox(width: 5),
+                          Transform(
                             transform: Matrix4.translationValues(
-                              0,
                               _translateButton.value * i,
                               0,
+                              0,
                             ),
-                            child: _icons[i].icon),
-                        const SizedBox(height: 5),
-                        Transform(
-                          transform: Matrix4.translationValues(
-                            0,
-                            _translateButton.value * i,
-                            0,
+                            child: TecText(
+                              _icons[i].title,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                  fontSize: contentFontSizeWith(context),
+                                  // fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  shadows: [
+                                    const Shadow(
+                                      offset: Offset(1, 1),
+                                      blurRadius: 5,
+                                      color: Colors.black,
+                                    ),
+                                  ]),
+                            ),
                           ),
-                          child: TecText(
-                            _icons[i].title,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                fontSize: contentFontSizeWith(context),
-                                // fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                shadows: [
-                                  const Shadow(
-                                    offset: Offset(1, 1),
-                                    blurRadius: 5,
-                                    color: Colors.black,
-                                  ),
-                                ]),
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                      ],
-                    ],
-                  )),
+                          const SizedBox(width: 10)
+                        ]
+                      ])
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 40),
+                          for (var i = 0; i < _icons.length; i++) ...[
+                            Transform(
+                                transform: Matrix4.translationValues(
+                                  0,
+                                  _translateButton.value * i,
+                                  0,
+                                ),
+                                child: _icons[i].icon),
+                            const SizedBox(height: 5),
+                            Transform(
+                              transform: Matrix4.translationValues(
+                                0,
+                                _translateButton.value * i,
+                                0,
+                              ),
+                              child: TecText(
+                                _icons[i].title,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                    fontSize: contentFontSizeWith(context),
+                                    // fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    shadows: [
+                                      const Shadow(
+                                        offset: Offset(1, 1),
+                                        blurRadius: 5,
+                                        color: Colors.black,
+                                      ),
+                                    ]),
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                          ],
+                        ],
+                      )),
+          ),
+          FloatingActionButton(
+              backgroundColor: Const.tecartaBlue,
+              onPressed: _animate,
+              child: AnimatedBuilder(
+                  animation: widget.controller,
+                  builder: (context, child) => Transform(
+                        transform: Matrix4.rotationZ(widget.controller.value * 0.5 * math.pi),
+                        alignment: FractionalOffset.center,
+                        child: const Icon(Icons.close),
+                      )))
+        ];
+
+    if (isSmallScreen(context) && MediaQuery.of(context).orientation == Orientation.landscape) {
+      child = Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: _ExpandedView(
+                  onViewTap: widget.onViewTap,
+                  controller: widget.controller,
+                  parentContext: widget.parentContext),
             ),
-            FloatingActionButton(
-                backgroundColor: Const.tecartaBlue,
-                onPressed: _animate,
-                child: AnimatedBuilder(
-                    animation: widget.controller,
-                    builder: (context, child) => Transform(
-                          transform: Matrix4.rotationZ(widget.controller.value * 0.5 * math.pi),
-                          alignment: FractionalOffset.center,
-                          child: const Icon(Icons.close),
-                        )))
-          ],
-        ),
-      ],
-    );
+            const SizedBox(height: 20),
+            Row(children: children(useRow: true))
+          ]);
+    } else {
+      child = Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: _ExpandedView(
+                onViewTap: widget.onViewTap,
+                controller: widget.controller,
+                parentContext: widget.parentContext),
+          ),
+          Column(children: children()),
+        ],
+      );
+    }
 
     return AnimatedContainer(duration: const Duration(milliseconds: 250), child: child);
   }
@@ -695,23 +744,6 @@ class _TabFAB extends StatelessWidget {
               : TecIcons.tecartabiblelogo,
           color: context.tabManager.state.tab != TecTab.reader ? Const.tecartaBlue : Colors.white,
           size: 28),
-    );
-  }
-}
-
-class _ExitSelectionFAB extends StatelessWidget {
-  final VoidCallback onTap;
-  const _ExitSelectionFAB(this.onTap);
-
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: onTap,
-      backgroundColor: Const.tecartaBlue,
-      child: const Icon(
-        Icons.close,
-        color: Colors.white,
-      ),
     );
   }
 }
@@ -822,51 +854,70 @@ class _SelectViewOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final layouts = <Rect>[];
-    final uids = <int>[];
+    final vmBloc = context.viewManager;
+    final volumeId =
+        (vmBloc.dataBlocWithView(viewUid) as VolumeViewDataBloc).state.asVolumeViewData.volumeId;
+    final volume = VolumesRepository.shared.volumeWithId(volumeId);
+    final visibleViews = vmBloc.state.views.where((v) => vmBloc.isViewVisible(v.uid)).toList();
+    var viewLayout = vmBloc.layoutOfView(visibleViews.last.uid).rect;
 
-    // final insets = <EdgeInsets>[];
-    for (final view in context.viewManager?.state?.views) {
-      if (context.viewManager.isViewVisible(view.uid)) {
-        uids.add(view.uid);
-        layouts.add(context.viewManager.layoutOfView(view.uid).rect);
-        // insets.add(context.viewManager.insetsOfView(view.uid));
-      }
+    if (vmBloc.isViewVisible(viewUid)) {
+      viewLayout = vmBloc.layoutOfView(viewUid).rect;
     }
 
-    return SafeArea(
-      child: GestureDetector(
-        onTap: () => onSelect(null),
-        behavior: HitTestBehavior.translucent,
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      TecToast.show(context, 'Drag to place the ${volume.name}');
+    });
+
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => onSelect(null),
+      child: SafeArea(
         child: Stack(children: [
-          for (int i = 0; i < layouts.length; i++)
-            Positioned.fromRect(
-              rect: layouts[i],
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () => onSelect(uids[i]),
-                child: Container(
-                    margin: const EdgeInsets.all(40),
-                    decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          side: BorderSide(color: Const.tecartaBlue.withOpacity(0.3), width: 5)),
-                      color: Const.tecartaBlue.withOpacity(0.5),
-                    ),
-                    // color: Colors.primaries[i].withOpacity(0.5),
-                    child: Center(
-                        child: Card(
-                      shape: const CircleBorder(),
-                      child: IconButton(
-                        color: Const.tecartaBlue,
-                        onPressed: () => onSelect(uids[i]),
-                        icon: const Icon(Icons.check),
-                      ),
-                    ))),
-              ),
-            ),
+          Positioned.fromRect(
+            rect: viewLayout,
+            child: Align(
+                alignment: Alignment.center,
+                child: Draggable(
+                    data: viewUid,
+                    onDragStarted: () {
+                      context.tabManager.changeTab(TecTab.reader);
+                      context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
+                    },
+                    childWhenDragging: const SizedBox.shrink(),
+                    onDragCompleted: () {
+                      onSelect(null);
+                      context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
+                    },
+                    feedback: _VolumeCard(volume.id),
+                    child: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move))),
+          ),
         ]),
       ),
+    );
+  }
+}
+
+class _StackIcon extends StatelessWidget {
+  final Widget child;
+  final IconData icon;
+  const _StackIcon(this.child, this.icon);
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.topRight.add(const Alignment(-2.5, -0.5)),
+      children: [
+        child,
+        CircleAvatar(
+          radius: 15,
+          backgroundColor: Const.tecartaBlue,
+          child: Icon(
+            icon,
+            size: 15,
+            color: Colors.white,
+          ),
+        )
+      ],
     );
   }
 }

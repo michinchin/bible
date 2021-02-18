@@ -7,9 +7,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/selection/selection_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
-import '../../models/const.dart';
 import 'selection_sheet.dart';
 
 const _selectionSheetKey = 2;

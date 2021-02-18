@@ -101,9 +101,8 @@ class DragTargetView extends StatelessWidget {
             if (vmBloc.state.maximizedViewUid > 0) {
               vmBloc.maximize(b);
             } else {
-              vmBloc.move(
-                  fromPosition: context.viewManager.indexOfView(b),
-                  toPosition: context.viewManager.indexOfView(viewUid),
+              vmBloc.swapPositions(
+                  context.viewManager.indexOfView(b), context.viewManager.indexOfView(viewUid),
                   unhide: true);
             }
           }
