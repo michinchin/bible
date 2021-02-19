@@ -123,28 +123,34 @@ class DragTargetView extends StatelessWidget {
                         : const BoxDecoration(color: Colors.transparent),
                     child: child),
                 if (state.sameView && state.inRect)
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                     if (oneView) ...[
-                      DragViewIcon(
-                        onAccept: (_) {
-                          context.tbloc<DragOverlayCubit>().clear();
-                          context.viewManager.remove(viewUid);
-                        },
-                        icon: Icons.close,
+                      Expanded(
+                        child: DragViewIcon(
+                          onAccept: (_) {
+                            context.tbloc<DragOverlayCubit>().clear();
+                            context.viewManager.remove(viewUid);
+                          },
+                          leftSide: true,
+                          text: 'Close',
+                          icon: Icons.close,
+                        ),
                       ),
-                      DragViewIcon(
-                          onAccept: (_) => context.viewManager.hide(viewUid),
-                          icon: Icons.visibility_off_outlined),
                       if (!isMaximized) ...[
-                        DragViewIcon(
-                          onAccept: (_) => context.viewManager.maximize(viewUid),
-                          icon: Icons.fullscreen,
+                        Expanded(
+                          child: DragViewIcon(
+                            onAccept: (_) => context.viewManager.maximize(viewUid),
+                            icon: Icons.fullscreen,
+                            text: 'Full Screen',
+                          ),
                         ),
                       ] else
-                        DragViewIcon(
+                        Expanded(
+                            child: DragViewIcon(
                           onAccept: (_) => context.viewManager.restore(),
                           icon: Icons.grid_view,
-                        )
+                          text: 'View All',
+                        ))
                     ]
                   ]),
               ]);
@@ -155,25 +161,60 @@ class DragTargetView extends StatelessWidget {
 class DragViewIcon extends StatelessWidget {
   final Function(int) onAccept;
   final IconData icon;
-  const DragViewIcon({this.onAccept, this.icon});
+  final String text;
+  final bool leftSide;
+  const DragViewIcon({this.onAccept, this.icon, this.leftSide = false, this.text = ''});
 
   @override
   Widget build(BuildContext context) {
+    const borderRadius = 50.0;
+    final br = BorderRadius.only(
+      topLeft: Radius.circular(leftSide ? borderRadius : 0),
+      bottomLeft: Radius.circular(leftSide ? borderRadius : 0),
+      topRight: Radius.circular(leftSide ? 0 : borderRadius),
+      bottomRight: Radius.circular(leftSide ? 0 : borderRadius),
+    );
     return DragTarget<int>(
         onAccept: onAccept,
+        onLeave: (_) => context.tbloc<DragOverlayCubit>().clear(),
         // onMove: (d) => context.tbloc<DragOverlayCubit>().onMoveWithinIcon(context, d),
         // tec.dmPrint('Moving within object: ${d.offset}'),
-        builder: (c, cd, rd) => Card(
-              shape: const CircleBorder(),
-              elevation: cd.isNotEmpty ? 0 : 10,
-              child: CircleAvatar(
-                radius: 30,
-                backgroundColor: cd.isNotEmpty ? Const.tecartaBlue : Theme.of(context).cardColor,
-                child: Icon(
-                  icon,
-                  color: cd.isNotEmpty ? Colors.white : Const.tecartaBlue,
-                ),
-              ),
-            ));
+        builder: (c, cd, rd) {
+          final backgroundColor = cd.isNotEmpty ? Theme.of(context).cardColor : Const.tecartaBlue;
+          final iconColor = cd.isNotEmpty ? Const.tecartaBlue : Theme.of(context).cardColor;
+          return Container(
+              alignment: Alignment.center,
+              decoration: cd.isNotEmpty
+                  ? BoxDecoration(
+                      borderRadius: br,
+                      color: Const.tecartaBlue.withOpacity(0.5),
+                      border: Border.all(width: 5, color: Const.tecartaBlue.withOpacity(0.5)))
+                  : const BoxDecoration(color: Colors.transparent),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    width: 60,
+                    child: Card(
+                      shape: const CircleBorder(),
+                      elevation: cd.isNotEmpty ? 0 : 10,
+                      child: CircleAvatar(
+                        radius: 30,
+                        backgroundColor: backgroundColor,
+                        child: Icon(icon, color: iconColor),
+                      ),
+                    ),
+                  ),
+                  Chip(
+                    backgroundColor: backgroundColor,
+                    label: Text(
+                      text,
+                      style: TextStyle(color: iconColor),
+                    ),
+                  ),
+                ],
+              ));
+        });
   }
 }

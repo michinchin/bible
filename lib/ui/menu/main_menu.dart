@@ -86,7 +86,7 @@ List<TableRow> _buildMenuItems(
         subtitle: 'App Info, version number, website link',
         rowPadding: rowPadding,
         scaleFont: true),
-        
+
     tecModalPopupMenuDivider(menuContext, rowPadding: rowPadding),
 
     tecModalPopupMenuItem(

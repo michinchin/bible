@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:bible/blocs/sheet/sheet_manager_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -115,6 +116,7 @@ class ActionBar extends StatelessWidget {
     return LongPressDraggable<int>(
         data: viewUid,
         hapticFeedbackOnStart: true,
+        onDragStarted: () => context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse),
         feedback: Opacity(opacity: 0.8, child: child),
         child: child);
   }

@@ -171,13 +171,13 @@ List<TableRow> buildMenuItemsForViewWithState(
   items.addAll([
     // tecModalPopupMenuDivider(menuContext, title: 'Open new'),
     // ...generateAddMenuItems(menuContext, state.uid),
-    tecModalPopupMenuDivider(menuContext),
-    tecModalPopupMenuItem(
-      menuContext,
-      Icons.help_outline,
-      'Help',
-      () => showViewHelpDialog(context),
-    )
+    // tecModalPopupMenuDivider(menuContext),
+    // tecModalPopupMenuItem(
+    //   menuContext,
+    //   Icons.help_outline,
+    //   'Help',
+    //   () => showViewHelpDialog(context),
+    // )
   ]);
 
   return items;

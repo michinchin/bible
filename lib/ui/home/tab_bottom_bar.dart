@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:bible/ui/common/common.dart';
+import 'package:bible/ui/common/tec_modal_popup_menu.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -245,6 +247,7 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
 }
 
 const bookCoverWidth = 60.0;
+const bookCoverHeight = 80.0;
 
 class _VolumeCard extends StatelessWidget {
   final int volumeId;
@@ -252,7 +255,6 @@ class _VolumeCard extends StatelessWidget {
   const _VolumeCard(this.volumeId, {this.shadowColor});
   @override
   Widget build(BuildContext context) {
-    const bookCoverHeight = 80.0;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final sColor = shadowColor ?? (isDarkMode ? Colors.black54 : Colors.black26);
     final volume = VolumesRepository.shared.volumeWithId(volumeId);
@@ -266,14 +268,11 @@ class _VolumeCard extends StatelessWidget {
         child: volume != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(5),
-                child: volume != null
-                    ? VolumeImage(
-                        volume: volume,
-                        fit: BoxFit.fill,
-                      )
-                    : Container(child: Text('Bible')),
-              )
-            : null);
+                child: VolumeImage(
+                  volume: volume,
+                  fit: BoxFit.fill,
+                ))
+            : Container());
   }
 }
 
@@ -306,12 +305,69 @@ class __ExpandedViewState extends State<_ExpandedView> {
     context.tabManager.changeTab(TecTab.reader);
   }
 
-  void _onCoverTap(List<_OffscreenView> visibleCovers, _OffscreenView cover) {
-    if (visibleCovers.length <= 1) {
-      _onSwitchViews(cover.uid);
+  void _onCoverTap(int viewUid) {
+    if (context.viewManager.countOfVisibleViews <= 1) {
+      _onSwitchViews(viewUid);
     } else {
-      widget.onViewTap(cover.uid);
+      widget.onViewTap(viewUid);
     }
+  }
+
+  List<TableRow> buildMenuItems(BuildContext context, int uid) {
+    final items = <TableRow>[];
+    final vmBloc = context.viewManager;
+    final isVisible = vmBloc.isViewVisible(uid);
+    final isMaximized = vmBloc.state.maximizedViewUid == uid;
+
+    items.add(tecModalPopupMenuItem(context, Icons.close, 'Close', () {
+      vmBloc.remove(uid);
+      context.tabManager.add(TecTabEvent.reader);
+      Navigator.of(context).maybePop();
+    }));
+
+    if (isVisible && isMaximized) {
+      items.add(tecModalPopupMenuItem(
+        context,
+        FeatherIcons.grid,
+        'View All',
+        () {
+          vmBloc.restore();
+          context.tabManager.add(TecTabEvent.reader);
+          Navigator.of(context).maybePop();
+        },
+      ));
+    } else if (isVisible) {
+      items.add(tecModalPopupMenuItem(
+        context,
+        FeatherIcons.maximize2,
+        'Full screen',
+        () {
+          vmBloc.maximize(uid);
+          context.tabManager.add(TecTabEvent.reader);
+          Navigator.of(context).maybePop();
+        },
+      ));
+    }
+
+    return items;
+  }
+
+  Future<void> _onCoverLongPress(int uid) async {
+    final key = GlobalObjectKey(uid);
+    final renderBox = key.currentContext.findRenderObject() as RenderBox;
+    // final size = renderBox.size;
+    final position = renderBox.localToGlobal(Offset.zero);
+    // final x = (position.dx - (MediaQuery.of(context).size.width / 2) + size.width / 2) /
+    // (MediaQuery.of(context).size.width / 2);
+    // final y = (position.dy - (MediaQuery.of(context).size.height / 2) + size.height / 2) /
+    // (MediaQuery.of(context).size.height / 2);
+
+    await showTecModalPopupMenu(
+        context: context,
+        // alignment: Alignment(x, y),
+        offset: Offset(position.dx, position.dy),
+        minWidth: bookCoverWidth,
+        menuItemsBuilder: (c) => buildMenuItems(c, uid));
   }
 
   @override
@@ -378,52 +434,27 @@ class __ExpandedViewState extends State<_ExpandedView> {
                               curve: Curves.easeOut),
                         ),
                         child: InkWell(
-                          onTap: () => _onCoverTap(_visibleCovers, cover),
+                          key: GlobalObjectKey(cover.uid),
+                          onTap: () => _onCoverTap(cover.uid),
+                          onLongPress: () => _onCoverLongPress(cover.uid),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               if (cover.uid != null)
                                 Flexible(
-                                    flex: 4,
-                                    child: Dismissible(
-                                      key: ValueKey(cover.uid),
-                                      direction: DismissDirection.vertical,
-                                      confirmDismiss: (_) async {
-                                        if (context.viewManager.countOfOpenViews > 1) {
-                                          return true;
-                                        } else {
-                                          TecToast.show(context, 'Cannot remove last');
-                                          return false;
-                                        }
+                                  flex: 4,
+                                  child: Draggable(
+                                      data: cover.uid,
+                                      onDragStarted: () {
+                                        context.tabManager.changeTab(TecTab.reader);
+                                        context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
                                       },
-                                      onDismissed: (_) {
-                                        setState(() {
-                                          context.viewManager.remove(cover.uid);
-                                        });
-                                      },
-                                      background: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                                        alignment: Alignment.centerRight,
-                                        // color: Colors.red,
-                                        child: const Icon(
-                                          Icons.close,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      child: LongPressDraggable(
-                                          data: cover.uid,
-                                          onDragStarted: () {
-                                            context.tabManager.changeTab(TecTab.reader);
-                                            context
-                                                .tbloc<SheetManagerBloc>()
-                                                .add(SheetEvent.collapse);
-                                          },
-                                          onDragCompleted: () => widget.parentContext
-                                              .tbloc<SheetManagerBloc>()
-                                              .add(SheetEvent.main),
-                                          feedback: cover.icon,
-                                          child: cover.icon),
-                                    ))
+                                      onDragCompleted: () => widget.parentContext
+                                          .tbloc<SheetManagerBloc>()
+                                          .add(SheetEvent.main),
+                                      feedback: cover.icon,
+                                      child: cover.icon),
+                                )
                               else
                                 cover.icon,
                               const SizedBox(height: 5),
@@ -889,7 +920,7 @@ class _SelectViewOverlay extends StatelessWidget {
                       onSelect(null);
                       context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
                     },
-                    feedback: _VolumeCard(volume.id),
+                    feedback: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move),
                     child: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move))),
           ),
         ]),

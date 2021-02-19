@@ -11,12 +11,14 @@ Future<void> showTecModalPopupMenu({
   @required List<TableRow> Function(BuildContext context) menuItemsBuilder,
   EdgeInsetsGeometry insets,
   Alignment alignment = Alignment.center,
+  Offset offset,
   double minWidth,
 }) {
   return showTecModalPopup<void>(
     useRootNavigator: true,
     context: context,
     alignment: alignment,
+    offset: offset,
     edgeInsets: insets,
     builder: (context) => TecPopupSheet(
       child: Material(
