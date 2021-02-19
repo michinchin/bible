@@ -18,6 +18,7 @@ import 'blocs/app_lifecycle_bloc.dart';
 import 'blocs/app_theme_bloc.dart';
 import 'blocs/content_settings.dart';
 import 'blocs/downloads/downloads_bloc.dart';
+import 'blocs/recent_volumes_bloc.dart';
 import 'blocs/search/search_bloc.dart';
 import 'blocs/shared_bible_ref_bloc.dart';
 import 'blocs/sheet/pref_items_bloc.dart';
@@ -107,7 +108,8 @@ class App extends StatelessWidget {
         BlocProvider(create: (context) => ContentSettingsBloc()),
         BlocProvider(create: (context) => PrefItemsBloc()),
         BlocProvider(create: (context) => SearchBloc()),
-        BlocProvider<TabManagerBloc>(create: (context) => TabManagerBloc()),
+        BlocProvider(create: (context) => TabManagerBloc()),
+        BlocProvider(create: (context) => RecentVolumesBloc()),
         // BlocProvider(create: (context) => AppEntryCubit())
       ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(

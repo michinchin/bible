@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart' as collection;
@@ -16,6 +15,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/downloads/downloads_bloc.dart';
 import '../../blocs/is_licensed_bloc.dart';
+import '../../blocs/recent_volumes_bloc.dart';
 import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../common/tec_navigator.dart';
@@ -23,7 +23,6 @@ import 'volume_card.dart';
 import 'volume_detail.dart';
 import 'volumes_bloc.dart';
 import 'volumes_filter_sheet.dart';
-import 'volumes_sort_bloc.dart';
 
 export 'volumes_bloc.dart' show VolumesFilter;
 
@@ -68,27 +67,6 @@ Future<int> selectVolumeInLibrary(
 }
 
 ///
-/// Shows the Library with the given [title] and returns the list of the IDs
-/// of Volumes that were selected, if any.
-///
-Future<List<int>> selectVolumesInLibrary(
-  BuildContext context, {
-  String title,
-  String initialTabPrefix,
-  Iterable<int> selectedVolumes,
-  bool scrollToSelectedVolumes = true,
-}) {
-  return _showLibrary<List<int>>(
-    context: context,
-    title: title,
-    initialTabPrefix: initialTabPrefix,
-    selectedVolumes: selectedVolumes ?? [],
-    scrollToSelectedVolumes: scrollToSelectedVolumes,
-    allowMultipleSelections: true,
-  );
-}
-
-///
 /// Pushes a `VolumeDetail` view for the given [volume] on the `Navigator` of
 /// the current [context].
 ///
@@ -128,7 +106,6 @@ Future<T> _showLibrary<T extends Object>({
   Iterable<int> selectedVolumes = const {},
   bool scrollToSelectedVolumes = true,
   bool whenTappedPopWithVolumeId = false,
-  bool allowMultipleSelections = false,
 }) {
   return showTecDialog<T>(
     context: context,
@@ -146,7 +123,6 @@ Future<T> _showLibrary<T extends Object>({
           selectedVolumes: selectedVolumes,
           scrollToSelectedVolumes: scrollToSelectedVolumes,
           whenTappedPopWithVolumeId: whenTappedPopWithVolumeId,
-          allowMultipleSelections: allowMultipleSelections,
           heroPrefix: 'popup',
         ),
       ),
@@ -160,7 +136,6 @@ class LibraryScaffold extends StatelessWidget {
   final Iterable<int> selectedVolumes;
   final bool scrollToSelectedVolumes;
   final bool whenTappedPopWithVolumeId;
-  final bool allowMultipleSelections;
   final bool showCloseButton;
   final String heroPrefix;
 
@@ -171,7 +146,6 @@ class LibraryScaffold extends StatelessWidget {
     this.selectedVolumes = const {},
     this.scrollToSelectedVolumes = true,
     this.whenTappedPopWithVolumeId = false,
-    this.allowMultipleSelections = false,
     this.showCloseButton = true,
     this.heroPrefix,
   }) : super(key: key);
@@ -198,7 +172,6 @@ class LibraryScaffold extends StatelessWidget {
             selectedVolumes: selectedVolumes,
             scrollToSelectedVolumes: scrollToSelectedVolumes,
             whenTappedPopWithVolumeId: whenTappedPopWithVolumeId,
-            allowMultipleSelections: allowMultipleSelections,
             showCloseButton: showCloseButton,
           );
         },
@@ -244,7 +217,6 @@ class _Library extends StatefulWidget {
   final Iterable<int> selectedVolumes;
   final bool scrollToSelectedVolumes;
   final bool whenTappedPopWithVolumeId;
-  final bool allowMultipleSelections;
   final bool showCloseButton;
   final String heroPrefix;
 
@@ -256,11 +228,9 @@ class _Library extends StatefulWidget {
     this.selectedVolumes = const {},
     this.scrollToSelectedVolumes = true,
     this.whenTappedPopWithVolumeId = false,
-    this.allowMultipleSelections = false,
     this.showCloseButton = true,
     this.heroPrefix,
   })  : assert(tabs != null),
-        assert(!whenTappedPopWithVolumeId == false || !allowMultipleSelections),
         super(key: key);
 
   @override
@@ -278,57 +248,53 @@ class _LibraryState extends State<_Library> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<VolumesSortBloc>(
-      create: (_) => VolumesSortBloc(),
-      child: widget.tabs.length > 1
-          ? DefaultTabController(
-              initialIndex: widget.initialTabIndex ?? 0,
-              length: widget.tabs.length,
-              child: Scaffold(
-                backgroundColor: Theme.of(context).backgroundColor,
-                appBar: _appBar(
-                  showCloseButton: widget.showCloseButton,
-                  bottom: TabBar(
-                    isScrollable: true,
-                    tabs: widget.tabs.map((t) => Tab(text: t.title)).toList(),
-                  ),
-                ),
-                body: TabBarView(children: widget.tabs.map(_widgetFromTab).toList()),
-              ),
-            )
-          : Scaffold(
+    return widget.tabs.length > 1
+        ? DefaultTabController(
+            initialIndex: widget.initialTabIndex ?? 0,
+            length: widget.tabs.length,
+            child: Scaffold(
               backgroundColor: Theme.of(context).backgroundColor,
-              appBar: _appBar(showCloseButton: widget.showCloseButton),
-              body: _widgetFromTab(widget.tabs.first),
+              appBar: _appBar(
+                showCloseButton: widget.showCloseButton,
+                bottom: TabBar(
+                  isScrollable: true,
+                  tabs: widget.tabs.map((t) => Tab(text: t.title)).toList(),
+                ),
+              ),
+              body: TabBarView(children: widget.tabs.map(_widgetForTab).toList()),
             ),
-    );
+          )
+        : Scaffold(
+            backgroundColor: Theme.of(context).backgroundColor,
+            appBar: _appBar(showCloseButton: widget.showCloseButton),
+            body: _widgetForTab(widget.tabs.first),
+          );
   }
 
-  Widget _widgetFromTab(LibraryTab t) => BlocBuilder<VolumesSortBloc, VolumesSort>(
-        buildWhen: (previous, current) =>
-            previous.sortBy != current.sortBy || current.sortBy == VolumesSortOpt.recent,
-        builder: (context, sort) => BlocProvider<VolumesBloc>(
-          create: (context) => VolumesBloc(
-            key: tec.isNullOrEmpty(t.prefsKey) ? null : '_library_${t.prefsKey}',
-            kvStore: tec.isNullOrEmpty(t.prefsKey)
-                ? null
-                : tec.MemoryKVStore.shared, // tec.Prefs.shared,
-            defaultFilter: t.filter,
-          )..refresh(),
-          child: BlocBuilder<VolumesBloc, VolumesState>(
-            builder: (context, state) => _VolumesList(
-              heroPrefix: widget.heroPrefix,
-              selectedVolumes: _selectedVolumes,
-              scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
-              allowMultipleSelections: widget.allowMultipleSelections,
-              alwaysSortByRecent: t.title == 'Recent',
-              onTapVolume: widget.whenTappedPopWithVolumeId
-                  ? (id) {
-                      context.tbloc<VolumesSortBloc>().updateWithVolume(id);
-                      Navigator.of(context, rootNavigator: true).maybePop<int>(id);
-                    }
-                  : null,
-            ),
+  Widget _widgetForTab(LibraryTab t) => t.title == 'Recent'
+      ? BlocBuilder<RecentVolumesBloc, RecentVolumes>(
+          builder: (context, sort) => _widgetForTabSub(t))
+      : _widgetForTabSub(t);
+
+  Widget _widgetForTabSub(LibraryTab t) => BlocProvider<VolumesBloc>(
+        create: (context) => VolumesBloc(
+          key: tec.isNullOrEmpty(t.prefsKey) ? null : '_library_${t.prefsKey}',
+          kvStore:
+              tec.isNullOrEmpty(t.prefsKey) ? null : tec.MemoryKVStore.shared, // tec.Prefs.shared,
+          defaultFilter: t.filter,
+        )..refresh(),
+        child: BlocBuilder<VolumesBloc, VolumesState>(
+          builder: (context, state) => _VolumesList(
+            heroPrefix: widget.heroPrefix,
+            selectedVolumes: _selectedVolumes,
+            scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
+            sortByRecent: t.title == 'Recent',
+            onTapVolume: widget.whenTappedPopWithVolumeId
+                ? (id) {
+                    context.tbloc<RecentVolumesBloc>().updateWithVolume(id);
+                    Navigator.of(context, rootNavigator: true).maybePop<int>(id);
+                  }
+                : null,
           ),
         ),
       );
@@ -341,24 +307,18 @@ class _LibraryState extends State<_Library> {
               : null,
           automaticallyImplyLeading: false,
           title: Text(tec.isNullOrEmpty(widget.title) ? 'Library' : widget.title),
-          actions: widget.allowMultipleSelections
-              ? [
-                  CupertinoButton(
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: Text(
-                      'Done',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline6
-                          .copyWith(color: Theme.of(context).accentColor),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context, rootNavigator: true)
-                          .maybePop<List<int>>(_selectedVolumes.toList());
-                    },
-                  ),
-                ]
-              : null,
+          actions: [
+            IconButton(
+              tooltip: 'search',
+              icon: const Icon(Icons.search),
+              onPressed: () {}, // TODO(ron): ...
+            ),
+            IconButton(
+              tooltip: 'filters',
+              icon: const Icon(Icons.filter_list),
+              onPressed: () {}, // TODO(ron): => showVolumesFilterSheet(context)),
+            ),
+          ],
           bottom: bottom,
         ),
       );
@@ -367,19 +327,17 @@ class _LibraryState extends State<_Library> {
 class _VolumesList extends StatefulWidget {
   final Set<int> selectedVolumes;
   final bool scrollToSelectedVolumes;
-  final bool allowMultipleSelections;
   final void Function(int volume) onTapVolume;
   final String heroPrefix;
-  final bool alwaysSortByRecent;
+  final bool sortByRecent;
 
   const _VolumesList({
     Key key,
     this.selectedVolumes,
     this.scrollToSelectedVolumes = true,
-    this.allowMultipleSelections = false,
     this.onTapVolume,
     this.heroPrefix,
-    this.alwaysSortByRecent = false,
+    this.sortByRecent = false,
   }) : super(key: key);
 
   @override
@@ -418,7 +376,7 @@ class _VolumesListState extends State<_VolumesList> {
   void _scrollToVolumeAfterBuild() {
     if (_scrollToVolume &&
         context.tbloc<VolumesBloc>().state.volumes.isNotEmpty &&
-        context.tbloc<VolumesSortBloc>().state.sortBy == VolumesSortOpt.name) {
+        !widget.sortByRecent) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         if (mounted && _scrollController.isAttached) {
           final index = context
@@ -498,14 +456,13 @@ class _VolumesListState extends State<_VolumesList> {
         (bloc.languages?.length ?? 0) > 1 /* || (bloc.categories?.length ?? 0) > 1 */;
 
     var volumes = bloc.state.volumes;
-    if (widget.alwaysSortByRecent ||
-        context.tbloc<VolumesSortBloc>().state.sortBy == VolumesSortOpt.recent) {
-      final sortBloc = context.tbloc<VolumesSortBloc>();
+    if (widget.sortByRecent) {
+      final sortBloc = context.tbloc<RecentVolumesBloc>();
       volumes = List.of(volumes);
       // Using mergeSort because it is stable (i.e. equal elements remain in the same order).
       collection.mergeSort<Volume>(volumes, compare: (a, b) => sortBloc.compare(a.id, b.id));
-      if (widget.alwaysSortByRecent) {
-        volumes = volumes.take(sortBloc.state.recent.length).toList();
+      if (widget.sortByRecent) {
+        volumes = volumes.take(sortBloc.state.volumes.length).toList();
       }
     }
 
@@ -518,45 +475,12 @@ class _VolumesListState extends State<_VolumesList> {
       bottom: false,
       child: Column(
         children: [
-          AnimatedCrossFade(
-            duration: const Duration(milliseconds: 300),
-            crossFadeState: showSearch ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-            firstChild: TecSearchField(
-              padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
-              textEditingController: _textEditingController,
-              focusNode: _focusNode,
-              onSubmit: (s) => _searchListener(),
-            ),
-            secondChild: Row(
-              children: [
-                SizedBox(width: padding / 2),
-                if (!widget.alwaysSortByRecent)
-                  Theme(
-                    data: Theme.of(context).copyWith(accentColor: barTextColor),
-                    child: TecPopupMenuButton<int>(
-                      title: '',
-                      values: {0: 'Title ↓', 1: 'Recent ↓'} as LinkedHashMap<int, String>,
-                      currentValue: context.tbloc<VolumesSortBloc>().state.sortBy.index,
-                      defaultValue: 1,
-                      defaultName: 'Any',
-                      onSelectValue: (value) {
-                        context.tbloc<VolumesSortBloc>().updateSortBy(VolumesSortOpt.values[value]);
-                      },
-                    ),
-                  ),
-                const Spacer(),
-                IconButton(
-                    tooltip: 'search',
-                    icon: const Icon(Icons.search),
-                    onPressed: () => _focusNode.requestFocus()),
-                if (showFilter)
-                  IconButton(
-                      tooltip: 'filters',
-                      icon: const Icon(Icons.filter_list),
-                      onPressed: () => showVolumesFilterSheet(context)),
-              ],
-            ),
-          ),
+          // TecSearchField(
+          //   padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
+          //   textEditingController: _textEditingController,
+          //   focusNode: _focusNode,
+          //   onSubmit: (s) => _searchListener(),
+          // ),
           Expanded(
             child: TecScrollbar(
               child: ScrollablePositionedList.builder(
@@ -570,23 +494,13 @@ class _VolumesListState extends State<_VolumesList> {
                         previous.items[volume.id] != current.items[volume.id],
                     builder: (context, downloads) {
                       return VolumeCard(
-                        isCompact: widget.onTapVolume != null || widget.allowMultipleSelections,
+                        isCompact: widget.onTapVolume != null,
                         volume: volume,
                         heroPrefix: widget.heroPrefix,
-                        trailing: !widget.allowMultipleSelections
-                            ? _VolumeActionButton(volume: volume, heroPrefix: widget.heroPrefix)
-                            : Checkbox(
-                                value: widget.selectedVolumes.contains(volume.id),
-                                onChanged: (checked) => _toggle(volume.id),
-                              ),
-                        onTap: widget.onTapVolume != null || widget.allowMultipleSelections
-                            ? () {
-                                if (widget.allowMultipleSelections) {
-                                  _toggle(volume.id);
-                                } else {
-                                  widget.onTapVolume(volume.id);
-                                }
-                              }
+                        trailing:
+                            _VolumeActionButton(volume: volume, heroPrefix: widget.heroPrefix),
+                        onTap: widget.onTapVolume != null
+                            ? () => widget.onTapVolume(volume.id)
                             : () => showDetailViewForVolume(context, volume, widget.heroPrefix),
                       );
                     },
