@@ -5,7 +5,6 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tec_util/tec_util.dart' as tec;
-import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/content_settings.dart';
@@ -74,7 +73,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
       ..remove(currentFont)
       ..insert(0, currentFont);
     recentFonts = recentFonts.take(100).toList();
-    Prefs.shared.setStringList('_font_settings_recent', recentFonts);
+    tec.Prefs.shared.setStringList('_font_settings_recent', recentFonts);
     _scrollController.dispose();
 
     super.dispose();
@@ -240,17 +239,17 @@ class _Fonts {
   }
 
   final recent =
-      Prefs.shared.getStringList('_font_settings_recent', defaultValue: [_systemDefault]);
+      tec.Prefs.shared.getStringList('_font_settings_recent', defaultValue: [_systemDefault]);
 
   /// Font type to filter by.
   String get fontType => _fontType;
   String _fontType =
-      Prefs.shared.getString('_font_settings_filter_type', defaultValue: _strSansSerif);
+      tec.Prefs.shared.getString('_font_settings_filter_type', defaultValue: _strSansSerif);
 
   /// Alphabetically (== true) or by popularity (== false).
   bool get sortAlphabetically => _alphabetically;
   bool _alphabetically =
-      Prefs.shared.getBool('_font_settings_sort_alphabetically', defaultValue: false);
+      tec.Prefs.shared.getBool('_font_settings_sort_alphabetically', defaultValue: false);
 
   static const _all = 'all';
   static const _systemDefault = 'System Default';
@@ -264,12 +263,12 @@ class _Fonts {
 
     if (_fontType != filter) {
       _fontType = filter;
-      Prefs.shared.setString('_font_settings_filter_type', _fontType);
+      tec.Prefs.shared.setString('_font_settings_filter_type', _fontType);
     }
 
     if (_alphabetically != alphabetically) {
       _alphabetically = alphabetically;
-      Prefs.shared.setBool('_font_settings_sort_alphabetically', _alphabetically);
+      tec.Prefs.shared.setBool('_font_settings_sort_alphabetically', _alphabetically);
     }
 
     if (_fontType == _all) {
