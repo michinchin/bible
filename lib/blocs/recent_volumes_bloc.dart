@@ -25,6 +25,15 @@ class RecentVolumesBloc extends Cubit<RecentVolumes> {
     emit(newState);
   }
 
+  void removeVolume(int volume) {
+    final newState = RecentVolumes(state.volumes.where((v) => v.id != volume).toList());
+    if (newState != state) {
+      tec.Prefs.shared.setString(prefsKey, tec.toJsonString(newState));
+      _cache = null;
+      emit(newState);
+    }
+  }
+
   Map<int, int> _cache;
   int compare(int volume1, int volume2) {
     var i = 0;
