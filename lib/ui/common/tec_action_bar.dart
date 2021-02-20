@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/sheet/sheet_manager_bloc.dart';
+
 @immutable
 class ActionBarItem {
   final String title;
@@ -115,6 +117,7 @@ class ActionBar extends StatelessWidget {
     return LongPressDraggable<int>(
         data: viewUid,
         hapticFeedbackOnStart: true,
+        onDragStarted: () => context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse),
         feedback: Opacity(opacity: 0.8, child: child),
         child: child);
   }

@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:tec_util/tec_util.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 // ignore: avoid_classes_with_only_static_members
 class Const {
@@ -15,9 +15,9 @@ class Const {
   // Ad info:
 
   // native ads
-  static final prefNativeAdId = platformIs(Platform.android)
+  static final prefNativeAdId = tec.platformIs(tec.Platform.android)
       ? 'ca-app-pub-5279916355700267/7465311659'
-      : platformIs(Platform.iOS)
+      : tec.platformIs(tec.Platform.iOS)
           ? 'ca-app-pub-5279916355700267/1130609577'
           : null;
 
