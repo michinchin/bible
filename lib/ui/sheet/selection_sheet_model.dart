@@ -8,8 +8,8 @@ import 'package:tec_web_view/tec_web_view.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
+import '../../blocs/prefs_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
-import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../models/chapter_verses.dart';
 import '../../models/color_utils.dart';
@@ -192,7 +192,7 @@ class SelectionSheetModel {
     //   TecShare.copy(c, await _shareText(c, uid: uid, maybeAddLink: false));
     // }
 
-    if (c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.closeAfterCopyShare)) {
+    if (PrefsBloc.getBool(PrefItemId.closeAfterCopyShare)) {
       deselect(c);
     }
   }
@@ -207,7 +207,7 @@ class SelectionSheetModel {
 
       final v = await VolumesRepository.shared.bibleWithId(bibleId).referenceAndVerseTextWith(ref);
       final verses = v.value.verseText;
-      final shareWithLink = c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+      final shareWithLink = PrefsBloc.getBool(PrefItemId.includeShareLink);
       final verse = ChapterVerses.formatForShare([v.value.reference], verses);
       buffer.write(verse);
       if (maybeAddLink && shareWithLink) {
@@ -235,7 +235,7 @@ class SelectionSheetModel {
   }
 
   static Future<void> share(BuildContext c, {int uid}) async {
-    final copyWithLink = c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    final copyWithLink = PrefsBloc.getBool(PrefItemId.includeShareLink);
     if (copyWithLink) {
       final text = await tecShowProgressDlg<String>(
         context: c,
@@ -247,7 +247,7 @@ class SelectionSheetModel {
       TecShare.share(await _shareText(c, uid: uid, maybeAddLink: false));
     }
 
-    if (c.tbloc<PrefItemsBloc>().itemBool(PrefItemId.closeAfterCopyShare)) {
+    if (PrefsBloc.getBool(PrefItemId.closeAfterCopyShare)) {
       deselect(c);
     }
   }
@@ -353,7 +353,8 @@ class __DefineWebViewState extends State<_DefineWebView> {
 
   @override
   void initState() {
-    url = Uri.https('google.com', '/search', <String, String>{'q': 'define:${widget.words}'}).toString();
+    url = Uri.https('google.com', '/search', <String, String>{'q': 'define:${widget.words}'})
+        .toString();
     super.initState();
   }
 

@@ -69,6 +69,6 @@ class MainMenuModel {
         ),
       ],
     );
-    return Navigator.of(context).maybePop();
+    // return Navigator.of(context).maybePop();
   }
 }

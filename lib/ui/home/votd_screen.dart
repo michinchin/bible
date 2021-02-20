@@ -6,8 +6,8 @@ import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/prefs_bloc.dart';
 import '../../blocs/shared_bible_ref_bloc.dart';
-import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/chapter_verses.dart';
@@ -74,7 +74,7 @@ class __VotdScreenState extends State<_VotdScreen> {
   }
 
   Future<void> share() async {
-    final copyWithLink = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    final copyWithLink = PrefsBloc.getBool(PrefItemId.includeShareLink);
     if (!copyWithLink) {
       final text = await tecShowProgressDlg<tec.ErrorOrValue<ReferenceAndVerseText>>(
         context: context,

@@ -21,6 +21,7 @@ class PrefItemId {
     customColor4,
     translationsFilter
   ];
+
   static const saveToPrefsList = [
     navLayout,
     nav3Tap,
@@ -30,7 +31,9 @@ class PrefItemId {
     searchFilterBookGridView,
     searchFilterTranslationGridView,
     closeAfterCopyShare,
-    priorityTranslations
+    priorityTranslations,
+    syncChapter,
+    syncVerse,
   ];
 
   static int uniqueId(int id) => 100 + id;
@@ -63,14 +66,21 @@ class PrefItemId {
 
   /// priority translations for sorting individual search result translations
   static const priorityTranslations = 14;
+
+  /// all bible views have same chapter
+  static const syncChapter = 15;
+
+  /// bible views with same chapter also have same verse
+  static const syncVerse = 16;
+
 }
 
 class PrefItem extends tua.UserItem {
   PrefItem({
     @required PrefItemDataType prefItemDataType,
     @required int prefItemId, // 1-4 for custom colors
-    int verse, // 0|1 for bool value or as int value
-    String info = '',
+    int intValue, // 0|1 for bool value or as int value
+    String stringValue = '',
     DateTime created,
     int deleted = 0,
     int id,
@@ -79,8 +89,8 @@ class PrefItem extends tua.UserItem {
           type: tua.UserItemType.prefItem.index,
           chapter: prefItemDataType.index,
           book: prefItemId,
-          verse: verse,
-          info: info,
+          verse: intValue,
+          info: stringValue,
           created: tec.dbIntFromDateTime(created ?? DateTime.now()),
           deleted: deleted,
           modified: tec.dbIntFromDateTime(modified ?? DateTime.now()),
@@ -90,8 +100,8 @@ class PrefItem extends tua.UserItem {
   factory PrefItem.from(tua.UserItem item) => PrefItem(
       prefItemDataType: PrefItemDataType.values[item.chapter],
       prefItemId: item.book,
-      verse: item.verse,
-      info: item.info,
+      intValue: item.verse,
+      stringValue: item.info,
       id: item.id,
       deleted: item.deleted,
       created: tec.dateOnlyFromDbInt(item.created),
@@ -126,13 +136,13 @@ extension PrefItemHelper on PrefItem {
       return PrefItem(
           prefItemDataType: PrefItemDataType.values[prefItemDataType],
           prefItemId: prefItemId,
-          verse: verse);
+          intValue: verse);
     } else {
       final info = splitValue.last;
       return PrefItem(
           prefItemDataType: PrefItemDataType.values[prefItemDataType],
           prefItemId: prefItemId,
-          info: info);
+          stringValue: info);
     }
   }
 }

@@ -9,8 +9,8 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/content_settings.dart';
+import '../../blocs/prefs_bloc.dart';
 import '../../blocs/search/nav_bloc.dart';
-import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/const.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
@@ -18,7 +18,7 @@ import '../common/tec_tab_indicator.dart';
 import 'nav.dart';
 
 class BCVTabView extends StatelessWidget {
-  final Function(BuildContext, PrefItems) listener;
+  final Function(BuildContext, PrefBlocState) listener;
   final TabController tabController;
   final TextEditingController searchController;
   const BCVTabView(
@@ -27,10 +27,9 @@ class BCVTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final navBloc = context.tbloc<NavBloc>(); // ignore: close_sinks
-    final prefState = context.tbloc<PrefItemsBloc>(); // ignore: close_sinks
-    final navGridViewEnabled = prefState.itemBool(PrefItemId.navLayout);
-    final nav3TapEnabled = prefState.itemBool(PrefItemId.nav3Tap);
-    return BlocListener<PrefItemsBloc, PrefItems>(
+    final navGridViewEnabled = PrefsBloc.getBool(PrefItemId.navLayout);
+    final nav3TapEnabled = PrefsBloc.getBool(PrefItemId.nav3Tap);
+    return BlocListener<PrefsBloc, PrefBlocState>(
         listener: listener,
         child: SafeArea(
           bottom: false,
@@ -147,7 +146,7 @@ class _BookView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bible = VolumesRepository.shared.bibleWithId(Const.defaultBible);
-    final navCanonical = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.navBookOrder);
+    final navCanonical = PrefsBloc.getBool(PrefItemId.navBookOrder);
     void updateSearch(String s) => searchController
       ..text = s
       ..selection = TextSelection.collapsed(offset: s.length);
@@ -183,7 +182,7 @@ class _BookView extends StatelessWidget {
       final bloc = context.tbloc<NavBloc>();
       // if book only has one chapter, special case
       if (bible.chaptersIn(book: book) == 1) {
-        if (context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap)) {
+        if (PrefsBloc.getBool(PrefItemId.nav3Tap)) {
           final nameOfBook = bible.nameOfBook(book);
           updateSearch(nameOfBook);
           bloc

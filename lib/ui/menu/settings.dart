@@ -1,17 +1,23 @@
-import 'package:bible/ui/menu/notifications_view.dart';
-import 'package:bible/ui/menu/zendesk_help.dart';
+import 'dart:math' as math;
+
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
+import 'package:tec_views/tec_views.dart';
+import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/app_theme_bloc.dart';
-import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../blocs/prefs_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
 import '../misc/text_settings.dart';
+import '../volume/volume_view_data_bloc.dart';
 import 'main_menu_model.dart';
+import 'notifications_view.dart';
+import 'zendesk_help.dart';
 
 void showSettings(BuildContext context) =>
     Navigator.of(context, rootNavigator: true).push(MaterialPageRoute<void>(
@@ -96,51 +102,79 @@ class SettingsView extends StatelessWidget {
           )),
     );
   }
-}
 
-List<Widget> readTiles(BuildContext context) {
-  final prefBloc = context.tbloc<PrefItemsBloc>(); //ignore: close_sinks
-  final color = Theme.of(context).textColor;
-  final textStyle = TextStyle(fontSize: 15, color: color);
+  List<Widget> readTiles(BuildContext context) {
+    final color = Theme.of(context).textColor;
+    final textStyle = TextStyle(fontSize: 15, color: color);
 
-  return [
-    _SettingsSwitch(
-        secondary: Icon(Icons.lightbulb_outline, color: color),
-        title: Text('Dark theme', style: textStyle),
-        onChanged: () => context.tbloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
-        value: AppSettings.shared.isDarkTheme()),
-    _SettingsSwitch(
-      secondary: Icon(Icons.link, color: color),
-      title: Text('Include Link with Share', style: textStyle),
-      onChanged: () => prefBloc.add(
-          PrefItemEvent.update(prefItem: prefBloc.toggledPrefItem(PrefItemId.includeShareLink))),
-      value: prefBloc.itemBool(PrefItemId.includeShareLink),
-    ),
-    _SettingsSwitch(
-      secondary: Icon(Icons.close, color: color),
-      title: Text('Close Sheet after Copy/Share', style: textStyle),
-      onChanged: () => prefBloc.add(
-          PrefItemEvent.update(prefItem: prefBloc.toggledPrefItem(PrefItemId.closeAfterCopyShare))),
-      value: prefBloc.itemBool(PrefItemId.closeAfterCopyShare),
-    ),
-    _SettingsSwitch(
-      secondary: Icon(Icons.play_circle_outline, color: color),
-      title: Text('Autoscroll', style: textStyle),
-      onChanged: () => TecAutoScroll.setEnabled(enabled: !TecAutoScroll.isEnabled()),
-      value: TecAutoScroll.isEnabled(),
-    ),
-    ListTile(
-      dense: true,
-      leading: Icon(Icons.format_size, color: color),
-      title: Text('Text Settings', style: textStyle),
-      onTap: () {
-        while (Navigator.canPop(context)) {
-          Navigator.of(context).pop();
-        }
-        showTextSettingsDialog(context);
-      },
-    )
-  ];
+    return [
+      _SettingsSwitch(
+          secondary: Icon(Icons.lightbulb_outline, color: color),
+          title: Text('Dark theme', style: textStyle),
+          onChanged: () => context.tbloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
+          value: AppSettings.shared.isDarkTheme()),
+      _SettingsSwitch(
+        secondary: Icon(Icons.sync_alt, color: color),
+        title: Text('Sync chapter in views', style: textStyle),
+        onChanged: () {
+          final useSharedRef = PrefsBloc.toggle(PrefItemId.syncChapter);
+
+          // update open views...
+          BookChapterVerse bcv;
+
+          for (final view in context.viewManager?.state?.views) {
+            final viewDataBloc = context.viewManager.dataBlocWithView(view.uid);
+            final viewData = viewDataBloc?.state;
+            if (viewData is VolumeViewData) {
+              bcv ??= viewData.bcv;
+              viewDataBloc?.update(
+                  context, viewData.copyWith(useSharedRef: useSharedRef, bcv: bcv));
+            }
+          }
+        },
+        value: PrefsBloc.getBool(PrefItemId.syncChapter),
+      ),
+      BlocBuilder<PrefsBloc, PrefBlocState>(builder: (context, state) {
+        return _SettingsSwitch(
+          enabled: PrefsBloc.getBool(PrefItemId.syncChapter),
+          secondary: Transform.rotate(
+              angle: 90 * math.pi / 180, child: Icon(Icons.sync_alt, color: color)),
+          title: Text('Sync verse in views', style: textStyle),
+          onChanged: () => PrefsBloc.toggle(PrefItemId.syncVerse),
+          value: PrefsBloc.getBool(PrefItemId.syncVerse),
+        );
+      }),
+      _SettingsSwitch(
+        secondary: Icon(Icons.link, color: color),
+        title: Text('Include Link with Share', style: textStyle),
+        onChanged: () => PrefsBloc.toggle(PrefItemId.includeShareLink),
+        value: PrefsBloc.getBool(PrefItemId.includeShareLink),
+      ),
+      _SettingsSwitch(
+        secondary: Icon(Icons.close, color: color),
+        title: Text('Close Sheet after Copy/Share', style: textStyle),
+        onChanged: () => PrefsBloc.toggle(PrefItemId.closeAfterCopyShare),
+        value: PrefsBloc.getBool(PrefItemId.closeAfterCopyShare),
+      ),
+      _SettingsSwitch(
+        secondary: Icon(Icons.play_circle_outline, color: color),
+        title: Text('Autoscroll', style: textStyle),
+        onChanged: () => TecAutoScroll.setEnabled(enabled: !TecAutoScroll.isEnabled()),
+        value: TecAutoScroll.isEnabled(),
+      ),
+      ListTile(
+        dense: true,
+        leading: Icon(Icons.format_size, color: color),
+        title: Text('Text Settings', style: textStyle),
+        onTap: () {
+          while (Navigator.canPop(context)) {
+            Navigator.of(context).pop();
+          }
+          showTextSettingsDialog(context);
+        },
+      )
+    ];
+  }
 }
 
 class _SettingsSwitch extends StatefulWidget {
@@ -148,7 +182,10 @@ class _SettingsSwitch extends StatefulWidget {
   final Function onChanged;
   final Widget title;
   final Widget secondary;
-  const _SettingsSwitch({this.value, this.onChanged, this.title, this.secondary});
+  final bool enabled;
+
+  const _SettingsSwitch(
+      {this.value, this.onChanged, this.title, this.secondary, this.enabled = true});
 
   @override
   __SettingsSwitchState createState() => __SettingsSwitchState();
@@ -168,12 +205,14 @@ class __SettingsSwitchState extends State<_SettingsSwitch> {
     return SwitchListTile.adaptive(
       dense: true,
       value: _value,
-      onChanged: (_) {
-        setState(() {
-          _value = !_value;
-        });
-        widget.onChanged();
-      },
+      onChanged: widget.enabled
+          ? (_) {
+              setState(() {
+                _value = !_value;
+              });
+              widget.onChanged();
+            }
+          : null,
       title: widget.title,
       secondary: widget.secondary,
     );

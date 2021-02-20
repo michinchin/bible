@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_html/tec_html.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/help/search_help_bloc.dart';
@@ -131,6 +131,7 @@ void showArticlePage(BuildContext c, ZendeskArticle article) => Navigator.of(c, 
 
 class ZendeskArticlePage extends StatelessWidget {
   final ZendeskArticle article;
+
   const ZendeskArticlePage(this.article);
 
   @override

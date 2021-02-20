@@ -9,9 +9,9 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/prefs_bloc.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
-import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/pref_item.dart';
 import '../../models/search/tec_share.dart';
 import '../../models/user_item_helper.dart';
@@ -73,15 +73,8 @@ Future<Reference> navigate(BuildContext context, Reference ref,
 Future<Reference> showBibleSearch(BuildContext context, Reference ref,
     {String search = '', bool showHistory = false}) {
   if (search.isNotEmpty) {
-    final translations = context
-        .tbloc<PrefItemsBloc>()
-        .state
-        .items
-        .itemWithId(PrefItemId.translationsFilter)
-        .info
-        .split('|')
-        .map(int.parse)
-        .toList();
+    final translations =
+        PrefsBloc.getString(PrefItemId.translationsFilter).split('|').map(int.parse).toList();
     context
         .tbloc<SearchBloc>()
         ?.add(SearchEvent.request(search: search, translations: translations));
@@ -125,18 +118,10 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   NavBloc navBloc() => context.tbloc<NavBloc>();
 
-  PrefItemsBloc prefsBloc() => context.tbloc<PrefItemsBloc>();
-
   SearchBloc searchBloc() => context.tbloc<SearchBloc>();
 
-  List<int> translations() => prefsBloc()
-      .state
-      .items
-      .itemWithId(PrefItemId.translationsFilter)
-      .info
-      .split('|')
-      .map(int.parse)
-      .toList();
+  List<int> translations() =>
+      PrefsBloc.getString(PrefItemId.translationsFilter).split('|').map(int.parse).toList();
 
   Function() _searchListener;
   Timer _debounce;
@@ -144,7 +129,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   @override
   void initState() {
     _searchController = TextEditingController(text: '');
-    final nav3TapEnabled = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
+    final nav3TapEnabled = PrefsBloc.getBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
 
     _searchResultsTabController =
@@ -190,7 +175,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   }
 
   void _changeTabController() {
-    final nav3TapEnabled = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.nav3Tap);
+    final nav3TapEnabled = PrefsBloc.getBool(PrefItemId.nav3Tap);
     final tabLength = nav3TapEnabled ? maxTabsAvailable : minTabsAvailable;
     setState(() {
       _tabController =
@@ -251,13 +236,10 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           borderRadius:
               BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
       context: context,
-      builder: (c) => BlocBuilder<PrefItemsBloc, PrefItems>(
-          cubit: prefsBloc(),
-          builder: (context, state) {
-            final items = state?.items ?? [];
-            final navGridViewEnabled = items.boolForPrefItem(PrefItemId.navLayout);
-            final nav3TapEnabled = items.boolForPrefItem(PrefItemId.nav3Tap);
-            final navCanonical = items.boolForPrefItem(PrefItemId.navBookOrder);
+      builder: (c) => BlocBuilder<PrefsBloc, PrefBlocState>(builder: (context, state) {
+            final navGridViewEnabled = PrefsBloc.getBool(PrefItemId.navLayout);
+            final nav3TapEnabled = PrefsBloc.getBool(PrefItemId.nav3Tap);
+            final navCanonical = PrefsBloc.getBool(PrefItemId.navBookOrder);
             return SafeArea(
               child: ListView(
                 shrinkWrap: true,
@@ -270,8 +252,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                       navBloc()
                         ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
                         ..add(const NavEvent.onSearchChange(search: ''));
-                      prefsBloc().add(PrefItemEvent.update(
-                          prefItem: prefsBloc().toggledPrefItem(PrefItemId.navBookOrder)));
+                      PrefsBloc.toggle(PrefItemId.navBookOrder);
                     },
                   ),
                   ListTile(
@@ -281,16 +262,14 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                       navBloc()
                         ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
                         ..add(const NavEvent.onSearchChange(search: ''));
-                      prefsBloc().add(PrefItemEvent.update(
-                          prefItem: prefsBloc().toggledPrefItem(PrefItemId.navLayout)));
+                      PrefsBloc.toggle(PrefItemId.navLayout);
                     },
                   ),
                   ListTile(
                     title: Text(
                         nav3TapEnabled ? 'Show book and chapter' : 'Show book, chapter, and verse'),
                     onTap: () {
-                      prefsBloc().add(PrefItemEvent.update(
-                          prefItem: prefsBloc().toggledPrefItem(PrefItemId.nav3Tap)));
+                      PrefsBloc.toggle(PrefItemId.nav3Tap);
                     },
                   ),
                 ],

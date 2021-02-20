@@ -10,9 +10,9 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/prefs_bloc.dart';
 import '../../blocs/search/nav_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
-import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../../models/pref_item.dart';
@@ -328,7 +328,7 @@ class _SearchResultsViewState extends State<SearchResultsView> {
 
   SearchResultInfo orderByDefaultTranslation(SearchResultInfo res) {
     final defaultTranslations =
-        context.tbloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
+        PrefsBloc.getString(PrefItemId.priorityTranslations);
     final dts = (defaultTranslations?.split('|')?.map(int.tryParse)?.toList() ?? [])
       ..removeWhere((p) => p == null);
 
@@ -434,7 +434,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
 
   @override
   void initState() {
-    _includeShareLink = context.tbloc<PrefItemsBloc>().itemBool(PrefItemId.includeShareLink);
+    _includeShareLink = PrefsBloc.getBool(PrefItemId.includeShareLink);
     super.initState();
   }
 

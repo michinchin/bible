@@ -4,8 +4,8 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
+import '../../blocs/prefs_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
-import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/color_utils.dart';
 import '../../models/pref_item.dart';
 import '../../ui/sheet/snap_sheet.dart';
@@ -47,8 +47,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
     });
   }
 
-  Future<void> onShowColorPicker(
-      BuildContext context, List<PrefItem> prefItems, int colorIndex) async {
+  Future<void> onShowColorPicker(BuildContext context, int colorIndex) async {
     final colorChosen = await showModalBottomSheet<int>(
         context: context,
         useRootNavigator: true,
@@ -60,7 +59,6 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
         builder: (c) => BlocProvider.value(
               value: context.tbloc<SelectionCmdBloc>(),
               child: _ColorSelectionView(
-                prefItems: prefItems,
                 colorIndex: colorIndex,
                 underlineMode: underlineMode,
               ),
@@ -68,8 +66,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
     if (colorChosen != null) {
       context.tbloc<SelectionCmdBloc>()?.add(SelectionCmd.setStyle(
           underlineMode ? HighlightType.underline : HighlightType.highlight, colorChosen));
-      context.tbloc<PrefItemsBloc>()?.add(PrefItemEvent.update(
-          prefItem: PrefItem.from(prefItems.itemWithId(colorIndex).copyWith(verse: colorChosen))));
+      PrefsBloc.setInt(colorIndex, colorChosen);
     } else {
       context.tbloc<SelectionCmdBloc>()?.add(const SelectionCmd.cancelTrial());
     }
@@ -92,124 +89,120 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
           SelectionSheetModel.deselect(context);
         }
       },
-      child: BlocBuilder<PrefItemsBloc, PrefItems>(
-          cubit: context.tbloc<PrefItemsBloc>(),
-          builder: (context, state) {
-            final prefItems = state?.items
-                    ?.where((i) =>
-                        i.book >= PrefItemId.customColor1 && i.book <= PrefItemId.customColor4)
-                    ?.toList() ??
-                []
-              ..sort((i1, i2) => i1.book.compareTo(i2.book));
-            final customColors = [for (final color in prefItems) Color(color.verse)];
-            final colors = [
-              SelectionSheetModel.underlineButton(
-                  underlineMode: underlineMode, onSwitchToUnderline: _onSwitchToUnderline),
-              SelectionSheetModel.noColorButton(context, forUnderline: underlineMode),
-              for (final color in SelectionSheetModel.defaultColors) ...[
-                _ColorPickerButton(
-                  isForUnderline: underlineMode,
-                  color: color,
-                  editMode: editMode,
-                  defaultColors: true,
-                  onEdit: () => TecToast.show(context, 'Cannot edit default colors'),
-                ),
-              ],
-              if (tec.isNotNullOrEmpty(customColors))
-                for (var i = 0; i < customColors.length; i++) ...[
-                  _ColorPickerButton(
-                    editMode: editMode,
-                    switchToEditMode: _onEditMode,
-                    isForUnderline: underlineMode,
-                    color: customColors[i],
-                    onEdit: () => onShowColorPicker(context, prefItems, i + 1),
-                  ),
-                ],
-              SelectionSheetModel.pickColorButton(editMode: editMode, onEditMode: _onEditMode),
-              const SizedBox(width: 5)
-            ];
-
-            final size = MediaQuery.of(context).size;
-            final showOneRow = (size.width > 900);
-            var numItems = colors.length;
-
-            if (showOneRow) {
-              numItems += miniChildren.length;
-            }
-
-            return Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                      height: 40,
-                      child: ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemCount: numItems,
-                        itemBuilder: (c, i) {
-                          if (showOneRow) {
-                            if (i == 0) {
-                              return Padding(
-                                  padding: const EdgeInsets.only(left: 5), child: miniChildren[i]);
-                            }
-                            if (i < miniChildren.length) {
-                              return miniChildren[i];
-                            }
-                            return colors[i - miniChildren.length];
-                          } else {
-                            return colors[i];
-                          }
-                        },
-                        separatorBuilder: (c, i) {
-                          // don't put a divider after the last element...
-                          if (showOneRow) {
-                            if (i < miniChildren.length - 1) {
-                              return const VerticalDivider(color: Colors.transparent, width: 25);
-                            }
-                            if (i == miniChildren.length - 1) {
-                              return VerticalDivider(color: Theme.of(context).appBarTheme.textTheme.headline6.color, width: 40);
-                            }
-                            if (i < numItems - 2) {
-                              return const VerticalDivider(color: Colors.transparent, width: 15);
-                            }
-                            return Container();
-                          } else {
-                            return (i < colors.length - 2)
-                                ? const VerticalDivider(color: Colors.transparent, width: 15)
-                                : Container();
-                          }
-                        },
-                      )),
-                  if (!showOneRow)
-                    Padding(
-                        // bottom padding is handled by TecScaffoldWrapper
-                        padding: const EdgeInsets.only(left: 10, right: 10, top: 15),
-                        child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              for (final child in miniChildren)
-                                Expanded(
-                                  child: child,
-                                ),
-                            ])),
-                ],
+      child: BlocBuilder<PrefsBloc, PrefBlocState>(builder: (context, state) {
+        final customColors = [
+          for (var colorId = PrefItemId.customColor1; colorId <= PrefItemId.customColor4; colorId++)
+            Color(PrefsBloc.getInt(colorId))
+        ];
+        final colors = [
+          SelectionSheetModel.underlineButton(
+              underlineMode: underlineMode, onSwitchToUnderline: _onSwitchToUnderline),
+          SelectionSheetModel.noColorButton(context, forUnderline: underlineMode),
+          for (final color in SelectionSheetModel.defaultColors) ...[
+            _ColorPickerButton(
+              isForUnderline: underlineMode,
+              color: color,
+              editMode: editMode,
+              defaultColors: true,
+              onEdit: () => TecToast.show(context, 'Cannot edit default colors'),
+            ),
+          ],
+          if (tec.isNotNullOrEmpty(customColors))
+            for (var i = 0; i < customColors.length; i++) ...[
+              _ColorPickerButton(
+                editMode: editMode,
+                switchToEditMode: _onEditMode,
+                isForUnderline: underlineMode,
+                color: customColors[i],
+                onEdit: () => onShowColorPicker(context, i + 1),
               ),
-            );
-          }),
+            ],
+          SelectionSheetModel.pickColorButton(editMode: editMode, onEditMode: _onEditMode),
+          const SizedBox(width: 5)
+        ];
+
+        final size = MediaQuery.of(context).size;
+        final showOneRow = (size.width > 900);
+        var numItems = colors.length;
+
+        if (showOneRow) {
+          numItems += miniChildren.length;
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                  height: 40,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: numItems,
+                    itemBuilder: (c, i) {
+                      if (showOneRow) {
+                        if (i == 0) {
+                          return Padding(
+                              padding: const EdgeInsets.only(left: 5), child: miniChildren[i]);
+                        }
+                        if (i < miniChildren.length) {
+                          return miniChildren[i];
+                        }
+                        return colors[i - miniChildren.length];
+                      } else {
+                        return colors[i];
+                      }
+                    },
+                    separatorBuilder: (c, i) {
+                      // don't put a divider after the last element...
+                      if (showOneRow) {
+                        if (i < miniChildren.length - 1) {
+                          return const VerticalDivider(color: Colors.transparent, width: 25);
+                        }
+                        if (i == miniChildren.length - 1) {
+                          return VerticalDivider(
+                              color: Theme.of(context).appBarTheme.textTheme.headline6.color,
+                              width: 40);
+                        }
+                        if (i < numItems - 2) {
+                          return const VerticalDivider(color: Colors.transparent, width: 15);
+                        }
+                        return Container();
+                      } else {
+                        return (i < colors.length - 2)
+                            ? const VerticalDivider(color: Colors.transparent, width: 15)
+                            : Container();
+                      }
+                    },
+                  )),
+              if (!showOneRow)
+                Padding(
+                    // bottom padding is handled by TecScaffoldWrapper
+                    padding: const EdgeInsets.only(left: 10, right: 10, top: 15),
+                    child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          for (final child in miniChildren)
+                            Expanded(
+                              child: child,
+                            ),
+                        ])),
+            ],
+          ),
+        );
+      }),
     );
   }
 }
 
 class _ColorSelectionView extends StatefulWidget {
-  final List<PrefItem> prefItems;
   final int colorIndex;
   final bool underlineMode;
 
-  const _ColorSelectionView({this.prefItems, this.colorIndex, this.underlineMode});
+  const _ColorSelectionView({this.colorIndex, this.underlineMode});
 
   @override
   __ColorSelectionViewState createState() => __ColorSelectionViewState();
@@ -223,7 +216,7 @@ class __ColorSelectionViewState extends State<_ColorSelectionView> {
     colorChosen = 0xff999999;
     context.tbloc<SelectionCmdBloc>()?.add(SelectionCmd.tryStyle(
         widget.underlineMode ? HighlightType.underline : HighlightType.highlight,
-        widget.prefItems.itemWithId(widget.colorIndex).verse));
+        PrefsBloc.getInt(widget.colorIndex)));
     super.initState();
   }
 
@@ -237,7 +230,7 @@ class __ColorSelectionViewState extends State<_ColorSelectionView> {
           Expanded(
             child: ColorPicker(
                 showColorContainer: false,
-                color: Color(widget.prefItems.itemWithId(widget.colorIndex)?.verse ?? colorChosen),
+                color: Color(PrefsBloc.getInt(widget.colorIndex, defaultValue: colorChosen)),
                 onColorChanged: (color) {
                   context.tbloc<SelectionCmdBloc>()?.add(SelectionCmd.tryStyle(
                       widget.underlineMode ? HighlightType.underline : HighlightType.highlight,

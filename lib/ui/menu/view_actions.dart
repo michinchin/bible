@@ -6,10 +6,9 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../models/app_settings.dart';
 import '../../models/const.dart';
 import '../common/tec_modal_popup_menu.dart';
-import '../volume/volume_view_data_bloc.dart';
-import 'help_dialog.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
   // ignore: close_sinks
@@ -68,10 +67,6 @@ List<TableRow> buildMenuItemsForViewWithState(
   // ignore: close_sinks
   final vmBloc = context.viewManager;
   final isMaximized = vmBloc?.state?.maximizedViewUid != 0;
-
-  final viewData = VolumeViewData.fromContext(context, state.uid);
-  final useSharedRef = viewData.useSharedRef;
-
   final items = <TableRow>[];
 
   final countOfViews = (vmBloc?.state?.views?.length ?? 0);
@@ -80,7 +75,10 @@ List<TableRow> buildMenuItemsForViewWithState(
   items.add(tecModalPopupMenuDivider(menuContext, title: 'View options'));
 
   if (isMaximized) {
-    items.add(tecModalPopupMenuItem(menuContext, FeatherIcons.minimize2, 'Exit full screen', () {
+    final icon = isSmallScreen(context) ? (MediaQuery.of(context).orientation == Orientation.portrait) ?
+    SFSymbols.square_split_1x2 : SFSymbols.square_split_2x1 : SFSymbols.square_split_2x2;
+
+    items.add(tecModalPopupMenuItem(menuContext, icon, 'Split screen', () {
       Navigator.of(menuContext).maybePop();
       vmBloc?.restore();
     }));
@@ -100,28 +98,28 @@ List<TableRow> buildMenuItemsForViewWithState(
     );
   }
 
-  if (countOfVisibleViews > 1) {
-    items.add(tecModalPopupMenuItem(menuContext, FeatherIcons.eyeOff, 'Hide', () {
-      Navigator.of(menuContext).maybePop();
-      vmBloc?.hide(state.uid);
-    }));
-  }
+  // if (countOfVisibleViews > 1) {
+  //   items.add(tecModalPopupMenuItem(menuContext, FeatherIcons.eyeOff, 'Hide', () {
+  //     Navigator.of(menuContext).maybePop();
+  //     vmBloc?.hide(state.uid);
+  //   }));
+  // }
 
-  if (state.type == Const.viewTypeVolume) {
-    items.add(tecModalPopupMenuItem(
-      menuContext,
-      useSharedRef ? Icons.link_off_outlined : Icons.link_outlined,
-      useSharedRef ? 'Unlink chapter' : 'Link chapter',
-      countOfViews <= 1
-          ? null
-          : () {
-              Navigator.of(menuContext).maybePop();
-              final viewDataBloc = context.tbloc<VolumeViewDataBloc>();
-              assert(viewDataBloc != null);
-              viewDataBloc?.update(context, viewData.copyWith(useSharedRef: !useSharedRef));
-            },
-    ));
-  }
+  // if (state.type == Const.viewTypeVolume) {
+  //   items.add(tecModalPopupMenuItem(
+  //     menuContext,
+  //     useSharedRef ? Icons.link_off_outlined : Icons.link_outlined,
+  //     useSharedRef ? 'Unlink chapter' : 'Link chapter',
+  //     countOfViews <= 1
+  //         ? null
+  //         : () {
+  //             Navigator.of(menuContext).maybePop();
+  //             final viewDataBloc = context.tbloc<VolumeViewDataBloc>();
+  //             assert(viewDataBloc != null);
+  //             viewDataBloc?.update(context, viewData.copyWith(useSharedRef: !useSharedRef));
+  //           },
+  //   ));
+  // }
 
   items.add(
     tecModalPopupMenuItem(
@@ -168,17 +166,17 @@ List<TableRow> buildMenuItemsForViewWithState(
   // }
 
   // ignore: cascade_invocations
-  items.addAll([
-    // tecModalPopupMenuDivider(menuContext, title: 'Open new'),
-    // ...generateAddMenuItems(menuContext, state.uid),
-    tecModalPopupMenuDivider(menuContext),
-    tecModalPopupMenuItem(
-      menuContext,
-      Icons.help_outline,
-      'Help',
-      () => showViewHelpDialog(context),
-    )
-  ]);
+  // items.addAll([
+  //   // tecModalPopupMenuDivider(menuContext, title: 'Open new'),
+  //   // ...generateAddMenuItems(menuContext, state.uid),
+  //   tecModalPopupMenuDivider(menuContext),
+  //   tecModalPopupMenuItem(
+  //     menuContext,
+  //     Icons.help_outline,
+  //     'Help',
+  //     () => showViewHelpDialog(context),
+  //   )
+  // ]);
 
   return items;
 }

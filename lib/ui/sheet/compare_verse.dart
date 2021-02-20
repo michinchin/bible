@@ -1,10 +1,9 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
-import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../blocs/sheet/pref_items_bloc.dart';
+import '../../blocs/prefs_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/pref_item.dart';
 import '../../models/reference_ext.dart';
@@ -15,8 +14,7 @@ Future<int> showCompareSheet(BuildContext c, Reference ref) async {
       book: ref.book,
       chapter: ref.chapter,
       verse: ref.verse,
-      translations:
-          c.tbloc<PrefItemsBloc>().state.items.itemWithId(PrefItemId.translationsFilter).info);
+      translations: PrefsBloc.getString(PrefItemId.translationsFilter));
 
   return showModalBottomSheet<int>(
     shape: const RoundedRectangleBorder(
@@ -39,7 +37,9 @@ Future<int> showCompareSheet(BuildContext c, Reference ref) async {
 class CompareVerseScreen extends StatelessWidget {
   final String title;
   final CompareResults results;
+
   const CompareVerseScreen({this.results, this.title});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

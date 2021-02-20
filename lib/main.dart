@@ -18,9 +18,9 @@ import 'blocs/app_lifecycle_bloc.dart';
 import 'blocs/app_theme_bloc.dart';
 import 'blocs/content_settings.dart';
 import 'blocs/downloads/downloads_bloc.dart';
+import 'blocs/prefs_bloc.dart';
 import 'blocs/search/search_bloc.dart';
 import 'blocs/shared_bible_ref_bloc.dart';
-import 'blocs/sheet/pref_items_bloc.dart';
 import 'blocs/sheet/tab_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'models/const.dart';
@@ -86,6 +86,9 @@ Future<void> main() async {
 
   InAppPurchases.init();
 
+  // items in prefs bloc can be saved in the db - userDB needs to have been initialized
+  await PrefsBloc.shared.load();
+
   tec.dmPrint('Main initialization took ${stopwatch.elapsed}');
   stopwatch.stop();
 
@@ -105,14 +108,14 @@ class App extends StatelessWidget {
         BlocProvider(create: (context) => ViewManagerBloc(kvStore: tec.Prefs.shared)),
         BlocProvider(create: (context) => ThemeModeBloc()),
         BlocProvider(create: (context) => ContentSettingsBloc()),
-        BlocProvider(create: (context) => PrefItemsBloc()),
+        BlocProvider(create: (context) => PrefsBloc.shared),
         BlocProvider(create: (context) => SearchBloc()),
         BlocProvider<TabManagerBloc>(create: (context) => TabManagerBloc()),
         // BlocProvider(create: (context) => AppEntryCubit())
       ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (context, themeMode) {
-          return tec.BlocProvider<TecStyleBloc>(
+          return tec.TecBlocProvider<TecStyleBloc>(
               bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
               child: OKToast(
                 child: AppLifecycleWrapper(

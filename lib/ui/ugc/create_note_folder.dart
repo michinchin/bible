@@ -82,8 +82,9 @@ class _CreateNoteFolderDialogState extends State<_CreateNoteFolderDialog> {
   void initState() {
     super.initState();
     foldersExist = false;
-    controller = TextEditingController();
-    controller.addListener(() {});
+    controller
+      = TextEditingController()
+      ..addListener(() {});
     parentFolder = widget.initParentFolder;
     getFolderCount();
   }

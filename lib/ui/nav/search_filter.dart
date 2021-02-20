@@ -4,12 +4,12 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 
+import '../../blocs/prefs_bloc.dart';
 import '../../blocs/search/search_bloc.dart';
-import '../../blocs/sheet/pref_items_bloc.dart';
 import '../../models/const.dart';
 import '../../models/language_utils.dart' as l;
 import '../../models/pref_item.dart';
@@ -59,8 +59,6 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
   String _currFilter;
   bool _showPriorityTranslations;
 
-  PrefItemsBloc prefsBloc() => context.tbloc<PrefItemsBloc>();
-
   final bookTitle = 'Book';
   final translationTitle = 'Translation';
   final priorityTranslationTitle = 'Priority Translation';
@@ -79,8 +77,8 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
           });
         }
       });
-    _booksInGridView = prefsBloc().itemBool(PrefItemId.searchFilterBookGridView);
-    _volumesInGridView = prefsBloc().itemBool(PrefItemId.searchFilterTranslationGridView);
+    _booksInGridView = PrefsBloc.getBool(PrefItemId.searchFilterBookGridView);
+    _volumesInGridView = PrefsBloc.getBool(PrefItemId.searchFilterTranslationGridView);
     _selectedVolumes = widget.selectedVolumes?.toSet();
     _filteredBooks = widget.selectedBooks?.toSet();
     super.initState();
@@ -88,13 +86,11 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
 
   @override
   void deactivate() {
-    if (_booksInGridView != prefsBloc().itemBool(PrefItemId.searchFilterBookGridView)) {
-      prefsBloc().add(PrefItemEvent.update(
-          prefItem: prefsBloc().toggledPrefItem(PrefItemId.searchFilterBookGridView)));
+    if (_booksInGridView != PrefsBloc.getBool(PrefItemId.searchFilterBookGridView)) {
+      PrefsBloc.toggle(PrefItemId.searchFilterBookGridView);
     }
-    if (_volumesInGridView != prefsBloc().itemBool(PrefItemId.searchFilterTranslationGridView)) {
-      prefsBloc().add(PrefItemEvent.update(
-          prefItem: prefsBloc().toggledPrefItem(PrefItemId.searchFilterTranslationGridView)));
+    if (_volumesInGridView != PrefsBloc.getBool(PrefItemId.searchFilterTranslationGridView)) {
+      PrefsBloc.toggle(PrefItemId.searchFilterTranslationGridView);
     }
 
     _updateSearch();
@@ -106,9 +102,7 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
     final volumes = _selectedVolumes.toList();
 
     if (volumes != null && !tec.areEqualSets(_selectedVolumes, widget.selectedVolumes.toSet())) {
-      final prefItem =
-          prefsBloc().infoChangedPrefItem(PrefItemId.translationsFilter, volumes.join('|'));
-      prefsBloc().add(PrefItemEvent.update(prefItem: prefItem));
+      PrefsBloc.setString(PrefItemId.translationsFilter, volumes.join('|'));
       if (widget.searchController.text.isNotEmpty) {
         context
             .tbloc<SearchBloc>()
@@ -267,18 +261,15 @@ class _VolumeFilter extends StatefulWidget {
 class __VolumeFilterState extends State<_VolumeFilter> {
   List<int> _priorityTranslationList;
 
-  PrefItemsBloc prefBloc() => context.tbloc<PrefItemsBloc>();
+  PrefsBloc prefBloc() => context.tbloc<PrefsBloc>();
 
   @override
   void deactivate() {
-    final priorityTranslations =
-        context.tbloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
+    final priorityTranslations = PrefsBloc.getString(PrefItemId.priorityTranslations);
     final pt = (priorityTranslations?.split('|')?.map(int.tryParse)?.toList() ?? [])
       ..removeWhere((p) => p == null);
     if (pt != _priorityTranslationList) {
-      prefBloc().add(PrefItemEvent.update(
-          prefItem: prefBloc().infoChangedPrefItem(
-              PrefItemId.priorityTranslations, _priorityTranslationList.join('|'))));
+      PrefsBloc.setString(PrefItemId.priorityTranslations, _priorityTranslationList.join('|'));
       context.tbloc<SearchBloc>().refresh();
     }
     super.deactivate();
@@ -286,8 +277,7 @@ class __VolumeFilterState extends State<_VolumeFilter> {
 
   @override
   void initState() {
-    final priorityTranslations =
-        context.tbloc<PrefItemsBloc>().itemWithId(PrefItemId.priorityTranslations).info;
+    final priorityTranslations = PrefsBloc.getString(PrefItemId.priorityTranslations);
     final pt = (priorityTranslations?.split('|')?.map(int.tryParse)?.toList() ?? [])
       ..removeWhere((p) => p == null);
     _priorityTranslationList = pt.toList();
