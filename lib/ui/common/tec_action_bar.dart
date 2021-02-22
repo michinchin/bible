@@ -114,10 +114,10 @@ class ActionBar extends StatelessWidget {
             ],
           ),
         ));
-    return LongPressDraggable<int>(
+    return Draggable<int>(
         data: viewUid,
-        hapticFeedbackOnStart: true,
         onDragStarted: () => context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse),
+        onDragCompleted: () => context.tbloc<SheetManagerBloc>().add(SheetEvent.main),
         feedback: Opacity(opacity: 0.8, child: child),
         child: child);
   }

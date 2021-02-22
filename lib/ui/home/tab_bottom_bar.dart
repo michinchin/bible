@@ -265,7 +265,7 @@ class _VolumeCard extends StatelessWidget {
         ? BoxDecoration(
             boxShadow: [
               boxShadow(
-                  color: borderColor, offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 3)
+                  color: borderColor, offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2)
             ],
             borderRadius: BorderRadius.circular(5),
           )
@@ -1028,6 +1028,18 @@ class _SelectViewOverlay extends StatelessWidget {
       TecToast.show(context, 'Drag to place the ${volume.name}');
     });
 
+    final child = InkWell(
+        onTap: () async {
+          if (viewUid & Const.recentFlag == Const.recentFlag) {
+            await ViewManager.shared.onAddView(context, Const.viewTypeVolume,
+                options: <String, dynamic>{'volumeId': viewUid ^ Const.recentFlag});
+          } else {
+            vmBloc.show(viewUid);
+          }
+          onSelect(null);
+        },
+        child: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move));
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => onSelect(null),
@@ -1038,18 +1050,19 @@ class _SelectViewOverlay extends StatelessWidget {
             child: Align(
                 alignment: Alignment.center,
                 child: Draggable(
-                    data: viewUid,
-                    onDragStarted: () {
-                      context.tabManager.changeTab(TecTab.reader);
-                      context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
-                    },
-                    childWhenDragging: const SizedBox.shrink(),
-                    onDragCompleted: () {
-                      onSelect(null);
-                      context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
-                    },
-                    feedback: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move),
-                    child: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move))),
+                  data: viewUid,
+                  onDragStarted: () {
+                    context.tabManager.changeTab(TecTab.reader);
+                    context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
+                  },
+                  childWhenDragging: const SizedBox.shrink(),
+                  onDragCompleted: () {
+                    onSelect(null);
+                    context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
+                  },
+                  feedback: child,
+                  child: child,
+                )),
           ),
         ]),
       ),
