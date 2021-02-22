@@ -40,9 +40,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     if (!kDebugMode) initNotifications();
+    //show onboarding
     if (tec.Prefs.shared.getBool(Const.prefShowOnboarding, defaultValue: true)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        /* if (!kDebugMode) */ showOnboarding(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!kDebugMode) {
+          await showOnboarding(context);
+          initFeatureDiscovery(
+              context: context, pref: Const.prefFabTabs, steps: {Const.fabTabFeatureId});
+        }
       });
     }
     super.initState();
@@ -183,7 +188,7 @@ class _ChangeChapterFabState extends State<ChangeChapterFab> {
       }
     }
 
-    final viewData = widget.state.views.first.volumeDataWith(context); 
+    final viewData = widget.state.views.first.volumeDataWith(context);
     final volumeId = viewData.volumeId;
     Bible bible;
 

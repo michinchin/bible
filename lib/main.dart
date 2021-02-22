@@ -1,4 +1,5 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -121,27 +122,29 @@ class App extends StatelessWidget {
               bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
               child: OKToast(
                 child: AppLifecycleWrapper(
-                  child: MaterialApp(
-                    navigatorKey: navService.navigatorKey,
-                    theme: ThemeData.light().copyWithAppTheme(),
-                    darkTheme: ThemeData.dark().copyWithAppTheme(),
-                    themeMode: themeMode,
-                    debugShowCheckedModeBanner: false,
-                    localizationsDelegates: const [
-                      GlobalMaterialLocalizations.delegate,
-                      GlobalWidgetsLocalizations.delegate,
-                      GlobalCupertinoLocalizations.delegate,
-                    ],
-                    supportedLocales: const [
-                      Locale('en', 'US'),
-                      Locale('es'), // Spanish
-                      Locale('ar'), // Arabic
-                    ],
-                    title: _appTitle,
-                    home: I18n(
-                      //initialLocale: const Locale('es'),
-                      //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
-                      child: const HomeScreen(),
+                  child: FeatureDiscovery(
+                    child: MaterialApp(
+                      navigatorKey: navService.navigatorKey,
+                      theme: ThemeData.light().copyWithAppTheme(),
+                      darkTheme: ThemeData.dark().copyWithAppTheme(),
+                      themeMode: themeMode,
+                      debugShowCheckedModeBanner: false,
+                      localizationsDelegates: const [
+                        GlobalMaterialLocalizations.delegate,
+                        GlobalWidgetsLocalizations.delegate,
+                        GlobalCupertinoLocalizations.delegate,
+                      ],
+                      supportedLocales: const [
+                        Locale('en', 'US'),
+                        Locale('es'), // Spanish
+                        Locale('ar'), // Arabic
+                      ],
+                      title: _appTitle,
+                      home: I18n(
+                        //initialLocale: const Locale('es'),
+                        //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
+                        child: const HomeScreen(),
+                      ),
                     ),
                   ),
                 ),

@@ -1,9 +1,12 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:fixed_width_widget_span/fixed_width_widget_span.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_widgets/tec_widgets.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 
 import '../../models/app_settings.dart';
 import 'tec_dialog.dart';
@@ -332,6 +335,32 @@ Future<dynamic> showScreen<T>({
     );
 
 IconData splitScreenIcon(BuildContext context) {
-  return isSmallScreen(context) ? (MediaQuery.of(context).orientation == Orientation.portrait) ?
-  SFSymbols.square_split_1x2 : SFSymbols.square_split_2x1 : SFSymbols.square_split_2x2;
+  return isSmallScreen(context)
+      ? (MediaQuery.of(context).orientation == Orientation.portrait)
+          ? SFSymbols.square_split_1x2
+          : SFSymbols.square_split_2x1
+      : SFSymbols.square_split_2x2;
+}
+
+/// Feature Discovery
+bool initFeatureDiscovery({
+  @required BuildContext context,
+  @required String pref,
+  @required Iterable<String> steps,
+}) {
+  if (tec.Prefs.shared.getBool(pref, defaultValue: true)) {
+    tec.Prefs.shared.setBool(pref, false);
+    SchedulerBinding.instance.addPostFrameCallback(
+      (duration) {
+        Future.delayed(const Duration(milliseconds: 250), () {
+          if (!MediaQuery.of(context).accessibleNavigation) {
+            FeatureDiscovery.discoverFeatures(context, steps);
+          }
+        });
+      },
+    );
+
+    return true;
+  }
+  return false;
 }
