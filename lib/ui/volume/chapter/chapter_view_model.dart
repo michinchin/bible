@@ -24,7 +24,7 @@ import 'chapter_selection.dart';
 import 'verse_tag.dart';
 
 const _despanifyChapterHtml = true;
-const _superscriptVerseNumbers = kDebugMode;
+const _superscriptVerseNumbers = true; // kDebugMode;
 
 const _footnote = '\ue900';
 const _footnoteStyle = TextStyle(fontFamily: 'tec_icons', color: Colors.blue, height: 1);
