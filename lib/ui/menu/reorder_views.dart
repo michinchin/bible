@@ -209,7 +209,8 @@ class DragViewIcon extends StatelessWidget {
         builder: (c, cd, rd) {
           final backgroundColor = cd.isNotEmpty ? Theme.of(context).cardColor : Const.tecartaBlue;
           final iconColor = cd.isNotEmpty ? Const.tecartaBlue : Theme.of(context).cardColor;
-          return Container(
+          return AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
               alignment: Alignment.center,
               decoration: cd.isNotEmpty
                   ? BoxDecoration(
@@ -221,16 +222,13 @@ class DragViewIcon extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(
-                    width: 60,
-                    child: Card(
-                      shape: const CircleBorder(),
-                      elevation: cd.isNotEmpty ? 0 : 10,
-                      child: CircleAvatar(
-                        radius: 30,
-                        backgroundColor: backgroundColor,
-                        child: Icon(icon, color: iconColor),
-                      ),
+                  Card(
+                    shape: const CircleBorder(),
+                    elevation: cd.isNotEmpty ? 0 : 10,
+                    child: CircleAvatar(
+                      radius: 30,
+                      backgroundColor: backgroundColor,
+                      child: Icon(icon, color: iconColor),
                     ),
                   ),
                   Chip(
