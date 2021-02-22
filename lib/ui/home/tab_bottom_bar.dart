@@ -265,7 +265,7 @@ class _VolumeCard extends StatelessWidget {
         ? BoxDecoration(
             boxShadow: [
               boxShadow(
-                  color: borderColor, offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 3)
+                  color: borderColor, offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2)
             ],
             borderRadius: BorderRadius.circular(5),
           )
