@@ -7,7 +7,6 @@ import 'package:tec_views/tec_views.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/const.dart';
-import '../common/common.dart';
 import '../common/tec_modal_popup_menu.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
@@ -75,7 +74,8 @@ List<TableRow> buildMenuItemsForViewWithState(
   items.add(tecModalPopupMenuDivider(menuContext, title: 'View options'));
 
   if (isMaximized) {
-    items.add(tecModalPopupMenuItem(menuContext, splitScreenIcon(context), 'Split screen', () {
+    items.add(tecModalPopupMenuItem(
+        menuContext, SFSymbols.arrow_down_right_arrow_up_left, 'Exit full screen', () {
       Navigator.of(menuContext).maybePop();
       vmBloc?.restore();
     }));
@@ -127,16 +127,24 @@ List<TableRow> buildMenuItemsForViewWithState(
           ? null
           : () {
               Navigator.of(menuContext).maybePop();
+              final isMaximized = (vmBloc?.state?.maximizedViewUid ?? 0) > 0;
 
-              // close this view and all other off screen views
-              // so an off screen doesn't appear w/o direct request
-              for (final view in context.viewManager?.state?.views) {
-                if (!context.viewManager.isViewVisible(view.uid)) {
-                  vmBloc?.remove(view.uid);
+              if (!isMaximized) {
+                // close this view and all other off screen views
+                // so an off screen doesn't appear w/o direct request
+                for (final view in context.viewManager?.state?.views) {
+                  if (!context.viewManager.isViewVisible(view.uid)) {
+                    vmBloc?.remove(view.uid);
+                  }
                 }
               }
 
               vmBloc?.remove(state.uid);
+
+              // if app was maximized - restore that
+              if (isMaximized && context.viewManager.countOfOpenViews > 1) {
+                vmBloc?.maximize(context.viewManager.state.views.first.uid);
+              }
             },
     ),
   );

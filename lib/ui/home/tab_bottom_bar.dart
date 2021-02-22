@@ -339,6 +339,18 @@ class __ExpandedViewState extends State<_ExpandedView> {
     final isVisible = vmBloc.isViewVisible(uid);
     final isMaximized = vmBloc.state.maximizedViewUid == uid;
 
+    if (!isVisible && vmBloc.state.maximizedViewUid <= 0) {
+      items.add(tecModalPopupMenuItem(
+        context,
+        SFSymbols.plus,
+        'Add view',
+        () {
+          Navigator.of(context).maybePop();
+          _onCoverTap(uid);
+        },
+      ));
+    }
+
     if (!isVisible || !isMaximized) {
       items.add(tecModalPopupMenuItem(
         context,
@@ -366,10 +378,22 @@ class __ExpandedViewState extends State<_ExpandedView> {
         context,
         splitScreenIcon(context),
         'Split screen',
-        () {
-          vmBloc.restore();
-          Navigator.of(context).maybePop();
+        () async {
+          await Navigator.of(context).maybePop();
           widget.parentContext.tabManager.add(TecTabEvent.reader);
+
+          // remove full screen
+          vmBloc.restore();
+
+          // make sure this content is viewable...
+          if (uid & Const.recentFlag == Const.recentFlag) {
+            final uidToShow = vmBloc.state.nextUid;
+            await ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume,
+                options: <String, dynamic>{'volumeId': uid ^ Const.recentFlag});
+            vmBloc.show(uidToShow);
+          } else {
+            vmBloc.show(uid);
+          }
         },
       ));
     }
@@ -463,7 +487,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
             // _onSwitchViews(view);
           },
           uid: view.uid,
-          icon: child /* !visible ? child : _StackIcon(child, FeatherIcons.eye) */);
+          icon: visible ? child : _StackIcon(child, SFSymbols.eye_slash));
       _existingVolumes.add(volumeId);
       if (visible) {
         _visibleCovers.add(cover);
