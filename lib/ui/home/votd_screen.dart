@@ -7,6 +7,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/prefs_bloc.dart';
+import '../../blocs/recent_volumes_bloc.dart';
 import '../../blocs/shared_bible_ref_bloc.dart';
 import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
@@ -281,26 +282,44 @@ Bible currentBibleFromContext(BuildContext context) {
 
   final maxViewId = context.viewManager?.state?.maximizedViewUid ?? -1;
 
+  // check the max view...
   if (maxViewId > 0) {
     for (final viewState in context.viewManager.state.views) {
-      if (viewState.type == Const.viewTypeVolume && viewState.uid == maxViewId) {
-        final _volumeId = VolumeViewData.fromContext(context, viewState.uid)?.volumeId;
-        if (isBibleId(_volumeId)) {
-          volumeId = _volumeId;
-          break;
+      if (viewState.uid == maxViewId) {
+        if (viewState.type == Const.viewTypeVolume) {
+          final _volumeId = VolumeViewData.fromContext(context, viewState.uid)?.volumeId;
+          if (isBibleId(_volumeId)) {
+            volumeId = _volumeId;
+          }
         }
+
+        break;
       }
     }
   }
 
+  // see if there is an off screen bible view
   if (volumeId == null) {
     final viewState = context.viewManager.state.views.firstWhere(
         (v) => (v.type == Const.viewTypeVolume &&
             isBibleId(VolumeViewData.fromContext(context, v.uid)?.volumeId)),
         orElse: () => null);
 
-    volumeId = (viewState?.volumeDataWith(context)?.volumeId) ?? defaultBibleId;
+    volumeId = viewState?.volumeDataWith(context)?.volumeId;
   }
+
+  // check recent views
+  if (volumeId == null) {
+    for (final recent in context.tbloc<RecentVolumesBloc>().state.volumes) {
+      if (isBibleId(recent.id)) {
+        volumeId = recent.id;
+        break;
+      }
+    }
+  }
+
+  // otherwise pick the default
+  volumeId ??= defaultBibleId;
 
   final bible = VolumesRepository.shared.bibleWithId(volumeId);
 
