@@ -42,6 +42,9 @@ class Const {
   // Onboarding
   static const prefShowOnboarding = 'showOnboaring';
 
+  // FAB
+  static const recentFlag = 0x10000;
+
   //------------------------------------------
 
   // Bible

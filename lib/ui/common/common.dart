@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../models/app_settings.dart';
 import 'tec_dialog.dart';
 import 'tec_tab_indicator.dart';
 
@@ -329,3 +330,8 @@ Future<dynamic> showScreen<T>({
       attachedToEdge: bottomAttached,
       builder: builder,
     );
+
+IconData splitScreenIcon(BuildContext context) {
+  return isSmallScreen(context) ? (MediaQuery.of(context).orientation == Orientation.portrait) ?
+  SFSymbols.square_split_1x2 : SFSymbols.square_split_2x1 : SFSymbols.square_split_2x2;
+}

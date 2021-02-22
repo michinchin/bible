@@ -63,12 +63,18 @@ class ViewableVolume extends Viewable {
     int currentViewId,
     Map<String, dynamic> options,
   }) async {
-    final volumeId = await selectVolumeInLibrary(
-      context,
-      title: 'Open New',
-      initialTabPrefix: options == null ? null : tec.as<String>(options['tab']),
-    );
-    // tec.dmPrint('selected $bibleId');
+    int volumeId;
+
+    if (options != null && options.containsKey('volumeId')) {
+      volumeId = tec.as<int>(options['volumeId']);
+    }
+    else {
+      volumeId = await selectVolumeInLibrary(
+        context,
+        title: 'Open New',
+        initialTabPrefix: options == null ? null : tec.as<String>(options['tab']),
+      );
+    }
 
     if (volumeId != null) {
       final viewUid = currentViewId ??

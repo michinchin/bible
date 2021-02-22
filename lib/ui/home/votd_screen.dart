@@ -277,15 +277,32 @@ class _VotdsScreen extends StatelessWidget {
 
 Bible currentBibleFromContext(BuildContext context) {
   // find bible translation from views
-  final viewState = context.viewManager.state.views.firstWhere(
-      (v) =>
-          (context.viewManager?.state?.maximizedViewUid == v.uid) ||
-          (v.type == Const.viewTypeVolume &&
-              isBibleId(VolumeViewData.fromContext(context, v.uid)?.volumeId) &&
-              !context.viewManager.state.hasMaximizedView),
-      orElse: () => null);
+  int volumeId;
 
-  final bible = VolumesRepository.shared
-      .bibleWithId((viewState?.volumeDataWith(context)?.volumeId) ?? defaultBibleId);
+  final maxViewId = context.viewManager?.state?.maximizedViewUid ?? -1;
+
+  if (maxViewId > 0) {
+    for (final viewState in context.viewManager.state.views) {
+      if (viewState.type == Const.viewTypeVolume && viewState.uid == maxViewId) {
+        final _volumeId = VolumeViewData.fromContext(context, viewState.uid)?.volumeId;
+        if (isBibleId(_volumeId)) {
+          volumeId = _volumeId;
+          break;
+        }
+      }
+    }
+  }
+
+  if (volumeId == null) {
+    final viewState = context.viewManager.state.views.firstWhere(
+        (v) => (v.type == Const.viewTypeVolume &&
+            isBibleId(VolumeViewData.fromContext(context, v.uid)?.volumeId)),
+        orElse: () => null);
+
+    volumeId = (viewState?.volumeDataWith(context)?.volumeId) ?? defaultBibleId;
+  }
+
+  final bible = VolumesRepository.shared.bibleWithId(volumeId);
+
   return bible;
 }

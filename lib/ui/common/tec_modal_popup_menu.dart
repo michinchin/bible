@@ -88,6 +88,7 @@ TableRow tecModalPopupMenuItem(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TecText(title,
+                        softWrap: false,
                         textScaleFactor: scaleFont ? scale * 1.2 : scale,
                         style: TextStyle(
                             color: color,

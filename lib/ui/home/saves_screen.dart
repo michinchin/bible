@@ -16,7 +16,9 @@ Future<void> showSaveScreen(BuildContext context, {int year}) =>
 
 class SavesScreen extends StatelessWidget {
   final int year;
+
   const SavesScreen({this.year});
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<OtdSaves>(
@@ -50,7 +52,9 @@ class SavesScreen extends StatelessWidget {
 class _SavedOtds extends StatelessWidget {
   final OtdSaves otds;
   final int year;
+
   const _SavedOtds(this.year, this.otds);
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<dynamic>>(
@@ -108,7 +112,9 @@ class TabWrapper extends StatelessWidget {
   final List<Widget> tabViews;
   final List<Tab> tabs;
   final Widget emptyList;
+
   const TabWrapper({this.tabViews, this.tabs, this.appBarTitle, this.emptyList});
+
   @override
   Widget build(BuildContext context) {
     return tabViews.length <= 1

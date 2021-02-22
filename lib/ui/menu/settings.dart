@@ -115,7 +115,7 @@ class SettingsView extends StatelessWidget {
           value: AppSettings.shared.isDarkTheme()),
       _SettingsSwitch(
         secondary: Icon(Icons.sync_alt, color: color),
-        title: Text('Sync chapter in views', style: textStyle),
+        title: Text('Sync chapter', style: textStyle),
         onChanged: () {
           final useSharedRef = PrefsBloc.toggle(PrefItemId.syncChapter);
 
@@ -139,7 +139,7 @@ class SettingsView extends StatelessWidget {
           enabled: PrefsBloc.getBool(PrefItemId.syncChapter),
           secondary: Transform.rotate(
               angle: 90 * math.pi / 180, child: Icon(Icons.sync_alt, color: color)),
-          title: Text('Sync verse in views', style: textStyle),
+          title: Text('Sync verse', style: textStyle),
           onChanged: () => PrefsBloc.toggle(PrefItemId.syncVerse),
           value: PrefsBloc.getBool(PrefItemId.syncVerse),
         );

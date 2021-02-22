@@ -4,11 +4,13 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/recent_volumes_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
@@ -251,20 +253,33 @@ const bookCoverHeight = 80.0;
 
 class _VolumeCard extends StatelessWidget {
   final int volumeId;
-  final Color shadowColor;
-  const _VolumeCard(this.volumeId, {this.shadowColor});
+  final Color borderColor;
+
+  const _VolumeCard(this.volumeId, {this.borderColor});
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final sColor = shadowColor ?? (isDarkMode ? Colors.black54 : Colors.black26);
     final volume = VolumesRepository.shared.volumeWithId(volumeId);
+    final border = (borderColor != null)
+        ? BoxDecoration(
+            border: Border.all(color: borderColor, width: 2),
+            borderRadius: BorderRadius.circular(5),
+          )
+        : BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            boxShadow: [
+              boxShadow(
+                  color: (isDarkMode ? Colors.black54 : Colors.black26),
+                  offset: const Offset(0, 3),
+                  blurRadius: 5)
+            ],
+          );
+
     return Container(
         width: bookCoverWidth,
         height: bookCoverHeight,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
-          boxShadow: [boxShadow(color: sColor, offset: const Offset(0, 3), blurRadius: 5)],
-        ),
+        decoration: border,
         child: volume != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(5),
@@ -297,11 +312,16 @@ class __ExpandedViewState extends State<_ExpandedView> {
       return;
     }
 
-    if (vmBloc.state.maximizedViewUid > 0) {
-      vmBloc?.maximize(viewUid);
+    if (viewUid & Const.recentFlag == Const.recentFlag) {
+      // need to add this view...
+      ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume,
+          options: <String, dynamic>{'volumeId': viewUid ^ Const.recentFlag});
+    } else if (vmBloc.state.maximizedViewUid > 0) {
+      vmBloc.maximize(viewUid);
     } else {
-      vmBloc?.show(viewUid);
+      vmBloc.show(viewUid);
     }
+
     context.tabManager.changeTab(TecTab.reader);
   }
 
@@ -319,35 +339,81 @@ class __ExpandedViewState extends State<_ExpandedView> {
     final isVisible = vmBloc.isViewVisible(uid);
     final isMaximized = vmBloc.state.maximizedViewUid == uid;
 
-    items.add(tecModalPopupMenuItem(context, Icons.close, 'Close', () {
-      vmBloc.remove(uid);
-      context.tabManager.add(TecTabEvent.reader);
-      Navigator.of(context).maybePop();
-    }));
-
-    if (isVisible && isMaximized) {
+    if (!isVisible || !isMaximized) {
       items.add(tecModalPopupMenuItem(
         context,
-        FeatherIcons.grid,
-        'View All',
+        SFSymbols.arrow_up_left_arrow_down_right,
+        'Full screen',
+        isVisible && !isMaximized && vmBloc.countOfOpenViews == 1
+            ? null
+            : () async {
+                var uidToShow = uid;
+                if (uid & Const.recentFlag == Const.recentFlag) {
+                  // need to add this view...
+                  uidToShow = vmBloc.state.nextUid;
+                  await ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume,
+                      options: <String, dynamic>{'volumeId': uid ^ Const.recentFlag});
+                }
+                vmBloc.maximize(uidToShow);
+                await Navigator.of(context).maybePop();
+                widget.parentContext.tabManager.add(TecTabEvent.reader);
+              },
+      ));
+    }
+
+    if (vmBloc.state.maximizedViewUid > 0 && !isMaximized) {
+      items.add(tecModalPopupMenuItem(
+        context,
+        splitScreenIcon(context),
+        'Split screen',
         () {
           vmBloc.restore();
-          context.tabManager.add(TecTabEvent.reader);
           Navigator.of(context).maybePop();
-        },
-      ));
-    } else if (isVisible) {
-      items.add(tecModalPopupMenuItem(
-        context,
-        FeatherIcons.maximize2,
-        'Full screen',
-        () {
-          vmBloc.maximize(uid);
-          context.tabManager.add(TecTabEvent.reader);
-          Navigator.of(context).maybePop();
+          widget.parentContext.tabManager.add(TecTabEvent.reader);
         },
       ));
     }
+
+    items.add(tecModalPopupMenuItem(
+        context,
+        Icons.close,
+        isVisible ? 'Close' : 'Remove',
+        (isVisible && vmBloc.countOfOpenViews == 1)
+            ? null
+            : () {
+                // remove the view - if it's in the view manager
+                vmBloc.remove(uid);
+
+                // drop the menu
+                Navigator.of(context).maybePop();
+
+                if (isVisible) {
+                  // view is closed - if there are no more views - add one...
+                  if (vmBloc.countOfOpenViews == 1) {}
+
+                  // return to the reader
+                  widget.parentContext.tabManager.add(TecTabEvent.reader);
+                } else {
+                  // remove from recent used volumes
+                  int volumeId;
+                  if (uid & Const.recentFlag == Const.recentFlag) {
+                    // recent cover
+                    volumeId = uid ^ Const.recentFlag;
+                  } else {
+                    final viewDataBloc = vmBloc.dataBlocWithView(uid);
+                    if (viewDataBloc is VolumeViewDataBloc) {
+                      volumeId = viewDataBloc.state.asVolumeViewData.volumeId;
+                    }
+                  }
+
+                  if (volumeId != null && volumeId > 0) {
+                    context.tbloc<RecentVolumesBloc>().removeVolume(volumeId);
+                    setState(() {
+                      // force rebuild of cover list...
+                    });
+                  }
+                }
+              }));
 
     return items;
   }
@@ -372,22 +438,24 @@ class __ExpandedViewState extends State<_ExpandedView> {
 
   @override
   Widget build(BuildContext context) {
+    const _maxCovers = 9;
     final _covers = <_OffscreenView>[];
     final _visibleCovers = <_OffscreenView>[];
+    final _existingVolumes = <int>[];
 
     // get the offscreen views...
     for (final view in context.viewManager?.state?.views) {
       var title = ViewManager.shared.menuTitleWith(context: context, state: view);
-      final vbloc = context.viewManager.dataBlocWithView(view.uid);
+      final viewDataBloc = context.viewManager.dataBlocWithView(view.uid);
       int volumeId;
-      if (vbloc != null) {
-        final volumeView = tec.as<VolumeViewDataBloc>(vbloc).state.asVolumeViewData;
+      if (viewDataBloc != null) {
+        final volumeView = tec.as<VolumeViewDataBloc>(viewDataBloc).state.asVolumeViewData;
         volumeId = volumeView.volumeId;
         title =
             '${!volumeView.useSharedRef ? '${volumeView.bookNameAndChapter(useShortBookName: true)}\n' : ''}${'${VolumesRepository.shared.volumeWithId(volumeId).abbreviation}'}';
       }
       final visible = context.viewManager.isViewVisible(view.uid);
-      final child = _VolumeCard(volumeId, shadowColor: visible ? Colors.white : null);
+      final child = _VolumeCard(volumeId, borderColor: visible ? Colors.yellow : null);
       final cover = _OffscreenView(
           title: title,
           onPressed: () {
@@ -395,11 +463,35 @@ class __ExpandedViewState extends State<_ExpandedView> {
             // _onSwitchViews(view);
           },
           uid: view.uid,
-          icon: !visible ? child : _StackIcon(child, FeatherIcons.eye));
+          icon: child /* !visible ? child : _StackIcon(child, FeatherIcons.eye) */);
+      _existingVolumes.add(volumeId);
       if (visible) {
         _visibleCovers.add(cover);
       } else {
         _covers.add(cover);
+      }
+    }
+
+    // get the recent covers
+    for (final recent in context.tbloc<RecentVolumesBloc>().state.volumes) {
+      if (_existingVolumes.contains(recent.id)) {
+        continue;
+      }
+
+      final cover = _OffscreenView(
+        title: VolumesRepository.shared.volumeWithId(recent.id).abbreviation,
+        onPressed: () {
+          // context.tabManager.changeTab(TecTab.reader);
+          // _onSwitchViews(view);
+        },
+        uid: Const.recentFlag + recent.id,
+        icon: _VolumeCard(recent.id),
+      );
+
+      _covers.add(cover);
+
+      if (_visibleCovers.length + _covers.length >= _maxCovers) {
+        break;
       }
     }
 
@@ -502,6 +594,7 @@ class _CloseFAB extends StatefulWidget {
   final AnimationController controller;
   final BuildContext parentContext;
   final Function(int uid) onViewTap;
+
   const _CloseFAB(
       {Key key, @required this.controller, @required this.parentContext, @required this.onViewTap})
       : super(key: key);
@@ -881,13 +974,21 @@ class TecTabBar extends StatelessWidget {
 class _SelectViewOverlay extends StatelessWidget {
   final int viewUid;
   final Function(int) onSelect;
+
   const _SelectViewOverlay(this.viewUid, this.onSelect);
 
   @override
   Widget build(BuildContext context) {
     final vmBloc = context.viewManager;
-    final volumeId =
-        (vmBloc.dataBlocWithView(viewUid) as VolumeViewDataBloc).state.asVolumeViewData.volumeId;
+    int volumeId;
+
+    if (viewUid & Const.recentFlag == Const.recentFlag) {
+      volumeId = viewUid ^ Const.recentFlag;
+    } else {
+      volumeId =
+          (vmBloc.dataBlocWithView(viewUid) as VolumeViewDataBloc).state.asVolumeViewData.volumeId;
+    }
+
     final volume = VolumesRepository.shared.volumeWithId(volumeId);
     final visibleViews = vmBloc.state.views.where((v) => vmBloc.isViewVisible(v.uid)).toList();
     var viewLayout = vmBloc.layoutOfView(visibleViews.last.uid).rect;
@@ -932,7 +1033,9 @@ class _SelectViewOverlay extends StatelessWidget {
 class _StackIcon extends StatelessWidget {
   final Widget child;
   final IconData icon;
+
   const _StackIcon(this.child, this.icon);
+
   @override
   Widget build(BuildContext context) {
     return Stack(

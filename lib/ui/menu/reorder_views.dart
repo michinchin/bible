@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_views/tec_views.dart';
+import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart';
+import 'package:tec_views/tec_views.dart';
 
 import '../../models/const.dart';
+import '../common/common.dart';
 
 ///
 /// DragOverlay
@@ -11,6 +13,7 @@ import '../../models/const.dart';
 class DragOverlayDetails {
   final bool inRect;
   final bool sameView;
+
   // final bool inIcon;
   DragOverlayDetails copyWith({
     bool inRect,
@@ -22,6 +25,7 @@ class DragOverlayDetails {
         sameView: sameView ?? this.sameView,
         // inIcon: inIcon ?? this.inIcon,
       );
+
   DragOverlayDetails({
     this.inRect = false,
     this.sameView = false,
@@ -31,6 +35,7 @@ class DragOverlayDetails {
 
 class DragOverlayCubit extends Cubit<DragOverlayDetails> {
   final int uid;
+
   DragOverlayCubit(this.uid) : super(DragOverlayDetails());
 
   void onMove(
@@ -65,6 +70,7 @@ class DragOverlayCubit extends Cubit<DragOverlayDetails> {
         inRect: false, sameView: false,
         // inIcon: false
       ));
+
   void leaveRect() => emit(state.copyWith(sameView: false));
 }
 
@@ -76,6 +82,7 @@ extension RectExtension on Rect {
 class DragTargetView extends StatelessWidget {
   final Widget child;
   final int viewUid;
+
   const DragTargetView({this.child, this.viewUid});
 
   @override
@@ -87,7 +94,7 @@ class DragTargetView extends StatelessWidget {
             context.tbloc<DragOverlayCubit>().clear();
           }
         },
-        onAccept: (b) {
+        onAccept: (b) async {
           // tec.dmPrint('$b ${state.uid}');
           context.tbloc<DragOverlayCubit>().clear();
           if (b != viewUid) {
@@ -99,11 +106,30 @@ class DragTargetView extends StatelessWidget {
             }
 
             if (vmBloc.state.maximizedViewUid > 0) {
-              vmBloc.maximize(b);
+              if (b & Const.recentFlag == Const.recentFlag) {
+                // need to create the new view...
+                final nextUid = vmBloc.state.nextUid;
+                await ViewManager.shared.onAddView(context, Const.viewTypeVolume,
+                    currentViewId: viewUid,
+                    options: <String, dynamic>{'volumeId': b ^ Const.recentFlag});
+
+                vmBloc.maximize(nextUid);
+              } else {
+                vmBloc.maximize(b);
+              }
             } else {
-              vmBloc.swapPositions(
-                  context.viewManager.indexOfView(b), context.viewManager.indexOfView(viewUid),
-                  unhide: true);
+              if (b & Const.recentFlag == Const.recentFlag) {
+                // need to create the new view...
+                await ViewManager.shared.onAddView(context, Const.viewTypeVolume,
+                    currentViewId: viewUid,
+                    options: <String, dynamic>{'volumeId': b ^ Const.recentFlag});
+
+                vmBloc.remove(viewUid);
+              } else {
+                vmBloc.swapPositions(
+                    context.viewManager.indexOfView(b), context.viewManager.indexOfView(viewUid),
+                    unhide: true);
+              }
             }
           }
         },
@@ -133,14 +159,14 @@ class DragTargetView extends StatelessWidget {
                           },
                           leftSide: true,
                           text: 'Close',
-                          icon: Icons.close,
+                          icon: SFSymbols.xmark,
                         ),
                       ),
                       if (!isMaximized) ...[
                         Expanded(
                           child: DragViewIcon(
                             onAccept: (_) => context.viewManager.maximize(viewUid),
-                            icon: Icons.fullscreen,
+                            icon: SFSymbols.arrow_up_left_arrow_down_right,
                             text: 'Full Screen',
                           ),
                         ),
@@ -148,8 +174,8 @@ class DragTargetView extends StatelessWidget {
                         Expanded(
                             child: DragViewIcon(
                           onAccept: (_) => context.viewManager.restore(),
-                          icon: Icons.grid_view,
-                          text: 'View All',
+                          icon: splitScreenIcon(context),
+                          text: 'Split screen',
                         ))
                     ]
                   ]),
@@ -163,6 +189,7 @@ class DragViewIcon extends StatelessWidget {
   final IconData icon;
   final String text;
   final bool leftSide;
+
   const DragViewIcon({this.onAccept, this.icon, this.leftSide = false, this.text = ''});
 
   @override

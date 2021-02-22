@@ -6,8 +6,8 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
-import '../../models/app_settings.dart';
 import '../../models/const.dart';
+import '../common/common.dart';
 import '../common/tec_modal_popup_menu.dart';
 
 List<Widget> defaultActionsBuilder(BuildContext context, ViewState state, Size size) {
@@ -75,10 +75,7 @@ List<TableRow> buildMenuItemsForViewWithState(
   items.add(tecModalPopupMenuDivider(menuContext, title: 'View options'));
 
   if (isMaximized) {
-    final icon = isSmallScreen(context) ? (MediaQuery.of(context).orientation == Orientation.portrait) ?
-    SFSymbols.square_split_1x2 : SFSymbols.square_split_2x1 : SFSymbols.square_split_2x2;
-
-    items.add(tecModalPopupMenuItem(menuContext, icon, 'Split screen', () {
+    items.add(tecModalPopupMenuItem(menuContext, splitScreenIcon(context), 'Split screen', () {
       Navigator.of(menuContext).maybePop();
       vmBloc?.restore();
     }));
@@ -86,7 +83,7 @@ List<TableRow> buildMenuItemsForViewWithState(
     items.add(
       tecModalPopupMenuItem(
         menuContext,
-        FeatherIcons.maximize2,
+        SFSymbols.arrow_up_left_arrow_down_right,
         'Full screen',
         countOfVisibleViews <= 1
             ? null
@@ -124,59 +121,25 @@ List<TableRow> buildMenuItemsForViewWithState(
   items.add(
     tecModalPopupMenuItem(
       menuContext,
-      Icons.close,
+      SFSymbols.xmark,
       'Close',
       countOfViews <= 1
           ? null
           : () {
               Navigator.of(menuContext).maybePop();
-              var nextMaxUid = -1;
 
-              // on a phone - if maximized, maximize the underneath one
-              if (state.uid == vmBloc?.state?.maximizedViewUid &&
-                  (vmBloc?.numViewsLimited ?? false) &&
-                  (vmBloc?.state?.views?.length ?? 0) > 2) {
-                final views = vmBloc?.state?.views;
-                if (vmBloc.indexOfView(vmBloc.state.maximizedViewUid) ==
-                    vmBloc.state.views.length - 1) {
-                  nextMaxUid = views.first.uid;
-                } else {
-                  nextMaxUid = views
-                      .firstWhere((v) =>
-                          vmBloc.indexOfView(v.uid) ==
-                          vmBloc.indexOfView(vmBloc.state.maximizedViewUid) + 1)
-                      .uid;
+              // close this view and all other off screen views
+              // so an off screen doesn't appear w/o direct request
+              for (final view in context.viewManager?.state?.views) {
+                if (!context.viewManager.isViewVisible(view.uid)) {
+                  vmBloc?.remove(view.uid);
                 }
               }
 
               vmBloc?.remove(state.uid);
-
-              if (nextMaxUid > 0) {
-                vmBloc?.maximize(nextMaxUid);
-              }
             },
     ),
   );
-
-  // if (((vmBloc?.countOfInvisibleViews ?? 0) >= 1)) {
-  //   items.addAll([
-  //     tecModalPopupMenuDivider(menuContext, title: 'Restore'),
-  //     ..._generateOffScreenItems(menuContext, state.uid),
-  //   ]);
-  // }
-
-  // ignore: cascade_invocations
-  // items.addAll([
-  //   // tecModalPopupMenuDivider(menuContext, title: 'Open new'),
-  //   // ...generateAddMenuItems(menuContext, state.uid),
-  //   tecModalPopupMenuDivider(menuContext),
-  //   tecModalPopupMenuItem(
-  //     menuContext,
-  //     Icons.help_outline,
-  //     'Help',
-  //     () => showViewHelpDialog(context),
-  //   )
-  // ]);
 
   return items;
 }
