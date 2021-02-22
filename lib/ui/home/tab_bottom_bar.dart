@@ -263,7 +263,10 @@ class _VolumeCard extends StatelessWidget {
     final volume = VolumesRepository.shared.volumeWithId(volumeId);
     final border = (borderColor != null)
         ? BoxDecoration(
-            border: Border.all(color: borderColor, width: 2),
+            boxShadow: [
+              boxShadow(
+                  color: borderColor, offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 3)
+            ],
             borderRadius: BorderRadius.circular(5),
           )
         : BoxDecoration(
@@ -479,7 +482,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
             '${!volumeView.useSharedRef ? '${volumeView.bookNameAndChapter(useShortBookName: true)}\n' : ''}${'${VolumesRepository.shared.volumeWithId(volumeId).abbreviation}'}';
       }
       final visible = context.viewManager.isViewVisible(view.uid);
-      final child = _VolumeCard(volumeId, borderColor: visible ? Colors.yellow : null);
+      final child = _VolumeCard(volumeId, borderColor: visible ? Const.tecartaBlue : null);
       final cover = _OffscreenView(
           title: title,
           onPressed: () {
@@ -636,7 +639,7 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
   @override
   void initState() {
     _animationController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 350))
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 400))
           ..addListener(() {
             setState(() {});
           })
