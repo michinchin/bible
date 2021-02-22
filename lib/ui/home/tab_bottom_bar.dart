@@ -329,7 +329,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
   }
 
   void _onCoverTap(int viewUid) {
-    if (context.viewManager.isFull) {
+    if (context.viewManager.isFull || context.viewManager.isViewVisible(viewUid)) {
       widget.onViewTap(viewUid);
     } else {
       _onSwitchViews(viewUid);
@@ -345,8 +345,20 @@ class __ExpandedViewState extends State<_ExpandedView> {
     if (!isVisible && vmBloc.state.maximizedViewUid <= 0) {
       items.add(tecModalPopupMenuItem(
         context,
-        SFSymbols.plus,
-        'Add view',
+        vmBloc.isFull ? Icons.swap_calls : SFSymbols.plus,
+        vmBloc.isFull ? 'Replace View' : 'Add view',
+        () {
+          Navigator.of(context).maybePop();
+          _onCoverTap(uid);
+        },
+      ));
+    }
+
+    if (isVisible && vmBloc.state.maximizedViewUid <= 0) {
+      items.add(tecModalPopupMenuItem(
+        context,
+        Icons.swap_calls,
+        'Move view',
         () {
           Navigator.of(context).maybePop();
           _onCoverTap(uid);

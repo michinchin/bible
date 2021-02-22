@@ -119,12 +119,18 @@ class DragTargetView extends StatelessWidget {
               }
             } else {
               if (b & Const.recentFlag == Const.recentFlag) {
+                final toPosition = vmBloc.indexOfView(viewUid);
+                final nextUid = vmBloc.state.nextUid;
+
                 // need to create the new view...
                 await ViewManager.shared.onAddView(context, Const.viewTypeVolume,
-                    currentViewId: viewUid,
                     options: <String, dynamic>{'volumeId': b ^ Const.recentFlag});
 
-                vmBloc.remove(viewUid);
+                final fromPosition = vmBloc.indexOfView(nextUid);
+
+                vmBloc
+                  ..move(fromPosition: fromPosition, toPosition: toPosition)
+                  ..remove(viewUid);
               } else {
                 vmBloc.swapPositions(
                     context.viewManager.indexOfView(b), context.viewManager.indexOfView(viewUid),
