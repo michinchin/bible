@@ -62,14 +62,14 @@ sed -i '' "s/DEBUG-VERSION/$VERSION-$BUILD_NUMBER/g" lib/version.dart
 #"../tools/build/makeIndex.sh" "Android Products" "${HTDOCS}/bibles/android"
 
 # Android 
-flutter build appbundle --build-name $VERSION --build-number $BUILD_NUMBER
+flutter build appbundle --build-name $VERSION --build-number $BUILD_NUMBER --bundle-sksl-path flutter_01.sksl.json
 echo python ~/tools/playstore/upload.py com.tecarta.TecartaBible build/app/outputs/bundle/release/app-release.aab
 python ~/tools/playstore/upload.py com.tecarta.TecartaBible build/app/outputs/bundle/release/app-release.aab
 
 # iOS
 cd ios && pod install && cd ..
 security -v unlock-keychain -p goph3rw00d ~/Library/Keychains/login.keychain
-flutter build ios --release --build-name $VERSION --build-number $BUILD_NUMBER
+flutter build ios --release --build-name $VERSION --build-number $BUILD_NUMBER --bundle-sksl-path flutter_01.sksl.json
 cd ios
 xcodebuild -workspace Runner.xcworkspace -scheme "Runner" -sdk iphoneos -configuration "Release" archive -archivePath Runner.xcarchive -allowProvisioningUpdates
 xcodebuild -project Runner.xcodeproj -exportArchive -archivePath Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath . -allowProvisioningUpdates
