@@ -10,11 +10,13 @@ import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../blocs/prefs_bloc.dart';
 import '../../blocs/recent_volumes_bloc.dart';
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
+import '../../models/pref_item.dart';
 import '../../ui/sheet/snap_sheet.dart';
 import '../common/common.dart';
 import '../common/tec_modal_popup.dart';
@@ -359,10 +361,12 @@ class __ExpandedViewState extends State<_ExpandedView> {
         context,
         Icons.swap_calls,
         'Move view',
-        () {
-          Navigator.of(context).maybePop();
-          _onCoverTap(uid);
-        },
+        vmBloc.countOfOpenViews > 1
+            ? () {
+                Navigator.of(context).maybePop();
+                _onCoverTap(uid);
+              }
+            : null,
       ));
     }
 
@@ -420,16 +424,10 @@ class __ExpandedViewState extends State<_ExpandedView> {
         (isVisible && vmBloc.countOfOpenViews == 1)
             ? null
             : () {
-                // remove the view - if it's in the view manager
+                Navigator.of(context).maybePop();
                 vmBloc.remove(uid);
 
-                // drop the menu
-                Navigator.of(context).maybePop();
-
                 if (isVisible) {
-                  // view is closed - if there are no more views - add one...
-                  if (vmBloc.countOfOpenViews == 1) {}
-
                   // return to the reader
                   widget.parentContext.tabManager.add(TecTabEvent.reader);
                 } else {
@@ -481,6 +479,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
     final _covers = <_OffscreenView>[];
     final _visibleCovers = <_OffscreenView>[];
     final _existingVolumes = <int>[];
+    String _locationTitle;
 
     // get the offscreen views...
     for (final view in context.viewManager?.state?.views) {
@@ -492,6 +491,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
         volumeId = volumeView.volumeId;
         title =
             '${!volumeView.useSharedRef ? '${volumeView.bookNameAndChapter(useShortBookName: true)}\n' : ''}${'${VolumesRepository.shared.volumeWithId(volumeId).abbreviation}'}';
+        _locationTitle ??= volumeView.bookNameAndChapter(useShortBookName: true);
       }
       final visible = context.viewManager.isViewVisible(view.uid);
       final child = _VolumeCard(volumeId, borderColor: visible ? Const.tecartaBlue : null);
@@ -518,7 +518,9 @@ class __ExpandedViewState extends State<_ExpandedView> {
       }
 
       final cover = _OffscreenView(
-        title: VolumesRepository.shared.volumeWithId(recent.id).abbreviation,
+        title: (!PrefsBloc.getBool(PrefItemId.syncChapter) && _locationTitle.isNotEmpty)
+            ? _locationTitle
+            : VolumesRepository.shared.volumeWithId(recent.id).abbreviation,
         onPressed: () {
           // context.tabManager.changeTab(TecTab.reader);
           // _onSwitchViews(view);

@@ -95,29 +95,6 @@ List<TableRow> buildMenuItemsForViewWithState(
     );
   }
 
-  // if (countOfVisibleViews > 1) {
-  //   items.add(tecModalPopupMenuItem(menuContext, FeatherIcons.eyeOff, 'Hide', () {
-  //     Navigator.of(menuContext).maybePop();
-  //     vmBloc?.hide(state.uid);
-  //   }));
-  // }
-
-  // if (state.type == Const.viewTypeVolume) {
-  //   items.add(tecModalPopupMenuItem(
-  //     menuContext,
-  //     useSharedRef ? Icons.link_off_outlined : Icons.link_outlined,
-  //     useSharedRef ? 'Unlink chapter' : 'Link chapter',
-  //     countOfViews <= 1
-  //         ? null
-  //         : () {
-  //             Navigator.of(menuContext).maybePop();
-  //             final viewDataBloc = context.tbloc<VolumeViewDataBloc>();
-  //             assert(viewDataBloc != null);
-  //             viewDataBloc?.update(context, viewData.copyWith(useSharedRef: !useSharedRef));
-  //           },
-  //   ));
-  // }
-
   items.add(
     tecModalPopupMenuItem(
       menuContext,
@@ -127,24 +104,7 @@ List<TableRow> buildMenuItemsForViewWithState(
           ? null
           : () {
               Navigator.of(menuContext).maybePop();
-              final isMaximized = (vmBloc?.state?.maximizedViewUid ?? 0) > 0;
-
-              if (!isMaximized) {
-                // close this view and all other off screen views
-                // so an off screen doesn't appear w/o direct request
-                for (final view in context.viewManager?.state?.views) {
-                  if (!context.viewManager.isViewVisible(view.uid)) {
-                    vmBloc?.remove(view.uid);
-                  }
-                }
-              }
-
-              vmBloc?.remove(state.uid);
-
-              // if app was maximized - restore that
-              if (isMaximized && context.viewManager.countOfOpenViews > 1) {
-                vmBloc?.maximize(context.viewManager.state.views.first.uid);
-              }
+              vmBloc.remove(state.uid);
             },
     ),
   );
