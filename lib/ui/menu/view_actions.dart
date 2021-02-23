@@ -95,29 +95,6 @@ List<TableRow> buildMenuItemsForViewWithState(
     );
   }
 
-  // if (countOfVisibleViews > 1) {
-  //   items.add(tecModalPopupMenuItem(menuContext, FeatherIcons.eyeOff, 'Hide', () {
-  //     Navigator.of(menuContext).maybePop();
-  //     vmBloc?.hide(state.uid);
-  //   }));
-  // }
-
-  // if (state.type == Const.viewTypeVolume) {
-  //   items.add(tecModalPopupMenuItem(
-  //     menuContext,
-  //     useSharedRef ? Icons.link_off_outlined : Icons.link_outlined,
-  //     useSharedRef ? 'Unlink chapter' : 'Link chapter',
-  //     countOfViews <= 1
-  //         ? null
-  //         : () {
-  //             Navigator.of(menuContext).maybePop();
-  //             final viewDataBloc = context.tbloc<VolumeViewDataBloc>();
-  //             assert(viewDataBloc != null);
-  //             viewDataBloc?.update(context, viewData.copyWith(useSharedRef: !useSharedRef));
-  //           },
-  //   ));
-  // }
-
   items.add(
     tecModalPopupMenuItem(
       menuContext,
@@ -127,7 +104,7 @@ List<TableRow> buildMenuItemsForViewWithState(
           ? null
           : () {
               Navigator.of(menuContext).maybePop();
-              vmBloc?.remove(state.uid);
+              vmBloc.remove(state.uid);
             },
     ),
   );
