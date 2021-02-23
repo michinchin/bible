@@ -133,8 +133,7 @@ class DragTargetView extends StatelessWidget {
                   ..remove(viewUid);
               } else {
                 vmBloc.swapPositions(
-                    context.viewManager.indexOfView(b), context.viewManager.indexOfView(viewUid),
-                    unhide: true);
+                    context.viewManager.indexOfView(b), context.viewManager.indexOfView(viewUid));
               }
             }
           }

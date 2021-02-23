@@ -127,24 +127,7 @@ List<TableRow> buildMenuItemsForViewWithState(
           ? null
           : () {
               Navigator.of(menuContext).maybePop();
-              final isMaximized = (vmBloc?.state?.maximizedViewUid ?? 0) > 0;
-
-              if (!isMaximized) {
-                // close this view and all other off screen views
-                // so an off screen doesn't appear w/o direct request
-                for (final view in context.viewManager?.state?.views) {
-                  if (!context.viewManager.isViewVisible(view.uid)) {
-                    vmBloc?.remove(view.uid);
-                  }
-                }
-              }
-
               vmBloc?.remove(state.uid);
-
-              // if app was maximized - restore that
-              if (isMaximized && context.viewManager.countOfOpenViews > 1) {
-                vmBloc?.maximize(context.viewManager.state.views.first.uid);
-              }
             },
     ),
   );

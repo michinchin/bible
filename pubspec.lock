@@ -320,7 +320,7 @@ packages:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.1"
+    version: "6.1.2"
   flutter_blurhash:
     dependency: transitive
     description:
@@ -1145,7 +1145,7 @@ packages:
       name: tec_views
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.14"
+    version: "1.0.15"
   tec_volumes:
     dependency: "direct main"
     description:

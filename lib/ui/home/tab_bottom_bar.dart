@@ -102,8 +102,7 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
     context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
     if (uid != null && _viewUid != uid) {
       context.viewManager.swapPositions(
-          context.viewManager.indexOfView(_viewUid), context.viewManager.indexOfView(uid),
-          unhide: true);
+          context.viewManager.indexOfView(_viewUid), context.viewManager.indexOfView(uid));
     }
     setState(() {
       _showSelectViewOverlay = false;
