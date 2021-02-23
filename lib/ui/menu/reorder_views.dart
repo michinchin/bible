@@ -120,6 +120,8 @@ class DragTargetView extends StatelessWidget {
             } else {
               if (b & Const.recentFlag == Const.recentFlag) {
                 final toPosition = vmBloc.indexOfView(viewUid);
+                vmBloc.remove(viewUid);
+
                 final nextUid = vmBloc.state.nextUid;
 
                 // need to create the new view...
@@ -128,9 +130,7 @@ class DragTargetView extends StatelessWidget {
 
                 final fromPosition = vmBloc.indexOfView(nextUid);
 
-                vmBloc
-                  ..move(fromPosition: fromPosition, toPosition: toPosition)
-                  ..remove(viewUid);
+                vmBloc..move(fromPosition: fromPosition, toPosition: toPosition, unhide: true);
               } else {
                 vmBloc.swapPositions(
                     context.viewManager.indexOfView(b), context.viewManager.indexOfView(viewUid));
