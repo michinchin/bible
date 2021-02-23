@@ -105,7 +105,7 @@ class DragTargetView extends StatelessWidget {
               return;
             }
 
-            if (vmBloc.state.maximizedViewUid > 0) {
+            if (vmBloc.state.maximizedViewUid > 0 || vmBloc.countOfVisibleViews == 1) {
               if (b & Const.recentFlag == Const.recentFlag) {
                 // need to create the new view...
                 final nextUid = vmBloc.state.nextUid;
