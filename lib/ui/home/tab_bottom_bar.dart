@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:bible/ui/library/library.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/cupertino.dart';
@@ -717,12 +718,22 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     final _icons = <_OffscreenView>[
-      getOffscreenIconView(
-          title: 'Add View',
-          icon: Icons.add,
-          onPressed: (context) {
-            ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
-          }),
+      if (!context.viewManager.isFull || context.viewManager.state.maximizedViewUid > 0)
+        getOffscreenIconView(
+            title: 'Add View',
+            icon: Icons.add,
+            onPressed: (context) {
+              ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume);
+            }),
+      if (context.viewManager.isFull && context.viewManager.state.maximizedViewUid <= 0)
+        getOffscreenIconView(
+            title: 'Replace View',
+            icon: Icons.swap_calls,
+            onPressed: (context) async {
+              final volumeId =
+                  await selectVolumeInLibrary(context, title: 'Select', initialTabPrefix: null);
+              widget.onViewTap(Const.recentFlag | volumeId);
+            }),
       getOffscreenIconView(title: 'Settings', icon: FeatherIcons.settings, onPressed: showSettings),
       getOffscreenIconView(
           title: 'Journal',
