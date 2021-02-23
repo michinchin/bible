@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -567,6 +568,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
                               curve: Curves.easeOut),
                         ),
                         child: InkWell(
+                          highlightColor: Colors.transparent,
                           key: GlobalObjectKey(cover.uid),
                           onTap: () => _onCoverTap(cover.uid),
                           onLongPress: () => _onCoverLongPress(cover.uid),
@@ -893,22 +895,68 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
   }
 }
 
-class _TabFAB extends StatelessWidget {
+class _TabFAB extends StatefulWidget {
+  @override
+  __TabFABState createState() => __TabFABState();
+}
+
+class __TabFABState extends State<_TabFAB> {
+  void _onTap() {
+    if (context.tabManager.state.tab != TecTab.reader) {
+      initFeatureDiscovery(
+          context: context, pref: Const.prefFabRead, steps: {Const.fabReadFeatureId});
+      context.tabManager.changeTab(TecTab.reader);
+    } else {
+      context.tabManager.changeTab(TecTab.switcher);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FloatingActionButton(
-      elevation: 2,
-      heroTag: null,
-      onPressed: () => context.tabManager.changeTab(
-          context.tabManager.state.tab != TecTab.reader ? TecTab.reader : TecTab.switcher),
-      backgroundColor:
-          context.tabManager.state.tab != TecTab.reader ? Colors.white : Const.tecartaBlue,
-      child: Icon(
-          context.tabManager.state.tab != TecTab.reader
-              ? TecIcons.tecartabiblelogo
-              : TecIcons.tecartabiblelogo,
-          color: context.tabManager.state.tab != TecTab.reader ? Const.tecartaBlue : Colors.white,
-          size: 28),
+    var backgroundColor = Const.tecartaBlue;
+    var textColor = Colors.white;
+    var targetColor = Theme.of(context).cardColor;
+    var title = 'Welcome!';
+    var description = 'Tap here to view the Bible';
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    if (context.tabManager.state.tab == TecTab.reader) {
+      backgroundColor = Theme.of(context).cardColor;
+      textColor = isDarkMode ? Colors.white : Colors.black;
+      targetColor = Const.tecartaBlue;
+      title = 'Let\'s get started!';
+      description =
+          'Tap here to view your journal, history, and more. Add new views or switch between recent ones.';
+    }
+    return DescribedFeatureOverlay(
+      featureId: context.tabManager.state.tab == TecTab.reader
+          ? Const.fabReadFeatureId
+          : Const.fabTabFeatureId,
+      tapTarget: Icon(
+        TecIcons.tecartabiblelogo,
+        color: context.tabManager.state.tab != TecTab.reader ? Const.tecartaBlue : Colors.white,
+      ),
+      onComplete: () async {
+        _onTap();
+        return true;
+      },
+      backgroundColor: backgroundColor,
+      textColor: textColor,
+      targetColor: targetColor,
+      title: Text(title),
+      description: Text(description),
+      child: FloatingActionButton(
+        elevation: 2,
+        heroTag: null,
+        onPressed: _onTap,
+        backgroundColor:
+            context.tabManager.state.tab != TecTab.reader ? Colors.white : Const.tecartaBlue,
+        child: Icon(
+            context.tabManager.state.tab != TecTab.reader
+                ? TecIcons.tecartabiblelogo
+                : TecIcons.tecartabiblelogo,
+            color: context.tabManager.state.tab != TecTab.reader ? Const.tecartaBlue : Colors.white,
+            size: 28),
+      ),
     );
   }
 }

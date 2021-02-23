@@ -44,6 +44,11 @@ class Const {
 
   // FAB
   static const recentFlag = 0x10000;
+  // feature discovery items
+  static const fabReadFeatureId = 'fab_read_feature_id';
+  static const fabTabFeatureId = 'fab_tab_feature_id';
+  static const prefFabRead = 'fabRead';
+  static const prefFabTabs = 'fabTabs';
 
   //------------------------------------------
 

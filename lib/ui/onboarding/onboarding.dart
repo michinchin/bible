@@ -141,10 +141,13 @@ class _OnboardingState extends State<Onboarding> {
                         }
                       })),
               FlatButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text(
-                    'Skip',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  onPressed: () => index == pages.length - 1
+                      ? Navigator.of(context).pop()
+                      : _controller.animateToPage(pages.length - 1,
+                          duration: const Duration(milliseconds: 250), curve: Curves.easeIn),
+                  child: Text(
+                    index == pages.length - 1 ? 'Done' : 'Skip',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   )),
               PageIndicatorList(_controller, index, pages.length)
             ],
