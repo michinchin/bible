@@ -78,8 +78,9 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
       vsync: this,
     );
 
-    _slideTabAnimation = Tween<Offset>(begin: const Offset(0.0, 0.0), end: const Offset(0.0, 2.1))
-        .animate(CurvedAnimation(
+    _slideTabAnimation =
+        Tween<Offset>(begin: const Offset(0.0, 0.0), end: const Offset(0.0, 2.1))
+            .animate(CurvedAnimation(
       parent: _slideTabController,
       curve: Curves.easeOut,
     ));
@@ -181,7 +182,9 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
           bottomNavigationBar: _showSelectViewOverlay
               ? null
               : BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
-                  if (sheetState.type == SheetType.hidden) {
+                  if (sheetState.type == SheetType.selection ||
+                      tabState.tab == TecTab.switcher ||
+                      sheetState.type == SheetType.hidden) {
                     // slide the tab off the screen...
                     _slideTabController.forward();
                   } else {
@@ -189,9 +192,11 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
                     _slideTabController.reverse();
                   }
 
-                  return Visibility(
-                    visible:
-                        (sheetState.type != SheetType.selection && tabState.tab != TecTab.switcher),
+                  return Opacity(
+                    opacity:
+                        (sheetState.type == SheetType.selection || tabState.tab == TecTab.switcher)
+                            ? 0
+                            : 1.0,
                     child: SlideTransition(
                         position: _slideTabAnimation, child: TecTabBar(tabs: widget.tabs)),
                   );
