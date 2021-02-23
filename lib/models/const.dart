@@ -43,7 +43,8 @@ class Const {
   static const prefShowOnboarding = 'showOnboaring';
 
   // FAB
-  static const recentFlag = 0x10000;
+  static const recentFlag = 0x2000000000000;
+
   // feature discovery items
   static const fabReadFeatureId = 'fab_read_feature_id';
   static const fabTabFeatureId = 'fab_tab_feature_id';
