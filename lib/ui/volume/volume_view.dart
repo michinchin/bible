@@ -79,7 +79,7 @@ class ViewableVolume extends Viewable {
     if (volumeId != null) {
       final viewUid = currentViewId ??
           context.viewManager?.state?.views
-              ?.lastWhere((el) => el.type == Const.viewTypeVolume, orElse: () => null)
+              ?.firstWhere((el) => el.type == Const.viewTypeVolume, orElse: () => null)
               ?.uid;
       final previous = viewUid == null
           ? VolumeViewData.fromJson(null)
