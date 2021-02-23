@@ -11,6 +11,7 @@ import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
+import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/downloads/downloads_bloc.dart';
 import '../../blocs/is_licensed_bloc.dart';
@@ -78,6 +79,11 @@ void showDetailViewForVolume(BuildContext context, Volume volume, String heroPre
         builder: (c) => VolumeDetail(volume: volume, heroPrefix: heroPrefix),
         bottomAttached: true);
   }
+}
+
+void _showDetailViewForVolume(BuildContext context, Volume volume, String heroPrefix) {
+  Navigator.of(context).push<void>(MaterialPageRoute(
+      builder: (context) => VolumeDetail(volume: volume, heroPrefix: heroPrefix)));
 }
 
 ///
@@ -217,6 +223,7 @@ class _Library extends StatefulWidget {
   final bool whenTappedPopWithVolumeId;
   final bool showCloseButton;
   final String heroPrefix;
+  final bool isSearchMode;
 
   const _Library({
     Key key,
@@ -228,6 +235,7 @@ class _Library extends StatefulWidget {
     this.whenTappedPopWithVolumeId = false,
     this.showCloseButton = true,
     this.heroPrefix,
+    this.isSearchMode = false,
   })  : assert(tabs != null),
         super(key: key);
 
@@ -287,6 +295,7 @@ class _LibraryState extends State<_Library> {
             selectedVolumes: _selectedVolumes,
             scrollToSelectedVolumes: widget.scrollToSelectedVolumes,
             sortByRecent: t.title == 'Recent',
+            showSearch: widget.isSearchMode,
             onTapVolume: widget.whenTappedPopWithVolumeId
                 ? (id) {
                     context.tbloc<RecentVolumesBloc>().updateWithVolume(id);
@@ -300,23 +309,41 @@ class _LibraryState extends State<_Library> {
   PreferredSizeWidget _appBar({PreferredSizeWidget bottom, bool showCloseButton = true}) =>
       MinHeightAppBar(
         appBar: AppBar(
-          leading: showCloseButton
-              ? CloseButton(onPressed: () => Navigator.of(context, rootNavigator: true).maybePop())
-              : null,
+          leading: widget.isSearchMode
+              ? BackButton(onPressed: () => Navigator.of(context).maybePop())
+              : showCloseButton
+                  ? CloseButton(
+                      onPressed: () => Navigator.of(context, rootNavigator: true).maybePop())
+                  : null,
           automaticallyImplyLeading: false,
           title: Text(tec.isNullOrEmpty(widget.title) ? 'Library' : widget.title),
-          actions: [
-            IconButton(
-              tooltip: 'search',
-              icon: const Icon(Icons.search),
-              onPressed: () {}, // TODO(ron): ...
-            ),
-            IconButton(
-              tooltip: 'filters',
-              icon: const Icon(Icons.filter_list),
-              onPressed: () {}, // TODO(ron): => showVolumesFilterSheet(context)),
-            ),
-          ],
+          actions: widget.isSearchMode
+              ? null
+              : [
+                  IconButton(
+                    tooltip: 'search',
+                    icon: const Icon(Icons.search),
+                    onPressed: () => Navigator.of(context).push<int>(
+                      MaterialPageRoute(
+                        builder: (context) => _Library(
+                          tabs: const [
+                            LibraryTab(title: '', filter: VolumesFilter(), prefsKey: 'search')
+                          ],
+                          title: 'Search Library',
+                          isSearchMode: true,
+                          showCloseButton: false,
+                          whenTappedPopWithVolumeId: widget.whenTappedPopWithVolumeId,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // TO-DO(ron): maybe add this later, currently it only does languages, so not super useful.
+                  // IconButton(
+                  //   tooltip: 'filters',
+                  //   icon: const Icon(Icons.filter_list),
+                  //   onPressed: => showVolumesFilterSheet(context)),
+                  // ),
+                ],
           bottom: bottom,
         ),
       );
@@ -328,6 +355,7 @@ class _VolumesList extends StatefulWidget {
   final void Function(int volume) onTapVolume;
   final String heroPrefix;
   final bool sortByRecent;
+  final bool showSearch;
 
   const _VolumesList({
     Key key,
@@ -336,6 +364,7 @@ class _VolumesList extends StatefulWidget {
     this.onTapVolume,
     this.heroPrefix,
     this.sortByRecent = false,
+    this.showSearch = false,
   }) : super(key: key);
 
   @override
@@ -437,16 +466,6 @@ class _VolumesListState extends State<_VolumesList> {
     }
   }
 
-  // void _refresh([VoidCallback fn]) {
-  //   if (mounted) setState(fn ?? () {});
-  // }
-
-  // void _toggle(int id) {
-  //   _refresh(() {
-  //     if (!widget.selectedVolumes.remove(id)) widget.selectedVolumes.add(id);
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     final bloc = context.tbloc<VolumesBloc>(); // ignore: close_sinks
@@ -464,21 +483,20 @@ class _VolumesListState extends State<_VolumesList> {
       }
     }
 
-    // final textScaleFactor = textScaleFactorWith(context);
-    // final padding = (12.0 * textScaleFactor).roundToDouble();
-    // final showSearch = _searchFieldHasFocus;
-    // final barTextColor = Theme.of(context).appBarTheme.textTheme.headline6.color;
+    final textScaleFactor = textScaleFactorWith(context);
+    final padding = (12.0 * textScaleFactor).roundToDouble();
 
     return SafeArea(
       bottom: false,
       child: Column(
         children: [
-          // TecSearchField(
-          //   padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
-          //   textEditingController: _textEditingController,
-          //   focusNode: _focusNode,
-          //   onSubmit: (s) => _searchListener(),
-          // ),
+          if (widget.showSearch)
+            TecSearchField(
+              padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
+              textEditingController: _textEditingController,
+              focusNode: _focusNode,
+              onSubmit: (s) => _searchListener(),
+            ),
           Expanded(
             child: TecScrollbar(
               child: ScrollablePositionedList.builder(
@@ -499,7 +517,7 @@ class _VolumesListState extends State<_VolumesList> {
                             _VolumeActionButton(volume: volume, heroPrefix: widget.heroPrefix),
                         onTap: widget.onTapVolume != null
                             ? () => widget.onTapVolume(volume.id)
-                            : () => showDetailViewForVolume(context, volume, widget.heroPrefix),
+                            : () => _showDetailViewForVolume(context, volume, widget.heroPrefix),
                       );
                     },
                   );
@@ -546,7 +564,7 @@ class _VolumeActionButton extends StatelessWidget {
           icon: const Icon(SFSymbols.checkmark_alt_circle),
           // iconSize: 32,
           color: Colors.green,
-          onPressed: () => showDetailViewForVolume(context, volume, heroPrefix));
+          onPressed: () => _showDetailViewForVolume(context, volume, heroPrefix));
     } else if (item == null ||
         item.status == DownloadStatus.undefined ||
         item.status == DownloadStatus.failed ||
@@ -564,7 +582,7 @@ class _VolumeActionButton extends StatelessWidget {
             icon: Icon(platformAwareMoreIcon(context)),
             // iconSize: 32,
             // color: color,
-            onPressed: () => showDetailViewForVolume(context, volume, heroPrefix));
+            onPressed: () => _showDetailViewForVolume(context, volume, heroPrefix));
       }
     } else if (item.status == DownloadStatus.running) {
       return Stack(
