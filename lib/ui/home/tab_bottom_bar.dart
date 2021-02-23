@@ -923,7 +923,7 @@ class __TabFABState extends State<_TabFAB> {
       targetColor = Const.tecartaBlue;
       title = 'Let\'s get started!';
       description =
-          'Tap here to view your journal, search, history, and more. Also find recent bible content here, and a way to switch views.';
+          'Tap here to view your journal, history, and more. Add new views or switch between recent ones.';
     }
     return DescribedFeatureOverlay(
       featureId: context.tabManager.state.tab == TecTab.reader
