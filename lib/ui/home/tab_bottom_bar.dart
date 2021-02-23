@@ -503,7 +503,7 @@ class __ExpandedViewState extends State<_ExpandedView> {
             // _onSwitchViews(view);
           },
           uid: view.uid,
-          icon: visible ? child : _StackIcon(child, SFSymbols.eye_slash));
+          icon: child /* visible ? child : _StackIcon(child, SFSymbols.eye_slash)*/);
       _existingVolumes.add(volumeId);
       if (visible) {
         _visibleCovers.add(cover);
