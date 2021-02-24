@@ -337,7 +337,8 @@ class __ExpandedViewState extends State<_ExpandedView> {
   }
 
   void _onCoverTap(int viewUid) {
-    if (context.viewManager.isFull || context.viewManager.isViewVisible(viewUid)) {
+    if (context.viewManager.state.maximizedViewUid <= 0 &&
+        (context.viewManager.isFull || context.viewManager.isViewVisible(viewUid))) {
       widget.onViewTap(viewUid);
     } else {
       _onSwitchViews(viewUid);
