@@ -951,7 +951,7 @@ class __TabFABState extends State<_TabFAB> {
         color: context.tabManager.state.tab != TecTab.reader ? Const.tecartaBlue : Colors.white,
       ),
       onComplete: () async {
-        _onTap();
+        // _onTap();
         return true;
       },
       backgroundColor: backgroundColor,
