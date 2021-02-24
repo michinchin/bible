@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
 import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
@@ -11,6 +12,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../blocs/app_theme_bloc.dart';
 import '../../blocs/prefs_bloc.dart';
 import '../../models/app_settings.dart';
+import '../../models/const.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
 import '../misc/text_settings.dart';
@@ -30,6 +32,25 @@ class SettingsView extends StatelessWidget {
   final MainMenuModel menuModel;
 
   const SettingsView({this.menuModel});
+
+  Widget _accountButton(BuildContext context) {
+    final signedIn = AppSettings.shared.userAccount.user.isSignedIn;
+
+    return FlatButton(
+        child: Text(signedIn ? AppSettings.shared.userAccount.user.email : 'Sign in',
+            style: TextStyle(color: Theme.of(context).textColor)),
+        onPressed: () async {
+          await tua.showSignInDlg(
+              context: context,
+              account: AppSettings.shared.userAccount,
+              useRootNavigator: true,
+              appName: Const.appNameForUA);
+
+          if (signedIn != AppSettings.shared.userAccount.user.isSignedIn) {
+            await Navigator.of(context).maybePop();
+          }
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,27 +73,7 @@ class SettingsView extends StatelessWidget {
                     _TitleSettingTile(
                       title: 'Account',
                       icon: FeatherIcons.user,
-                      trailing: FlatButton.icon(
-                          icon: Text('Sync now',
-                              style: TextStyle(color: Theme.of(context).textColor)),
-                          label: Icon(Icons.sync, color: Theme.of(context).textColor),
-                          onPressed: () {
-                            final ua = AppSettings.shared.userAccount;
-                            if (ua.user.isSignedIn) {
-                              ua.syncUserDb<void>(
-                                  itemTypes: ua.itemTypesToSync,
-                                  completion: (ua, status) {
-                                    if (status == 200) {
-                                      TecToast.show(context, 'Successfully Synced');
-                                    } else {
-                                      TecToast.show(context, 'Failed to Sync');
-                                    }
-                                    return;
-                                  });
-                            } else {
-                              TecToast.show(context, 'Sign in to Sync');
-                            }
-                          }),
+                      trailing: _accountButton(context),
                     ),
                     const _TitleSettingTile(title: 'Read', icon: FeatherIcons.bookmark),
                     Padding(

@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:bible/ui/library/library.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/cupertino.dart';
@@ -24,6 +23,7 @@ import '../common/common.dart';
 import '../common/tec_modal_popup.dart';
 import '../common/tec_modal_popup_menu.dart';
 import '../common/tec_navigator.dart';
+import '../library/library.dart';
 import '../library/volume_image.dart';
 import '../menu/settings.dart';
 import '../nav/nav.dart';
