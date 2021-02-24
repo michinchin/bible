@@ -277,10 +277,12 @@ packages:
   feature_discovery:
     dependency: "direct main"
     description:
-      name: feature_discovery
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.13.0+2"
+      path: "."
+      ref: HEAD
+      resolved-ref: c07549b1377751d5c99be69ac7e6789f37709e7e
+      url: "https://github.com/tecarta/feature_discovery"
+    source: git
+    version: "0.13.0+1"
   ffi:
     dependency: transitive
     description:

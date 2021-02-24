@@ -84,7 +84,9 @@ dependencies:
   cupertino_icons: ^1.0.0
   equatable: ^1.2.5
   feather_icons_flutter: ^4.7.4
-  feature_discovery: ^0.13.0+2
+  feature_discovery:
+    git:
+      url: https://github.com/tecarta/feature_discovery
   flutter_bloc: ^6.1.0
   flutter_downloader: ^1.5.1
   flutter_keyboard_visibility: ^4.0.2
