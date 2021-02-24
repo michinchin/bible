@@ -22,7 +22,6 @@ class ViewableVolume extends Viewable {
       providers: [
         BlocProvider<VolumeViewDataBloc>.value(
             value: context.viewManager.dataBlocWithView(state.uid) as VolumeViewDataBloc),
-        BlocProvider<DragOverlayCubit>(create: (_) => DragOverlayCubit(state.uid))
       ],
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -34,7 +33,6 @@ class ViewableVolume extends Viewable {
             final child = isBibleId(viewData.asVolumeViewData.volumeId)
                 ? PageableChapterView(viewState: state, size: size)
                 : StudyView(viewState: state, size: size);
-            context.tbloc<DragOverlayCubit>().clear();
             return DragTargetView(child: child, viewUid: state.uid);
           },
         ),

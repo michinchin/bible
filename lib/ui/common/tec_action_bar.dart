@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:bible/ui/menu/reorder_views.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -116,8 +117,14 @@ class ActionBar extends StatelessWidget {
         ));
     return Draggable<int>(
         data: viewUid,
-        onDragStarted: () => context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse),
-        onDragCompleted: () => context.tbloc<SheetManagerBloc>().add(SheetEvent.main),
+        onDragStarted: () {
+          context.tbloc<DragOverlayCubit>().show(viewUid);
+          context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
+        },
+        onDragEnd: (_) {
+          context.tbloc<DragOverlayCubit>().clear();
+          context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
+        },
         feedback: Opacity(opacity: 0.8, child: child),
         child: child);
   }
