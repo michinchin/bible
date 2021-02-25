@@ -1,10 +1,10 @@
-import 'package:bible/blocs/sheet/sheet_manager_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 
+import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../models/const.dart';
 import '../common/common.dart';
 
@@ -72,6 +72,7 @@ class _DragTargetViewState extends State<DragTargetView> {
               builder: (context, cd, rd) => Stack(alignment: Alignment.center, children: [
                 widget.child,
                 if (state.show) ...[
+                  Container(color: Theme.of(context).backgroundColor.withOpacity(0.8)),
                   // &&_inRect
                   if (state.currentUid != widget.viewUid)
                     DragViewIcon(
@@ -181,15 +182,10 @@ class DragViewIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.white : Colors.black;
     return AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        alignment: Alignment.center,
-        // decoration: cd.isNotEmpty
-        //     ? BoxDecoration(
-        //         borderRadius: br,
-        //         color: Const.tecartaBlue.withOpacity(0.5),
-        //         border: Border.all(width: 5, color: Const.tecartaBlue.withOpacity(0.5)))
-        //     : const BoxDecoration(color: Colors.transparent),
         child: DragTarget<int>(
             onAccept: onAccept,
             // onLeave: (_) => context.tbloc<DragOverlayCubit>().clear(),
@@ -197,27 +193,26 @@ class DragViewIcon extends StatelessWidget {
             // tec.dmPrint('Moving within object: ${d.offset}'),
             builder: (c, cd, rd) {
               final backgroundColor =
-                  cd.isNotEmpty ? Theme.of(context).cardColor : Const.tecartaBlue;
-              final iconColor = cd.isNotEmpty ? Const.tecartaBlue : Theme.of(context).cardColor;
+                  cd.isNotEmpty ? Const.tecartaBlue : Theme.of(context).cardColor;
+              final iconColor = cd.isNotEmpty ? Theme.of(context).cardColor : Const.tecartaBlue;
               return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Card(
-                      shape: const CircleBorder(),
-                      elevation: cd.isNotEmpty ? 0 : 10,
+                      shape: CircleBorder(
+                          side: BorderSide(width: 3, color: Const.tecartaBlue.withOpacity(0.5))),
+                      elevation: cd.isNotEmpty ? 0 : 3,
                       child: CircleAvatar(
                         radius: 30,
                         backgroundColor: backgroundColor,
                         child: Icon(icon, color: iconColor),
                       ),
                     ),
-                    Chip(
-                      backgroundColor: backgroundColor,
-                      label: Text(
-                        text,
-                        style: TextStyle(color: iconColor),
-                      ),
+                    const SizedBox(height: 10),
+                    Text(
+                      text,
+                      style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
                     )
                   ]);
             }));

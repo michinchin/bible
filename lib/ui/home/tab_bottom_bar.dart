@@ -108,6 +108,8 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
     if (uid != null && _viewUid != uid) {
       context.viewManager.swapPositions(
           context.viewManager.indexOfView(_viewUid), context.viewManager.indexOfView(uid));
+    } else if (uid == null) {
+      context.tbloc<DragOverlayCubit>().clear();
     }
     setState(() {
       _showSelectViewOverlay = false;
@@ -1101,14 +1103,7 @@ class _SelectViewOverlay extends StatelessWidget {
     }
 
     final child = InkWell(
-        onTap: () async {
-          if (viewUid & Const.recentFlag == Const.recentFlag) {
-            await ViewManager.shared.onAddView(context, Const.viewTypeVolume,
-                options: <String, dynamic>{'volumeId': viewUid ^ Const.recentFlag});
-          }
-          onSelect(null);
-        },
-        child: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move));
+        onTap: () => onSelect(null), child: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move));
     final aligned = Align(
         alignment: Alignment.center,
         child: Draggable(
