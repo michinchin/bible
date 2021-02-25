@@ -316,7 +316,7 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 300),
     )..forward(from: 0);
     _animation = CurvedAnimation(
       parent: _controller,
