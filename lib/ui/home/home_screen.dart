@@ -19,6 +19,7 @@ import '../../models/notifications/notifications_model.dart';
 import '../common/common.dart';
 import '../common/tec_scroll_listener.dart';
 import '../library/library.dart';
+import '../menu/reorder_views.dart';
 import '../onboarding/onboarding.dart';
 import '../sheet/snap_sheet.dart';
 import '../volume/volume_view_data.dart';
@@ -88,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
         BlocProvider<SelectionCmdBloc>(create: (context) => SelectionCmdBloc()),
         BlocProvider<SheetManagerBloc>(create: (context) => SheetManagerBloc()),
         BlocProvider<TabManagerBloc>(create: (context) => TabManagerBloc()),
+        BlocProvider<DragOverlayCubit>(create: (_) => DragOverlayCubit())
       ],
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: AppSettings.shared.overlayStyle(context),

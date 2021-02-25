@@ -6,6 +6,7 @@ import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
+import '../menu/reorder_views.dart';
 
 @immutable
 class ActionBarItem {
@@ -116,8 +117,14 @@ class ActionBar extends StatelessWidget {
         ));
     return Draggable<int>(
         data: viewUid,
-        onDragStarted: () => context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse),
-        onDragCompleted: () => context.tbloc<SheetManagerBloc>().add(SheetEvent.main),
+        onDragStarted: () {
+          context.tbloc<DragOverlayCubit>().show(viewUid);
+          context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
+        },
+        onDragEnd: (_) {
+          context.tbloc<DragOverlayCubit>().clear();
+          context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
+        },
         feedback: Opacity(opacity: 0.8, child: child),
         child: child);
   }

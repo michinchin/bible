@@ -25,6 +25,7 @@ import '../common/tec_modal_popup_menu.dart';
 import '../common/tec_navigator.dart';
 import '../library/library.dart';
 import '../library/volume_image.dart';
+import '../menu/reorder_views.dart';
 import '../menu/settings.dart';
 import '../nav/nav.dart';
 import '../ugc/ugc_view.dart';
@@ -95,6 +96,7 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
   void _onViewTap(int uid) {
     context.tabManager.changeTab(TecTab.reader);
     context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
+    context.tbloc<DragOverlayCubit>().show(uid);
     setState(() {
       _viewUid = uid;
       _showSelectViewOverlay = true;
@@ -106,6 +108,8 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
     if (uid != null && _viewUid != uid) {
       context.viewManager.swapPositions(
           context.viewManager.indexOfView(_viewUid), context.viewManager.indexOfView(uid));
+    } else if (uid == null) {
+      context.tbloc<DragOverlayCubit>().clear();
     }
     setState(() {
       _showSelectViewOverlay = false;
@@ -598,12 +602,11 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
                                 child: Draggable(
                                     data: cover.uid,
                                     onDragStarted: () {
-                                      context.tabManager.changeTab(TecTab.reader);
+                                      context.tbloc<DragOverlayCubit>().show(cover.uid);
                                       context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
+                                      context.tabManager.changeTab(TecTab.reader);
                                     },
-                                    onDragCompleted: () => widget.parentContext
-                                        .tbloc<SheetManagerBloc>()
-                                        .add(SheetEvent.main),
+                                    // onDragCompleted never called because widget already gets disposed
                                     feedback: cover.icon,
                                     child: cover.icon),
                               )
@@ -631,6 +634,7 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
                                             ]
                                           : [],
                                     ),
+
                               ),
                             ),
                           ],
@@ -1058,53 +1062,49 @@ class _SelectViewOverlay extends StatelessWidget {
     }
 
     final volume = VolumesRepository.shared.volumeWithId(volumeId);
-    final visibleViews = vmBloc.state.views.where((v) => vmBloc.isViewVisible(v.uid)).toList();
-    var viewLayout = vmBloc.layoutOfView(visibleViews.last.uid).rect;
-
+    Rect viewLayout;
     if (vmBloc.isViewVisible(viewUid)) {
       viewLayout = vmBloc.layoutOfView(viewUid).rect;
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      TecToast.show(context, 'Drag to place the ${volume.name}');
-    });
-
     final child = InkWell(
-        onTap: () async {
-          if (viewUid & Const.recentFlag == Const.recentFlag) {
-            await ViewManager.shared.onAddView(context, Const.viewTypeVolume,
-                options: <String, dynamic>{'volumeId': viewUid ^ Const.recentFlag});
-          } else {
-            vmBloc.show(viewUid);
-          }
-          onSelect(null);
-        },
-        child: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move));
-
+        onTap: () => onSelect(null), child: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move));
+    final aligned = Align(
+        alignment: Alignment.center,
+        child: Draggable(
+          data: viewUid,
+          onDragStarted: () {
+            context.tabManager.changeTab(TecTab.reader);
+            context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
+          },
+          childWhenDragging: const SizedBox.shrink(),
+          onDragEnd: (_) {
+            context.tbloc<DragOverlayCubit>().clear();
+            onSelect(null);
+            context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
+          },
+          feedback: child,
+          child: child,
+        ));
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => onSelect(null),
       child: SafeArea(
-        child: Stack(children: [
-          Positioned.fromRect(
-            rect: viewLayout,
-            child: Align(
-                alignment: Alignment.center,
-                child: Draggable(
-                  data: viewUid,
-                  onDragStarted: () {
-                    context.tabManager.changeTab(TecTab.reader);
-                    context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
-                  },
-                  childWhenDragging: const SizedBox.shrink(),
-                  onDragCompleted: () {
-                    onSelect(null);
-                    context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
-                  },
-                  feedback: child,
-                  child: child,
-                )),
-          ),
+        child: Stack(alignment: Alignment.center, children: [
+          if (viewLayout != null)
+            Positioned.fromRect(
+              rect: viewLayout,
+              child: aligned,
+            )
+          else
+            aligned,
+          Positioned(
+              bottom: 10,
+              child: Chip(
+                backgroundColor: Const.tecartaBlue,
+                label: Text('Drag to place the ${volume.name}',
+                    style: const TextStyle(color: Colors.white)),
+              ))
         ]),
       ),
     );
