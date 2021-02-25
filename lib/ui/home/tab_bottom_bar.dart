@@ -298,7 +298,6 @@ class _ExpandedView extends StatefulWidget {
 class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Animation<double> _animation;
-  var _showShadow = false;
 
   @override
   void initState() {
@@ -306,17 +305,12 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
-    )..forward(from: 0);
+    );
+
     _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.fastOutSlowIn,
-    )..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          setState(() {
-            _showShadow = true;
-          });
-        }
-      });
+    );
   }
 
   void _onSwitchViews(int viewUid) {
@@ -551,7 +545,7 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
       }
     }
 
-    return Material(
+    final view = Material(
       color: Colors.transparent,
       child: GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -612,19 +606,16 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
                                 textScaleFactor: 0.7,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                      fontSize: contentFontSizeWith(context),
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      shadows: _showShadow
-                                          ? [
-                                              const Shadow(
-                                                offset: Offset(1.0, 1.0),
-                                                blurRadius: 5,
-                                                color: Colors.black,
-                                              ),
-                                            ]
-                                          : [],
-                                    ),
+                                    fontSize: contentFontSizeWith(context),
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    shadows: [
+                                      const Shadow(
+                                        offset: Offset(1.0, 1.0),
+                                        blurRadius: 5,
+                                        color: Colors.black,
+                                      ),
+                                    ]),
                               ),
                             ),
                           ],
@@ -635,6 +626,15 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
             ),
           )),
     );
+
+    // view has been created - start the animation on next frame
+    if (_controller.status == AnimationStatus.dismissed) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        _controller.forward(from: 0.5);
+      });
+    }
+
+    return view;
   }
 }
 
@@ -855,7 +855,7 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
         children: [
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(left: 30.0),
+              padding: EdgeInsets.only(left: isSmallScreen(context) ? 10 : 30.0),
               child: _expandedView,
             ),
           ),
