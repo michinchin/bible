@@ -75,7 +75,7 @@ List<TableRow> buildMenuItemsForViewWithState(
 
   if (isMaximized) {
     items.add(tecModalPopupMenuItem(
-        menuContext, SFSymbols.arrow_down_right_arrow_up_left, 'Exit full screen', () {
+        menuContext, SFSymbols.arrow_down_right_arrow_up_left, 'Exit Full Screen', () {
       Navigator.of(menuContext).maybePop();
       vmBloc?.restore();
     }));

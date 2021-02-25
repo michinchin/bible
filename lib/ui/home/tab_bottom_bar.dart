@@ -55,12 +55,10 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
   Map<TecTab, GlobalKey> tabKeys;
   GlobalKey ugcViewKey;
   int _viewUid;
-  bool _showSelectViewOverlay;
 
   @override
   void initState() {
     super.initState();
-    _showSelectViewOverlay = false;
     _closeFABController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 150),
@@ -99,7 +97,6 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
     context.tbloc<DragOverlayCubit>().show(uid);
     setState(() {
       _viewUid = uid;
-      _showSelectViewOverlay = true;
     });
   }
 
@@ -111,9 +108,6 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
     } else if (uid == null) {
       context.tbloc<DragOverlayCubit>().clear();
     }
-    setState(() {
-      _showSelectViewOverlay = false;
-    });
   }
 
   Future<bool> _onBackPressed() async {
@@ -168,7 +162,7 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
               BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
             return Visibility(
                 visible: (sheetState.type != SheetType.selection),
-                child: ((tabState.tab == TecTab.switcher)
+                child: tabState.tab == TecTab.switcher
                     ? Padding(
                         padding: EdgeInsets.only(bottom: bottomPadding),
                         child: _CloseFAB(
@@ -176,34 +170,30 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
                           parentContext: context,
                           onViewTap: _onViewTap,
                         ))
-                    : _showSelectViewOverlay
-                        ? const SizedBox.shrink()
-                        : SlideTransition(position: _slideTabAnimation, child: _TabFAB())));
+                    : SlideTransition(position: _slideTabAnimation, child: _TabFAB()));
           }),
           drawer: (tabState.tab != TecTab.reader) ? null : UGCView(key: ugcViewKey),
           drawerScrimColor: barrierColorWithContext(context),
-          bottomNavigationBar: _showSelectViewOverlay
-              ? null
-              : BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
-                  if (sheetState.type == SheetType.selection ||
-                      tabState.tab == TecTab.switcher ||
-                      sheetState.type == SheetType.hidden) {
-                    // slide the tab off the screen...
-                    _slideTabController.forward();
-                  } else {
-                    // slide the tab to normal view...
-                    _slideTabController.reverse();
-                  }
+          bottomNavigationBar:
+              BlocBuilder<SheetManagerBloc, SheetManagerState>(builder: (context, sheetState) {
+            if (sheetState.type == SheetType.selection ||
+                tabState.tab == TecTab.switcher ||
+                sheetState.type == SheetType.hidden) {
+              // slide the tab off the screen...
+              _slideTabController.forward();
+            } else {
+              // slide the tab to normal view...
+              _slideTabController.reverse();
+            }
 
-                  return Opacity(
-                    opacity:
-                        (sheetState.type == SheetType.selection || tabState.tab == TecTab.switcher)
-                            ? 0
-                            : 1.0,
-                    child: SlideTransition(
-                        position: _slideTabAnimation, child: TecTabBar(tabs: widget.tabs)),
-                  );
-                }),
+            return Opacity(
+              opacity: (sheetState.type == SheetType.selection || tabState.tab == TecTab.switcher)
+                  ? 0
+                  : 1.0,
+              child: SlideTransition(
+                  position: _slideTabAnimation, child: TecTabBar(tabs: widget.tabs)),
+            );
+          }),
           body: Container(
             color: Theme.of(context).backgroundColor,
             child: Stack(
@@ -221,7 +211,6 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
                           builder: (context) {
                             return Stack(children: [
                               widget.tabs[i].widget,
-                              if (_showSelectViewOverlay) _SelectViewOverlay(_viewUid, onSelectView)
                             ]);
                           },
                         ),
@@ -321,8 +310,7 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
     _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.fastOutSlowIn,
-    )
-      ..addStatusListener((status) {
+    )..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           setState(() {
             _showShadow = true;
@@ -567,7 +555,10 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
       color: Colors.transparent,
       child: GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () => context.tabManager.changeTab(TecTab.reader),
+          onTap: () {
+            context.tabManager.changeTab(TecTab.reader);
+            context.tbloc<SheetManagerBloc>()..add(SheetEvent.restore)..add(SheetEvent.main);
+          },
           child: SingleChildScrollView(
             reverse: true,
             child: Container(
@@ -634,7 +625,6 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
                                             ]
                                           : [],
                                     ),
-
                               ),
                             ),
                           ],
@@ -1043,96 +1033,96 @@ class TecTabBar extends StatelessWidget {
   }
 }
 
-class _SelectViewOverlay extends StatelessWidget {
-  final int viewUid;
-  final Function(int) onSelect;
+// class _SelectViewOverlay extends StatelessWidget {
+//   final int viewUid;
+//   final Function(int) onSelect;
 
-  const _SelectViewOverlay(this.viewUid, this.onSelect);
+//   const _SelectViewOverlay(this.viewUid, this.onSelect);
 
-  @override
-  Widget build(BuildContext context) {
-    final vmBloc = context.viewManager;
-    int volumeId;
+//   @override
+//   Widget build(BuildContext context) {
+//     final vmBloc = context.viewManager;
+//     int volumeId;
 
-    if (viewUid & Const.recentFlag == Const.recentFlag) {
-      volumeId = viewUid ^ Const.recentFlag;
-    } else {
-      volumeId =
-          (vmBloc.dataBlocWithView(viewUid) as VolumeViewDataBloc).state.asVolumeViewData.volumeId;
-    }
+//     if (viewUid & Const.recentFlag == Const.recentFlag) {
+//       volumeId = viewUid ^ Const.recentFlag;
+//     } else {
+//       volumeId =
+//           (vmBloc.dataBlocWithView(viewUid) as VolumeViewDataBloc).state.asVolumeViewData.volumeId;
+//     }
 
-    final volume = VolumesRepository.shared.volumeWithId(volumeId);
-    Rect viewLayout;
-    if (vmBloc.isViewVisible(viewUid)) {
-      viewLayout = vmBloc.layoutOfView(viewUid).rect;
-    }
+//     final volume = VolumesRepository.shared.volumeWithId(volumeId);
+//     Rect viewLayout;
+//     if (vmBloc.isViewVisible(viewUid)) {
+//       viewLayout = vmBloc.layoutOfView(viewUid).rect;
+//     }
 
-    final child = InkWell(
-        onTap: () => onSelect(null), child: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move));
-    final aligned = Align(
-        alignment: Alignment.center,
-        child: Draggable(
-          data: viewUid,
-          onDragStarted: () {
-            context.tabManager.changeTab(TecTab.reader);
-            context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
-          },
-          childWhenDragging: const SizedBox.shrink(),
-          onDragEnd: (_) {
-            context.tbloc<DragOverlayCubit>().clear();
-            onSelect(null);
-            context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
-          },
-          feedback: child,
-          child: child,
-        ));
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: () => onSelect(null),
-      child: SafeArea(
-        child: Stack(alignment: Alignment.center, children: [
-          if (viewLayout != null)
-            Positioned.fromRect(
-              rect: viewLayout,
-              child: aligned,
-            )
-          else
-            aligned,
-          Positioned(
-              bottom: 10,
-              child: Chip(
-                backgroundColor: Const.tecartaBlue,
-                label: Text('Drag to place the ${volume.name}',
-                    style: const TextStyle(color: Colors.white)),
-              ))
-        ]),
-      ),
-    );
-  }
-}
+//     final child = InkWell(
+//         onTap: () => onSelect(null), child: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move));
+//     final aligned = Align(
+//         alignment: Alignment.center,
+//         child: Draggable(
+//           data: viewUid,
+//           onDragStarted: () {
+//             context.tabManager.changeTab(TecTab.reader);
+//             context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
+//           },
+//           childWhenDragging: const SizedBox.shrink(),
+//           onDragCompleted: () {
+//             context.tbloc<DragOverlayCubit>().clear();
+//             context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
+//             onSelect(null);
+//           },
+//           feedback: child,
+//           child: child,
+//         ));
+//     return GestureDetector(
+//       behavior: HitTestBehavior.translucent,
+//       onTap: () => onSelect(null),
+//       child: SafeArea(
+//         child: Stack(alignment: Alignment.center, children: [
+//           if (viewLayout != null)
+//             Positioned.fromRect(
+//               rect: viewLayout,
+//               child: aligned,
+//             )
+//           else
+//             aligned,
+//           Positioned(
+//               bottom: 10,
+//               child: Chip(
+//                 backgroundColor: Const.tecartaBlue,
+//                 label: Text('Drag to place the ${volume.name}',
+//                     style: const TextStyle(color: Colors.white)),
+//               ))
+//         ]),
+//       ),
+//     );
+//   }
+// }
 
-class _StackIcon extends StatelessWidget {
-  final Widget child;
-  final IconData icon;
+// class _StackIcon extends StatelessWidget {
+//   final Widget child;
+//   final IconData icon;
 
-  const _StackIcon(this.child, this.icon);
+//   const _StackIcon(this.child, this.icon);
 
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.topRight.add(const Alignment(-2.5, -0.5)),
-      children: [
-        child,
-        CircleAvatar(
-          radius: 15,
-          backgroundColor: Const.tecartaBlue,
-          child: Icon(
-            icon,
-            size: 15,
-            color: Colors.white,
-          ),
-        )
-      ],
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Stack(
+//       alignment: Alignment.topRight.add(const Alignment(-2.5, -0.5)),
+//       children: [
+//         child,
+//         CircleAvatar(
+//           radius: 15,
+//           backgroundColor: Const.tecartaBlue,
+//           child: Icon(
+//             icon,
+//             size: 15,
+//             color: Colors.white,
+//           ),
+//         )
+//       ],
+//     );
+//   }
+// }
