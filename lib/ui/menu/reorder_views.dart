@@ -188,20 +188,18 @@ class DragViewIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkMode ? Colors.white : Const.tecartaBlue;
-    return InkWell(
-      onTap: () => onAccept(null),
-      child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          child: DragTarget<int>(
-              onAccept: onAccept,
-              // onLeave: (_) => context.tbloc<DragOverlayCubit>().clear(),
-              // onMove: (d) => context.tbloc<DragOverlayCubit>().onMoveWithinIcon(context, d),
-              // tec.dmPrint('Moving within object: ${d.offset}'),
-              builder: (c, cd, rd) {
-                final backgroundColor =
-                    cd.isNotEmpty ? Const.tecartaBlue : Theme.of(context).backgroundColor;
-                final iconColor = cd.isNotEmpty ? Colors.white : Const.tecartaBlue;
-                return Column(
+    return DragTarget<int>(
+        onAccept: onAccept,
+        builder: (c, cd, rd) {
+          final backgroundColor =
+              cd.isNotEmpty ? Const.tecartaBlue : Theme.of(context).backgroundColor;
+          final iconColor = cd.isNotEmpty ? Colors.white : Const.tecartaBlue;
+          return InkWell(
+            onTap: () => onAccept(null),
+            child: AnimatedContainer(
+                padding: const EdgeInsets.all(30),
+                duration: const Duration(milliseconds: 250),
+                child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -219,10 +217,11 @@ class DragViewIcon extends StatelessWidget {
                       Text(
                         text,
                         textScaleFactor: 1.5,
+                        textAlign: TextAlign.center,
                         style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
                       ),
-                    ]);
-              })),
-    );
+                    ])),
+          );
+        });
   }
 }

@@ -591,8 +591,9 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
                                       context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
                                       context.tabManager.changeTab(TecTab.reader);
                                     },
-                                    // onDragCompleted never called because widget already gets disposed
-                                    feedback: cover.icon,
+                                    onDraggableCanceled: (v, o) =>
+                                        widget.parentContext.tbloc<DragOverlayCubit>().clear(),
+                                    feedback: Transform.scale(scale: 1.25, child: cover.icon),
                                     child: cover.icon),
                               )
                             else
