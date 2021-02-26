@@ -1,4 +1,3 @@
-import 'package:bible/ui/volume/chapter/chapter_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
@@ -7,7 +6,6 @@ import 'package:tec_views/tec_views.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../models/const.dart';
-import '../common/common.dart';
 
 ///
 /// DragOverlay
@@ -68,110 +66,113 @@ class _DragTargetViewState extends State<DragTargetView> {
     }
 
     return BlocBuilder<DragOverlayCubit, DragOverlayDetails>(
-      builder: (c, state) => Stack(alignment: Alignment.center, children: [
-        widget.child,
-        if (state.show) ...[
-          GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: clear,
-              child: Container(color: Theme.of(c).backgroundColor.withOpacity(0.8))),
-          // &&_inRect
-          if (state.currentUid != widget.viewUid)
-            DragViewIcon(
-              text: 'View Here',
-              icon: SFSymbols.rectangle_badge_checkmark,
-              onAccept: (uid) async {
-                // tec.dmPrint(' ${state.uid}');
+      builder: (c, state) => DragTarget<int>(
+        onAccept: (_) => clear(),
+        builder: (c, cd, rd) => Stack(alignment: Alignment.center, children: [
+          widget.child,
+          if (state.show) ...[
+            GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: clear,
+                child: Container(color: Theme.of(c).backgroundColor.withOpacity(0.8))),
+            // &&_inRect
+            if (state.currentUid != widget.viewUid)
+              DragViewIcon(
+                text: 'View Here',
+                icon: SFSymbols.rectangle_badge_checkmark,
+                onAccept: (uid) async {
+                  // tec.dmPrint(' ${state.uid}');
 
-                var b = uid;
-                if (b == null) {
-                  final currentUid = c.tbloc<DragOverlayCubit>().state.currentUid;
-                  if (currentUid != 0) {
-                    b = currentUid;
-                  }
-                }
-                if (b != widget.viewUid) {
-                  // ignore: close_sinks
-                  final vmBloc = c.viewManager;
-
-                  if (vmBloc == null) {
-                    return;
-                  }
-
-                  if (vmBloc.state.maximizedViewUid > 0 || vmBloc.countOfVisibleViews == 1) {
-                    if (b & Const.recentFlag == Const.recentFlag) {
-                      // need to create the new view...
-                      final nextUid = vmBloc.state.nextUid;
-                      await ViewManager.shared.onAddView(c, Const.viewTypeVolume,
-                          currentViewId: widget.viewUid,
-                          options: <String, dynamic>{'volumeId': b ^ Const.recentFlag});
-
-                      vmBloc.maximize(nextUid);
-                    } else {
-                      vmBloc.maximize(b);
-                    }
-                  } else {
-                    if (b & Const.recentFlag == Const.recentFlag) {
-                      final toPosition = vmBloc.indexOfView(widget.viewUid);
-                      vmBloc.remove(widget.viewUid);
-
-                      final nextUid = vmBloc.state.nextUid;
-
-                      // need to create the new view...
-                      await ViewManager.shared.onAddView(c, Const.viewTypeVolume,
-                          options: <String, dynamic>{'volumeId': b ^ Const.recentFlag});
-
-                      final fromPosition = vmBloc.indexOfView(nextUid);
-
-                      vmBloc
-                        ..move(fromPosition: fromPosition, toPosition: toPosition, unhide: true);
-                    } else {
-                      vmBloc.swapPositions(
-                          c.viewManager.indexOfView(b), c.viewManager.indexOfView(widget.viewUid));
+                  var b = uid;
+                  if (b == null) {
+                    final currentUid = c.tbloc<DragOverlayCubit>().state.currentUid;
+                    if (currentUid != 0) {
+                      b = currentUid;
                     }
                   }
-                }
-                clear();
-              },
-            ),
-          if (state.currentUid == widget.viewUid)
-            Row(children: [
-              if (oneView) ...[
-                Expanded(
-                  child: DragViewIcon(
-                    onAccept: (_) {
-                      clear();
-                      c.viewManager.remove(widget.viewUid);
-                    },
-                    text: 'Close',
-                    icon: SFSymbols.xmark,
-                  ),
-                ),
-                if (!isMaximized) ...[
+                  if (b != widget.viewUid) {
+                    // ignore: close_sinks
+                    final vmBloc = c.viewManager;
+
+                    if (vmBloc == null) {
+                      return;
+                    }
+
+                    if (vmBloc.state.maximizedViewUid > 0 || vmBloc.countOfVisibleViews == 1) {
+                      if (b & Const.recentFlag == Const.recentFlag) {
+                        // need to create the new view...
+                        final nextUid = vmBloc.state.nextUid;
+                        await ViewManager.shared.onAddView(c, Const.viewTypeVolume,
+                            currentViewId: widget.viewUid,
+                            options: <String, dynamic>{'volumeId': b ^ Const.recentFlag});
+
+                        vmBloc.maximize(nextUid);
+                      } else {
+                        vmBloc.maximize(b);
+                      }
+                    } else {
+                      if (b & Const.recentFlag == Const.recentFlag) {
+                        final toPosition = vmBloc.indexOfView(widget.viewUid);
+                        vmBloc.remove(widget.viewUid);
+
+                        final nextUid = vmBloc.state.nextUid;
+
+                        // need to create the new view...
+                        await ViewManager.shared.onAddView(c, Const.viewTypeVolume,
+                            options: <String, dynamic>{'volumeId': b ^ Const.recentFlag});
+
+                        final fromPosition = vmBloc.indexOfView(nextUid);
+
+                        vmBloc
+                          ..move(fromPosition: fromPosition, toPosition: toPosition, unhide: true);
+                      } else {
+                        vmBloc.swapPositions(c.viewManager.indexOfView(b),
+                            c.viewManager.indexOfView(widget.viewUid));
+                      }
+                    }
+                  }
+                  clear();
+                },
+              ),
+            if (state.currentUid == widget.viewUid)
+              Row(children: [
+                if (oneView) ...[
                   Expanded(
                     child: DragViewIcon(
                       onAccept: (_) {
                         clear();
-                        c.viewManager.maximize(widget.viewUid);
+                        c.viewManager.remove(widget.viewUid);
                       },
-                      icon: SFSymbols.arrow_up_left_arrow_down_right,
-                      text: 'Full Screen',
+                      text: 'Close',
+                      icon: SFSymbols.xmark,
                     ),
                   ),
-                ] else
-                  Expanded(
+                  if (!isMaximized) ...[
+                    Expanded(
                       child: DragViewIcon(
-                    onAccept: (_) {
-                      clear();
-                      c.viewManager.restore();
-                    },
-                    icon: SFSymbols.arrow_down_right_arrow_up_left,
-                    text: 'Exit Full Screen',
-                  ))
-              ]
-            ]),
-        ]
-      ]),
+                        onAccept: (_) {
+                          clear();
+                          c.viewManager.maximize(widget.viewUid);
+                        },
+                        icon: SFSymbols.arrow_up_left_arrow_down_right,
+                        text: 'Full Screen',
+                      ),
+                    ),
+                  ] else
+                    Expanded(
+                        child: DragViewIcon(
+                      onAccept: (_) {
+                        clear();
+                        c.viewManager.restore();
+                      },
+                      icon: SFSymbols.arrow_down_right_arrow_up_left,
+                      text: 'Exit Full Screen',
+                    ))
+                ]
+              ]),
+          ]
+        ]),
+      ),
     );
   }
 }
