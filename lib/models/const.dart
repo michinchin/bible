@@ -38,6 +38,7 @@ class Const {
   static const prefFirstTimeOpen = 'firstTimeOpen';
   static const prefNotifications = 'notifications';
   static const prefNotificationUpdate = 'notificationUpdate';
+  static const prefNotificationPermissionGranted = 'notificationPermission';
 
   // Onboarding
   static const prefShowOnboarding = 'showOnboaring';

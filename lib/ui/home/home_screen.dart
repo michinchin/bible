@@ -63,7 +63,14 @@ class _HomeScreenState extends State<HomeScreen> {
           (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 500 : 1250;
 
       if (mounted) {
-        final granted = await Notifications.shared?.requestPermissions(context);
+        var granted = false;
+
+        if (tec.Prefs.shared.getInt(Const.prefNotificationPermissionGranted, defaultValue: 0) !=
+            -1) {
+          granted = await Notifications.shared?.requestPermissions(context);
+          await tec.Prefs.shared.setInt(Const.prefNotificationPermissionGranted, granted ? 1 : -1);
+        }
+
         if (granted) {
           NotificationBloc.init(NotificationsModel.shared);
           NotificationsModel.shared.bible = currentBibleFromContext(context);
@@ -175,7 +182,9 @@ enum ChapterButton { previous, next }
 class ChangeChapterFab extends StatefulWidget {
   final ViewManagerState state;
   final ChapterButton buttonType;
+
   const ChangeChapterFab(this.state, this.buttonType);
+
   @override
   _ChangeChapterFabState createState() => _ChangeChapterFabState();
 }

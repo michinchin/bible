@@ -5,12 +5,14 @@ import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../models/const.dart';
 import '../../models/notifications/notifications_model.dart';
 import '../home/votd_screen.dart';
 
 Future<void> showNotifications(BuildContext context) async {
   final allowed = await Notifications.shared?.requestPermissions(context) ?? false;
   if (allowed) {
+    await tec.Prefs.shared.setInt(Const.prefNotificationPermissionGranted, 1);
     NotificationBloc.init(NotificationsModel());
     await Navigator.of(context, rootNavigator: true).push(MaterialPageRoute<void>(
         builder: (c) =>
