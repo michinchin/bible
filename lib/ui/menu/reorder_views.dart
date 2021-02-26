@@ -90,6 +90,7 @@ class _DragTargetViewState extends State<DragTargetView> {
                       b = currentUid;
                     }
                   }
+                  clear();
                   if (b != widget.viewUid) {
                     // ignore: close_sinks
                     final vmBloc = c.viewManager;
@@ -131,7 +132,6 @@ class _DragTargetViewState extends State<DragTargetView> {
                       }
                     }
                   }
-                  clear();
                 },
               ),
             if (state.currentUid == widget.viewUid)
