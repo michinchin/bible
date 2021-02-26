@@ -75,7 +75,7 @@ dependencies:
     hosted:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
-    version: ^2.1.0
+    version: ^2.1.1
   animations: ^1.1.2
   bloc: ^6.1.0
   cached_network_image: ^2.3.3
@@ -112,9 +112,9 @@ dependencies:
   video_player: ^1.0.1
   zefyr: ^1.0.0-dev.2.0
 
-# dependency_overrides:
-#   tec_util:
-#     path: ../shared/tec_util
+#dependency_overrides:
+#  tec_widgets:
+#     path: ../shared/tec_widgets
 
 dev_dependencies:
   flutter_test:

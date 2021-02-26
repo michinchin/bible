@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:bible/ui/common/tec_scroll_listener.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,12 +10,12 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../../blocs/content_settings.dart';
 import '../../../blocs/selection/selection_bloc.dart';
-import '../../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../../models/app_settings.dart';
 import '../../common/common.dart';
 import '../../common/tec_auto_hide_app_bar.dart';
 import '../../common/tec_interactive_viewer.dart';
 import '../../common/tec_pdf_viewer.dart';
+import '../../common/tec_scroll_listener.dart';
 import '../volume_view_data_bloc.dart';
 import 'shared_app_bar_bloc.dart';
 import 'study_res_bloc.dart';
