@@ -1,3 +1,4 @@
+import 'package:bible/ui/volume/chapter/chapter_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
@@ -61,8 +62,9 @@ class _DragTargetViewState extends State<DragTargetView> {
   Widget build(BuildContext context) {
     final isMaximized = context.viewManager?.state?.maximizedViewUid != 0;
     final oneView = !(context.viewManager.countOfVisibleViews == 1 && !isMaximized);
-    void clear(BuildContext context) {
+    void clear() {
       context.tbloc<DragOverlayCubit>().clear();
+      context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
     }
 
     return BlocBuilder<DragOverlayCubit, DragOverlayDetails>(
@@ -71,8 +73,8 @@ class _DragTargetViewState extends State<DragTargetView> {
         if (state.show) ...[
           GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onTap: () => clear(context),
-              child: Container(color: Theme.of(context).backgroundColor.withOpacity(0.8))),
+              onTap: clear,
+              child: Container(color: Theme.of(c).backgroundColor.withOpacity(0.8))),
           // &&_inRect
           if (state.currentUid != widget.viewUid)
             DragViewIcon(
@@ -83,14 +85,14 @@ class _DragTargetViewState extends State<DragTargetView> {
 
                 var b = uid;
                 if (b == null) {
-                  final currentUid = context.tbloc<DragOverlayCubit>().state.currentUid;
+                  final currentUid = c.tbloc<DragOverlayCubit>().state.currentUid;
                   if (currentUid != 0) {
                     b = currentUid;
                   }
                 }
                 if (b != widget.viewUid) {
                   // ignore: close_sinks
-                  final vmBloc = context.viewManager;
+                  final vmBloc = c.viewManager;
 
                   if (vmBloc == null) {
                     return;
@@ -100,7 +102,7 @@ class _DragTargetViewState extends State<DragTargetView> {
                     if (b & Const.recentFlag == Const.recentFlag) {
                       // need to create the new view...
                       final nextUid = vmBloc.state.nextUid;
-                      await ViewManager.shared.onAddView(context, Const.viewTypeVolume,
+                      await ViewManager.shared.onAddView(c, Const.viewTypeVolume,
                           currentViewId: widget.viewUid,
                           options: <String, dynamic>{'volumeId': b ^ Const.recentFlag});
 
@@ -116,7 +118,7 @@ class _DragTargetViewState extends State<DragTargetView> {
                       final nextUid = vmBloc.state.nextUid;
 
                       // need to create the new view...
-                      await ViewManager.shared.onAddView(context, Const.viewTypeVolume,
+                      await ViewManager.shared.onAddView(c, Const.viewTypeVolume,
                           options: <String, dynamic>{'volumeId': b ^ Const.recentFlag});
 
                       final fromPosition = vmBloc.indexOfView(nextUid);
@@ -124,12 +126,12 @@ class _DragTargetViewState extends State<DragTargetView> {
                       vmBloc
                         ..move(fromPosition: fromPosition, toPosition: toPosition, unhide: true);
                     } else {
-                      vmBloc.swapPositions(context.viewManager.indexOfView(b),
-                          context.viewManager.indexOfView(widget.viewUid));
+                      vmBloc.swapPositions(
+                          c.viewManager.indexOfView(b), c.viewManager.indexOfView(widget.viewUid));
                     }
                   }
                 }
-                clear(context);
+                clear();
               },
             ),
           if (state.currentUid == widget.viewUid)
@@ -138,8 +140,8 @@ class _DragTargetViewState extends State<DragTargetView> {
                 Expanded(
                   child: DragViewIcon(
                     onAccept: (_) {
-                      clear(context);
-                      context.viewManager.remove(widget.viewUid);
+                      clear();
+                      c.viewManager.remove(widget.viewUid);
                     },
                     text: 'Close',
                     icon: SFSymbols.xmark,
@@ -149,8 +151,8 @@ class _DragTargetViewState extends State<DragTargetView> {
                   Expanded(
                     child: DragViewIcon(
                       onAccept: (_) {
-                        clear(context);
-                        context.viewManager.maximize(widget.viewUid);
+                        clear();
+                        c.viewManager.maximize(widget.viewUid);
                       },
                       icon: SFSymbols.arrow_up_left_arrow_down_right,
                       text: 'Full Screen',
@@ -160,8 +162,8 @@ class _DragTargetViewState extends State<DragTargetView> {
                   Expanded(
                       child: DragViewIcon(
                     onAccept: (_) {
-                      clear(context);
-                      context.viewManager.restore();
+                      clear();
+                      c.viewManager.restore();
                     },
                     icon: SFSymbols.arrow_down_right_arrow_up_left,
                     text: 'Exit Full Screen',
