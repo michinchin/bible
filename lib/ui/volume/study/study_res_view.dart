@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
+import 'package:bible/ui/common/tec_scroll_listener.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart' as tec;
@@ -10,6 +10,8 @@ import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../../blocs/content_settings.dart';
+import '../../../blocs/selection/selection_bloc.dart';
+import '../../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../../models/app_settings.dart';
 import '../../common/common.dart';
 import '../../common/tec_auto_hide_app_bar.dart';
@@ -174,36 +176,47 @@ class _Article extends StatelessWidget {
   final StudyRes studyRes;
   final Size viewSize;
   final EdgeInsets padding;
+  final _scrollController = ScrollController();
 
-  const _Article(
-      {Key key, @required this.studyRes, @required this.viewSize, @required this.padding})
+  _Article({Key key, @required this.studyRes, @required this.viewSize, @required this.padding})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return tec.isNullOrEmpty(studyRes.html)
         ? const Center(child: LoadingIndicator())
-        : TecScrollbar(
-            child: SingleChildScrollView(
-              child: BlocBuilder<ContentSettingsBloc, ContentSettings>(
-                builder: (context, settings) {
-                  final marginWidth = (viewSize.width * _marginPercent).roundToDouble();
-                  var _padding = (padding ?? EdgeInsets.zero);
-                  _padding = padding.copyWith(
-                    left: padding.left + marginWidth,
-                    right: padding.right + marginWidth,
-                  );
+        : TecAutoScroll(
+            scrollController: _scrollController,
+            allowAutoscroll: () => !context.tbloc<SelectionBloc>().state.isTextSelected,
+            navigationBarPadding: () => context.fullBottomBarPadding,
+            autoscrollActive: (active) {
+              if (!active) {
+                TecScrollListener.of(context)?.simulateReverse();
+              }
+            },
+            child: TecScrollbar(
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: BlocBuilder<ContentSettingsBloc, ContentSettings>(
+                  builder: (context, settings) {
+                    final marginWidth = (viewSize.width * _marginPercent).roundToDouble();
+                    var _padding = (padding ?? EdgeInsets.zero);
+                    _padding = padding.copyWith(
+                      left: padding.left + marginWidth,
+                      right: padding.right + marginWidth,
+                    );
 
-                  if (kIsWeb) return Text(studyRes.html);
+                    if (kIsWeb) return Text(studyRes.html);
 
-                  return TecHtml(
-                    studyRes.html,
-                    baseUrl: VolumesRepository.shared.volumeWithId(studyRes.volumeId)?.baseUrl,
-                    backgroundColor: Theme.of(context).backgroundColor,
-                    textScaleFactor: contentTextScaleFactorWith(context),
-                    padding: _padding,
-                  );
-                },
+                    return TecHtml(
+                      studyRes.html,
+                      baseUrl: VolumesRepository.shared.volumeWithId(studyRes.volumeId)?.baseUrl,
+                      backgroundColor: Theme.of(context).backgroundColor,
+                      textScaleFactor: contentTextScaleFactorWith(context),
+                      padding: _padding,
+                    );
+                  },
+                ),
               ),
             ),
           );

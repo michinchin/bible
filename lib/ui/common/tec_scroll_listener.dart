@@ -17,11 +17,17 @@ class TecScrollListener extends StatefulWidget {
     this.axisDirection,
   }) : super(key: key);
 
+  static TecScrollListenerState of(BuildContext context) {
+    assert(context != null);
+    final result = context.findAncestorStateOfType<TecScrollListenerState>();
+    return result;
+  }
+
   @override
-  _TecScrollListenerState createState() => _TecScrollListenerState();
+  TecScrollListenerState createState() => TecScrollListenerState();
 }
 
-class _TecScrollListenerState extends State<TecScrollListener> {
+class TecScrollListenerState extends State<TecScrollListener> {
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
@@ -71,10 +77,29 @@ class _TecScrollListenerState extends State<TecScrollListener> {
         }
       } else {
         _scrollContext = null;
-        // tec.dmPrint('Ignoring scroll, pos: $pos, minPos: $minPos, maxPos: $maxPos');
+
+        // scrolled to end of view - simulate reverse event for UI updates...
+        if (_previousDirection != ScrollDirection.reverse) {
+          _previousDirection = ScrollDirection.reverse;
+          widget.changedDirection(_previousDirection);
+        }
       }
     }
 
     return false;
+  }
+
+  // simulateReverse is used when a widget below us in the tree stops scrolling
+  // and wants to simulate a "reverse" scroll to trigger UI changes
+  // (i.e. autoscroll stop via tap - show tabbar)
+  void simulateReverse() {
+    _previousDirection = ScrollDirection.reverse;
+    widget.changedDirection(_previousDirection);
+
+    // clear the direction of any other TecScrollListeners in the widget tree
+    final tsl = TecScrollListener.of(context);
+    if (tsl != null) {
+      tsl.simulateReverse();
+    }
   }
 }

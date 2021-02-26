@@ -22,6 +22,7 @@ import '../../../blocs/sheet/sheet_manager_bloc.dart';
 import '../../../models/app_settings.dart';
 import '../../common/common.dart';
 import '../../common/tec_overflow_box.dart';
+import '../../common/tec_scroll_listener.dart';
 import '../volume_view_data_bloc.dart';
 import 'chapter_build_helper.dart';
 import 'chapter_selection.dart';
@@ -538,18 +539,8 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
             allowAutoscroll: () => !context.tbloc<SelectionBloc>().state.isTextSelected,
             navigationBarPadding: () => context.fullBottomBarPadding,
             autoscrollActive: (active) {
-              if (active) {
-                context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
-              } else {
-                // we're priming the scroll listener so the fab shows up
-                // and properly disappears on scroll forward
-                // would also work to set sheet to main and have scroll listener
-                // reset previous position
-                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                  _scrollController
-                    ..jumpTo(_scrollController.offset + 15)
-                    ..jumpTo(_scrollController.offset - 15);
-                });
+              if (!active) {
+                TecScrollListener.of(context)?.simulateReverse();
               }
             },
             child: TecScrollbar(
