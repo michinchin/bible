@@ -42,15 +42,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     if (!kDebugMode) initNotifications();
     //show onboarding
-    if (tec.Prefs.shared.getBool(Const.prefShowOnboarding, defaultValue: true)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (tec.Prefs.shared.getBool(Const.prefShowOnboarding, defaultValue: true)) {
         if (!kDebugMode) {
           await showOnboarding(context);
-          initFeatureDiscovery(
-              context: context, pref: Const.prefFabTabs, steps: {Const.fabTabFeatureId});
         }
-      });
-    }
+      }
+      initFeatureDiscovery(
+          context: context, pref: Const.prefFabTabs, steps: {Const.fabTabFeatureId});
+    });
     super.initState();
   }
 
