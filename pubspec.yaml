@@ -30,7 +30,7 @@ dependencies:
     hosted:
       name: tec_native_ad
       url: http://noah.tecarta.com:8100
-    version: ^0.0.5
+    version: ^1.0.0
   tec_notifications:
     hosted:
       name: tec_notifications

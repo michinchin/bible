@@ -248,14 +248,12 @@ class _TabBottomBarState extends State<TabBottomBar> with TickerProviderStateMix
   }
 }
 
-const bookCoverWidth = 60.0;
-const bookCoverHeight = 80.0;
-
 class _VolumeCard extends StatelessWidget {
   final int volumeId;
   final Color borderColor;
+  final double width;
 
-  const _VolumeCard(this.volumeId, {this.borderColor});
+  const _VolumeCard(this.volumeId, this.width, {this.borderColor});
 
   @override
   Widget build(BuildContext context) {
@@ -271,8 +269,8 @@ class _VolumeCard extends StatelessWidget {
           );
 
     return Container(
-        width: bookCoverWidth,
-        height: bookCoverHeight,
+        width: width,
+        height: 4 * width / 3,
         decoration: border,
         child: volume != null
             ? ClipRRect(
@@ -288,8 +286,9 @@ class _VolumeCard extends StatelessWidget {
 class _ExpandedView extends StatefulWidget {
   final BuildContext parentContext;
   final Function(int) onViewTap;
+  final double width;
 
-  const _ExpandedView({Key key, this.parentContext, this.onViewTap}) : super(key: key);
+  const _ExpandedView({Key key, this.parentContext, this.onViewTap, this.width}) : super(key: key);
 
   @override
   __ExpandedViewState createState() => __ExpandedViewState();
@@ -298,10 +297,13 @@ class _ExpandedView extends StatefulWidget {
 class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Animation<double> _animation;
+  double _bookCoverWidth;
 
   @override
   void initState() {
     super.initState();
+    _bookCoverWidth = (widget.width < 350) ? 45 : 60;
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -474,7 +476,7 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
         context: context,
         // alignment: Alignment(x, y),
         offset: Offset(position.dx, position.dy),
-        minWidth: bookCoverWidth,
+        minWidth: _bookCoverWidth,
         menuItemsBuilder: (c) => buildMenuItems(c, uid));
   }
 
@@ -501,6 +503,7 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
       final visible = context.viewManager.isViewVisible(view.uid);
       final child = _VolumeCard(
         volumeId,
+        _bookCoverWidth,
         borderColor: visible ? Const.tecartaBlue : null,
       );
       final cover = _OffscreenView(
@@ -535,7 +538,7 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
           // _onSwitchViews(view);
         },
         uid: Const.recentFlag + recent.id,
-        icon: _VolumeCard(recent.id),
+        icon: _VolumeCard(recent.id, _bookCoverWidth),
       );
 
       _covers.add(cover);
@@ -600,14 +603,14 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
                               cover.icon,
                             const SizedBox(height: 5),
                             SizedBox(
-                              width: bookCoverWidth,
+                              width: _bookCoverWidth,
                               child: TecText(
                                 cover.title,
                                 maxLines: 1,
-                                textScaleFactor: 0.7,
+                                // textScaleFactor: 0.7,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                    fontSize: contentFontSizeWith(context),
+                                    // fontSize: contentFontSizeWith(context),
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                     shadows: [
@@ -777,10 +780,10 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
                           const SizedBox(width: 5),
                           TecText(
                             _icons[i].title,
+                            textScaleFactor: 0.7,
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.bodyText1.copyWith(
                                 fontSize: contentFontSizeWith(context),
-                                // fontWeight: FontWeight.bold,
                                 color: Colors.white,
                                 shadows: [
                                   const Shadow(
@@ -798,16 +801,18 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 40),
+                          // const SizedBox(height: 40),
                           for (var i = 0; i < _icons.length; i++) ...[
                             _icons[i].icon,
                             const SizedBox(height: 5),
                             TecText(
                               _icons[i].title,
                               textAlign: TextAlign.center,
+                              // maxFontSize: 14,
+                              // maxScaleFactor: 1.0,
                               style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                  fontSize: contentFontSizeWith(context),
-                                  // fontWeight: FontWeight.bold,
+                                  // fontSize: math.min(14, contentFontSizeWith(context)),
+                                  // fontSize: contentFontSizeWith(context),
                                   color: Colors.white,
                                   shadows: [
                                     const Shadow(
@@ -836,7 +841,7 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
         ];
 
     final _expandedView =
-        _ExpandedView(onViewTap: widget.onViewTap, parentContext: widget.parentContext);
+        _ExpandedView(onViewTap: widget.onViewTap, parentContext: widget.parentContext, width: MediaQuery.of(context).size.width);
 
     if (isSmallScreen(context) && MediaQuery.of(context).orientation == Orientation.landscape) {
       child = Column(

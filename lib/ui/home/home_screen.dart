@@ -223,6 +223,8 @@ class _ChangeChapterFabState extends State<ChangeChapterFab> {
 
   @override
   Widget build(BuildContext context) {
+    final scale = MediaQuery.of(context)?.textScaleFactor ?? 1.0;
+
     return FloatingActionButton(
         tooltip: '${widget.buttonType == ChapterButton.previous ? 'Previous' : 'Next'} Chapter',
         elevation: defaultActionBarElevation,
@@ -232,7 +234,7 @@ class _ChangeChapterFabState extends State<ChangeChapterFab> {
             widget.buttonType == ChapterButton.previous
                 ? FeatherIcons.chevronLeft
                 : FeatherIcons.chevronRight,
-            size: 15,
+            size: 24 * scale,
             color: Theme.of(context).textColor),
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? Theme.of(context).appBarTheme.color
@@ -240,33 +242,3 @@ class _ChangeChapterFabState extends State<ChangeChapterFab> {
         onPressed: _changeChapter);
   }
 }
-
-// class MainMenuFab extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) => FloatingActionButton(
-//         elevation: defaultActionBarElevation,
-//         mini: true,
-//         heroTag: null,
-//         child: Icon(FeatherIcons.user, size: 15, color: Theme.of(context).textColor),
-//         backgroundColor: Theme.of(context).brightness == Brightness.dark
-//             ? Theme.of(context).appBarTheme.color
-//             : Theme.of(context).backgroundColor,
-//         onPressed: () => showMainMenu(context),
-//       );
-// }
-
-// class JournalFab extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) => FloatingActionButton(
-//       elevation: defaultActionBarElevation,
-//       mini: true,
-//       heroTag: null,
-//       child: Icon(FeatherIcons.bookOpen, size: 15, color: Theme.of(context).textColor),
-//       backgroundColor: Theme.of(context).brightness == Brightness.dark
-//           ? Theme.of(context).appBarTheme.color
-//           : Theme.of(context).backgroundColor,
-//       onPressed: () {
-//         TecAutoScroll.stopAutoscroll();
-//         Scaffold.of(context).openDrawer();
-//       });
-// }

@@ -70,7 +70,8 @@ class ActionBar extends StatelessWidget {
   Widget _layoutBuilder(BuildContext context, BoxConstraints constraints) {
     final theme = Theme.of(context);
     final appBarTheme = AppBarTheme.of(context);
-    final textStyle = appBarTheme.textTheme?.headline6 ?? theme.primaryTextTheme.headline6;
+    var textStyle = appBarTheme.textTheme?.headline6 ?? theme.primaryTextTheme.headline6;
+    // textStyle = textStyle.copyWith(fontSize: math.min(14, textStyle.fontSize));
 
     // Cache for calculated item widths, so the calculation only happens once.
     final cache = _Cache<int, double>();
