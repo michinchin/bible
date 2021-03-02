@@ -121,8 +121,8 @@ class _DefaultCard extends StatelessWidget {
             ),
             Expanded(child: _TitleEtcColumn(res: res, parent: parent, bible: bible, onTap: onTap)),
             if (res.hasType(ResourceType.folder))
-              Center(
-                child: const Icon(
+              const Center(
+                child: Icon(
                   Icons.navigate_next,
                 ),
               ),
