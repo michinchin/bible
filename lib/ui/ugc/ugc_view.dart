@@ -99,8 +99,9 @@ class _UGCViewState extends State<UGCView> {
   @override
   void dispose() {
     BreadCrumb.save(breadCrumbs);
-    _userDbChangeSubscription.cancel();
+    _userDbChangeSubscription?.cancel();
     _userDbChangeSubscription = null;
+    listScrollController?.dispose();
     super.dispose();
   }
 
@@ -207,6 +208,7 @@ class _UGCViewState extends State<UGCView> {
 
     // every load gets a new scroll controller since we're using animated switcher
     // old and new view coexist on transition
+    listScrollController?.dispose();
     listScrollController = ScrollController();
 
     // maintain scroll position...

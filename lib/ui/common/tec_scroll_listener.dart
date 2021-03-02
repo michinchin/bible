@@ -89,17 +89,14 @@ class TecScrollListenerState extends State<TecScrollListener> {
     return false;
   }
 
-  // simulateReverse is used when a widget below us in the tree stops scrolling
-  // and wants to simulate a "reverse" scroll to trigger UI changes
-  // (i.e. autoscroll stop via tap - show tabbar)
+  /// 
+  /// Simulates a reverse to trigger UI changes (e.g. TecAutoScroll stop and show the TabBar).
+  /// 
   void simulateReverse() {
     _previousDirection = ScrollDirection.reverse;
     widget.changedDirection(_previousDirection);
 
-    // clear the direction of any other TecScrollListeners in the widget tree
-    final tsl = TecScrollListener.of(context);
-    if (tsl != null) {
-      tsl.simulateReverse();
-    }
+    // Clear the direction of the next TecScrollListener up the widget tree, if any.
+    TecScrollListener.of(context)?.simulateReverse();
   }
 }

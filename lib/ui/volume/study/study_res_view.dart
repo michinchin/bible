@@ -171,18 +171,30 @@ class _Folder extends StatelessWidget {
   }
 }
 
-class _Article extends StatelessWidget {
+class _Article extends StatefulWidget {
   final StudyRes studyRes;
   final Size viewSize;
   final EdgeInsets padding;
-  final _scrollController = ScrollController();
 
-  _Article({Key key, @required this.studyRes, @required this.viewSize, @required this.padding})
+  const _Article({Key key, @required this.studyRes, @required this.viewSize, @required this.padding})
       : super(key: key);
 
   @override
+  __ArticleState createState() => __ArticleState();
+}
+
+class __ArticleState extends State<_Article> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return tec.isNullOrEmpty(studyRes.html)
+    return tec.isNullOrEmpty(widget.studyRes.html)
         ? const Center(child: LoadingIndicator())
         : TecAutoScroll(
             scrollController: _scrollController,
@@ -198,18 +210,18 @@ class _Article extends StatelessWidget {
                 controller: _scrollController,
                 child: BlocBuilder<ContentSettingsBloc, ContentSettings>(
                   builder: (context, settings) {
-                    final marginWidth = (viewSize.width * _marginPercent).roundToDouble();
-                    var _padding = (padding ?? EdgeInsets.zero);
-                    _padding = padding.copyWith(
-                      left: padding.left + marginWidth,
-                      right: padding.right + marginWidth,
+                    final marginWidth = (widget.viewSize.width * _marginPercent).roundToDouble();
+                    var _padding = (widget.padding ?? EdgeInsets.zero);
+                    _padding = widget.padding.copyWith(
+                      left: widget.padding.left + marginWidth,
+                      right: widget.padding.right + marginWidth,
                     );
 
-                    if (kIsWeb) return Text(studyRes.html);
+                    if (kIsWeb) return Text(widget.studyRes.html);
 
                     return TecHtml(
-                      studyRes.html,
-                      baseUrl: VolumesRepository.shared.volumeWithId(studyRes.volumeId)?.baseUrl,
+                      widget.studyRes.html,
+                      baseUrl: VolumesRepository.shared.volumeWithId(widget.studyRes.volumeId)?.baseUrl,
                       backgroundColor: Theme.of(context).backgroundColor,
                       textScaleFactor: contentTextScaleFactorWith(context),
                       padding: _padding,

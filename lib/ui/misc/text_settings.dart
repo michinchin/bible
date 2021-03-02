@@ -74,7 +74,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
       ..insert(0, currentFont);
     recentFonts = recentFonts.take(100).toList();
     tec.Prefs.shared.setStringList('_font_settings_recent', recentFonts);
-    _scrollController.dispose();
+    _scrollController?.dispose();
 
     super.dispose();
   }

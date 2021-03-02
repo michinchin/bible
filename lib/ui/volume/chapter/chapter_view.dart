@@ -481,7 +481,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
   @override
   void dispose() {
     _wordSelectionController.dispose();
-    _scrollController.dispose();
+    _scrollController?.dispose();
     super.dispose();
   }
 
