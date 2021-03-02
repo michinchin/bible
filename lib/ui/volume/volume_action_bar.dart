@@ -44,7 +44,7 @@ class VolumeViewActionBar extends StatelessWidget {
               ),
               ActionBarItem(
                   title: volume.abbreviation, //_onSelectVolume(context, viewData)
-                  priority: 4,
+                  priority: 2,
                   // icon: const Icon(FeatherIcons.chevronDown),
                   onTap: () {
                     _onSelectVolume(context, viewData);
