@@ -364,3 +364,9 @@ bool initFeatureDiscovery({
   }
   return false;
 }
+
+Future<void> resetFeatureDiscoveries(List<String> prefs) async {
+  for (final p in prefs) {
+    await tec.Prefs.shared.setBool(p, true);
+  }
+}

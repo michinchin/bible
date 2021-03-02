@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bible/models/const.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_html/tec_html.dart';
@@ -118,6 +119,21 @@ class _ZendeskHelpState extends State<ZendeskHelp> {
                   leading: const Icon(Icons.email_outlined),
                   title: const Text('Email Feedback'),
                   onTap: () => MainMenuModel().emailFeedback(context),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.help_outline),
+                  title: const Text('Reset Feature Discovery'),
+                  onTap: () async {
+                    await resetFeatureDiscoveries([Const.prefFabRead, Const.prefFabTabs]);
+                    while (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                    }
+                    // initFeatureDiscovery(
+                    //     context: context, pref: Const.prefFabTabs, steps: [Const.fabTabFeatureId]);
+                    // initFeatureDiscovery(
+                    //     context: context, pref: Const.prefFabRead, steps: [Const.fabReadFeatureId]);
+                    TecToast.show(context, 'Success!');
+                  },
                 )
               ],
             ));

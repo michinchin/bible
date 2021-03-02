@@ -130,4 +130,10 @@ class _BreadCrumbRowState extends State<BreadCrumbRow> {
     _controller = ScrollController();
     _numberCrumbs = 0;
   }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
 }

@@ -734,7 +734,9 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
             onPressed: (context) async {
               final volumeId =
                   await selectVolumeInLibrary(context, title: 'Select', initialTabPrefix: null);
-              widget.onViewTap(Const.recentFlag | volumeId);
+              if (volumeId != null) {
+                widget.onViewTap(Const.recentFlag | volumeId);
+              }
             }),
       getOffscreenIconView(title: 'Settings', icon: FeatherIcons.settings, onPressed: showSettings),
       getOffscreenIconView(
@@ -768,13 +770,12 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
 
     Widget child;
     List<Widget> children({bool useRow = false}) => [
-          Expanded(
+          Flexible(
             child: SingleChildScrollView(
                 scrollDirection: useRow ? Axis.horizontal : Axis.vertical,
                 reverse: true,
                 child: useRow
                     ? Row(mainAxisSize: MainAxisSize.min, children: [
-                        const SizedBox(width: 40),
                         for (var i = 0; i < _icons.length; i++) ...[
                           _icons[i].icon,
                           const SizedBox(width: 5),
@@ -782,16 +783,16 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
                             _icons[i].title,
                             textScaleFactor: 0.7,
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                fontSize: contentFontSizeWith(context),
-                                color: Colors.white,
-                                shadows: [
-                                  const Shadow(
-                                    offset: Offset(1, 1),
-                                    blurRadius: 5,
-                                    color: Colors.black,
-                                  ),
-                                ]),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1
+                                .copyWith(color: Colors.white, shadows: [
+                              const Shadow(
+                                offset: Offset(1, 1),
+                                blurRadius: 5,
+                                color: Colors.black,
+                              ),
+                            ]),
                           ),
                           const SizedBox(width: 10)
                         ]
@@ -801,26 +802,22 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // const SizedBox(height: 40),
                           for (var i = 0; i < _icons.length; i++) ...[
                             _icons[i].icon,
                             const SizedBox(height: 5),
                             TecText(
                               _icons[i].title,
                               textAlign: TextAlign.center,
-                              // maxFontSize: 14,
-                              // maxScaleFactor: 1.0,
-                              style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                  // fontSize: math.min(14, contentFontSizeWith(context)),
-                                  // fontSize: contentFontSizeWith(context),
-                                  color: Colors.white,
-                                  shadows: [
-                                    const Shadow(
-                                      offset: Offset(1, 1),
-                                      blurRadius: 5,
-                                      color: Colors.black,
-                                    ),
-                                  ]),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText1
+                                  .copyWith(color: Colors.white, shadows: [
+                                const Shadow(
+                                  offset: Offset(1, 1),
+                                  blurRadius: 5,
+                                  color: Colors.black,
+                                ),
+                              ]),
                             ),
                             const SizedBox(height: 5),
                           ],
@@ -845,6 +842,7 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
 
     if (isSmallScreen(context) && MediaQuery.of(context).orientation == Orientation.landscape) {
       child = Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -852,10 +850,11 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
               child: _expandedView,
             ),
             const SizedBox(height: 20),
-            Row(children: children(useRow: true))
+            Row(mainAxisSize: MainAxisSize.min, children: children(useRow: true))
           ]);
     } else {
       child = Row(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -865,7 +864,7 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
               child: _expandedView,
             ),
           ),
-          Column(children: children()),
+          Column(mainAxisSize: MainAxisSize.min, children: children()),
         ],
       );
     }
@@ -883,7 +882,7 @@ class __TabFABState extends State<_TabFAB> {
   void _onTap() {
     if (context.tabManager.state.tab != TecTab.reader) {
       initFeatureDiscovery(
-          context: context, pref: Const.prefFabRead, steps: {Const.fabReadFeatureId});
+          context: context, pref: Const.prefFabRead, steps: [Const.fabReadFeatureId]);
       context.tabManager.changeTab(TecTab.reader);
     } else {
       context.tabManager.changeTab(TecTab.switcher);
