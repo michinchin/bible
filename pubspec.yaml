@@ -18,6 +18,7 @@ dependencies:
   feature_discovery:
     git:
       url: https://github.com/tecarta/feature_discovery
+      ref: a78ecca2eaae2e1e2bf13508f79d220e7d36e1b8
   flutter:
     sdk: flutter
   flutter_bloc: ^6.1.0
@@ -116,7 +117,7 @@ dependencies:
     git:
       url: https://github.com/tecarta/zefyr
       path: packages/zefyr
-      ref: 1.0-dev
+      ref: 00a3c1c952c18e3bb69bf553e3277d70d5069edc
 
 #dependency_overrides:
 #  tec_widgets:

@@ -278,7 +278,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: a78ecca2eaae2e1e2bf13508f79d220e7d36e1b8
       resolved-ref: a78ecca2eaae2e1e2bf13508f79d220e7d36e1b8
       url: "https://github.com/tecarta/feature_discovery"
     source: git
@@ -1369,8 +1369,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/zefyr"
-      ref: "1.0-dev"
-      resolved-ref: "158103f591ab498239390070e999085a679a5268"
+      ref: "00a3c1c952c18e3bb69bf553e3277d70d5069edc"
+      resolved-ref: "00a3c1c952c18e3bb69bf553e3277d70d5069edc"
       url: "https://github.com/tecarta/zefyr"
     source: git
     version: "1.0.0-dev.2.0"
