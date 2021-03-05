@@ -277,17 +277,19 @@ class _InterstitialState extends State<InterstitialScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: <Widget>[
-                              OutlineButton(
+                              OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(width: 1.0, color: redColor),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0)),
+                                ),
                                 child: const Text('REMOVE ADS',
                                     style: TextStyle(fontWeight: FontWeight.bold, color: redColor)),
                                 onPressed: () {
                                   _removeAds(context);
                                 },
-                                borderSide: const BorderSide(width: 1.0, color: redColor),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5.0)),
                               ),
-                              OutlineButton(
+                              OutlinedButton(
                                 child: const Text('SEND FEEDBACK',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -296,9 +298,11 @@ class _InterstitialState extends State<InterstitialScreen> {
                                 onPressed: () {
                                   _emailFeedback(context, 'devo-1');
                                 },
-                                borderSide: const BorderSide(width: 1.0, color: blueColor),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5.0)),
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(width: 1.0, color: blueColor),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0)),
+                                ),
                               ),
                             ],
                           ),

@@ -13,13 +13,13 @@ void showCreateNoteFolder(BuildContext context, UserItem currentFolder) {
     context: context,
     content: 'New folder or note?',
     actions: [
-      FlatButton(
+      TextButton(
           child: const Text('Folder'),
           onPressed: () {
             Navigator.of(context).pop();
             _showCreateFolder(context, currentFolder);
           }),
-      FlatButton(
+      TextButton(
           child: const Text('Note'),
           onPressed: () {
             // close the dialog
@@ -82,9 +82,7 @@ class _CreateNoteFolderDialogState extends State<_CreateNoteFolderDialog> {
   void initState() {
     super.initState();
     foldersExist = false;
-    controller
-      = TextEditingController()
-      ..addListener(() {});
+    controller = TextEditingController()..addListener(() {});
     parentFolder = widget.initParentFolder;
     getFolderCount();
   }
@@ -124,21 +122,23 @@ class _CreateNoteFolderDialogState extends State<_CreateNoteFolderDialog> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text('Create new folder in:', style: Theme.of(context).textTheme.subtitle1),
-                      FlatButton(
-                          minWidth: 0,
-                          padding: const EdgeInsets.only(left: 8, top: 10, right: 14, bottom: 10),
-                          onPressed: foldersExist
-                              ? () async {
-                                  final newParent =
-                                      await selectParentFolder(context, parentFolder.id);
-                                  if (newParent != null && newParent.id != parentFolder.id) {
-                                    setState(() {
-                                      parentFolder = newParent;
-                                    });
+                      ButtonTheme(
+                        minWidth: 0,
+                        padding: const EdgeInsets.only(left: 8, top: 10, right: 14, bottom: 10),
+                        child: TextButton(
+                            onPressed: foldersExist
+                                ? () async {
+                                    final newParent =
+                                        await selectParentFolder(context, parentFolder.id);
+                                    if (newParent != null && newParent.id != parentFolder.id) {
+                                      setState(() {
+                                        parentFolder = newParent;
+                                      });
+                                    }
                                   }
-                                }
-                              : null,
-                          child: Text(parentFolder.title, style: style)),
+                                : null,
+                            child: Text(parentFolder.title, style: style)),
+                      ),
                     ],
                   ),
                   Container(
@@ -178,12 +178,12 @@ class _CreateNoteFolderDialogState extends State<_CreateNoteFolderDialog> {
             ),
             Builder(builder: (context) {
               return ButtonBar(children: [
-                FlatButton(
+                TextButton(
                     child: const Text('Cancel'),
                     onPressed: () {
                       Navigator.of(context).pop(null);
                     }),
-                FlatButton(
+                TextButton(
                     child: const Text('Create'),
                     onPressed: () {
                       final name = controller.text.trim();

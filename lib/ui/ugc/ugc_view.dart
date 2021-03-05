@@ -801,14 +801,14 @@ class _UGCViewState extends State<UGCView> {
                                                 title: 'Delete $title?',
                                                 content: message,
                                                 actions: [
-                                                  FlatButton(
+                                                  TextButton(
                                                       onPressed: () async {
                                                         Navigator.of(context).pop(true);
                                                         await AppSettings.shared.userAccount.userDb
                                                             .deleteItem(items[i] as UserItem);
                                                       },
                                                       child: const Text('Delete')),
-                                                  FlatButton(
+                                                  TextButton(
                                                       onPressed: () {
                                                         Navigator.of(context).pop(false);
                                                       },

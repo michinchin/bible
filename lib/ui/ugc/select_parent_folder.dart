@@ -95,12 +95,12 @@ class __SelectParentFolderState extends State<_SelectParentFolder> {
               ),
             ButtonBar(
               children: [
-                FlatButton(
+                TextButton(
                     child: const Text('Cancel'),
                     onPressed: () {
                       Navigator.of(context).pop(null);
                     }),
-                FlatButton(
+                TextButton(
                     child: const Text('Select'),
                     onPressed: () {
                       Navigator.of(context).pop(currentFolder);

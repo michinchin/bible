@@ -360,7 +360,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       if (s.navViewState == NavViewState.bcvTabs) {
         if (s.tabIndex != NavTabs.book.index) {
           actions = [
-            FlatButton(
+            TextButton(
                 child: Text(
                   'GO',
                   style: TextStyle(color: tabColors[s.tabIndex]),

@@ -146,7 +146,7 @@ class __VotdScreenState extends State<_VotdScreen> {
           // padding: EdgeInsets.zero,
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
-          child: FlatButton(
+          child: TextButton(
             child: TecText(
               t.abbreviation,
               style: cardSubtitleCompactStyle.copyWith(

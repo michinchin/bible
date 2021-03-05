@@ -194,7 +194,7 @@ class _QuickFindState extends State<QuickFind> {
                   icon: TecIcons.marginNoteOutline,
                   type: UserItemType.marginNote,
                 ),
-                FlatButton(
+                TextButton(
                   child: const Text('DONE'),
                   onPressed: () {
                     Navigator.of(context).maybePop();

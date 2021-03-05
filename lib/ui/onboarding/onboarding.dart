@@ -118,9 +118,11 @@ class _OnboardingState extends State<Onboarding> {
                         ? Colors.white.withOpacity(0.3)
                         : Const.tecartaBlue,
                   ),
-                  child: FlatButton(
-                      padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
-                      shape: const StadiumBorder(),
+                  child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
+                        shape: const StadiumBorder(),
+                      ),
                       child: Text(
                         index != pages.length - 1 ? 'Continue' : 'Sign In',
                         style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
@@ -140,7 +142,7 @@ class _OnboardingState extends State<Onboarding> {
                           }
                         }
                       })),
-              FlatButton(
+              TextButton(
                   onPressed: () => index == pages.length - 1
                       ? Navigator.of(context).pop()
                       : _controller.animateToPage(pages.length - 1,

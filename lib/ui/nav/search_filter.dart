@@ -184,9 +184,11 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
                           Text(
                               '${_showPriorityTranslations ? priorityTranslationTitle : _currFilter} filter'),
                           if (_showPriorityTranslations)
-                            FlatButton(
+                            TextButton(
                               child: const Text('Done'),
-                              visualDensity: VisualDensity.compact,
+                              style: TextButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                              ),
                               onPressed: () {
                                 _togglePriorityTranslations();
                                 if (_showPriorityTranslations) {
@@ -364,14 +366,16 @@ class __VolumeFilterState extends State<_VolumeFilter> {
                                   padding: const EdgeInsets.symmetric(horizontal: 5),
                                   layoutBehavior: ButtonBarLayoutBehavior.constrained,
                                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  child: FlatButton(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(5)),
-                                      color: _selected(v)
-                                          ? Theme.of(context).accentColor
-                                          : Theme.of(context).brightness == Brightness.dark
-                                              ? Theme.of(context).cardColor
-                                              : Colors.grey[200],
+                                  child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(5)),
+                                        primary: _selected(v)
+                                            ? Theme.of(context).accentColor
+                                            : Theme.of(context).brightness == Brightness.dark
+                                                ? Theme.of(context).cardColor
+                                                : Colors.grey[200],
+                                      ),
                                       onPressed: () => _toggle(v.id),
                                       child: Text(
                                         _title(v),
@@ -567,13 +571,15 @@ class __BookFilterState extends State<_BookFilter> {
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       layoutBehavior: ButtonBarLayoutBehavior.constrained,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      child: FlatButton(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                          color: !widget.selectedBooks.contains(b)
-                              ? Theme.of(context).accentColor
-                              : isDarkTheme
-                                  ? Theme.of(context).cardColor
-                                  : Colors.grey[200],
+                      child: TextButton(
+                          style: TextButton.styleFrom(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                            primary: !widget.selectedBooks.contains(b)
+                                ? Theme.of(context).accentColor
+                                : isDarkTheme
+                                    ? Theme.of(context).cardColor
+                                    : Colors.grey[200],
+                          ),
                           onPressed: () => _toggle(b),
                           child: Text(
                             '${bookNames[b]}${searchResults.isNotEmpty ? ' (${bookResults[b]})' : ''}',
@@ -612,24 +618,28 @@ class __BookFilterState extends State<_BookFilter> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FlatButton(
-                    height: 30,
-                    minWidth: 50,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                    color: _testSelected(s)
-                        ? Theme.of(context).accentColor
-                        : isDarkTheme
-                            ? Theme.of(context).cardColor
-                            : Colors.grey[200],
-                    onPressed: () => _toggle(s == otLabel ? otId : ntId),
-                    child: Text(
-                      '$s ${searchResults.isNotEmpty ? '(${s == otLabel ? _otCount : _ntCount})' : ''}',
-                      style: TextStyle(
-                          color: _testSelected(s)
-                              ? Colors.white
-                              : Theme.of(context).textColor.withOpacity(0.8)),
-                    )),
+                ButtonTheme(
+                  height: 30,
+                  minWidth: 50,
+                  child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                        primary: _testSelected(s)
+                            ? Theme.of(context).accentColor
+                            : isDarkTheme
+                                ? Theme.of(context).cardColor
+                                : Colors.grey[200],
+                      ),
+                      onPressed: () => _toggle(s == otLabel ? otId : ntId),
+                      child: Text(
+                        '$s ${searchResults.isNotEmpty ? '(${s == otLabel ? _otCount : _ntCount})' : ''}',
+                        style: TextStyle(
+                            color: _testSelected(s)
+                                ? Colors.white
+                                : Theme.of(context).textColor.withOpacity(0.8)),
+                      )),
+                ),
               ],
             ),
           )

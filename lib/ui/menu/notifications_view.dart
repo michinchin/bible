@@ -97,34 +97,41 @@ class __NotificationTileState extends State<_NotificationTile> {
       title: TecText.rich(
         TextSpan(children: [
           WidgetSpan(
-            child: FlatButton(
-              padding: EdgeInsets.zero,
+            child: ButtonTheme(
               minWidth: double.infinity,
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onPressed: () async {
-                final selectedTime = await showTimePicker(
-                    context: context,
-                    builder: (context, child) {
-                      return TimePickerTheme(
-                        data: TimePickerTheme.of(context).copyWith(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
-                        child: child,
-                      );
-                    },
-                    initialTime: TimeOfDay.fromDateTime(widget.notification.time));
-                if (selectedTime != null) {
-                  context.tbloc<NotificationBloc>().update(
-                      widget.notification,
-                      widget.notification
-                          .copyWith(time: widget.notification.time.applied(selectedTime)));
-                }
-              },
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '${tec.hourMinuteDescription(widget.notification.time)}',
-                  style: Theme.of(context).textTheme.headline4,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  backgroundColor: Colors.transparent,
+                ),
+                onPressed: () async {
+                  final selectedTime = await showTimePicker(
+                      context: context,
+                      builder: (context, child) {
+                        return TimePickerTheme(
+                          data: TimePickerTheme.of(context).copyWith(
+                              shape:
+                                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                          child: child,
+                        );
+                      },
+                      initialTime: TimeOfDay.fromDateTime(widget.notification.time));
+                  if (selectedTime != null) {
+                    context
+                        .tbloc<NotificationBloc>()
+                        .add(NotificationEvent(NotificationEventType.update, data: [
+                          widget.notification,
+                          widget.notification
+                              .copyWith(time: widget.notification.time.applied(selectedTime))
+                        ]));
+                  }
+                },
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '${tec.hourMinuteDescription(widget.notification.time)}',
+                    style: Theme.of(context).textTheme.headline4,
+                  ),
                 ),
               ),
             ),
@@ -143,30 +150,39 @@ class __NotificationTileState extends State<_NotificationTile> {
                 Flexible(
                   child: ButtonTheme(
                     minWidth: 40,
-                    child: OutlineButton(
-                        visualDensity: VisualDensity.comfortable,
-                        shape: CircleBorder(
-                            side: BorderSide(
-                                color: tec
-                                        .weekdayListFromBitField(widget.notification.week.bitField)
-                                        .contains(day.dayValue)
-                                    ? Theme.of(context).accentColor
-                                    : Theme.of(context).textColor)),
+                    child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          visualDensity: VisualDensity.comfortable,
+                          shape: CircleBorder(
+                              side: BorderSide(
+                                  color: tec
+                                          .weekdayListFromBitField(
+                                              widget.notification.week.bitField)
+                                          .contains(day.dayValue)
+                                      ? Theme.of(context).accentColor
+                                      : Theme.of(context).textColor)),
+                        ),
                         onPressed: () {
                           final i = widget.notification.week.days
                               .indexWhere((d) => d.dayValue == day.dayValue);
                           widget.notification.week.toggleDay(widget.notification.week.days[i]);
-                          context.tbloc<NotificationBloc>().update(
-                              widget.notification,
-                              widget.notification.copyWith(
-                                  week: Week(bitField: widget.notification.week.bitField)));
+                          context
+                              .tbloc<NotificationBloc>()
+                              .add(NotificationEvent(NotificationEventType.update, data: [
+                                widget.notification,
+                                widget.notification.copyWith(
+                                    week: Week(bitField: widget.notification.week.bitField))
+                              ]));
                         },
-                        textColor: tec
-                                .weekdayListFromBitField(widget.notification.week.bitField)
-                                .contains(day.dayValue)
-                            ? Theme.of(context).accentColor
-                            : Theme.of(context).textColor,
-                        child: Text(day.shortName[0])),
+                        child: Text(
+                          day.shortName[0],
+                          style: TextStyle(
+                              color: tec
+                                      .weekdayListFromBitField(widget.notification.week.bitField)
+                                      .contains(day.dayValue)
+                                  ? Theme.of(context).accentColor
+                                  : Theme.of(context).textColor),
+                        )),
                   ),
                 )
             ],
@@ -182,9 +198,9 @@ class __NotificationTileState extends State<_NotificationTile> {
                   value: widget.notification.enabled,
                   onChanged: (b) {
                     if (b != widget.notification.enabled) {
-                      context
-                          .tbloc<NotificationBloc>()
-                          .update(widget.notification, widget.notification.copyWith(enabled: b));
+                      context.tbloc<NotificationBloc>().add(NotificationEvent(
+                          NotificationEventType.update,
+                          data: [widget.notification, widget.notification.copyWith(enabled: b)]));
                     }
                   })),
           const Spacer(),

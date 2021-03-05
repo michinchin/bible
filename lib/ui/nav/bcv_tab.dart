@@ -216,7 +216,7 @@ class _BookView extends StatelessWidget {
     //       for (final book in books) ...[
     //         ButtonTheme(
     //           minWidth: 50,
-    //           child: FlatButton(
+    //           child: TextButton(
     //             padding: EdgeInsets.zero,
     //             shape: const StadiumBorder(),
     //             color: Colors.grey.withOpacity(0.1),
@@ -323,17 +323,19 @@ class _PillButton extends StatelessWidget {
   const _PillButton({@required this.onPressed, @required this.textColor, @required this.text});
   @override
   Widget build(BuildContext context) {
-    return RaisedButton(
-      padding: EdgeInsets.zero,
-      shape: const StadiumBorder(),
-      color: Theme.of(context).cardColor,
-      textColor: textColor,
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.zero,
+        shape: const StadiumBorder(),
+        primary: Theme.of(context).cardColor,
+      ),
       onPressed: onPressed,
       child: Text(
         text,
         textAlign: TextAlign.center,
         textScaleFactor: context.tbloc<ContentSettingsBloc>().state.textScaleFactor,
         maxLines: 1,
+        style: TextStyle(color: textColor),
       ),
     );
   }

@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
 import 'package:native_pdf_renderer/native_pdf_renderer.dart';
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:http/http.dart' as http;
 
 import 'common.dart';
 import 'tec_interactive_viewer.dart';
@@ -109,7 +109,7 @@ class _TecPdfViewerBloc extends Cubit<_TecPdfViewerData> {
 
       try {
         if (url.startsWith('http')) {
-          final response = await http.get(url);
+          final response = await http.get(Uri.parse(url));
 
           // After every `await`, cancel if other calls are waiting.
           if (_isClosed || fcc.hasCallsWaitingAfter(callId)) throw _Cancel();

@@ -327,8 +327,7 @@ class _SearchResultsViewState extends State<SearchResultsView> {
   }
 
   SearchResultInfo orderByDefaultTranslation(SearchResultInfo res) {
-    final defaultTranslations =
-        PrefsBloc.getString(PrefItemId.priorityTranslations);
+    final defaultTranslations = PrefsBloc.getString(PrefItemId.priorityTranslations);
     final dts = (defaultTranslations?.split('|')?.map(int.tryParse)?.toList() ?? [])
       ..removeWhere((p) => p == null);
 
@@ -600,8 +599,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
                 ),
                 Stack(children: [
                   ButtonBar(alignment: MainAxisAlignment.start, children: [
-                    FlatButton(
-                      textColor: searchThemeColor,
+                    TextButton(
                       // icon: RotatedBox(
                       //   quarterTurns: 1,
                       //   child: Icon(widget.res.contextExpanded ? Icons.unfold_less : Icons.unfold_more),
@@ -611,6 +609,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
                         semanticsLabel:
                             widget.res.contextExpanded ? 'Collapse Context' : 'Expand Context',
                         textScaleFactor: contentTextScaleFactorWith(context),
+                        style: const TextStyle(color: searchThemeColor),
                       ),
                       onPressed: _onContext,
                     ),
@@ -625,12 +624,12 @@ class __SearchResultCardState extends State<_SearchResultCard> {
                           tooltip: 'Share',
                           icon: const Icon(FeatherIcons.share2, size: 20),
                           onPressed: _onShare),
-                      FlatButton(
-                          textColor: searchThemeColor,
+                      TextButton(
                           // tooltip: 'Open in TecartaBible',
                           child: Text(
                             'Go To',
                             textScaleFactor: contentTextScaleFactorWith(context),
+                            style: const TextStyle(color: searchThemeColor),
                           ),
                           onPressed: _openInTB),
                     ],
@@ -674,12 +673,15 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
         child: Semantics(
           container: true,
           label: 'View all translations',
-          child: FlatButton(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          child: TextButton(
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            ),
             child: Text(
               'ALL',
               textScaleFactor: contentTextScaleFactorWith(context),
+              style: TextStyle(color: selectedTextColor),
             ),
             onPressed: () async {
               final volumeId =
@@ -689,8 +691,6 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
                     Reference.fromHref(widget.res.searchResult.href).copyWith(volume: volumeId));
               }
             },
-            textColor: selectedTextColor,
-            splashColor: searchThemeColor,
           ),
         ));
 
@@ -710,15 +710,17 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
         child: Semantics(
           container: true,
           label: curr == each.id ? '${each.a} selected' : 'Select ${each.a}',
-          child: FlatButton(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          child: TextButton(
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              primary: buttonColor,
+            ),
             child: Text(
               each.a,
               textScaleFactor: contentTextScaleFactorWith(context),
+              style: TextStyle(color: textColor),
             ),
-            textColor: textColor,
-            color: buttonColor,
             //currently chosen, pass tag
             onPressed: () => _changeTranslation(i),
           ),

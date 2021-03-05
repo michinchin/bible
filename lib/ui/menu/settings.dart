@@ -36,7 +36,7 @@ class SettingsView extends StatelessWidget {
   Widget _accountButton(BuildContext context) {
     final signedIn = AppSettings.shared.userAccount.user.isSignedIn;
 
-    return FlatButton(
+    return TextButton(
         child: Text(signedIn ? AppSettings.shared.userAccount.user.email : 'Sign in',
             style: TextStyle(color: Theme.of(context).textColor)),
         onPressed: () async {
