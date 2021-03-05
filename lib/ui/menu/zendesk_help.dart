@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:bible/models/const.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
+import '../../models/const.dart';
 import '../../models/help/search_help_bloc.dart';
 import '../../models/help/zendesk_api.dart';
 import '../common/common.dart';
