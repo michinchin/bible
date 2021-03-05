@@ -394,7 +394,7 @@ Future<String> _descriptionWithVolume(Volume volume) async {
   try {
     final prefix = tec.platformIs(tec.Platform.iOS) ? 'IOS' : 'PLAY';
     final url = '${tec.streamUrl}/products-desc/${prefix}_TecartaBible.${volume.id}.json.gz';
-    final response = await http.get(url);
+    final response = await http.get(Uri.parse(url));
     final jsonStr = tec.isNullOrEmpty(response?.bodyBytes) ? null : utf8.decode(response.bodyBytes);
     final dynamic json = jsonDecode(jsonStr);
     if (json is String) {
