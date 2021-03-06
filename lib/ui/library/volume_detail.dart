@@ -248,6 +248,22 @@ class _ButtonsState extends State<_Buttons> {
   @override
   Widget build(BuildContext context) {
     final div = SizedBox(width: widget.padding);
+
+    final outlinedButtonStyle = OutlinedButton.styleFrom(
+      padding: const EdgeInsets.all(4),
+    ).copyWith(
+      side: MaterialStateProperty.resolveWith<BorderSide>(
+        (states) {
+          if (states.contains(MaterialState.pressed)) {
+            return BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+              width: 1,
+            );
+          }
+          return null; // Defer to the widget's default.
+        },
+      ),
+    );
     return Row(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -255,12 +271,10 @@ class _ButtonsState extends State<_Buttons> {
         div,
         if (!_isLicensed)
           Expanded(
-            child: OutlineButton(
-              padding: const EdgeInsets.all(4),
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
+            child: OutlinedButton(
               child: TecText(_priceStr == null ? '' : 'Buy $_priceStr',
                   textScaleFactor: widget.textScaleFactor),
+              style: outlinedButtonStyle,
               onPressed: _isPurchasing || _priceStr == null
                   ? null
                   : () {
@@ -278,21 +292,17 @@ class _ButtonsState extends State<_Buttons> {
           ),
         if (_isLicensed)
           Expanded(
-            child: OutlineButton(
-              padding: const EdgeInsets.all(4),
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
+            child: OutlinedButton(
               child: TecText('Download', textScaleFactor: widget.textScaleFactor),
+              style: outlinedButtonStyle,
               onPressed: null,
             ),
           ),
         // if (!isLicensed && widget.volume.isForSale && widget.showReadNow) ...[
         //   div,
         //   Expanded(
-        //     child: OutlineButton(
-        //       padding: const EdgeInsets.all(5),
-        //       splashColor: Colors.transparent,
-        //       highlightColor: Colors.transparent,
+        //     child: OutlinedButton(
+        //       style: outlinedButtonStyle,
         //       child: const TecText(
         //         'Free Plan',
         //         autoSize: true,

@@ -10,6 +10,7 @@ analyzer:
     implicit-dynamic: false
 
   exclude:
+    - lib/generated_plugin_registrant.dart
     # - lib/**/*.freezed.dart
     # - lib/**/*.g.dart
 
@@ -89,7 +90,7 @@ linter:
     - flutter_style_todos
     - hash_and_equals
     - implementation_imports
-    - invariant_booleans
+    # EXPERIMENTAL - invariant_booleans
     - iterable_contains_unrelated_type
     # DISABLE - join_return_with_assignment
     - leading_newlines_in_multiline_strings
