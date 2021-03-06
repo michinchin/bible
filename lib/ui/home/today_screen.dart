@@ -14,6 +14,7 @@ import 'dotd_screen.dart';
 import 'votd_screen.dart';
 
 class TodayScreen extends StatelessWidget {
+  const TodayScreen({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final portraitMode = MediaQuery.of(context).orientation == Orientation.portrait;
@@ -34,7 +35,7 @@ class TodayScreen extends StatelessWidget {
                             const SizedBox(height: 40)
                           ]),
                     )
-                  : Container(
+                  : SizedBox(
                       height: dayCardHeight,
                       child: Row(
                         children: [

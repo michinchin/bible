@@ -58,7 +58,7 @@ class CompareResults {
     return tec.apiRequest(
         endpoint: 'allverses',
         parameters: <String, dynamic>{
-          'volumes': '$translations',
+          'volumes': translations,
           'book': book,
           'chapter': chapter,
           'verse': verse,

@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
         value: AppSettings.shared.overlayStyle(context),
         child: TabBottomBar(
           tabs: [
-            TabBottomBarItem(
+            const TabBottomBarItem(
               tab: TecTab.today,
               icon: Icons.today_outlined,
               label: 'Today',
@@ -160,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   }),
-                  SnapSheet(),
+                  const SnapSheet(),
                 ],
               ),
             ),
@@ -183,7 +183,7 @@ class ChangeChapterFab extends StatefulWidget {
   final ViewManagerState state;
   final ChapterButton buttonType;
 
-  const ChangeChapterFab(this.state, this.buttonType);
+  const ChangeChapterFab(this.state, this.buttonType, {Key key}) : super(key: key);
 
   @override
   _ChangeChapterFabState createState() => _ChangeChapterFabState();

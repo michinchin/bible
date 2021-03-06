@@ -24,7 +24,7 @@ void main() {
     expect('"dog'.countOfWords(toIndex: 1), 0);
 
     // ASCII Punctuation, except the single quote char, which is a valid word char.
-    expect('!"#\$%&()*+,-./:;<=>?@[\\]^_`{|}~'.countOfWords(), 0);
+    expect(r'!"#$%&()*+,-./:;<=>?@[\]^_`{|}~'.countOfWords(), 0);
 
     // Non-word smart quote chars.
     expect('‘“”'.countOfWords(), 0);

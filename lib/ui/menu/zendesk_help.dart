@@ -14,9 +14,10 @@ import 'main_menu_model.dart';
 
 void showZendeskHelp(BuildContext context) =>
     Navigator.of(context, rootNavigator: true).push(MaterialPageRoute<void>(
-        builder: (c) => BlocProvider(create: (c) => SearchHelpBloc(), child: ZendeskHelp())));
+        builder: (c) => BlocProvider(create: (c) => SearchHelpBloc(), child: const ZendeskHelp())));
 
 class ZendeskHelp extends StatefulWidget {
+  const ZendeskHelp({Key key}) : super(key: key);
   @override
   _ZendeskHelpState createState() => _ZendeskHelpState();
 }
@@ -148,7 +149,7 @@ void showArticlePage(BuildContext c, ZendeskArticle article) => Navigator.of(c, 
 class ZendeskArticlePage extends StatelessWidget {
   final ZendeskArticle article;
 
-  const ZendeskArticlePage(this.article);
+  const ZendeskArticlePage(this.article, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

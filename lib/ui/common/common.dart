@@ -79,7 +79,7 @@ class ListLabel extends StatelessWidget {
   final String label;
   final TextStyle style;
 
-  const ListLabel(this.label, {this.style});
+  const ListLabel(this.label, {Key key, this.style}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -232,7 +232,8 @@ class IconWithNumberBadge extends StatelessWidget {
   final Color badgeColor;
   final Color color;
 
-  const IconWithNumberBadge({this.icon, this.value, this.color, this.badgeColor});
+  const IconWithNumberBadge({Key key, this.icon, this.value, this.color, this.badgeColor})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -272,14 +273,16 @@ class PageIndicatorList extends StatelessWidget {
   final int position;
   final int pageLength;
   final bool darkMode;
-  const PageIndicatorList(this.controller, this.position, this.pageLength, {this.darkMode = true});
+  const PageIndicatorList(this.controller, this.position, this.pageLength,
+      {Key key, this.darkMode = true})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     Widget indicator(int i) => GestureDetector(
           onTap: () => controller.animateToPage(i,
               duration: const Duration(milliseconds: 250), curve: Curves.easeInOut),
-          child: Container(
+          child: SizedBox(
             height: 10,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 50),

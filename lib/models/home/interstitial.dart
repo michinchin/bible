@@ -74,7 +74,7 @@ class Interstitial {
 class InterstitialScreen extends StatefulWidget {
   final String adUnitId;
 
-  const InterstitialScreen(this.adUnitId);
+  const InterstitialScreen(this.adUnitId, {Key key}) : super(key: key);
 
   @override
   _InterstitialState createState() {
@@ -226,7 +226,7 @@ class _InterstitialState extends State<InterstitialScreen> {
                   children: <Widget>[
                     if (_maxAdHeight == 0) Container(),
                     if (_maxAdHeight > 0)
-                      Container(
+                      SizedBox(
                         width: windowSizeWith(context).width,
                         height: _maxAdHeight.toDouble(),
                         child: TecNativeAd(

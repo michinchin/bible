@@ -38,7 +38,7 @@ class CompareVerseScreen extends StatelessWidget {
   final String title;
   final CompareResults results;
 
-  const CompareVerseScreen({this.results, this.title});
+  const CompareVerseScreen({Key key, this.results, this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

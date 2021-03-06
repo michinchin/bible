@@ -36,7 +36,7 @@ class __ViewHelpDialogState extends State<_ViewHelpDialog> {
   @override
   Widget build(BuildContext context) {
     final imagePaths = ['assets/images/moveView', 'assets/images/viewOp'];
-    return Container(
+    return SizedBox(
         height: 500,
         child: Column(
           children: [

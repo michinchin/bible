@@ -129,7 +129,7 @@ Iterable<TableRow> _generateOffScreenItems(BuildContext menuContext, int viewUid
   for (final view in vmBloc?.state?.views) {
     if (!vmBloc.isViewVisible(view.uid)) {
       final title = vm.menuTitleWith(context: menuContext, state: view);
-      items.add(tecModalPopupMenuItem(menuContext, vm.iconWithType(view.type), '$title', () {
+      items.add(tecModalPopupMenuItem(menuContext, vm.iconWithType(view.type), title, () {
         _onSwitchViews(vmBloc, viewUid, view);
         Navigator.of(menuContext).maybePop();
       }));
@@ -147,7 +147,7 @@ Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
     if (title == null) return [];
 
     TableRow row({String title, IconData icon, String tab}) =>
-        tecModalPopupMenuItem(menuContext, icon ?? vm.iconWithType(type), '$title', () async {
+        tecModalPopupMenuItem(menuContext, icon ?? vm.iconWithType(type), title, () async {
           tec.dmPrint('Adding new view of type $type.');
           await vm.onAddView(menuContext, type,
               currentViewId: viewUid, options: tab == null ? null : <String, dynamic>{'tab': tab});

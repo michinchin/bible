@@ -8,7 +8,8 @@ import '../../blocs/search/nav_bloc.dart';
 class SearchSuggestionsView extends StatelessWidget {
   final Function({String query}) onSubmit;
   final TextEditingController searchController;
-  const SearchSuggestionsView({@required this.onSubmit, @required this.searchController});
+  const SearchSuggestionsView({Key key, @required this.onSubmit, @required this.searchController})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

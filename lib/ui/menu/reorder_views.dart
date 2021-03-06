@@ -49,7 +49,7 @@ class DragTargetView extends StatefulWidget {
   final Widget child;
   final int viewUid;
 
-  const DragTargetView({this.child, this.viewUid});
+  const DragTargetView({Key key, this.child, this.viewUid}) : super(key: key);
 
   @override
   _DragTargetViewState createState() => _DragTargetViewState();
@@ -182,7 +182,7 @@ class DragViewIcon extends StatelessWidget {
   final IconData icon;
   final String text;
 
-  const DragViewIcon({this.onAccept, this.icon, this.text = ''});
+  const DragViewIcon({Key key, this.onAccept, this.icon, this.text = ''}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

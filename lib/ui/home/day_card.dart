@@ -10,12 +10,14 @@ class DayCard extends StatelessWidget {
   final String imageUrl;
   final String body;
   final VoidCallback onTap;
-  const DayCard(
-      {@required this.date,
-      @required this.title,
-      @required this.imageUrl,
-      @required this.onTap,
-      this.body = ''});
+  const DayCard({
+    Key key,
+    @required this.date,
+    @required this.title,
+    @required this.imageUrl,
+    @required this.onTap,
+    this.body = '',
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +67,7 @@ class DateWithImage extends StatelessWidget {
   final DateTime date;
   final String imageUrl;
   final double side;
-  const DateWithImage({this.date, this.imageUrl, this.side});
+  const DateWithImage({Key key, this.date, this.imageUrl, this.side}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return ClipRRect(

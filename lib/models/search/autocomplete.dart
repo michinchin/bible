@@ -20,7 +20,7 @@ class AutoComplete {
   static Future<AutoComplete> fetch({String phrase, String translationIds}) async {
     final cleanPhrase = optimizePhrase(phrase);
     final suggestions = getSuggestions(cleanPhrase);
-    final cacheParam = '${_getCacheKey(cleanPhrase, translationIds)}';
+    final cacheParam = _getCacheKey(cleanPhrase, translationIds);
 
     if (cleanPhrase.trim().isEmpty) {
       return AutoComplete.fromJson(
@@ -45,7 +45,8 @@ class AutoComplete {
           completion: (status, json, dynamic error) async {
             if (status == 200) {
               // save to tecCache...
-              await TecCache.shared.saveJsonToCache(json: json, cacheUrl: '${tec.cacheUrl}/$cacheParam');
+              await TecCache.shared
+                  .saveJsonToCache(json: json, cacheUrl: '${tec.cacheUrl}/$cacheParam');
 
               return json;
             } else {
@@ -92,7 +93,7 @@ String optimizePhrase(String phrase) {
   var cleanPhrase = tec.removeDiacritics(phrase.trimLeft());
 
   // remove punctuation
-  cleanPhrase = cleanPhrase.replaceAll(RegExp('[^ a-zA-Z\'0-9:\-]'), ' ');
+  cleanPhrase = cleanPhrase.replaceAll(RegExp('[^ a-zA-Z\'0-9:-]'), ' ');
 
   // top 5 words...
   final words = cleanPhrase.split(' ');
@@ -134,7 +135,7 @@ String optimizePhrase(String phrase) {
 
 Map<String, String> getSuggestions(String phrase) {
   String words, partialWord;
-  final s = phrase..replaceAll('\'', '')..replaceAll('\"', '');
+  final s = phrase..replaceAll('\'', '')..replaceAll('"', '');
 
   final index = s.lastIndexOf(' ');
 

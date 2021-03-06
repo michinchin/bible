@@ -28,7 +28,7 @@ class VolumeImage extends StatelessWidget {
           height: height,
           fit: fit,
           imageUrl: path,
-          errorWidget: (context, url, dynamic error) => Container(width: width, height: height),
+          errorWidget: (context, url, dynamic error) => SizedBox(width: width, height: height),
         );
 
     return tec.isNotNullOrEmpty(heroPrefix)

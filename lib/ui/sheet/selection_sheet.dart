@@ -134,7 +134,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
+              SizedBox(
                   height: 40,
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 10),

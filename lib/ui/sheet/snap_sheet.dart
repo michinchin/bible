@@ -14,6 +14,7 @@ const _selectionSheetKey = 2;
 
 // must have SheetManagerBloc provided
 class SnapSheet extends StatefulWidget {
+  const SnapSheet({Key key}) : super(key: key);
   @override
   _SnapSheetState createState() => _SnapSheetState();
 }
@@ -163,7 +164,8 @@ class SelectionSheetButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String title;
 
-  const SelectionSheetButton({@required this.icon, @required this.onPressed, this.title});
+  const SelectionSheetButton({Key key, @required this.icon, @required this.onPressed, this.title})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +201,8 @@ class SheetIconButton extends StatelessWidget {
   final IconData icon;
   final Color color;
 
-  const SheetIconButton({this.onPressed, this.text, this.icon, this.color});
+  const SheetIconButton({Key key, this.onPressed, this.text, this.icon, this.color})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

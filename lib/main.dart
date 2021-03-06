@@ -94,13 +94,15 @@ Future<void> main() async {
   tec.dmPrint('Main initialization took ${stopwatch.elapsed}');
   stopwatch.stop();
 
-  runApp(App());
+  runApp(const App());
 }
 
 ///
 /// App
 ///
 class App extends StatelessWidget {
+  const App({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(

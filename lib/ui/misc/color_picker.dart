@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 
 // Originally copied from https://github.com/creomobile/creo_color_picker
 
+// ignore_for_file: no_logic_in_create_state
+
 const _rainbow = LinearGradient(colors: [
   Color(0xffff0000),
   Color(0xffffff00),
@@ -207,7 +209,8 @@ class ColorPickerContext extends StatelessWidget {
 
 /// Provides [ColorPickerParameters] for the specified [ColorPickerContext].
 class ColorPickerContextData extends InheritedWidget {
-  const ColorPickerContextData(this._widget, Widget child, this.parameters) : super(child: child);
+  const ColorPickerContextData(this._widget, Widget child, this.parameters, {Key key})
+      : super(key: key, child: child);
 
   final ColorPickerContext _widget;
   final ColorPickerParameters parameters;

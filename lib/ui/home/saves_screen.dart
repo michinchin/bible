@@ -17,7 +17,7 @@ Future<void> showSaveScreen(BuildContext context, {int year}) =>
 class SavesScreen extends StatelessWidget {
   final int year;
 
-  const SavesScreen({this.year});
+  const SavesScreen({Key key, this.year}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +113,8 @@ class TabWrapper extends StatelessWidget {
   final List<Tab> tabs;
   final Widget emptyList;
 
-  const TabWrapper({this.tabViews, this.tabs, this.appBarTitle, this.emptyList});
+  const TabWrapper({Key key, this.tabViews, this.tabs, this.appBarTitle, this.emptyList})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

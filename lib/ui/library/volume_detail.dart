@@ -46,7 +46,7 @@ class _VolumeDetailState extends State<VolumeDetail> {
         ),
       ),
       body: SafeArea(
-              child: ListView(
+        child: ListView(
           children: [
             _VolumeCard(
               volume: widget.volume,
@@ -105,7 +105,7 @@ class _VolumeCard extends StatelessWidget {
 
         return Padding(
           padding: EdgeInsets.only(right: padding, left: padding),
-          child: Container(
+          child: SizedBox(
             height: cardHeight,
             child: Stack(
               alignment: Alignment.topLeft,

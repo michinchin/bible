@@ -21,8 +21,12 @@ class BCVTabView extends StatelessWidget {
   final Function(BuildContext, PrefBlocState) listener;
   final TabController tabController;
   final TextEditingController searchController;
-  const BCVTabView(
-      {@required this.listener, @required this.tabController, @required this.searchController});
+  const BCVTabView({
+    Key key,
+    @required this.listener,
+    @required this.tabController,
+    @required this.searchController,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

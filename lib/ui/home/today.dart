@@ -49,6 +49,7 @@ Future<void> showDotdFromNotification(BuildContext context, DateTime date) async
 }
 
 class Today extends StatefulWidget {
+  const Today({Key key}) : super(key: key);
   @override
   _TodayState createState() => _TodayState();
 }
@@ -74,7 +75,7 @@ class _TodayState extends State<Today> {
           ],
         ),
       ),
-      body: TodayScreen(),
+      body: const TodayScreen(),
     );
   }
 }

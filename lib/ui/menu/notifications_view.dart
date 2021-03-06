@@ -16,11 +16,12 @@ Future<void> showNotifications(BuildContext context) async {
     NotificationBloc.init(NotificationsModel());
     await Navigator.of(context, rootNavigator: true).push(MaterialPageRoute<void>(
         builder: (c) =>
-            BlocProvider.value(value: NotificationBloc.shared, child: NotificationsView())));
+            BlocProvider.value(value: NotificationBloc.shared, child: const NotificationsView())));
   }
 }
 
 class NotificationsView extends StatefulWidget {
+  const NotificationsView({Key key}) : super(key: key);
   @override
   _NotificationsViewState createState() => _NotificationsViewState();
 }
@@ -129,7 +130,7 @@ class __NotificationTileState extends State<_NotificationTile> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    '${tec.hourMinuteDescription(widget.notification.time)}',
+                    tec.hourMinuteDescription(widget.notification.time),
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),

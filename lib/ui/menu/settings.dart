@@ -31,7 +31,7 @@ void showSettings(BuildContext context) =>
 class SettingsView extends StatelessWidget {
   final MainMenuModel menuModel;
 
-  const SettingsView({this.menuModel});
+  const SettingsView({Key key, this.menuModel}) : super(key: key);
 
   Widget _accountButton(BuildContext context) {
     final signedIn = AppSettings.shared.userAccount.user.isSignedIn;

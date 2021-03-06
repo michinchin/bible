@@ -9,11 +9,12 @@ import '../common/common.dart';
 
 Future<void> showOnboarding(BuildContext context) async {
   await Navigator.of(context)
-      .push<void>(MaterialPageRoute(builder: (c) => Onboarding(), fullscreenDialog: true));
+      .push<void>(MaterialPageRoute(builder: (c) => const Onboarding(), fullscreenDialog: true));
   await tec.Prefs.shared.setBool(Const.prefShowOnboarding, false);
 }
 
 class Onboarding extends StatefulWidget {
+  const Onboarding({Key key}) : super(key: key);
   @override
   _OnboardingState createState() => _OnboardingState();
 }

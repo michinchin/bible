@@ -94,7 +94,7 @@ class SearchResults {
     String searchWords;
 
     urlEncodingExceptions.forEach((k, v) => cacheWords = cacheWords.replaceAll(RegExp(k), v));
-    tec.removeDiacritics(cacheWords).replaceAll(RegExp('[^ a-zA-Z\'0-9:\-]'), ' ').trim();
+    tec.removeDiacritics(cacheWords).replaceAll(RegExp('[^ a-zA-Z\'0-9:-]'), ' ').trim();
 
     // phrase or exact search ?
     if (cacheWords[0] == '"' || cacheWords[0] == '\'') {
@@ -144,8 +144,8 @@ class SearchResults {
           },
           completion: (status, json, dynamic error) async {
             if (status == 200) {
-              await TecCache.shared.saveJsonToCache(
-                  json: json, cacheUrl: '${tec.cacheUrl}/$cacheParam.gz');
+              await TecCache.shared
+                  .saveJsonToCache(json: json, cacheUrl: '${tec.cacheUrl}/$cacheParam.gz');
 
               return json;
             } else {
@@ -183,7 +183,7 @@ final urlEncodingExceptions = <String, String>{
   '‒': '-',
   '—': '-', // UTF-8: E2 80 94
   '―': '-', // UTF-8: E2 80 95
-  '\\.': '',
+  r'\.': '',
 };
 
 String _formatWords(String keywords) {
@@ -211,7 +211,8 @@ String _formatRefs(String query) {
     final shortRef = arr[0].group(0);
     if (Const.extraBookNames.containsKey(shortRef)) {
       final bookId = Const.extraBookNames[shortRef];
-      final fullBookName = VolumesRepository.shared.bibleWithId(Const.defaultBible).nameOfBook(bookId);
+      final fullBookName =
+          VolumesRepository.shared.bibleWithId(Const.defaultBible).nameOfBook(bookId);
       final fixedQuery = query.replaceAll(shortRef, fullBookName);
 
       return fixedQuery;

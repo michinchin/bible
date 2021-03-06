@@ -102,7 +102,7 @@ class Nav extends StatefulWidget {
   final bool searchView;
   final bool showHistory;
 
-  const Nav({this.searchView, this.showHistory = false});
+  const Nav({Key key, this.searchView, this.showHistory = false}) : super(key: key);
 
   @override
   _NavState createState() => _NavState();

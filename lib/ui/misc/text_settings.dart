@@ -28,7 +28,7 @@ class _TextSettings extends StatelessWidget {
         if (fonts != null) {
           return _TextSettingsUI(fonts: fonts);
         } else {
-          return Container(
+          return SizedBox(
             height: 100,
             child: Center(
               child: error == null ? const LoadingIndicator() : Text(error.toString()),
@@ -153,7 +153,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
               ],
             ),
           ),
-          Container(
+          SizedBox(
             height: fontSize * textScale * 2,
             // color: Colors.red,
             child: ListView.builder(
@@ -174,7 +174,7 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
                         final embedded = name.startsWith('embedded_');
                         final showName = (embedded) ? name.substring(9) : name;
                         return Text(
-                          '$showName',
+                          showName,
                           textScaleFactor: textScale,
                           style: name == _Fonts._systemDefault
                               ? TextStyle(fontSize: fontSize, color: textColor)

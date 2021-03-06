@@ -34,7 +34,8 @@ class SearchAndHistoryView extends StatelessWidget {
   final TextEditingController searchController;
   final TabController tabController;
 
-  const SearchAndHistoryView(this.searchController, this.tabController);
+  const SearchAndHistoryView(this.searchController, this.tabController, {Key key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +58,7 @@ class SearchAndHistoryView extends StatelessWidget {
       body: Container(
         color: Theme.of(context).dialogBackgroundColor,
         child: TabBarView(controller: tabController, children: [
-          SearchResultsView(),
+          const SearchResultsView(),
           HistoryView(searchController, tabController),
         ]),
       ),
@@ -69,7 +70,7 @@ class HistoryView extends StatefulWidget {
   final TextEditingController searchController;
   final TabController tabController;
 
-  const HistoryView(this.searchController, this.tabController);
+  const HistoryView(this.searchController, this.tabController, {Key key}) : super(key: key);
 
   @override
   _HistoryViewState createState() => _HistoryViewState();
@@ -295,6 +296,7 @@ class _NavHistoryView extends StatelessWidget {
 }
 
 class SearchResultsView extends StatefulWidget {
+  const SearchResultsView({Key key}) : super(key: key);
   @override
   _SearchResultsViewState createState() => _SearchResultsViewState();
 }
@@ -742,7 +744,7 @@ class SearchResultsLabel extends StatelessWidget {
   final List<SearchResult> results;
   final bool navView;
 
-  const SearchResultsLabel(this.results, {this.navView = false});
+  const SearchResultsLabel(this.results, {Key key, this.navView = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -804,7 +806,7 @@ class SearchResultsLabel extends StatelessWidget {
                     text: '${navView ? '' : 'Showing'}'
                         ' ${results.length} verse${results.length > 1 ? 's' : ''} containing '),
                 TextSpan(
-                    text: '${context.tbloc<SearchBloc>().state.search}',
+                    text: context.tbloc<SearchBloc>().state.search,
                     style: const TextStyle(fontWeight: FontWeight.bold)),
                 if (searchBlocState.excludedBooks.isNotEmpty)
                   if (showOTLabel)

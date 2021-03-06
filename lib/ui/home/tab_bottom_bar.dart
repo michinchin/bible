@@ -497,7 +497,7 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
         final volumeView = tec.as<VolumeViewDataBloc>(viewDataBloc).state.asVolumeViewData;
         volumeId = volumeView.volumeId;
         title =
-            '${!volumeView.useSharedRef ? '${volumeView.bookNameAndChapter(useShortBookName: true)}\n' : ''}${'${VolumesRepository.shared.volumeWithId(volumeId).abbreviation}'}';
+            '${!volumeView.useSharedRef ? '${volumeView.bookNameAndChapter(useShortBookName: true)}\n' : ''}${VolumesRepository.shared.volumeWithId(volumeId).abbreviation}';
         _locationTitle ??= volumeView.bookNameAndChapter(useShortBookName: true);
       }
       final visible = context.viewManager.isViewVisible(view.uid);
@@ -837,8 +837,10 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
                       )))
         ];
 
-    final _expandedView =
-        _ExpandedView(onViewTap: widget.onViewTap, parentContext: widget.parentContext, width: MediaQuery.of(context).size.width);
+    final _expandedView = _ExpandedView(
+        onViewTap: widget.onViewTap,
+        parentContext: widget.parentContext,
+        width: MediaQuery.of(context).size.width);
 
     if (isSmallScreen(context) && MediaQuery.of(context).orientation == Orientation.landscape) {
       child = Column(
@@ -943,7 +945,7 @@ class FabIcon extends StatelessWidget {
   final String text;
   final IconData icon;
 
-  const FabIcon({this.text, this.icon});
+  const FabIcon({Key key, this.text, this.icon}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -993,7 +995,7 @@ class TecTabBar extends StatelessWidget {
   final List<TabBottomBarItem> tabs;
   final TabManagerBloc tabManager;
 
-  const TecTabBar({@required this.tabs, this.tabManager});
+  const TecTabBar({Key key, @required this.tabs, this.tabManager}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

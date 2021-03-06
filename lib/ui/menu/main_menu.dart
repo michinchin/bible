@@ -38,7 +38,7 @@ List<TableRow> _buildMenuItems(
       menuContext,
       FeatherIcons.user,
       AppSettings.shared.userAccount.isSignedIn
-          ? '${AppSettings.shared.userAccount.user.email}'
+          ? AppSettings.shared.userAccount.user.email
           : 'Account',
       () {
         Navigator.of(menuContext).pop();
