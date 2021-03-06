@@ -1,4 +1,5 @@
 import 'package:tec_util/tec_util.dart' as tec;
+import 'package:http/http.dart' as http;
 
 const zendeskApiUrl = 'https://support.tecartabible.com/api/v2/help_center';
 const articleKey = 'articles';
@@ -7,7 +8,6 @@ const authKey =
 const categoryId = '200291314';
 
 class ZendeskApi {
-
   static Future<List<ZendeskArticle>> fetchSearch(String query) async {
     final parameters = <String, String>{'query': query, 'category': categoryId};
     final queryParams = Uri(queryParameters: parameters).query;
@@ -15,7 +15,7 @@ class ZendeskApi {
         headers: {'Authorization': 'Basic $authKey'},
         url: '$zendeskApiUrl/articles/search.json?$queryParams',
         completion: (status, json, dynamic error) => Future.value(json));
-        
+
     if (json != null) {
       final articles = <ZendeskArticle>[];
       for (final each in json['results']) {
@@ -28,7 +28,8 @@ class ZendeskApi {
 
   // need to grab sections and then articles for each articles
   static Future<List<ZendeskSection>> fetchSections() async {
-    final response = await tec.httpGet('$zendeskApiUrl/en-us/categories/$categoryId/sections.json');
+    final response =
+        await http.get(Uri.parse('$zendeskApiUrl/en-us/categories/$categoryId/sections.json'));
     final json = tec.parseJsonSync(response?.body ?? '');
     if (json != null) {
       final sections = <ZendeskSection>[];
@@ -43,8 +44,8 @@ class ZendeskApi {
 
   /// all articles available
   static Future<List<ZendeskArticle>> fetchArticles({int sectionId}) async {
-    final response = await tec.httpGet(
-        '$zendeskApiUrl/en-us${sectionId != null ? '/sections/$sectionId' : ''}/articles.json');
+    final response = await http.get(Uri.parse(
+        '$zendeskApiUrl/en-us${sectionId != null ? '/sections/$sectionId' : ''}/articles.json'));
     final json = tec.parseJsonSync(response?.body ?? '');
     if (json != null) {
       final articles = <ZendeskArticle>[];
