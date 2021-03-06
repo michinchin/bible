@@ -42,7 +42,7 @@ packages:
       name: args
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.0"
+    version: "2.0.0"
   async:
     dependency: transitive
     description:
@@ -245,7 +245,7 @@ packages:
       name: device_info_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   equatable:
     dependency: "direct main"
     description:
@@ -357,35 +357,35 @@ packages:
       name: flutter_keyboard_visibility
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.0-nullsafety.3"
+    version: "5.0.0"
   flutter_keyboard_visibility_platform_interface:
     dependency: transitive
     description:
       name: flutter_keyboard_visibility_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0-nullsafety.0"
+    version: "2.0.0"
   flutter_keyboard_visibility_web:
     dependency: transitive
     description:
       name: flutter_keyboard_visibility_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0-nullsafety.0"
+    version: "2.0.0"
   flutter_local_notifications:
     dependency: transitive
     description:
       name: flutter_local_notifications
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.1+1"
+    version: "5.0.0-nullsafety.0"
   flutter_local_notifications_platform_interface:
     dependency: transitive
     description:
       name: flutter_local_notifications_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0+1"
+    version: "3.0.0-nullsafety.2"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
@@ -394,9 +394,11 @@ packages:
   flutter_native_timezone:
     dependency: transitive
     description:
-      name: flutter_native_timezone
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "527ef2880bf071a6655a547d954785d754e0325f"
+      url: "https://github.com/pinkfish/flutter_native_timezone"
+    source: git
     version: "1.0.9"
   flutter_plugin_android_lifecycle:
     dependency: transitive
@@ -435,7 +437,7 @@ packages:
       name: freezed
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.14.0"
+    version: "0.14.0+1"
   freezed_annotation:
     dependency: "direct main"
     description:
@@ -449,7 +451,7 @@ packages:
       name: gettext_parser
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0+1"
+    version: "0.2.0"
   glob:
     dependency: transitive
     description:
@@ -526,7 +528,7 @@ packages:
       name: i18n_extension
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0-dev.1"
+    version: "3.0.0"
   idb_shim:
     dependency: transitive
     description:
@@ -554,14 +556,14 @@ packages:
       name: image_picker_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   in_app_purchase:
     dependency: "direct main"
     description:
       name: in_app_purchase
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.0"
+    version: "0.5.1"
   intl:
     dependency: transitive
     description:
@@ -736,7 +738,7 @@ packages:
       name: path_provider_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   path_provider_windows:
     dependency: transitive
     description:
@@ -778,7 +780,7 @@ packages:
       name: plugin_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0-nullsafety.2"
+    version: "2.0.0"
   pointycastle:
     dependency: transitive
     description:
@@ -871,12 +873,12 @@ packages:
     source: hosted
     version: "2.0.0"
   shared_preferences:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: shared_preferences
-      url: "https://pub.dartlang.org"
+      url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.3-concurrent"
   shared_preferences_linux:
     dependency: transitive
     description:
@@ -979,7 +981,7 @@ packages:
       name: sprintf
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.0"
+    version: "6.0.0"
   sqflite:
     dependency: transitive
     description:
@@ -1084,7 +1086,7 @@ packages:
       name: tec_notifications
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "0.1.0"
+    version: "0.1.1"
   tec_platform_util:
     dependency: "direct main"
     description:
@@ -1182,7 +1184,7 @@ packages:
       name: timezone
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.1"
+    version: "0.7.0-nullsafety.0"
   timing:
     dependency: transitive
     description:
@@ -1231,7 +1233,7 @@ packages:
       name: url_launcher_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   url_launcher_web:
     dependency: transitive
     description:

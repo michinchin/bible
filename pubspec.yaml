@@ -23,7 +23,7 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^6.1.0
   flutter_downloader: ^1.5.1
-  flutter_keyboard_visibility: ^5.0.0-nullsafety.3
+  flutter_keyboard_visibility: ^5.0.0
   flutter_localizations:
     sdk: flutter
   flutter_sfsymbols: ^1.0.0
@@ -68,7 +68,7 @@ dependencies:
     hosted:
       name: tec_notifications
       url: http://noah.tecarta.com:8100
-    version: ^0.1.0
+    version: ^0.1.1
   tec_platform_util:
     hosted:
       name: tec_platform_util
@@ -118,6 +118,13 @@ dependencies:
       url: https://github.com/tecarta/zefyr
       path: packages/zefyr
       ref: 00a3c1c952c18e3bb69bf553e3277d70d5069edc
+
+dependency_overrides:
+  shared_preferences:
+    hosted:
+      name: shared_preferences
+      url: http://noah.tecarta.com:8100
+      version: ^2.0.3-concurrent
 
 #dependency_overrides:
 #  tec_widgets:
