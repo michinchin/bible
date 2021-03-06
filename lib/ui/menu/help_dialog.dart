@@ -108,7 +108,7 @@ class __HelpPageViewState extends State<_HelpPageView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        if (!kIsWeb && _controller.value.initialized)
+        if (!kIsWeb && _controller.value.isInitialized)
           Expanded(
               child: Stack(
             alignment: Alignment.center,
