@@ -10,6 +10,7 @@ analyzer:
     implicit-dynamic: false
 
   exclude:
+    - lib/generated_plugin_registrant.dart
     # - lib/**/*.freezed.dart
     # - lib/**/*.g.dart
 
