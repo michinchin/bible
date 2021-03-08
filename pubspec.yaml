@@ -26,11 +26,11 @@ dependencies:
   flutter_keyboard_visibility: ^5.0.0
   flutter_localizations:
     sdk: flutter
-  flutter_sfsymbols: ^1.0.0
+  flutter_sfsymbols: ^2.0.0
   flutter_svg: ^0.21.0-nullsafety.0
   freezed_annotation: ^0.14.0
   google_fonts: ^2.0.0-nullsafety.0
-  i18n_extension: ^3.0.0-dev.1
+  i18n_extension: ^4.0.0
   image_picker: ^0.7.0
   in_app_purchase: ^0.5.0
   json_annotation: ^4.0.0
