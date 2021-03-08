@@ -13,6 +13,8 @@ Future<void> showNotifications(BuildContext context) async {
   final allowed = await Notifications.shared?.requestPermissions(context) ?? false;
   if (allowed) {
     await tec.Prefs.shared.setInt(Const.prefNotificationPermissionGranted, 1);
+    // why is this not using the shared instance?
+    // I'd like to get rid of this bloc
     NotificationBloc.init(NotificationsModel());
     await Navigator.of(context, rootNavigator: true).push(MaterialPageRoute<void>(
         builder: (c) =>

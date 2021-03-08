@@ -16,6 +16,7 @@ import '../../models/const.dart';
 import '../../models/home/interstitial.dart';
 import '../../models/home/saves.dart';
 import '../../models/home/votd.dart';
+import '../../models/notifications/notifications_model.dart';
 import '../../models/pref_item.dart';
 import '../../models/reference_ext.dart';
 import '../../models/search/tec_share.dart';
@@ -36,6 +37,7 @@ Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
     await showScreen<void>(context: context, builder: (c) => _VotdScreen(votd));
   }
 
+  await NotificationsModel.initNotifications(context);
   await Interstitial.show(context);
   context.tabManager.add(TecTabEvent.showTabBar);
 }

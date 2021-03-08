@@ -12,6 +12,7 @@ import '../../models/home/dotd.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/interstitial.dart';
 import '../../models/home/saves.dart';
+import '../../models/notifications/notifications_model.dart';
 import '../../models/search/tec_share.dart';
 import '../common/common.dart';
 import '../library/library.dart';
@@ -28,6 +29,8 @@ Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
     await showScreen<void>(
         context: context, builder: (c) => _DotdScreen(devo), bottomAttached: true);
   }
+
+  await NotificationsModel.initNotifications(context);
   await Interstitial.show(context);
   context.tabManager.add(TecTabEvent.showTabBar);
 }

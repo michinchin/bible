@@ -15,6 +15,7 @@ import 'votd_screen.dart';
 
 class TodayScreen extends StatelessWidget {
   const TodayScreen({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final portraitMode = MediaQuery.of(context).orientation == Orientation.portrait;

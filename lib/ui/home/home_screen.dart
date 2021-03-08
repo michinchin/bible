@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
@@ -26,7 +25,6 @@ import '../volume/volume_view_data.dart';
 import '../volume/volume_view_data_bloc.dart';
 import 'tab_bottom_bar.dart';
 import 'today.dart';
-import 'votd_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key key}) : super(key: key);
@@ -36,13 +34,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _startTime = DateTime.now();
-
   @override
   void initState() {
-    if (!kDebugMode) initNotifications();
-    //show onboarding
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    Future.delayed(const Duration(seconds: 1), () async {
       if (tec.Prefs.shared.getBool(Const.prefShowOnboarding, defaultValue: true)) {
         if (!kDebugMode) {
           await showOnboarding(context);
@@ -50,37 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       initFeatureDiscovery(
           context: context, pref: Const.prefFabTabs, steps: {Const.fabTabFeatureId});
+
+      await NotificationsModel.initNotifications(context, appInit: true);
     });
+
     super.initState();
-  }
-
-  void initNotifications() {
-    // TODO(abby): on cold start, doesn't open notification on iOS...why?
-    // if cold start - wait longer...
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final delay =
-          (DateTime.now().difference(_startTime) > const Duration(seconds: 15)) ? 500 : 1250;
-
-      if (mounted) {
-        var granted = false;
-
-        if (tec.Prefs.shared.getInt(Const.prefNotificationPermissionGranted, defaultValue: 0) !=
-            -1) {
-          granted = await Notifications.shared?.requestPermissions(context);
-          await tec.Prefs.shared.setInt(Const.prefNotificationPermissionGranted, granted ? 1 : -1);
-        }
-
-        if (granted) {
-          NotificationBloc.init(NotificationsModel.shared);
-          NotificationsModel.shared.bible = currentBibleFromContext(context);
-          Future.delayed(Duration(milliseconds: delay), () {
-            // resend the notification
-            Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
-          });
-        }
-      }
-    });
   }
 
   @override

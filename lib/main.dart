@@ -50,10 +50,10 @@ Future<void> main() async {
 
   if (!kIsWeb) {
     await FlutterDownloader.initialize(debug: kDebugMode);
-    // await Notifications.init(
-    //     prefFirstTimeOpened: Const.prefFirstTimeOpen,
-    //     channelInfo: ChannelInfo(id: 'tec-id', name: 'tec-name', description: 'tec-description'),
-    //     color: Const.tecartaBlue);
+    await Notifications.init(
+        prefFirstTimeOpened: Const.prefFirstTimeOpen,
+        channelInfo: ChannelInfo(id: 'tec-id', name: 'tec-name', description: 'tec-description'),
+        color: Const.tecartaBlue);
   }
 
   await tec.Prefs.shared.load();
