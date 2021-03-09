@@ -394,12 +394,10 @@ packages:
   flutter_native_timezone:
     dependency: transitive
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "527ef2880bf071a6655a547d954785d754e0325f"
-      url: "https://github.com/pinkfish/flutter_native_timezone"
-    source: git
-    version: "1.0.9"
+      name: flutter_native_timezone
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.10"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -1086,7 +1084,7 @@ packages:
       name: tec_notifications
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "0.1.1"
+    version: "0.1.2"
   tec_platform_util:
     dependency: "direct main"
     description:
