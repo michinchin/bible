@@ -125,6 +125,8 @@ dependency_overrides:
       name: shared_preferences
       url: http://noah.tecarta.com:8100
       version: ^2.0.3-concurrent
+  tec_native_ad:
+    path: ../shared/tec_native_ad
 
 #dependency_overrides:
 #  tec_widgets:
