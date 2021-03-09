@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tec_notifications/tec_notifications.dart';
-import 'package:tec_util/tec_util.dart';
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../navigation_service.dart';
@@ -99,31 +99,37 @@ class NotificationsModel extends NotificationsHelper {
     var granted = false;
 
     final prefGranted =
-        Prefs.shared.getInt(Const.prefNotificationPermissionGranted, defaultValue: 0);
+        tec.Prefs.shared.getInt(Const.prefNotificationPermissionGranted, defaultValue: 0);
 
-    if (appInit && prefGranted != 1 && (platformIs(Platform.iOS) || platformIs(Platform.macOS))) {
+    if (appInit &&
+        prefGranted != 1 &&
+        (tec.platformIs(tec.Platform.iOS) || tec.platformIs(tec.Platform.macOS))) {
       // don't do the initial request permissions on Apple devices on app start
       return;
-    }
-    else if (!appInit && prefGranted == 1) {
+    } else if (!appInit && prefGranted == 1) {
       // notifications have already been initialized...
       return;
     }
 
     if (prefGranted == 0) {
       granted = await Notifications.shared?.requestPermissions(context);
-      await Prefs.shared.setInt(Const.prefNotificationPermissionGranted, granted ? 1 : -1);
+      await tec.Prefs.shared.setInt(Const.prefNotificationPermissionGranted, granted ? 1 : -1);
     } else if (prefGranted == 1) {
       granted = await Notifications.shared?.requestPermissions(context);
     }
 
     if (granted) {
-      NotificationBloc.init(NotificationsModel.shared);
       NotificationsModel.shared.bible = currentBibleFromContext(context);
       Future.delayed(const Duration(milliseconds: 500), () {
         // resend the notification
         Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
       });
     }
+  }
+
+  static Future<void> showNotificationsView(BuildContext context) async {
+    final bible = currentBibleFromContext(context);
+    NotificationsModel.shared.bible = bible;
+    await showNotifications(context, NotificationsModel.shared);
   }
 }

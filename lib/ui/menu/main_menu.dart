@@ -6,9 +6,9 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
+import '../../models/notifications/notifications_model.dart';
 import '../common/tec_modal_popup_menu.dart';
 import 'main_menu_model.dart';
-import 'notifications_view.dart';
 import 'settings.dart';
 import 'zendesk_help.dart';
 
@@ -63,7 +63,7 @@ List<TableRow> _buildMenuItems(
     tecModalPopupMenuDivider(menuContext, rowPadding: rowPadding),
 
     tecModalPopupMenuItem(
-        menuContext, FeatherIcons.bell, 'Notifications', () => showNotifications(context),
+        menuContext, FeatherIcons.bell, 'Notifications', () => NotificationsModel.showNotificationsView(context),
         subtitle: 'Reminders for daily verse, devotional of the day, and more.',
         rowPadding: rowPadding,
         scaleFont: true),

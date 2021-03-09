@@ -13,12 +13,12 @@ import '../../blocs/app_theme_bloc.dart';
 import '../../blocs/prefs_bloc.dart';
 import '../../models/app_settings.dart';
 import '../../models/const.dart';
+import '../../models/notifications/notifications_model.dart';
 import '../../models/pref_item.dart';
 import '../common/common.dart';
 import '../misc/text_settings.dart';
 import '../volume/volume_view_data_bloc.dart';
 import 'main_menu_model.dart';
-import 'notifications_view.dart';
 import 'zendesk_help.dart';
 
 void showSettings(BuildContext context) =>
@@ -83,7 +83,7 @@ class SettingsView extends StatelessWidget {
                     _TitleSettingTile(
                       title: 'Notifications',
                       icon: FeatherIcons.bell,
-                      onPressed: () => showNotifications(context),
+                      onPressed: () => NotificationsModel.showNotificationsView(context),
                     ),
                     const _TitleSettingTile(title: 'Audio', icon: FeatherIcons.volume1),
                     _TitleSettingTile(
