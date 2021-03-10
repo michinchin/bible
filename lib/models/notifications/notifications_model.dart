@@ -95,8 +95,9 @@ class NotificationsModel extends NotificationsHelper {
     }
   }
 
-  static Future<void> initNotifications(BuildContext context, {bool appInit = false}) async {
+  static Future<bool> initNotifications(BuildContext context, {bool appInit = false}) async {
     var granted = false;
+    var dialogShown = false;
 
     final prefGranted =
         tec.Prefs.shared.getInt(Const.prefNotificationPermissionGranted, defaultValue: 0);
@@ -105,15 +106,16 @@ class NotificationsModel extends NotificationsHelper {
         prefGranted != 1 &&
         (tec.platformIs(tec.Platform.iOS) || tec.platformIs(tec.Platform.macOS))) {
       // don't do the initial request permissions on Apple devices on app start
-      return;
+      return dialogShown;
     } else if (!appInit && prefGranted == 1) {
       // notifications have already been initialized...
-      return;
+      return dialogShown;
     }
 
     if (prefGranted == 0) {
       granted = await Notifications.shared?.requestPermissions(context);
       await tec.Prefs.shared.setInt(Const.prefNotificationPermissionGranted, granted ? 1 : -1);
+      dialogShown = true;
     } else if (prefGranted == 1) {
       granted = await Notifications.shared?.requestPermissions(context);
     }
@@ -124,7 +126,11 @@ class NotificationsModel extends NotificationsHelper {
         // resend the notification
         Notifications.payloadStream.listen(NotificationsModel.shared.handlePayload);
       });
+
+      return dialogShown;
     }
+
+    return false;
   }
 
   static Future<void> showNotificationsView(BuildContext context) async {

@@ -21,8 +21,12 @@ import 'day_card.dart';
 import 'votd_screen.dart';
 
 Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
-  context.tabManager.add(TecTabEvent.hideTabBar);
+  // we need to save the tabManager - as rotation with ads messes with context
+  // ignore: close_sinks
+  final tabManager = context.tabManager..add(TecTabEvent.hideTabBar);
+
   await Interstitial.init(context, productId: devo.productId, adUnitId: Const.prefNativeAdId);
+
   if (isSmallScreen(context)) {
     await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _DotdScreen(devo)));
   } else {
@@ -30,9 +34,11 @@ Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
         context: context, builder: (c) => _DotdScreen(devo), bottomAttached: true);
   }
 
-  await NotificationsModel.initNotifications(context);
-  await Interstitial.show(context);
-  context.tabManager.add(TecTabEvent.showTabBar);
+  if (!await NotificationsModel.initNotifications(context)) {
+    await Interstitial.show(context);
+  }
+
+  tabManager.add(TecTabEvent.showTabBar);
 }
 
 class _DotdScreen extends StatefulWidget {

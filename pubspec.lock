@@ -22,13 +22,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
-  apple_sign_in:
-    dependency: transitive
-    description:
-      name: apple_sign_in
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.0"
   archive:
     dependency: transitive
     description:
@@ -91,7 +84,7 @@ packages:
       name: build_daemon
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.8"
+    version: "2.1.9"
   build_resolvers:
     dependency: transitive
     description:
@@ -126,7 +119,7 @@ packages:
       name: built_value
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.0.0"
+    version: "8.0.2"
   cached_network_image:
     dependency: "direct main"
     description:
@@ -175,7 +168,7 @@ packages:
       name: code_builder
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.6.0"
+    version: "3.7.0"
   collection:
     dependency: "direct main"
     description:
@@ -329,7 +322,7 @@ packages:
       name: flutter_blurhash
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.2-nullsafety.0"
+    version: "0.5.4-nullsafety.0"
   flutter_cache_manager:
     dependency: transitive
     description:
@@ -378,14 +371,14 @@ packages:
       name: flutter_local_notifications
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.0-nullsafety.0"
+    version: "5.0.0-nullsafety.1"
   flutter_local_notifications_platform_interface:
     dependency: transitive
     description:
       name: flutter_local_notifications_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0-nullsafety.2"
+    version: "3.0.0-nullsafety.4"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
@@ -477,7 +470,7 @@ packages:
       name: google_sign_in_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   google_sign_in_web:
     dependency: transitive
     description:
@@ -533,7 +526,7 @@ packages:
       name: idb_shim
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0+1"
+    version: "2.0.0+2"
   image:
     dependency: transitive
     description:
@@ -547,7 +540,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.2"
+    version: "0.7.2+1"
   image_picker_platform_interface:
     dependency: transitive
     description:
@@ -862,21 +855,21 @@ packages:
       name: sembast
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0+2"
+    version: "3.0.0+4"
   share:
     dependency: "direct main"
     description:
       name: share
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   shared_preferences:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: shared_preferences
-      url: "http://noah.tecarta.com:8100"
+      url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.3-concurrent"
+    version: "2.0.4"
   shared_preferences_linux:
     dependency: transitive
     description:
@@ -940,6 +933,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.4+1"
+  sign_in_with_apple:
+    dependency: transitive
+    description:
+      name: sign_in_with_apple
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -1074,9 +1074,9 @@ packages:
   tec_native_ad:
     dependency: "direct main"
     description:
-      path: "../shared/tec_native_ad"
-      relative: true
-    source: path
+      name: tec_native_ad
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
     version: "1.0.0"
   tec_notifications:
     dependency: "direct main"
@@ -1112,7 +1112,7 @@ packages:
       name: tec_user_account
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.2.0"
+    version: "2.2.1"
   tec_util:
     dependency: "direct main"
     description:
@@ -1266,7 +1266,7 @@ packages:
       name: video_player
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   video_player_platform_interface:
     dependency: transitive
     description:

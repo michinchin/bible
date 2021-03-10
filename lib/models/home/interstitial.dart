@@ -37,18 +37,20 @@ class Interstitial {
     }
   }
 
-  static Future<bool> show(BuildContext context) async {
+  static Future<bool> show(BuildContext context, {bool force = false}) async {
     if (kIsWeb) return false;
-    const minViewTime = Duration(seconds: 15);
+    final minViewTime = Duration(seconds: force ? 1 : 10);
 
     // does this product have a license?
-    if (await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(removeAdsVolumeId) ||
-        await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(_productId)) {
-      return false;
+    if (!force) {
+      if (await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(removeAdsVolumeId) ||
+          await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(_productId)) {
+        return false;
+      }
     }
 
     final lastAdShown = DateTime.fromMillisecondsSinceEpoch(
-        tec.Prefs.shared.getInt(prefLastInterstitialShown, defaultValue: 0));
+        force ? 0 : tec.Prefs.shared.getInt(prefLastInterstitialShown, defaultValue: 0));
 
     if (/*!kDebugMode && */
         DateTime.now().difference(_adStartTime) > minViewTime &&
@@ -83,26 +85,7 @@ class InterstitialScreen extends StatefulWidget {
 }
 
 class _InterstitialState extends State<InterstitialScreen> {
-  var _maxAdHeight = 0;
-  GlobalKey textKey = GlobalKey();
-  GlobalKey windowKey = GlobalKey();
-  var _smallScreen = false;
   var _okToClose = false;
-
-  Future<void> findReservedHeight(Duration _) async {
-    final bigBox = windowKey.currentContext.findRenderObject();
-    final box = textKey.currentContext.findRenderObject();
-    if (bigBox is RenderBox && box is RenderBox) {
-      // reserve the height of the box + some padding...
-      final newMaxAdHeight = bigBox.size.height - box.size.height - 30;
-
-      if (newMaxAdHeight != _maxAdHeight) {
-        setState(() {
-          _maxAdHeight = newMaxAdHeight.floor();
-        });
-      }
-    }
-  }
 
   void _buyProduct() {
     InAppPurchases.shared.purchase(
@@ -203,6 +186,7 @@ class _InterstitialState extends State<InterstitialScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const tinyScreenHeight = 330;
     const blueColor = Color.fromARGB(255, 71, 146, 206);
     const redColor = Color.fromARGB(255, 239, 83, 80);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -212,127 +196,143 @@ class _InterstitialState extends State<InterstitialScreen> {
       child: Scaffold(
           body: SafeArea(
         bottom: false,
-        child: OrientationBuilder(builder: (context, _) {
-          _smallScreen = (windowSizeWith(context).height <= 700);
+        child: LayoutBuilder(builder: (context, constraints) {
+          return OrientationBuilder(builder: (context, orientation) {
+            final ad = TecNativeAd(
+              adUnitId: widget.adUnitId,
+              uniqueId: 'devo-1',
+              adFormat: 'large',
+              darkMode: Theme.of(context).brightness != Brightness.light,
+              maxHeight: 100 // will fix next tec_native_ad check in,
+            );
 
-          WidgetsBinding.instance.addPostFrameCallback(findReservedHeight);
+            const message = 'Thank you for supporting the TecartaBible '
+                'App! To support the app\'s continued '
+                'development, a dismissible ad will occasionally appear '
+                'after you have read a devotional or verse of the day. Remove all ads '
+                'by paying a small fee.';
 
-          return SizedBox(
-              key: windowKey,
-              width: windowSizeWith(context).width,
-              child: Stack(children: [
+            const shortMessage = 'Thank you for supporting the TecartaBible '
+                'App! Remove all ads by paying a small fee.';
+
+            final removeAds = OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(width: 1.0, color: redColor),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
+              ),
+              child: const Text('REMOVE ADS',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: redColor)),
+              onPressed: () {
+                _removeAds(context);
+              },
+            );
+
+            final sendFeedback = OutlinedButton(
+              child: const Text('SEND FEEDBACK',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: blueColor,
+                  )),
+              onPressed: () {
+                _emailFeedback(context, 'devo-1');
+              },
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(width: 1.0, color: blueColor),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
+              ),
+            );
+
+            final adInfo = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                  child: Text('Why am I seeing this ad?',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Theme.of(context).textColor : Colors.black87,
+                          fontSize: 16.0)),
+                ),
+                Padding(
+                    padding: EdgeInsets.only(
+                        top: 5.0,
+                        left: 15.0,
+                        right: 15.0,
+                        bottom: constraints.maxHeight < tinyScreenHeight ? 20.0 : 30.0),
+                    child: Text((constraints.maxHeight < tinyScreenHeight) ? shortMessage : message,
+                        style: const TextStyle(fontSize: 16.0, height: 1.2))),
+                Padding(
+                  padding: EdgeInsets.only(
+                      bottom: constraints.maxHeight < tinyScreenHeight ? 0.0 : 30.0),
+                  child: (constraints.maxHeight < tinyScreenHeight)
+                      ? Center(
+                          child: Column(children: [
+                            removeAds,
+                            sendFeedback,
+                          ]),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            removeAds,
+                            sendFeedback,
+                          ],
+                        ),
+                ),
+              ],
+            );
+
+            return Stack(children: [
+              if (!isSmallScreen(context) || orientation == Orientation.portrait)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    if (_maxAdHeight == 0) Container(),
-                    if (_maxAdHeight > 0)
-                      SizedBox(
-                        width: windowSizeWith(context).width,
-                        height: _maxAdHeight.toDouble(),
-                        child: TecNativeAd(
-                          adUnitId: widget.adUnitId,
-                          uniqueId: 'devo-1',
-                          adFormat: 'large',
-                          darkMode: Theme.of(context).brightness != Brightness.light,
-                          maxHeight: _maxAdHeight,
-                        ),
-                      ),
-                    const Spacer(),
-                    Column(
-                      key: textKey,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-                          child: Text('Why am I seeing this ad?',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isDarkMode ? Theme.of(context).textColor : Colors.black87,
-                                  fontSize: 16.0)),
-                        ),
-                        if (_smallScreen)
-                          const Padding(
-                            padding:
-                                EdgeInsets.only(top: 5.0, left: 15.0, right: 15.0, bottom: 10.0),
-                            child: Text(
-                                'To support the app\'s continued '
-                                'development, a dismissible ad will occasionally appear '
-                                'after you have read a devotional.',
-                                style: TextStyle(fontSize: 16.0, height: 1.2)),
-                          ),
-                        if (!_smallScreen)
-                          const Padding(
-                            padding:
-                                EdgeInsets.only(top: 5.0, left: 15.0, right: 15.0, bottom: 30.0),
-                            child: Text(
-                                'Thank you for supporting the TecartaBible '
-                                'App! To support the app\'s continued '
-                                'development, a dismissible ad will occasionally appear '
-                                'after you have read a devotional or verse of the day. Remove all ads '
-                                'by paying a small fee.',
-                                style: TextStyle(fontSize: 16.0, height: 1.2)),
-                          ),
-                        Padding(
-                          padding: EdgeInsets.only(bottom: ((_smallScreen) ? 10.0 : 30.0)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              OutlinedButton(
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(width: 1.0, color: redColor),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5.0)),
-                                ),
-                                child: const Text('REMOVE ADS',
-                                    style: TextStyle(fontWeight: FontWeight.bold, color: redColor)),
-                                onPressed: () {
-                                  _removeAds(context);
-                                },
-                              ),
-                              OutlinedButton(
-                                child: const Text('SEND FEEDBACK',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: blueColor,
-                                    )),
-                                onPressed: () {
-                                  _emailFeedback(context, 'devo-1');
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(width: 1.0, color: blueColor),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5.0)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                    Expanded(child: Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: ad,
+                    )),
+                    adInfo,
                   ],
                 ),
-                Container(
-                  alignment: Alignment.topLeft,
-                  margin: const EdgeInsets.only(top: 10.0, left: 10.0),
-                  width: 40.0,
-                  height: 40.0,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [boxShadow()],
-                    border: Border.all(color: Colors.black26, width: 1.0),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    color: isDarkMode ? Colors.white : Colors.black,
-                    tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                    onPressed: () {
-                      _okToClose = true;
-                      Navigator.maybePop(context);
-                    },
-                  ),
+              if (isSmallScreen(context) && orientation == Orientation.landscape)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [adInfo],
+                        ),
+                      ),
+                    ),
+                    Expanded(child: ad),
+                  ],
                 ),
-              ]));
+              Container(
+                alignment: Alignment.topLeft,
+                margin: const EdgeInsets.only(top: 10.0, left: 10.0),
+                width: 40.0,
+                height: 40.0,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [boxShadow()],
+                  border: Border.all(color: Colors.black26, width: 1.0),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.close),
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  onPressed: () {
+                    _okToClose = true;
+                    Navigator.maybePop(context);
+                  },
+                ),
+              ),
+            ]);
+          });
         }),
       )),
     );

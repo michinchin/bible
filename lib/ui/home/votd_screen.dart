@@ -27,7 +27,10 @@ import '../volume/volume_view_data_bloc.dart';
 import 'day_card.dart';
 
 Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
-  context.tabManager.add(TecTabEvent.hideTabBar);
+  // we need to save the tabManager - as rotation with adds messes with context
+  // ignore: close_sinks
+  final tabManager = context.tabManager..add(TecTabEvent.hideTabBar);
+
   await Interstitial.init(context,
       productId: currentBibleFromContext(context)?.id, adUnitId: Const.prefNativeAdId);
 
@@ -37,9 +40,11 @@ Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
     await showScreen<void>(context: context, builder: (c) => _VotdScreen(votd));
   }
 
-  await NotificationsModel.initNotifications(context);
-  await Interstitial.show(context);
-  context.tabManager.add(TecTabEvent.showTabBar);
+  if (!await NotificationsModel.initNotifications(context)) {
+    await Interstitial.show(context, force: true);
+  }
+
+  tabManager.add(TecTabEvent.showTabBar);
 }
 
 const imageAspectRatio = 1080.0 / 555.0;
