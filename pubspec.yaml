@@ -83,7 +83,7 @@ dependencies:
     hosted:
       name: tec_user_account
       url: http://noah.tecarta.com:8100
-    version: ^2.2.0
+    version: ^2.2.2
   tec_util:
     hosted:
       name: tec_util
@@ -120,8 +120,8 @@ dependencies:
       ref: 00a3c1c952c18e3bb69bf553e3277d70d5069edc
 
 #dependency_overrides:
-#  tec_widgets:
-#     path: ../shared/tec_widgets
+#  tec_user_account:
+#     path: ../shared/tec_user_account
 
 dev_dependencies:
   bloc_test: ^7.1.0

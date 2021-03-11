@@ -86,6 +86,13 @@ class InterstitialScreen extends StatefulWidget {
 
 class _InterstitialState extends State<InterstitialScreen> {
   var _okToClose = false;
+  String adId;
+
+  @override
+  void initState() {
+    super.initState();
+    adId = 'ad-${DateTime.now().millisecondsSinceEpoch % 1000}';
+  }
 
   void _buyProduct() {
     InAppPurchases.shared.purchase(
@@ -200,7 +207,7 @@ class _InterstitialState extends State<InterstitialScreen> {
           return OrientationBuilder(builder: (context, orientation) {
             final ad = TecNativeAd(
               adUnitId: widget.adUnitId,
-              uniqueId: 'devo-1',
+              uniqueId: adId,
               adFormat: 'large',
               darkMode: Theme.of(context).brightness != Brightness.light,
               maxHeight: 100 // will fix next tec_native_ad check in,
@@ -234,7 +241,7 @@ class _InterstitialState extends State<InterstitialScreen> {
                     color: blueColor,
                   )),
               onPressed: () {
-                _emailFeedback(context, 'devo-1');
+                _emailFeedback(context, adId);
               },
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(width: 1.0, color: blueColor),
