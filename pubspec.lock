@@ -1074,9 +1074,9 @@ packages:
   tec_native_ad:
     dependency: "direct main"
     description:
-      name: tec_native_ad
-      url: "http://noah.tecarta.com:8100"
-    source: hosted
+      path: "../shared/tec_native_ad"
+      relative: true
+    source: path
     version: "1.0.0"
   tec_notifications:
     dependency: "direct main"
@@ -1144,9 +1144,9 @@ packages:
   tec_widgets:
     dependency: "direct main"
     description:
-      name: tec_widgets
-      url: "http://noah.tecarta.com:8100"
-    source: hosted
+      path: "../shared/tec_widgets"
+      relative: true
+    source: path
     version: "2.2.0"
   term_glyph:
     dependency: transitive

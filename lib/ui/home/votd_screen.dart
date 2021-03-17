@@ -31,8 +31,8 @@ Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
   // ignore: close_sinks
   final tabManager = context.tabManager..add(TecTabEvent.hideTabBar);
 
-  await Interstitial.init(context,
-      productId: currentBibleFromContext(context)?.id, adUnitId: Const.prefNativeAdId);
+  // ads aren't based on owned products... so don't pass a product id in
+  await Interstitial.init(/*currentBibleFromContext(context)?.id*/);
 
   if (isSmallScreen(context)) {
     await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _VotdScreen(votd)));

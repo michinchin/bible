@@ -119,9 +119,11 @@ dependencies:
       path: packages/zefyr
       ref: 00a3c1c952c18e3bb69bf553e3277d70d5069edc
 
-#dependency_overrides:
-#  tec_user_account:
-#     path: ../shared/tec_user_account
+dependency_overrides:
+  tec_native_ad:
+     path: ../shared/tec_native_ad
+  tec_widgets:
+    path: ../shared/tec_widgets
 
 dev_dependencies:
   bloc_test: ^7.1.0

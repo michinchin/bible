@@ -95,7 +95,7 @@ class _ChapterView extends StatelessWidget {
         children: [
           for (var i = 1; i <= chapters; i++) ...[
             _PillButton(
-              textColor: ref.chapter == i ? tabColors[NavTabs.chapter.index] : textColor,
+              textColor: /* ref.chapter == i ? tabColors[NavTabs.chapter.index] :*/ textColor,
               onPressed: () {
                 if (!nav3TapEnabled) {
                   Navigator.of(context).maybePop(ref.copyWith(chapter: i));
@@ -133,7 +133,7 @@ class _VerseView extends StatelessWidget {
               context.tbloc<NavBloc>().add(NavEvent.setRef(ref: updatedRef));
               Navigator.of(context).maybePop(updatedRef);
             },
-            textColor: ref.verse == i ? tabColors[NavTabs.verse.index] : textColor,
+            textColor: /*ref.verse == i ? tabColors[NavTabs.verse.index] :*/ textColor,
             text: i.toString(),
           )
         ]
@@ -187,11 +187,9 @@ class _BookView extends StatelessWidget {
       // if book only has one chapter, special case
       if (bible.chaptersIn(book: book) == 1) {
         if (PrefsBloc.getBool(PrefItemId.nav3Tap)) {
-          final nameOfBook = bible.nameOfBook(book);
-          updateSearch(nameOfBook);
-          bloc
-            ..selectBook(book, nameOfBook)
-            ..add(NavEvent.changeTabIndex(index: NavTabs.verse.index));
+          // simulate a chapter 1 tap for this book
+          updateSearch('${bible.nameOfBook(book)} 1:');
+          context.tbloc<NavBloc>().selectChapter(book, bible.nameOfBook(book), 1);
         } else {
           Navigator.of(context).maybePop(bloc.state.ref.copyWith(book: book));
         }
@@ -208,7 +206,7 @@ class _BookView extends StatelessWidget {
               _PillButton(
                 text: bookNames[book],
                 onPressed: () => onTap(book),
-                textColor: ref.book == book ? tabColors[NavTabs.book.index] : textColor,
+                textColor: /*ref.book == book ? tabColors[NavTabs.book.index] :*/ textColor,
               ),
             ]
           ],

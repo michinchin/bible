@@ -7,7 +7,6 @@ import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/tab_manager_bloc.dart';
 import '../../models/app_settings.dart';
-import '../../models/const.dart';
 import '../../models/home/dotd.dart';
 import '../../models/home/dotds.dart';
 import '../../models/home/interstitial.dart';
@@ -25,7 +24,8 @@ Future<void> showDotdScreen(BuildContext context, Dotd devo) async {
   // ignore: close_sinks
   final tabManager = context.tabManager..add(TecTabEvent.hideTabBar);
 
-  await Interstitial.init(context, productId: devo.productId, adUnitId: Const.prefNativeAdId);
+  // ads aren't based on productIds...
+  await Interstitial.init(/*devo.productId*/);
 
   if (isSmallScreen(context)) {
     await Navigator.of(context).push<void>(MaterialPageRoute(builder: (c) => _DotdScreen(devo)));
