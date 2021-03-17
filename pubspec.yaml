@@ -28,7 +28,7 @@ dependencies:
     sdk: flutter
   flutter_sfsymbols: ^2.0.0
   flutter_svg: ^0.21.0-nullsafety.0
-  freezed_annotation: ^0.14.0
+  freezed_annotation: ^0.14.1
   google_fonts: ^2.0.0-nullsafety.0
   i18n_extension: ^4.0.0
   image_picker: ^0.7.0
@@ -42,7 +42,7 @@ dependencies:
   quill_delta: ^2.0.0
   scrollable_positioned_list: ^0.1.8
   share: ^2.0.0
-  string_validator: ^0.2.0-nullsafety.0
+  string_validator: ^0.3.0
 
   tec_cache:
     hosted:
@@ -58,7 +58,7 @@ dependencies:
     hosted:
       name: tec_html
       url: http://noah.tecarta.com:8100
-    version: ^3.2.0
+    version: ^3.3.1
   tec_native_ad:
     hosted:
       name: tec_native_ad
@@ -83,7 +83,7 @@ dependencies:
     hosted:
       name: tec_user_account
       url: http://noah.tecarta.com:8100
-    version: ^2.2.2
+    version: ^2.2.3
   tec_util:
     hosted:
       name: tec_util
@@ -110,9 +110,9 @@ dependencies:
       url: http://noah.tecarta.com:8100
     version: ^2.1.1
 
-  tuple: ^2.0.0-nullsafety.0
+  tuple: ^2.0.0
   url_launcher: ^6.0.2
-  video_player: ^2.0.0
+  video_player: ^2.0.2
   zefyr:
     git:
       url: https://github.com/tecarta/zefyr
@@ -127,10 +127,10 @@ dependency_overrides:
 
 dev_dependencies:
   bloc_test: ^7.1.0
-  build_runner: ^1.10.2
+  build_runner: ^1.11.5
   flutter_test:
     sdk: flutter
-  freezed: ^0.14.0
+  freezed: ^0.14.1
   json_serializable: ^4.0.2
 
 flutter:
