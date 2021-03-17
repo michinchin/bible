@@ -41,7 +41,7 @@ Future<void> showVotdScreen(BuildContext context, VotdEntry votd) async {
   }
 
   if (!await NotificationsModel.initNotifications(context)) {
-    await Interstitial.show(context, force: true);
+    await Interstitial.show(context, force: false);
   }
 
   tabManager.add(TecTabEvent.showTabBar);
