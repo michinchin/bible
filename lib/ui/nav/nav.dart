@@ -282,17 +282,20 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     Widget body(NavViewState navViewState) {
       switch (navViewState) {
         case NavViewState.bcvTabs:
+          debugPrint('bcv tab');
           return BCVTabView(
             listener: (c, s) => _changeTabController(),
             tabController: _tabController,
             searchController: _searchController,
           );
         case NavViewState.searchSuggestions:
+          debugPrint('suggestions view');
           return SearchSuggestionsView(
             searchController: _searchController,
             onSubmit: onSubmit,
           );
         case NavViewState.searchResults:
+          debugPrint('results view');
           return SearchAndHistoryView(_searchController, _searchResultsTabController);
       }
       return Container();

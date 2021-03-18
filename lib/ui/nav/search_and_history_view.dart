@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -40,21 +39,21 @@ class SearchAndHistoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Theme.of(context).dialogBackgroundColor,
-        automaticallyImplyLeading: false,
-        flexibleSpace: Center(
-          child: TabBar(
-              controller: tabController,
-              isScrollable: true,
-              indicatorSize: TabBarIndicatorSize.label,
-              indicator: BubbleTabIndicator(color: searchThemeColor.withOpacity(0.5)),
-              labelColor: Theme.of(context).textColor,
-              unselectedLabelColor: Theme.of(context).textColor,
-              tabs: const [Tab(child: Text('SEARCH RESULTS')), Tab(child: Text('HISTORY'))]),
-        ),
-      ),
+      // appBar: AppBar(
+      //   elevation: 0,
+      //   backgroundColor: Theme.of(context).dialogBackgroundColor,
+      //   automaticallyImplyLeading: false,
+      //   flexibleSpace: Center(
+      //     child: TabBar(
+      //         controller: tabController,
+      //         isScrollable: true,
+      //         indicatorSize: TabBarIndicatorSize.label,
+      //         indicator: BubbleTabIndicator(color: searchThemeColor.withOpacity(0.5)),
+      //         labelColor: Theme.of(context).textColor,
+      //         unselectedLabelColor: Theme.of(context).textColor,
+      //         tabs: const [Tab(child: Text('SEARCH RESULTS')), Tab(child: Text('HISTORY'))]),
+      //   ),
+      // ),
       body: Container(
         color: Theme.of(context).dialogBackgroundColor,
         child: TabBarView(controller: tabController, children: [
@@ -77,25 +76,25 @@ class HistoryView extends StatefulWidget {
 }
 
 class _HistoryViewState extends State<HistoryView> {
-  void _onSearchTap(BuildContext c, SearchHistoryItem searchHistoryItem) {
-    c.tbloc<SearchBloc>()
-      ..add(SearchEvent.request(
-        search: searchHistoryItem.search,
-        translations: searchHistoryItem.volumesFiltered.isNotEmpty
-            ? searchHistoryItem.volumesFiltered.split('|').map(int.parse).toList()
-            : [],
-      ))
-      ..add(SearchEvent.filterBooks(searchHistoryItem.booksFiltered.isNotEmpty
-          ? searchHistoryItem.booksFiltered.split('|').map(int.parse).toList()
-          : []))
-      ..add(SearchEvent.setScrollIndex(searchHistoryItem?.index ?? 0));
-
-    c.tbloc<NavBloc>().add(NavEvent.onSearchFinished(search: searchHistoryItem.search));
-    widget.searchController
-      ..text = searchHistoryItem.search
-      ..selection = TextSelection.collapsed(offset: searchHistoryItem.search.length);
-    widget.tabController.animateTo(1);
-  }
+  // void _onSearchTap(BuildContext c, SearchHistoryItem searchHistoryItem) {
+  //   c.tbloc<SearchBloc>()
+  //     ..add(SearchEvent.request(
+  //       search: searchHistoryItem.search,
+  //       translations: searchHistoryItem.volumesFiltered.isNotEmpty
+  //           ? searchHistoryItem.volumesFiltered.split('|').map(int.parse).toList()
+  //           : [],
+  //     ))
+  //     ..add(SearchEvent.filterBooks(searchHistoryItem.booksFiltered.isNotEmpty
+  //         ? searchHistoryItem.booksFiltered.split('|').map(int.parse).toList()
+  //         : []))
+  //     ..add(SearchEvent.setScrollIndex(searchHistoryItem?.index ?? 0));
+  //
+  //   c.tbloc<NavBloc>().add(NavEvent.onSearchFinished(search: searchHistoryItem.search));
+  //   widget.searchController
+  //     ..text = searchHistoryItem.search
+  //     ..selection = TextSelection.collapsed(offset: searchHistoryItem.search.length);
+  //   widget.tabController.animateTo(1);
+  // }
 
   Future<List<dynamic>> _future() => Future.wait<List<dynamic>>(
       [UserItemHelper.navHistoryItemsFromDb(), UserItemHelper.searchHistoryItemsFromDb()]);
@@ -120,62 +119,62 @@ class _HistoryViewState extends State<HistoryView> {
                 ? const Center(child: Text('Search or navigate to view history'))
                 : SingleChildScrollView(
                     child: Column(children: [
-                      InkWell(
-                        onTap: () async {
-                          final ref = await Navigator.of(c).push(MaterialPageRoute<Reference>(
-                              builder: (c) => _NavHistoryView(navHistory)));
-                          if (ref != null) {
-                            await Navigator.of(context).maybePop<Reference>(
-                                ref?.copyWith(volume: context.tbloc<NavBloc>().state.ref.volume));
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                            ListLabel('Navigation History',
-                                style: Theme.of(context).textTheme.bodyText1),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Icon(Icons.chevron_right,
-                                  color: Theme.of(context).textTheme.caption.color),
-                            ),
-                          ]),
-                        ),
-                      ),
+                      // InkWell(
+                      //   onTap: () async {
+                      //     final ref = await Navigator.of(c).push(MaterialPageRoute<Reference>(
+                      //         builder: (c) => _NavHistoryView(navHistory)));
+                      //     if (ref != null) {
+                      //       await Navigator.of(context).maybePop<Reference>(
+                      //           ref?.copyWith(volume: context.tbloc<NavBloc>().state.ref.volume));
+                      //     }
+                      //   },
+                      //   child: Padding(
+                      //     padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      //     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      //       ListLabel('Navigation History',
+                      //           style: Theme.of(context).textTheme.bodyText1),
+                      //       Padding(
+                      //         padding: const EdgeInsets.only(right: 8.0),
+                      //         child: Icon(Icons.chevron_right,
+                      //             color: Theme.of(context).textTheme.caption.color),
+                      //       ),
+                      //     ]),
+                      //   ),
+                      // ),
                       ...ListTile.divideTiles(context: context, tiles: [
-                        for (final navHistoryItem in navHistory.take(5))
+                        for (final navHistoryItem in navHistory.take(50))
                           _NavHistoryTile(navHistoryItem),
                       ]),
-                      InkWell(
-                          onTap: () async {
-                            final searchChosen = await Navigator.of(c).push(
-                                MaterialPageRoute<SearchHistoryItem>(
-                                    builder: (c) => _SearchHistoryView(searchHistory)));
-                            if (searchChosen != null) {
-                              _onSearchTap(c, searchChosen);
-                            }
-                          },
-                          child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0),
-                              child:
-                                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                ListLabel('Search History',
-                                    style: Theme.of(context).textTheme.bodyText1),
-                                Padding(
-                                    padding: const EdgeInsets.only(right: 8.0),
-                                    child: Icon(Icons.chevron_right,
-                                        color: Theme.of(c).textTheme.caption.color)),
-                              ]))),
-                      ...ListTile.divideTiles(context: context, tiles: [
-                        for (final searchHistoryItem in searchHistory.take(5))
-                          ListTile(
-                            dense: true,
-                            leading: const Icon(Icons.search),
-                            title: Text(searchHistoryItem.search,
-                                style: Theme.of(context).textTheme.bodyText1),
-                            onTap: () => _onSearchTap(c, searchHistoryItem),
-                          )
-                      ]),
+                      // InkWell(
+                      //     onTap: () async {
+                      //       final searchChosen = await Navigator.of(c).push(
+                      //           MaterialPageRoute<SearchHistoryItem>(
+                      //               builder: (c) => _SearchHistoryView(searchHistory)));
+                      //       if (searchChosen != null) {
+                      //         _onSearchTap(c, searchChosen);
+                      //       }
+                      //     },
+                      //     child: Padding(
+                      //         padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      //         child:
+                      //             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      //           ListLabel('Search History',
+                      //               style: Theme.of(context).textTheme.bodyText1),
+                      //           Padding(
+                      //               padding: const EdgeInsets.only(right: 8.0),
+                      //               child: Icon(Icons.chevron_right,
+                      //                   color: Theme.of(c).textTheme.caption.color)),
+                      //         ]))),
+                      // ...ListTile.divideTiles(context: context, tiles: [
+                      //   for (final searchHistoryItem in searchHistory.take(5))
+                      //     ListTile(
+                      //       dense: true,
+                      //       leading: const Icon(Icons.search),
+                      //       title: Text(searchHistoryItem.search,
+                      //           style: Theme.of(context).textTheme.bodyText1),
+                      //       onTap: () => _onSearchTap(c, searchHistoryItem),
+                      //     )
+                      // ]),
                     ]),
                   );
           }
@@ -193,7 +192,7 @@ class _NavHistoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
         dense: true,
-        leading: const Icon(Icons.history),
+        // leading: const Icon(Icons.history),
         // remove translation from label
         title: Text(
             navHistoryItem
@@ -201,13 +200,17 @@ class _NavHistoryTile extends StatelessWidget {
                 .split(' ')
                 .take(navHistoryItem.label().split(' ').length - 1)
                 .join(' '),
+            textScaleFactor: contentTextScaleFactorWith(context),
             style: const TextStyle(fontWeight: FontWeight.w500)),
         subtitle: FutureBuilder<tec.ErrorOrValue<ReferenceAndVerseText>>(
           future: currentBibleFromContext(context).referenceAndVerseTextWith(navHistoryItem),
           builder: (c, s) {
             if (s.hasData) {
               final verseText = s.data.value.verseText.values.map((v) => v.text).join(' ');
-              return Text(verseText);
+              return Text(
+                verseText,
+                textScaleFactor: contentTextScaleFactorWith(context),
+              );
             }
             return Container();
           },
@@ -217,6 +220,7 @@ class _NavHistoryTile extends StatelessWidget {
   }
 }
 
+/*
 class _SearchHistoryView extends StatelessWidget {
   final List<SearchHistoryItem> searchHistory;
 
@@ -253,8 +257,9 @@ class _SearchHistoryView extends StatelessWidget {
             ),
     );
   }
-}
+}*/
 
+/*
 class _NavHistoryView extends StatelessWidget {
   final List<Reference> navHistory;
 
@@ -294,31 +299,30 @@ class _NavHistoryView extends StatelessWidget {
     );
   }
 }
+*/
 
 class SearchResultsView extends StatefulWidget {
   const SearchResultsView({Key key}) : super(key: key);
+
   @override
   _SearchResultsViewState createState() => _SearchResultsViewState();
 }
 
 class _SearchResultsViewState extends State<SearchResultsView> {
-  ItemScrollController scrollController;
-  ItemPositionsListener positionListener;
+  ScrollController scrollController;
 
   @override
   void initState() {
     final s = context.tbloc<SearchBloc>().state;
-    scrollController = ItemScrollController();
+    scrollController = ScrollController();
     if (s.scrollIndex > 1) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.isAttached) {
-          scrollController.scrollTo(
-              index: s.scrollIndex, duration: const Duration(milliseconds: 250));
-          TecToast.show(context, 'Scrolled to last saved place');
+        if (scrollController.hasClients) {
+          scrollController.jumpTo(s.scrollIndex.toDouble());
         }
       });
     }
-    positionListener = ItemPositionsListener.create();
+
     super.initState();
   }
 
@@ -347,14 +351,21 @@ class _SearchResultsViewState extends State<SearchResultsView> {
   }
 
   Future<void> _saveSearch(SearchState s) async {
-    if (positionListener.itemPositions.value.isNotEmpty) {
-      if (s.filteredResults.isNotEmpty) {
-        // this is where we save the search result...once user exits page
-        await context.tbloc<SearchBloc>().saveToSearchHistory(s.search,
-            translations: s.filteredTranslations.join('|'),
-            booksExcluded: s.excludedBooks.join('|'),
-            scrollIndex: positionListener.itemPositions.value.first.index);
-      }
+    final scrollOffset = scrollController.offset.toInt();
+
+    if (s.filteredResults.isNotEmpty) {
+      // ignore: close_sinks
+      final searchBloc = context.tbloc<SearchBloc>();
+
+      // this is where we save the search result...once user exits page
+      await searchBloc.saveToSearchHistory(s.search,
+          translations: s.filteredTranslations.join('|'),
+          booksExcluded: s.excludedBooks.join('|'),
+          scrollIndex: scrollOffset);
+
+      // it does save the search results to db - but it doesn't update state
+      // specifically scroll position
+      searchBloc.add(SearchEvent.setScrollIndex(scrollOffset));
     }
   }
 
@@ -363,8 +374,8 @@ class _SearchResultsViewState extends State<SearchResultsView> {
     return BlocConsumer<SearchBloc, SearchState>(
         listener: (c, s) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (scrollController.isAttached) {
-              scrollController.scrollTo(index: 0, duration: const Duration(milliseconds: 250));
+            if (scrollController.hasClients) {
+              scrollController.jumpTo(0);
             }
           });
         },
@@ -389,29 +400,30 @@ class _SearchResultsViewState extends State<SearchResultsView> {
             child: Scaffold(
               body: Container(
                 color: Theme.of(context).dialogBackgroundColor,
-                child: ScrollablePositionedList.separated(
-                  itemCount: results.length + 2,
-                  itemScrollController: scrollController,
-                  itemPositionsListener: positionListener,
-                  separatorBuilder: (c, i) {
-                    if (i == 0) {
-                      // if sized box has height: 0, causes errors in scrollable list
-                      // see: https://stackoverflow.com/questions/63352010/failed-assertion-line-556-pos-15-scrolloffsetcorrection-0-0-is-not-true
-                      return const SizedBox(height: 1);
-                    }
-                    i--;
-                    return const Divider(height: 5);
-                  },
-                  itemBuilder: (c, i) {
-                    if (i == 0) {
-                      return SearchResultsLabel(results.map((r) => r.searchResult).toList());
-                    } else if (i == results.length + 1) {
-                      return const SizedBox(height: 30);
-                    }
-                    i--;
-                    final res = results[i];
-                    return _SearchResultCard(res, lFormattedKeywords: lFormattedKeywords);
-                  },
+                child: Scrollbar(
+                  child: ListView.builder(
+                    itemCount: results.length + 2,
+                    controller: scrollController,
+                    // separatorBuilder: (c, i) {
+                    //   if (i == 0) {
+                    //     // if sized box has height: 0, causes errors in scrollable list
+                    //     // see: https://stackoverflow.com/questions/63352010/failed-assertion-line-556-pos-15-scrolloffsetcorrection-0-0-is-not-true
+                    //     return const SizedBox(height: 1);
+                    //   }
+                    //   i--;
+                    //   return const Divider(height: 5);
+                    // },
+                    itemBuilder: (c, i) {
+                      if (i == 0) {
+                        return SearchResultsLabel(results.map((r) => r.searchResult).toList());
+                      } else if (i == results.length + 1) {
+                        return const SizedBox(height: 30);
+                      }
+                      i--;
+                      final res = results[i];
+                      return _SearchResultCard(res, lFormattedKeywords: lFormattedKeywords);
+                    },
+                  ),
                 ),
               ),
             ),

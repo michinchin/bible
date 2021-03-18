@@ -717,6 +717,45 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
             backgroundColor: Theme.of(context).cardColor));
   }
 
+  Future<bool> _navigateToRefAndShow(Reference ref) async {
+    final vmBloc = widget.parentContext.viewManager;
+    for (final view in vmBloc?.state?.views) {
+      final volumeViewDataBloc = vmBloc.dataBlocWithView(view.uid);
+      if (volumeViewDataBloc is VolumeViewDataBloc) {
+        if (volumeViewDataBloc.state.asVolumeViewData.volumeId == ref.volume) {
+          final viewData = volumeViewDataBloc.state.asVolumeViewData
+              .copyWith(bcv: BookChapterVerse.fromRef(ref));
+          await volumeViewDataBloc.update(widget.parentContext, viewData);
+          vmBloc.show(view.uid);
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  Future<void> _handleBibleSearch(Reference ref) async {
+    if (ref != null) {
+      // if translation is in the view stack - just nav there and show...
+      if (await _navigateToRefAndShow(ref)) {
+        return;
+      }
+
+      // need to add this translation to view manager...
+      await ViewManager.shared.onAddView(widget.parentContext, Const.viewTypeVolume,
+          options: <String, dynamic>{'volumeId': ref.volume});
+
+      // add the volume to recent list
+      widget.parentContext.tbloc<RecentVolumesBloc>().updateWithVolume(ref.volume);
+
+      // give the view manager a chance to update views, then nav & show
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateToRefAndShow(ref);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final _icons = <_OffscreenView>[
@@ -754,18 +793,15 @@ class __CloseFABState extends State<_CloseFAB> with SingleTickerProviderStateMix
       getOffscreenIconView(
           title: 'History',
           icon: Icons.history,
-          onPressed: (context) {
-            showBibleSearch(context, null, showHistory: true);
-            // TecToast.show(context, 'need to show history here');
+          onPressed: (context) async {
+            await _handleBibleSearch(await showBibleSearch(context, null, showHistory: true));
           }),
       getOffscreenIconView(
           title: 'Search',
           icon: Icons.search,
-          onPressed: (context) {
-            showBibleSearch(context, null);
+          onPressed: (context) async {
+            await _handleBibleSearch(await showBibleSearch(context, null));
           }),
-      // getOffscreenIconView(
-      //     title: 'Help', icon: FeatherIcons.helpCircle, onPressed: showZendeskHelp),
     ];
 
     Widget child;
@@ -1039,97 +1075,3 @@ class TecTabBar extends StatelessWidget {
     );
   }
 }
-
-// class _SelectViewOverlay extends StatelessWidget {
-//   final int viewUid;
-//   final Function(int) onSelect;
-
-//   const _SelectViewOverlay(this.viewUid, this.onSelect);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final vmBloc = context.viewManager;
-//     int volumeId;
-
-//     if (viewUid & Const.recentFlag == Const.recentFlag) {
-//       volumeId = viewUid ^ Const.recentFlag;
-//     } else {
-//       volumeId =
-//           (vmBloc.dataBlocWithView(viewUid) as VolumeViewDataBloc).state.asVolumeViewData.volumeId;
-//     }
-
-//     final volume = VolumesRepository.shared.volumeWithId(volumeId);
-//     Rect viewLayout;
-//     if (vmBloc.isViewVisible(viewUid)) {
-//       viewLayout = vmBloc.layoutOfView(viewUid).rect;
-//     }
-
-//     final child = InkWell(
-//         onTap: () => onSelect(null), child: _StackIcon(_VolumeCard(volume.id), FeatherIcons.move));
-//     final aligned = Align(
-//         alignment: Alignment.center,
-//         child: Draggable(
-//           data: viewUid,
-//           onDragStarted: () {
-//             context.tabManager.changeTab(TecTab.reader);
-//             context.tbloc<SheetManagerBloc>().add(SheetEvent.collapse);
-//           },
-//           childWhenDragging: const SizedBox.shrink(),
-//           onDragCompleted: () {
-//             context.tbloc<DragOverlayCubit>().clear();
-//             context.tbloc<SheetManagerBloc>().add(SheetEvent.main);
-//             onSelect(null);
-//           },
-//           feedback: child,
-//           child: child,
-//         ));
-//     return GestureDetector(
-//       behavior: HitTestBehavior.translucent,
-//       onTap: () => onSelect(null),
-//       child: SafeArea(
-//         child: Stack(alignment: Alignment.center, children: [
-//           if (viewLayout != null)
-//             Positioned.fromRect(
-//               rect: viewLayout,
-//               child: aligned,
-//             )
-//           else
-//             aligned,
-//           Positioned(
-//               bottom: 10,
-//               child: Chip(
-//                 backgroundColor: Const.tecartaBlue,
-//                 label: Text('Drag to place the ${volume.name}',
-//                     style: const TextStyle(color: Colors.white)),
-//               ))
-//         ]),
-//       ),
-//     );
-//   }
-// }
-
-// class _StackIcon extends StatelessWidget {
-//   final Widget child;
-//   final IconData icon;
-
-//   const _StackIcon(this.child, this.icon);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Stack(
-//       alignment: Alignment.topRight.add(const Alignment(-2.5, -0.5)),
-//       children: [
-//         child,
-//         CircleAvatar(
-//           radius: 15,
-//           backgroundColor: Const.tecartaBlue,
-//           child: Icon(
-//             icon,
-//             size: 15,
-//             color: Colors.white,
-//           ),
-//         )
-//       ],
-//     );
-//   }
-// }

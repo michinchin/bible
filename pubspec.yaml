@@ -40,7 +40,6 @@ dependencies:
   pedantic: ^1.9.2
   provider: ^4.3.2+2
   quill_delta: ^2.0.0
-  scrollable_positioned_list: ^0.1.8
   share: ^2.0.0
   string_validator: ^0.3.0
 
