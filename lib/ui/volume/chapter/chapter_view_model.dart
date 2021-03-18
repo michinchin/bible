@@ -353,7 +353,8 @@ class ChapterViewModel {
                 if (span is TaggableTextSpan) {
                   final tag = span.tag;
                   if (tag is VerseTag && verse >= tag.verse && verse <= tag.endVerse) {
-                    final anchor = paragraph.anchorAtRange(TextRange(start: index, end: index + 1));
+                    final anchor = paragraph.anchorAtRange(TextRange(start: index, end: index + 1),
+                        trim: false);
                     y = anchor?.rects?.first?.top;
                     return false; // Stop walking the span tree.
                   }
