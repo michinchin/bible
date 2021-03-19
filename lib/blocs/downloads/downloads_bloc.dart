@@ -1,11 +1,11 @@
+import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:equatable/equatable.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 
 import 'downloads_bloc_io.dart' if (dart.library.html) 'downloads_bloc_web.dart';
 
-class DownloadsBloc extends tec.SafeBloc<DownloadsState, DownloadsState> {
+class DownloadsBloc extends Bloc<DownloadsState, DownloadsState> {
   DownloadsBloc() : super(const DownloadsState(isLoading: true, items: {}));
 
   factory DownloadsBloc.create() => DownloadsBlocImp();

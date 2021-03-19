@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_user_account/tec_user_account.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart' as vol;
 
 import '../../models/app_settings.dart';
@@ -14,14 +15,14 @@ import '../../models/language_utils.dart';
 
 export '../../models/language_utils.dart';
 
-class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
+class VolumesBloc extends Bloc<VolumesFilter, VolumesState> {
   final String key;
-  final tec.KeyValueStore _kvStore;
+  final KeyValueStore _kvStore;
   final VolumesFilter defaultFilter;
 
   StreamSubscription<UserDbChange> _userDbChangeSubscription;
 
-  VolumesBloc({this.defaultFilter, this.key, tec.KeyValueStore kvStore})
+  VolumesBloc({this.defaultFilter, this.key, KeyValueStore kvStore})
       : _kvStore = kvStore,
         super(_initialState(defaultFilter, key, kvStore)) {
     _userDbChangeSubscription =
@@ -42,12 +43,12 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
   }
 
   static VolumesState _initialState(
-      VolumesFilter defaultFilter, String key, tec.KeyValueStore kvStore) {
-    if (tec.isNotNullOrEmpty(key) && kvStore != null) {
+      VolumesFilter defaultFilter, String key, KeyValueStore kvStore) {
+    if (isNotNullOrEmpty(key) && kvStore != null) {
       final jsonStr = kvStore.getString(key);
       VolumesFilter filter;
-      if (tec.isNotNullOrEmpty(jsonStr)) {
-        final json = tec.parseJsonSync(jsonStr);
+      if (isNotNullOrEmpty(jsonStr)) {
+        final json = parseJsonSync(jsonStr);
         if (json != null) filter = VolumesFilter.fromJson(json);
         filter = filter.copyWith(searchFilter: '');
       }
@@ -63,8 +64,8 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
     await _updateCaches(event);
 
     // If there's a key and store, save the filter.
-    if (tec.isNotNullOrEmpty(key) && _kvStore != null) {
-      await _kvStore.setString(key, tec.toJsonString(event.toJson()));
+    if (isNotNullOrEmpty(key) && _kvStore != null) {
+      await _kvStore.setString(key, toJsonString(event.toJson()));
     }
 
     final volumes = await _volumesWith(event, cacheLicensedIds: true);
@@ -125,7 +126,7 @@ class VolumesBloc extends tec.SafeBloc<VolumesFilter, VolumesState> {
     for (var i = 0; i < ids.length; i++) {
       final id = ids[i];
       if (i > 0 && ids.indexWhere((el) => el == id) < i) {
-        tec.dmPrint('VolumesBloc volume id $id has duplicates!');
+        dmPrint('VolumesBloc volume id $id has duplicates!');
       }
     }
 
@@ -177,7 +178,7 @@ class VolumesState extends Equatable {
   List<Object> get props => [filter, volumes];
 
   factory VolumesState.fromJson(Object object) {
-    final json = (object is String ? tec.parseJsonSync(object) : object);
+    final json = (object is String ? parseJsonSync(object) : object);
     if (json is Map<String, dynamic>) {
       final filter = VolumesFilter.fromJson(json['filter']);
       return VolumesState(filter, const []);
@@ -238,18 +239,18 @@ class VolumesFilter extends Equatable {
       );
 
   factory VolumesFilter.fromJson(Object object) {
-    final json = (object is String ? tec.parseJsonSync(object) : object);
+    final json = (object is String ? parseJsonSync(object) : object);
     if (json is Map<String, dynamic>) {
       return VolumesFilter(
         volumeType: vol.VolumeType.values[math.min(
-            vol.VolumeType.values.length - 1, math.max(0, tec.as<int>(json['volumeType']) ?? 0))],
+            vol.VolumeType.values.length - 1, math.max(0, as<int>(json['volumeType']) ?? 0))],
         location: vol.Location.values[math.min(
-            vol.Location.values.length - 1, math.max(0, tec.as<int>(json['location']) ?? 0))],
+            vol.Location.values.length - 1, math.max(0, as<int>(json['location']) ?? 0))],
         ownershipStatus: OwnershipStatus.values[math.min(OwnershipStatus.values.length - 1,
-            math.max(0, tec.as<int>(json['ownershipStatus']) ?? 0))],
-        category: tec.as<int>(json['category']) ?? 0,
-        language: tec.as<String>(json['language']) ?? '',
-        searchFilter: tec.as<String>(json['searchFilter']) ?? '',
+            math.max(0, as<int>(json['ownershipStatus']) ?? 0))],
+        category: as<int>(json['category']) ?? 0,
+        language: as<String>(json['language']) ?? '',
+        searchFilter: as<String>(json['searchFilter']) ?? '',
       );
     }
     return null;

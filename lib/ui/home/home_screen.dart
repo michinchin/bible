@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     Future.delayed(const Duration(seconds: 1), () async {
-      if (tec.Prefs.shared.getBool(Const.prefShowOnboarding, defaultValue: true)) {
+      if (Prefs.shared.getBool(Const.prefShowOnboarding, defaultValue: true)) {
         if (!kDebugMode) {
           await showOnboarding(context);
         }

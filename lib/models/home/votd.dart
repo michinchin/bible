@@ -1,5 +1,5 @@
 import 'package:tec_cache/tec_cache.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../chapter_verses.dart';
@@ -26,18 +26,18 @@ class VotdEntry {
     return finalRef;
   }
 
-  Future<tec.ErrorOrValue<String>> getFormattedVerse(Bible bible) async {
+  Future<ErrorOrValue<String>> getFormattedVerse(Bible bible) async {
     final refAndVerse = await bible?.referenceAndVerseTextWith(ref);
     if (refAndVerse.error == null &&
         refAndVerse.value != null &&
-        tec.isNotNullOrEmpty(refAndVerse.value.verseText)) {
+        isNotNullOrEmpty(refAndVerse.value.verseText)) {
       final verseText = refAndVerse.value.verseText;
-      return tec.ErrorOrValue(
+      return ErrorOrValue(
           refAndVerse.error,
           ChapterVerses.formatForShare([refAndVerse.value.reference], verseText,
               includeRef: false));
     } else {
-      return tec.ErrorOrValue(refAndVerse.error, '');
+      return ErrorOrValue(refAndVerse.error, '');
     }
   }
 }
@@ -49,15 +49,15 @@ class Votd {
   Votd({this.data, this.specials, this.verses});
 
   factory Votd.fromJson(Map<String, dynamic> json) {
-    final specials = tec.as<Map<String, dynamic>>(json['specials']);
-    final data = tec.as<List<dynamic>>(json['data']);
+    final specials = as<Map<String, dynamic>>(json['specials']);
+    final data = as<List<dynamic>>(json['data']);
 
     return Votd(data: data, specials: specials);
   }
 
   static Future<Votd> fetch({int year}) async {
     final y = year ?? DateTime.now().year;
-    final hostAndPath = '${tec.streamUrl}/home';
+    final hostAndPath = '$cloudFrontStreamUrl/home';
     final fileName = 'votd-$y.json';
     final json = await TecCache.shared.jsonFromUrl(
         url: '$hostAndPath/$fileName',
@@ -72,19 +72,19 @@ class Votd {
   }
 
   int ordinalDay(DateTime time) =>
-      tec.indexForDay(tec.dayOfTheYear(time), year: time.year, length: data.length);
+      indexForDay(dayOfTheYear(time), year: time.year, length: data.length);
 
   VotdEntry forDateTime(DateTime time) {
     final ordinalDay =
-        tec.indexForDay(tec.dayOfTheYear(time), year: time.year, length: data.length);
-    if (tec.isNotNullOrEmpty(specials) && tec.isNotNullOrEmpty(data)) {
-      final isSpecial = tec.isNullOrEmpty(specials['${ordinalDay + 1}']);
+        indexForDay(dayOfTheYear(time), year: time.year, length: data.length);
+    if (isNotNullOrEmpty(specials) && isNotNullOrEmpty(data)) {
+      final isSpecial = isNullOrEmpty(specials['${ordinalDay + 1}']);
       final image =
-          tec.as<String>(isSpecial ? data[ordinalDay][1] : specials['${ordinalDay + 1}'][1]);
+          as<String>(isSpecial ? data[ordinalDay][1] : specials['${ordinalDay + 1}'][1]);
       final refs =
-          tec.as<String>(isSpecial ? data[ordinalDay][0] : specials['${ordinalDay + 1}'][0]);
+          as<String>(isSpecial ? data[ordinalDay][0] : specials['${ordinalDay + 1}'][0]);
       return VotdEntry(
-        imageUrl: '${tec.streamUrl}/votd/$image',
+        imageUrl: '$cloudFrontStreamUrl/votd/$image',
         refs: refs,
         year: time.year,
         ordinalDay: ordinalDay,

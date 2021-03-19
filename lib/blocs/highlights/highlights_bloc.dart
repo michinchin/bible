@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:tec_user_account/tec_user_account.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/app_settings.dart';
@@ -104,7 +105,7 @@ abstract class HighlightEvent with _$HighlightEvent {
   const factory HighlightEvent.changeVolumeId(int volumeId) = _ChangeVolumeId;
 }
 
-class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighlights> {
+class ChapterHighlightsBloc extends Bloc<HighlightEvent, ChapterHighlights> {
   int volumeId;
   final int book;
   final int chapter;
@@ -152,7 +153,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
 
     if (reload) {
       // margin notes for this chapter changed, reload...
-      tec.dmPrint('new hls for chapter $chapter');
+      dmPrint('new hls for chapter $chapter');
       _initUserContent();
     }
   }
@@ -204,7 +205,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
             verseEnd: v,
             wordBegin: hl.ref.startWordForVerse(v),
             wordEnd: hl.ref.endWordForVerse(v),
-            created: tec.dbIntFromDateTime(DateTime.now()),
+            created: dbIntFromDateTime(DateTime.now()),
           );
 
           await AppSettings.shared.userAccount.userDb.saveItem(ui);
@@ -235,7 +236,7 @@ class ChapterHighlightsBloc extends tec.SafeBloc<HighlightEvent, ChapterHighligh
       }
 
       // if (kDebugMode) {
-      //   tec.dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');
+      //   dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');
       // }
 
       // _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
@@ -282,15 +283,15 @@ extension HighlightsBlocExtOnListOfHighlight on List<Highlight> {
 
 //void _printHighlights(List<Highlight> hls, {String withTitle}) {
 //  if (kDebugMode) {
-//    tec.dmPrint('');
-//    tec.dmPrint('-----------------------------------------------------');
-//    if (withTitle?.isNotEmpty ?? false) tec.dmPrint(withTitle);
-//    tec.dmPrint('');
+//    dmPrint('');
+//    dmPrint('-----------------------------------------------------');
+//    if (withTitle?.isNotEmpty ?? false) dmPrint(withTitle);
+//    dmPrint('');
 //    for (final hl in hls) {
-//      tec.dmPrint(hl.ref);
+//      dmPrint(hl.ref);
 //    }
-//    tec.dmPrint('');
-//    tec.dmPrint('-----------------------------------------------------\n');
-//    tec.dmPrint('');
+//    dmPrint('');
+//    dmPrint('-----------------------------------------------------\n');
+//    dmPrint('');
 //  }
 //}

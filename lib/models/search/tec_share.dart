@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share/share.dart';
 import 'package:tec_volumes/tec_volumes.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/reference_ext.dart';
@@ -22,9 +22,9 @@ class TecShare {
         Uri(scheme: 'https', host: 'tecartabible.com', path: '/share', queryParameters: params)
             .toString();
 
-    shortUrl = await tec.shortenUrl(url);
+    shortUrl = await shortenUrl(url);
 
-    // tec.dmPrint('Share url: $url\nShort url: $shortUrl');
+    // dmPrint('Share url: $url\nShort url: $shortUrl');
     return shortUrl.isNotEmpty ? '\n$shortUrl' : '';
   }
 

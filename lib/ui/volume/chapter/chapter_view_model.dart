@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_selectable/tec_selectable.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -117,7 +117,7 @@ class ChapterViewModel {
       var remainingText = text;
 
       // If in xref, add xref styling to the span:
-      if (tag.isInXref && tec.isNotNullOrEmpty(tag.href)) {
+      if (tag.isInXref && isNotNullOrEmpty(tag.href)) {
         // We don't want leading spaces to have the xref style...
         if (_prevTagXrefHref != tag.href) {
           final index = remainingText.indexAtWord(1);
@@ -127,7 +127,7 @@ class ChapterViewModel {
             final wsSpans = _spansForText(tag, whitespace, style, selectedTextStyle, recognizer,
                 isDarkTheme: isDarkTheme);
             if (wsSpans.length > 1) {
-              tec.dmPrint('_spansForText returned ${wsSpans.length} spans for "$whitespace"!');
+              dmPrint('_spansForText returned ${wsSpans.length} spans for "$whitespace"!');
             }
             spans.addAll(wsSpans);
           }
@@ -214,7 +214,7 @@ class ChapterViewModel {
     final spans = <InlineSpan>[];
     final v = tag.verse;
     var currentWord = tag.word;
-    final endWord = math.max(currentWord, currentWord + tec.countOfWordsInString(text) - 1);
+    final endWord = math.max(currentWord, currentWord + countOfWordsInString(text) - 1);
     var remainingText = text;
 
     ///
@@ -239,7 +239,7 @@ class ChapterViewModel {
             'wordCount: $wordCount, endIndex: $endIndex, currentWord: $currentWord, '
             'remainingText.length: ${remainingText.length}, '
             'remainingText: "${jsonEncode(remainingText)}" ';
-        tec.dmPrint(errorMsg);
+        dmPrint(errorMsg);
         assert(false);
         return const TextSpan(text: '');
       }
@@ -371,7 +371,7 @@ class ChapterViewModel {
       walkRenderTree(tecHtmlRenderBox);
 
       if (y != null) {
-        tec.dmPrint('scrollToVerse scrolling to offset: $y, animated: $animated');
+        dmPrint('scrollToVerse scrolling to offset: $y, animated: $animated');
         if (animated) {
           controller.animateTo(y - 8,
               duration: const Duration(milliseconds: 1000), curve: Curves.ease);
@@ -379,7 +379,7 @@ class ChapterViewModel {
           controller.jumpTo(y - 8);
         }
       } else {
-        tec.dmPrint('scrollToVerse did not find verse $verse');
+        dmPrint('scrollToVerse did not find verse $verse');
       }
     }
   }
@@ -408,7 +408,7 @@ class ChapterViewModel {
       // Was it a long press on an xref?
       if (!handledTap &&
           tag.isInXref &&
-          tec.isNotNullOrEmpty(tag.href) &&
+          isNotNullOrEmpty(tag.href) &&
           _tapDownStopwatch.elapsed.inMilliseconds > 500) {
         final reference = Reference(volume: volume, book: book, chapter: chapter, verse: tag.verse);
         handledTap = selection.handleXref(context, reference, null, tag, _globalTapUpOffset);
@@ -450,10 +450,10 @@ class ChapterViewModel {
                               paragraph.anchorAtRange(TextRange(start: index, end: index + 1));
                           if (anchor?.copyInflated(hitPadding)?.containsPoint(pt) ?? false) {
                             if (tag.isInFootnote) {
-                              tec.dmPrint('tapped on footnote in verse ${tag.verse}');
+                              dmPrint('tapped on footnote in verse ${tag.verse}');
                               _onTapFootnote(context, tag, _globalTapUpOffset);
                             } else if (tag.isInMarginNote) {
-                              tec.dmPrint('tapped on margin note in verse ${tag.verse}');
+                              dmPrint('tapped on margin note in verse ${tag.verse}');
                               _onTapMarginNote(context, tag);
                             }
                             return false; // Stop walking the span tree.
@@ -472,7 +472,7 @@ class ChapterViewModel {
                         final text = paragraph.text.substring(range.start, range.end);
                         final taggedText =
                             paragraph.anchorAtRange(range)?.taggedTextWithParagraphs([paragraph]);
-                        tec.dmPrint('tapped on: "$text" with tag:${taggedText?.tag}');
+                        dmPrint('tapped on: "$text" with tag:${taggedText?.tag}');
 
                         final tag = taggedText?.tag;
                         if (tag is VerseTag && isBibleId(volume)) {
@@ -510,7 +510,7 @@ class ChapterViewModel {
         final position = context.viewManager?.indexOfView(viewUid) ?? -1;
         context.viewManager?.add(
             type: Const.viewTypeNote,
-            data: tec.toJsonString(mn.stateJson()),
+            data: toJsonString(mn.stateJson()),
             position: position == -1 ? null : position + 1);
       }
     }
@@ -521,7 +521,7 @@ class ChapterViewModel {
     final bible = VolumesRepository.shared.bibleWithId(volume);
     final footnoteHtml =
         await bible.footnoteHtmlWith(book, chapter, int.parse(tag.href.split('_').last));
-    if (tec.isNotNullOrEmpty(footnoteHtml.value)) {
+    if (isNotNullOrEmpty(footnoteHtml.value)) {
       if (selection.isNotEmpty) {
         TecToast.show(context, 'Clear selection to view footnote');
         // not sure if I want to force this...
@@ -550,8 +550,8 @@ class ChapterViewModel {
           },
         );
       }
-    } else if (tec.isNullOrEmpty(footnoteHtml.error)) {
-      tec.dmPrint('ERROR: ${footnoteHtml?.error}');
+    } else if (isNullOrEmpty(footnoteHtml.error)) {
+      dmPrint('ERROR: ${footnoteHtml?.error}');
     }
   }
 }
@@ -574,24 +574,24 @@ TextStyle _merge(TextStyle s1, TextStyle s2) => s1 == null
 /// If the volume does not have study notes for the chapter, returns HTML with the
 /// message "Study notes are not available for this chapter."
 ///
-Future<tec.ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int chapter) async {
+Future<ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int chapter) async {
   if (volume is Bible) {
     final result = await volume.chapterHtmlWith(book, chapter);
-    if (!_despanifyChapterHtml || tec.isNullOrEmpty(result.value)) return result;
+    if (!_despanifyChapterHtml || isNullOrEmpty(result.value)) return result;
     var html = result.value.despanified();
-    tec.dmPrint('Despanifying HTML for ${volume.abbreviation} '
+    dmPrint('Despanifying HTML for ${volume.abbreviation} '
         '${volume.assocBible().nameOfBook(book)} $chapter reduced size by '
         '${100 - (100 * html.length ~/ result.value.length)}%, '
         '${result.value.length - html.length} chars!');
     if (_superscriptVerseNumbers) {
       html = html.replaceAllMapped(_verseNumbers, (m) => '"0">${m[1].superscripted()}<');
     }
-    return tec.ErrorOrValue(null, html);
+    return ErrorOrValue(null, html);
   } else {
     final result = await volume.resourcesWithBook(book, chapter, ResourceType.studyNote);
     assert(result != null);
     if (result.error != null) {
-      return tec.ErrorOrValue<String>(result.error, null);
+      return ErrorOrValue<String>(result.error, null);
     } else {
       final html = StringBuffer();
       for (final note in result.value) {
@@ -602,7 +602,7 @@ Future<tec.ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int ch
       if (html.isEmpty) {
         html.writeln('<p>Study notes are not available for this chapter.</p>');
       }
-      return tec.ErrorOrValue<String>(null, html.toString());
+      return ErrorOrValue<String>(null, html.toString());
     }
   }
 }

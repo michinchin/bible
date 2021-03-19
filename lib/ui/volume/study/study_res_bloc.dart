@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 Volume _volume(int id) => VolumesRepository.shared.volumeWithId(id);
@@ -34,14 +34,14 @@ class StudyResBloc extends Cubit<StudyRes> {
     // Asynchronously get the resource, if needed.
     if (s.res == null) {
       volume ??= _volume(s.volumeId);
-      tec.ErrorOrValue<Resource> result;
+      ErrorOrValue<Resource> result;
       if (s.resId != null) {
         result = await volume?.resourceWithId(s.resId);
       } else if (s.book != null && s.chapter != null) {
         final r = await volume?.resourcesWithBook(s.book, s.chapter, type);
-        result = tec.ErrorOrValue(r.error, tec.isNullOrEmpty(r.value) ? null : r.value.first);
+        result = ErrorOrValue(r.error, isNullOrEmpty(r.value) ? null : r.value.first);
       }
-      // tec.dmPrint('StudyResBloc update got new ${result.value}');
+      // dmPrint('StudyResBloc update got new ${result.value}');
       s = s.copyWithRes(result.value).copyWithError(result.error);
     }
 
@@ -49,9 +49,9 @@ class StudyResBloc extends Cubit<StudyRes> {
     if (s.res != null && s.res.filename.endsWith('.html') && s.html == null) {
       volume ??= _volume(s.volumeId);
       final fileUrl = volume?.fileUrlForResource(s.res);
-      if (tec.isNotNullOrEmpty(fileUrl)) {
-        s = s.copyWithHtml(await tec.textFromUrl(fileUrl));
-        // tec.dmPrint('StudyResBloc update got new html: ${s.html}');
+      if (isNotNullOrEmpty(fileUrl)) {
+        s = s.copyWithHtml(await textFromUrl(fileUrl));
+        // dmPrint('StudyResBloc update got new html: ${s.html}');
       }
     }
 
@@ -62,7 +62,7 @@ class StudyResBloc extends Cubit<StudyRes> {
       s = s.copyWithChildren(result.value).copyWithError(result.error);
     }
 
-    // if (s != state) tec.dmPrint('StudyResBloc update emitting $s');
+    // if (s != state) dmPrint('StudyResBloc update emitting $s');
     emit(s);
   }
 }
@@ -126,7 +126,7 @@ class StudyRes extends Equatable {
   StudyRes copyWithError(Object error) => copyWith(error: error, clearError: true);
 
   @override
-  String toString() => tec.toJsonString(toJson());
+  String toString() => toJsonString(toJson());
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{

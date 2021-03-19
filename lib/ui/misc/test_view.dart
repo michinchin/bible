@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -21,7 +21,7 @@ Widget testViewPageableBuilder(BuildContext context, ViewState state, Size size)
             : null;
       },
       onPageChanged: (context, state, page) {
-        tec.dmPrint('View ${state.uid} onPageChanged($page)');
+        dmPrint('View ${state.uid} onPageChanged($page)');
       },
     );
 

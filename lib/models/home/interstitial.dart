@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_native_ad/interstitial.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../ui/iap/iap_dialog.dart';
@@ -40,8 +40,8 @@ class Interstitial {
     }) async {
       // if (!mounted) return;
       if (error != null) {
-        tec.dmPrint('IAP FAILED WITH ERROR: ${error?.message}');
-      } else if (tec.isNotNullOrEmpty(inAppId)) {
+        dmPrint('IAP FAILED WITH ERROR: ${error?.message}');
+      } else if (isNotNullOrEmpty(inAppId)) {
         final id = int.tryParse(inAppId.split('.').last);
         if (id != null) {
           if (!await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(id)) {
@@ -73,7 +73,7 @@ class Interstitial {
           (inAppId, isRestoration, error) =>
               _handlePurchase(context, inAppId, isRestoration: isRestoration, error: error),
           _removeAdsId,
-          consumable: tec.platformIs(tec.Platform.android));
+          consumable: TecPlatform.isAndroid);
       Navigator.of(context).pop();
     }
 

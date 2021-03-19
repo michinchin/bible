@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_user_account/tec_user_account.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -677,7 +677,7 @@ class _UGCViewState extends State<UGCView> {
                                         return Padding(
                                             padding: const EdgeInsets.only(
                                                 top: 12.0, bottom: 4.0, left: 16.0, right: 16.0),
-                                            child: Text(tec.longDate(di.date),
+                                            child: Text(longDate(di.date),
                                                 style: const TextStyle(
                                                     fontSize: 18.0,
                                                     fontStyle: FontStyle.italic,
@@ -746,7 +746,7 @@ class _UGCViewState extends State<UGCView> {
                                                                     UGCView.folderRecent)
                                                                   Expanded(
                                                                       child: Text(
-                                                                    tec.shortDate(
+                                                                    shortDate(
                                                                         (items[i] as UserItem)
                                                                             .modifiedDT),
                                                                     textAlign: TextAlign.end,

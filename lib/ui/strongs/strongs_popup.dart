@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_html/tec_html.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../common/common.dart';
@@ -34,15 +35,15 @@ Future<void> showStrongsPopup({
             appBar: MinHeightAppBar(
               appBar: AppBar(
                   leading: const CloseButton(),
-                  title: tec.isNullOrEmpty(title) ? null : Text(title)),
+                  title: isNullOrEmpty(title) ? null : Text(title)),
             ),
             body: Container(
               color: isDarkTheme ? Colors.black : Colors.white,
-              child: TecFutureBuilder<tec.ErrorOrValue<String>>(
+              child: TecFutureBuilder<ErrorOrValue<String>>(
                 futureBuilder: () => bible.strongsHtmlWith(strongsId),
                 builder: (context, result, error) {
                   final htmlFragment = result?.value;
-                  if (tec.isNotNullOrEmpty(htmlFragment)) {
+                  if (isNotNullOrEmpty(htmlFragment)) {
                     final fullHtml = strongsHtmlWithFragment(htmlFragment);
                     return SingleChildScrollView(
                       child: TecHtml(

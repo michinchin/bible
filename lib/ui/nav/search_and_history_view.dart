@@ -5,7 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -111,9 +112,9 @@ class _HistoryViewState extends State<HistoryView> {
           }
 
           if (s.hasData) {
-            navHistory = tec.as<List<Reference>>(s.data[0])
+            navHistory = as<List<Reference>>(s.data[0])
               ..sort((a, b) => b.modified.compareTo(a.modified));
-            searchHistory = tec.as<List<SearchHistoryItem>>(s.data[1])
+            searchHistory = as<List<SearchHistoryItem>>(s.data[1])
               ..sort((a, b) => b.modified.compareTo(a.modified));
             return searchHistory.isEmpty && navHistory.isEmpty
                 ? const Center(child: Text('Search or navigate to view history'))
@@ -202,7 +203,7 @@ class _NavHistoryTile extends StatelessWidget {
                 .join(' '),
             textScaleFactor: contentTextScaleFactorWith(context),
             style: const TextStyle(fontWeight: FontWeight.w500)),
-        subtitle: FutureBuilder<tec.ErrorOrValue<ReferenceAndVerseText>>(
+        subtitle: FutureBuilder<ErrorOrValue<ReferenceAndVerseText>>(
           future: currentBibleFromContext(context).referenceAndVerseTextWith(navHistoryItem),
           builder: (c, s) {
             if (s.hasData) {
@@ -232,7 +233,7 @@ class _SearchHistoryView extends StatelessWidget {
       final localizations = MaterialLocalizations.of(context);
       final formattedTimeOfDay = localizations.formatTimeOfDay(TimeOfDay(
           hour: searchHistory[i].modified.hour, minute: searchHistory[i].modified.minute));
-      return '${tec.shortDate(searchHistory[i].modified)}, $formattedTimeOfDay';
+      return '${shortDate(searchHistory[i].modified)}, $formattedTimeOfDay';
     }
 
     return Scaffold(
@@ -271,7 +272,7 @@ class _NavHistoryView extends StatelessWidget {
       final localizations = MaterialLocalizations.of(context);
       final formattedTimeOfDay = localizations.formatTimeOfDay(
           TimeOfDay(hour: navHistory[i].modified.hour, minute: navHistory[i].modified.minute));
-      return '${tec.shortDate(navHistory[i].modified)}, $formattedTimeOfDay';
+      return '${shortDate(navHistory[i].modified)}, $formattedTimeOfDay';
     }
 
     return Scaffold(
@@ -379,7 +380,7 @@ class _SearchResultsViewState extends State<SearchResultsView> {
             }
           });
         },
-        listenWhen: (p, c) => !tec.areEqualLists(p.excludedBooks, c.excludedBooks),
+        listenWhen: (p, c) => !areEqualLists(p.excludedBooks, c.excludedBooks),
         builder: (context, state) {
           if (state.loading) {
             return const Center(child: LoadingIndicator());
@@ -528,7 +529,7 @@ class __SearchResultCardState extends State<_SearchResultCard> {
   void _openInTB() {
     Navigator.of(context, rootNavigator: true).pop(Reference.fromHref(widget.res.searchResult.href,
         volume: widget.res.searchResult.verses[widget.res.currentVerseIndex].id));
-    tec.dmPrint('Navigating to verse: ${widget.res.searchResult.href}');
+    dmPrint('Navigating to verse: ${widget.res.searchResult.href}');
   }
 
   void _onListTileTap() {

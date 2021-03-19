@@ -4,7 +4,8 @@ import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/content_settings.dart';
@@ -67,13 +68,13 @@ class _TextSettingsUIState extends State<_TextSettingsUI> {
   @override
   void dispose() {
     // Update the recent fonts list in prefs.
-    var currentFont = tec.Prefs.shared.getString(Const.prefContentFontName, defaultValue: '');
+    var currentFont = Prefs.shared.getString(Const.prefContentFontName, defaultValue: '');
     if (currentFont.isEmpty) currentFont = _Fonts._systemDefault;
     var recentFonts = widget.fonts.recent
       ..remove(currentFont)
       ..insert(0, currentFont);
     recentFonts = recentFonts.take(100).toList();
-    tec.Prefs.shared.setStringList('_font_settings_recent', recentFonts);
+    Prefs.shared.setStringList('_font_settings_recent', recentFonts);
     _scrollController?.dispose();
 
     super.dispose();
@@ -239,17 +240,17 @@ class _Fonts {
   }
 
   final recent =
-      tec.Prefs.shared.getStringList('_font_settings_recent', defaultValue: [_systemDefault]);
+      Prefs.shared.getStringList('_font_settings_recent', defaultValue: [_systemDefault]);
 
   /// Font type to filter by.
   String get fontType => _fontType;
   String _fontType =
-      tec.Prefs.shared.getString('_font_settings_filter_type', defaultValue: _strSansSerif);
+      Prefs.shared.getString('_font_settings_filter_type', defaultValue: _strSansSerif);
 
   /// Alphabetically (== true) or by popularity (== false).
   bool get sortAlphabetically => _alphabetically;
   bool _alphabetically =
-      tec.Prefs.shared.getBool('_font_settings_sort_alphabetically', defaultValue: false);
+      Prefs.shared.getBool('_font_settings_sort_alphabetically', defaultValue: false);
 
   static const _all = 'all';
   static const _systemDefault = 'System Default';
@@ -263,12 +264,12 @@ class _Fonts {
 
     if (_fontType != filter) {
       _fontType = filter;
-      tec.Prefs.shared.setString('_font_settings_filter_type', _fontType);
+      Prefs.shared.setString('_font_settings_filter_type', _fontType);
     }
 
     if (_alphabetically != alphabetically) {
       _alphabetically = alphabetically;
-      tec.Prefs.shared.setBool('_font_settings_sort_alphabetically', _alphabetically);
+      Prefs.shared.setBool('_font_settings_sort_alphabetically', _alphabetically);
     }
 
     if (_fontType == _all) {
@@ -300,31 +301,31 @@ Future<_Fonts> _loadFonts() async {
     const bundlePath = 'assets/fonts.json';
     final text = await rootBundle.loadString(bundlePath);
     if (text != null) {
-      final json = tec.parseJsonSync(text);
+      final json = parseJsonSync(text);
       if (json != null) {
         // add embedded fonts
-        final embeddedFonts = tec.as<List<dynamic>>(json['embedded']);
+        final embeddedFonts = as<List<dynamic>>(json['embedded']);
         for (final item in embeddedFonts) {
           if (item is List<dynamic> && item.length == 2) {
-            final name = tec.as<String>(item.first);
-            final type = tec.as<String>(item.last);
+            final name = as<String>(item.first);
+            final type = as<String>(item.last);
             assert(type?.isNotEmpty ?? false);
             fonts.add(_Font('embedded_$name', type));
           }
         }
 
         // add google fonts
-        final googleFonts = tec.as<List<dynamic>>(json['google']);
+        final googleFonts = as<List<dynamic>>(json['google']);
         for (final item in googleFonts) {
           if (item is List<dynamic> && item.length == 2) {
-            final name = tec.as<String>(item.first);
+            final name = as<String>(item.first);
             // Make sure the font is still available in GoogleFonts.
             if (fontNames.contains(name)) {
-              final type = tec.as<String>(item.last);
+              final type = as<String>(item.last);
               assert(type?.isNotEmpty ?? false);
               fonts.add(_Font(name, type));
             } else {
-              tec.dmPrint('TextSettings loadFonts font $name is no longer available.');
+              dmPrint('TextSettings loadFonts font $name is no longer available.');
             }
           }
         }
@@ -333,7 +334,7 @@ Future<_Fonts> _loadFonts() async {
   }
   // ignore: avoid_catches_without_on_clauses
   catch (e) {
-    tec.dmPrint('TextSettings loadFonts failed with error: ${e.toString()}');
+    dmPrint('TextSettings loadFonts failed with error: ${e.toString()}');
   }
 
   // await Future.delayed(Duration(seconds: 2), () {});

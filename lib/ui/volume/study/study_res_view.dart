@@ -3,8 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_html/tec_html.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -44,11 +45,11 @@ class StudyResView extends StatelessWidget {
                 padding: studyRes.resId == 0 ? padding : padding.copyWith(top: _altTopPadding));
           }
 
-          if (tec.isNotNullOrEmpty(studyRes.res?.filename)) {
+          if (isNotNullOrEmpty(studyRes.res?.filename)) {
             final url = VolumesRepository.shared
                 .volumeWithId(studyRes.res.volumeId)
                 .fileUrlForResource(studyRes.res);
-            if (tec.isNotNullOrEmpty(url)) {
+            if (isNotNullOrEmpty(url)) {
               // HTML
               if (url.endsWith('.html')) {
                 return _Article(
@@ -112,7 +113,7 @@ class _Folder extends StatelessWidget {
   Widget build(BuildContext context) {
     final bible = VolumesRepository.shared.volumeWithId(studyRes.volumeId)?.assocBible();
 
-    return tec.isNullOrEmpty(studyRes.children)
+    return isNullOrEmpty(studyRes.children)
         ? const Center(child: LoadingIndicator())
         : TecScrollbar(
             // Use ScrollablePositionedList?
@@ -176,7 +177,8 @@ class _Article extends StatefulWidget {
   final Size viewSize;
   final EdgeInsets padding;
 
-  const _Article({Key key, @required this.studyRes, @required this.viewSize, @required this.padding})
+  const _Article(
+      {Key key, @required this.studyRes, @required this.viewSize, @required this.padding})
       : super(key: key);
 
   @override
@@ -194,7 +196,7 @@ class __ArticleState extends State<_Article> {
 
   @override
   Widget build(BuildContext context) {
-    return tec.isNullOrEmpty(widget.studyRes.html)
+    return isNullOrEmpty(widget.studyRes.html)
         ? const Center(child: LoadingIndicator())
         : TecAutoScroll(
             scrollController: _scrollController,
@@ -221,7 +223,8 @@ class __ArticleState extends State<_Article> {
 
                     return TecHtml(
                       widget.studyRes.html,
-                      baseUrl: VolumesRepository.shared.volumeWithId(widget.studyRes.volumeId)?.baseUrl,
+                      baseUrl:
+                          VolumesRepository.shared.volumeWithId(widget.studyRes.volumeId)?.baseUrl,
                       backgroundColor: Theme.of(context).backgroundColor,
                       textScaleFactor: contentTextScaleFactorWith(context),
                       padding: _padding,

@@ -4,7 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 import '../../models/search/context.dart';
 import '../../models/search/search_history_item.dart';
@@ -70,13 +70,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   Stream<SearchState> mapEventToState(SearchEvent event) async* {
     if (event is _Requested) {
       yield state.copyWith(loading: true);
-      tec.dmPrint('Loading search: ${event.search}');
+      dmPrint('Loading search: ${event.search}');
 
       try {
         final translations =
             event.translations?.join('|') ?? state.filteredTranslations?.join('|') ?? '';
         final res = await SearchResults.fetch(words: event.search, translationIds: translations);
-        tec.dmPrint('Completed search "${event.search}" with ${res.length} result(s)');
+        dmPrint('Completed search "${event.search}" with ${res.length} result(s)');
 
         yield state.copyWith(
             searchResults: res.map((r) => SearchResultInfo(r)).toList(),
@@ -89,7 +89,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
             search: event.search,
             filteredTranslations: event.translations);
       } catch (_) {
-        tec.dmPrint('Error with search "${event.search}"');
+        dmPrint('Error with search "${event.search}"');
         yield state.copyWith(
             error: true,
             loading: false,
@@ -99,7 +99,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     } else if (event is _ModifySearchResult) {
       yield _modifySearchResult(event.searchResult);
     } else if (event is _SelectionMode) {
-      tec.dmPrint('Selection Mode in search: ${!state.selectionMode ? 'ON' : 'OFF'}');
+      dmPrint('Selection Mode in search: ${!state.selectionMode ? 'ON' : 'OFF'}');
       if (!state.selectionMode) {
         yield state.copyWith(selectionMode: !state.selectionMode);
       } else {

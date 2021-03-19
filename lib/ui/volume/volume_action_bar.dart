@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -91,7 +91,7 @@ Future<void> _onNavigate(BuildContext context, VolumeViewData viewData,
     await Future.delayed(const Duration(milliseconds: 350), () {
       final newViewData =
           viewData.copyWith(bcv: BookChapterVerse.fromRef(ref), volumeId: ref.volume);
-      tec.dmPrint('VolumeViewActionBar _onNavigate updating with new data: $newViewData');
+      dmPrint('VolumeViewActionBar _onNavigate updating with new data: $newViewData');
       context.read<VolumeViewDataBloc>().update(context, newViewData);
     });
   }
@@ -116,7 +116,7 @@ Future<void> _onSelectVolume(BuildContext context, VolumeViewData viewData) asyn
   }
 
   if (newViewData != null) {
-    tec.dmPrint('VolumeViewActionBar _onSelectVolume updating with new data: $newViewData');
+    dmPrint('VolumeViewActionBar _onSelectVolume updating with new data: $newViewData');
     await context.read<VolumeViewDataBloc>().update(context, newViewData);
   }
 }

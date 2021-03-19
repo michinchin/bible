@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 // Popular volumes sorted with most popular first.
 const _popularVolumes = [9, 51, 32, 47, 91, 231, 50, 65, 309, 1017, 1014, 1013];
@@ -13,14 +13,14 @@ class RecentVolumesBloc extends Cubit<RecentVolumes> {
   final String prefsKey;
 
   RecentVolumesBloc({this.prefsKey = '_recent_volumes'})
-      : super(RecentVolumes.fromJson(tec.Prefs.shared.getString(prefsKey)) ??
+      : super(RecentVolumes.fromJson(Prefs.shared.getString(prefsKey)) ??
             RecentVolumes(_popularVolumes.map((id) => RecentVolume(id, null)).toList()));
 
   void updateWithVolume(int volume, {DateTime now}) {
     final newState = RecentVolumes(state.volumes.where((v) => v.id != volume).toList()
       ..insert(0, RecentVolume(volume, now ?? DateTime.now())));
-    tec.Prefs.shared.setString(prefsKey, tec.toJsonString(newState));
-    // tec.dmPrint('RecentVolumesBloc.updateWithVolume($volume => $newState');
+    Prefs.shared.setString(prefsKey, toJsonString(newState));
+    // dmPrint('RecentVolumesBloc.updateWithVolume($volume => $newState');
     _cache = null;
     emit(newState);
   }
@@ -28,7 +28,7 @@ class RecentVolumesBloc extends Cubit<RecentVolumes> {
   void removeVolume(int volume) {
     final newState = RecentVolumes(state.volumes.where((v) => v.id != volume).toList());
     if (newState != state) {
-      tec.Prefs.shared.setString(prefsKey, tec.toJsonString(newState));
+      Prefs.shared.setString(prefsKey, toJsonString(newState));
       _cache = null;
       emit(newState);
     }
@@ -57,12 +57,12 @@ class RecentVolumes extends Equatable {
   List<Object> get props => [volumes];
 
   factory RecentVolumes.fromJson(Object object) {
-    final json = (object is String ? tec.parseJsonSync(object) : object);
+    final json = (object is String ? parseJsonSync(object) : object);
     if (json is Map<String, Object>) {
-      final ids = tec.asList<int>(json['ids']) ?? [];
-      final dts = tec.asList<int>(json['dts']) ?? [];
+      final ids = asList<int>(json['ids']) ?? [];
+      final dts = asList<int>(json['dts']) ?? [];
       var i = 0;
-      final volumes = ids.map((id) => RecentVolume(id, tec.dateTimeFromDbInt(dts[i++]))).toList();
+      final volumes = ids.map((id) => RecentVolume(id, dateTimeFromDbInt(dts[i++]))).toList();
       return (RecentVolumes(volumes));
     }
     return null;
@@ -71,12 +71,12 @@ class RecentVolumes extends Equatable {
   Map<String, Object> toJson() {
     return <String, Object>{
       if (volumes.isNotEmpty) 'ids': volumes.map((v) => v.id).toList(),
-      if (volumes.isNotEmpty) 'dts': volumes.map((v) => tec.dbIntFromDateOnly(v.dt)).toList(),
+      if (volumes.isNotEmpty) 'dts': volumes.map((v) => dbIntFromDateOnly(v.dt)).toList(),
     };
   }
 
   @override
-  String toString() => tec.toJsonString(toJson());
+  String toString() => toJsonString(toJson());
 }
 
 @immutable

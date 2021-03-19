@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../common/common.dart';
@@ -90,8 +90,8 @@ class DateWithImage extends StatelessWidget {
               Flexible(
                 flex: 1,
                 child: TecText(
-                  '${tec.shortNameOfWeekday(date.weekday)},'
-                  ' ${tec.shortNameOfMonth(date.month)}',
+                  '${shortNameOfWeekday(date.weekday)},'
+                  ' ${shortNameOfMonth(date.month)}',
                   autoSize: true,
                   minFontSize: 8,
                   maxLines: 1,

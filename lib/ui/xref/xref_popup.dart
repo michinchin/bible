@@ -3,7 +3,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -40,13 +41,13 @@ Future<void> showXrefsPopup({
         value: originalContext.tbloc<VolumeViewDataBloc>(),
         child: TecPopupSheet(
           padding: EdgeInsets.zero,
-          title: (tec.isNotNullOrEmpty(title))
+          title: (isNotNullOrEmpty(title))
               ? Container(
                   // color: _xrefUiOption == XrefUiOption.flat ? titleBgClr : Colors.transparent,
                   constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
                   padding: EdgeInsets.all(padding),
                   child: TecTitleBar(
-                    title: tec.isNullOrEmpty(text) ? title : "'$text', $title",
+                    title: isNullOrEmpty(text) ? title : "'$text', $title",
                     style: const TextStyle(fontSize: 18),
                   ),
                 )
@@ -119,7 +120,7 @@ class _XrefWidget extends StatelessWidget {
             .state
             .asVolumeViewData
             .copyWith(bcv: BookChapterVerse(xref.book, xref.chapter, xref.verse));
-        // tec.dmPrint('Xref updating with new data: $viewData');
+        // dmPrint('Xref updating with new data: $viewData');
         context.tbloc<VolumeViewDataBloc>().update(context, viewData);
         Navigator.of(context).maybePop();
       },

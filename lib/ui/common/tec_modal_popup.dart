@@ -392,7 +392,3 @@ const TextStyle _kPopupSheetContentStyle = TextStyle(
   color: Color(0xFF8F8F8F),
   textBaseline: TextBaseline.alphabetic,
 );
-
-void dmPrint(Object object) {
-  if (kDebugMode) print(object); // ignore: avoid_print
-}

@@ -6,7 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -494,7 +495,7 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
       final viewDataBloc = context.viewManager.dataBlocWithView(view.uid);
       int volumeId;
       if (viewDataBloc != null) {
-        final volumeView = tec.as<VolumeViewDataBloc>(viewDataBloc).state.asVolumeViewData;
+        final volumeView = as<VolumeViewDataBloc>(viewDataBloc).state.asVolumeViewData;
         volumeId = volumeView.volumeId;
         title =
             '${!volumeView.useSharedRef ? '${volumeView.bookNameAndChapter(useShortBookName: true)}\n' : ''}${VolumesRepository.shared.volumeWithId(volumeId).abbreviation}';

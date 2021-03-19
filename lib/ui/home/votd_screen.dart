@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -84,7 +85,7 @@ class __VotdScreenState extends State<_VotdScreen> {
   Future<void> share() async {
     final copyWithLink = PrefsBloc.getBool(PrefItemId.includeShareLink);
     if (!copyWithLink) {
-      final text = await tecShowProgressDlg<tec.ErrorOrValue<ReferenceAndVerseText>>(
+      final text = await tecShowProgressDlg<ErrorOrValue<ReferenceAndVerseText>>(
         context: context,
         title: 'Preparing to share...',
         future: _bible.referenceAndVerseTextWith(widget.votd.ref),
@@ -175,7 +176,7 @@ class __VotdScreenState extends State<_VotdScreen> {
           ),
         ),
       ],
-      childBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
+      childBuilder: (c, i) => FutureBuilder<ErrorOrValue<String>>(
         future: widget.votd.getFormattedVerse(_bible),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data.error == null) {
@@ -242,9 +243,9 @@ class _VotdsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final votds = <VotdEntry>[];
     final days = <DateTime>[];
-    for (var day = DateTime(tec.today.year, 1, 1);
-        day.isBefore(DateTime(tec.today.year, 12, 31)) ||
-            day.isAtSameMomentAs(DateTime(tec.today.year, 12, 31));
+    for (var day = DateTime(today.year, 1, 1);
+        day.isBefore(DateTime(today.year, 12, 31)) ||
+            day.isAtSameMomentAs(DateTime(today.year, 12, 31));
         day = day.add(const Duration(days: 1))) {
       days.add(day);
       votds.add(votd.forDateTime(day));
@@ -267,10 +268,10 @@ class _VotdsScreen extends StatelessWidget {
             bottom: false,
             child: ScrollablePositionedList.builder(
                 initialScrollIndex: scrollToDateTime == null
-                    ? days.indexOf(tec.today)
-                    : days.indexOf(tec.dateOnly(scrollToDateTime)),
+                    ? days.indexOf(today)
+                    : days.indexOf(dateOnly(scrollToDateTime)),
                 itemCount: votds.length,
-                itemBuilder: (c, i) => FutureBuilder<tec.ErrorOrValue<String>>(
+                itemBuilder: (c, i) => FutureBuilder<ErrorOrValue<String>>(
                     future: votds[i].getFormattedVerse(currentBibleFromContext(context)),
                     builder: (context, snapshot) => DayCard(
                         date: days[i],

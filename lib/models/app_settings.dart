@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_env/tec_env.dart' as tev;
 import 'package:tec_user_account/tec_user_account.dart' as tua;
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../blocs/content_settings.dart';
@@ -24,7 +24,7 @@ class AppSettings {
   // PUBLIC API
   //
 
-  tec.DeviceInfo deviceInfo;
+  DeviceInfo deviceInfo;
   tua.UserAccount userAccount;
   tev.TecEnv env;
 
@@ -33,7 +33,7 @@ class AppSettings {
   ///
   bool isDarkTheme() {
     // if it's been set in the app - return that
-    var isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
+    var isDarkTheme = Prefs.shared.getBool('isDarkTheme');
 
     // otherwise check system dark mode...
     isDarkTheme ??= (WidgetsBinding.instance.window.platformBrightness == Brightness.dark);
@@ -61,11 +61,11 @@ class AppSettings {
   }) async {
     assert(shared.userAccount == null, 'AppSettings.load() must only be called once.');
     env = const tev.TecEnv();
-    deviceInfo = await tec.DeviceInfo.fetch();
-    tec.dmPrint(
-        'Running on ${deviceInfo.productName} with ${tec.platformName} ${deviceInfo.version}');
+    deviceInfo = await DeviceInfo.fetch();
+    dmPrint(
+        'Running on ${deviceInfo.productName} with ${TecPlatform.platformName} ${deviceInfo.version}');
 
-    final platformPrefix = tec.platformName == 'ANDROID' ? 'PLAY' : tec.platformName;
+    final platformPrefix = TecPlatform.isAndroid ? 'PLAY' : TecPlatform.platformName;
     final appPrefix = '${platformPrefix}_$appName';
 
     // we want to open the user db - but don't wait for sync
@@ -106,7 +106,7 @@ double contentTextScaleFactorWith(BuildContext context) {
         // maxScaleFactor: 1.0,
       ) *
       BlocProvider.of<ContentSettingsBloc>(context).state.textScaleFactor;
-  // tec.dmPrint('scale: $scale');
+  // dmPrint('scale: $scale');
   return scale;
 }
 
@@ -128,15 +128,15 @@ class _KVStore with tua.UserAccountKVStore {
 
   @override
   String getString(String key, {String defaultValue}) {
-    return tec.Prefs.shared.getString(key, defaultValue: defaultValue);
+    return Prefs.shared.getString(key, defaultValue: defaultValue);
   }
 
   @override
   Future<bool> setString(String key, String value) async {
-    return tec.Prefs.shared.setString(key, value);
+    return Prefs.shared.setString(key, value);
   }
 }
 
-extension TecDeviceInfoExt on tec.DeviceInfo {
+extension TecDeviceInfoExt on DeviceInfo {
   bool get isSimulator => productName.contains('Simulator');
 }

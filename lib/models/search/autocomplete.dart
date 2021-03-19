@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:tec_cache/tec_cache.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 class AutoComplete {
   final String word;
@@ -10,11 +10,10 @@ class AutoComplete {
   AutoComplete({this.word, this.possibles});
 
   factory AutoComplete.fromJson(Map<String, dynamic> json) {
-    final possibles = tec
-        .as<List<dynamic>>(json['possibles'])
-        .map((dynamic s) => tec.as<String>(s)) //ignore: unnecessary_lambdas
+    final possibles = as<List<dynamic>>(json['possibles'])
+        .map((dynamic s) => as<String>(s)) //ignore: unnecessary_lambdas
         .toList();
-    return AutoComplete(word: tec.as<String>(json['partial']), possibles: possibles);
+    return AutoComplete(word: as<String>(json['partial']), possibles: possibles);
   }
 
   static Future<AutoComplete> fetch({String phrase, String translationIds}) async {
@@ -29,13 +28,13 @@ class AutoComplete {
 
     // check cloudfront cache
     var json = await TecCache.shared.jsonFromUrl(
-      url: '${tec.cacheUrl}/$cacheParam',
+      url: '$cloudFrontCacheUrl/$cacheParam',
       connectionTimeout: const Duration(seconds: 10),
     );
 
     // check the server
-    if (tec.isNullOrEmpty(json)) {
-      json = await tec.apiRequest(
+    if (isNullOrEmpty(json)) {
+      json = await apiRequest(
           endpoint: 'suggest',
           parameters: <String, dynamic>{
             'words': suggestions['words'],
@@ -46,7 +45,7 @@ class AutoComplete {
             if (status == 200) {
               // save to tecCache...
               await TecCache.shared
-                  .saveJsonToCache(json: json, cacheUrl: '${tec.cacheUrl}/$cacheParam');
+                  .saveJsonToCache(json: json, cacheUrl: '$cloudFrontCacheUrl/$cacheParam');
 
               return json;
             } else {
@@ -55,7 +54,7 @@ class AutoComplete {
           });
     }
 
-    if (tec.isNullOrEmpty(json)) {
+    if (isNullOrEmpty(json)) {
       return Future.error('Error getting results from server');
     } else {
       return AutoComplete.fromJson(json);
@@ -69,7 +68,7 @@ String _getCacheKey(String phrase, String translationIds) {
   final words = getSuggestions(phrase);
   final fullWords = words['words'].split(' ').join('_');
   var partial = '';
-  if (tec.isNotNullOrEmpty(words['partialWord'])) {
+  if (isNotNullOrEmpty(words['partialWord'])) {
     partial += '-${words['partialWord']}';
   }
 
@@ -90,7 +89,7 @@ String _getCacheKey(String phrase, String translationIds) {
 
 String optimizePhrase(String phrase) {
   // normalize phrase
-  var cleanPhrase = tec.removeDiacritics(phrase.trimLeft());
+  var cleanPhrase = removeDiacritics(phrase.trimLeft());
 
   // remove punctuation
   cleanPhrase = cleanPhrase.replaceAll(RegExp('[^ a-zA-Z\'0-9:-]'), ' ');

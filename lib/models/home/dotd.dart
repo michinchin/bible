@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:tec_env/tec_env.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../const.dart';
@@ -58,12 +58,12 @@ class Dotd {
   /// Returns a new dotd from parsing devo-of-the-day JSON.
   factory Dotd.fromDotdJson(List<dynamic> json) {
     if (json.length >= 5 && json[1] is List<dynamic> && json[1].length == 2) {
-      final productId = tec.as<int>(json[1][0]);
-      final resourceId = tec.as<int>(json[1][1]);
-      final imageName = tec.as<String>(json[2]);
-      final commands = tec.as<String>(json[3]);
-      final title = tec.as<String>(json[4]);
-      final intro = tec.as<String>(json[5]);
+      final productId = as<int>(json[1][0]);
+      final resourceId = as<int>(json[1][1]);
+      final imageName = as<String>(json[2]);
+      final commands = as<String>(json[3]);
+      final title = as<String>(json[4]);
+      final intro = as<String>(json[5]);
       return Dotd(
           title: title,
           intro: intro,
@@ -79,7 +79,7 @@ class Dotd {
   String get heroTagForImage => '$hashCode-$imageName';
 
   /// Returns image url
-  String get imageUrl => '${tec.streamUrl}/votd/$imageName';
+  String get imageUrl => '$cloudFrontStreamUrl/votd/$imageName';
 
   Volume get volume => VolumesRepository.shared.volumeWithId(productId);
 
@@ -91,7 +91,7 @@ class Dotd {
     } else {
       url = '${Const.tecartaBibleLink}share/$productId/$resourceId';
     }
-    return tec.shortenUrl(url);
+    return shortenUrl(url);
   }
 
   Future<String> shareText() async => 'Devotional of the Day\n$title\n${await shortLink()}';
@@ -103,9 +103,9 @@ class Dotd {
       String html;
       final fileUrl = volume.fileUrlForResource(res.value);
       if (fileUrl.startsWith('http')) {
-        html = await tec.utf8StringFromHttpRequest(tec.HttpRequestType.get, url: fileUrl);
+        html = await utf8StringFromHttpRequest(HttpRequestType.get, url: fileUrl);
       } else {
-        html = tec.getTextFromFile(fileUrl);
+        html = getTextFromFile(fileUrl);
       }
       return formattedHtml(html, env);
     }
@@ -116,10 +116,10 @@ class Dotd {
     if (command != null) {
       var formattedHtml = html;
       for (final each in command.commands) {
-        if (tec.as<String>(each[0]) == 'html.remove') {
-          if (tec.as<List>(each).length == 3) {
-            final startsWith = tec.as<String>(each[1]);
-            final endsWith = tec.as<String>(each[2]);
+        if (as<String>(each[0]) == 'html.remove') {
+          if (as<List>(each).length == 3) {
+            final startsWith = as<String>(each[1]);
+            final endsWith = as<String>(each[2]);
             while (formattedHtml.contains(startsWith)) {
               final range =
                   formattedHtml.rangeOfDelimitedSubstring(delimiters: [startsWith, endsWith]);
@@ -162,19 +162,19 @@ class Dotd {
 
   /// Asynchronously returns a new DevoRes from a JSON list.
   factory Dotd.fromJson(List<dynamic> list) {
-    final productId = tec.as<int>(list[1][0]);
-    final resourceId = tec.as<int>(list[1][1]);
-    final imageName = tec.as<String>(list[2]);
-    final commands = tec.as<String>(list[3]);
-    final title = tec.as<String>(list[4]);
-    final intro = tec.as<String>(list[5]);
+    final productId = as<int>(list[1][0]);
+    final resourceId = as<int>(list[1][1]);
+    final imageName = as<String>(list[2]);
+    final commands = as<String>(list[3]);
+    final title = as<String>(list[4]);
+    final intro = as<String>(list[5]);
 
-    if (tec.isNotNullOrZero(productId) &&
-        tec.isNotNullOrZero(resourceId) &&
-        tec.isNotNullOrEmpty(imageName) &&
-        tec.isNotNullOrEmpty(commands) &&
-        tec.isNotNullOrEmpty(title) &&
-        tec.isNotNullOrEmpty(intro)) {
+    if (isNotNullOrZero(productId) &&
+        isNotNullOrZero(resourceId) &&
+        isNotNullOrEmpty(imageName) &&
+        isNotNullOrEmpty(commands) &&
+        isNotNullOrEmpty(title) &&
+        isNotNullOrEmpty(intro)) {
       return Dotd(
         title: title,
         intro: intro,
@@ -194,7 +194,7 @@ class HtmlCommand {
 
   factory HtmlCommand.fromJson(List<dynamic> list) {
     if (list[0] == 'commands') {
-      final commands = tec.as<List>(list[1]);
+      final commands = as<List>(list[1]);
       return HtmlCommand(commands);
     }
     return null;

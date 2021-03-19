@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:tec_user_account/tec_user_account.dart' as tua;
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 enum PrefItemDataType { json, string, bool, int }
 
@@ -91,9 +91,9 @@ class PrefItem extends tua.UserItem {
           book: prefItemId,
           verse: intValue,
           info: stringValue,
-          created: tec.dbIntFromDateTime(created ?? DateTime.now()),
+          created: dbIntFromDateTime(created ?? DateTime.now()),
           deleted: deleted,
-          modified: tec.dbIntFromDateTime(modified ?? DateTime.now()),
+          modified: dbIntFromDateTime(modified ?? DateTime.now()),
           id: id,
         );
 
@@ -104,8 +104,8 @@ class PrefItem extends tua.UserItem {
       stringValue: item.info,
       id: item.id,
       deleted: item.deleted,
-      created: tec.dateOnlyFromDbInt(item.created),
-      modified: tec.dateOnlyFromDbInt(item.modified));
+      created: dateOnlyFromDbInt(item.created),
+      modified: dateOnlyFromDbInt(item.modified));
 }
 
 extension PrefItemHelper on PrefItem {

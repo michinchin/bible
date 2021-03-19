@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 enum SheetType { main, selection, hidden }
 
@@ -45,7 +45,7 @@ class SheetManagerBloc extends Bloc<SheetEvent, SheetManagerState> {
         }
         break;
     }
-    tec.dmPrint('Sheet Update: to ${newState.type}');
+    dmPrint('Sheet Update: to ${newState.type}');
     yield newState;
   }
 }

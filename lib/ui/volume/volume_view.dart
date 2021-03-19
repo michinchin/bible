@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
@@ -64,13 +64,13 @@ class ViewableVolume extends Viewable {
     int volumeId;
 
     if (options != null && options.containsKey('volumeId')) {
-      volumeId = tec.as<int>(options['volumeId']);
+      volumeId = as<int>(options['volumeId']);
     }
     else {
       volumeId = await selectVolumeInLibrary(
         context,
         title: 'Open New',
-        initialTabPrefix: options == null ? null : tec.as<String>(options['tab']),
+        initialTabPrefix: options == null ? null : as<String>(options['tab']),
       );
     }
 

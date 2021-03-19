@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -39,7 +39,7 @@ Future<void> showNavigate(BuildContext context,
     await Future.delayed(const Duration(milliseconds: 350), () {
       // final newViewData =
       // viewData.copyWith(bcv: BookChapterVerse.fromRef(ref), volumeId: ref.volume);
-      // tec.dmPrint('VolumeViewActionBar _onNavigate updating with new data: $newViewData');
+      // dmPrint('VolumeViewActionBar _onNavigate updating with new data: $newViewData');
       // context.read<VolumeViewDataBloc>().update(context, newViewData);
     });
   }
@@ -47,9 +47,6 @@ Future<void> showNavigate(BuildContext context,
 
 Future<Reference> navigate(BuildContext context, Reference ref,
     {int initialIndex = 0, bool searchView = false}) {
-  // dummy tec reference to remove import warning
-  tec.today;
-
   final hasSearchResults = context.tbloc<SearchBloc>().state.searchResults.isNotEmpty;
   return showTecDialog<Reference>(
     context: context,
@@ -155,7 +152,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       if (_debounce?.isActive ?? false) _debounce.cancel();
       _debounce = Timer(const Duration(milliseconds: 250), () {
         if (navBloc().state.search != _searchController.text) {
-          // tec.dmPrint('/nTESTING:${_searchController.text}/n');
+          // dmPrint('/nTESTING:${_searchController.text}/n');
           navBloc().add(NavEvent.onSearchChange(search: _searchController.text));
         }
       });
@@ -422,7 +419,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
     return BlocConsumer<NavBloc, NavState>(
       listener: (c, s) {
-        // tec.dmPrint(
+        // dmPrint(
         //     'Change from listener:\nstate search:${s.search}\nsearchController:${_searchController.text}');
         if (s.tabIndex < _tabController.length && s.tabIndex != _tabController.index) {
           _tabController.animateTo(s.tabIndex);

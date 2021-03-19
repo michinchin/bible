@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/highlights/highlights_bloc.dart';
@@ -107,7 +108,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
               onEdit: () => TecToast.show(context, 'Cannot edit default colors'),
             ),
           ],
-          if (tec.isNotNullOrEmpty(customColors))
+          if (isNotNullOrEmpty(customColors))
             for (var i = 0; i < customColors.length; i++) ...[
               _ColorPickerButton(
                 editMode: editMode,

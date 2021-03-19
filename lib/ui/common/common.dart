@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:tec_widgets/tec_widgets.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 import '../../models/app_settings.dart';
 import 'tec_dialog.dart';
@@ -351,8 +351,8 @@ bool initFeatureDiscovery({
   @required String pref,
   @required Iterable<String> steps,
 }) {
-  if (tec.Prefs.shared.getBool(pref, defaultValue: true)) {
-    tec.Prefs.shared.setBool(pref, false);
+  if (Prefs.shared.getBool(pref, defaultValue: true)) {
+    Prefs.shared.setBool(pref, false);
     SchedulerBinding.instance.addPostFrameCallback(
       (duration) {
         Future.delayed(const Duration(milliseconds: 250), () {
@@ -370,6 +370,6 @@ bool initFeatureDiscovery({
 
 Future<void> resetFeatureDiscoveries(List<String> prefs) async {
   for (final p in prefs) {
-    await tec.Prefs.shared.setBool(p, true);
+    await Prefs.shared.setBool(p, true);
   }
 }

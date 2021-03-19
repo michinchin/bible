@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 import '../models/app_settings.dart';
 
@@ -27,7 +27,7 @@ class AppLifecycleBloc extends Bloc<AppLifecycleState, AppLifecycleState> {
 
   @override
   Stream<AppLifecycleState> mapEventToState(AppLifecycleState event) async* {
-    tec.dmPrint('App state changed to $event');
+    dmPrint('App state changed to $event');
     switch (event) {
       case AppLifecycleState.resumed:
         _handleResume();
@@ -50,7 +50,7 @@ class AppLifecycleBloc extends Bloc<AppLifecycleState, AppLifecycleState> {
     _appResumedCount++;
     _pausedStopwatch.stop();
     if (kDebugMode) {
-      tec.dmPrint('App resumed after being paused for $pausedDuration');
+      dmPrint('App resumed after being paused for $pausedDuration');
     }
 
     // If paused for more than 10 seconds and a user is signed in, initiate a sync.

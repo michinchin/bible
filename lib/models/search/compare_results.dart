@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:tec_cache/tec_cache.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 class CompareResult {
   final int id;
@@ -12,9 +12,9 @@ class CompareResult {
   const CompareResult({this.id, this.a, this.text});
 
   factory CompareResult.fromJson(Map<String, dynamic> json) {
-    final id = tec.as<int>(json['id']);
-    final abbreviation = tec.as<String>(json['a']);
-    final text = tec.as<String>(json['text']);
+    final id = as<int>(json['id']);
+    final abbreviation = as<String>(json['a']);
+    final text = as<String>(json['text']);
 
     return CompareResult(
       id: id,
@@ -51,11 +51,11 @@ class CompareResults {
 
     final json = await TecCache.shared.jsonFromFile(cachedPath: _cachedPath);
 
-    if (tec.isNotNullOrEmpty(json)) {
-      return CompareResults.fromJson(tec.as<List<dynamic>>(json['list']));
+    if (isNotNullOrEmpty(json)) {
+      return CompareResults.fromJson(as<List<dynamic>>(json['list']));
     }
 
-    return tec.apiRequest(
+    return apiRequest(
         endpoint: 'allverses',
         parameters: <String, dynamic>{
           'volumes': translations,
@@ -66,7 +66,7 @@ class CompareResults {
         completion: (status, json, dynamic error) async {
           if (status == 200) {
             await TecCache.shared.saveJsonToCache(json: json, cacheUrl: _cachedPath);
-            return CompareResults.fromJson(tec.as<List<dynamic>>(json['list']));
+            return CompareResults.fromJson(as<List<dynamic>>(json['list']));
           } else {
             return CompareResults(data: []);
           }

@@ -2,7 +2,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -148,7 +148,7 @@ Iterable<TableRow> generateAddMenuItems(BuildContext menuContext, int viewUid) {
 
     TableRow row({String title, IconData icon, String tab}) =>
         tecModalPopupMenuItem(menuContext, icon ?? vm.iconWithType(type), title, () async {
-          tec.dmPrint('Adding new view of type $type.');
+          dmPrint('Adding new view of type $type.');
           await vm.onAddView(menuContext, type,
               currentViewId: viewUid, options: tab == null ? null : <String, dynamic>{'tab': tab});
           await Navigator.of(menuContext).maybePop();

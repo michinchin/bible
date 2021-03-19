@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 typedef InAppPurchaseHandler = Future<void> Function(
     String inAppId, bool isRestoration, IAPError error);
@@ -16,7 +16,7 @@ class InAppPurchases {
   }
 
   InAppPurchases._() {
-    tec.dmPrint('WARNING: Unable to initialize in-app purchases in WEB app.');
+    dmPrint('WARNING: Unable to initialize in-app purchases in WEB app.');
   }
 
   void dispose() {
@@ -32,7 +32,7 @@ class InAppPurchases {
     bool consumable = false,
     bool simulatePurchase = false,
   }) async {
-    assert(context != null && purchaseHandler != null && tec.isNotNullOrEmpty(productId));
+    assert(context != null && purchaseHandler != null && isNotNullOrEmpty(productId));
     unawaited(purchaseHandler?.call(productId, false,
         IAPError(source: null, code: null, message: 'In-app purchase connection is unavailable.')));
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 class VolumeImage extends StatelessWidget {
@@ -22,7 +22,7 @@ class VolumeImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final path = '${tec.streamUrl}/covers/${volume.id}.jpg';
+    final path = '$cloudFrontStreamUrl/covers/${volume.id}.jpg';
     Widget img() => CachedNetworkImage(
           width: width,
           height: height,
@@ -31,7 +31,7 @@ class VolumeImage extends StatelessWidget {
           errorWidget: (context, url, dynamic error) => SizedBox(width: width, height: height),
         );
 
-    return tec.isNotNullOrEmpty(heroPrefix)
+    return isNotNullOrEmpty(heroPrefix)
         ? Hero(tag: heroTagForVolume(volume, heroPrefix), child: img())
         : img();
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 import '../../models/home/dotds.dart';
 import '../../models/home/saves.dart';
@@ -12,7 +12,7 @@ import 'votd_screen.dart';
 
 Future<void> showSaveScreen(BuildContext context, {int year}) =>
     Navigator.of(context).push(MaterialPageRoute<void>(
-        maintainState: false, builder: (c) => SavesScreen(year: year ?? tec.today.year)));
+        maintainState: false, builder: (c) => SavesScreen(year: year ?? today.year)));
 
 class SavesScreen extends StatelessWidget {
   final int year;
@@ -61,14 +61,14 @@ class _SavedOtds extends StatelessWidget {
       future: Future.wait<dynamic>([Dotds.fetch(year: year), Votd.fetch(year: year)]),
       builder: (c, s) {
         if (s.hasData) {
-          final dotds = tec.as<Dotds>(s.data[0]);
-          final votds = tec.as<Votd>(s.data[1]);
+          final dotds = as<Dotds>(s.data[0]);
+          final votds = as<Votd>(s.data[1]);
           final children = (otds?.data ?? []).map<Widget>((s) {
             if (s.year == year) {
-              final date = tec.dateOnly(DateTime(s.year, 1, 1).add(Duration(days: s.day)));
+              final date = dateOnly(DateTime(s.year, 1, 1).add(Duration(days: s.day)));
               if (s.cardType == votdType) {
                 final votd = votds.forDateTime(date);
-                return FutureBuilder<tec.ErrorOrValue<String>>(
+                return FutureBuilder<ErrorOrValue<String>>(
                   future: votd.getFormattedVerse(currentBibleFromContext(c)),
                   builder: (c, s) => DayCard(
                     imageUrl: votd.imageUrl,

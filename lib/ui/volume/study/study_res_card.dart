@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -144,7 +144,7 @@ class _TitleEtcColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final refStyle = tec.isNullOrEmpty(res.title) ? _titleStyle : _subtitleStyle;
+    final refStyle = isNullOrEmpty(res.title) ? _titleStyle : _subtitleStyle;
 
     if (res.hasType(ResourceType.reference)) {
       return _ReferenceWidget(res: res, bible: bible);
@@ -153,14 +153,14 @@ class _TitleEtcColumn extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (tec.isNotNullOrEmpty(res.title)) ...[
+        if (isNotNullOrEmpty(res.title)) ...[
           Text(res.title, style: _titleStyle),
           const SizedBox(height: 4),
         ],
-        if (bible != null && tec.isNotNullOrZero(res.book) && tec.isNotNullOrZero(res.chapter)) ...[
+        if (bible != null && isNotNullOrZero(res.book) && isNotNullOrZero(res.chapter)) ...[
           Text(bible.titleWithResource(res), style: refStyle),
         ],
-        if (tec.isNotNullOrEmpty(res.caption)) ...[
+        if (isNotNullOrEmpty(res.caption)) ...[
           const SizedBox(height: 4),
           Text(
             res.caption,
@@ -177,8 +177,8 @@ extension on Bible {
   String titleWithResource(Resource res) {
     if (res?.book == null || res?.chapter == null) return '';
     final bookAndChapter = titleWithBookAndChapter(res.book, res.chapter);
-    if (tec.isNotNullOrZero(res.verse)) {
-      if (tec.isNotNullOrZero(res.endVerse)) {
+    if (isNotNullOrZero(res.verse)) {
+      if (isNotNullOrZero(res.endVerse)) {
         return '$bookAndChapter:${res.verse}-${res.endVerse}';
       }
       return '$bookAndChapter:${res.verse}';
@@ -210,7 +210,7 @@ class _ReferenceWidget extends StatelessWidget {
       return Text('ERROR: Invalid data, Bible: ${bible?.abbreviation}, resource: ${res.toJson()}');
     }
 
-    if (tec.isNotNullOrEmpty(res.verseText)) {
+    if (isNotNullOrEmpty(res.verseText)) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -268,7 +268,7 @@ extension on ReferenceAndVerseText {
 class VerseTextBloc extends Cubit<ReferenceAndVerseText> {
   VerseTextBloc(Reference ref) : super(ReferenceAndVerseText(ref, LinkedHashMap<int, VerseText>()));
 
-  Future<void> updateWith(Future<tec.ErrorOrValue<ReferenceAndVerseText>> futureResult) async {
+  Future<void> updateWith(Future<ErrorOrValue<ReferenceAndVerseText>> futureResult) async {
     final result = await futureResult;
     emit(result?.value ??
         ReferenceAndVerseText(

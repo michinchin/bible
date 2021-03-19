@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pedantic/pedantic.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -86,7 +86,7 @@ class _VolumeCard extends StatelessWidget {
       builder: (context, constraints) {
         //final halfPad = (padding / 2.0).roundToDouble();
 
-        tec.dmPrint(
+        dmPrint(
             '_VolumeCard building with hero tag: "${heroTagForVolume(volume, heroPrefix)}"');
 
         final cardHeight = math.min(350.0, (constraints.maxWidth * 0.5).roundToDouble() + 50.0);
@@ -127,7 +127,7 @@ class _VolumeCard extends StatelessWidget {
                         children: <Widget>[
                           Padding(
                             padding: EdgeInsets.fromLTRB(padding, 0, padding, padding),
-                            child: tec.isNotNullOrEmpty(heroPrefix)
+                            child: isNotNullOrEmpty(heroPrefix)
                                 ? Hero(
                                     tag: heroTagForVolume(volume, heroPrefix),
                                     child: image(),
@@ -327,8 +327,8 @@ class _ButtonsState extends State<_Buttons> {
     IAPError error,
   }) async {
     if (error != null) {
-      tec.dmPrint('IAP FAILED WITH ERROR: ${error?.message}');
-    } else if (tec.isNotNullOrEmpty(inAppId)) {
+      dmPrint('IAP FAILED WITH ERROR: ${error?.message}');
+    } else if (isNotNullOrEmpty(inAppId)) {
       final id = int.tryParse(inAppId.split('.').last);
       if (id != null) {
         if (!await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(id)) {
@@ -399,13 +399,13 @@ class _VolumeDescription extends StatelessWidget {
 }
 
 Future<String> _descriptionWithVolume(Volume volume) async {
-  // tec.dmPrint('calling _descriptionWithVolume(${volume.id})');
+  // dmPrint('calling _descriptionWithVolume(${volume.id})');
 
   try {
-    final prefix = tec.platformIs(tec.Platform.iOS) ? 'IOS' : 'PLAY';
-    final url = '${tec.streamUrl}/products-desc/${prefix}_TecartaBible.${volume.id}.json.gz';
+    final prefix = TecPlatform.isIOS ? 'IOS' : 'PLAY';
+    final url = '$cloudFrontStreamUrl/products-desc/${prefix}_TecartaBible.${volume.id}.json.gz';
     final response = await http.get(Uri.parse(url));
-    final jsonStr = tec.isNullOrEmpty(response?.bodyBytes) ? null : utf8.decode(response.bodyBytes);
+    final jsonStr = isNullOrEmpty(response?.bodyBytes) ? null : utf8.decode(response.bodyBytes);
     final dynamic json = jsonDecode(jsonStr);
     if (json is String) {
       return json;
@@ -413,7 +413,7 @@ Future<String> _descriptionWithVolume(Volume volume) async {
   }
   // ignore: avoid_catches_without_on_clauses
   catch (e) {
-    tec.dmPrint('_descriptionWithVolume(${volume.id}) failed with error: $e');
+    dmPrint('_descriptionWithVolume(${volume.id}) failed with error: $e');
   }
 
   return '';

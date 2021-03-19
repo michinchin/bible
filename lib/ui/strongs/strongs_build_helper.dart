@@ -4,7 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:tec_html/tec_html.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 import 'strongs_popup.dart';
 
@@ -51,7 +51,7 @@ class StrongsBuildHelper {
 /// Returns a TextSpan, WidgetSpan, or `null` for the given HTML text node.
 ///
 InlineSpan strongsSpanForText(BuildContext context, String text, TextStyle style, Object tag) {
-  if (tag is String && tag.isNotEmpty && tec.isNotNullOrEmpty(text)) {
+  if (tag is String && tag.isNotEmpty && isNotNullOrEmpty(text)) {
     final recognizer = TapGestureRecognizer()..onTap = () => _onTappedSpanWithHref(context, tag);
 
     var textStyle = style;
@@ -69,7 +69,7 @@ InlineSpan strongsSpanForText(BuildContext context, String text, TextStyle style
 }
 
 void _onTappedSpanWithHref(BuildContext context, String href) {
-  tec.dmPrint('tapped $href');
+  dmPrint('tapped $href');
   if (href.startsWith('G') || href.startsWith('H')) {
     if (href.contains('-')) {
       // e.g. "G1520-49", where 49 is book number

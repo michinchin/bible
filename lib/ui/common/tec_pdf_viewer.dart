@@ -6,7 +6,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:native_pdf_renderer/native_pdf_renderer.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:http/http.dart' as http;
 
 import 'common.dart';
@@ -62,7 +62,7 @@ class _TecPdfViewerBloc extends Cubit<_TecPdfViewerData> {
     updateWith(url: url);
   }
 
-  final _fcc = tec.FuncCallCoordinator();
+  final _fcc = FuncCallCoordinator();
   var _loadingPdf = false;
   var _isClosed = false;
 
@@ -98,9 +98,9 @@ class _TecPdfViewerBloc extends Cubit<_TecPdfViewerData> {
     emit(_TecPdfViewerData(_url, state.scale, _image, _error));
   }
 
-  Future<tec.ErrorOrValue<MemoryImage>> _imageFromPdf(String url) async {
+  Future<ErrorOrValue<MemoryImage>> _imageFromPdf(String url) async {
     // Make sure we only handle one call at a time.
-    return _fcc.syncCall<tec.ErrorOrValue<MemoryImage>>((fcc, callId) async {
+    return _fcc.syncCall<ErrorOrValue<MemoryImage>>((fcc, callId) async {
       PdfDocument pdfDoc;
       PdfPage pdfPage;
 
@@ -161,7 +161,7 @@ class _TecPdfViewerBloc extends Cubit<_TecPdfViewerData> {
         await pdfDoc?.close();
       } catch (_) {}
 
-      return tec.ErrorOrValue(error, image);
+      return ErrorOrValue(error, image);
     });
   }
 

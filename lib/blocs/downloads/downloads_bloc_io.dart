@@ -6,8 +6,7 @@ import 'dart:ui';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-// import 'package:tec_platform_util/tec_platform_util.dart' as tec;
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import 'downloads_bloc.dart';
@@ -39,13 +38,13 @@ class DownloadsBlocImp extends DownloadsBloc {
         newItems[volumeId].status == DownloadStatus.failed ||
         newItems[volumeId].status == DownloadStatus.canceled);
 
-    final licenseUrl = '${tec.streamUrl}/products-list/license-$volumeId.json.gz';
-    final json = await tec.sendHttpRequest<Map<String, dynamic>>(tec.HttpRequestType.get,
+    final licenseUrl = '$cloudFrontStreamUrl/products-list/license-$volumeId.json.gz';
+    final json = await sendHttpRequest<Map<String, dynamic>>(HttpRequestType.get,
         url: licenseUrl, completion: (status, json, dynamic error) => Future.value(json));
 
     if (json != null) {
-      final url = tec.as<String>(json['url']);
-      if (tec.isNotNullOrEmpty(url)) {
+      final url = as<String>(json['url']);
+      if (isNotNullOrEmpty(url)) {
         final taskId = await FlutterDownloader.enqueue(
             url: url,
             // headers: {"auth": "test_for_sql_encoding"},
@@ -54,7 +53,7 @@ class DownloadsBlocImp extends DownloadsBloc {
             openFileFromNotification: false);
 
         if (taskId == null) {
-          tec.dmPrint('FlutterDownloader.enqueue(\'$url\') returned null!');
+          dmPrint('FlutterDownloader.enqueue(\'$url\') returned null!');
         } else {
           newItems[volumeId] = newItems[volumeId].copyWith(taskId: taskId, url: url);
         }
@@ -93,7 +92,7 @@ class DownloadsBlocImp extends DownloadsBloc {
     } else {
       final newTaskId = await FlutterDownloader.resume(taskId: item.taskId);
       if (newTaskId == null) {
-        tec.dmPrint('FlutterDownloader.resume(\'${item.url}\') returned null!');
+        dmPrint('FlutterDownloader.resume(\'${item.url}\') returned null!');
       } else {
         final newItems = Map.of(state.items); // shallow copy
         newItems[volumeId] = newItems[volumeId].copyWith(taskId: newTaskId);
@@ -134,12 +133,12 @@ class DownloadsBlocImp extends DownloadsBloc {
     }
     _port.listen((dynamic data) {
       if (isDebugMode) {
-        // tec.dmPrint('UI Isolate Callback: $data');
+        // dmPrint('UI Isolate Callback: $data');
       }
-      if (!isClosed && data is List<dynamic>) {
-        final taskId = tec.as<String>(data[0]);
-        final status = tec.as<DownloadTaskStatus>(data[1]);
-        final progress = tec.as<int>(data[2]);
+      if (/*!isClosed && // bloc class now does a closed test */data is List<dynamic>) {
+        final taskId = as<String>(data[0]);
+        final status = as<DownloadTaskStatus>(data[1]);
+        final progress = as<int>(data[2]);
         final volumeId = state.items.values
             .firstWhere((item) => item.taskId == taskId, orElse: () => null)
             ?.volumeId;
@@ -170,7 +169,7 @@ class DownloadsBlocImp extends DownloadsBloc {
 
   static void _downloadCallback(String id, DownloadTaskStatus status, int progress) {
     if (isDebugMode) {
-      tec.dmPrint('DownloadsBloc: task ($id) is in status ($status) and process ($progress)');
+      dmPrint('DownloadsBloc: task ($id) is in status ($status) and process ($progress)');
     }
     final send = IsolateNameServer.lookupPortByName('downloader_send_port');
     send?.send([id, status, progress]);
@@ -178,7 +177,8 @@ class DownloadsBlocImp extends DownloadsBloc {
 
   Future<void> _loadDownloadTasks() async {
     final tasks = await FlutterDownloader.loadTasks();
-    if (isClosed) return;
+    // bloc class now does a closed test
+    // if (isClosed) return;
 
     final newItems = Map.of(state.items); // shallow copy
 
@@ -215,14 +215,14 @@ class DownloadsBlocImp extends DownloadsBloc {
   }
 
   Future<String> _findLocalPath() async {
-    final directory = tec.platformIs(tec.Platform.android)
+    final directory = TecPlatform.isAndroid
         ? await getExternalStorageDirectory()
         : await getApplicationDocumentsDirectory();
     return directory.path;
   }
 
   Future<bool> _unzipItem(DownloadItem item) async {
-    if (item == null || tec.isNullOrEmpty(item.url)) return false;
+    if (item == null || isNullOrEmpty(item.url)) return false;
 
     final zipFilename = path.basename(item.url);
     final zipFilepath = path.join(_downloadsDir, zipFilename);

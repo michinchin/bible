@@ -1,5 +1,5 @@
 import 'package:tec_cache/tec_cache.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 class Context {
   Map<int, String> verses;
@@ -11,9 +11,9 @@ class Context {
 
   factory Context.fromJson(Map<String, dynamic> json) {
     final verses = <int, String>{};
-    tec.as<Map<String, dynamic>>(json['verses']).forEach((k, dynamic v) {
+    as<Map<String, dynamic>>(json['verses']).forEach((k, dynamic v) {
       final t = int.parse(k);
-      verses[t] = tec.as<String>(v);
+      verses[t] = as<String>(v);
     });
 
     return Context(verses: verses);
@@ -29,12 +29,12 @@ class Context {
       try {
         endVerse = int.parse(arr.last.group(1));
       } catch (_) {
-        tec.dmPrint('error getting range endVerse');
+        dmPrint('error getting range endVerse');
       }
     }
 
     final json = await TecCache.shared.jsonFromUrl(
-      url: '${tec.streamUrl}/$translation/chapters/${book}_$chapter.json.gz',
+      url: '$cloudFrontStreamUrl/$translation/chapters/${book}_$chapter.json.gz',
     );
     Context context;
     if (json != null) {

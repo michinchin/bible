@@ -4,7 +4,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
-import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
+import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tec_notifications/tec_notifications.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../navigation_service.dart';
@@ -100,11 +100,11 @@ class NotificationsModel extends NotificationsHelper {
     var dialogShown = false;
 
     final prefGranted =
-        tec.Prefs.shared.getInt(Const.prefNotificationPermissionGranted, defaultValue: 0);
+        Prefs.shared.getInt(Const.prefNotificationPermissionGranted, defaultValue: 0);
 
     if (appInit &&
         prefGranted != 1 &&
-        (tec.platformIs(tec.Platform.iOS) || tec.platformIs(tec.Platform.macOS))) {
+        (TecPlatform.isIOS || TecPlatform.isMacOS)) {
       // don't do the initial request permissions on Apple devices on app start
       return dialogShown;
     } else if (!appInit && prefGranted == 1) {
@@ -114,7 +114,7 @@ class NotificationsModel extends NotificationsHelper {
 
     if (prefGranted == 0) {
       granted = await Notifications.shared?.requestPermissions(context);
-      await tec.Prefs.shared.setInt(Const.prefNotificationPermissionGranted, granted ? 1 : -1);
+      await Prefs.shared.setInt(Const.prefNotificationPermissionGranted, granted ? 1 : -1);
       dialogShown = true;
     } else if (prefGranted == 1) {
       granted = await Notifications.shared?.requestPermissions(context);

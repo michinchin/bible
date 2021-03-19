@@ -7,14 +7,14 @@ packages:
       name: _fe_analyzer_shared
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "14.0.0"
+    version: "18.0.0"
   analyzer:
     dependency: transitive
     description:
       name: analyzer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.41.2"
+    version: "1.2.0"
   animations:
     dependency: "direct main"
     description:
@@ -49,14 +49,14 @@ packages:
       name: bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.3"
+    version: "7.0.0"
   bloc_test:
     dependency: "direct dev"
     description:
       name: bloc_test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "7.1.0"
+    version: "8.0.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -70,7 +70,7 @@ packages:
       name: build
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.2"
+    version: "1.6.3"
   build_config:
     dependency: transitive
     description:
@@ -91,7 +91,7 @@ packages:
       name: build_resolvers
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.3"
+    version: "1.5.4"
   build_runner:
     dependency: "direct dev"
     description:
@@ -196,7 +196,7 @@ packages:
       name: coverage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.15.2"
+    version: "1.0.1"
   crypto:
     dependency: transitive
     description:
@@ -224,7 +224,7 @@ packages:
       name: dart_style
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.12"
+    version: "1.3.14"
   device_info:
     dependency: transitive
     description:
@@ -271,8 +271,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: a78ecca2eaae2e1e2bf13508f79d220e7d36e1b8
-      resolved-ref: a78ecca2eaae2e1e2bf13508f79d220e7d36e1b8
+      ref: "2b323e916ccf7a6f970626e0d971e8844c4c4835"
+      resolved-ref: "2b323e916ccf7a6f970626e0d971e8844c4c4835"
       url: "https://github.com/tecarta/feature_discovery"
     source: git
     version: "0.13.0+1"
@@ -315,7 +315,7 @@ packages:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.3"
+    version: "7.0.0"
   flutter_blurhash:
     dependency: transitive
     description:
@@ -337,13 +337,27 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.5.2"
-  flutter_facebook_login:
+  flutter_facebook_auth:
     dependency: transitive
     description:
-      name: flutter_facebook_login
-      url: "http://noah.tecarta.com:8100"
+      name: flutter_facebook_auth
+      url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0+2"
+    version: "3.1.1"
+  flutter_facebook_auth_platform_interface:
+    dependency: transitive
+    description:
+      name: flutter_facebook_auth_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.1"
+  flutter_facebook_auth_web:
+    dependency: transitive
+    description:
+      name: flutter_facebook_auth_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.1"
   flutter_keyboard_visibility:
     dependency: "direct main"
     description:
@@ -463,7 +477,7 @@ packages:
       name: google_sign_in
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.0"
+    version: "5.0.1"
   google_sign_in_platform_interface:
     dependency: transitive
     description:
@@ -625,13 +639,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
-  mockito:
+  mocktail:
     dependency: transitive
     description:
-      name: mockito
+      name: mocktail
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.4"
+    version: "0.1.1"
   native_pdf_renderer:
     dependency: "direct main"
     description:
@@ -687,7 +701,7 @@ packages:
       name: package_config
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.9.3"
+    version: "2.0.0"
   path:
     dependency: "direct main"
     description:
@@ -751,13 +765,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.11.0"
-  permission:
-    dependency: transitive
-    description:
-      name: permission
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.7"
   petitparser:
     dependency: transitive
     description:
@@ -806,7 +813,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.3"
+    version: "5.0.0"
   pub_semver:
     dependency: transitive
     description:
@@ -1050,6 +1057,13 @@ packages:
       url: "http://noah.tecarta.com:8100"
     source: hosted
     version: "2.0.1"
+  tec_bloc:
+    dependency: "direct main"
+    description:
+      name: tec_bloc
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
+    version: "1.0.0"
   tec_cache:
     dependency: "direct main"
     description:
@@ -1084,14 +1098,14 @@ packages:
       name: tec_native_ad
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
   tec_notifications:
     dependency: "direct main"
     description:
       name: tec_notifications
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "0.1.2"
+    version: "1.0.0"
   tec_platform_util:
     dependency: "direct main"
     description:
@@ -1119,42 +1133,42 @@ packages:
       name: tec_user_account
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.2.3"
+    version: "2.2.5"
   tec_util:
     dependency: "direct main"
     description:
       name: tec_util
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.3.2"
+    version: "1.3.4"
   tec_views:
     dependency: "direct main"
     description:
       name: tec_views
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.1"
   tec_volumes:
     dependency: "direct main"
     description:
       name: tec_volumes
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.3.0"
+    version: "1.3.1"
   tec_web_view:
     dependency: "direct main"
     description:
       name: tec_web_view
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.3"
   tec_widgets:
     dependency: "direct main"
     description:
       name: tec_widgets
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.2.1"
+    version: "2.2.3"
   term_glyph:
     dependency: transitive
     description:

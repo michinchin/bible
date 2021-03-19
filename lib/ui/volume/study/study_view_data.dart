@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
@@ -78,11 +78,11 @@ class StudyViewData extends VolumeViewData {
     var studyTab = 0;
     var resStack = <StudyItem>[];
 
-    final jsonMap = json is String ? tec.parseJsonSync(json) : json;
+    final jsonMap = json is String ? parseJsonSync(json) : json;
     if (jsonMap is Map<String, dynamic>) {
-      studyTab = tec.as<int>(jsonMap['studyTab']) ?? 0;
-      final resStackJson = tec.asList<Map<String, dynamic>>(jsonMap['resStack']);
-      if (tec.isNotNullOrEmpty(resStackJson)) {
+      studyTab = as<int>(jsonMap['studyTab']) ?? 0;
+      final resStackJson = asList<Map<String, dynamic>>(jsonMap['resStack']);
+      if (isNotNullOrEmpty(resStackJson)) {
         resStack = resStackJson.expand<StudyItem>((json) {
           final studyItem = StudyItem.fromJson(json);
           return studyItem == null ? [] : [studyItem];
@@ -124,13 +124,13 @@ class StudyItem extends Equatable {
     Resource res;
     double scrollPercent;
 
-    final jsonMap = json is String ? tec.parseJsonSync(json) : json;
+    final jsonMap = json is String ? parseJsonSync(json) : json;
     if (jsonMap is Map<String, dynamic>) {
-      final volumeId = tec.as<int>(jsonMap['volumeId']);
-      final resJson = tec.as<Map<String, dynamic>>(jsonMap['res']);
+      final volumeId = as<int>(jsonMap['volumeId']);
+      final resJson = as<Map<String, dynamic>>(jsonMap['res']);
       if (volumeId != null && resJson != null) {
         res = Resource.fromJson(resJson, volume: volumeId);
-        scrollPercent = tec.as<double>(jsonMap['scrollPercent']) ?? 0.0;
+        scrollPercent = as<double>(jsonMap['scrollPercent']) ?? 0.0;
       }
     }
 

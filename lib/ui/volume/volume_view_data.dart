@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:tec_volumes/tec_volumes.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 
 import '../../blocs/shared_bible_ref_bloc.dart';
@@ -37,7 +37,7 @@ class VolumeViewData extends ViewData {
       );
 
   factory VolumeViewData.fromContext(BuildContext context, int viewUid) {
-    final jsonMap = tec.parseJsonSync(context.viewManager?.dataWithView(viewUid));
+    final jsonMap = parseJsonSync(context.viewManager?.dataWithView(viewUid));
 
     // This is kinda a hack, but if the json has a 'studyTab' key, it is `StudyViewData`.
     if (jsonMap?.containsKey('studyTab') ?? false) {
@@ -79,12 +79,12 @@ class VolumeViewData extends ViewData {
     int page;
     bool useSharedRef;
 
-    final jsonMap = json is String ? tec.parseJsonSync(json) : json;
+    final jsonMap = json is String ? parseJsonSync(json) : json;
     if (jsonMap is Map<String, dynamic>) {
-      volumeId = tec.as<int>(jsonMap['vid']);
+      volumeId = as<int>(jsonMap['vid']);
       bcv = BookChapterVerse.fromJson(jsonMap['bcv']);
-      page = tec.as<int>(jsonMap['page']);
-      useSharedRef = tec.as<bool>(jsonMap['useSharedRef']);
+      page = as<int>(jsonMap['page']);
+      useSharedRef = as<bool>(jsonMap['useSharedRef']);
     }
 
     return VolumeViewData(

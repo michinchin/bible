@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-// import 'package:tec_util/tec_util.dart' as tec;
+// import 'package:tec_util/tec_util.dart';
 
 export 'package:flutter/rendering.dart' show ScrollDirection;
 
@@ -48,7 +48,7 @@ class TecScrollListenerState extends State<TecScrollListener> {
       final maxPos = (notification.metrics.maxScrollExtent ?? double.infinity) - 10.0;
       if (maxPos <= minPos) {
         if (_previousDirection != ScrollDirection.reverse) {
-          // tec.dmPrint('Sending `reverse`, pos: $pos, minPos: $minPos, maxPos: $maxPos');
+          // dmPrint('Sending `reverse`, pos: $pos, minPos: $minPos, maxPos: $maxPos');
           _previousDirection = ScrollDirection.reverse;
           widget.changedDirection(_previousDirection);
         }
@@ -63,14 +63,14 @@ class TecScrollListenerState extends State<TecScrollListener> {
         if (pos < _lastScrollPos - delta || pos <= minPos) {
           _lastScrollPos = pos;
           if (_previousDirection != ScrollDirection.reverse) {
-            // tec.dmPrint('Sending `reverse`, pos: $pos, minPos: $minPos, maxPos: $maxPos');
+            // dmPrint('Sending `reverse`, pos: $pos, minPos: $minPos, maxPos: $maxPos');
             _previousDirection = ScrollDirection.reverse;
             widget.changedDirection(_previousDirection);
           }
         } else if (pos > _lastScrollPos + delta) {
           _lastScrollPos = pos;
           if (_previousDirection != ScrollDirection.forward) {
-            // tec.dmPrint('Sending `forward`, pos: $pos, minPos: $minPos, maxPos: $maxPos');
+            // dmPrint('Sending `forward`, pos: $pos, minPos: $minPos, maxPos: $maxPos');
             _previousDirection = ScrollDirection.forward;
             widget.changedDirection(_previousDirection);
           }

@@ -1,9 +1,10 @@
 import 'dart:async';
 
+import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_user_account/tec_user_account.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/app_settings.dart';
@@ -37,7 +38,7 @@ extension ChapterMarginNotesExt on ChapterMarginNotes {
   }
 }
 
-class ChapterMarginNotesBloc extends tec.SafeBloc<MarginNotesEvent, ChapterMarginNotes> {
+class ChapterMarginNotesBloc extends Bloc<MarginNotesEvent, ChapterMarginNotes> {
   int volumeId;
   final int book;
   final int chapter;
@@ -85,7 +86,7 @@ class ChapterMarginNotesBloc extends tec.SafeBloc<MarginNotesEvent, ChapterMargi
 
     if (reload) {
       // margin notes for this chapter changed, reload...
-      tec.dmPrint('new margin notes for chapter $chapter');
+      dmPrint('new margin notes for chapter $chapter');
       _initUserContent();
     }
   }

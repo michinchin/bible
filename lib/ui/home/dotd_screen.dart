@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tec_html/tec_html.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -192,9 +192,9 @@ class _DotdsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final dotds = <Dotd>[];
     final days = <DateTime>[];
-    for (var day = DateTime(tec.today.year, 1, 1);
-        day.isBefore(DateTime(tec.today.year, 12, 31)) ||
-            day.isAtSameMomentAs(DateTime(tec.today.year, 12, 31));
+    for (var day = DateTime(today.year, 1, 1);
+        day.isBefore(DateTime(today.year, 12, 31)) ||
+            day.isAtSameMomentAs(DateTime(today.year, 12, 31));
         day = day.add(const Duration(days: 1))) {
       days.add(day);
       dotds.add(dotd.devoForDate(day));
@@ -215,8 +215,8 @@ class _DotdsScreen extends StatelessWidget {
         child: SafeArea(
             child: ScrollablePositionedList.builder(
                 initialScrollIndex: scrollToDateTime == null
-                    ? days.indexOf(tec.today)
-                    : days.indexOf(tec.dateOnly(scrollToDateTime)),
+                    ? days.indexOf(today)
+                    : days.indexOf(dateOnly(scrollToDateTime)),
                 itemCount: dotds.length,
                 itemBuilder: (c, i) => DayCard(
                     date: days[i],

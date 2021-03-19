@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:tec_html/tec_html.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import 'verse_tag.dart';
@@ -78,13 +78,13 @@ class ChapterBuildHelper {
 
     if (!_isInNonVerseElement) {
       final id = attrs.id;
-      if (tec.isNotNullOrEmpty(id) &&
+      if (isNotNullOrEmpty(id) &&
           name == 'div' &&
           (attrs.className == 'v' || attrs.className.startsWith('v '))) {
         final verse = int.tryParse(id);
         if (verse != null) {
           if (verse <= _currentVerse && isBibleId(volume)) {
-            tec.dmPrint('ERROR: new verse # ($id) is <= previous verse # ($_currentVerse)');
+            dmPrint('ERROR: new verse # ($id) is <= previous verse # ($_currentVerse)');
             assert(false);
           }
 
@@ -110,16 +110,16 @@ class ChapterBuildHelper {
     var word = _currentWord;
 
     if (text?.isNotEmpty ?? false) {
-      final wordCount = tec.countOfWordsInString(text);
-      // tec.dmPrint('$wordCount words for text: $text');
+      final wordCount = countOfWordsInString(text);
+      // dmPrint('$wordCount words for text: $text');
       if (wordCount > 0) {
         word = _currentWord;
         _currentWord += wordCount;
         if (_debugMode) {
           if (wordCount == 1) {
-            tec.dmPrint('verse: $_currentVerse, word $word: [$text]');
+            dmPrint('verse: $_currentVerse, word $word: [$text]');
           } else {
-            tec.dmPrint('verse: $_currentVerse, words $word-${word + wordCount - 1}: [$text]');
+            dmPrint('verse: $_currentVerse, words $word-${word + wordCount - 1}: [$text]');
           }
         }
       }
@@ -144,7 +144,7 @@ class ChapterBuildHelper {
       ? null
       : (name, attrs, level, isVisible) {
           final id = attrs.id;
-          if (tec.isNotNullOrEmpty(id) &&
+          if (isNotNullOrEmpty(id) &&
               name == 'div' &&
               (attrs.className == 'v' || attrs.className.startsWith('v '))) {
             final toggle = (!isVisible && versesToShow.contains(id)) ||

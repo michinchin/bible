@@ -9,7 +9,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -50,7 +51,7 @@ Future<int> selectVolumeInLibrary(
   bool scrollToSelectedVolume = true,
 }) {
   // var tabPrefix = initialTabPrefix;
-  // if (tec.isNullOrEmpty(tabPrefix) && selectedVolume != null) {
+  // if (isNullOrEmpty(tabPrefix) && selectedVolume != null) {
   //   final vp = VolumesRepository.shared;
   //   tabPrefix = _tweakedName(vp.categoryWithId(vp.categoryWithVolume(selectedVolume))?.name);
   // }
@@ -165,7 +166,7 @@ class LibraryScaffold extends StatelessWidget {
           if (hasLicensedVolumes == null) return const Center(child: LoadingIndicator());
 
           final tabs = _tabs(hasLicensedVolumes: hasLicensedVolumes);
-          final initialIndex = tec.isNullOrEmpty(initialTabPrefix)
+          final initialIndex = isNullOrEmpty(initialTabPrefix)
               ? 0
               : math.max(0, tabs.indexWhere((t) => t.title.startsWith(initialTabPrefix)));
           return _Library(
@@ -284,9 +285,9 @@ class _LibraryState extends State<_Library> {
 
   Widget _widgetForTabSub(LibraryTab t) => BlocProvider<VolumesBloc>(
         create: (context) => VolumesBloc(
-          key: tec.isNullOrEmpty(t.prefsKey) ? null : '_library_${t.prefsKey}',
+          key: isNullOrEmpty(t.prefsKey) ? null : '_library_${t.prefsKey}',
           kvStore:
-              tec.isNullOrEmpty(t.prefsKey) ? null : tec.MemoryKVStore.shared, // tec.Prefs.shared,
+              isNullOrEmpty(t.prefsKey) ? null : MemoryKVStore.shared, // Prefs.shared,
           defaultFilter: t.filter,
         )..refresh(),
         child: BlocBuilder<VolumesBloc, VolumesState>(
@@ -316,7 +317,7 @@ class _LibraryState extends State<_Library> {
                       onPressed: () => Navigator.of(context, rootNavigator: true).maybePop())
                   : null,
           automaticallyImplyLeading: false,
-          title: Text(tec.isNullOrEmpty(widget.title) ? 'Library' : widget.title),
+          title: Text(isNullOrEmpty(widget.title) ? 'Library' : widget.title),
           actions: widget.isSearchMode
               ? null
               : [
@@ -446,7 +447,7 @@ class _VolumesListState extends State<_VolumesList> {
       const Duration(milliseconds: 300),
       () {
         if (mounted) {
-          // tec.dmPrint('search string: ${_textEditingController.text.trim()}');
+          // dmPrint('search string: ${_textEditingController.text.trim()}');
           context.tbloc<VolumesBloc>()?.add(
                 context.tbloc<VolumesBloc>().state.filter.copyWith(
                       searchFilter: _textEditingController.text.trim(),

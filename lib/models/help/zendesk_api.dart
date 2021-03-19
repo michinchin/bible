@@ -1,4 +1,4 @@
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:http/http.dart' as http;
 
 const zendeskApiUrl = 'https://support.tecartabible.com/api/v2/help_center';
@@ -11,7 +11,7 @@ class ZendeskApi {
   static Future<List<ZendeskArticle>> fetchSearch(String query) async {
     final parameters = <String, String>{'query': query, 'category': categoryId};
     final queryParams = Uri(queryParameters: parameters).query;
-    final json = await tec.sendHttpRequest(tec.HttpRequestType.get,
+    final json = await sendHttpRequest(HttpRequestType.get,
         headers: {'Authorization': 'Basic $authKey'},
         url: '$zendeskApiUrl/articles/search.json?$queryParams',
         completion: (status, json, dynamic error) => Future.value(json));
@@ -19,7 +19,7 @@ class ZendeskApi {
     if (json != null) {
       final articles = <ZendeskArticle>[];
       for (final each in json['results']) {
-        articles.add(ZendeskArticle.fromJson(tec.as<Map<dynamic, dynamic>>(each)));
+        articles.add(ZendeskArticle.fromJson(as<Map<dynamic, dynamic>>(each)));
       }
       return articles;
     }
@@ -30,11 +30,11 @@ class ZendeskApi {
   static Future<List<ZendeskSection>> fetchSections() async {
     final response =
         await http.get(Uri.parse('$zendeskApiUrl/en-us/categories/$categoryId/sections.json'));
-    final json = tec.parseJsonSync(response?.body ?? '');
+    final json = parseJsonSync(response?.body ?? '');
     if (json != null) {
       final sections = <ZendeskSection>[];
       for (final each in json['sections']) {
-        final section = ZendeskSection.fromJson(tec.as<Map<dynamic, dynamic>>(each));
+        final section = ZendeskSection.fromJson(as<Map<dynamic, dynamic>>(each));
         sections.add(section);
       }
       return sections;
@@ -46,11 +46,11 @@ class ZendeskApi {
   static Future<List<ZendeskArticle>> fetchArticles({int sectionId}) async {
     final response = await http.get(Uri.parse(
         '$zendeskApiUrl/en-us${sectionId != null ? '/sections/$sectionId' : ''}/articles.json'));
-    final json = tec.parseJsonSync(response?.body ?? '');
+    final json = parseJsonSync(response?.body ?? '');
     if (json != null) {
       final articles = <ZendeskArticle>[];
       for (final each in json[articleKey]) {
-        articles.add(ZendeskArticle.fromJson(tec.as<Map<dynamic, dynamic>>(each)));
+        articles.add(ZendeskArticle.fromJson(as<Map<dynamic, dynamic>>(each)));
       }
       return articles;
     }
@@ -76,10 +76,10 @@ class ZendeskSection {
           articles: articles ?? this.articles);
 
   factory ZendeskSection.fromJson(Map<dynamic, dynamic> data) => ZendeskSection(
-        name: tec.as<String>(data['name']),
-        id: tec.as<int>(data['id']),
-        url: tec.as<String>(data['url']),
-        locale: tec.as<String>(data['locale']),
+        name: as<String>(data['name']),
+        id: as<int>(data['id']),
+        url: as<String>(data['url']),
+        locale: as<String>(data['locale']),
       );
 }
 
@@ -104,12 +104,12 @@ class ZendeskArticle {
       this.snippet});
 
   factory ZendeskArticle.fromJson(Map<dynamic, dynamic> data) => ZendeskArticle(
-      title: tec.as<String>(data['title']),
-      id: tec.as<int>(data['id']),
-      url: tec.as<String>(data['url']),
-      authorId: tec.as<int>(data['author_id']),
-      editedAt: DateTime.parse(tec.as<String>(data['edited_at'])),
-      body: tec.as<String>(data['body']),
-      locale: tec.as<String>(data['locale']),
-      snippet: tec.as<String>(data['snipppet']));
+      title: as<String>(data['title']),
+      id: as<int>(data['id']),
+      url: as<String>(data['url']),
+      authorId: as<int>(data['author_id']),
+      editedAt: DateTime.parse(as<String>(data['edited_at'])),
+      body: as<String>(data['body']),
+      locale: as<String>(data['locale']),
+      snippet: as<String>(data['snipppet']));
 }

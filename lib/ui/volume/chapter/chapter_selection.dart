@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:tec_html/tec_html.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -64,7 +65,7 @@ class ChapterSelection {
   /// Call to clear all selections, if any.
   void clearAllSelections(BuildContext context) {
     if (_debugMode) {
-      tec.dmPrint('ChapterSelection.clearAllSelections');
+      dmPrint('ChapterSelection.clearAllSelections');
     }
     _isInTrialMode = false;
     wordSelectionController.deselectAll();
@@ -93,20 +94,20 @@ class ChapterSelection {
       _selectionEnd = end.tag is VerseTag ? end : null;
       if (_selectionStart == null || _selectionEnd == null) {
         _selectionStart = _selectionEnd = null;
-        tec.dmPrint('ERROR: Either START or END has a tag that is not a VerseTag!');
-        tec.dmPrint('START: $start');
-        tec.dmPrint('END:   $end');
+        dmPrint('ERROR: Either START or END has a tag that is not a VerseTag!');
+        dmPrint('START: $start');
+        dmPrint('END:   $end');
         assert(false);
       } else {
         // if (_debugMode) {
-        //   tec.dmPrint('START: $_selectionStart');
-        //   tec.dmPrint('END:   $_selectionEnd');
+        //   dmPrint('START: $_selectionStart');
+        //   dmPrint('END:   $_selectionEnd');
         // }
       }
     } else {
       _selectionStart = _selectionEnd = null;
       // if (_debugMode) {
-      //   tec.dmPrint('No words selected.');
+      //   dmPrint('No words selected.');
       // }
     }
 
@@ -192,7 +193,7 @@ class ChapterSelection {
   }
 
   bool _enableStrongs(VerseTag tag, VerseTag endTag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href) && tag.href == endTag?.href) {
+    if ((tag?.isInXref ?? false) && isNotNullOrEmpty(tag?.href) && tag.href == endTag?.href) {
       final parts = tag.href.split(';');
       for (final part in parts) {
         if (part.startsWith('G') || part.startsWith('H')) return true;
@@ -202,7 +203,7 @@ class ChapterSelection {
   }
 
   bool _handleStrongs(BuildContext context, VerseTag tag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
+    if ((tag?.isInXref ?? false) && isNotNullOrEmpty(tag?.href)) {
       final parts = tag.href.split(';');
       for (final part in parts) {
         if (part.startsWith('G') || part.startsWith('H')) {
@@ -215,14 +216,14 @@ class ChapterSelection {
   }
 
   bool _enableXref(VerseTag tag, VerseTag endTag) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href) && tag.href == endTag?.href) {
+    if ((tag?.isInXref ?? false) && isNotNullOrEmpty(tag?.href) && tag.href == endTag?.href) {
       if (tag.href.contains('_') || tag.href.contains('/')) return true;
     }
     return false;
   }
 
   bool handleXref(BuildContext context, Reference reference, String text, VerseTag tag, Offset pt) {
-    if ((tag?.isInXref ?? false) && tec.isNotNullOrEmpty(tag?.href)) {
+    if ((tag?.isInXref ?? false) && isNotNullOrEmpty(tag?.href)) {
       final bible = VolumesRepository.shared.volumeWithId(volume)?.assocBible();
 
       bible?.xrefsWithHrefProperty(tag.href)?.then((result) {
@@ -263,7 +264,7 @@ class ChapterSelection {
     TecAutoScroll.stopAutoscroll();
     widgetNeedsRebuild(block);
     if (_debugMode) {
-      tec.dmPrint('selected verses: $_selectedVerses');
+      dmPrint('selected verses: $_selectedVerses');
     }
     notifyOfSelections(context);
   }

@@ -1,7 +1,7 @@
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 import 'app_settings.dart';
 import 'search/search_history_item.dart';
@@ -43,7 +43,7 @@ class UserItemHelper {
   }
 
   static UserItem createBookmark(Reference ref) => UserItem(
-        created: tec.dbIntFromDateTime(DateTime.now()),
+        created: dbIntFromDateTime(DateTime.now()),
         type: UserItemType.bookmark.index,
         book: ref.book,
         chapter: ref.chapter,
@@ -67,7 +67,7 @@ class UserItemHelper {
           chapter: i.chapter,
           verse: i.verse,
           volume: i.volumeId,
-        ).copyWith(modified: tec.dateTimeFromDbInt(i.modified));
+        ).copyWith(modified: dateTimeFromDbInt(i.modified));
         refs.add(ref);
       }
     }
@@ -85,7 +85,7 @@ class UserItemHelper {
         .getItemsWithParent(searchHistoryParentId, ofTypes: [UserItemType.note]);
     final searchItems = <SearchHistoryItem>[];
     for (final i in items) {
-      final item = SearchHistoryItem.fromJson(tec.parseJsonSync(i.info));
+      final item = SearchHistoryItem.fromJson(parseJsonSync(i.info));
       searchItems.add(item);
     }
     return searchItems;
@@ -93,10 +93,10 @@ class UserItemHelper {
 
   /// create user item from search history item
   static UserItem createSearchHistoryUserItem(SearchHistoryItem item) => UserItem(
-      created: tec.dbIntFromDateTime(DateTime.now()),
+      created: dbIntFromDateTime(DateTime.now()),
       type: UserItemType.note.index,
       parentId: searchHistoryParentId,
-      info: tec.toJsonString(item.toJson()));
+      info: toJsonString(item.toJson()));
 
   /// save search history item to db
   static Future<void> saveSearchHistoryItem(SearchHistoryItem searchHistoryItem) async {
@@ -113,13 +113,13 @@ class UserItemHelper {
 
     // if item is already in list, move to top
     final index = items.indexWhere((i) =>
-        SearchHistoryItem.fromJson(tec.parseJsonSync(i.info)).search.toLowerCase().trim() ==
+        SearchHistoryItem.fromJson(parseJsonSync(i.info)).search.toLowerCase().trim() ==
         searchHistoryItem.search.toLowerCase().trim());
 
     UserItem item;
     if (index != -1) {
       item = items[index].copyWith(
-          modified: DateTime.now(), info: tec.toJsonString(searchHistoryItem.toJson()), deleted: 0);
+          modified: DateTime.now(), info: toJsonString(searchHistoryItem.toJson()), deleted: 0);
     } else {
       item = createSearchHistoryUserItem(searchHistoryItem);
     }

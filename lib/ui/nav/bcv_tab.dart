@@ -4,7 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:tec_util/tec_util.dart' show TecUtilExtOnBuildContext;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -302,7 +303,7 @@ class _DynamicGrid extends StatelessWidget {
       return 70;
     }
 
-    // tec.dmPrint('textScaleFactor: ${textScaleFactor}');
+    // dmPrint('textScaleFactor: ${textScaleFactor}');
 
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -347,7 +348,7 @@ class _PillButton extends StatelessWidget {
 //   @override
 //   Widget build(BuildContext context) {
 //     return LayoutBuilder(builder: (context, constraints) {
-//       // tec.dmPrint('Nav constraints: $constraints');
+//       // dmPrint('Nav constraints: $constraints');
 //       final area = constraints.maxHeight * constraints.minHeight;
 
 //       final bible = VolumesRepository.shared.bibleWithId(9);

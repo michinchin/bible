@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../models/app_settings.dart';
@@ -63,8 +63,8 @@ class PrefsBloc extends Cubit<PrefBlocState> {
       }
     }
     for (final id in PrefItemId.saveToPrefsList) {
-      final value = tec.Prefs.shared.getString(PrefItemId.keyForPrefs(id), defaultValue: '');
-      if (tec.isNotNullOrEmpty(value)) {
+      final value = Prefs.shared.getString(PrefItemId.keyForPrefs(id), defaultValue: '');
+      if (isNotNullOrEmpty(value)) {
         final prefItem = PrefItemHelper.fromSharedPrefs(PrefItemId.keyForPrefs(id), value);
         items.add(prefItem);
       }
@@ -148,7 +148,7 @@ class PrefsBloc extends Cubit<PrefBlocState> {
       return AppSettings.shared.userAccount.userDb
           .saveItem(prefItem.copyWith(id: prefItem.uniqueId));
     } else {
-      return tec.Prefs.shared.setString(prefItem.keyForPrefs, prefItem.valueToSave);
+      return Prefs.shared.setString(prefItem.keyForPrefs, prefItem.valueToSave);
     }
   }
 

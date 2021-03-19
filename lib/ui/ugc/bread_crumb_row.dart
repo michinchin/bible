@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 import '../../models/app_settings.dart';
 import 'ugc_view.dart';
@@ -23,14 +23,14 @@ class BreadCrumb {
       };
 
   factory BreadCrumb.fromJson(Map<String, dynamic> json) {
-    return BreadCrumb(tec.as<int>(json['i']), tec.as<String>(json['f']),
-        scrollOffset: tec.as<double>(json['s']));
+    return BreadCrumb(as<int>(json['i']), as<String>(json['f']),
+        scrollOffset: as<double>(json['s']));
   }
 
   static Future<List<BreadCrumb>> load() async {
     final breadCrumbs = <BreadCrumb>[];
 
-    var json = tec.Prefs.shared.getString(prefBreadCrumbs, defaultValue: '');
+    var json = Prefs.shared.getString(prefBreadCrumbs, defaultValue: '');
     if (json.startsWith('${AppSettings.shared.userAccount.user.userId.toString()}:')) {
       json = json.substring(AppSettings.shared.userAccount.user.userId.toString().length + 1);
     }
@@ -40,7 +40,7 @@ class BreadCrumb {
 
     if (json.isNotEmpty) {
       final crumbs =
-      tec.asList<Map<String, dynamic>>(jsonDecode(json));
+      asList<Map<String, dynamic>>(jsonDecode(json));
       for (final crumb in crumbs) {
         breadCrumbs.add(BreadCrumb.fromJson(crumb));
       }
@@ -60,7 +60,7 @@ class BreadCrumb {
   }
 
   static void save(List<BreadCrumb> breadCrumbs) {
-    tec.Prefs.shared.setString(prefBreadCrumbs,
+    Prefs.shared.setString(prefBreadCrumbs,
         '${AppSettings.shared.userAccount.user.userId}:${jsonEncode(breadCrumbs)}');
   }
 }

@@ -2,7 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../blocs/sheet/sheet_manager_bloc.dart';
@@ -88,7 +89,7 @@ class ActionBar extends StatelessWidget {
               constraints.maxWidth &&
           actualItems.length > 1) {
         final minPriority =
-            actualItems.fold<int>(tec.maxSafeInt, (v, item) => math.min(v, item.priority));
+            actualItems.fold<int>(maxSafeInt, (v, item) => math.min(v, item.priority));
         final i = actualItems.indexWhere((item) => item.priority == minPriority);
         assert(i >= 0);
         actualItems.removeAndUpdateCacheForItemAtIndex(i >= 0 ? i : 0, cache);

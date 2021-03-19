@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:quill_delta/quill_delta.dart';
 import 'package:tec_user_account/tec_user_account.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:zefyr/zefyr.dart';
@@ -37,9 +38,9 @@ class ViewableNote extends Viewable {
   String menuTitle({BuildContext context, ViewState state}) {
     if (state?.uid != null) {
       final json = context.viewManager?.dataWithView(state.uid);
-      final jsonMap = json is String ? tec.parseJsonSync(json) : json;
+      final jsonMap = json is String ? parseJsonSync(json) : json;
       if (jsonMap is Map<String, dynamic>) {
-        return tec.as<String>(jsonMap['title']);
+        return as<String>(jsonMap['title']);
       }
     }
 

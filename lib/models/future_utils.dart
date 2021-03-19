@@ -1,4 +1,4 @@
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 ///
 /// Sometimes the inputs to a `Future` change before the `Future` completes, 
@@ -35,7 +35,7 @@ class FutureHandler<T> {
   ///
   void updateWith(Future<T> future) => _update(future);
 
-  void updateWithFutureErrorOrValue(Future<tec.ErrorOrValue<T>> future) => _update(future);
+  void updateWithFutureErrorOrValue(Future<ErrorOrValue<T>> future) => _update(future);
 
   void _update(Future future) {
     if (future == null) {
@@ -47,7 +47,7 @@ class FutureHandler<T> {
     _activeCallbackIdentity = callbackIdentity;
     future.then<void>((dynamic data) {
       if (_activeCallbackIdentity == callbackIdentity) {
-        if (data is tec.ErrorOrValue<T>) {
+        if (data is ErrorOrValue<T>) {
           handler(data.value, data.error);
         } else if (data is T) {
           handler(data, null);

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:equatable/equatable.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 extension TecExtOnString on String {
   ///
@@ -187,7 +187,7 @@ extension TecExtOnString on String {
     var str = this;
 
     if (firstNormalize) {
-      str = tec.removeDiacritics(str);
+      str = removeDiacritics(str);
       str = str.toLowerCase();
     }
 

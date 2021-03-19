@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 const _buttonFontSize = 18.0;
@@ -102,7 +102,7 @@ class TecPopupMenuButton<T> extends StatelessWidget {
           TextSpan(
             children: [
               TextSpan(text: title.endsWith(': ') || title.isEmpty ? title : '$title: '),
-              if (tec.isNotNullOrEmpty(currentName))
+              if (isNotNullOrEmpty(currentName))
                 TextSpan(
                   text: currentName,
                   style: TextStyle(color: Theme.of(context).accentColor),

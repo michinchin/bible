@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:bloc/bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 enum ThemeModeEvent { toggle }
 
@@ -9,7 +9,7 @@ class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
   ThemeModeBloc() : super(initialState);
 
   static ThemeMode get initialState {
-    final isDarkTheme = tec.Prefs.shared.getBool('isDarkTheme');
+    final isDarkTheme = Prefs.shared.getBool('isDarkTheme');
     if (isDarkTheme == null) {
       return ThemeMode.system;
     } else {
@@ -26,12 +26,12 @@ class ThemeModeBloc extends Bloc<ThemeModeEvent, ThemeMode> {
           final isDark = (WidgetsBinding.instance.window.platformBrightness == Brightness.dark);
           if (state == ThemeMode.system || ((state == ThemeMode.dark) == isDark)) {
             newThemeMode = isDark ? ThemeMode.light : ThemeMode.dark;
-            await tec.Prefs.shared.setBool('isDarkTheme', !isDark);
+            await Prefs.shared.setBool('isDarkTheme', !isDark);
           } else {
             newThemeMode = ThemeMode.system;
-            await tec.Prefs.shared.remove('isDarkTheme');
+            await Prefs.shared.remove('isDarkTheme');
           }
-          // tec.dmPrint('newThemeMode: $newThemeMode');
+          // dmPrint('newThemeMode: $newThemeMode');
           yield newThemeMode;
           break;
         }

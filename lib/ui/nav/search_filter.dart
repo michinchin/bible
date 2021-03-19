@@ -4,7 +4,8 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
@@ -101,7 +102,7 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
     final books = _filteredBooks.toList();
     final volumes = _selectedVolumes.toList();
 
-    if (volumes != null && !tec.areEqualSets(_selectedVolumes, widget.selectedVolumes.toSet())) {
+    if (volumes != null && !areEqualSets(_selectedVolumes, widget.selectedVolumes.toSet())) {
       PrefsBloc.setString(PrefItemId.translationsFilter, volumes.join('|'));
       if (widget.searchController.text.isNotEmpty) {
         context
@@ -109,7 +110,7 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
             .add(SearchEvent.request(search: widget.searchController.text, translations: volumes));
       }
     }
-    if (books != null && !tec.areEqualSets(_filteredBooks, widget.selectedBooks.toSet())) {
+    if (books != null && !areEqualSets(_filteredBooks, widget.selectedBooks.toSet())) {
       // excluded books
       context.tbloc<SearchBloc>().add(SearchEvent.filterBooks(books));
     }

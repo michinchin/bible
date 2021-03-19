@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:tec_cache/tec_cache.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 import 'dotd.dart';
 
@@ -39,14 +39,14 @@ class Dotds {
       return command;
     }
 
-    final data = tec.as<List<dynamic>>(json['data']);
-    final specials = tec.as<Map<String, dynamic>>(json['specials']);
-    final commands = tec.as<Map<String, dynamic>>(json['shared']);
+    final data = as<List<dynamic>>(json['data']);
+    final specials = as<Map<String, dynamic>>(json['specials']);
+    final commands = as<Map<String, dynamic>>(json['shared']);
 
     // commands
     final commandMap = <String, HtmlCommand>{};
     for (final c in commands.keys) {
-      final command = tec.as<List<dynamic>>(commands[c]);
+      final command = as<List<dynamic>>(commands[c]);
       if (command != null) {
         commandMap[c] = HtmlCommand.fromJson(command);
       }
@@ -72,7 +72,7 @@ class Dotds {
     // specials
     final sDevos = <int, Dotd>{};
     for (final s in specials.keys) {
-      final special = tec.as<List<dynamic>>(specials[s]);
+      final special = as<List<dynamic>>(specials[s]);
       sDevos[int.parse(s)] = Dotd.fromJson(special);
     }
 
@@ -83,7 +83,7 @@ class Dotds {
   static Future<Dotds> fetch({int year}) async {
     final y = year ?? DateTime.now().year;
     final fileName = 'devo-$y.json';
-    final hostAndPath = '${tec.streamUrl}/home';
+    final hostAndPath = '$cloudFrontStreamUrl/home';
     final json = await TecCache.shared.jsonFromUrl(
         url: '$hostAndPath/$fileName',
         cachedPath: '${hostAndPath.replaceAll('https://', '')}/$fileName',
@@ -97,7 +97,7 @@ class Dotds {
 
   /// Returns the devotional for the given date.
   Dotd devoForDate(DateTime date) {
-    if (date != null && tec.isNotNullOrEmpty(data)) {
+    if (date != null && isNotNullOrEmpty(data)) {
       final i = indexForDate(date);
       if (specials.containsKey(i + 1)) {
         return specials[i + 1];
@@ -110,7 +110,7 @@ class Dotds {
   /// Returns the index into `data` for the given date.
   int indexForDate(DateTime date) {
     if (date != null) {
-      return tec.indexForDay(tec.dayOfTheYear(date), year: date.year, length: data.length);
+      return indexForDay(dayOfTheYear(date), year: date.year, length: data.length);
     }
     return -1;
   }

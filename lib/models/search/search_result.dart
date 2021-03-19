@@ -1,7 +1,7 @@
 import 'dart:core';
 
 import 'package:tec_cache/tec_cache.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../const.dart';
@@ -46,9 +46,9 @@ class SearchResult {
   String get href => '$bookId/$chapterId/$verseId';
 
   factory SearchResult.fromJson(Map<String, dynamic> json) {
-    final ref = tec.as<String>(json['reference']);
+    final ref = as<String>(json['reference']);
     final v = <Verse>[];
-    final a = tec.as<List<dynamic>>(json['verses']);
+    final a = as<List<dynamic>>(json['verses']);
     for (final b in a) {
       if (b is Map<String, dynamic>) {
         final verse = Verse.fromJson(b, ref);
@@ -59,10 +59,10 @@ class SearchResult {
     }
     return SearchResult(
       ref: ref,
-      bookId: tec.as<int>(json['bookId']),
-      chapterId: tec.as<int>(json['chapterId']),
+      bookId: as<int>(json['bookId']),
+      chapterId: as<int>(json['chapterId']),
       verses: v,
-      verseId: tec.as<int>(json['verseId']),
+      verseId: as<int>(json['verseId']),
     );
   }
 }
@@ -73,7 +73,7 @@ class SearchResults {
 
   factory SearchResults.fromJson(Map<String, dynamic> json) {
     final d = <SearchResult>[];
-    final a = tec.as<List<dynamic>>(json['searchResults']);
+    final a = as<List<dynamic>>(json['searchResults']);
     for (final b in a) {
       if (b is Map<String, dynamic>) {
         final res = SearchResult.fromJson(b);
@@ -94,7 +94,7 @@ class SearchResults {
     String searchWords;
 
     urlEncodingExceptions.forEach((k, v) => cacheWords = cacheWords.replaceAll(RegExp(k), v));
-    tec.removeDiacritics(cacheWords).replaceAll(RegExp('[^ a-zA-Z\'0-9:-]'), ' ').trim();
+    removeDiacritics(cacheWords).replaceAll(RegExp('[^ a-zA-Z\'0-9:-]'), ' ').trim();
 
     // phrase or exact search ?
     if (cacheWords[0] == '"' || cacheWords[0] == '\'') {
@@ -126,13 +126,13 @@ class SearchResults {
 
     // check cloudfront cache
     var json = await TecCache.shared.jsonFromUrl(
-      url: '${tec.cacheUrl}/$cacheParam.gz',
+      url: '$cloudFrontCacheUrl/$cacheParam.gz',
       connectionTimeout: const Duration(seconds: 10),
     );
 
     // try server
-    if (tec.isNullOrEmpty(json)) {
-      json = await tec.apiRequest(
+    if (isNullOrEmpty(json)) {
+      json = await apiRequest(
           endpoint: 'search',
           parameters: <String, dynamic>{
             'searchWords': searchWords,
@@ -145,7 +145,7 @@ class SearchResults {
           completion: (status, json, dynamic error) async {
             if (status == 200) {
               await TecCache.shared
-                  .saveJsonToCache(json: json, cacheUrl: '${tec.cacheUrl}/$cacheParam.gz');
+                  .saveJsonToCache(json: json, cacheUrl: '$cloudFrontCacheUrl/$cacheParam.gz');
 
               return json;
             } else {
@@ -154,7 +154,7 @@ class SearchResults {
           });
     }
 
-    if (tec.isNullOrEmpty(json)) {
+    if (isNullOrEmpty(json)) {
       return Future.error('Error getting results from server');
     } else {
       return SearchResults.fromJson(json).data;

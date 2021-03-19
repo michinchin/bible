@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
@@ -17,14 +17,14 @@ class MainMenuModel {
   /// Opens the native email UI with an email for questions or comments.
   Future<void> emailFeedback(BuildContext context) async {
     var email = 'biblesupport@tecarta.com';
-    if (tec.platformIs(tec.Platform.android)) {
+    if (TecPlatform.isAndroid) {
       email = 'androidsupport@tecarta.com';
-    } else if (tec.platformIs(tec.Platform.iOS)) {
+    } else if (TecPlatform.isIOS) {
       email = 'iossupport@tecarta.com';
     }
 
     final di = AppSettings.shared.deviceInfo;
-    tec.dmPrint('Running on ${di.productName} with ${di.model} ${di.version}');
+    dmPrint('Running on ${di.productName} with ${di.model} ${di.version}');
     const version = (appVersion == 'DEBUG-VERSION' ? '(debug version)' : 'v$appVersion');
     final subject = 'Feedback regarding TecartaBible $version '
         'on ${di.productName} with ${di.model} ${di.version}';
@@ -40,7 +40,7 @@ class MainMenuModel {
       final msg = 'Error emailing: ${e.toString()}';
       await Navigator.of(context).maybePop();
       TecToast.show(context, msg);
-      tec.dmPrint(msg);
+      dmPrint(msg);
     }
     await Navigator.of(context).maybePop();
   }

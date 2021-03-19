@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_html/tec_html.dart';
-import 'package:tec_util/tec_util.dart';
+import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/const.dart';
@@ -42,7 +42,7 @@ class _ZendeskHelpState extends State<ZendeskHelp> {
       const Duration(milliseconds: 300),
       () {
         if (mounted) {
-          // tec.dmPrint('search string: ${_textEditingController.text.trim()}');
+          // dmPrint('search string: ${_textEditingController.text.trim()}');
           context.tbloc<SearchHelpBloc>()?.add(SearchHelpEvent(_searchController.text));
         }
       },

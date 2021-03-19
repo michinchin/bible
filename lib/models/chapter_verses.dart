@@ -1,6 +1,6 @@
 import 'package:tec_cache/tec_cache.dart';
 
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../models/reference_ext.dart';
@@ -10,10 +10,10 @@ class ChapterVerses {
   ChapterVerses({this.data});
 
   factory ChapterVerses.fromJson(Map<String, dynamic> json) {
-    final verses = tec.as<Map<String, dynamic>>(json['verses']);
+    final verses = as<Map<String, dynamic>>(json['verses']);
     final v = <int, String>{};
     for (final verseNum in verses.keys) {
-      final verse = {int.parse(verseNum): tec.as<String>(verses[verseNum])};
+      final verse = {int.parse(verseNum): as<String>(verses[verseNum])};
       if (verse != null) {
         v.addAll(verse);
       }
@@ -26,11 +26,11 @@ class ChapterVerses {
         '${refForChapter.volume}/chapters/${refForChapter.book}_${refForChapter.chapter}';
     // check cloudfront cache
     final json = await TecCache.shared.jsonFromUrl(
-      url: '${tec.streamUrl}/$cacheParam.json.gz',
+      url: '$cloudFrontStreamUrl/$cacheParam.json.gz',
       connectionTimeout: const Duration(seconds: 10),
     );
 
-    if (tec.isNullOrEmpty(json)) {
+    if (isNullOrEmpty(json)) {
       return Future.error('Error getting results from server');
     }
     return ChapterVerses.fromJson(json);

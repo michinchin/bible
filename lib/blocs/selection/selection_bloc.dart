@@ -20,7 +20,7 @@ class SelectionBloc extends Bloc<SelectionState, SelectionState> {
 
   @override
   Stream<SelectionState> mapEventToState(SelectionState event) async* {
-    // tec.dmPrint('$event');
+    // dmPrint('$event');
     yield event;
   }
 }

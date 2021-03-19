@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:tec_user_account/tec_user_account.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/reference_ext.dart';
@@ -23,11 +23,11 @@ class MarginNote extends UserItem {
       chapter: chapter,
       verse: verse,
       type: UserItemType.marginNote.index,
-      created: created ?? tec.dbIntFromDateTime(DateTime.now()),
+      created: created ?? dbIntFromDateTime(DateTime.now()),
       id: id,
       deleted: deleted,
       info: text,
-      modified: modified ?? tec.dbIntFromDateTime(DateTime.now()));
+      modified: modified ?? dbIntFromDateTime(DateTime.now()));
 
   factory MarginNote.from(UserItem item) {
     return MarginNote(
@@ -36,8 +36,8 @@ class MarginNote extends UserItem {
       chapter: item.chapter,
       verse: item.verse,
       text: item.info,
-      modified: item.modified ?? tec.dbIntFromDateTime(DateTime.now()),
-      created: item.created ?? tec.dbIntFromDateTime(DateTime.now()),
+      modified: item.modified ?? dbIntFromDateTime(DateTime.now()),
+      created: item.created ?? dbIntFromDateTime(DateTime.now()),
       deleted: item.deleted,
       id: item.id,
     );

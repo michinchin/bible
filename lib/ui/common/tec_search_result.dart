@@ -4,7 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:string_validator/string_validator.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 import '../../models/search/search_result.dart';
 
@@ -103,7 +103,7 @@ class _TecSearchResultState extends State<TecSearchResult> {
     @required List<String> lFormattedKeywords,
     @required Color keywordColor,
   }) {
-    final cleanText = tec.removeDiacritics(text);
+    final cleanText = removeDiacritics(text);
     final content = <TextSpan>[];
 
     final bold = <int, int>{};

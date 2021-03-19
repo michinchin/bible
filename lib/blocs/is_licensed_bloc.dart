@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:pedantic/pedantic.dart';
 import 'package:tec_user_account/tec_user_account.dart';
-import 'package:tec_util/tec_util.dart' as tec;
 
 import '../models/app_settings.dart';
 
@@ -18,7 +18,7 @@ enum IsLicensedOpt { any, all }
 /// This Bloc listens for license changes in the TecUserAccount UserDb, and
 /// auto-updates if there are changes.
 ///
-class IsLicensedBloc extends tec.SafeBloc<bool, bool> {
+class IsLicensedBloc extends Bloc<bool, bool> {
   final Set<int> _setOfIds;
   final IsLicensedOpt option;
   final bool checkPremium;
@@ -59,7 +59,7 @@ class IsLicensedBloc extends tec.SafeBloc<bool, bool> {
 
   Future<void> _refresh() async {
     // Future.delayed(const Duration(seconds: 1), () async {
-    if (isClosed) return;
+    // bloc add now does this test... if (isClosed) return;
     final owned = await AppSettings.shared.userAccount.userDb.fullyLicensedVolumesInList(
       _setOfIds,
       checkPremium: checkPremium,

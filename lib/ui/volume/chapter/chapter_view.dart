@@ -6,9 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_env/tec_env.dart';
 import 'package:tec_html/tec_html.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -51,7 +52,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
 
   @override
   void initState() {
-    // tec.dmPrint('_PageableChapterViewState initState for ${widget.viewState.uid} size ${widget.size}');
+    // dmPrint('_PageableChapterViewState initState for ${widget.viewState.uid} size ${widget.size}');
     super.initState();
     final viewData = context.tbloc<VolumeViewDataBloc>().state.asVolumeViewData;
     _volume = VolumesRepository.shared.volumeWithId(viewData.volumeId);
@@ -93,7 +94,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
   void _onNewViewData(VolumeViewData viewData) {
     if (!mounted || viewData == null || _volume == null) return;
 
-    // tec.dmPrint('PageableChapterView._onNewViewData $viewData');
+    // dmPrint('PageableChapterView._onNewViewData $viewData');
 
     var volumeChanged = false;
     var volume = _volume;
@@ -105,20 +106,20 @@ class _PageableChapterViewState extends State<PageableChapterView> {
 
     final page = _bcvPageZero.chaptersTo(viewData.bcv, bible: volume.assocBible());
     if (page == null) {
-      // tec.dmPrint('PageableChapterView._onNewViewData unable to navigate to '
+      // dmPrint('PageableChapterView._onNewViewData unable to navigate to '
       //     '${viewData.bcv} in ${volume.assocBible().abbreviation}');
       return; // ----------------------------------------------------------->
     }
 
     if (volumeChanged) {
-      // tec.dmPrint('PageableChapterView._onNewViewData: Volume changed '
+      // dmPrint('PageableChapterView._onNewViewData: Volume changed '
       //     'from ${_volume.id} to ${volume.id}.');
       _volume = volume;
       _bible = volume.assocBible();
     }
 
     if (_pageController != null && _pageController.page.round() != page) {
-      // tec.dmPrint('PageableChapterView._onNewViewData: Page changed '
+      // dmPrint('PageableChapterView._onNewViewData: Page changed '
       //     'from ${_pageController.page.round()} to $page');
       _pageController?.jumpToPage(page);
     }
@@ -143,7 +144,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
               viewData.bcv.verse > 1) {
             ref = ref.copyWith(verse: viewData.bcv.verse);
           }
-          // tec.dmPrint('PageableChapterView.pageBuilder: creating ChapterView for '
+          // dmPrint('PageableChapterView.pageBuilder: creating ChapterView for '
           //     '${_bible.abbreviation} ${ref.toString()}');
           return _BibleChapterView(
             viewUid: widget.viewState.uid,
@@ -174,7 +175,7 @@ class _PageableChapterViewState extends State<PageableChapterView> {
       final newData = viewData.copyWith(
           bcv: viewData.bcv.book == bcv.book && viewData.bcv.chapter == bcv.chapter ? null : bcv,
           page: page);
-      // tec.dmPrint('PageableChapterView.onPageChanged: updating $viewData with new '
+      // dmPrint('PageableChapterView.onPageChanged: updating $viewData with new '
       //     'data: $newData');
       await context
           .tbloc<VolumeViewDataBloc>()
@@ -204,11 +205,11 @@ class _BibleChapterView extends StatefulWidget {
 }
 
 class _BibleChapterViewState extends State<_BibleChapterView> {
-  Future<tec.ErrorOrValue<String>> _future;
+  Future<ErrorOrValue<String>> _future;
 
   @override
   void initState() {
-    // tec.dmPrint('_BibleChapterView initState for ${widget.viewUid} size ${widget.size}');
+    // dmPrint('_BibleChapterView initState for ${widget.viewUid} size ${widget.size}');
     super.initState();
     _update();
   }
@@ -227,12 +228,12 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
 
   @override
   Widget build(BuildContext context) {
-    // tec.dmPrint('_BibleChapterView build for ${widget.viewUid} size ${widget.size}');
-    return TecFutureBuilder<tec.ErrorOrValue<String>>(
+    // dmPrint('_BibleChapterView build for ${widget.viewUid} size ${widget.size}');
+    return TecFutureBuilder<ErrorOrValue<String>>(
       future: _future,
       builder: (context, data, error) {
         final htmlFragment = data?.value;
-        if (tec.isNotNullOrEmpty(htmlFragment)) {
+        if (isNotNullOrEmpty(htmlFragment)) {
           return BlocBuilder<ContentSettingsBloc, ContentSettings>(builder: (context, settings) {
             return _ChapterView(
               viewUid: widget.viewUid,
@@ -244,7 +245,7 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
             );
           });
         } else {
-          // tec.dmPrint('VIEW ${widget.viewUid} waiting for HTML to load...');
+          // dmPrint('VIEW ${widget.viewUid} waiting for HTML to load...');
           return Container(
             color: Theme.of(context).backgroundColor,
             child: Center(
@@ -378,7 +379,7 @@ class _ChapterViewState extends State<_ChapterView> {
                 }
 
                 if (userContentValid && highlights.loaded && marginNotes.loaded) {
-                  // tec.dmPrint('loading ${widget.ref.chapter}');
+                  // dmPrint('loading ${widget.ref.chapter}');
 
                   return _ChapterHtml(
                     viewUid: widget.viewUid,
@@ -395,7 +396,7 @@ class _ChapterViewState extends State<_ChapterView> {
                     padding: widget.padding,
                   );
                 } else {
-                  // tec.dmPrint('VIEW ${widget.viewUid} waiting for highlights and margin notes');
+                  // dmPrint('VIEW ${widget.viewUid} waiting for highlights and margin notes');
                   return Container();
                 }
               },
@@ -450,7 +451,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
   void initState() {
     super.initState();
 
-    // tec.dmPrint('New ChapterViewModel for ${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}');
+    // dmPrint('New ChapterViewModel for ${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}');
 
     _selection = ChapterSelection(
         wordSelectionController: _wordSelectionController,
@@ -488,7 +489,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
   @override
   Widget build(BuildContext context) {
     final debugId = '${widget.volumeId}/${widget.ref.book}/${widget.ref.chapter}';
-    // tec.dmPrint('_ChapterHtml building TecHtml for $debugId ${widget.size}');
+    // dmPrint('_ChapterHtml building TecHtml for $debugId ${widget.size}');
 
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkTheme ? Colors.white : Colors.black;
@@ -506,7 +507,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
       right: padding.right + marginWidth,
     );
 
-    // tec.dmPrint('rebuilding ${widget.ref} with size ${widget.size} ');
+    // dmPrint('rebuilding ${widget.ref} with size ${widget.size} ');
 
     return MultiBlocListener(
       listeners: [
@@ -517,15 +518,15 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
           listener: (context, viewData) {
             final newBcv = viewData.asVolumeViewData.bcv;
             if (newBcv.book == widget.ref.book && newBcv.chapter == widget.ref.chapter) {
-              // tec.dmPrint('Notifying of selections for ${widget.ref}');
+              // dmPrint('Notifying of selections for ${widget.ref}');
               _selection.notifyOfSelections(context);
               // TO-DO(ron): Only scroll if the verse changes?
               if (newBcv.verse > 1 || _scrollController.offset > 0) {
-                tec.dmPrint('ChapterHtml ViewData changed, so scrolling to verse ${newBcv.verse}');
+                dmPrint('ChapterHtml ViewData changed, so scrolling to verse ${newBcv.verse}');
                 _viewModel.scrollToVerse(newBcv.verse, _scrollController);
               }
             } else {
-              // tec.dmPrint('Ignoring selections in ${widget.ref}');
+              // dmPrint('Ignoring selections in ${widget.ref}');
             }
           },
         )
@@ -562,7 +563,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                       maxWidth: widget.size.width,
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          // tec.dmPrint('Building TecHtml for ${widget.volumeId} ${widget.ref} '
+                          // dmPrint('Building TecHtml for ${widget.volumeId} ${widget.ref} '
                           //     'with size ${constraints.biggest}');
                           return TecHtml(
                             widget.html,
@@ -594,7 +595,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                               // the HTML has not be rendered.
                               if (_scrollToVerse > 1) {
                                 _scrollToVerse = 0;
-                                tec.dmPrint(
+                                dmPrint(
                                     'ChapterHtml post build will scroll to verse ${widget.ref.verse}');
                                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                                   _viewModel.scrollToVerse(widget.ref.verse, _scrollController,
@@ -626,7 +627,7 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
                               if (widget.volumeId == 91 && url.contains('bible_vendor.css')) {
                                 return v91BibleVendorCss;
                               }
-                              return tec.textFromUrl(url);
+                              return textFromUrl(url);
                             }, */
                           );
                         },
@@ -648,7 +649,7 @@ const _marginPercent = 0.05;
 
 const TextStyle _htmlDefaultTextStyle = TextStyle(
   inherit: false,
-  //fontFamily: tec.platformIs(tec.Platform.iOS) ? 'Avenir' : 'normal',
+  //fontFamily: TecPlatform.isIOS ? 'Avenir' : 'normal',
   fontSize: 16,
   fontWeight: FontWeight.normal,
   height: _lineSpacing,

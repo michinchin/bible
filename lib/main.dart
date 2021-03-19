@@ -7,9 +7,10 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
 import 'package:tec_user_account/tec_user_account.dart' as tua;
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -55,14 +56,14 @@ Future<void> main() async {
         color: Const.tecartaBlue);
   }
 
-  await tec.Prefs.shared.load();
+  await Prefs.shared.load();
 
-  final product = tec.platformIs(tec.Platform.web)
+  final product = TecPlatform.isWeb
       ? 'WebSite'
-      : '${tec.platformIs(tec.Platform.iOS) ? 'IOS' : 'PLAY'}_TecartaBible';
+      : '${TecPlatform.isIOS ? 'IOS' : 'PLAY'}_TecartaBible';
 
   VolumesRepository.shared = TecVolumesRepository(
-    productsUrl: '${tec.streamUrl}/products-list/$product.json.gz',
+    productsUrl: '$cloudFrontStreamUrl/products-list/$product.json.gz',
     productsBundleKey: 'assets/products.json',
     bundledProducts: [
       BundledProduct([9], 'assets'),
@@ -90,7 +91,7 @@ Future<void> main() async {
   // items in prefs bloc can be saved in the db - userDB needs to have been initialized
   await PrefsBloc.shared.load();
 
-  tec.dmPrint('Main initialization took ${stopwatch.elapsed}');
+  dmPrint('Main initialization took ${stopwatch.elapsed}');
   stopwatch.stop();
 
   runApp(const App());
@@ -108,7 +109,7 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => DownloadsBloc.create()),
         BlocProvider(create: (context) => SharedBibleRefBloc()),
-        BlocProvider(create: (context) => ViewManagerBloc(kvStore: tec.Prefs.shared)),
+        BlocProvider(create: (context) => ViewManagerBloc(kvStore: Prefs.shared)),
         BlocProvider(create: (context) => ThemeModeBloc()),
         BlocProvider(create: (context) => ContentSettingsBloc()),
         BlocProvider(create: (context) => PrefsBloc.shared),
@@ -119,7 +120,7 @@ class App extends StatelessWidget {
       ],
       child: BlocBuilder<ThemeModeBloc, ThemeMode>(
         builder: (context, themeMode) {
-          return tec.TecBlocProvider<TecStyleBloc>(
+          return TecBlocProvider<TecStyleBloc>(
               bloc: TecStyleBloc(<String, dynamic>{'dialogStyle': TecMetaStyle.material}),
               child: OKToast(
                 child: AppLifecycleWrapper(

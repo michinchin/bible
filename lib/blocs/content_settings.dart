@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 import '../models/const.dart';
 
@@ -50,19 +50,19 @@ class ContentSettingsBloc extends Cubit<ContentSettings> {
   ContentSettingsBloc()
       : super(ContentSettings(
           textScaleFactor:
-              tec.Prefs.shared.getDouble(Const.prefContentTextScaleFactor, defaultValue: 1.35),
-          fontName: tec.Prefs.shared.getString(Const.prefContentFontName, defaultValue: ''),
+              Prefs.shared.getDouble(Const.prefContentTextScaleFactor, defaultValue: 1.35),
+          fontName: Prefs.shared.getString(Const.prefContentFontName, defaultValue: ''),
         ));
 
   void updateWith(ContentSettings settings) {
     assert(settings != null);
 
     if (state.textScaleFactor != settings.textScaleFactor) {
-      tec.Prefs.shared.setDouble(Const.prefContentTextScaleFactor, settings.textScaleFactor);
+      Prefs.shared.setDouble(Const.prefContentTextScaleFactor, settings.textScaleFactor);
     }
 
     if (state.fontName != settings.fontName) {
-      tec.Prefs.shared.setString(Const.prefContentFontName, settings.fontName);
+      Prefs.shared.setString(Const.prefContentFontName, settings.fontName);
     }
 
     emit(settings);

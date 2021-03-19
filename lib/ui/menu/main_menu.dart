@@ -56,7 +56,7 @@ List<TableRow> _buildMenuItems(
     ),
     // tecModalPopupMenuItem(
     //   menuContext,
-    //   tec.platformIs(tec.Platform.iOS) ? FeatherIcons.share : FeatherIcons.share2,
+    //   TecPlatform.isIOS ? FeatherIcons.share : FeatherIcons.share2,
     //   'Share app',
     //   () => menuModel.shareApp(menuContext),
     // ),
@@ -72,7 +72,7 @@ List<TableRow> _buildMenuItems(
     tecModalPopupMenuItem(
         menuContext, FeatherIcons.settings, 'Settings', () => showSettings(context),
         subtitle: 'Font Size, line spacing, dark mode', rowPadding: rowPadding, scaleFont: true),
-    // if (tec.platformIs(tec.Platform.iOS))
+    // if (TecPlatform.isIOS)
     //   tecModalPopupMenuItem(
     //     menuContext,
     //     Icons.restore,

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
@@ -48,7 +49,7 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
     if (_tabController == null || _tabController.length != length || _currentVolumeId != volumeId) {
       // If the volume changed, we need to clear the shared app bar.
       if (_currentVolumeId != volumeId) {
-        tec.dmPrint('StudyView: clearing the shared app bar because the volume changed '
+        dmPrint('StudyView: clearing the shared app bar because the volume changed '
             'from $_currentVolumeId to $volumeId');
         _currentVolumeId = volumeId;
         context.tbloc<SharedAppBarBloc>().update(null);
@@ -57,7 +58,7 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
       _tabController?.dispose();
       _tabController = TabController(initialIndex: initialIndex, length: length, vsync: this)
         ..addListener(() {
-          tec.dmPrint('Study tabs changed to index ${_tabController.index}');
+          dmPrint('Study tabs changed to index ${_tabController.index}');
           context.read<SharedAppBarBloc>().update(null);
 
           final bloc = context.read<VolumeViewDataBloc>();
@@ -79,7 +80,7 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
               context.read<StudyViewBloc>().updateWithData(viewData as VolumeViewData),
           child: BlocBuilder<StudyViewBloc, StudyViewState>(
             builder: (context, state) {
-              // tec.dmPrint('StudyView.build in StudyViewBloc volume: ${state.volumeId}');
+              // dmPrint('StudyView.build in StudyViewBloc volume: ${state.volumeId}');
               if (state.sections == null || state.sections.isEmpty) {
                 return const Center(child: LoadingIndicator());
               }
@@ -122,7 +123,7 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
                     );
 
                     const top = 80.0; // appBar.preferredSize.height;
-                    // tec.dmPrint('top padding: $top');
+                    // dmPrint('top padding: $top');
                     const padding = EdgeInsets.fromLTRB(0, top, 0, 50);
 
                     final tabContents = state.sections
@@ -184,7 +185,7 @@ class _TabContent extends StatelessWidget {
       final isIntro = section == StudySection.intros;
       final isResources = section == StudySection.resources;
 
-      // tec.dmPrint('_TabContent building $section');
+      // dmPrint('_TabContent building $section');
 
       return BlocProvider<StudyResBloc>(
         create: (_) {

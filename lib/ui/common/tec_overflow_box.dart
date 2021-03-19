@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-// import 'package:tec_util/tec_util.dart' as tec;
+// import 'package:tec_util/tec_util.dart';
 
 class TecOverflowBox extends SingleChildRenderObjectWidget {
   final double minWidth;
@@ -76,7 +76,7 @@ class RenderTecOverflowBox extends RenderProxyBox {
         width = childConstraints.constrainWidth(width);
       }
     }
-    tec.dmPrint('computeMinIntrinsicWidth($height) => $width');
+    dmPrint('computeMinIntrinsicWidth($height) => $width');
     return width;
   }
 
@@ -92,7 +92,7 @@ class RenderTecOverflowBox extends RenderProxyBox {
         width = childConstraints.constrainWidth(width);
       }
     }
-    tec.dmPrint('computeMaxIntrinsicWidth($height) => $width');
+    dmPrint('computeMaxIntrinsicWidth($height) => $width');
     return width;
   }
 
@@ -108,7 +108,7 @@ class RenderTecOverflowBox extends RenderProxyBox {
         height = childConstraints.constrainHeight(height);
       }
     }
-    tec.dmPrint('computeMinIntrinsicHeight($width) => $height');
+    dmPrint('computeMinIntrinsicHeight($width) => $height');
     return height;
   }
 
@@ -124,7 +124,7 @@ class RenderTecOverflowBox extends RenderProxyBox {
         height = childConstraints.constrainHeight(height);
       }
     }
-    tec.dmPrint('computeMaxIntrinsicHeight($width) => $height');
+    dmPrint('computeMaxIntrinsicHeight($width) => $height');
     return height;
   }
   */
@@ -141,7 +141,7 @@ class RenderTecOverflowBox extends RenderProxyBox {
   Size _computeLayout() {
     if (child != null) {
       final c = childConstraints.enforceIfNotBounded(constraints);
-      // tec.dmPrint('calling child.layout($c)');
+      // dmPrint('calling child.layout($c)');
       child.layout(c, parentUsesSize: true);
       if (childConstraints.hasBoundedWidth) {
         if (!childConstraints.hasBoundedHeight) {

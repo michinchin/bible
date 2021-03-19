@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/search/autocomplete.dart';
@@ -64,7 +64,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
   // @override
   // void onTransition(Transition<NavEvent, NavState> transition) {
-  //   // tec.dmPrint(transition);
+  //   // dmPrint(transition);
   //   super.onTransition(transition);
   // }
 
@@ -83,8 +83,8 @@ class NavBloc extends Bloc<NavEvent, NavState> {
           changeTabIndex: _changeTabIndex,
           changeState: _changeState,
           setRef: _setReference);
-      // tec.dmPrint('$newState');
-      tec.dmPrint(NavViewState.values[newState.navViewState.index]);
+      // dmPrint('$newState');
+      dmPrint(NavViewState.values[newState.navViewState.index]);
       yield newState;
     }
   }
@@ -92,7 +92,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
   NavState _changeNavView(NavViewState vs) => state.copyWith(navViewState: vs);
 
   NavState _onSearchChange(String s) {
-    // tec.dmPrint('SEARCH CHANGE: $s');
+    // dmPrint('SEARCH CHANGE: $s');
     var currState = state.copyWith(search: s);
 
     if (s.isNotEmpty && s != null) {
@@ -187,7 +187,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
             );
           } catch (e) {
             chapter = -1;
-            tec.dmPrint(e.toString());
+            dmPrint(e.toString());
           }
 
           if (chapter > 0 && s.toLowerCase().trim() == '${selectedBook.toLowerCase()} $chapter:') {
@@ -224,7 +224,7 @@ class NavBloc extends Bloc<NavEvent, NavState> {
   }
 
   NavState _onSearchFinished(String s) {
-    tec.dmPrint('Search Submitted: $s');
+    dmPrint('Search Submitted: $s');
     return state.copyWith(search: s, navViewState: NavViewState.searchResults);
   }
 

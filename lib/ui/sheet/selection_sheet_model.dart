@@ -1,7 +1,8 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_web_view/tec_web_view.dart';
@@ -216,12 +217,12 @@ class SelectionSheetModel {
     }
 
     if (uid != null) {
-      final ref = tec.as<Reference>(bloc.selectionObjectWithViewUid(uid));
+      final ref = as<Reference>(bloc.selectionObjectWithViewUid(uid));
       final bible = VolumeViewData.fromContext(c, uid)?.volumeId;
       await writeRef(ref, bible);
     } else {
       for (final vuid in views) {
-        final ref = tec.as<Reference>(bloc.selectionObjectWithViewUid(vuid));
+        final ref = as<Reference>(bloc.selectionObjectWithViewUid(vuid));
         final bible = VolumeViewData.fromContext(c, vuid)?.volumeId;
         await writeRef(ref, bible);
         if (vuid != views.last) {
@@ -230,7 +231,7 @@ class SelectionSheetModel {
       }
     }
 
-    tec.dmPrint('SHARE TEXT: ${buffer.toString()}');
+    dmPrint('SHARE TEXT: ${buffer.toString()}');
     return buffer.toString();
   }
 
@@ -290,7 +291,7 @@ class SelectionSheetModel {
     final views = bloc.visibleViewsWithSelections.toList();
     final refs = <Reference>[];
     for (final v in views) {
-      refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
+      refs.add(as<Reference>(bloc.selectionObjectWithViewUid(v)));
     }
     var ref = refs[0];
     // ask for which verse to compare if multiple selected in views
@@ -333,7 +334,7 @@ class SelectionSheetModel {
     final views = bloc.visibleViewsWithSelections.toList();
     final refs = <Reference>[];
     for (final v in views) {
-      refs.add(tec.as<Reference>(bloc.selectionObjectWithViewUid(v)));
+      refs.add(as<Reference>(bloc.selectionObjectWithViewUid(v)));
     }
     return refs;
   }
@@ -371,7 +372,7 @@ class __DefineWebViewState extends State<_DefineWebView> {
       final msg = 'Error launching web search: ${e.toString()}';
       await Navigator.of(context).maybePop();
       TecToast.show(context, msg);
-      tec.dmPrint(msg);
+      dmPrint(msg);
     }
     await Navigator.of(context).maybePop();
   }

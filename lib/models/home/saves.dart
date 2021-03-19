@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:tec_user_account/tec_user_account.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 
 import '../app_settings.dart';
 
@@ -24,8 +24,8 @@ class OtdSave extends UserItem {
           id: id,
           parentId: parentId,
           deleted: deleted,
-          created: created ?? tec.dbIntFromDateTime(DateTime.now()),
-          modified: modified ?? tec.dbIntFromDateTime(DateTime.now()),
+          created: created ?? dbIntFromDateTime(DateTime.now()),
+          modified: modified ?? dbIntFromDateTime(DateTime.now()),
         );
   final int cardType;
   final int year;

@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
-import 'package:tec_util/tec_util.dart' as tec;
+import 'package:tec_util/tec_util.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
@@ -82,7 +82,7 @@ class _VotdCard extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final votd = snapshot.data.forDateTime(DateTime.now());
-          return FutureBuilder<tec.ErrorOrValue<String>>(
+          return FutureBuilder<ErrorOrValue<String>>(
               future: votd.getFormattedVerse(currentBibleFromContext(context)),
               builder: (context, s) {
                 if (s.hasData && s.data.error == null) {
