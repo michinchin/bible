@@ -37,6 +37,22 @@
     // pdfjsLib.GlobalWorkerOptions.workerSrc = "//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.4.456/pdf.worker.min.js";
   </script>
 
+
+  <script>
+    var FACEBOOK_APP_ID = "156251967778545";
+    window.fbAsyncInit = function () {
+      FB.init({
+        appId: FACEBOOK_APP_ID,
+        cookie: false,
+        xfbml: true,
+        version: "v9.0",
+      });
+      // FB.AppEvents.logPageView();
+    };
+  </script>
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js" ></script>
+  <script src="flutter_facebook_auth.js" type="application/javascript" ></script>
+
   <script src="main.dart.js" type="application/javascript"></script>
 </body>
 </html>
