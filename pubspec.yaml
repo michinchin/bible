@@ -10,7 +10,7 @@ dependencies:
   animations: ^2.0.0
   bloc: ^7.0.0
   cached_network_image: ^3.0.0-nullsafety
-  collection: ^1.14.12
+  collection: ^1.15.0
   combos: ^1.2.0
   cupertino_icons: ^1.0.0
   equatable: ^2.0.0
@@ -29,15 +29,15 @@ dependencies:
   flutter_sfsymbols: ^2.0.0
   flutter_svg: ^0.21.0-nullsafety.0
   freezed_annotation: ^0.14.1
-  google_fonts: ^2.0.0-nullsafety.0
+  google_fonts: ^2.0.0
   i18n_extension: ^4.0.0
   image_picker: ^0.7.2+1
   in_app_purchase: ^0.5.0
-  json_annotation: ^4.0.0
+  json_annotation: ^4.0.1
   native_pdf_renderer: ^3.0.0
-  path: ^1.7.0
-  path_provider: ^2.0.0-nullsafety
-  pedantic: ^1.9.2
+  path: ^1.8.0
+  path_provider: ^2.0.1
+  pedantic: ^1.11.0
   provider: ^5.0.0
   quill_delta: ^2.0.0
   share: ^2.0.0
@@ -61,7 +61,7 @@ dependencies:
     hosted:
       name: tec_html
       url: http://noah.tecarta.com:8100
-    version: ^3.3.1
+    version: ^3.3.3
   tec_native_ad:
     hosted:
       name: tec_native_ad
@@ -81,7 +81,7 @@ dependencies:
     hosted:
       name: tec_selectable
       url: http://noah.tecarta.com:8100
-    version: ^2.1.5
+    version: ^2.2.1
   tec_user_account:
     hosted:
       name: tec_user_account
@@ -123,11 +123,11 @@ dependencies:
 
 dev_dependencies:
   bloc_test: ^8.0.0
-  build_runner: ^1.11.5
+  build_runner: ^1.12.2
   flutter_test:
     sdk: flutter
-  freezed: ^0.14.1
-  json_serializable: ^4.0.2
+  freezed: ^0.14.1+1
+  json_serializable: ^4.1.0
 
 flutter:
   uses-material-design: true
