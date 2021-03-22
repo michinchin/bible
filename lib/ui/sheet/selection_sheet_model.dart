@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,9 +7,9 @@ import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
-import 'package:tec_web_view/tec_web_view.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../blocs/prefs_bloc.dart';
 import '../../blocs/selection/selection_bloc.dart';
@@ -351,16 +353,14 @@ class _DefineWebView extends StatefulWidget {
 
 class __DefineWebViewState extends State<_DefineWebView> {
   String url;
+  var _loading = true;
 
   @override
   void initState() {
     url = Uri.https('google.com', '/search', <String, String>{'q': 'define:${widget.words}'})
         .toString();
+    if (TecPlatform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     super.initState();
-  }
-
-  void onWebCreated(WebController webController) {
-    webController..loadUrl(url);
   }
 
   Future<void> _launchSearch() async {
@@ -377,6 +377,14 @@ class __DefineWebViewState extends State<_DefineWebView> {
     await Navigator.of(context).maybePop();
   }
 
+  JavascriptChannel _toasterJavascriptChannel(BuildContext context) {
+    return JavascriptChannel(
+        name: 'Toaster',
+        onMessageReceived: (message) {
+          TecToast.show(context, message.message);
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -390,12 +398,34 @@ class __DefineWebViewState extends State<_DefineWebView> {
         actions: [IconButton(icon: const Icon(FeatherIcons.compass), onPressed: _launchSearch)],
       ),
       body: SafeArea(
-        child: TecWebView(
-          onWebCreated: onWebCreated,
-          backgroundColor: Theme.of(context).canvasColor,
-          loadingIndicator: const LoadingIndicator(),
+          child: Stack(children: [
+        WebView(
+          initialUrl: url,
+          javascriptMode: JavascriptMode.unrestricted,
+          onProgress: (progress) {
+            dmPrint('WebView is loading (progress : $progress%)');
+          },
+          javascriptChannels: <JavascriptChannel>{
+            _toasterJavascriptChannel(context),
+          },
+          navigationDelegate: (request) {
+            setState(() {
+              _loading = true;
+            });
+            return NavigationDecision.navigate;
+          },
+          onPageStarted: (url) {
+            dmPrint('Page started loading: $url');
+          },
+          onPageFinished: (url) {
+            dmPrint('Page finished loading: $url');
+            setState(() {
+              _loading = false;
+            });
+          },
         ),
-      ),
+        if (_loading) const Center(child: LoadingIndicator()),
+      ])),
     );
   }
 }
