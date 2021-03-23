@@ -729,7 +729,7 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-              primary: buttonColor,
+              backgroundColor: buttonColor,
             ),
             child: Text(
               each.a,

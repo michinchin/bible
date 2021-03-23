@@ -125,20 +125,22 @@ class _VerseView extends StatelessWidget {
     final chapter = ref.chapter;
     final verses = bible.versesIn(book: book, chapter: chapter);
 
-    return _DynamicGrid(
-      children: [
-        for (var i = 1; i <= verses; i++) ...[
-          _PillButton(
-            onPressed: () {
-              final updatedRef = ref.copyWith(verse: i, endVerse: i);
-              context.tbloc<NavBloc>().add(NavEvent.setRef(ref: updatedRef));
-              Navigator.of(context).maybePop(updatedRef);
-            },
-            textColor: /*ref.verse == i ? tabColors[NavTabs.verse.index] :*/ textColor,
-            text: i.toString(),
-          )
-        ]
-      ],
+    return SingleChildScrollView(
+      child: _DynamicGrid(
+        children: [
+          for (var i = 1; i <= verses; i++) ...[
+            _PillButton(
+              onPressed: () {
+                final updatedRef = ref.copyWith(verse: i, endVerse: i);
+                context.tbloc<NavBloc>().add(NavEvent.setRef(ref: updatedRef));
+                Navigator.of(context).maybePop(updatedRef);
+              },
+              textColor: /*ref.verse == i ? tabColors[NavTabs.verse.index] :*/ textColor,
+              text: i.toString(),
+            )
+          ]
+        ],
+      ),
     );
   }
 }
@@ -308,7 +310,7 @@ class _DynamicGrid extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: GridView.extent(
-            padding: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.only(bottom: 40),
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             maxCrossAxisExtent: extentCalculated(),

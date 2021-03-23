@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:bible/models/app_settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -17,6 +16,7 @@ import 'package:tec_widgets/tec_widgets.dart';
 import '../../../blocs/highlights/highlights_bloc.dart';
 import '../../../blocs/margin_notes/margin_notes_bloc.dart';
 import '../../../blocs/selection/selection_bloc.dart';
+import '../../../models/app_settings.dart';
 import '../../../models/color_utils.dart';
 import '../../../models/const.dart';
 import '../../../models/string_utils.dart';
