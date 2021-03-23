@@ -502,25 +502,24 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
         _locationTitle ??= volumeView.bookNameAndChapter(useShortBookName: true);
       }
       final visible = context.viewManager.isViewVisible(view.uid);
-      final child = _VolumeCard(
-        volumeId,
-        _bookCoverWidth,
-        borderColor: visible ? Const.tecartaBlue : null,
-      );
-      final cover = _OffscreenView(
-        title: title,
-        onPressed: () {
-          // context.tabManager.changeTab(TecTab.reader);
-          // _onSwitchViews(view);
-        },
-        uid: view.uid,
-        icon: child,
-      );
-      _existingVolumes.add(volumeId);
+
       if (visible) {
+        final child = _VolumeCard(
+          volumeId,
+          _bookCoverWidth,
+          borderColor: visible ? Const.tecartaBlue : null,
+        );
+        final cover = _OffscreenView(
+          title: title,
+          onPressed: () {
+            // context.tabManager.changeTab(TecTab.reader);
+            // _onSwitchViews(view);
+          },
+          uid: view.uid,
+          icon: child,
+        );
+        _existingVolumes.add(volumeId);
         _visibleCovers.add(cover);
-      } else {
-        _covers.add(cover);
       }
     }
 
