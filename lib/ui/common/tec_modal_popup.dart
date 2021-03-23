@@ -113,10 +113,15 @@ class TecPopupSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = CupertinoDynamicColor.withBrightness(
-      color: const Color(0xFFFFFFFF).withOpacity(bgOpacity), // originally F9F9F9
-      darkColor: Colors.grey[900].withOpacity(bgOpacity), // originally 252525
-    );
+    final bgColor = Theme.of(context).canvasColor.withOpacity(bgOpacity);
+
+    // OLD WAY: (keep for reference)
+    // final bgColor = CupertinoDynamicColor.resolve(
+    //     CupertinoDynamicColor.withBrightness(
+    //       color: const Color(0xFFFFFFFF).withOpacity(bgOpacity), // originally F9F9F9
+    //       darkColor: Colors.grey[900].withOpacity(bgOpacity), // originally 252525
+    //     ),
+    //     context);
 
     // return Container(width: 10, height: 10, color: Colors.red.withOpacity(0.5));
 
@@ -135,7 +140,7 @@ class TecPopupSheet extends StatelessWidget {
               filter: ImageFilter.blur(sigmaX: bgBlur, sigmaY: bgBlur),
               // child: Container(width: 300, height: 300, color: Colors.white.withOpacity(0.7)),
               child: Container(
-                color: Theme.of(context).canvasColor,
+                color: bgColor,
                 child: _PopupSheetContent(
                   child: child,
                   title: title,
