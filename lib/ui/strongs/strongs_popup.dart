@@ -34,8 +34,7 @@ Future<void> showStrongsPopup({
           child: Scaffold(
             appBar: MinHeightAppBar(
               appBar: AppBar(
-                  leading: const CloseButton(),
-                  title: isNullOrEmpty(title) ? null : Text(title)),
+                  leading: const CloseButton(), title: isNullOrEmpty(title) ? null : Text(title)),
             ),
             body: Container(
               color: isDarkTheme ? Colors.black : Colors.white,
@@ -44,7 +43,7 @@ Future<void> showStrongsPopup({
                 builder: (context, result, error) {
                   final htmlFragment = result?.value;
                   if (isNotNullOrEmpty(htmlFragment)) {
-                    final fullHtml = strongsHtmlWithFragment(htmlFragment);
+                    final fullHtml = strongsHtmlWithFragment(htmlFragment, darkTheme: isDarkTheme);
                     return SingleChildScrollView(
                       child: TecHtml(
                         fullHtml,

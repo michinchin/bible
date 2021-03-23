@@ -186,23 +186,23 @@ class __VotdScreenState extends State<_VotdScreen> {
               top: false,
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       const SizedBox(height: 10),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: TecText(
                           res,
-                          style: cardSubtitleCompactStyle,
+                          style: cardSubtitleCompactStyle.copyWith(height: 1.4),
                           textScaleFactor: contentTextScaleFactorWith(context),
                           textAlign: TextAlign.left,
                         ),
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 10),
                       Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
                           child: InkWell(
                             onTap: () => onVerseTap(ref),
                             child: TecText(

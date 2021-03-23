@@ -135,7 +135,7 @@ class TecPopupSheet extends StatelessWidget {
               filter: ImageFilter.blur(sigmaX: bgBlur, sigmaY: bgBlur),
               // child: Container(width: 300, height: 300, color: Colors.white.withOpacity(0.7)),
               child: Container(
-                color: CupertinoDynamicColor.resolve(bgColor, context),
+                color: Theme.of(context).canvasColor,
                 child: _PopupSheetContent(
                   child: child,
                   title: title,

@@ -218,8 +218,8 @@ class _HomeCard extends StatelessWidget {
                                 style: cardSubtitleCompactStyle
                                     .copyWith(color: Colors.white, shadows: <Shadow>[
                                   const Shadow(
-                                      offset: Offset(0.6, 0.60),
-                                      blurRadius: 1.0,
+                                      offset: Offset(1,1),
+                                      blurRadius: 2.0,
                                       color: Colors.black),
                                 ]),
                                 textScaleFactor: contentTextScaleFactorWith(context),

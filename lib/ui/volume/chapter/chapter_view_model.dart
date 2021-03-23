@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:bible/models/app_settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -541,7 +542,12 @@ class ChapterViewModel {
                   // color: Colors.red,
                   constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
                   child: GestureDetector(
-                    child: TecHtml(footnoteHtml.value, baseUrl: '', selectable: false),
+                    child: TecHtml(
+                      footnoteHtml.value,
+                      baseUrl: '',
+                      selectable: false,
+                      textScaleFactor: contentTextScaleFactorWith(context),
+                    ),
                     onTap: () => Navigator.of(context).maybePop(),
                   ),
                 ),

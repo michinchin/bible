@@ -55,16 +55,25 @@ Future<void> showXrefsPopup({
           child: Material(
             child: Container(
               constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
-              child: Column(children: [
-                ...xrefs.expand((xref) {
-                  final card = _XrefWidget(xref: xref, padding: EdgeInsets.all(dblPad));
-                  final widgets = firstCard
-                      ? [card]
-                      : [Divider(thickness: 1, height: 1, indent: dblPad, endIndent: dblPad), card];
-                  firstCard = false;
-                  return widgets;
-                }),
-              ]),
+              child: Padding(
+                padding: EdgeInsets.only(top: padding, left: dblPad, right: dblPad, bottom: dblPad),
+                child: Column(children: [
+                  ...xrefs.expand((xref) {
+                    if (firstCard) {
+                      firstCard = false;
+                      return [_XrefWidget(xref: xref, padding: EdgeInsets.zero)];
+                    }
+
+                    return [_XrefWidget(xref: xref, padding: EdgeInsets.only(top: dblPad))];
+                    // final card = _XrefWidget(xref: xref, padding: EdgeInsets.all(dblPad));
+                    // final widgets = firstCard
+                    //     ? [card]
+                    //     : [Divider(thickness: 1, height: 1, indent: dblPad, endIndent: dblPad), card];
+                    // firstCard = false;
+                    // return widgets;
+                  }),
+                ]),
+              ),
             ),
           ),
         ),
@@ -111,7 +120,7 @@ class _XrefWidget extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             TextSpan(text: xref.text),
           ]),
-          textScaleFactor: .9 * contentTextScaleFactorWith(context),
+          textScaleFactor: contentTextScaleFactorWith(context),
         ),
       ),
       onTap: () {
