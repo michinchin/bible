@@ -28,6 +28,7 @@ import 'blocs/sheet/tab_manager_bloc.dart';
 import 'models/app_settings.dart';
 import 'models/const.dart';
 import 'models/iap/iap.dart';
+import 'models/pref_item.dart';
 import 'navigation_service.dart';
 import 'ui/common/common.dart';
 import 'ui/home/home_screen.dart';
@@ -58,9 +59,8 @@ Future<void> main() async {
 
   await Prefs.shared.load();
 
-  final product = TecPlatform.isWeb
-      ? 'WebSite'
-      : '${TecPlatform.isIOS ? 'IOS' : 'PLAY'}_TecartaBible';
+  final product =
+      TecPlatform.isWeb ? 'WebSite' : '${TecPlatform.isIOS ? 'IOS' : 'PLAY'}_TecartaBible';
 
   VolumesRepository.shared = TecVolumesRepository(
     productsUrl: '$cloudFrontStreamUrl/products-list/$product.json.gz',
@@ -109,7 +109,11 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => DownloadsBloc.create()),
         BlocProvider(create: (context) => SharedBibleRefBloc()),
-        BlocProvider(create: (context) => ViewManagerBloc(kvStore: Prefs.shared)),
+        BlocProvider(
+            create: (context) => ViewManagerBloc(
+                kvStore: Prefs.shared,
+                clearMaximizedOffScreen:
+                    PrefsBloc.getBool(PrefItemId.syncChapter, defaultValue: true))),
         BlocProvider(create: (context) => ThemeModeBloc()),
         BlocProvider(create: (context) => ContentSettingsBloc()),
         BlocProvider(create: (context) => PrefsBloc.shared),

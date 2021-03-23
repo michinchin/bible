@@ -118,8 +118,8 @@ dependencies:
       ref: 00a3c1c952c18e3bb69bf553e3277d70d5069edc
 
 #dependency_overrides:
-#  tec_widgets:
-#    path: ../shared/tec_widgets
+#  tec_views:
+#    path: ../shared/tec_views
 
 dev_dependencies:
   bloc_test: ^8.0.0
