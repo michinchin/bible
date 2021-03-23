@@ -71,7 +71,7 @@ dependencies:
     hosted:
       name: tec_notifications
       url: http://noah.tecarta.com:8100
-    version: ^1.0.0
+    version: ^1.0.2
   tec_platform_util:
     hosted:
       name: tec_platform_util
@@ -86,7 +86,7 @@ dependencies:
     hosted:
       name: tec_user_account
       url: http://noah.tecarta.com:8100
-    version: ^2.2.5
+    version: ^2.2.6
   tec_util:
     hosted:
       name: tec_util
