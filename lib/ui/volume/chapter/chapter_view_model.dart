@@ -85,6 +85,14 @@ class ChapterViewModel {
       // Note, `v` will be `null` if not in a verse.
       final v = tag.verse;
 
+      // If it is the verse number span:
+      if (_superscriptVerseNumbers &&
+          v != null &&
+          !tag.isInVerse &&
+          text.startsWith(v.toString())) {
+        return TaggableTextSpan(tag: tag, text: text.superscripted(), style: style);
+      }
+
       // If it's a footnote, just return the special footnote span.
       if (tag.isInFootnote) {
         if (tag.href != _currentFootnoteHref) {
@@ -584,14 +592,11 @@ Future<ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int chapte
   if (volume is Bible) {
     final result = await volume.chapterHtmlWith(book, chapter);
     if (!_despanifyChapterHtml || isNullOrEmpty(result.value)) return result;
-    var html = result.value.despanified();
+    final html = result.value.despanified();
     dmPrint('Despanifying HTML for ${volume.abbreviation} '
         '${volume.assocBible().nameOfBook(book)} $chapter reduced size by '
         '${100 - (100 * html.length ~/ result.value.length)}%, '
         '${result.value.length - html.length} chars!');
-    if (_superscriptVerseNumbers) {
-      html = html.replaceAllMapped(_verseNumbers, (m) => '"0">${m[1].superscripted()}<');
-    }
     return ErrorOrValue(null, html);
   } else {
     final result = await volume.resourcesWithBook(book, chapter, ResourceType.studyNote);
@@ -612,5 +617,3 @@ Future<ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int chapte
     }
   }
 }
-
-final _verseNumbers = RegExp(r'"0">(\d+-?\d*)<');
