@@ -86,7 +86,7 @@ dependencies:
     hosted:
       name: tec_user_account
       url: http://noah.tecarta.com:8100
-    version: ^2.2.6
+    version: ^2.2.8
   tec_util:
     hosted:
       name: tec_util
@@ -106,7 +106,7 @@ dependencies:
     hosted:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
-    version: ^2.2.3
+    version: ^2.2.4
   tuple: ^2.0.0
   url_launcher: ^6.0.2
   video_player: ^2.0.2
@@ -118,8 +118,8 @@ dependencies:
       ref: 00a3c1c952c18e3bb69bf553e3277d70d5069edc
 
 #dependency_overrides:
-#  tec_views:
-#    path: ../shared/tec_views
+#  tec_widgets:
+#    path: ../shared/tec_widgets
 
 dev_dependencies:
   bloc_test: ^8.0.0

@@ -123,7 +123,6 @@ class __VotdScreenState extends State<_VotdScreen> {
       backgroundColor:
           Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
       imageAspectRatio: imageAspectRatio,
-      //  scrollController: scrollController,
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       actions: [
         IconButton(
@@ -233,24 +232,40 @@ Future<void> showAllVotd(BuildContext context, Votd votd, {DateTime scrollToDate
     Navigator.of(context).push(
         MaterialPageRoute(builder: (c) => _VotdsScreen(votd, scrollToDateTime: scrollToDateTime)));
 
-class _VotdsScreen extends StatelessWidget {
+class _VotdsScreen extends StatefulWidget {
   final Votd votd;
   final DateTime scrollToDateTime;
 
   const _VotdsScreen(this.votd, {this.scrollToDateTime});
 
   @override
-  Widget build(BuildContext context) {
-    final votds = <VotdEntry>[];
-    final days = <DateTime>[];
+  __VotdsScreenState createState() => __VotdsScreenState();
+}
+
+class __VotdsScreenState extends State<_VotdsScreen> {
+  final votds = <VotdEntry>[];
+  final days = <DateTime>[];
+  int scrollIndex;
+
+  @override
+  void initState() {
     for (var day = DateTime(today.year, 1, 1);
         day.isBefore(DateTime(today.year, 12, 31)) ||
             day.isAtSameMomentAs(DateTime(today.year, 12, 31));
-        day = day.add(const Duration(days: 1))) {
+        day = addDaysToDateTime(day, 1)) {
       days.add(day);
-      votds.add(votd.forDateTime(day));
+      votds.add(widget.votd.forDateTime(day));
     }
 
+    scrollIndex = widget.scrollToDateTime == null
+        ? days.indexOf(today)
+        : days.indexOf(dateOnly(widget.scrollToDateTime));
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: MinHeightAppBar(
@@ -264,22 +279,21 @@ class _VotdsScreen extends StatelessWidget {
         ),
       ),
       body: TecScrollbar(
-        child: SafeArea(
-            bottom: false,
-            child: ScrollablePositionedList.builder(
-                initialScrollIndex: scrollToDateTime == null
-                    ? days.indexOf(today)
-                    : days.indexOf(dateOnly(scrollToDateTime)),
-                itemCount: votds.length,
-                itemBuilder: (c, i) => FutureBuilder<ErrorOrValue<String>>(
-                    future: votds[i].getFormattedVerse(currentBibleFromContext(context)),
-                    builder: (context, snapshot) => DayCard(
-                        date: days[i],
-                        title: votds[i].ref.label(),
-                        body: snapshot.data?.value ?? '',
-                        imageUrl: votds[i].imageUrl,
-                        onTap: () => showVotdScreen(context, votds[i]))))),
-      ),
+          child: SafeArea(
+              bottom: false,
+              child: ScrollablePositionedList.builder(
+                  initialScrollIndex: scrollIndex,
+                  itemCount: votds.length,
+                  itemBuilder: (c, i) {
+                    return FutureBuilder<ErrorOrValue<String>>(
+                        future: votds[i].getFormattedVerse(currentBibleFromContext(context)),
+                        builder: (context, snapshot) => DayCard(
+                            date: days[i],
+                            title: votds[i].ref.label(),
+                            body: snapshot.data?.value ?? '',
+                            imageUrl: votds[i].imageUrl,
+                            onTap: () => showVotdScreen(context, votds[i])));
+                  }))),
     );
   }
 }

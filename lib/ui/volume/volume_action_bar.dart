@@ -55,7 +55,9 @@ class VolumeViewActionBar extends StatelessWidget {
                 onTap: () {
                   showTecModalPopupMenu(
                     context: context,
-                    insets: context.viewManager.insetsOfView(state.uid).add(const EdgeInsets.only(top: 20)),
+                    insets: context.viewManager
+                        .insetsOfView(state.uid)
+                        .add(const EdgeInsets.only(top: 20)),
                     alignment: Alignment.topCenter,
                     minWidth: 125,
                     menuItemsBuilder: (menuContext) => buildMenuItemsForViewWithState(
@@ -106,6 +108,25 @@ Future<void> _onSelectVolume(BuildContext context, VolumeViewData viewData) asyn
   VolumeViewData newViewData;
   if (volumeId != null) {
     assert(viewData != null);
+
+    // see if there is an off screen view already...
+    final vmBloc = context.viewManager;
+    for (final view in vmBloc?.state?.views) {
+      // only check views that are marked hidden or were in full screen mode
+      // and this view is not the full screen view
+      if (view.isHidden ||
+          (vmBloc.state.maximizedViewUid > 0 && vmBloc.state.maximizedViewUid != view.uid)) {
+        final volumeViewDataBloc = vmBloc.dataBlocWithView(view.uid);
+        if (volumeViewDataBloc is VolumeViewDataBloc) {
+          if (volumeViewDataBloc.state.asVolumeViewData.volumeId == volumeId &&
+              viewData.bcv == volumeViewDataBloc.state.asVolumeViewData.bcv) {
+            vmBloc.show(view.uid);
+            return;
+          }
+        }
+      }
+    }
+
     if (isBibleId(volumeId)) {
       newViewData = VolumeViewData(volumeId, viewData.bcv, 0, useSharedRef: viewData.useSharedRef);
     } else if (isStudyVolumeId(volumeId)) {

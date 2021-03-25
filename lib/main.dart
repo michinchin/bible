@@ -54,7 +54,7 @@ Future<void> main() async {
     await FlutterDownloader.initialize(debug: kDebugMode);
     await Notifications.init(
         channelInfo: ChannelInfo(id: 'tec-id', name: 'tec-name', description: 'tec-description'),
-        color: Const.tecartaBlue);
+        color: Const.tecartaLightBlue);
   }
 
   await Prefs.shared.load();

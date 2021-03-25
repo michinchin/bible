@@ -485,7 +485,7 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
   Widget build(BuildContext context) {
     final _maxCovers = isSmallScreen(context) ? 9 : 14;
     final _covers = <_OffscreenView>[];
-    final _visibleCovers = <_OffscreenView>[];
+    final _hiddenCovers = <int, List<_OffscreenView>>{};
     final _existingVolumes = <int>[];
     String _locationTitle;
 
@@ -494,42 +494,59 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
       var title = ViewManager.shared.menuTitleWith(context: context, state: view);
       final viewDataBloc = context.viewManager.dataBlocWithView(view.uid);
       int volumeId;
-      if (viewDataBloc != null) {
+      if (viewDataBloc is VolumeViewDataBloc) {
         final volumeView = as<VolumeViewDataBloc>(viewDataBloc).state.asVolumeViewData;
         volumeId = volumeView.volumeId;
         title =
             '${!volumeView.useSharedRef ? '${volumeView.bookNameAndChapter(useShortBookName: true)}\n' : ''}${VolumesRepository.shared.volumeWithId(volumeId).abbreviation}';
         _locationTitle ??= volumeView.bookNameAndChapter(useShortBookName: true);
-      }
-      final visible = context.viewManager.isViewVisible(view.uid);
+        final visible = context.viewManager.isViewVisible(view.uid);
 
-      if (visible) {
-        final child = _VolumeCard(
-          volumeId,
-          _bookCoverWidth,
-          borderColor: visible ? Const.tecartaBlue : null,
-        );
-        final cover = _OffscreenView(
-          title: title,
-          onPressed: () {
-            // context.tabManager.changeTab(TecTab.reader);
-            // _onSwitchViews(view);
-          },
-          uid: view.uid,
-          icon: child,
-        );
-        _existingVolumes.add(volumeId);
-        _visibleCovers.add(cover);
+        // include visible
+        if (visible || !volumeView.useSharedRef) {
+          final child = _VolumeCard(
+            volumeId,
+            _bookCoverWidth,
+            borderColor: visible ? Const.tecartaBlue : null,
+          );
+          final cover = _OffscreenView(
+            title: title,
+            onPressed: () {
+              // context.tabManager.changeTab(TecTab.reader);
+              // _onSwitchViews(view);
+            },
+            uid: view.uid,
+            icon: child,
+          );
+
+          _existingVolumes.add(volumeId);
+
+          if (visible) {
+            _covers.add(cover);
+          } else {
+            if (!_hiddenCovers.containsKey(volumeId)) {
+              _hiddenCovers.putIfAbsent(volumeId, () => [cover]);
+            }
+            else {
+              _hiddenCovers[volumeId].add(cover);
+            }
+          }
+        }
       }
     }
 
     // get the recent covers
     for (final recent in context.tbloc<RecentVolumesBloc>().state.volumes) {
+      if (_hiddenCovers.containsKey(recent.id)) {
+        // _hiddenCovers is only populated when syncChapters is off
+        _covers.addAll(_hiddenCovers[recent.id]);
+      }
+
       if (_existingVolumes.contains(recent.id)) {
         continue;
       }
 
-      final cover = _OffscreenView(
+      _covers.add(_OffscreenView(
         title: (!PrefsBloc.getBool(PrefItemId.syncChapter) && _locationTitle.isNotEmpty)
             ? _locationTitle
             : VolumesRepository.shared.volumeWithId(recent.id).abbreviation,
@@ -539,13 +556,15 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
         },
         uid: Const.recentFlag + recent.id,
         icon: _VolumeCard(recent.id, _bookCoverWidth),
-      );
+      ));
 
-      _covers.add(cover);
-
-      if (_visibleCovers.length + _covers.length >= _maxCovers) {
+      if (_covers.length >= _maxCovers) {
         break;
       }
+    }
+
+    if (_covers.length > _maxCovers) {
+      _covers.length = _maxCovers;
     }
 
     final view = Material(
@@ -565,15 +584,8 @@ class __ExpandedViewState extends State<_ExpandedView> with SingleTickerProvider
                   verticalDirection: VerticalDirection.up,
                   spacing: 30,
                   runSpacing: 10,
-                  children: List<Widget>.generate(_visibleCovers.length + _covers.length, (index) {
-                    var i = index;
-                    _OffscreenView cover;
-                    if (i >= _visibleCovers.length) {
-                      i = index - _visibleCovers.length;
-                      cover = _covers[i];
-                    } else {
-                      cover = _visibleCovers[i];
-                    }
+                  children: List<Widget>.generate(_covers.length, (index) {
+                    final cover = _covers[index];
                     return ScaleTransition(
                       scale: _animation,
                       child: InkWell(

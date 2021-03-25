@@ -182,23 +182,40 @@ Future<void> showAllDotd(BuildContext context, Dotds dotd, {DateTime scrollToDat
               scrollToDateTime: scrollToDateTime,
             )));
 
-class _DotdsScreen extends StatelessWidget {
+class _DotdsScreen extends StatefulWidget {
   final Dotds dotd;
   final DateTime scrollToDateTime;
 
   const _DotdsScreen(this.dotd, {this.scrollToDateTime});
 
   @override
-  Widget build(BuildContext context) {
-    final dotds = <Dotd>[];
-    final days = <DateTime>[];
+  __DotdsScreenState createState() => __DotdsScreenState();
+}
+
+class __DotdsScreenState extends State<_DotdsScreen> {
+  final dotds = <Dotd>[];
+  final days = <DateTime>[];
+  int scrollIndex;
+
+  @override
+  void initState() {
     for (var day = DateTime(today.year, 1, 1);
         day.isBefore(DateTime(today.year, 12, 31)) ||
             day.isAtSameMomentAs(DateTime(today.year, 12, 31));
-        day = day.add(const Duration(days: 1))) {
+        day = addDaysToDateTime(day, 1)) {
       days.add(day);
-      dotds.add(dotd.devoForDate(day));
+      dotds.add(widget.dotd.devoForDate(day));
     }
+
+    scrollIndex = widget.scrollToDateTime == null
+        ? days.indexOf(today)
+        : days.indexOf(dateOnly(widget.scrollToDateTime));
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: MinHeightAppBar(
@@ -214,9 +231,7 @@ class _DotdsScreen extends StatelessWidget {
       body: TecScrollbar(
         child: SafeArea(
             child: ScrollablePositionedList.builder(
-                initialScrollIndex: scrollToDateTime == null
-                    ? days.indexOf(today)
-                    : days.indexOf(dateOnly(scrollToDateTime)),
+                initialScrollIndex: scrollIndex,
                 itemCount: dotds.length,
                 itemBuilder: (c, i) => DayCard(
                     date: days[i],
