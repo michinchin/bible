@@ -27,7 +27,7 @@ class StrongsBuildHelper {
 
   Object _tagHtmlElement(
     String name,
-    LinkedHashMap<dynamic, String> attrs,
+    LinkedHashMap<Object, String> attrs,
     String text,
     int level,
     bool isVisible,

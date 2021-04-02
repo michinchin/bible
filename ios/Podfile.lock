@@ -21,7 +21,7 @@ PODS:
   - Flutter (1.0.0)
   - flutter_downloader (0.0.1):
     - Flutter
-  - flutter_facebook_auth (1.0.0):
+  - flutter_facebook_auth (2.0.0):
     - FBSDKCoreKit (~> 9.1.0)
     - FBSDKLoginKit (~> 9.1.0)
     - Flutter
@@ -223,7 +223,7 @@ SPEC CHECKSUMS:
   FBSDKLoginKit: d98498c598ec09de657385a9349a1f21119b7f86
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_downloader: 058b9c41564a90500f67f3e432e3524613a7fd83
-  flutter_facebook_auth: 24b6e255a5b2336963da48d0d3eeee4df824c0ed
+  flutter_facebook_auth: 4b170c07b7fce791497093fcc3f134fb215f3f07
   flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   flutter_native_timezone: 5f05b2de06c9776b4cc70e1839f03de178394d22

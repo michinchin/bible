@@ -1105,7 +1105,7 @@ packages:
       name: tec_html
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "3.3.3"
+    version: "3.3.4"
   tec_native_ad:
     dependency: "direct main"
     description:
@@ -1135,12 +1135,12 @@ packages:
     source: hosted
     version: "1.2.0"
   tec_selectable:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: tec_selectable
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.2.1"
+    version: "2.2.2"
   tec_user_account:
     dependency: "direct main"
     description:

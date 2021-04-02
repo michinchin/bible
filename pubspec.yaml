@@ -58,10 +58,11 @@ dependencies:
       url: http://noah.tecarta.com:8100
     version: ^1.0.1
   tec_html:
+    # path: ../shared/tec_html
     hosted:
       name: tec_html
       url: http://noah.tecarta.com:8100
-    version: ^3.3.3
+    version: ^3.3.4
   tec_native_ad:
     hosted:
       name: tec_native_ad
@@ -77,11 +78,6 @@ dependencies:
       name: tec_platform_util
       url: http://noah.tecarta.com:8100
     version: ^1.0.2
-  tec_selectable:
-    hosted:
-      name: tec_selectable
-      url: http://noah.tecarta.com:8100
-    version: ^2.2.1
   tec_user_account:
     hosted:
       name: tec_user_account

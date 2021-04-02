@@ -203,6 +203,11 @@ extension TecExtOnString on String {
   /// unchanged.
   ///
   String unsuperscripted() => String.fromCharCodes(_unsuperscript(codeUnits));
+
+  ///
+  /// Returns true iff the string starts with a digit.
+  ///
+  bool get startsWithDigit => isNotEmpty && codeUnits.first.isInRange(0x0030, 0x003A);
 }
 
 @immutable

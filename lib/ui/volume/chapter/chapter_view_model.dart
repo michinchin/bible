@@ -85,12 +85,14 @@ class ChapterViewModel {
       // Note, `v` will be `null` if not in a verse.
       final v = tag.verse;
 
-      // If it is the verse number span:
-      if (_superscriptVerseNumbers &&
-          v != null &&
-          !tag.isInVerse &&
-          text.startsWith(v.toString())) {
-        return TaggableTextSpan(tag: tag, text: text.superscripted(), style: style);
+      // If it is the verse number span, superscript it.
+      if (_superscriptVerseNumbers && v != null && !tag.isInVerse && text.startsWithDigit) {
+        final vStr = v.toString();
+        final l = vStr.length;
+        if (text.startsWith(vStr) &&
+            (text.length == vStr.length || !text.substring(l, l + 1).startsWithDigit)) {
+          return TaggableTextSpan(tag: tag, text: text.superscripted(), style: style);
+        }
       }
 
       // If it's a footnote, just return the special footnote span.
