@@ -382,7 +382,7 @@ class ChapterViewModel {
       walkRenderTree(tecHtmlRenderBox);
 
       if (y != null) {
-        dmPrint('scrollToVerse scrolling to offset: $y, animated: $animated');
+        // dmPrint('scrollToVerse scrolling to offset: $y, animated: $animated');
         if (animated) {
           controller.animateTo(y - 8,
               duration: const Duration(milliseconds: 1000), curve: Curves.ease);
@@ -390,7 +390,8 @@ class ChapterViewModel {
           controller.jumpTo(y - 8);
         }
       } else {
-        dmPrint('scrollToVerse did not find verse $verse');
+        dmPrint(
+            'ChapterViewModel scrollToVerse for $volume/$book/$chapter did not find verse $verse');
       }
     }
   }
@@ -427,11 +428,12 @@ class ChapterViewModel {
     }
     */
 
-    // Handle the tap if the tapDown/Up values are set.
-    if (!handledTap && _globalTapUpOffset != null) {
+    // Handle the tap if the tapDown/Up values are set and this is a Bible volume.
+    if (!handledTap && _globalTapUpOffset != null && isBibleId(volume)) {
       final tecHtmlRenderBox = globalKey.currentContext?.findRenderObject();
       if (tecHtmlRenderBox is RenderBox && tecHtmlRenderBox.hasSize) {
         final pt = _globalTapUpOffset - tecHtmlRenderBox.localToGlobal(Offset.zero);
+        final tecHtmlWidth = tecHtmlRenderBox.size.width;
 
         const hitPadding = 12.0;
 
@@ -443,8 +445,10 @@ class ChapterViewModel {
           if (ro is RenderBox && ro.hasSize) {
             final offset = ro.getTransformTo(tecHtmlRenderBox)?.getTranslation();
             if (offset != null) {
-              final rect = Rect.fromLTWH(offset.x, offset.y, ro.size.width, ro.size.height)
-                  .inflate(hitPadding);
+              // Extend the rect width to the full width of the TecHtml view.
+              final rect =
+                  Rect.fromLTWH(offset.x, offset.y, tecHtmlWidth - offset.x, ro.size.height)
+                      .inflate(hitPadding);
 
               // If the tap point is in this render box's inflated rect...
               if (rect.contains(pt)) {
@@ -457,14 +461,14 @@ class ChapterViewModel {
                       if (span is TaggableTextSpan) {
                         final tag = span.tag;
                         if (tag is VerseTag && (tag.isInFootnote || tag.isInMarginNote)) {
-                          final anchor =
-                              paragraph.anchorAtRange(TextRange(start: index, end: index + 1));
+                          final anchor = paragraph
+                              .anchorAtRange(TextRange(start: index, end: index + 1), trim: false);
                           if (anchor?.copyInflated(hitPadding)?.containsPoint(pt) ?? false) {
                             if (tag.isInFootnote) {
-                              dmPrint('tapped on footnote in verse ${tag.verse}');
+                              // dmPrint('tapped on footnote in verse ${tag.verse}');
                               _onTapFootnote(context, tag, _globalTapUpOffset);
                             } else if (tag.isInMarginNote) {
-                              dmPrint('tapped on margin note in verse ${tag.verse}');
+                              // dmPrint('tapped on margin note in verse ${tag.verse}');
                               _onTapMarginNote(context, tag);
                             }
                             return false; // Stop walking the span tree.
@@ -474,22 +478,29 @@ class ChapterViewModel {
                       return true; // Continue walking the span tree.
                     });
 
+                    // Next, see if the tap landed on, or to the right of, a verse...
                     if (!handledTap) {
-                      // Next, find the text that was tapped on.
-                      final range = paragraph.wordBoundaryAtPt(pt);
-                      if (range != null) {
-                        handledTap = true;
-
-                        final text = paragraph.text.substring(range.start, range.end);
-                        final taggedText =
-                            paragraph.anchorAtRange(range)?.taggedTextWithParagraphs([paragraph]);
-                        dmPrint('tapped on: "$text" with tag:${taggedText?.tag}');
-
-                        final tag = taggedText?.tag;
-                        if (tag is VerseTag && isBibleId(volume)) {
-                          selection.toggleVerse(context, tag.verse);
+                      int lastVerseInParagraph;
+                      handledTap = !paragraph.visitChildSpans((span, index) {
+                        if (span is TaggableTextSpan &&
+                            span.text.isNotEmpty &&
+                            span.tag is VerseTag &&
+                            (span.tag as VerseTag).isInVerse) {
+                          final verse = (span.tag as VerseTag).verse;
+                          final includeLastLine = span.text.endsWith('\n') ||
+                              (lastVerseInParagraph ??= paragraph.lastVerseInParagraph()) == verse;
+                          final anchor = paragraph
+                              .anchorAtRange(TextRange(start: index, end: index + span.text.length),
+                                  trim: false)
+                              ?.copyWithRightEdge(tecHtmlWidth, includeLastLine: includeLastLine);
+                          if (anchor?.containsPoint(pt) ?? false) {
+                            // dmPrint('tapped on "$text"');
+                            selection.toggleVerse(context, verse);
+                            return false; // Stop walking the span tree.
+                          }
                         }
-                      }
+                        return true; // Continue walking the span tree.
+                      });
                     }
                   }
                 } else {
@@ -617,5 +628,31 @@ Future<ErrorOrValue<String>> chapterHtmlWith(Volume volume, int book, int chapte
       }
       return ErrorOrValue<String>(null, html.toString());
     }
+  }
+}
+
+extension on TecSelectionAnchor {
+  TecSelectionAnchor copyWithRightEdge(double rightEdge, {bool includeLastLine = false}) =>
+      TecSelectionAnchor(
+        paragraph,
+        textSel,
+        rects
+            .map((r) => !includeLastLine && rects.last == r
+                ? r
+                : Rect.fromLTRB(r.left, r.top, rightEdge, r.bottom))
+            .toList(),
+      );
+}
+
+extension on TecSelectionParagraph {
+  int lastVerseInParagraph() {
+    var lastVerse = 0;
+    visitChildSpans((span, index) {
+      if (span is TaggableTextSpan && span.tag is VerseTag && (span.tag as VerseTag).isInVerse) {
+        lastVerse = (span.tag as VerseTag).verse;
+      }
+      return true; // Continue walking the span tree.
+    });
+    return lastVerse;
   }
 }
