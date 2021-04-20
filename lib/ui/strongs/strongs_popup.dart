@@ -1,3 +1,4 @@
+import 'package:bible/models/app_settings.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,35 +33,35 @@ Future<void> showStrongsPopup({
         return BlocProvider.value(
           value: originalContext.tbloc<VolumeViewDataBloc>(),
           child: Scaffold(
+            backgroundColor: isDarkTheme ? Colors.black : Colors.white,
             appBar: MinHeightAppBar(
               appBar: AppBar(
                   leading: const CloseButton(), title: isNullOrEmpty(title) ? null : Text(title)),
             ),
-            body: Container(
-              color: isDarkTheme ? Colors.black : Colors.white,
-              child: TecFutureBuilder<ErrorOrValue<String>>(
-                futureBuilder: () => bible.strongsHtmlWith(strongsId),
-                builder: (context, result, error) {
-                  final htmlFragment = result?.value;
-                  if (isNotNullOrEmpty(htmlFragment)) {
-                    final fullHtml = strongsHtmlWithFragment(htmlFragment, darkTheme: isDarkTheme);
-                    return SingleChildScrollView(
-                      child: TecHtml(
-                        fullHtml,
-                        baseUrl: bible.baseUrl,
-                        selectable: false,
-                        tagHtmlElement: helper.tagHtmlElement,
-                        spanForText: (text, style, tag) =>
-                            strongsSpanForText(context, text, style, tag),
-                      ),
-                    );
-                  } else {
-                    return Center(
-                      child: error == null ? const LoadingIndicator() : Text(error.toString()),
-                    );
-                  }
-                },
-              ),
+            body: TecFutureBuilder<ErrorOrValue<String>>(
+              futureBuilder: () => bible.strongsHtmlWith(strongsId),
+              builder: (context, result, error) {
+                final htmlFragment = result?.value;
+                if (isNotNullOrEmpty(htmlFragment)) {
+                  final fullHtml = strongsHtmlWithFragment(htmlFragment,
+                      darkTheme: isDarkTheme,
+                      fontSizePercent: (90 * contentTextScaleFactorWith(context)).toInt());
+                  return SingleChildScrollView(
+                    child: TecHtml(
+                      fullHtml,
+                      baseUrl: bible.baseUrl,
+                      selectable: false,
+                      tagHtmlElement: helper.tagHtmlElement,
+                      spanForText: (text, style, tag) =>
+                          strongsSpanForText(context, text, style, tag),
+                    ),
+                  );
+                } else {
+                  return Center(
+                    child: error == null ? const LoadingIndicator() : Text(error.toString()),
+                  );
+                }
+              },
             ),
           ),
         );

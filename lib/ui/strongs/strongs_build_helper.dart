@@ -117,10 +117,7 @@ String strongsHtmlWithFragment(
 
   final fontSize = (fontSizePercent ?? 100);
   buffer
-    ..write('<body style="background-color: $color; '
-        // 'margin-left: $marginLeft; margin-right: $marginRight; '
-        // 'padding-top: $marginTop; padding-bottom: $marginBottom; '
-        'font-size: $fontSize%;">\n')
+    ..write('<body style="font-size: $fontSize%;padding-bottom:40px">\n')
     ..write('$htmlFragment\n\n')
     ..write('</body>\n</html>\n');
 
