@@ -26,7 +26,7 @@ class ChapterVerses {
         '${refForChapter.volume}/chapters/${refForChapter.book}_${refForChapter.chapter}';
     // check cloudfront cache
     final json = await TecCache.shared.jsonFromUrl(
-      url: '$cloudFrontStreamUrl/$cacheParam.json.gz',
+      url: '$cloudFrontStreamUrl/$cacheParam.json',
       connectionTimeout: const Duration(seconds: 10),
     );
 

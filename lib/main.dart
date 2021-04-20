@@ -63,7 +63,7 @@ Future<void> main() async {
       TecPlatform.isWeb ? 'WebSite' : '${TecPlatform.isIOS ? 'IOS' : 'PLAY'}_TecartaBible';
 
   VolumesRepository.shared = TecVolumesRepository(
-    productsUrl: '$cloudFrontStreamUrl/products-list/$product.json.gz',
+    productsUrl: '$cloudFrontStreamUrl/products-list/$product.json',
     productsBundleKey: 'assets/products.json',
     bundledProducts: [
       BundledProduct([9], 'assets'),

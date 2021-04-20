@@ -38,12 +38,14 @@ class DownloadsBlocImp extends DownloadsBloc {
         newItems[volumeId].status == DownloadStatus.failed ||
         newItems[volumeId].status == DownloadStatus.canceled);
 
-    final licenseUrl = '$cloudFrontStreamUrl/products-list/license-$volumeId.json.gz';
+    final licenseUrl = '$cloudFrontStreamUrl/products-list/license-$volumeId.json';
     final json = await sendHttpRequest<Map<String, dynamic>>(HttpRequestType.get,
-        url: licenseUrl, completion: (status, json, dynamic error) => Future.value(json));
+        url: licenseUrl,
+        completion: (status, json, dynamic error) => Future.value(json));
 
     if (json != null) {
-      final url = as<String>(json['url']);
+      const _name = 0, _size = 1, _url = 2;
+      final url = as<String>(json['list'][_url]);
       if (isNotNullOrEmpty(url)) {
         final taskId = await FlutterDownloader.enqueue(
             url: url,
@@ -135,7 +137,7 @@ class DownloadsBlocImp extends DownloadsBloc {
       if (isDebugMode) {
         // dmPrint('UI Isolate Callback: $data');
       }
-      if (/*!isClosed && // bloc class now does a closed test */data is List<dynamic>) {
+      if (/*!isClosed && // bloc class now does a closed test */ data is List<dynamic>) {
         final taskId = as<String>(data[0]);
         final status = as<DownloadTaskStatus>(data[1]);
         final progress = as<int>(data[2]);

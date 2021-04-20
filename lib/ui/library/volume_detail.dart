@@ -403,7 +403,7 @@ Future<String> _descriptionWithVolume(Volume volume) async {
 
   try {
     final prefix = TecPlatform.isIOS ? 'IOS' : 'PLAY';
-    final url = '$cloudFrontStreamUrl/products-desc/${prefix}_TecartaBible.${volume.id}.json.gz';
+    final url = '$cloudFrontStreamUrl/products-desc/${prefix}_TecartaBible.${volume.id}.json';
     final response = await http.get(Uri.parse(url));
     final jsonStr = isNullOrEmpty(response?.bodyBytes) ? null : utf8.decode(response.bodyBytes);
     final dynamic json = jsonDecode(jsonStr);

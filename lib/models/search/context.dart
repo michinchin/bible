@@ -34,7 +34,7 @@ class Context {
     }
 
     final json = await TecCache.shared.jsonFromUrl(
-      url: '$cloudFrontStreamUrl/$translation/chapters/${book}_$chapter.json.gz',
+      url: '$cloudFrontStreamUrl/$translation/chapters/${book}_$chapter.json',
     );
     Context context;
     if (json != null) {
