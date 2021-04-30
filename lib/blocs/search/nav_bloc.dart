@@ -71,9 +71,11 @@ class NavBloc extends Bloc<NavEvent, NavState> {
   @override
   Stream<NavState> mapEventToState(NavEvent event) async* {
     if (event is _LoadWordSuggestions) {
-      final suggestions = await _loadWordSuggestions(event.search);
-      yield state.copyWith(
-          wordSuggestions: suggestions, navViewState: NavViewState.searchSuggestions);
+      // final suggestions = await _loadWordSuggestions(event.search);
+      // TODO(abby): fix word suggest
+      // yield state.copyWith(
+      // wordSuggestions: suggestions, navViewState: NavViewState.searchSuggestions);
+
     } else {
       final newState = event.when(
           changeNavView: _changeNavView,
