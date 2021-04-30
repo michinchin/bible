@@ -103,9 +103,10 @@ extension AppExtOnThemeData on ThemeData {
   ///
   ThemeData copyWithAppTheme() {
     final bodyColor = brightness == Brightness.light ? Colors.grey[800] : const Color(0xFFBBBBBB);
+    const tecartaBlue = Color(0xff4a7dee);
 
     return copyWith(
-      accentColor: brightness == Brightness.light ? accentColor : Colors.blue,
+      accentColor: brightness == Brightness.light ? accentColor : tecartaBlue,
       bottomSheetTheme:
           bottomSheetTheme.copyWith(elevation: defaultElevation, shape: bottomSheetShape),
       appBarTheme: tecAppBarTheme(),

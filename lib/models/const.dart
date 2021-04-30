@@ -34,7 +34,9 @@ class Const {
 
   // Links
   static const tecartaBibleLink = 'https://tecartabible.com/';
-
+  static const termsLink = 'https://tecartabible.com/terms';
+  static const privacyLink = 'https://tecartabible.com/privacy';
+  
   // Notifications
   static const prefFirstTimeOpen = 'firstTimeOpen';
   static const prefNotifications = 'notifications';
