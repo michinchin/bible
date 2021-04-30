@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
@@ -45,7 +46,10 @@ class _SettingsViewState extends State<SettingsView> {
     return Scaffold(
       appBar: MinHeightAppBar(
         appBar: AppBar(
-          title: const Text('Settings'),
+          title: const Text(
+            'Settings',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           elevation: 0,
         ),
       ),
@@ -78,6 +82,7 @@ class _SettingsViewState extends State<SettingsView> {
                     ),
                     _GreyContainer(
                       child: ListTile(
+                        dense: true,
                         leading: const Icon(FeatherIcons.sun),
                         title: const Text('Daily notifications'),
                         trailing: const Icon(Icons.chevron_right),
@@ -90,6 +95,7 @@ class _SettingsViewState extends State<SettingsView> {
                         icon: FeatherIcons.volume2),
                     const _GreyContainer(
                       child: ListTile(
+                        dense: true,
                         leading: Icon(Icons.record_voice_over_outlined),
                         title: Text('Voice'),
                         trailing: Icon(Icons.chevron_right),
@@ -117,10 +123,16 @@ class _SettingsViewState extends State<SettingsView> {
 
   List<Widget> accountTiles(BuildContext context) {
     if (AppSettings.shared.userAccount.isSignedIn) {
+      final lastSyncTime = tec.dateTimeFromDbInt(AppSettings.shared.userAccount.user.lastSyncTime);
       return [
         ListTile(
+          dense: true,
           leading: const Icon(FeatherIcons.refreshCcw),
           title: const Text('Sync Now'),
+          trailing: Text(
+            'Last synced: ${tec.shortDate(lastSyncTime)}',
+            style: const TextStyle(fontSize: 10),
+          ),
           onTap: () async {
             await tecShowProgressDlg(
                 context: context,
@@ -130,18 +142,21 @@ class _SettingsViewState extends State<SettingsView> {
           },
         ),
         ListTile(
+          dense: true,
           leading: const Icon(FeatherIcons.mail),
           title: const Text('Change email'),
           trailing: const Icon(Icons.chevron_right),
           onTap: () {},
         ),
         ListTile(
+          dense: true,
           leading: const Icon(FeatherIcons.key),
           title: const Text('Change password'),
           trailing: const Icon(Icons.chevron_right),
           onTap: () {},
         ),
         ListTile(
+          dense: true,
           leading: const Icon(FeatherIcons.logOut),
           title: const Text('Sign Out'),
           onTap: () async {
@@ -156,6 +171,7 @@ class _SettingsViewState extends State<SettingsView> {
     } else {
       return [
         ListTile(
+          dense: true,
           leading: const Icon(FeatherIcons.logIn),
           title: const Text('Sign In'),
           trailing: const Icon(Icons.chevron_right),
@@ -174,6 +190,7 @@ class _SettingsViewState extends State<SettingsView> {
   List<Widget> aboutTiles(BuildContext context) {
     return [
       ListTile(
+        dense: true,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -189,18 +206,21 @@ class _SettingsViewState extends State<SettingsView> {
         ),
       ),
       ListTile(
+        dense: true,
         leading: const Icon(Icons.public),
         title: const Text('Website'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => launcher.launch(Const.tecartaBibleLink),
       ),
       ListTile(
+        dense: true,
         leading: const Icon(Icons.description),
         title: const Text('Terms Of Service'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => launcher.launch(Const.termsLink),
       ),
       ListTile(
+        dense: true,
         leading: const Icon(FeatherIcons.lock),
         title: const Text('Privacy Policy'),
         trailing: const Icon(Icons.chevron_right),
@@ -212,12 +232,14 @@ class _SettingsViewState extends State<SettingsView> {
   List<Widget> helpTiles(BuildContext context) {
     return [
       ListTile(
+        dense: true,
         leading: const Icon(Icons.info_outline),
         title: const Text('FAQs'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => showZendeskHelp(context),
       ),
       ListTile(
+          dense: true,
           leading: const Icon(FeatherIcons.mail),
           title: const Text('Email Feedback'),
           trailing: const Icon(Icons.chevron_right),
@@ -227,17 +249,17 @@ class _SettingsViewState extends State<SettingsView> {
 
   List<Widget> readTiles(BuildContext context) {
     final color = Theme.of(context).textColor;
-    final textStyle = TextStyle(fontSize: 15, color: color);
+    // final textStyle = TextStyle(fontSize: 15, color: color);
 
     return [
       _SettingsSwitch(
           secondary: const Icon(FeatherIcons.moon),
-          title: Text('Dark theme', style: textStyle),
+          title: const Text('Dark theme'),
           onChanged: () => context.tbloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
           value: AppSettings.shared.isDarkTheme()),
       _SettingsSwitch(
         secondary: const Icon(Icons.sync_alt),
-        title: Text('Sync chapter', style: textStyle),
+        title: const Text('Sync chapter'),
         onChanged: () {
           final useSharedRef = PrefsBloc.toggle(PrefItemId.syncChapter);
 
@@ -260,33 +282,33 @@ class _SettingsViewState extends State<SettingsView> {
         return _SettingsSwitch(
           enabled: PrefsBloc.getBool(PrefItemId.syncChapter),
           secondary: Transform.rotate(angle: 90 * math.pi / 180, child: const Icon(Icons.sync_alt)),
-          title: Text('Sync verse', style: textStyle),
+          title: const Text('Sync verse'),
           onChanged: () => PrefsBloc.toggle(PrefItemId.syncVerse),
           value: PrefsBloc.getBool(PrefItemId.syncVerse),
         );
       }),
       _SettingsSwitch(
         secondary: const Icon(Icons.link),
-        title: Text('Include Link with Share', style: textStyle),
+        title: const Text('Include Link with Share'),
         onChanged: () => PrefsBloc.toggle(PrefItemId.includeShareLink),
         value: PrefsBloc.getBool(PrefItemId.includeShareLink),
       ),
       _SettingsSwitch(
         secondary: const Icon(Icons.close),
-        title: Text('Close Sheet after Copy/Share', style: textStyle),
+        title: const Text('Close Sheet after Copy/Share'),
         onChanged: () => PrefsBloc.toggle(PrefItemId.closeAfterCopyShare),
         value: PrefsBloc.getBool(PrefItemId.closeAfterCopyShare),
       ),
       _SettingsSwitch(
         secondary: const Icon(Icons.unfold_more),
-        title: Text('Autoscroll', style: textStyle),
+        title: const Text('Autoscroll'),
         onChanged: () => TecAutoScroll.setEnabled(enabled: !TecAutoScroll.isEnabled()),
         value: TecAutoScroll.isEnabled(),
       ),
       ListTile(
         dense: true,
         leading: const Icon(Icons.format_size),
-        title: Text('Text Settings', style: textStyle),
+        title: const Text('Text Settings'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
           while (Navigator.canPop(context)) {

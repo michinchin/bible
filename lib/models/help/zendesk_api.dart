@@ -5,7 +5,6 @@ const zendeskApiUrl = 'https://support.tecartabible.com/api/v2/help_center';
 const articleKey = 'articles';
 const authKey = 'h N W Z 0 B U Z r l W b c n R h L m N v b S 9 0 b 2 t l b j p C W D l F '
     'W F d E d G h Q V E 1 Y Z 2 1 5 W V N k S F B x T W N a N z N t c n V Q d 1 B U V l R D Z 0 N h';
-// 'bWlrZUB0ZWNhcnRhLmNvbS90b2tlbjpCWDlFWFdEdGhQVE1YZ215WVNkSFBxTWNaNzNtcnVQd1BUVlRDZ0Nh';
 const categoryId = '200291314';
 
 class ZendeskApi {
