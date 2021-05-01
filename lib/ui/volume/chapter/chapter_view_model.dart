@@ -24,7 +24,7 @@ import '../../common/common.dart';
 import 'chapter_selection.dart';
 import 'verse_tag.dart';
 
-const _despanifyChapterHtml = true;
+const _despanifyChapterHtml = false;
 const _superscriptVerseNumbers = true; // kDebugMode;
 
 const _footnote = '\ue900';
