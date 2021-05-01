@@ -358,7 +358,7 @@ class __VolumeFilterState extends State<_VolumeFilter> {
                         ? Wrap(
                             alignment: WrapAlignment.start,
                             spacing: 10,
-                            runSpacing: 10,
+                            // runSpacing: 10,
                             children: [
                               for (final v in map[lang])
                                 ButtonTheme(
@@ -371,7 +371,7 @@ class __VolumeFilterState extends State<_VolumeFilter> {
                                       style: TextButton.styleFrom(
                                         shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(5)),
-                                        primary: _selected(v)
+                                        backgroundColor: _selected(v)
                                             ? Theme.of(context).accentColor
                                             : Theme.of(context).brightness == Brightness.dark
                                                 ? Theme.of(context).cardColor
@@ -575,7 +575,7 @@ class __BookFilterState extends State<_BookFilter> {
                       child: TextButton(
                           style: TextButton.styleFrom(
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                            primary: !widget.selectedBooks.contains(b)
+                            backgroundColor: !widget.selectedBooks.contains(b)
                                 ? Theme.of(context).accentColor
                                 : isDarkTheme
                                     ? Theme.of(context).cardColor
@@ -626,7 +626,7 @@ class __BookFilterState extends State<_BookFilter> {
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                        primary: _testSelected(s)
+                        backgroundColor: _testSelected(s)
                             ? Theme.of(context).accentColor
                             : isDarkTheme
                                 ? Theme.of(context).cardColor

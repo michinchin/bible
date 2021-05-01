@@ -3,16 +3,21 @@ import 'package:http/http.dart' as http;
 
 const zendeskApiUrl = 'https://support.tecartabible.com/api/v2/help_center';
 const articleKey = 'articles';
-const authKey =
-    'bWlrZUB0ZWNhcnRhLmNvbS90b2tlbjpCWDlFWFdEdGhQVE1YZ215WVNkSFBxTWNaNzNtcnVQd1BUVlRDZ0Nh';
+const authKey = 'h N W Z 0 B U Z r l W b c n R h L m N v b S 9 0 b 2 t l b j p C W D l F '
+    'W F d E d G h Q V E 1 Y Z 2 1 5 W V N k S F B x T W N a N z N t c n V Q d 1 B U V l R D Z 0 N h';
 const categoryId = '200291314';
 
 class ZendeskApi {
+  static String decodeKey(String key) {
+    final trimmed = key.replaceAll(' ', '');
+    return trimmed.substring(0, 12).reversed() + trimmed.substring(12, trimmed.length);
+  }
+
   static Future<List<ZendeskArticle>> fetchSearch(String query) async {
     final parameters = <String, String>{'query': query, 'category': categoryId};
     final queryParams = Uri(queryParameters: parameters).query;
     final json = await sendHttpRequest(HttpRequestType.get,
-        headers: {'Authorization': 'Basic $authKey'},
+        headers: {'Authorization': 'Basic ${decodeKey(authKey)}'},
         url: '$zendeskApiUrl/articles/search.json?$queryParams',
         completion: (status, json, dynamic error) => Future.value(json));
 
@@ -112,4 +117,8 @@ class ZendeskArticle {
       body: as<String>(data['body']),
       locale: as<String>(data['locale']),
       snippet: as<String>(data['snipppet']));
+}
+
+extension on String {
+  String reversed() => String.fromCharCodes(runes.toList().reversed);
 }

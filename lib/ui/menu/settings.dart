@@ -1,13 +1,15 @@
 import 'dart:math' as math;
 
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
+import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:tec_bloc/tec_bloc.dart';
+import 'package:tec_user_account/tec_user_account_ui.dart' as tua;
+import 'package:tec_util/tec_util.dart' as tec;
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../blocs/app_theme_bloc.dart';
 import '../../blocs/prefs_bloc.dart';
@@ -28,42 +30,33 @@ void showSettings(BuildContext context) =>
             ),
         fullscreenDialog: true));
 
-class SettingsView extends StatelessWidget {
+class SettingsView extends StatefulWidget {
   final MainMenuModel menuModel;
 
   const SettingsView({Key key, this.menuModel}) : super(key: key);
 
-  Widget _accountButton(BuildContext context) {
-    final signedIn = AppSettings.shared.userAccount.user.isSignedIn;
+  @override
+  _SettingsViewState createState() => _SettingsViewState();
+}
 
-    return TextButton(
-        child: Text(signedIn ? AppSettings.shared.userAccount.user.email : 'Sign in',
-            style: TextStyle(color: Theme.of(context).textColor)),
-        onPressed: () async {
-          await tua.showSignInDlg(
-              context: context,
-              account: AppSettings.shared.userAccount,
-              useRootNavigator: true,
-              appName: Const.appNameForUA);
-
-          if (signedIn != AppSettings.shared.userAccount.user.isSignedIn) {
-            await Navigator.of(context).maybePop();
-          }
-        });
-  }
-
+class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
+    final isSignedIn = AppSettings.shared.userAccount.isSignedIn;
     return Scaffold(
       appBar: MinHeightAppBar(
         appBar: AppBar(
-          title: const Text('Settings'),
+          title: const Text(
+            'Settings',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           elevation: 0,
         ),
       ),
       body: Container(
           color: Theme.of(context).canvasColor,
           child: SafeArea(
+            bottom: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -71,31 +64,55 @@ class SettingsView extends StatelessWidget {
                 Expanded(
                   child: ListView(children: [
                     _TitleSettingTile(
-                      title: 'Account',
+                      title: isSignedIn ? AppSettings.shared.userAccount.user.email : 'Account',
                       icon: FeatherIcons.user,
-                      trailing: _accountButton(context),
+                      subtitle: 'Edit and manage your account details.',
                     ),
-                    const _TitleSettingTile(title: 'Read', icon: FeatherIcons.bookmark),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 30, bottom: 10),
-                      child: Column(children: readTiles(context)),
+                    _SecondaryTiles(accountTiles(context)),
+                    const _TitleSettingTile(
+                      title: 'Read',
+                      icon: FeatherIcons.book,
+                      subtitle: 'Adjust how you read your Bible',
                     ),
-                    _TitleSettingTile(
+                    _SecondaryTiles(readTiles(context)),
+                    const _TitleSettingTile(
                       title: 'Notifications',
                       icon: FeatherIcons.bell,
-                      onPressed: () => NotificationsModel.showNotificationsView(context),
+                      subtitle: 'Manage your reminders',
                     ),
-                    const _TitleSettingTile(title: 'Audio', icon: FeatherIcons.volume1),
-                    _TitleSettingTile(
+                    _GreyContainer(
+                      child: ListTile(
+                        dense: true,
+                        leading: const Icon(FeatherIcons.sun),
+                        title: const Text('Daily notifications'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => NotificationsModel.showNotificationsView(context),
+                      ),
+                    ),
+                    const _TitleSettingTile(
+                        title: 'Audio',
+                        subtitle: 'Adjust how you listen to your Bible',
+                        icon: FeatherIcons.volume2),
+                    const _GreyContainer(
+                      child: ListTile(
+                        dense: true,
+                        leading: Icon(Icons.record_voice_over_outlined),
+                        title: Text('Voice'),
+                        trailing: Icon(Icons.chevron_right),
+                      ),
+                    ),
+                    const _TitleSettingTile(
                       title: 'About',
-                      icon: FeatherIcons.info,
-                      onPressed: () => menuModel.showAboutDialog(context),
+                      icon: FeatherIcons.smartphone,
+                      subtitle: 'More about the app',
                     ),
-                    _TitleSettingTile(
+                    _SecondaryTiles(aboutTiles(context)),
+                    const _TitleSettingTile(
                       title: 'Help',
+                      subtitle: 'Get quick assistance',
                       icon: FeatherIcons.helpCircle,
-                      onPressed: () => showZendeskHelp(context),
                     ),
+                    _SecondaryTiles(helpTiles(context)),
                   ]),
                 )
               ],
@@ -104,19 +121,145 @@ class SettingsView extends StatelessWidget {
     );
   }
 
+  List<Widget> accountTiles(BuildContext context) {
+    if (AppSettings.shared.userAccount.isSignedIn) {
+      final lastSyncTime = tec.dateTimeFromDbInt(AppSettings.shared.userAccount.user.lastSyncTime);
+      return [
+        ListTile(
+          dense: true,
+          leading: const Icon(FeatherIcons.refreshCcw),
+          title: const Text('Sync Now'),
+          trailing: Text(
+            'Last synced: ${tec.shortDate(lastSyncTime)}',
+            style: const TextStyle(fontSize: 10),
+          ),
+          onTap: () async {
+            await tecShowProgressDlg(
+                context: context,
+                title: 'Syncing',
+                future: AppSettings.shared.userAccount.syncUserDb<void>(fullSync: true));
+            TecToast.show(context, 'Success');
+          },
+        ),
+        ListTile(
+          dense: true,
+          leading: const Icon(FeatherIcons.mail),
+          title: const Text('Change email'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {},
+        ),
+        ListTile(
+          dense: true,
+          leading: const Icon(FeatherIcons.key),
+          title: const Text('Change password'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {},
+        ),
+        ListTile(
+          dense: true,
+          leading: const Icon(FeatherIcons.logOut),
+          title: const Text('Sign Out'),
+          onTap: () async {
+            await tecShowProgressDlg(
+                context: context,
+                title: 'Signing out',
+                future: AppSettings.shared.userAccount.logOut<void>());
+            setState(() {});
+          },
+        ),
+      ];
+    } else {
+      return [
+        ListTile(
+          dense: true,
+          leading: const Icon(FeatherIcons.logIn),
+          title: const Text('Sign In'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () async {
+            await tua.showSignInDlg(
+                context: context,
+                account: AppSettings.shared.userAccount,
+                appName: Const.appNameForUA);
+            setState(() {});
+          },
+        ),
+      ];
+    }
+  }
+
+  List<Widget> aboutTiles(BuildContext context) {
+    return [
+      ListTile(
+        dense: true,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Version',
+              style: TextStyle(fontSize: 10),
+            ),
+            Text(
+              AppSettings.shared.deviceInfo.version,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            )
+          ],
+        ),
+      ),
+      ListTile(
+        dense: true,
+        leading: const Icon(Icons.public),
+        title: const Text('Website'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => launcher.launch(Const.tecartaBibleLink),
+      ),
+      ListTile(
+        dense: true,
+        leading: const Icon(Icons.description),
+        title: const Text('Terms Of Service'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => launcher.launch(Const.termsLink),
+      ),
+      ListTile(
+        dense: true,
+        leading: const Icon(FeatherIcons.lock),
+        title: const Text('Privacy Policy'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => launcher.launch(Const.privacyLink),
+      )
+    ];
+  }
+
+  List<Widget> helpTiles(BuildContext context) {
+    return [
+      ListTile(
+        dense: true,
+        leading: const Icon(Icons.info_outline),
+        title: const Text('FAQs'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => showZendeskHelp(context),
+      ),
+      ListTile(
+          dense: true,
+          leading: const Icon(FeatherIcons.mail),
+          title: const Text('Email Feedback'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => MainMenuModel().emailFeedback(context)),
+    ];
+  }
+
   List<Widget> readTiles(BuildContext context) {
     final color = Theme.of(context).textColor;
-    final textStyle = TextStyle(fontSize: 15, color: color);
+    // final textStyle = TextStyle(fontSize: 15, color: color);
 
     return [
       _SettingsSwitch(
-          secondary: Icon(Icons.lightbulb_outline, color: color),
-          title: Text('Dark theme', style: textStyle),
+          secondary: const Icon(FeatherIcons.moon),
+          title: const Text('Dark theme'),
           onChanged: () => context.tbloc<ThemeModeBloc>().add(ThemeModeEvent.toggle),
           value: AppSettings.shared.isDarkTheme()),
       _SettingsSwitch(
-        secondary: Icon(Icons.sync_alt, color: color),
-        title: Text('Sync chapter', style: textStyle),
+        secondary: const Icon(Icons.sync_alt),
+        title: const Text('Sync chapter'),
         onChanged: () {
           final useSharedRef = PrefsBloc.toggle(PrefItemId.syncChapter);
 
@@ -138,35 +281,35 @@ class SettingsView extends StatelessWidget {
       BlocBuilder<PrefsBloc, PrefBlocState>(builder: (context, state) {
         return _SettingsSwitch(
           enabled: PrefsBloc.getBool(PrefItemId.syncChapter),
-          secondary: Transform.rotate(
-              angle: 90 * math.pi / 180, child: Icon(Icons.sync_alt, color: color)),
-          title: Text('Sync verse', style: textStyle),
+          secondary: Transform.rotate(angle: 90 * math.pi / 180, child: const Icon(Icons.sync_alt)),
+          title: const Text('Sync verse'),
           onChanged: () => PrefsBloc.toggle(PrefItemId.syncVerse),
           value: PrefsBloc.getBool(PrefItemId.syncVerse),
         );
       }),
       _SettingsSwitch(
-        secondary: Icon(Icons.link, color: color),
-        title: Text('Include Link with Share', style: textStyle),
+        secondary: const Icon(Icons.link),
+        title: const Text('Include Link with Share'),
         onChanged: () => PrefsBloc.toggle(PrefItemId.includeShareLink),
         value: PrefsBloc.getBool(PrefItemId.includeShareLink),
       ),
       _SettingsSwitch(
-        secondary: Icon(Icons.close, color: color),
-        title: Text('Close Sheet after Copy/Share', style: textStyle),
+        secondary: const Icon(Icons.close),
+        title: const Text('Close Sheet after Copy/Share'),
         onChanged: () => PrefsBloc.toggle(PrefItemId.closeAfterCopyShare),
         value: PrefsBloc.getBool(PrefItemId.closeAfterCopyShare),
       ),
       _SettingsSwitch(
-        secondary: Icon(Icons.play_circle_outline, color: color),
-        title: Text('Autoscroll', style: textStyle),
+        secondary: const Icon(Icons.unfold_more),
+        title: const Text('Autoscroll'),
         onChanged: () => TecAutoScroll.setEnabled(enabled: !TecAutoScroll.isEnabled()),
         value: TecAutoScroll.isEnabled(),
       ),
       ListTile(
         dense: true,
-        leading: Icon(Icons.format_size, color: color),
-        title: Text('Text Settings', style: textStyle),
+        leading: const Icon(Icons.format_size),
+        title: const Text('Text Settings'),
+        trailing: const Icon(Icons.chevron_right),
         onTap: () {
           while (Navigator.canPop(context)) {
             Navigator.of(context).pop();
@@ -175,6 +318,41 @@ class SettingsView extends StatelessWidget {
         },
       )
     ];
+  }
+}
+
+class _GreyContainer extends StatelessWidget {
+  final Widget child;
+  const _GreyContainer({this.child});
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+        decoration: ShapeDecoration(
+            color: isDarkMode ? Theme.of(context).cardColor : const Color(0xFFF0F0F0),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+        margin: const EdgeInsets.all(15),
+        child: child);
+  }
+}
+
+class _SecondaryTiles extends StatelessWidget {
+  final List<Widget> tiles;
+  const _SecondaryTiles(this.tiles);
+  @override
+  Widget build(BuildContext context) {
+    return _GreyContainer(
+      child: ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          separatorBuilder: (c, i) => const Divider(
+                height: 5,
+                indent: 10,
+                endIndent: 10,
+              ),
+          itemCount: tiles.length,
+          itemBuilder: (c, i) => tiles[i]),
+    );
   }
 }
 
@@ -203,8 +381,10 @@ class __SettingsSwitchState extends State<_SettingsSwitch> {
 
   @override
   Widget build(BuildContext context) {
-    return SwitchListTile.adaptive(
+    return SwitchListTile(
       dense: true,
+      activeTrackColor: Const.tecartaBlue.withOpacity(0.5),
+      activeColor: Colors.white,
       value: _value,
       onChanged: widget.enabled
           ? (_) {
@@ -223,17 +403,13 @@ class __SettingsSwitchState extends State<_SettingsSwitch> {
 class _TitleSettingTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String subtitle;
   final VoidCallback onPressed;
-  final Widget trailing;
 
-  const _TitleSettingTile({this.icon, this.title, this.trailing, this.onPressed});
+  const _TitleSettingTile({this.icon, this.title, this.subtitle, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    final titleWidget = Text(
-      title,
-      style: const TextStyle(fontSize: 18.0),
-    );
     return InkWell(
       onTap: onPressed,
       child: Padding(
@@ -242,18 +418,30 @@ class _TitleSettingTile extends StatelessWidget {
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Row(
               children: [
-                Icon(
-                  icon,
-                  size: 25,
-                ),
+                Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: ShapeDecoration(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                        color: Const.tecartaBlue),
+                    child: Icon(
+                      icon,
+                      size: 18,
+                      color: Colors.white,
+                    )),
                 const VerticalDivider(color: Colors.transparent),
-                titleWidget,
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 12.0, color: Colors.grey),
+                  )
+                ]),
               ],
             ),
-            if (trailing != null)
-              Padding(padding: const EdgeInsets.only(right: 15), child: trailing)
           ]),
-          const Divider(indent: 40),
         ]),
       ),
     );
