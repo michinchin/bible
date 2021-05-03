@@ -88,7 +88,7 @@ class ChapterViewModel {
       final v = tag.verse;
 
       // If it is the verse number span, superscript it.
-      if (_superscriptVerseNumbers && v != null && v != 1 && !tag.isInVerse && text.startsWithDigit) {
+      if (_superscriptVerseNumbers && v != null && !tag.isInVerse && text.startsWithDigit) {
         final vStr = v.toString();
         final l = vStr.length;
         if (text.startsWith(vStr) &&
