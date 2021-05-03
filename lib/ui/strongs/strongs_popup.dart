@@ -1,4 +1,3 @@
-import 'package:bible/models/app_settings.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +6,7 @@ import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
+import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../volume/volume_view_data_bloc.dart';
 import 'strongs_build_helper.dart';

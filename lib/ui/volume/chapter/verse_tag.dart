@@ -7,7 +7,7 @@ import 'package:equatable/equatable.dart';
 ///
 /// Used to tag an HTML text node with the [verse] it is in, the [word] index
 /// of the first word in the text node, and a boolean indicating whether or not
-/// the associated text node is part of the actual verse text (as apposed to
+/// the associated text node is part of the actual verse text (as opposed to
 /// being the verse number, a footnote, a section title, or other text marked
 /// with v="0").
 ///

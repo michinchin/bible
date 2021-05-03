@@ -248,7 +248,7 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   List<Widget> readTiles(BuildContext context) {
-    final color = Theme.of(context).textColor;
+    // final color = Theme.of(context).textColor;
     // final textStyle = TextStyle(fontSize: 15, color: color);
 
     return [

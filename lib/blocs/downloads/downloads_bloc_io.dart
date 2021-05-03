@@ -44,8 +44,7 @@ class DownloadsBlocImp extends DownloadsBloc {
         completion: (status, json, dynamic error) => Future.value(json));
 
     if (json != null) {
-      const _name = 0, _size = 1, _url = 2;
-      final url = as<String>(json['list'][_url]);
+      final url = as<String>(json['list'][2]);
       if (isNotNullOrEmpty(url)) {
         final taskId = await FlutterDownloader.enqueue(
             url: url,

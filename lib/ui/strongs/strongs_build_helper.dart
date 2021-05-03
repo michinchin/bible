@@ -113,7 +113,7 @@ String strongsHtmlWithFragment(
 
   buffer.write('<title></title>\n</head>\n\n');
 
-  final color = (darkTheme ? 'black' : 'white');
+  // final color = (darkTheme ? 'black' : 'white');
 
   final fontSize = (fontSizePercent ?? 100);
   buffer

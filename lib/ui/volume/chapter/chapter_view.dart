@@ -317,8 +317,8 @@ class _ChapterViewState extends State<_ChapterView> {
     // Rebuild the HTML string only when necessary...
     if (_html == null) {
       final customStyles = isBibleId(widget.volume.id)
-          ? ' .C, .cno { display: none; } '
-              '.FOOTNO { line-height: inherit; top: inherit; } '
+          ? '.cno, .C { height: unset; margin-bottom: 0px; } '
+           '.FOOTNO { line-height: inherit; top: inherit; } '
               'h5, .SUBA, h1 { font-weight: normal !important; '
               'font-style: italic; font-size: 100% !important; } '
           : ' p { line-height: 1.2em; } ';
