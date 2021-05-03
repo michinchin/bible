@@ -1,9 +1,11 @@
 import 'dart:collection';
 
+import 'package:flutter/widgets.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
+import '../../common/tec_overflow_box.dart';
 import 'verse_tag.dart';
 
 const _debugMode = false; // kDebugMode
@@ -16,9 +18,11 @@ const _debugMode = false; // kDebugMode
 ///
 class ChapterBuildHelper {
   final int volume;
+  final BookChapterVerse ref;
   final List<String> versesToShow;
+  final double textScaleFactor;
 
-  ChapterBuildHelper(this.volume, this.versesToShow);
+  ChapterBuildHelper(this.volume, this.ref, this.versesToShow, this.textScaleFactor);
 
   TecHtmlTagElementFunc get tagHtmlElement => _tagHtmlElement;
 
@@ -123,6 +127,23 @@ class ChapterBuildHelper {
           }
         }
       }
+    }
+
+    if (attrs.className == 'cno' || attrs.className == 'C') {
+      final fontSize = 63.0 * textScaleFactor;
+      final height = fontSize;
+      return Transform.translate(
+        offset: Offset(0, TecPlatform.isIOS ? 0 : -(fontSize * 0.05).roundToDouble()),
+        child: TecOverflowBox(
+          minHeight: height,
+          maxHeight: height,
+          child: Container(
+            padding: EdgeInsets.only(right: textScaleFactor * 8.0),
+            child: Text(ref.chapter.toString(),
+                style: TextStyle(fontSize: fontSize, fontFamily: 'Palatino')),
+          ),
+        ),
+      );
     }
 
     return VerseTag(

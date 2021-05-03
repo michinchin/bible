@@ -318,7 +318,7 @@ class _ChapterViewState extends State<_ChapterView> {
     if (_html == null) {
       final customStyles = isBibleId(widget.volume.id)
           ? '.cno, .C { height: unset; margin-bottom: 0px; } '
-           '.FOOTNO { line-height: inherit; top: inherit; } '
+              '.FOOTNO { line-height: inherit; top: inherit; } '
               'h5, .SUBA, h1 { font-weight: normal !important; '
               'font-style: italic; font-size: 100% !important; } '
           : ' p { line-height: 1.2em; } ';
@@ -498,7 +498,8 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
         TextStyle(backgroundColor: isDarkTheme ? const Color(0xff393939) : const Color(0xffe6e6e6));
 
     // A new [ChapterBuildHelper] needs to be created for each build...
-    final helper = ChapterBuildHelper(widget.volumeId, widget.versesToShow);
+    final helper = ChapterBuildHelper(
+        widget.volumeId, widget.ref, widget.versesToShow, contentTextScaleFactorWith(context));
 
     final marginWidth = (widget.size.width * _marginPercent).roundToDouble();
     var padding = (widget.padding ?? EdgeInsets.zero);
