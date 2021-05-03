@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+import 'package:float_column/float_column.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_selectable/tec_selectable.dart';
 import 'package:tec_util/tec_util.dart';
@@ -352,34 +354,40 @@ class ChapterViewModel {
       double y;
 
       // Local func that walks the render object tree.
-      void walkRenderTree(RenderObject ro) {
-        // If already been handled, just return.
-        if (handled) return;
+      bool walkRenderTree(Object ro) {
+        final rp = ro is RenderParagraph
+            ? RenderParagraphAdapter(ro)
+            : ro is RenderTextMixin
+                ? ro
+                : null;
 
-        if (ro is RenderBox && ro.hasSize) {
-          if (ro is RenderParagraph && ro.text is TextSpan) {
-            final paragraph = TecSelectionParagraph.from(ro, ancestor: tecHtmlRenderBox);
-            if (paragraph != null) {
-              handled = !paragraph.visitChildSpans((span, index) {
-                if (span is TaggableTextSpan) {
-                  final tag = span.tag;
-                  if (tag is VerseTag && verse >= tag.verse && verse <= tag.endVerse) {
-                    final anchor = paragraph.anchorAtRange(TextRange(start: index, end: index + 1),
-                        trim: false);
-                    y = anchor?.rects?.first?.top;
-                    return false; // Stop walking the span tree.
-                  }
+        if (rp != null && rp.text is TextSpan) {
+          final paragraph = TecSelectionParagraph.from(rp, ancestor: tecHtmlRenderBox);
+          if (paragraph != null) {
+            handled = !paragraph.visitChildSpans((span, index) {
+              if (span is TaggableTextSpan) {
+                final tag = span.tag;
+                if (tag is VerseTag && verse >= tag.verse && verse <= tag.endVerse) {
+                  final anchor =
+                      paragraph.anchorAtRange(TextRange(start: index, end: index + 1), trim: false);
+                  y = anchor?.rects?.first?.top;
+                  return false; // Stop walking the span tree.
                 }
-                return true; // Continue walking the span tree.
-              });
-            }
-          } else {
-            ro.visitChildren(walkRenderTree);
+              }
+              return true; // Continue walking the span tree.
+            });
+
+            // If handled, stop walking the render tree.
+            if (handled) return false;
           }
+        } else if (ro is RenderObject) {
+          // ro.visitChildrenAndTextRenderers(walkRenderTree);
         }
+
+        return true;
       }
 
-      walkRenderTree(tecHtmlRenderBox);
+      tecHtmlRenderBox.visitChildrenAndTextRenderers(walkRenderTree);
 
       if (y != null) {
         // dmPrint('scrollToVerse scrolling to offset: $y, animated: $animated');
@@ -438,22 +446,25 @@ class ChapterViewModel {
         const hitPadding = 12.0;
 
         // Local func that walks the render object tree to find the text span that was tapped.
-        void walkRenderTree(RenderObject ro) {
-          // If the tap has already been handled, just return.
-          if (handledTap) return;
+        bool walkRenderTree(Object ro) {
+          final rp = ro is RenderParagraph
+              ? RenderParagraphAdapter(ro)
+              : ro is RenderTextMixin
+                  ? ro
+                  : null;
 
-          if (ro is RenderBox && ro.hasSize) {
-            final offset = ro.getTransformTo(tecHtmlRenderBox)?.getTranslation();
+          if (rp != null && rp.renderBox.hasSize) {
+            final offset = rp.renderBox.getTransformTo(tecHtmlRenderBox)?.getTranslation();
             if (offset != null) {
               // Extend the rect width to the full width of the TecHtml view.
-              final rect =
-                  Rect.fromLTWH(offset.x, offset.y, tecHtmlWidth - offset.x, ro.size.height)
-                      .inflate(hitPadding);
+              final rect = Rect.fromLTWH(offset.x + rp.offset.dx, offset.y + rp.offset.dy,
+                      tecHtmlWidth - offset.x, rp.renderBox.size.height)
+                  .inflate(hitPadding);
 
               // If the tap point is in this render box's inflated rect...
               if (rect.contains(pt)) {
-                if (ro is RenderParagraph && ro.text is TextSpan) {
-                  final paragraph = TecSelectionParagraph.from(ro, ancestor: tecHtmlRenderBox);
+                if (rp.text is TextSpan) {
+                  final paragraph = TecSelectionParagraph.from(rp, ancestor: tecHtmlRenderBox);
                   if (paragraph != null) {
                     //
                     // First, see if the tap landed on or near a footnote or margin note.
@@ -502,16 +513,21 @@ class ChapterViewModel {
                         return true; // Continue walking the span tree.
                       });
                     }
+
+                    // If handled tap, stop walking the render tree.
+                    if (handledTap) return false;
                   }
-                } else {
-                  ro.visitChildren(walkRenderTree);
+                } else if (ro is RenderObject) {
+                  // ro.visitChildrenAndTextRenderers(walkRenderTree);
                 }
               }
             }
           }
+
+          return true;
         }
 
-        walkRenderTree(tecHtmlRenderBox);
+        tecHtmlRenderBox.visitChildrenAndTextRenderers(walkRenderTree);
       }
     }
 
