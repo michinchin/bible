@@ -1,8 +1,11 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:equatable/equatable.dart';
+import 'package:tec_selectable/tec_selectable.dart';
+
+import '../../../models/string_utils.dart';
 
 ///
 /// Used to tag an HTML text node with the [verse] it is in, the [word] index
@@ -12,7 +15,7 @@ import 'package:equatable/equatable.dart';
 /// with v="0").
 ///
 @immutable
-class VerseTag extends Equatable {
+class VerseTag extends Equatable with SplittableTextSpanTag<VerseTag> {
   final int verse;
   final int word;
   final int endVerse;
@@ -76,5 +79,15 @@ class VerseTag extends Equatable {
     if (href != null) buf.write(', "href": ${jsonEncode(href)}');
     buf.write(' }');
     return buf.toString();
+  }
+
+  @override
+  List<VerseTag> splitWith(TextSpan span, {int atCharacter}) {
+    final text = span?.toPlainText(includeSemanticsLabels: false);
+    if (text != null && atCharacter > 0 && atCharacter < text.length - 1) {
+      final wordCount = text.countOfWords(toIndex: atCharacter);
+      return [this, copyWith(word: word + wordCount)];
+    }
+    return [this, this];
   }
 }
