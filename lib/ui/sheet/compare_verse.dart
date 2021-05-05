@@ -1,3 +1,4 @@
+import 'package:bible/ui/common/common.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
@@ -17,9 +18,7 @@ Future<int> showCompareSheet(BuildContext c, Reference ref) async {
       translations: PrefsBloc.getString(PrefItemId.translationsFilter));
 
   return showModalBottomSheet<int>(
-    shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
+    shape: bottomSheetShape,
     context: c,
     useRootNavigator: true,
     isScrollControlled: true,

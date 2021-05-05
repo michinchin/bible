@@ -23,9 +23,7 @@ Future<List<List<int>>> showFilter(BuildContext context,
         Iterable<int> filteredBooks,
         TextEditingController searchController}) =>
     showModalBottomSheet<List<List<int>>>(
-        shape: const RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
+        shape: bottomSheetShape,
         context: context,
         useRootNavigator: true,
         isScrollControlled: true,

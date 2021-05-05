@@ -229,9 +229,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   void _moreButton() => showModalBottomSheet<void>(
       barrierColor: barrierColorWithContext(context),
       elevation: 10,
-      shape: const RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
+      shape: bottomSheetShape,
       context: context,
       builder: (c) => BlocBuilder<PrefsBloc, PrefBlocState>(builder: (context, state) {
             final navGridViewEnabled = PrefsBloc.getBool(PrefItemId.navLayout);

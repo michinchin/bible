@@ -20,6 +20,7 @@ import '../../models/pref_item.dart';
 import '../../models/reference_ext.dart';
 import '../../models/search/tec_share.dart';
 import '../common/common.dart';
+import '../learn/learn.dart';
 import '../volume/volume_view_data.dart';
 import '../volume/volume_view_data_bloc.dart';
 import 'compare_verse.dart';
@@ -166,7 +167,8 @@ class SelectionSheetModel {
         break;
       case 'Learn':
         // put define/web search in learn for now
-        defineWebSearch(context);
+        // defineWebSearch(context);
+        showLearn(context);
         break;
       default:
         break;
@@ -264,7 +266,7 @@ class SelectionSheetModel {
     }
     var words = '';
     final verseArray = verses.data[ref.verse].split(' ');
-    if (ref.word != 0 && ref.endWord != 9999) {
+    if (ref.word > Reference.minWord && ref.endWord < Reference.maxWord) {
       if (ref.word == ref.endWord) {
         words = verseArray[ref.word - 1];
       } else if (verseArray.length > ref.word - 1 && verseArray.length > ref.endWord) {
@@ -276,7 +278,7 @@ class SelectionSheetModel {
     }
 
     await showModalBottomSheet<void>(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      shape: bottomSheetShape,
       context: c,
       useRootNavigator: true,
       isScrollControlled: true,

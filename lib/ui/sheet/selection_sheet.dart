@@ -10,6 +10,7 @@ import '../../blocs/selection/selection_bloc.dart';
 import '../../models/color_utils.dart';
 import '../../models/pref_item.dart';
 import '../../ui/sheet/snap_sheet.dart';
+import '../common/common.dart';
 import '../misc/color_picker.dart';
 import 'selection_sheet_model.dart';
 
@@ -54,9 +55,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
         useRootNavigator: true,
         enableDrag: false,
         barrierColor: Colors.transparent,
-        shape: const RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))),
+        shape: bottomSheetShape,
         builder: (c) => BlocProvider.value(
               value: context.tbloc<SelectionCmdBloc>(),
               child: _ColorSelectionView(
