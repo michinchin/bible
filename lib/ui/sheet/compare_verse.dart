@@ -1,4 +1,3 @@
-import 'package:bible/ui/common/common.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
@@ -9,6 +8,7 @@ import '../../models/app_settings.dart';
 import '../../models/pref_item.dart';
 import '../../models/reference_ext.dart';
 import '../../models/search/compare_results.dart';
+import '../common/common.dart';
 
 Future<int> showCompareSheet(BuildContext c, Reference ref) async {
   final compareResults = await CompareResults.fetch(
