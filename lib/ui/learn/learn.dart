@@ -64,11 +64,18 @@ class LearnScaffold extends StatelessWidget {
           // if `hasLicensedVolumes` is null, just return spinner.
           if (hasLicensedVolumes == null) return const Center(child: LoadingIndicator());
 
+          final bible = VolumesRepository.shared.bibleWithId(9);
+          final reference = refs.first;
+
           return Scaffold(
             appBar: AppBar(
               elevation: 1,
-              leading: const CloseButton(),
-              title: const Text('Learn'),
+              leading: CloseButton(
+                onPressed: () => Navigator.of(context, rootNavigator: true).maybePop(context),
+              ),
+              centerTitle: false,
+              title: Text('Learn: ${bible.nameOfBook(reference.book)} '
+                  '${reference.chapter}:${reference.versesToString()}'),
             ),
             body: BlocProvider<VolumesBloc>(
               create: (context) => VolumesBloc(
@@ -77,7 +84,7 @@ class LearnScaffold extends StatelessWidget {
                 defaultFilter: const VolumesFilter(volumeType: VolumeType.studyContent),
               )..refresh(),
               child: BlocBuilder<VolumesBloc, VolumesState>(
-                builder: (context, state) => _VolumesList(state),
+                builder: (context, state) => _VolumesList(state, refs),
               ),
             ),
           );
@@ -89,8 +96,9 @@ class LearnScaffold extends StatelessWidget {
 
 class _VolumesList extends StatelessWidget {
   final VolumesState volumesState;
+  final Iterable<Reference> refs;
 
-  const _VolumesList(this.volumesState, {Key key}) : super(key: key);
+  const _VolumesList(this.volumesState, this.refs, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +122,9 @@ class _VolumesList extends StatelessWidget {
             studyText: _studyTextForIndex(index),
             heroPrefix: heroPrefix,
             // trailing: _VolumeActionButton(volume: volume, heroPrefix: widget.heroPrefix),
-            onTap: () => Navigator.of(context)
-                .push<void>(MaterialPageRoute(builder: (context) => const LearnVolumeDetail())),
+            onTap: () => Navigator.of(context).push<void>(MaterialPageRoute(
+                builder: (context) => LearnVolumeDetail(
+                    volume: volume, reference: refs.first, heroPrefix: heroPrefix))),
           );
         },
       ),

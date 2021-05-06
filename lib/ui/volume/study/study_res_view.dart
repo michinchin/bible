@@ -27,8 +27,14 @@ const _altTopPadding = 130.0;
 class StudyResView extends StatelessWidget {
   final Size viewSize;
   final EdgeInsets padding;
+  final bool useAltTopPadding;
 
-  const StudyResView({Key key, @required this.viewSize, @required this.padding}) : super(key: key);
+  const StudyResView({
+    Key key,
+    @required this.viewSize,
+    @required this.padding,
+    this.useAltTopPadding = true,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +48,9 @@ class StudyResView extends StatelessWidget {
             return _Folder(
                 studyRes: studyRes,
                 viewSize: viewSize,
-                padding: studyRes.resId == 0 ? padding : padding.copyWith(top: _altTopPadding));
+                padding: studyRes.resId == 0 || !useAltTopPadding
+                    ? padding
+                    : padding.copyWith(top: _altTopPadding));
           }
 
           if (isNotNullOrEmpty(studyRes.res?.filename)) {
@@ -55,7 +63,7 @@ class StudyResView extends StatelessWidget {
                 return _Article(
                     studyRes: studyRes,
                     viewSize: viewSize,
-                    padding: type == ResourceType.introduction
+                    padding: type == ResourceType.introduction || !useAltTopPadding
                         ? padding
                         : padding.copyWith(top: _altTopPadding));
               }

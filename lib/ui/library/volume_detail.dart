@@ -48,13 +48,13 @@ class _VolumeDetailState extends State<VolumeDetail> {
       body: SafeArea(
         child: ListView(
           children: [
-            _VolumeCard(
+            VolumeDetailCard(
               volume: widget.volume,
               textScaleFactor: textScaleFactor,
               padding: padding,
               heroPrefix: widget.heroPrefix,
             ),
-            _VolumeDescription(
+            VolumeDescription(
               volume: widget.volume,
               textScaleFactor: textScaleFactor,
               padding: padding,
@@ -66,19 +66,20 @@ class _VolumeDetailState extends State<VolumeDetail> {
   }
 }
 
-class _VolumeCard extends StatelessWidget {
+class VolumeDetailCard extends StatelessWidget {
   final Volume volume;
   final double textScaleFactor;
   final double padding;
   final String heroPrefix;
 
   //final Widget buttons;
-  const _VolumeCard({
+  const VolumeDetailCard({
+    Key key,
     this.volume,
     this.textScaleFactor,
     this.padding,
     this.heroPrefix,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +88,7 @@ class _VolumeCard extends StatelessWidget {
         //final halfPad = (padding / 2.0).roundToDouble();
 
         dmPrint(
-            '_VolumeCard building with hero tag: "${heroTagForVolume(volume, heroPrefix)}"');
+            'VolumeDetailCard building with hero tag: "${heroTagForVolume(volume, heroPrefix)}"');
 
         final cardHeight = math.min(350.0, (constraints.maxWidth * 0.5).roundToDouble() + 50.0);
 
@@ -180,7 +181,7 @@ class _VolumeCard extends StatelessWidget {
 //         condition: (previous, current) =>
 //             previous.items[widget.volume.id] != current.items[widget.volume.id],
 //         builder: (context, downloads) {
-//           return _VolumeCard(
+//           return VolumeDetailCard(
 //             volume: widget.volume,
 //             isLicensed: isLicensed,
 //             isDownloaded: VolumesRepository.shared.isLocalVolume(widget.volume.id) ||
@@ -359,12 +360,12 @@ class _ButtonsState extends State<_Buttons> {
   }
 }
 
-class _VolumeDescription extends StatelessWidget {
+class VolumeDescription extends StatelessWidget {
   final Volume volume;
   final double textScaleFactor;
   final double padding;
 
-  const _VolumeDescription({
+  const VolumeDescription({
     Key key,
     this.volume,
     this.textScaleFactor,
