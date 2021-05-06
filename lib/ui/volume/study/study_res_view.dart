@@ -217,6 +217,9 @@ class __ArticleState extends State<_Article> {
                     _padding = widget.padding.copyWith(
                       left: widget.padding.left + marginWidth,
                       right: widget.padding.right + marginWidth,
+                      // scrolling to the bottom brings up the tab bar
+                      // bottom of the resource is never visible
+                      bottom: 160,
                     );
 
                     if (kIsWeb) return Text(widget.studyRes.html);
