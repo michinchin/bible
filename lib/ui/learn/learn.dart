@@ -70,7 +70,9 @@ class LearnScaffold extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(
               elevation: 1,
-              leading: const CloseButton(),
+              leading: CloseButton(
+                onPressed: () => Navigator.of(context, rootNavigator: true).maybePop(context),
+              ),
               centerTitle: false,
               title: Text('Learn: ${bible.nameOfBook(reference.book)} '
                   '${reference.chapter}:${reference.versesToString()}'),
