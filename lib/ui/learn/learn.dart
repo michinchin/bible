@@ -71,8 +71,9 @@ class LearnScaffold extends StatelessWidget {
             appBar: AppBar(
               elevation: 1,
               leading: const CloseButton(),
-              title: Text(
-                  'Learn: ${bible.nameOfBook(reference.book)} ${reference.chapter}:${reference.versesToString()}'),
+              centerTitle: false,
+              title: Text('Learn: ${bible.nameOfBook(reference.book)} '
+                  '${reference.chapter}:${reference.versesToString()}'),
             ),
             body: BlocProvider<VolumesBloc>(
               create: (context) => VolumesBloc(
