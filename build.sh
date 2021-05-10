@@ -2,7 +2,6 @@
 VERSION=10.0
 HTDOCS=/Users/builder/htdocs
 
-
 function invalidate {
     label=$(date +"%Y-%m-%d-%H:%M:%S")
 

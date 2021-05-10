@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
