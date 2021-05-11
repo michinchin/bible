@@ -1,7 +1,6 @@
 import 'dart:collection';
 
-import 'package:flutter/widgets.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
@@ -147,7 +146,7 @@ class ChapterBuildHelper {
       );
     }
 
-    return VerseTag(
+    final tag = VerseTag(
       verse: _currentVerse,
       word: word,
       endVerse: _currentEndVerse,
@@ -156,6 +155,48 @@ class ChapterBuildHelper {
       isInFootnote: _isInFootnote,
       href: _href,
     );
+
+    if (_currentVerse == 5 && attrs.className == 'vno') {
+      return [
+        const SizedBox(height: 10),
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 4,
+                color: Color(0xffe0e0e0),
+              ),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(width: 12),
+              const Icon(
+                Icons.menu_book_outlined,
+                size: 18,
+                color: Colors.orange,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  _exampleText,
+                  maxLines: 3,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.orange, fontSize: 16 * textScaleFactor),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        tag,
+      ];
+    }
+
+    return tag;
   }
 
   ///
@@ -207,3 +248,6 @@ class ChapterBuildHelper {
           return name == 'h5';
         };
 }
+
+const _exampleText =
+    'Praying morning, noon, and evening is an excellent way to maintain close contact with God and set priorities for the coming day. David followed this...';

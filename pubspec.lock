@@ -1119,7 +1119,7 @@ packages:
       name: tec_html
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "3.4.6"
+    version: "3.4.7"
   tec_native_ad:
     dependency: "direct main"
     description:
