@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+
+import 'package:collection/collection.dart' as collection;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tec_env/tec_env.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart';
-
 import 'package:tec_volumes/tec_volumes.dart';
 import 'package:tec_widgets/tec_widgets.dart';
 
 import '../../models/app_settings.dart';
 import '../common/common.dart';
 import '../library/volume_detail.dart';
-import '../library/volume_image.dart';
+// import '../library/volume_image.dart';
 import '../volume/study/study_res_bloc.dart';
 import '../volume/study/study_res_card.dart';
 import '../volume/study/study_res_view.dart';
 
-class LearnVolumeDetail extends StatelessWidget {
+class LearnVolumeDetail extends StatefulWidget {
   final Volume volume;
   final Reference reference;
   final String heroPrefix;
@@ -26,6 +27,13 @@ class LearnVolumeDetail extends StatelessWidget {
     @required this.reference,
     @required this.heroPrefix,
   }) : super(key: key);
+
+  @override
+  _LearnVolumeDetailState createState() => _LearnVolumeDetailState();
+}
+
+class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
+  bool _showOnlyFirstStudyNote = true;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +48,11 @@ class LearnVolumeDetail extends StatelessWidget {
     );
     final padding = (16.0 * textScaleFactor).roundToDouble();
 
-    final bible = VolumesRepository.shared.volumeWithId(volume.id)?.assocBible();
+    final bible = VolumesRepository.shared.volumeWithId(widget.volume.id)?.assocBible();
 
+    Widget title() => Text(widget.volume.name);
+
+    /*
     Widget image() => TecCard(
           color: Colors.transparent,
           padding: 0,
@@ -63,15 +74,17 @@ class LearnVolumeDetail extends StatelessWidget {
                   : image(),
             ),
             const SizedBox(width: 8),
-            Text(volume.name),
+            Text(volume.name, softWrap: true),
           ],
         );
+    */
 
     return Scaffold(
       appBar: AppBar(elevation: 1, centerTitle: false, title: title()),
       body: SafeArea(
         child: TecFutureBuilder<ErrorOrValue<List<Resource>>>(
-          futureBuilder: () => volume.resourcesWithBook(reference.book, reference.chapter),
+          futureBuilder: () =>
+              widget.volume.resourcesWithBook(widget.reference.book, widget.reference.chapter),
           builder: (context, result, error) {
             final finalError = error ?? result?.error;
             final resourceList = result?.value;
@@ -79,13 +92,13 @@ class LearnVolumeDetail extends StatelessWidget {
               final other = <Resource>[];
               final studyNotes = resourceList.expand<Resource>((el) {
                 if (el.hasType(ResourceType.studyNote)) {
-                  final studyNoteRef = reference.copyWith(
+                  final studyNoteRef = widget.reference.copyWith(
                     verse: el.verse,
                     word: Reference.minWord,
                     endVerse: el.endVerse,
                     endWord: Reference.maxWord,
                   );
-                  if (reference.overlaps(studyNoteRef)) {
+                  if (widget.reference.overlaps(studyNoteRef)) {
                     return [el];
                   }
                 } else {
@@ -93,6 +106,10 @@ class LearnVolumeDetail extends StatelessWidget {
                 }
                 return [];
               }).toList();
+
+              // Sort by number of verses covered, least to greatest.
+              collection.mergeSort<Resource>(studyNotes,
+                  compare: (a, b) => (a.endVerse - a.verse).compareTo(b.endVerse - b.verse));
 
               final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
               // final textColor = isDarkTheme ? Colors.white : Colors.black;
@@ -119,14 +136,31 @@ class LearnVolumeDetail extends StatelessWidget {
                         children: [
                           if (studyNotes.isNotEmpty) ...[
                             section(
-                                'Study Notes for ${bible.nameOfBook(reference.book)} ${reference.chapter}:${reference.versesToString()}'),
+                                'Study Notes for ${bible.nameOfBook(widget.reference.book)} ${widget.reference.chapter}:${widget.reference.versesToString()}'),
                             TecHtml(
-                              _htmlFromStudyNotes(studyNotes, volume, context),
-                              baseUrl: volume.baseUrl,
+                              _htmlFromStudyNotes(
+                                studyNotes,
+                                widget.volume,
+                                context,
+                                showOnlyFirstStudyNote: _showOnlyFirstStudyNote,
+                              ),
+                              baseUrl: widget.volume.baseUrl,
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               // textStyle: TextStyle(fontSize: 16, color: textColor),
                               backgroundColor: Theme.of(context).backgroundColor,
                             ),
+                            if (_showOnlyFirstStudyNote && studyNotes.length > 1)
+                              Container(
+                                color: isDarkTheme ? Colors.black : Colors.white,
+                                child: Center(
+                                  child: TextButton(
+                                    style: TextButton.styleFrom(),
+                                    onPressed: () =>
+                                        setState(() => _showOnlyFirstStudyNote = false),
+                                    child: const Text('Show All...'),
+                                  ),
+                                ),
+                              ),
                           ],
                           if (other.isNotEmpty)
                             section(
@@ -142,13 +176,13 @@ class LearnVolumeDetail extends StatelessWidget {
                           section('Title Details'),
                           const SizedBox(height: 16),
                           VolumeDetailCard(
-                            volume: volume,
+                            volume: widget.volume,
                             textScaleFactor: textScaleFactor,
                             padding: padding,
                             // heroPrefix: heroPrefix,
                           ),
                           VolumeDescription(
-                            volume: volume,
+                            volume: widget.volume,
                             textScaleFactor: textScaleFactor,
                             padding: padding,
                           ),
@@ -191,11 +225,17 @@ class LearnVolumeDetail extends StatelessWidget {
   }
 }
 
-String _htmlFromStudyNotes(List<Resource> studyNotes, Volume volume, BuildContext context) {
+String _htmlFromStudyNotes(
+  List<Resource> studyNotes,
+  Volume volume,
+  BuildContext context, {
+  bool showOnlyFirstStudyNote = true,
+}) {
   final html = StringBuffer();
   for (final note in studyNotes) {
-    if (html.isNotEmpty) html.writeln('<p> </p>');
+    if (html.isNotEmpty) html.writeln('<br>');
     html.writeln('<div class="v" id="${note.verse}" end="${note.endVerse}">${note.textData}</div>');
+    if (showOnlyFirstStudyNote) break;
   }
   if (html.isEmpty) {
     html.writeln('<p>Study notes are not available for this chapter.</p>');
