@@ -1,7 +1,6 @@
 import 'dart:collection';
 
-import 'package:flutter/widgets.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart';
 import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
@@ -43,6 +42,13 @@ class ChapterBuildHelper {
 
   String _href;
 
+  // Study callout related:
+  static const _minVersesBetweenStudyCallouts = 5;
+  static const _studyCalloutMax = 2;
+  var _studyCalloutCount = 0;
+  var _studyCalloutVerse = 0;
+  var _usesParagraphs = false;
+
   ///
   /// Returns the VerseTag for the given HTML element.
   ///
@@ -53,6 +59,10 @@ class ChapterBuildHelper {
     int level,
     bool isVisible,
   ) {
+    bool classNameContains(String str) => attrs.className.contains(str);
+    bool classNameStartsWith(String str) => attrs.className.startsWith(str);
+    bool classNameEquals(String str) => attrs.className == str;
+
     if (_isInNonVerseElement && level <= _nonVerseElementLevel) {
       _isInNonVerseElement = false;
       _isInVerse = _wasInVerse;
@@ -71,11 +81,11 @@ class ChapterBuildHelper {
     }
 
     // Is this the start of an xref or footnote?
-    if (!_isInXref && attrs.className.contains('xref')) {
+    if (!_isInXref && classNameContains('xref')) {
       _isInXref = true;
       _xrefElementLevel = level;
       _href = attrs['href'];
-    } else if (!_isInFootnote && attrs.className.contains('FOOTNO')) {
+    } else if (!_isInFootnote && classNameContains('FOOTNO')) {
       _isInFootnote = true;
       _footnoteElementLevel = level;
       _href = attrs['href'];
@@ -85,7 +95,7 @@ class ChapterBuildHelper {
       final id = attrs.id;
       if (isNotNullOrEmpty(id) &&
           name == 'div' &&
-          (attrs.className == 'v' || attrs.className.startsWith('v '))) {
+          (classNameEquals('v') || classNameStartsWith('v '))) {
         final verse = int.tryParse(id);
         if (verse != null) {
           if (verse <= _currentVerse && isBibleId(volume)) {
@@ -130,7 +140,8 @@ class ChapterBuildHelper {
       }
     }
 
-    if (attrs.className == 'cno' || attrs.className == 'C') {
+    // If this HTML element is a chapter number, return a chapter number widget.
+    if (classNameEquals('cno') || classNameEquals('C')) {
       final fontSize = 63.0 * textScaleFactor;
       final height = fontSize;
       return Transform.translate(
@@ -147,7 +158,7 @@ class ChapterBuildHelper {
       );
     }
 
-    return VerseTag(
+    final tag = VerseTag(
       verse: _currentVerse,
       word: word,
       endVerse: _currentEndVerse,
@@ -156,6 +167,59 @@ class ChapterBuildHelper {
       isInFootnote: _isInFootnote,
       href: _href,
     );
+
+    _usesParagraphs = _usesParagraphs || classNameEquals('poetry') || classNameEquals('para');
+
+    // Experimental: Insert a study content callout...
+    if (isBibleId(volume) &&
+        _studyCalloutCount < _studyCalloutMax &&
+        _currentVerse >= _studyCalloutVerse + _minVersesBetweenStudyCallouts &&
+        (!_usesParagraphs ||
+            name == 'h5' ||
+            classNameEquals('poetry') ||
+            classNameEquals('para'))) {
+      _studyCalloutCount++;
+      _studyCalloutVerse = _currentVerse;
+      return [
+        const SizedBox(height: 10),
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 4,
+                color: Color(0xffe0e0e0),
+              ),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(width: 12),
+              const Icon(
+                Icons.menu_book_outlined,
+                size: 18,
+                color: Colors.orange,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  _exampleText,
+                  maxLines: 3,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.orange, fontSize: 16 * textScaleFactor),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        tag,
+      ];
+    }
+
+    return tag;
   }
 
   ///
@@ -207,3 +271,6 @@ class ChapterBuildHelper {
           return name == 'h5';
         };
 }
+
+const _exampleText =
+    'Praying morning, noon, and evening is an excellent way to maintain close contact with God and set priorities for the coming day. David followed this...';

@@ -157,7 +157,7 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                                     style: TextButton.styleFrom(),
                                     onPressed: () =>
                                         setState(() => _showOnlyFirstStudyNote = false),
-                                    child: const Text('Show All...'),
+                                    child: const Text('Show more notes...'),
                                   ),
                                 ),
                               ),
