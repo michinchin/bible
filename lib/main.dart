@@ -67,6 +67,7 @@ Future<void> main() async {
     productsBundleKey: 'assets/products.json',
     bundledProducts: [
       BundledProduct([9], 'assets'),
+      BundledProduct([1014], 'assets'),
     ],
   );
 

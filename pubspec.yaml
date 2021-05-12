@@ -87,7 +87,7 @@ dependencies:
     hosted:
       name: tec_util
       url: http://noah.tecarta.com:8100
-    version: ^1.3.5
+    version: ^1.3.8
   tec_views:
     hosted:
       name: tec_views
@@ -144,6 +144,8 @@ flutter:
   assets:
     - assets/9.sqlite
     - assets/9.zip
+    - assets/1014.sqlite
+    - assets/1014.zip
     - assets/fonts.json
     - assets/footnote.svg
     - assets/marginNote.svg

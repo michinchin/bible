@@ -27,10 +27,9 @@ class AutoComplete {
     }
 
     // check cloudfront cache
-    var json = await TecCache.shared.jsonFromUrl(
-      url: '$cloudFrontCacheUrl/$cacheParam',
-      connectionTimeout: const Duration(seconds: 10),
-    );
+    var json = await sendHttpRequest<Map<String, dynamic>>(HttpRequestType.get,
+        url: '$cloudFrontCacheUrl/$cacheParam.json',
+        completion: (status, json, dynamic error) => Future.value(json));
 
     // check the server
     if (isNullOrEmpty(json)) {
@@ -43,10 +42,6 @@ class AutoComplete {
           },
           completion: (status, json, dynamic error) async {
             if (status == 200) {
-              // save to tecCache...
-              await TecCache.shared
-                  .saveJsonToCache(json: json, cacheUrl: '$cloudFrontCacheUrl/$cacheParam');
-
               return json;
             } else {
               return null;
@@ -62,8 +57,6 @@ class AutoComplete {
   }
 }
 
-const base64Map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-
 String _getCacheKey(String phrase, String translationIds) {
   final words = getSuggestions(phrase);
   final fullWords = words['words'].split(' ').join('_');
@@ -71,20 +64,8 @@ String _getCacheKey(String phrase, String translationIds) {
   if (isNotNullOrEmpty(words['partialWord'])) {
     partial += '-${words['partialWord']}';
   }
-
-  final encoded = StringBuffer();
-  const length = base64Map.length;
-  final volumeIds = translationIds.split('|').toList().map(double.parse).toList()..sort();
-
-  for (var i = 0; i < volumeIds.length; i++) {
-    var volumeId = volumeIds[i];
-    final digit = volumeId / length;
-    encoded.write(base64Map[digit.toInt()]);
-    volumeId -= digit.toInt() * length;
-    encoded.write(base64Map[volumeId.toInt()]);
-  }
-
-  return '$fullWords${partial}_${encoded.toString()}.gz';
+  final encoded = encodeIds(stringIds: translationIds);
+  return '$fullWords${partial}_$encoded';
 }
 
 String optimizePhrase(String phrase) {

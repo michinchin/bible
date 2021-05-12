@@ -59,7 +59,6 @@ class Const {
 
   // Bible
   static const defaultBible = 9;
-  static const base64Map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
   static const extraBookNames = {
     'ge': 1,

@@ -125,10 +125,9 @@ class SearchResults {
     final cacheParam = _getCacheKey(cacheWords, translationIds, exact, phrase);
 
     // check cloudfront cache
-    var json = await TecCache.shared.jsonFromUrl(
-      url: '$cloudFrontCacheUrl/$cacheParam.gz',
-      connectionTimeout: const Duration(seconds: 10),
-    );
+    var json = await sendHttpRequest<Map<String, dynamic>>(HttpRequestType.get,
+        url: '$cloudFrontCacheUrl/$cacheParam.json',
+        completion: (status, json, dynamic error) => Future.value(json));
 
     // try server
     if (isNullOrEmpty(json)) {
@@ -144,9 +143,6 @@ class SearchResults {
           },
           completion: (status, json, dynamic error) async {
             if (status == 200) {
-              await TecCache.shared
-                  .saveJsonToCache(json: json, cacheUrl: '$cloudFrontCacheUrl/$cacheParam.gz');
-
               return json;
             } else {
               return null;
@@ -229,16 +225,6 @@ String _getCacheKey(String keywords, String translationIds, int exact, int phras
   var words = keywords.replaceAll(' ', '_');
 
   words += '_';
-  final encoded = StringBuffer();
-  const length = Const.base64Map.length;
-  final volumeIds = translationIds.split('|').toList().map(double.parse).toList()..sort();
-
-  for (var i = 0; i < volumeIds.length; i++) {
-    var volumeId = volumeIds[i];
-    final digit = volumeId / length;
-    encoded.write(Const.base64Map[digit.toInt()]);
-    volumeId -= digit.toInt() * length;
-    encoded.write(Const.base64Map[volumeId.toInt()]);
-  }
-  return '$words${encoded.toString()}_0_0_${phrase}_$exact';
+  final encoded = encodeIds(stringIds: translationIds);
+  return '$words${encoded}_0_0_${phrase}_$exact';
 }
