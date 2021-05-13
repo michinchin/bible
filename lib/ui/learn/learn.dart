@@ -29,9 +29,10 @@ void showLearn(BuildContext context) {
   showLearnWithReferences(refs, context);
 }
 
-void showLearnWithReferences(Iterable<Reference> refs, BuildContext context) {
+void showLearnWithReferences(Iterable<Reference> refs, BuildContext context, {int volumeId}) {
   if (refs == null || refs.isEmpty) return;
 
+  final volume = volumeId == null ? null : VolumesRepository.shared.volumeWithId(volumeId);
   showModalBottomSheetWithMaxWidth<void>(
     context: context,
     maxWidth: 500.0,
@@ -43,7 +44,9 @@ void showLearnWithReferences(Iterable<Reference> refs, BuildContext context) {
     builder: (context) => NavigatorWithHeroController(
       onGenerateRoute: (settings) => MaterialPageRoute<dynamic>(
         settings: settings,
-        builder: (context) => LearnScaffold(refs: refs),
+        builder: (context) => volume == null
+            ? LearnScaffold(refs: refs)
+            : LearnVolumeDetail(volume: volume, reference: refs.first, heroPrefix: null),
       ),
     ),
   );
@@ -102,42 +105,54 @@ class _VolumesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var volumes = volumesState.volumes;
+    const _volumes = {1017, 1014, 1026, 1015, 1016, 2100, 1900, 1400, 1302};
+    var volumes = volumesState.volumes.where((e) => _volumes.contains(e.id)).toList();
     final sortBloc = context.tbloc<RecentVolumesBloc>();
-    volumes = List.of(volumes);
     // Using mergeSort because it is stable (i.e. equal elements remain in the same order).
     collection.mergeSort<Volume>(volumes, compare: (a, b) => sortBloc.compare(a.id, b.id));
     volumes = volumes.take(sortBloc.state.volumes.length).toList();
 
     const heroPrefix = 'learn';
+    final ref = refs.first;
 
     return SafeArea(
       bottom: false,
-      child: ListView.builder(
-        itemCount: volumes.length,
-        itemBuilder: (context, index) {
-          final volume = volumes[index];
-          return LearnVolumeCard(
-            volume: volume,
-            studyText: _studyTextForIndex(index),
-            heroPrefix: heroPrefix,
-            // trailing: _VolumeActionButton(volume: volume, heroPrefix: widget.heroPrefix),
-            onTap: () => Navigator.of(context).push<void>(MaterialPageRoute(
-                builder: (context) => LearnVolumeDetail(
-                    volume: volume, reference: refs.first, heroPrefix: heroPrefix))),
-          );
+      child: TecFutureBuilder<ErrorOrValue<Map<int, ResourceIntro>>>(
+        futureBuilder: () => VolumesRepository.shared.resourceIntros(
+            reference: Reference(book: ref.book, chapter: ref.chapter, verse: ref.verse),
+            volumes: volumes.map((e) => e.id).toList()),
+        builder: (context, result, error) {
+          final finalError = error ?? result?.error;
+          final intros = result?.value;
+          if (intros == null || intros.isEmpty) {
+            if (finalError != null) return Center(child: Text(finalError.toString()));
+            if (intros != null) {
+              final bible = VolumesRepository.shared.bibleWithId(9);
+              return Center(
+                  child: Text('Did not find any study resources for '
+                      '${bible.nameOfBook(ref.book)} ${ref.chapter}:${ref.versesToString()}'));
+            }
+            return const Center(child: LoadingIndicator());
+          } else {
+            final volumeIds = volumes.map((e) => e.id).where((e) => intros[e] != null).toList();
+            return ListView.builder(
+              itemCount: intros.keys.length,
+              itemBuilder: (context, index) {
+                final volume = volumes[volumes.indexWhere((e) => e.id == volumeIds[index])];
+                return LearnVolumeCard(
+                  volume: volume,
+                  studyText: intros[volume.id].intro,
+                  // heroPrefix: heroPrefix,
+                  // trailing: _VolumeActionButton(volume: volume, heroPrefix: widget.heroPrefix),
+                  onTap: () => Navigator.of(context).push<void>(MaterialPageRoute(
+                      builder: (context) => LearnVolumeDetail(
+                          volume: volume, reference: refs.first, heroPrefix: heroPrefix))),
+                );
+              },
+            );
+          }
         },
       ),
     );
   }
 }
-
-String _studyTextForIndex(int i) => _tmpStudyText[i % _tmpStudyText.length];
-const _tmpStudyText = [
-  'How long did it take God to create the world? There are two basic views about the days of creation: (1) Each day was a literal 24-hour period; (2) each...',
-  'A foundational teaching of the Bible is that God speaks and does so with universe-changing authority. The command in this verse is just two words in...',
-  'These verses introduce the Pentateuch (Genesis-Deuteronomy) and teach Israel that the world was created, ordered, and populated by the...',
-  'That must have been a twenty-four hour day—I don\'t see how you could get anything else out of it. Notice that God said, "Let there be light." Ten times...',
-  'God said. God effortlessly spoke light into existence (cf. Pss. 33:6, 148:5), which dispelled the darkness of verse 2 light. That which most clearly...',
-  'Some Preliminary Remarks: I have never run the Boston Marathon but at this moment I think I know what it feels like to stand at the starting line now...',
-];

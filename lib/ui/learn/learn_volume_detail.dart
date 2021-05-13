@@ -80,7 +80,15 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
     */
 
     return Scaffold(
-      appBar: AppBar(elevation: 1, centerTitle: false, title: title()),
+      appBar: AppBar(
+        elevation: 1,
+        leading: (ModalRoute.of(context)?.canPop ?? false)
+            ? const BackButton()
+            : CloseButton(
+                onPressed: () => Navigator.of(context, rootNavigator: true).maybePop(context)),
+        centerTitle: false,
+        title: title(),
+      ),
       body: SafeArea(
         child: TecFutureBuilder<ErrorOrValue<List<Resource>>>(
           futureBuilder: () =>

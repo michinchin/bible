@@ -7,6 +7,7 @@ import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../common/common.dart';
 import '../../common/tec_overflow_box.dart';
+import '../../learn/learn.dart';
 import 'verse_tag.dart';
 
 const _debugMode = false; // kDebugMode
@@ -183,42 +184,49 @@ class ChapterBuildHelper {
       _studyCalloutVerse = _currentVerse;
       return [
         // const SizedBox(height: 10),
-        Container(
-          decoration: const BoxDecoration(
-            border: Border(
-              left: BorderSide(
-                width: 4,
-                color: Color(0xffe0e0e0),
+        Builder(
+          builder: (context) => GestureDetector(
+            onTap: () => showLearnWithReferences([
+              Reference(book: ref.book, chapter: ref.chapter, verse: _studyCalloutVerse)
+            ], context, volumeId: 1017),
+            child: Container(
+              decoration: const BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    width: 4,
+                    color: Color(0xffe0e0e0),
+                  ),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const SizedBox(width: 12),
+                  const Icon(
+                    Icons.menu_book_outlined,
+                    size: 18,
+                    color: Colors.orange,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _Intro(
+                        textScaleFactor: textScaleFactor,
+                        book: ref.book,
+                        chapter: ref.chapter,
+                        verse: _studyCalloutVerse,
+                        volumes: const [1017]),
+                    // child: Text(
+                    //   _exampleText,
+                    //   maxLines: 3,
+                    //   softWrap: true,
+                    //   overflow: TextOverflow.ellipsis,
+                    //   style: TextStyle(color: Colors.orange, fontSize: 16 * textScaleFactor),
+                    // ),
+                  ),
+                ],
               ),
             ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(width: 12),
-              const Icon(
-                Icons.menu_book_outlined,
-                size: 18,
-                color: Colors.orange,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _Intro(
-                    textScaleFactor: textScaleFactor,
-                    book: ref.book,
-                    chapter: ref.chapter,
-                    verse: _studyCalloutVerse,
-                    volumes: const [1017]),
-                // child: Text(
-                //   _exampleText,
-                //   maxLines: 3,
-                //   softWrap: true,
-                //   overflow: TextOverflow.ellipsis,
-                //   style: TextStyle(color: Colors.orange, fontSize: 16 * textScaleFactor),
-                // ),
-              ),
-            ],
           ),
         ),
         const SizedBox(height: 14),
