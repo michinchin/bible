@@ -115,6 +115,11 @@ class _VolumesList extends StatelessWidget {
     const heroPrefix = 'learn';
     final ref = refs.first;
 
+    if (volumes.isEmpty) {
+      dmPrint('Learn: waiting for volumes...');
+      return const Center(child: LoadingIndicator());
+    }
+
     return SafeArea(
       bottom: false,
       child: TecFutureBuilder<ErrorOrValue<Map<int, ResourceIntro>>>(
