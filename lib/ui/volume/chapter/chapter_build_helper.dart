@@ -5,6 +5,7 @@ import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
+import '../../common/common.dart';
 import '../../common/tec_overflow_box.dart';
 import 'verse_tag.dart';
 
@@ -44,7 +45,7 @@ class ChapterBuildHelper {
 
   // Study callout related:
   static const _minVersesBetweenStudyCallouts = 5;
-  static const _studyCalloutMax = 2;
+  static const _studyCalloutMax = 1;
   var _studyCalloutCount = 0;
   var _studyCalloutVerse = 0;
   var _usesParagraphs = false;
@@ -181,7 +182,7 @@ class ChapterBuildHelper {
       _studyCalloutCount++;
       _studyCalloutVerse = _currentVerse;
       return [
-        const SizedBox(height: 10),
+        // const SizedBox(height: 10),
         Container(
           decoration: const BoxDecoration(
             border: Border(
@@ -203,18 +204,24 @@ class ChapterBuildHelper {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  _exampleText,
-                  maxLines: 3,
-                  softWrap: true,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.orange, fontSize: 16 * textScaleFactor),
-                ),
+                child: _Intro(
+                    textScaleFactor: textScaleFactor,
+                    book: ref.book,
+                    chapter: ref.chapter,
+                    verse: _studyCalloutVerse,
+                    volumes: const [1017]),
+                // child: Text(
+                //   _exampleText,
+                //   maxLines: 3,
+                //   softWrap: true,
+                //   overflow: TextOverflow.ellipsis,
+                //   style: TextStyle(color: Colors.orange, fontSize: 16 * textScaleFactor),
+                // ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 14),
         tag,
       ];
     }
@@ -272,5 +279,48 @@ class ChapterBuildHelper {
         };
 }
 
-const _exampleText =
-    'Praying morning, noon, and evening is an excellent way to maintain close contact with God and set priorities for the coming day. David followed this...';
+class _Intro extends StatelessWidget {
+  final int book;
+  final int chapter;
+  final int verse;
+  final List<int> volumes;
+  final double textScaleFactor;
+
+  const _Intro({Key key, this.book, this.chapter, this.verse, this.volumes, this.textScaleFactor})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    Widget text(String text) => Text(
+          text ?? ' \n \n ',
+          maxLines: 3,
+          softWrap: true,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: Colors.orange, fontSize: 16 * textScaleFactor),
+        );
+
+    return TecFutureBuilder<ErrorOrValue<Map<int, ResourceIntro>>>(
+      futureBuilder: () => VolumesRepository.shared.resourceIntros(
+          reference: Reference(book: book, chapter: chapter, verse: verse), volumes: volumes),
+      builder: (context, result, error) {
+        final finalError = error ?? result?.error;
+        final intros = result?.value;
+        if (intros == null || intros.isEmpty) {
+          if (finalError != null) return text(finalError.toString());
+          if (intros != null) return text('Did not find study resources for verse $verse. :(');
+          return Stack(
+            children: [
+              text(null),
+              Positioned.fill(
+                  child: Center(
+                child: finalError == null ? const LoadingIndicator() : Text(finalError.toString()),
+              )),
+            ],
+          );
+        } else {
+          return text(intros[intros.keys.first].intro);
+        }
+      },
+    );
+  }
+}

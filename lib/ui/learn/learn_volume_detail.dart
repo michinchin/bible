@@ -88,7 +88,11 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
           builder: (context, result, error) {
             final finalError = error ?? result?.error;
             final resourceList = result?.value;
-            if (resourceList != null) {
+            if (resourceList == null) {
+              return Center(
+                child: finalError == null ? const LoadingIndicator() : Text(finalError.toString()),
+              );
+            } else {
               final other = <Resource>[];
               final studyNotes = resourceList.expand<Resource>((el) {
                 if (el.hasType(ResourceType.studyNote)) {
@@ -189,10 +193,6 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                         ],
                       ),
                     );
-            } else {
-              return Center(
-                child: finalError == null ? const LoadingIndicator() : Text(finalError.toString()),
-              );
             }
           },
         ),
