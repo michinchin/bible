@@ -24,7 +24,9 @@ class ChapterBuildHelper {
   final List<String> versesToShow;
   final double textScaleFactor;
 
-  ChapterBuildHelper(this.volume, this.ref, this.versesToShow, this.textScaleFactor);
+  ChapterBuildHelper(this.volume, this.ref, this.versesToShow, this.textScaleFactor) {
+    _studyCalloutVerse = ref.verse + 2 - _minVersesBetweenStudyCallouts;
+  }
 
   TecHtmlTagElementFunc get tagHtmlElement => _tagHtmlElement;
 
@@ -184,51 +186,12 @@ class ChapterBuildHelper {
       _studyCalloutVerse = _currentVerse;
       return [
         // const SizedBox(height: 10),
-        Builder(
-          builder: (context) => GestureDetector(
-            onTap: () => showLearnWithReferences([
-              Reference(book: ref.book, chapter: ref.chapter, verse: _studyCalloutVerse)
-            ], context, volumeId: 1017),
-            child: Container(
-              decoration: const BoxDecoration(
-                border: Border(
-                  left: BorderSide(
-                    width: 4,
-                    color: Color(0xffe0e0e0),
-                  ),
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const SizedBox(width: 12),
-                  const Icon(
-                    Icons.menu_book_outlined,
-                    size: 18,
-                    color: Colors.orange,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _Intro(
-                        textScaleFactor: textScaleFactor,
-                        book: ref.book,
-                        chapter: ref.chapter,
-                        verse: _studyCalloutVerse,
-                        volumes: const [1017]),
-                    // child: Text(
-                    //   _exampleText,
-                    //   maxLines: 3,
-                    //   softWrap: true,
-                    //   overflow: TextOverflow.ellipsis,
-                    //   style: TextStyle(color: Colors.orange, fontSize: 16 * textScaleFactor),
-                    // ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        _Intro(
+            textScaleFactor: textScaleFactor,
+            book: ref.book,
+            chapter: ref.chapter,
+            verse: _studyCalloutVerse,
+            volumes: const [1017]),
         const SizedBox(height: 14),
         tag,
       ];
@@ -308,27 +271,87 @@ class _Intro extends StatelessWidget {
         );
 
     return TecFutureBuilder<ErrorOrValue<Map<int, ResourceIntro>>>(
-      futureBuilder: () => VolumesRepository.shared.resourceIntros(
-          reference: Reference(book: book, chapter: chapter, verse: verse), volumes: volumes),
+      futureBuilder: () => _IntroCache.shared.valueForKey(
+          '$book $chapter $verse',
+          (key) => VolumesRepository.shared.resourceIntros(
+              reference: Reference(book: book, chapter: chapter, verse: verse), volumes: volumes)),
       builder: (context, result, error) {
         final finalError = error ?? result?.error;
         final intros = result?.value;
         if (intros == null || intros.isEmpty) {
-          if (finalError != null) return text(finalError.toString());
-          if (intros != null) return text('Did not find study resources for verse $verse. :(');
-          return Stack(
-            children: [
-              text(null),
-              Positioned.fill(
-                  child: Center(
-                child: finalError == null ? const LoadingIndicator() : Text(finalError.toString()),
-              )),
-            ],
+          if (finalError != null || intros != null) {
+            dmPrint(finalError != null
+                ? 'ERROR getting study intros: $finalError'
+                : 'No study intros for $chapter:$verse');
+            return const SizedBox();
+          }
+          return _Callout(
+            child: Stack(
+              children: [
+                text(null),
+                Positioned.fill(
+                    child: Center(
+                  child:
+                      finalError == null ? const LoadingIndicator() : Text(finalError.toString()),
+                )),
+              ],
+            ),
           );
         } else {
-          return text(intros[intros.keys.first].intro);
+          return _Callout(
+              child: text(intros[intros.keys.first].intro),
+              onTap: () => showLearnWithReferences(
+                  [Reference(book: book, chapter: chapter, verse: verse)], context,
+                  volumeId: 1017));
         }
       },
     );
   }
+}
+
+class _Callout extends StatelessWidget {
+  final Widget child;
+  final void Function() onTap;
+
+  const _Callout({Key key, this.onTap, this.child}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Builder(
+      builder: (context) => GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 4,
+                color: Color(0xffe0e0e0),
+              ),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(width: 12),
+              const Icon(
+                Icons.menu_book_outlined,
+                size: 18,
+                color: Colors.orange,
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: child),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _IntroCache extends LruMemoryCache<ErrorOrValue<Map<int, ResourceIntro>>> {
+  static final _IntroCache shared = _IntroCache(maxItems: 6);
+
+  _IntroCache({int maxItems, Duration defaultExpiresIn})
+      : super(maxItems: maxItems, defaultExpiresIn: defaultExpiresIn);
 }
