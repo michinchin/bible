@@ -104,11 +104,12 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
               final other = <Resource>[];
               final studyNotes = resourceList.expand<Resource>((el) {
                 if (el.hasType(ResourceType.studyNote)) {
-                  final studyNoteRef = widget.reference.copyWith(
+                  final studyNoteRef = Reference(
+                    book: el.book,
+                    chapter: el.chapter,
                     verse: el.verse,
-                    word: Reference.minWord,
-                    endVerse: el.endVerse,
-                    endWord: Reference.maxWord,
+                    endVerse:
+                        el.endVerse != null && el.endVerse > el.verse ? el.endVerse : el.verse,
                   );
                   if (widget.reference.overlaps(studyNoteRef)) {
                     return [el];
