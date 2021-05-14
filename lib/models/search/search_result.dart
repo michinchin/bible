@@ -1,6 +1,5 @@
 import 'dart:core';
 
-import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
@@ -122,11 +121,9 @@ class SearchResults {
       searchWords = (matches.isNotEmpty) ? _formatRefs(currQuery) : cacheWords;
     }
 
-    final cacheParam = _getCacheKey(cacheWords, translationIds, exact, phrase);
-
     // check cloudfront cache
     var json = await sendHttpRequest<Map<String, dynamic>>(HttpRequestType.get,
-        url: '$cloudFrontCacheUrl/$cacheParam.json',
+        url: cfSearchCacheUrl(cacheWords, translationIds, exact, phrase),
         completion: (status, json, dynamic error) => Future.value(json));
 
     // try server
@@ -157,30 +154,6 @@ class SearchResults {
     }
   }
 }
-
-final urlEncodingExceptions = <String, String>{
-  '’': '\'', // UTF-8: E2 80 99
-  '‘': '\'', // UTF-8: E2 80 98
-  '‚': '',
-  ',': '', // get rid of commas
-  '‛': '\'',
-  '“': '"',
-  '”': '"',
-  '„': '"', // UTF-8: E2 80 9E
-  '‟': '"',
-  '′': '"',
-  '″': '"',
-  '‴': '"',
-  '‵': '\'',
-  '‶': '"',
-  '‷': '"',
-  '–': '-', // UTF-8: E2 80 93
-  '‐': '-',
-  '‒': '-',
-  '—': '-', // UTF-8: E2 80 94
-  '―': '-', // UTF-8: E2 80 95
-  r'\.': '',
-};
 
 String _formatWords(String keywords) {
   final modifiedKeywords = keywords.toLowerCase();
@@ -215,16 +188,4 @@ String _formatRefs(String query) {
     }
   }
   return query;
-}
-
-String _getCacheKey(String keywords, String translationIds, int exact, int phrase) {
-  String modKeywords;
-  modKeywords = keywords.toLowerCase();
-  urlEncodingExceptions.forEach((k, v) => modKeywords = modKeywords.replaceAll(RegExp(k), v));
-
-  var words = keywords.replaceAll(' ', '_');
-
-  words += '_';
-  final encoded = encodeIds(stringIds: translationIds);
-  return '$words${encoded}_0_0_${phrase}_$exact';
 }

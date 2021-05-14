@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_util/tec_util.dart';
 
 class AutoComplete {
@@ -19,7 +18,6 @@ class AutoComplete {
   static Future<AutoComplete> fetch({String phrase, String translationIds}) async {
     final cleanPhrase = optimizePhrase(phrase);
     final suggestions = getSuggestions(cleanPhrase);
-    final cacheParam = _getCacheKey(cleanPhrase, translationIds);
 
     if (cleanPhrase.trim().isEmpty) {
       return AutoComplete.fromJson(
@@ -28,7 +26,7 @@ class AutoComplete {
 
     // check cloudfront cache
     var json = await sendHttpRequest<Map<String, dynamic>>(HttpRequestType.get,
-        url: '$cloudFrontCacheUrl/$cacheParam.json',
+        url: cfSuggestCacheUrl(cleanPhrase, translationIds),
         completion: (status, json, dynamic error) => Future.value(json));
 
     // check the server
@@ -55,17 +53,6 @@ class AutoComplete {
       return AutoComplete.fromJson(json);
     }
   }
-}
-
-String _getCacheKey(String phrase, String translationIds) {
-  final words = getSuggestions(phrase);
-  final fullWords = words['words'].split(' ').join('_');
-  var partial = '';
-  if (isNotNullOrEmpty(words['partialWord'])) {
-    partial += '-${words['partialWord']}';
-  }
-  final encoded = encodeIds(stringIds: translationIds);
-  return '$fullWords${partial}_$encoded';
 }
 
 String optimizePhrase(String phrase) {
@@ -111,25 +98,4 @@ String optimizePhrase(String phrase) {
   }
 
   return cleanPhrase;
-}
-
-Map<String, String> getSuggestions(String phrase) {
-  String words, partialWord;
-  final s = phrase..replaceAll('\'', '')..replaceAll('"', '');
-
-  final index = s.lastIndexOf(' ');
-
-  if (index < 0) {
-    words = '';
-    partialWord = s;
-  } else {
-    words = s.substring(0, index).trim();
-    partialWord = s.substring(index).trim();
-  }
-
-  if (words.isEmpty && partialWord.isEmpty) {
-    return {'words': '', 'partialWord': ''};
-  }
-
-  return {'words': words, 'partialWord': partialWord};
 }

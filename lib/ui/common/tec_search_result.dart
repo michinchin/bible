@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:tec_util/tec_util.dart';
 
-import '../../models/search/search_result.dart';
-
 const _maxLinesLimit = 20;
 
 class TecSearchResult extends StatefulWidget {

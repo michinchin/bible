@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tec_util/tec_util.dart';
@@ -22,10 +22,9 @@ class InAppPurchases {
   }
 
   InAppPurchases._() {
-    InAppPurchaseConnection.enablePendingPurchases();
-    _subscription =
-        InAppPurchaseConnection.instance.purchaseUpdatedStream.listen(_handlePurchaseUpdates);
-    InAppPurchaseConnection.instance.isAvailable().then((available) {
+    InAppPurchaseAndroidPlatformAddition.enablePendingPurchases();
+    _subscription = InAppPurchase.instance.purchaseStream.listen(_handlePurchaseUpdates);
+    InAppPurchase.instance.isAvailable().then((available) {
       if (!available) {
         dmPrint('WARNING: Unable to initialize in-app purchases.');
       }
@@ -46,7 +45,7 @@ class InAppPurchases {
   Future<ProductDetails> detailsWithProduct(String productId) async {
     ProductDetailsResponse response;
     try {
-      response = await InAppPurchaseConnection.instance.queryProductDetails({productId});
+      response = await InAppPurchase.instance.queryProductDetails({productId});
     } catch (e) {
       dmPrint('InAppPurchases detailsWithProduct($productId) error: $e');
     }
@@ -62,7 +61,7 @@ class InAppPurchases {
   }) async {
     assert(context != null && purchaseHandler != null && isNotNullOrEmpty(productId));
 
-    if (!(await InAppPurchaseConnection.instance.isAvailable())) {
+    if (!(await InAppPurchase.instance.isAvailable())) {
       dmPrint('WARNING: Cannot purchase $productId, the in-app purchase lib is not available.');
       unawaited(purchaseHandler?.call(
           productId,
@@ -79,7 +78,7 @@ class InAppPurchases {
     }
 
     final ids = {productId};
-    final response = await InAppPurchaseConnection.instance.queryProductDetails(ids);
+    final response = await InAppPurchase.instance.queryProductDetails(ids);
     if (response.notFoundIDs.isNotEmpty) {
       dmPrint('ERROR: InAppPurchases queryProductDetails($productId) failed.');
       unawaited(purchaseHandler?.call(
@@ -92,16 +91,15 @@ class InAppPurchases {
       return; //------------------------------------------------------------>
     }
 
-    final purchaseParam =
-        PurchaseParam(productDetails: response.productDetails.first, sandboxTesting: kDebugMode);
+    final purchaseParam = PurchaseParam(productDetails: response.productDetails.first);
 
     _purchaseHandler = purchaseHandler;
 
     try {
       if (consumable) {
-        await InAppPurchaseConnection.instance.buyConsumable(purchaseParam: purchaseParam);
+        await InAppPurchase.instance.buyConsumable(purchaseParam: purchaseParam);
       } else {
-        await InAppPurchaseConnection.instance.buyNonConsumable(purchaseParam: purchaseParam);
+        await InAppPurchase.instance.buyNonConsumable(purchaseParam: purchaseParam);
       }
     } catch (e) {
       if (e.code == 'storekit_duplicate_product_object') {
@@ -136,7 +134,7 @@ class InAppPurchases {
   ) async {
     assert(context != null && purchaseHandler != null);
 
-    if (!(await InAppPurchaseConnection.instance.isAvailable())) {
+    if (!(await InAppPurchase.instance.isAvailable())) {
       dmPrint('WARNING: Cannot restore purchases, the in-app purchase lib is not available.');
       unawaited(purchaseHandler?.call(
           null,
@@ -146,47 +144,9 @@ class InAppPurchases {
       return; //------------------------------------------------------------>
     }
 
-    final response = await InAppPurchaseConnection.instance.queryPastPurchases();
-    if (response.error != null) {
-      if (TecPlatform.isIOS) {
-        final message = response.error.details['NSLocalizedDescription'].toString();
-        await tecShowSimpleAlertDialog<bool>(
-          context: context,
-          content: message,
-          useRootNavigator: false,
-          actions: <Widget>[
-            TecDialogButton(
-              child: const Text('OK'),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-          ],
-        );
-      } else {
-        dmPrint('ERROR restoring purchases: ${response.error}');
-      }
+    await InAppPurchase.instance.restorePurchases();
 
-      unawaited(purchaseHandler?.call(null, true, response.error));
-    } else {
-      _purchaseHandler = purchaseHandler;
-      await _handlePurchaseUpdates(response.pastPurchases, isRestoration: true);
-      _purchaseHandler = null;
-
-      if (TecPlatform.isIOS) {
-        if (response.pastPurchases.isEmpty) {
-          await tecShowSimpleAlertDialog<bool>(
-            context: context,
-            content: 'The App Store did not find any purchases to restore.',
-            useRootNavigator: false,
-            actions: <Widget>[
-              TecDialogButton(
-                child: const Text('OK'),
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-            ],
-          );
-        }
-      }
-    }
+    TecToast.show(context, 'Purchases have been restored.');
   }
 
   InAppPurchaseHandler _purchaseHandler;
@@ -218,7 +178,7 @@ class InAppPurchases {
             clearPurchaseHandler = true;
 
             if (details.pendingCompletePurchase) {
-              await InAppPurchaseConnection.instance.completePurchase(details);
+              await InAppPurchase.instance.completePurchase(details);
             }
 
             if (_purchaseHandler != null) {
@@ -236,19 +196,23 @@ class InAppPurchases {
             clearPurchaseHandler = true;
 
             if (details.pendingCompletePurchase) {
-              await InAppPurchaseConnection.instance.completePurchase(details);
+              await InAppPurchase.instance.completePurchase(details);
             }
 
             dmPrint('ERROR purchasing $productId: ${details.error}');
 
             if (_purchaseHandler != null) {
-              await _purchaseHandler(productId,
-                  TecPlatform.isIOS && _pendingPurchase == null, details.error);
+              await _purchaseHandler(
+                  productId, TecPlatform.isIOS && _pendingPurchase == null, details.error);
             } else {
               dmPrint('ERROR: While purchasing $productId, _purchaseHandler is null!');
             }
 
             _pendingPurchase = null;
+            break;
+
+          case PurchaseStatus.restored:
+            dmPrint('restore is not implemented yet :(');
             break;
         }
       }
