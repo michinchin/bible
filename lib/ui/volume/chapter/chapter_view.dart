@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -205,7 +206,7 @@ class _BibleChapterView extends StatefulWidget {
 }
 
 class _BibleChapterViewState extends State<_BibleChapterView> {
-  Future<ErrorOrValue<String>> _future;
+  Future<List<ErrorOrValue<Object>>> _future;
 
   @override
   void initState() {
@@ -223,16 +224,38 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
   }
 
   void _update() {
-    _future = chapterHtmlWith(widget.volume, widget.ref.book, widget.ref.chapter);
+    final ref = widget.ref;
+    _future = Future.wait([
+      chapterHtmlWith(widget.volume, ref.book, ref.chapter),
+      _StudyCalloutsCache.shared.valueForKey(ref.toString(), (key) {
+        final totalVerses =
+            VolumesRepository.shared.bibleWithId(9).versesIn(book: ref.book, chapter: ref.chapter);
+
+        final verses = <int>[];
+        final offset = random(min: 1, max: 4);
+        const delta = 10;
+        final verse = (ref.verse + offset < totalVerses)
+            ? ref.verse + offset
+            : math.max(2, ref.verse - offset);
+        for (var v = verse % delta; v < totalVerses; v += delta) {
+          if (v >= 2) verses.add(v);
+        }
+        assert(verses.isNotEmpty);
+
+        return VolumesRepository.shared.resourceCallouts(
+            book: ref.book, chapter: ref.chapter, verses: verses, volumes: [1017]);
+      }),
+    ]);
   }
 
   @override
   Widget build(BuildContext context) {
     // dmPrint('_BibleChapterView build for ${widget.viewUid} size ${widget.size}');
-    return TecFutureBuilder<ErrorOrValue<String>>(
+    return TecFutureBuilder<List<ErrorOrValue<Object>>>(
       future: _future,
       builder: (context, data, error) {
-        final htmlFragment = data?.value;
+        final htmlFragment = data == null ? null : (data[0].value as String);
+        final callouts = data == null ? null : (data[1].value as Map<int, Map<int, ResourceIntro>>);
         if (isNotNullOrEmpty(htmlFragment)) {
           return BlocBuilder<ContentSettingsBloc, ContentSettings>(builder: (context, settings) {
             return _ChapterView(
@@ -241,6 +264,7 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
               ref: widget.ref,
               htmlFragment: htmlFragment,
               size: widget.size,
+              studyCallouts: callouts,
               padding: widget.padding,
             );
           });
@@ -258,6 +282,13 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
   }
 }
 
+class _StudyCalloutsCache extends LruMemoryCache<ErrorOrValue<Map<int, Map<int, ResourceIntro>>>> {
+  static final _StudyCalloutsCache shared = _StudyCalloutsCache(maxItems: 6);
+
+  _StudyCalloutsCache({int maxItems, Duration defaultExpiresIn})
+      : super(maxItems: maxItems, defaultExpiresIn: defaultExpiresIn);
+}
+
 ///
 /// _ChapterView
 ///
@@ -267,8 +298,9 @@ class _ChapterView extends StatefulWidget {
   final BookChapterVerse ref;
   final String htmlFragment;
   final Size size;
-  final List<String> versesToShow;
+  final Map<int, Map<int, ResourceIntro>> studyCallouts;
   final EdgeInsets padding;
+  final List<String> versesToShow;
 
   const _ChapterView({
     Key key,
@@ -277,8 +309,9 @@ class _ChapterView extends StatefulWidget {
     @required this.ref,
     @required this.htmlFragment,
     @required this.size,
+    @required this.studyCallouts,
+    @required this.padding,
     this.versesToShow,
-    this.padding,
   })  : assert(volume != null && htmlFragment != null),
         super(key: key);
 
@@ -385,6 +418,7 @@ class _ChapterViewState extends State<_ChapterView> {
                     fontName: context.tbloc<ContentSettingsBloc>().state.fontName,
                     highlights: highlights,
                     marginNotes: marginNotes,
+                    studyCallouts: widget.studyCallouts,
                     padding: widget.padding,
                   );
                 } else {
@@ -411,6 +445,7 @@ class _ChapterHtml extends StatefulWidget {
   final String fontName;
   final ChapterHighlights highlights;
   final ChapterMarginNotes marginNotes;
+  final Map<int, Map<int, ResourceIntro>> studyCallouts;
   final EdgeInsets padding;
 
   const _ChapterHtml({
@@ -425,7 +460,8 @@ class _ChapterHtml extends StatefulWidget {
     @required this.fontName,
     @required this.highlights,
     @required this.marginNotes,
-    this.padding,
+    @required this.studyCallouts,
+    @required this.padding,
   }) : super(key: key);
 
   @override
@@ -490,8 +526,8 @@ class _ChapterHtmlState extends State<_ChapterHtml> {
         TextStyle(backgroundColor: isDarkTheme ? const Color(0xff393939) : const Color(0xffe6e6e6));
 
     // A new [ChapterBuildHelper] needs to be created for each build...
-    final helper = ChapterBuildHelper(
-        widget.volumeId, widget.ref, widget.versesToShow, contentTextScaleFactorWith(context));
+    final helper = ChapterBuildHelper(widget.volumeId, widget.ref, widget.studyCallouts,
+        widget.versesToShow, contentTextScaleFactorWith(context));
 
     final marginWidth = (widget.size.width * _marginPercent).roundToDouble();
     var padding = (widget.padding ?? EdgeInsets.zero);

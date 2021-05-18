@@ -23,16 +23,18 @@ class ChapterBuildHelper {
   final BookChapterVerse ref;
   final List<String> versesToShow;
   final double textScaleFactor;
+  final Map<int, Map<int, ResourceIntro>> studyCallouts;
 
-  ChapterBuildHelper(this.volume, this.ref, this.versesToShow, this.textScaleFactor) {
-    _studyCalloutVerse = ref.verse + 2 - _minVersesBetweenStudyCallouts;
+  ChapterBuildHelper(
+      this.volume, this.ref, this.studyCallouts, this.versesToShow, this.textScaleFactor) {
+    _studyCalloutVerses = studyCallouts.keys.toList()..sort();
   }
 
   TecHtmlTagElementFunc get tagHtmlElement => _tagHtmlElement;
 
   var _currentVerse = 0;
   var _currentWord = 0;
-  int _currentEndVerse;
+  var _currentEndVerse = 0;
   var _isInVerse = false;
   var _isInNonVerseElement = false;
   var _nonVerseElementLevel = 0;
@@ -47,10 +49,8 @@ class ChapterBuildHelper {
   String _href;
 
   // Study callout related:
-  static const _minVersesBetweenStudyCallouts = 5;
-  static const _studyCalloutMax = 1;
-  var _studyCalloutCount = 0;
-  var _studyCalloutVerse = 0;
+  List<int> _studyCalloutVerses;
+  var _studyCalloutVerseIndex = 0;
   var _usesParagraphs = false;
 
   ///
@@ -110,7 +110,7 @@ class ChapterBuildHelper {
           _isInVerse = true;
           _currentVerse = verse;
           _currentWord = 0;
-          _currentEndVerse = int.tryParse(attrs['end'] ?? '');
+          _currentEndVerse = int.tryParse(attrs['end'] ?? '') ?? verse;
 
           if (verse == 1 && isBibleId(volume)) {
             _currentWord++; // The old app has a chapter number, which is counted as a word.
@@ -174,24 +174,27 @@ class ChapterBuildHelper {
 
     _usesParagraphs = _usesParagraphs || classNameEquals('poetry') || classNameEquals('para');
 
-    // Experimental: Insert a study content callout...
+    // Insert a study callout?
     if (isBibleId(volume) &&
-        _studyCalloutCount < _studyCalloutMax &&
-        _currentVerse >= _studyCalloutVerse + _minVersesBetweenStudyCallouts &&
+        _studyCalloutVerseIndex < _studyCalloutVerses.length &&
+        _studyCalloutVerses[_studyCalloutVerseIndex] < _currentEndVerse &&
         (!_usesParagraphs ||
             name == 'h5' ||
             classNameEquals('poetry') ||
             classNameEquals('para'))) {
-      _studyCalloutCount++;
-      _studyCalloutVerse = _currentVerse;
+      final studyCalloutVerse = _studyCalloutVerses[_studyCalloutVerseIndex];
+      _studyCalloutVerseIndex++;
+      final callouts = studyCallouts[studyCalloutVerse];
+      final studyVolumeId = callouts.keys.first;
       return [
         // const SizedBox(height: 10),
-        _Intro(
+        _StudyCallout(
             textScaleFactor: textScaleFactor,
             book: ref.book,
             chapter: ref.chapter,
-            verse: _studyCalloutVerse,
-            volumes: const [1017]),
+            verse: studyCalloutVerse,
+            studyVolumeId: studyVolumeId,
+            resourceIntro: callouts[studyVolumeId]),
         const SizedBox(height: 14),
         tag,
       ];
@@ -250,15 +253,23 @@ class ChapterBuildHelper {
         };
 }
 
-class _Intro extends StatelessWidget {
+class _StudyCallout extends StatelessWidget {
   final int book;
   final int chapter;
   final int verse;
-  final List<int> volumes;
+  final int studyVolumeId;
+  final ResourceIntro resourceIntro;
   final double textScaleFactor;
 
-  const _Intro({Key key, this.book, this.chapter, this.verse, this.volumes, this.textScaleFactor})
-      : super(key: key);
+  const _StudyCallout({
+    Key key,
+    @required this.book,
+    @required this.chapter,
+    @required this.verse,
+    @required this.studyVolumeId,
+    @required this.resourceIntro,
+    @required this.textScaleFactor,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -270,6 +281,12 @@ class _Intro extends StatelessWidget {
           style: TextStyle(color: Colors.orange, fontSize: 16 * textScaleFactor),
         );
 
+    return _Callout(
+        child: text(resourceIntro.intro),
+        onTap: () => showLearnWithReferences(
+            [Reference(book: book, chapter: chapter, verse: verse)], context,
+            volumeId: studyVolumeId));
+    /*
     return TecFutureBuilder<ErrorOrValue<Map<int, ResourceIntro>>>(
       futureBuilder: () => _IntroCache.shared.valueForKey(
           '$book $chapter $verse',
@@ -305,7 +322,7 @@ class _Intro extends StatelessWidget {
                   volumeId: 1017));
         }
       },
-    );
+    ); */
   }
 }
 
@@ -349,9 +366,9 @@ class _Callout extends StatelessWidget {
   }
 }
 
-class _IntroCache extends LruMemoryCache<ErrorOrValue<Map<int, ResourceIntro>>> {
-  static final _IntroCache shared = _IntroCache(maxItems: 6);
+// class _IntroCache extends LruMemoryCache<ErrorOrValue<Map<int, ResourceIntro>>> {
+//   static final _IntroCache shared = _IntroCache(maxItems: 6);
 
-  _IntroCache({int maxItems, Duration defaultExpiresIn})
-      : super(maxItems: maxItems, defaultExpiresIn: defaultExpiresIn);
-}
+//   _IntroCache({int maxItems, Duration defaultExpiresIn})
+//       : super(maxItems: maxItems, defaultExpiresIn: defaultExpiresIn);
+// }
