@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:i18n_extension/i18n_widget.dart';
+// import 'package:i18n_extension/i18n_widget.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_notifications/tec_notifications.dart';
@@ -146,11 +146,13 @@ class App extends StatelessWidget {
                         Locale('ar'), // Arabic
                       ],
                       title: _appTitle,
-                      home: I18n(
-                        //initialLocale: const Locale('es'),
-                        //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
-                        child: const HomeScreen(),
-                      ),
+                      home:
+                          //I18n(
+                          //initialLocale: const Locale('es'),
+                          //initialLocale: const Locale('ar', 'EG'), // Arabic, Egypt
+                          //child:
+                          const HomeScreen(),
+                      // ),
                     ),
                   ),
                 ),

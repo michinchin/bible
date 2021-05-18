@@ -7,7 +7,7 @@ import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../../blocs/shared_bible_ref_bloc.dart';
-import '../../../translations.dart';
+//import '../../../translations.dart';
 import '../../common/common.dart';
 import '../../common/tec_auto_hide_app_bar.dart';
 import '../../common/tec_navigator.dart';
@@ -85,10 +85,10 @@ class _StudyViewState extends State<StudyView> with TickerProviderStateMixin {
                 return const Center(child: LoadingIndicator());
               }
 
-              final _aboutTitle = 'About'.i18n;
-              final _introTitle = 'Intro'.i18n;
-              final _resourcesTitle = 'Resources'.i18n;
-              final _notesTitle = 'Notes'.i18n;
+              const _aboutTitle = 'About'; // .i18n;
+              const _introTitle = 'Intro'; // .i18n;
+              const _resourcesTitle = 'Resources'; // .i18n;
+              const _notesTitle = 'Notes'; // .i18n;
               final _titles = [_aboutTitle, _introTitle, _resourcesTitle, _notesTitle];
 
               final tabTitles = state.sections.map((e) => _titles[e.index]);

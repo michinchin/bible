@@ -30,7 +30,7 @@ dependencies:
   flutter_svg: ^0.22.0
   freezed_annotation: ^0.14.1
   google_fonts: ^2.1.0
-  i18n_extension: ^4.0.2
+  #i18n_extension: ^4.0.3
   image_picker: ^0.7.2+1
   in_app_purchase: ^0.6.0
   in_app_purchase_android: ^0.1.0
@@ -117,10 +117,10 @@ dependencies:
 
 dev_dependencies:
   bloc_test: ^8.0.0
-  build_runner: ^1.12.2
+  build_runner: ^2.0.3
   flutter_test:
     sdk: flutter
-  freezed: ^0.14.1+2
+  freezed: ^0.14.2
   json_serializable: ^4.1.0
 
 flutter:
