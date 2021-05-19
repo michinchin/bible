@@ -1,23 +1,23 @@
 import 'dart:async';
-import 'dart:convert';
+// import 'dart:convert';
 
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+// import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:quill_delta/quill_delta.dart';
+// import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+// import 'package:quill_delta/quill_delta.dart';
 import 'package:tec_user_account/tec_user_account.dart';
-import 'package:tec_bloc/tec_bloc.dart';
+// import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
-import 'package:tec_widgets/tec_widgets.dart';
-import 'package:zefyr/zefyr.dart';
+// import 'package:tec_widgets/tec_widgets.dart';
+// import 'package:zefyr/zefyr.dart';
 
-import '../../blocs/sheet/sheet_manager_bloc.dart';
-import '../../models/app_settings.dart';
+// import '../../blocs/sheet/sheet_manager_bloc.dart';
+// import '../../models/app_settings.dart';
 import '../../models/const.dart';
-import '../common/common.dart';
-import '../menu/view_actions.dart';
+// import '../common/common.dart';
+// import '../menu/view_actions.dart';
 import 'note_action_bar.dart';
 
 const String _newNoteTitle = '___new___';
@@ -27,7 +27,8 @@ class ViewableNote extends Viewable {
 
   @override
   Widget builder(BuildContext context, ViewState state, Size size) =>
-      _NoteView(state: state, size: size);
+      const SizedBox();
+      // _NoteView(state: state, size: size);
 
   @override
   Widget floatingTitleBuilder(BuildContext context, ViewState state, Size size) {
@@ -65,6 +66,7 @@ class ViewableNote extends Viewable {
   }
 }
 
+/*
 class _NoteView extends StatefulWidget {
   final ViewState state;
   final Size size;
@@ -422,3 +424,4 @@ class _NoteViewState extends State<_NoteView> {
     );
   }
 }
+*/

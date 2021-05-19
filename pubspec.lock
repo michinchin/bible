@@ -709,13 +709,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.5.0"
-  notus:
-    dependency: transitive
-    description:
-      name: notus
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0-dev.4.0"
   octo_image:
     dependency: transitive
     description:
@@ -1428,15 +1421,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.0"
-  zefyr:
-    dependency: "direct main"
-    description:
-      path: "packages/zefyr"
-      ref: "00a3c1c952c18e3bb69bf553e3277d70d5069edc"
-      resolved-ref: "00a3c1c952c18e3bb69bf553e3277d70d5069edc"
-      url: "https://github.com/tecarta/zefyr"
-    source: git
-    version: "1.0.0-dev.2.0"
 sdks:
   dart: ">=2.13.0 <3.0.0"
   flutter: ">=2.0.0"

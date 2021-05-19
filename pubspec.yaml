@@ -30,7 +30,7 @@ dependencies:
   flutter_svg: ^0.22.0
   freezed_annotation: ^0.14.1
   google_fonts: ^2.1.0
-  #i18n_extension: ^4.0.3
+  # i18n_extension: ^4.0.3
   image_picker: ^0.7.2+1
   in_app_purchase: ^0.6.0
   in_app_purchase_android: ^0.1.0
@@ -109,11 +109,11 @@ dependencies:
   url_launcher: ^6.0.2
   video_player: ^2.1.1
   webview_flutter: ^2.0.4
-  zefyr:
-    git:
-      url: https://github.com/tecarta/zefyr
-      path: packages/zefyr
-      ref: 00a3c1c952c18e3bb69bf553e3277d70d5069edc
+  # zefyr:
+  #   git:
+  #     url: https://github.com/tecarta/zefyr
+  #     path: packages/zefyr
+  #     ref: 00a3c1c952c18e3bb69bf553e3277d70d5069edc
 
 dev_dependencies:
   bloc_test: ^8.0.0

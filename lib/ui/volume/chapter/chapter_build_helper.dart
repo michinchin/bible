@@ -5,7 +5,6 @@ import 'package:tec_html/tec_html.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
-import '../../common/common.dart';
 import '../../common/tec_overflow_box.dart';
 import '../../learn/learn.dart';
 import 'verse_tag.dart';
@@ -286,43 +285,6 @@ class _StudyCallout extends StatelessWidget {
         onTap: () => showLearnWithReferences(
             [Reference(book: book, chapter: chapter, verse: verse)], context,
             volumeId: studyVolumeId));
-    /*
-    return TecFutureBuilder<ErrorOrValue<Map<int, ResourceIntro>>>(
-      futureBuilder: () => _IntroCache.shared.valueForKey(
-          '$book $chapter $verse',
-          (key) => VolumesRepository.shared.resourceIntros(
-              reference: Reference(book: book, chapter: chapter, verse: verse), volumes: volumes)),
-      builder: (context, result, error) {
-        final finalError = error ?? result?.error;
-        final intros = result?.value;
-        if (intros == null || intros.isEmpty) {
-          if (finalError != null || intros != null) {
-            dmPrint(finalError != null
-                ? 'ERROR getting study intros: $finalError'
-                : 'No study intros for $chapter:$verse');
-            return const SizedBox();
-          }
-          return _Callout(
-            child: Stack(
-              children: [
-                text(null),
-                Positioned.fill(
-                    child: Center(
-                  child:
-                      finalError == null ? const LoadingIndicator() : Text(finalError.toString()),
-                )),
-              ],
-            ),
-          );
-        } else {
-          return _Callout(
-              child: text(intros[intros.keys.first].intro),
-              onTap: () => showLearnWithReferences(
-                  [Reference(book: book, chapter: chapter, verse: verse)], context,
-                  volumeId: 1017));
-        }
-      },
-    ); */
   }
 }
 
@@ -365,10 +327,3 @@ class _Callout extends StatelessWidget {
     );
   }
 }
-
-// class _IntroCache extends LruMemoryCache<ErrorOrValue<Map<int, ResourceIntro>>> {
-//   static final _IntroCache shared = _IntroCache(maxItems: 6);
-
-//   _IntroCache({int maxItems, Duration defaultExpiresIn})
-//       : super(maxItems: maxItems, defaultExpiresIn: defaultExpiresIn);
-// }
