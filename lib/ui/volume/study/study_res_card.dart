@@ -192,7 +192,7 @@ extension on Bible {
     if (res?.book == null || res?.chapter == null) return '';
     final bookAndChapter = titleWithBookAndChapter(res.book, res.chapter);
     if (isNotNullOrZero(res.verse)) {
-      if (isNotNullOrZero(res.endVerse)) {
+      if (isNotNullOrZero(res.endVerse) && res.endVerse > res.verse) {
         return '$bookAndChapter:${res.verse}-${res.endVerse}';
       }
       return '$bookAndChapter:${res.verse}';
@@ -307,13 +307,13 @@ Icon _iconForResource(Resource res, Resource parent, double size) {
       if (parent?.id == 0 ?? true) {
         switch (res.title) {
           case 'Maps':
-            return Icon(Icons.public, size: size, color: Colors.blue);
+            return Icon(Icons.public, size: size, color: Colors.teal);
           case 'Charts':
-            return Icon(Icons.poll_outlined, size: size, color: Colors.red);
+            return Icon(Icons.poll_outlined, size: size, color: Colors.orange);
           case 'Images':
             return Icon(Icons.insert_photo_outlined, size: size, color: Colors.green);
           case 'Articles':
-            return Icon(Icons.article_outlined, size: size, color: Colors.orange);
+            return Icon(Icons.article_outlined, size: size, color: Colors.blue);
           default:
             return Icon(Icons.folder_outlined, size: size);
         }
@@ -328,9 +328,9 @@ Icon _iconForResource(Resource res, Resource parent, double size) {
     case ResourceType.timeline:
       return Icon(Icons.insert_photo_outlined, size: size, color: Colors.green);
     case ResourceType.map:
-      return Icon(Icons.public, size: size, color: Colors.blue);
+      return Icon(Icons.public, size: size, color: Colors.teal);
     case ResourceType.chart:
-      return Icon(Icons.poll_outlined, size: size, color: Colors.red);
+      return Icon(Icons.poll_outlined, size: size, color: Colors.orange);
     case ResourceType.article:
     case ResourceType.studyNote:
     case ResourceType.introduction:
@@ -339,7 +339,7 @@ Icon _iconForResource(Resource res, Resource parent, double size) {
     case ResourceType.reference:
     case ResourceType.folderDevo:
     default:
-      return Icon(Icons.article_outlined, size: size, color: Colors.orange);
+      return Icon(Icons.article_outlined, size: size, color: Colors.blue);
       break;
   }
 }
