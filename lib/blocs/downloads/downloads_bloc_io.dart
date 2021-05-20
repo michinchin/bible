@@ -39,12 +39,10 @@ class DownloadsBlocImp extends DownloadsBloc {
         newItems[volumeId].status == DownloadStatus.canceled);
 
     final licenseUrl = '$cloudFrontStreamUrl/products-list/license-$volumeId.json';
-    final json = await sendHttpRequest<Map<String, dynamic>>(HttpRequestType.get,
-        url: licenseUrl,
-        completion: (status, json, dynamic error) => Future.value(json));
+    final json = await httpRequestList(licenseUrl);
 
     if (json != null) {
-      final url = as<String>(json['list'][2]);
+      final url = as<String>(json[2]);
       if (isNotNullOrEmpty(url)) {
         final taskId = await FlutterDownloader.enqueue(
             url: url,

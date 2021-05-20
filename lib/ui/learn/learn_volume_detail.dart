@@ -97,7 +97,7 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
               // Resource types to not show in list:
               const typesToIgnore = {ResourceType.reference};
 
-              bool chapterHasOtherStudyNotes = false;
+              var chapterHasOtherStudyNotes = false;
               final other = <Resource>[];
               final studyNotes = resourceList.expand<Resource>((el) {
                 if (el.hasType(ResourceType.studyNote)) {

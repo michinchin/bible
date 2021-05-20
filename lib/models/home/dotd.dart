@@ -98,17 +98,27 @@ class Dotd {
 
   /// Returns html, from remote or local
   Future<String> html(TecEnv env) async {
+    // TODO(ron): update to new devo format and refresh devo info...
+    final item = await httpRequestMap('$cloudFrontStreamUrl/$productId/items/$resourceId.json.gz');
+    if (item.containsKey('filename')) {
+      final html = await httpRequestString(
+          '$cloudFrontStreamUrl/$productId/data/${item['filename']}');
+      return formattedHtml(html, env);
+    }
+
+    /* this code worked when old devos were in the products list
     final res = await volume.resourceWithId(resourceId);
     if (res != null && res.error == null) {
       String html;
       final fileUrl = volume.fileUrlForResource(res.value);
       if (fileUrl.startsWith('http')) {
-        html = await utf8StringFromHttpRequest(HttpRequestType.get, url: fileUrl);
+        html = await httpRequestString(fileUrl);
       } else {
         html = getTextFromFile(fileUrl);
       }
       return formattedHtml(html, env);
     }
+    */
     return '';
   }
 

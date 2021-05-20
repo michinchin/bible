@@ -112,7 +112,7 @@ class _VolumesList extends StatelessWidget {
     collection.mergeSort<Volume>(volumes, compare: (a, b) => sortBloc.compare(a.id, b.id));
     volumes = volumes.take(sortBloc.state.volumes.length).toList();
 
-    const heroPrefix = 'learn';
+    // const heroPrefix = 'learn';
     final ref = refs.first;
 
     if (volumes.isEmpty) {
