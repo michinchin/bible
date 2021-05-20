@@ -172,7 +172,7 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                         children: [
                           if (studyNotes.isNotEmpty) ...[
                             section(
-                                'Study Notes for ${bible.nameOfBook(widget.reference.book)} ${widget.reference.chapter}${widget.showOnlyStudyNotes ? '' : ':${widget.reference.versesToString()}'}'),
+                                'Notes for ${bible.nameOfBook(widget.reference.book)} ${widget.reference.chapter}${widget.showOnlyStudyNotes ? '' : ':${widget.reference.versesToString()}'}'),
                             TecHtml(
                               _htmlFromStudyNotes(
                                 studyNotes,
@@ -191,7 +191,9 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                                 child: Center(
                                   child: TextButton(
                                     style: TextButton.styleFrom(),
-                                    child: const Text('Show all notes'),
+                                    child: Text('Show all notes for '
+                                        '${bible.nameOfBook(widget.reference.book)} '
+                                        '${widget.reference.chapter}'),
                                     // onPressed: () =>
                                     //     setState(() => _showOnlyFirstStudyNote = false),
                                     onPressed: () => Navigator.of(context).push<void>(
