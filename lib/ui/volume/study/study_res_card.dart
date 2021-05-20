@@ -23,6 +23,8 @@ class StudyResCard extends StatelessWidget {
   final Resource parent;
   final Bible bible;
   final VoidCallback onTap;
+  final double iconSize;
+  final bool useThumbnail;
 
   const StudyResCard({
     Key key,
@@ -30,17 +32,25 @@ class StudyResCard extends StatelessWidget {
     @required this.parent,
     @required this.bible,
     @required this.onTap,
+    this.useThumbnail = true,
+    this.iconSize,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final thumbnailUrl =
-        VolumesRepository.shared.volumeWithId(res.volumeId)?.thumbnailUrlForResource(res);
+    final thumbnailUrl = useThumbnail
+        ? VolumesRepository.shared.volumeWithId(res.volumeId)?.thumbnailUrlForResource(res)
+        : null;
     if (thumbnailUrl != null && thumbnailUrl.isNotEmpty) {
       return _ThumbnailCard(
-          res: res, parent: parent, bible: bible, onTap: onTap, thumbnailUrl: thumbnailUrl);
+          res: res,
+          parent: parent,
+          bible: bible,
+          onTap: onTap,
+          thumbnailUrl: thumbnailUrl,
+          thumbnailSize: iconSize ?? 80);
     } else {
-      return _DefaultCard(res: res, parent: parent, bible: bible, onTap: onTap);
+      return _DefaultCard(res: res, parent: parent, bible: bible, onTap: onTap, iconSize: iconSize);
     }
   }
 }
@@ -51,6 +61,7 @@ class _ThumbnailCard extends StatelessWidget {
   final Bible bible;
   final VoidCallback onTap;
   final String thumbnailUrl;
+  final double thumbnailSize;
 
   const _ThumbnailCard({
     Key key,
@@ -59,6 +70,7 @@ class _ThumbnailCard extends StatelessWidget {
     @required this.onTap,
     @required this.bible,
     @required this.thumbnailUrl,
+    @required this.thumbnailSize,
   }) : super(key: key);
 
   @override
@@ -77,7 +89,7 @@ class _ThumbnailCard extends StatelessWidget {
               child: _Card(
                 padding: EdgeInsets.zero,
                 elevation: 2,
-                child: TecImage(url: thumbnailUrl, width: 80, height: 80),
+                child: TecImage(url: thumbnailUrl, width: thumbnailSize, height: thumbnailSize),
               ),
             ),
             Expanded(
@@ -95,14 +107,16 @@ class _DefaultCard extends StatelessWidget {
   final Resource parent;
   final Bible bible;
   final VoidCallback onTap;
+  final double iconSize;
 
-  const _DefaultCard({
-    Key key,
-    @required this.res,
-    @required this.parent,
-    @required this.bible,
-    @required this.onTap,
-  }) : super(key: key);
+  const _DefaultCard(
+      {Key key,
+      @required this.res,
+      @required this.parent,
+      @required this.bible,
+      @required this.onTap,
+      this.iconSize})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +131,7 @@ class _DefaultCard extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.only(right: 12),
-              child: Icon(_iconForResource(res, parent)),
+              child: _iconForResource(res, parent, iconSize),
             ),
             Expanded(child: _TitleEtcColumn(res: res, parent: parent, bible: bible, onTap: onTap)),
             if (res.hasType(ResourceType.folder)) const Center(child: Icon(Icons.navigate_next)),
@@ -287,42 +301,45 @@ extension AsLinkedHashMapExtOnMap<K, V> on Map<K, V> {
   LinkedHashMap<K, V> asLinkedHashMap() => this as LinkedHashMap<K, V>;
 }
 
-IconData _iconForResource(Resource res, Resource parent) {
+Icon _iconForResource(Resource res, Resource parent, double size) {
   switch (res.baseType) {
     case ResourceType.folder:
       if (parent?.id == 0 ?? true) {
         switch (res.title) {
           case 'Maps':
-            return Icons.public;
+            return Icon(Icons.public, size: size, color: Colors.blue);
           case 'Charts':
-            return Icons.poll_outlined;
+            return Icon(Icons.poll_outlined, size: size, color: Colors.red);
           case 'Images':
-            return Icons.insert_photo_outlined;
+            return Icon(Icons.insert_photo_outlined, size: size, color: Colors.green);
           case 'Articles':
-            return Icons.article_outlined;
+            return Icon(Icons.article_outlined, size: size, color: Colors.orange);
           default:
-            return Icons.folder_outlined;
+            return Icon(Icons.folder_outlined, size: size);
         }
       } else {
-        return Icons.folder_outlined;
+        return Icon(Icons.folder_outlined, size: size);
       }
       break;
 
+    case ResourceType.image:
+    case ResourceType.video:
+    case ResourceType.interactive:
+    case ResourceType.timeline:
+      return Icon(Icons.insert_photo_outlined, size: size, color: Colors.green);
+    case ResourceType.map:
+      return Icon(Icons.public, size: size, color: Colors.blue);
+    case ResourceType.chart:
+      return Icon(Icons.poll_outlined, size: size, color: Colors.red);
     case ResourceType.article:
     case ResourceType.studyNote:
     case ResourceType.introduction:
     case ResourceType.question:
-    case ResourceType.image:
-    case ResourceType.map:
-    case ResourceType.chart:
     case ResourceType.link:
     case ResourceType.reference:
-    case ResourceType.video:
-    case ResourceType.interactive:
-    case ResourceType.timeline:
     case ResourceType.folderDevo:
     default:
-      return Icons.article_outlined;
+      return Icon(Icons.article_outlined, size: size, color: Colors.orange);
       break;
   }
 }

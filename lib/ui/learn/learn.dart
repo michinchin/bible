@@ -46,7 +46,7 @@ void showLearnWithReferences(Iterable<Reference> refs, BuildContext context, {in
         settings: settings,
         builder: (context) => volume == null
             ? LearnScaffold(refs: refs)
-            : LearnVolumeDetail(volume: volume, reference: refs.first, heroPrefix: null),
+            : LearnVolumeDetail(volume: volume, reference: refs.first),
       ),
     ),
   );
@@ -151,7 +151,7 @@ class _VolumesList extends StatelessWidget {
                   // trailing: _VolumeActionButton(volume: volume, heroPrefix: widget.heroPrefix),
                   onTap: () => Navigator.of(context).push<void>(MaterialPageRoute(
                       builder: (context) => LearnVolumeDetail(
-                          volume: volume, reference: refs.first, heroPrefix: heroPrefix))),
+                          volume: volume, reference: refs.first))),
                 );
               },
             );

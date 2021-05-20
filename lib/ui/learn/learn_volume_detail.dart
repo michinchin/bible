@@ -19,13 +19,13 @@ import '../volume/study/study_res_view.dart';
 class LearnVolumeDetail extends StatefulWidget {
   final Volume volume;
   final Reference reference;
-  final String heroPrefix;
+  final bool showOnlyStudyNotes;
 
   const LearnVolumeDetail({
     Key key,
     @required this.volume,
     @required this.reference,
-    @required this.heroPrefix,
+    this.showOnlyStudyNotes = false,
   }) : super(key: key);
 
   @override
@@ -36,21 +36,14 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
   bool _showOnlyFirstStudyNote = true;
 
   @override
+  void initState() {
+    super.initState();
+    _showOnlyFirstStudyNote = !widget.showOnlyStudyNotes;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // We're deliberately using `scaleFactorWith` instead of `textScaleFactor...` because
-    // if the user has their device text scaling set very high, it can cause overflow
-    // the the name and publisher text.
-    final textScaleFactor = scaleFactorWith(
-      context,
-      dampingFactor: 0.5,
-      minScaleFactor: 1,
-      maxScaleFactor: 3,
-    );
-    final padding = (16.0 * textScaleFactor).roundToDouble();
-
     final bible = VolumesRepository.shared.volumeWithId(widget.volume.id)?.assocBible();
-
-    Widget title() => Text(widget.volume.name);
 
     /*
     Widget image() => TecCard(
@@ -87,7 +80,7 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
             : CloseButton(
                 onPressed: () => Navigator.of(context, rootNavigator: true).maybePop(context)),
         centerTitle: false,
-        title: title(),
+        title: Text(widget.volume.name), // title(),
       ),
       body: SafeArea(
         child: TecFutureBuilder<ErrorOrValue<List<Resource>>>(
@@ -101,6 +94,10 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                 child: finalError == null ? const LoadingIndicator() : Text(finalError.toString()),
               );
             } else {
+              // Resource types to not show in list:
+              const typesToIgnore = {ResourceType.reference};
+
+              bool chapterHasOtherStudyNotes = false;
               final other = <Resource>[];
               final studyNotes = resourceList.expand<Resource>((el) {
                 if (el.hasType(ResourceType.studyNote)) {
@@ -111,18 +108,22 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                     endVerse:
                         el.endVerse != null && el.endVerse > el.verse ? el.endVerse : el.verse,
                   );
-                  if (widget.reference.overlaps(studyNoteRef)) {
+                  if (!_showOnlyFirstStudyNote || widget.reference.overlaps(studyNoteRef)) {
                     return [el];
+                  } else {
+                    chapterHasOtherStudyNotes = true;
                   }
-                } else {
+                } else if (!widget.showOnlyStudyNotes && !el.hasAnyOfTypes(typesToIgnore)) {
                   other.add(el);
                 }
                 return [];
               }).toList();
 
-              // Sort by number of verses covered, least to greatest.
-              collection.mergeSort<Resource>(studyNotes,
-                  compare: (a, b) => (a.endVerse - a.verse).compareTo(b.endVerse - b.verse));
+              // Sort study notes by number of verses covered, least to greatest.
+              if (_showOnlyFirstStudyNote) {
+                collection.mergeSort<Resource>(studyNotes,
+                    compare: (a, b) => (a.endVerse - a.verse).compareTo(b.endVerse - b.verse));
+              }
 
               final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
               // final textColor = isDarkTheme ? Colors.white : Colors.black;
@@ -141,6 +142,17 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                     ),
                   );
 
+              // We're deliberately using `scaleFactorWith` instead of `textScaleFactor...` because
+              // if the user has their device text scaling set very high, it can cause overflow
+              // the the name and publisher text.
+              final textScaleFactor = scaleFactorWith(
+                context,
+                dampingFactor: 0.5,
+                minScaleFactor: 1,
+                maxScaleFactor: 3,
+              );
+              final padding = (16.0 * textScaleFactor).roundToDouble();
+
               return studyNotes.isEmpty && other.isEmpty
                   ? const Center(child: Text('There are no resources for this reference.'))
                   : SingleChildScrollView(
@@ -149,7 +161,7 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                         children: [
                           if (studyNotes.isNotEmpty) ...[
                             section(
-                                'Study Notes for ${bible.nameOfBook(widget.reference.book)} ${widget.reference.chapter}:${widget.reference.versesToString()}'),
+                                'Study Notes for ${bible.nameOfBook(widget.reference.book)} ${widget.reference.chapter}${widget.showOnlyStudyNotes ? '' : ':${widget.reference.versesToString()}'}'),
                             TecHtml(
                               _htmlFromStudyNotes(
                                 studyNotes,
@@ -162,15 +174,24 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                               // textStyle: TextStyle(fontSize: 16, color: textColor),
                               backgroundColor: Theme.of(context).backgroundColor,
                             ),
-                            if (_showOnlyFirstStudyNote && studyNotes.length > 1)
+                            if (_showOnlyFirstStudyNote &&
+                                (chapterHasOtherStudyNotes || studyNotes.length > 1))
                               Container(
                                 color: isDarkTheme ? Colors.black : Colors.white,
                                 child: Center(
                                   child: TextButton(
                                     style: TextButton.styleFrom(),
-                                    onPressed: () =>
-                                        setState(() => _showOnlyFirstStudyNote = false),
-                                    child: const Text('Show more notes...'),
+                                    child: const Text('Show all notes'),
+                                    // onPressed: () =>
+                                    //     setState(() => _showOnlyFirstStudyNote = false),
+                                    onPressed: () => Navigator.of(context).push<void>(
+                                      MaterialPageRoute(
+                                        builder: (context) => LearnVolumeDetail(
+                                            volume: widget.volume,
+                                            reference: widget.reference,
+                                            showOnlyStudyNotes: true),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -185,20 +206,24 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                                   res: e,
                                   parent: null,
                                   bible: bible,
-                                  onTap: () => onTap(context, e)))),
-                          section('Title Details'),
-                          const SizedBox(height: 16),
-                          VolumeDetailCard(
-                            volume: widget.volume,
-                            textScaleFactor: textScaleFactor,
-                            padding: padding,
-                            // heroPrefix: heroPrefix,
-                          ),
-                          VolumeDescription(
-                            volume: widget.volume,
-                            textScaleFactor: textScaleFactor,
-                            padding: padding,
-                          ),
+                                  useThumbnail: false,
+                                  iconSize: 30,
+                                  onTap: () => onTapResCard(context, e)))),
+                          if (!widget.showOnlyStudyNotes) ...[
+                            section('Title Details'),
+                            const SizedBox(height: 16),
+                            VolumeDetailCard(
+                              volume: widget.volume,
+                              textScaleFactor: textScaleFactor,
+                              padding: padding,
+                              // heroPrefix: heroPrefix,
+                            ),
+                            VolumeDescription(
+                              volume: widget.volume,
+                              textScaleFactor: textScaleFactor,
+                              padding: padding,
+                            ),
+                          ],
                         ],
                       ),
                     );
@@ -209,7 +234,7 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
     );
   }
 
-  void onTap(BuildContext context, Resource res) {
+  void onTapResCard(BuildContext context, Resource res) {
     Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (context) {
