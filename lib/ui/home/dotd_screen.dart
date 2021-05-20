@@ -108,12 +108,17 @@ class __DotdScreenState extends State<_DotdScreen> {
                   TecHtml(
                     snapshot.data,
                     isInitialHtmlElementVisible: false,
-                    baseUrl: VolumesRepository.shared.volumeWithId(widget.devo.productId)?.baseUrl,
+                    // TODO(ron): this is an if for old devo base url
+                    baseUrl: (widget.devo.volume != null)
+                        ? VolumesRepository.shared.volumeWithId(widget.devo.productId)?.baseUrl
+                        : '$cloudFrontStreamUrl/${widget.devo.productId}/urlbase/',
                     onLoadFinished: (error) => setState(() => _showDevoButton = true),
                     textScaleFactor: contentTextScaleFactorWith(c),
                     selectable: false,
                   ),
-                  if (_showDevoButton)
+                  // volume is null on old devos
+                  // TODO(ron): remove if when using refresh...
+                  if (_showDevoButton && widget.devo.volume != null)
                     InkWell(
                       splashColor: Colors.transparent,
                       onTap: () => showDetailViewForVolume(c, widget.devo.volume, 'dotd'),

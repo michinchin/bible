@@ -83,7 +83,7 @@ class Dotds {
   static Future<Dotds> fetch({int year}) async {
     final y = year ?? DateTime.now().year;
     final fileName = 'devo-$y.json';
-    final hostAndPath = '$cloudFrontStreamUrl/home';
+    const hostAndPath = '$cloudFrontStreamUrl/home';
     final json = await TecCache.shared.jsonFromUrl(
         url: '$hostAndPath/$fileName',
         cachedPath: '${hostAndPath.replaceAll('https://', '')}/$fileName',

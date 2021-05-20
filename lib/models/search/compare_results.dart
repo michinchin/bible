@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_util/tec_util.dart';
 
 class CompareResult {
@@ -47,29 +46,26 @@ class CompareResults {
       @required int chapter,
       @required int verse,
       @required String translations}) async {
-    final _cachedPath = '${book}_${chapter}_${verse}_$translations';
 
-    final json = await TecCache.shared.jsonFromFile(cachedPath: _cachedPath);
+    // check cloudfront cache
+    var json = await httpRequestList(cfCompareCacheUrl(book, chapter, verse, translations));
 
-    if (isNotNullOrEmpty(json)) {
-      return CompareResults.fromJson(as<List<dynamic>>(json['list']));
+    // check the server
+    if (isNullOrEmpty(json)) {
+      json = await httpRequestList('$apiUrl/allverses',
+          body: apiBody(<String, dynamic>{
+            'volumes': translations,
+            'book': book,
+            'chapter': chapter,
+            'verse': verse,
+          }));
     }
 
-    return apiRequest(
-        endpoint: 'allverses',
-        parameters: <String, dynamic>{
-          'volumes': translations,
-          'book': book,
-          'chapter': chapter,
-          'verse': verse,
-        },
-        completion: (status, json, dynamic error) async {
-          if (status == 200) {
-            await TecCache.shared.saveJsonToCache(json: json, cacheUrl: _cachedPath);
-            return CompareResults.fromJson(as<List<dynamic>>(json['list']));
-          } else {
-            return CompareResults(data: []);
-          }
-        });
+    if (isNotNullOrEmpty(json)) {
+      return CompareResults.fromJson(json);
+    }
+    else {
+      return CompareResults(data: []);
+    }
   }
 }

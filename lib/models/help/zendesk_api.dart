@@ -16,10 +16,8 @@ class ZendeskApi {
   static Future<List<ZendeskArticle>> fetchSearch(String query) async {
     final parameters = <String, String>{'query': query, 'category': categoryId};
     final queryParams = Uri(queryParameters: parameters).query;
-    final json = await sendHttpRequest(HttpRequestType.get,
-        headers: {'Authorization': 'Basic ${decodeKey(authKey)}'},
-        url: '$zendeskApiUrl/articles/search.json?$queryParams',
-        completion: (status, json, dynamic error) => Future.value(json));
+    final json = await httpRequestMap('$zendeskApiUrl/articles/search.json?$queryParams',
+        headers: {'Authorization': 'Basic ${decodeKey(authKey)}'});
 
     if (json != null) {
       final articles = <ZendeskArticle>[];

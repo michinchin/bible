@@ -25,26 +25,16 @@ class AutoComplete {
     }
 
     // check cloudfront cache
-    var json = await sendHttpRequest<Map<String, dynamic>>(HttpRequestType.get,
-        url: cfSuggestCacheUrl(cleanPhrase, translationIds),
-        completion: (status, json, dynamic error) => Future.value(json));
+    var json = await httpRequestMap(cfSuggestCacheUrl(cleanPhrase, translationIds));
 
     // check the server
     if (isNullOrEmpty(json)) {
-      json = await apiRequest(
-          endpoint: 'suggest',
-          parameters: <String, dynamic>{
+      json = await httpRequestMap('$apiUrl/suggest',
+          body: apiBody(<String, dynamic>{
             'words': suggestions['words'],
             'partialWord': suggestions['partialWord'],
             'searchVolumes': translationIds,
-          },
-          completion: (status, json, dynamic error) async {
-            if (status == 200) {
-              return json;
-            } else {
-              return null;
-            }
-          });
+          }));
     }
 
     if (isNullOrEmpty(json)) {

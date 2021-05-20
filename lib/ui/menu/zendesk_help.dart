@@ -18,6 +18,7 @@ void showZendeskHelp(BuildContext context) =>
 
 class ZendeskHelp extends StatefulWidget {
   const ZendeskHelp({Key key}) : super(key: key);
+
   @override
   _ZendeskHelpState createState() => _ZendeskHelpState();
 }
@@ -43,7 +44,12 @@ class _ZendeskHelpState extends State<ZendeskHelp> {
       () {
         if (mounted) {
           // dmPrint('search string: ${_textEditingController.text.trim()}');
-          context.tbloc<SearchHelpBloc>()?.add(SearchHelpEvent(_searchController.text));
+          final searchBloc = context.tbloc<SearchHelpBloc>();
+
+          // only initiate a search if the query has changed...
+          if (searchBloc != null && _searchController.text != searchBloc.state.query) {
+            searchBloc.add(SearchHelpEvent(_searchController.text));
+          }
         }
       },
     );
@@ -159,9 +165,12 @@ class ZendeskArticlePage extends StatelessWidget {
         title: TecText(article.title, autoSize: true, maxLines: 2),
       ),
       body: SingleChildScrollView(
-        child: TecHtml(
-          article.body,
-          baseUrl: '',
+        child: Padding(
+          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+          child: TecHtml(
+            article.body,
+            baseUrl: '',
+          ),
         ),
       ),
     );

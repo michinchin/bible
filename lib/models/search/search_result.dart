@@ -68,6 +68,7 @@ class SearchResult {
 
 class SearchResults {
   List<SearchResult> data = [];
+
   SearchResults({this.data});
 
   factory SearchResults.fromJson(Map<String, dynamic> json) {
@@ -122,29 +123,19 @@ class SearchResults {
     }
 
     // check cloudfront cache
-    var json = await sendHttpRequest<Map<String, dynamic>>(HttpRequestType.get,
-        url: cfSearchCacheUrl(cacheWords, translationIds, exact, phrase),
-        completion: (status, json, dynamic error) => Future.value(json));
+    var json = await httpRequestMap(cfSearchCacheUrl(cacheWords, translationIds, exact, phrase));
 
     // try server
     if (isNullOrEmpty(json)) {
-      json = await apiRequest(
-          endpoint: 'search',
-          parameters: <String, dynamic>{
+      json = await httpRequestMap('$apiUrl/search',
+          body: apiBody(<String, dynamic>{
             'searchWords': searchWords,
             'book': 0,
             'bookset': 0,
             'exact': exact,
             'phrase': phrase,
             'searchVolumes': translationIds,
-          },
-          completion: (status, json, dynamic error) async {
-            if (status == 200) {
-              return json;
-            } else {
-              return null;
-            }
-          });
+          }));
     }
 
     if (isNullOrEmpty(json)) {

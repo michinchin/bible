@@ -57,7 +57,7 @@ class Votd {
 
   static Future<Votd> fetch({int year}) async {
     final y = year ?? DateTime.now().year;
-    final hostAndPath = '$cloudFrontStreamUrl/home';
+    const hostAndPath = '$cloudFrontStreamUrl/home';
     final fileName = 'votd-$y.json';
     final json = await TecCache.shared.jsonFromUrl(
         url: '$hostAndPath/$fileName',
