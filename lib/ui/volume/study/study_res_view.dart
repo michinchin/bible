@@ -247,7 +247,7 @@ class __ArticleState extends State<_Article> {
                       baseUrl:
                           VolumesRepository.shared.volumeWithId(widget.studyRes.volumeId)?.baseUrl,
                       backgroundColor: Theme.of(context).backgroundColor,
-                      textStyle: const TextStyle(fontSize: 18),
+                      textStyle: const TextStyle(fontSize: 16),
                       textScaleFactor: contentTextScaleFactorWith(context),
                       padding: _padding,
                     );

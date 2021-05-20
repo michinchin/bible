@@ -171,7 +171,6 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                               ),
                               baseUrl: widget.volume.baseUrl,
                               padding: const EdgeInsets.symmetric(horizontal: 16),
-                              // textStyle: TextStyle(fontSize: 16, color: textColor),
                               backgroundColor: Theme.of(context).backgroundColor,
                             ),
                             if (_showOnlyFirstStudyNote &&
