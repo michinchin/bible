@@ -25,18 +25,14 @@ class TecInteractiveViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasCaption = caption?.isNotEmpty ?? false;
-
-    if (hasCaption) {
-      // If there's no `TecAutoHideAppBarBloc` ancestor in the widget tree, make one,
-      // because _Caption needs it.
-      final bloc = context.findBloc<TecAutoHideAppBarBloc>();
-      if (bloc == null) {
-        return BlocProvider<TecAutoHideAppBarBloc>(
-          create: (_) => TecAutoHideAppBarBloc(),
-          child: _build(context),
-        );
-      }
+    // If there's no `TecAutoHideAppBarBloc` ancestor in the widget tree, make one,
+    // because _Caption needs it.
+    final bloc = context.findBloc<TecAutoHideAppBarBloc>();
+    if (bloc == null) {
+      return BlocProvider<TecAutoHideAppBarBloc>(
+        create: (_) => TecAutoHideAppBarBloc(),
+        child: Builder(builder: _build),
+      );
     }
 
     return _build(context);
