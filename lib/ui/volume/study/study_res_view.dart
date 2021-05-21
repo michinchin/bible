@@ -91,11 +91,11 @@ class StudyResView extends StatelessWidget {
           }
 
           if (type == ResourceType.studyNote) {
-            // TODO(ron): Handle this case.
+            // TO-DO(ron): Handle this case.
           }
 
           if (type == ResourceType.question) {
-            // TODO(ron): Handle this case.
+            // TO-DO(ron): Handle this case.
           }
 
           if (studyRes.error != null) {

@@ -29,7 +29,7 @@ import 'verse_tag.dart';
 const _despanifyChapterHtml = false;
 const _superscriptVerseNumbers = true; // kDebugMode;
 
-const _footnote = '\ue900';
+const _footnote = '\u2060\ue900';
 const _footnoteStyle = TextStyle(fontFamily: 'tec_icons', color: Colors.blue, height: 1);
 
 const _marginNote = '\ue901';

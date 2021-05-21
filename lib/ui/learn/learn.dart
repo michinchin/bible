@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart' as collection;
@@ -35,7 +37,7 @@ void showLearnWithReferences(Iterable<Reference> refs, BuildContext context, {in
   final volume = volumeId == null ? null : VolumesRepository.shared.volumeWithId(volumeId);
   showModalBottomSheetWithMaxWidth<void>(
     context: context,
-    maxWidth: 500.0,
+    maxWidth: math.max(500.0, MediaQuery.of(context).size.width * .75),
     height: 0.9,
     useRootNavigator: true,
     isScrollControlled: true,

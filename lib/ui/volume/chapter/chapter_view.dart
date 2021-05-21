@@ -349,6 +349,13 @@ class _ChapterViewState extends State<_ChapterView> {
 
     // Rebuild the HTML string only when necessary...
     if (_html == null) {
+      final customStyles = isBibleId(widget.volume.id)
+          ? // '.cno, .C { height: unset; margin-bottom: 0px; } '
+          '.FOOTNO { margin-left: 0px; margin-right: 0px; position: static; } '
+          // 'h5, .SUBA, h1 { font-weight: normal !important; '
+          // 'font-style: italic; font-size: 100% !important; } '
+          : ' p { line-height: 1.2em; } ';
+
       _html = _env.html(
         htmlFragment: widget.htmlFragment,
         fontSizePercent: (_contentScaleFactor * 100.0).round(),
@@ -357,6 +364,7 @@ class _ChapterViewState extends State<_ChapterView> {
         marginTop: '0px',
         marginBottom: '160px',
         vendorFolder: widget.volume.vendorFolder,
+        customStyles: customStyles,
       );
 
       // If it is a study volume, switch `bible_vendor.css` to `studynotes.css`.
