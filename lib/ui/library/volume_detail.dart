@@ -87,8 +87,8 @@ class VolumeDetailCard extends StatelessWidget {
       builder: (context, constraints) {
         //final halfPad = (padding / 2.0).roundToDouble();
 
-        dmPrint(
-            'VolumeDetailCard building with hero tag: "${heroTagForVolume(volume, heroPrefix)}"');
+        // dmPrint(
+        //     'VolumeDetailCard building with hero tag: "${heroTagForVolume(volume, heroPrefix)}"');
 
         final cardHeight = math.min(350.0, (constraints.maxWidth * 0.5).roundToDouble() + 50.0);
 

@@ -81,6 +81,15 @@ class StudyResView extends StatelessWidget {
             }
           }
 
+          if (type == ResourceType.callout && isNotNullOrEmpty(studyRes.res.caption)) {
+            return _Article(
+                studyRes: studyRes,
+                viewSize: viewSize,
+                padding: type == ResourceType.introduction || !useAltTopPadding
+                    ? padding
+                    : padding.copyWith(top: _altTopPadding));
+          }
+
           if (type == ResourceType.studyNote) {
             // TODO(ron): Handle this case.
           }
@@ -204,7 +213,8 @@ class __ArticleState extends State<_Article> {
 
   @override
   Widget build(BuildContext context) {
-    return isNullOrEmpty(widget.studyRes.html)
+    final html = widget.studyRes.html ?? widget.studyRes.res.caption;
+    return isNullOrEmpty(html)
         ? const Center(child: LoadingIndicator())
         : TecAutoScroll(
             scrollController: _scrollController,
@@ -230,13 +240,14 @@ class __ArticleState extends State<_Article> {
                       bottom: 160,
                     );
 
-                    if (kIsWeb) return Text(widget.studyRes.html);
+                    // if (kIsWeb) return Text(html);
 
                     return TecHtml(
-                      widget.studyRes.html,
+                      html,
                       baseUrl:
                           VolumesRepository.shared.volumeWithId(widget.studyRes.volumeId)?.baseUrl,
                       backgroundColor: Theme.of(context).backgroundColor,
+                      textStyle: const TextStyle(fontSize: 16),
                       textScaleFactor: contentTextScaleFactorWith(context),
                       padding: _padding,
                     );

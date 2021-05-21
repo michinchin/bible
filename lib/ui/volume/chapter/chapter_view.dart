@@ -413,7 +413,6 @@ class _ChapterViewState extends State<_ChapterView> {
                     baseUrl: widget.volume.baseUrl,
                     html: _html,
                     versesToShow: widget.versesToShow ?? [],
-                    // ['1', '2', '3']
                     size: widget.size,
                     fontName: context.tbloc<ContentSettingsBloc>().state.fontName,
                     highlights: highlights,

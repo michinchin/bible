@@ -174,7 +174,7 @@ class _TitleEtcColumn extends StatelessWidget {
         if (bible != null && isNotNullOrZero(res.book) && isNotNullOrZero(res.chapter)) ...[
           Text(bible.titleWithResource(res), style: refStyle),
         ],
-        if (isNotNullOrEmpty(res.caption)) ...[
+        if (isNotNullOrEmpty(res.caption) && !res.hasType(ResourceType.callout)) ...[
           const SizedBox(height: 4),
           Text(
             res.caption,

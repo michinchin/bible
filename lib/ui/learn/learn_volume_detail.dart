@@ -15,6 +15,7 @@ import '../library/volume_detail.dart';
 import '../volume/study/study_res_bloc.dart';
 import '../volume/study/study_res_card.dart';
 import '../volume/study/study_res_view.dart';
+import 'learn.dart';
 
 class LearnVolumeDetail extends StatefulWidget {
   final Volume volume;
@@ -72,15 +73,25 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
         );
     */
 
+    final showBackButton = (ModalRoute.of(context)?.canPop ?? false);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
-        leading: (ModalRoute.of(context)?.canPop ?? false)
+        leading: showBackButton
             ? const BackButton()
             : CloseButton(
                 onPressed: () => Navigator.of(context, rootNavigator: true).maybePop(context)),
         centerTitle: false,
         title: Text(widget.volume.name), // title(),
+        actions: [
+          if (!showBackButton)
+            IconButton(
+                onPressed: () => Navigator.of(context).pushReplacement<void, void>(
+                    MaterialPageRoute(
+                        builder: (context) => LearnScaffold(refs: [widget.reference]))),
+                icon: const Icon(Icons.lightbulb_outline)),
+        ],
       ),
       body: SafeArea(
         child: TecFutureBuilder<ErrorOrValue<List<Resource>>>(
@@ -161,7 +172,7 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                         children: [
                           if (studyNotes.isNotEmpty) ...[
                             section(
-                                'Study Notes for ${bible.nameOfBook(widget.reference.book)} ${widget.reference.chapter}${widget.showOnlyStudyNotes ? '' : ':${widget.reference.versesToString()}'}'),
+                                'Notes for ${bible.nameOfBook(widget.reference.book)} ${widget.reference.chapter}${widget.showOnlyStudyNotes ? '' : ':${widget.reference.versesToString()}'}'),
                             TecHtml(
                               _htmlFromStudyNotes(
                                 studyNotes,
@@ -171,7 +182,6 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                               ),
                               baseUrl: widget.volume.baseUrl,
                               padding: const EdgeInsets.symmetric(horizontal: 16),
-                              // textStyle: TextStyle(fontSize: 16, color: textColor),
                               backgroundColor: Theme.of(context).backgroundColor,
                             ),
                             if (_showOnlyFirstStudyNote &&
@@ -181,7 +191,9 @@ class _LearnVolumeDetailState extends State<LearnVolumeDetail> {
                                 child: Center(
                                   child: TextButton(
                                     style: TextButton.styleFrom(),
-                                    child: const Text('Show all notes'),
+                                    child: Text('Show all notes for '
+                                        '${bible.nameOfBook(widget.reference.book)} '
+                                        '${widget.reference.chapter}'),
                                     // onPressed: () =>
                                     //     setState(() => _showOnlyFirstStudyNote = false),
                                     onPressed: () => Navigator.of(context).push<void>(
