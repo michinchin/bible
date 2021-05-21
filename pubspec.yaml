@@ -46,19 +46,18 @@ dependencies:
     hosted:
       name: tec_bloc
       url: http://noah.tecarta.com:8100
-    version: ^1.0.0
+    version: ^2.0.0
   tec_cache:
     hosted:
       name: tec_cache
       url: http://noah.tecarta.com:8100
-    version: ^2.1.0
+    version: ^3.0.0
   tec_env:
     hosted:
       name: tec_env
       url: http://noah.tecarta.com:8100
     version: ^1.2.4
   tec_html:
-    # path: ../shared/tec_html
     hosted:
       name: tec_html
       url: http://noah.tecarta.com:8100
@@ -67,12 +66,12 @@ dependencies:
     hosted:
       name: tec_native_ad
       url: http://noah.tecarta.com:8100
-    version: ^1.0.3
+    version: ^2.0.0
   tec_notifications:
     hosted:
       name: tec_notifications
       url: http://noah.tecarta.com:8100
-    version: ^1.0.13
+    version: ^2.0.0
   tec_platform_util:
     hosted:
       name: tec_platform_util
@@ -82,28 +81,28 @@ dependencies:
     hosted:
       name: tec_user_account
       url: http://noah.tecarta.com:8100
-    version: ^2.3.0
+    version: ^3.0.0
   tec_util:
     hosted:
       name: tec_util
       url: http://noah.tecarta.com:8100
-    version: ^1.4.1
+    version: ^2.0.0
   tec_views:
     hosted:
       name: tec_views
       url: http://noah.tecarta.com:8100
-    version: ^1.1.1
+    version: ^2.0.0
   tec_volumes:
     # path: ../shared/tec_volumes
     hosted:
       name: tec_volumes
       url: http://noah.tecarta.com:8100
-    version: ^1.4.3
+    version: ^2.0.0
   tec_widgets:
     hosted:
       name: tec_widgets
       url: http://noah.tecarta.com:8100
-    version: ^2.2.4
+    version: ^3.0.0
   tuple: ^2.0.0
   url_launcher: ^6.0.2
   video_player: ^2.1.1
