@@ -30,8 +30,11 @@ extension ChapterHighlightsExt on ChapterHighlights {
     return null;
   }
 
-  Iterable<Highlight> highlightsForVerse(int verse,
-      {int startWord = Reference.minWord, int endWord = Reference.maxWord}) {
+  Iterable<Highlight> highlightsForVerse(
+    int verse, {
+    int startWord = Reference.minWord,
+    int endWord = Reference.maxWord,
+  }) {
     assert(startWord != null && endWord != null);
 
     // We keep the list sorted by each highlight's start word for the current verse.
@@ -249,6 +252,8 @@ class ChapterHighlightsBloc extends Bloc<HighlightEvent, ChapterHighlights> {
     assert(type != HighlightType.clear);
     final newList = state.highlights.copySubtracting(ref)..add(Highlight(type, color, ref));
     if (mode == HighlightMode.save) {
+      // _printHighlights(state.highlights, withTitle: 'before:');
+      // _printHighlights(newList, withTitle: 'after:');
       _saveHighlightsToDb(ref.verses.toList(), newList);
     }
     return ChapterHighlights(volumeId, book, chapter, newList, loaded: true);
@@ -260,6 +265,8 @@ class ChapterHighlightsBloc extends Bloc<HighlightEvent, ChapterHighlights> {
       // need to reset the hls...
       _initUserContent();
     } else {
+      // _printHighlights(state.highlights, withTitle: 'before:');
+      // _printHighlights(newList, withTitle: 'after:');
       _saveHighlightsToDb(ref.verses.toList(), newList);
     }
     return ChapterHighlights(volumeId, book, chapter, newList, loaded: true);
@@ -281,17 +288,18 @@ extension HighlightsBlocExtOnListOfHighlight on List<Highlight> {
   }
 }
 
-//void _printHighlights(List<Highlight> hls, {String withTitle}) {
-//  if (kDebugMode) {
-//    dmPrint('');
-//    dmPrint('-----------------------------------------------------');
-//    if (withTitle?.isNotEmpty ?? false) dmPrint(withTitle);
-//    dmPrint('');
-//    for (final hl in hls) {
-//      dmPrint(hl.ref);
-//    }
-//    dmPrint('');
-//    dmPrint('-----------------------------------------------------\n');
-//    dmPrint('');
-//  }
-//}
+// ignore: unused_element
+void _printHighlights(List<Highlight> hls, {String withTitle}) {
+  if (kDebugMode) {
+    dmPrint('');
+    dmPrint('-----------------------------------------------------');
+    if (withTitle?.isNotEmpty ?? false) dmPrint(withTitle);
+    dmPrint('');
+    for (final hl in hls) {
+      dmPrint(hl.ref);
+    }
+    dmPrint('');
+    dmPrint('-----------------------------------------------------\n');
+    dmPrint('');
+  }
+}

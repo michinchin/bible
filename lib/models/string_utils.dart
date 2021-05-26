@@ -353,6 +353,7 @@ const _whitespace = <int>{
   0x200A, // [ ] hair space
   0x202F, // [ ] narrow no-break space
   0x205F, // [ ] medium mathematical space
+  0x2060, // [] zero-width no-break character or "word joiner"
   0x3000, // [　] ideographic space
 };
 

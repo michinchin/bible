@@ -56,7 +56,7 @@ packages:
       name: bloc_test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.0.0"
+    version: "8.0.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -98,7 +98,7 @@ packages:
       name: build_runner
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   build_runner_core:
     dependency: transitive
     description:
@@ -561,7 +561,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.5+2"
+    version: "0.7.5+3"
   image_picker_for_web:
     dependency: transitive
     description:
@@ -757,7 +757,7 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   path_provider_linux:
     dependency: transitive
     description:
@@ -904,14 +904,14 @@ packages:
       name: share
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   shared_preferences:
     dependency: transitive
     description:
       name: shared_preferences
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.5"
+    version: "2.0.6"
   shared_preferences_linux:
     dependency: transitive
     description:
@@ -1091,7 +1091,7 @@ packages:
       name: tec_bloc
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.0"
+    version: "3.0.1"
   tec_cache:
     dependency: "direct main"
     description:
@@ -1161,14 +1161,14 @@ packages:
       name: tec_user_account
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.2"
   tec_util:
     dependency: "direct main"
     description:
       name: tec_util
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.2"
   tec_views:
     dependency: "direct main"
     description:
@@ -1182,14 +1182,14 @@ packages:
       name: tec_volumes
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   tec_widgets:
     dependency: "direct main"
     description:
       name: tec_widgets
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   term_glyph:
     dependency: transitive
     description:
@@ -1308,7 +1308,7 @@ packages:
       name: video_player
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.3"
   video_player_platform_interface:
     dependency: transitive
     description:
