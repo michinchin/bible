@@ -77,7 +77,7 @@ abstract class Highlight with _$Highlight {
       chapter: ui.chapter,
       verse: ui.verse,
       word: ui.wordBegin,
-      endWord: (ui.wordEnd <= Reference.minWord) ? Reference.maxWord : ui.wordEnd,
+      endWord: (ui.wordEnd <= 0) ? Reference.maxWord : ui.wordEnd,
     );
 
     final highlightType =
@@ -188,6 +188,7 @@ class ChapterHighlightsBloc extends Bloc<HighlightEvent, ChapterHighlights> {
     // remove any existing hls in this reference range...
     for (final ui in uc) {
       if (verses.contains(ui.verse)) {
+        // dmPrint('Removing highlight from DB: ${Highlight.from(ui).ref}');
         await AppSettings.shared.userAccount.userDb.deleteItem(ui);
       }
     }
@@ -196,6 +197,8 @@ class ChapterHighlightsBloc extends Bloc<HighlightEvent, ChapterHighlights> {
     for (final hl in hls) {
       for (final v in hl.ref.verses) {
         if (verses.contains(v)) {
+          final wordBegin = hl.ref.startWordForVerse(v);
+
           // create a new UserItem for this hl
           final ui = UserItem(
             type: UserItemType.highlight.index,
@@ -206,12 +209,15 @@ class ChapterHighlightsBloc extends Bloc<HighlightEvent, ChapterHighlights> {
                 ((hl.highlightType == HighlightType.underline) ? 0x1000000 : 0),
             verse: v,
             verseEnd: v,
-            wordBegin: hl.ref.startWordForVerse(v),
+            // Since `wordBegin == 1` means the same thing as `wordBegin == 0`, and `wordBegin == 0`
+            // is handled more efficiently, always turn a 1 into a 0.
+            wordBegin: wordBegin == 1 ? 0 : wordBegin,
             wordEnd: hl.ref.endWordForVerse(v),
             created: dbIntFromDateTime(DateTime.now()),
           );
 
           await AppSettings.shared.userAccount.userDb.saveItem(ui);
+          // dmPrint('Added highlight to DB: ${hl.ref}');
         }
       }
     }
@@ -237,6 +243,8 @@ class ChapterHighlightsBloc extends Bloc<HighlightEvent, ChapterHighlights> {
       for (final hl in hls) {
         newList = newList.copySubtracting(hl.ref)..add(hl);
       }
+
+      // _printHighlights(newList, withTitle: 'Downloaded Highlights:');
 
       // if (kDebugMode) {
       //   dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');

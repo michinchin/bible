@@ -1161,7 +1161,7 @@ packages:
       name: tec_user_account
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "3.0.2"
+    version: "3.0.3"
   tec_util:
     dependency: "direct main"
     description:
@@ -1182,7 +1182,7 @@ packages:
       name: tec_volumes
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   tec_widgets:
     dependency: "direct main"
     description:
