@@ -12,7 +12,11 @@ def main():
 
     callouts_conn.execute(
         'create table callouts(volumeId INTEGER, book INTEGER, chapter INTEGER, ' \
-        'verse INTEGER, itemId INTEGER, learn TEXT)'
+        'verse INTEGER, itemId INTEGER)'
+    )
+
+    callouts_conn.execute(
+        'create table learn(volumeId INTEGER, itemId INTEGER, learn TEXT)'
     )
 
     bible_path = os.path.join(head, 'volumes', '32', 'deploy', '32.sqlite')
@@ -29,6 +33,7 @@ def main():
         conn = sqlite3.connect(db_path)
         for bcv in bcvs:
             print('callouts for ' + str(volume_id) + ' book ' + str(bcv[0]) + ' chapter ' + str(bcv[1]))
+            learn_items = []
             for verse in range(1, bcv[2] + 1):
                 command = 'select itemId, learn from ResourceItems ri' + \
                 ' inner join ResourceItemTypes rt on ri.id = rt.itemId' + \
@@ -36,16 +41,25 @@ def main():
                 ' and verse <= ? and endVerse >= ?' + \
                 ' and type = 2 ' + \
                 ' order by (endVerse - verse) limit 1'
-                items = conn.cursor()
-                items.execute(command, (str(bcv[0]), str(bcv[1]), str(verse), str(verse)))
-                for item in items:
-                    callouts_conn.execute('insert into callouts values (?,?,?,?,?,?)',
-                                          (str(volume_id), str(bcv[0]), str(bcv[1]), str(bcv[2]), str(item[0]),
-                                           item[1]))
+                callouts = conn.cursor()
+                callouts.execute(command, (str(bcv[0]), str(bcv[1]), str(verse), str(verse)))
+                for callout in callouts:
+                    callouts_conn.execute('insert into callouts values (?,?,?,?,?)',
+                                          (str(volume_id), str(bcv[0]), str(bcv[1]), str(verse), str(callout[0])))
+
+                    key = str(volume_id) + '_' + str(callout[0])
+                    if key not in learn_items:
+                        learn_items.append(key)
+                        callouts_conn.execute('insert into learn values (?,?,?)', (str(volume_id), str(callout[0]),
+                                                                                  str(callout[1])))
+
         callouts_conn.commit()
 
     callouts_conn.execute(
         'CREATE INDEX idx_callouts on callouts (volumeId, book, chapter, verse)'
+    )
+    callouts_conn.execute(
+        'CREATE INDEX idx_learn on learn (volumeId, itemId)'
     )
 
 
