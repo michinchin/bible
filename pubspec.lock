@@ -1182,7 +1182,7 @@ packages:
       name: tec_volumes
       url: "http://noah.tecarta.com:8100"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   tec_widgets:
     dependency: "direct main"
     description:
