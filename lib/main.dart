@@ -33,7 +33,7 @@ import 'navigation_service.dart';
 import 'ui/common/common.dart';
 import 'ui/home/home_screen.dart';
 import 'ui/ugc/note_view.dart';
-import 'ui/volume/callouts_io.dart' if (dart.library.html) 'callouts_web.dart';
+import 'ui/volume/callouts_io.dart' if (dart.library.html) 'ui/volume/callouts_web.dart';
 import 'ui/volume/volume_view.dart';
 
 const _appTitle = 'Tecarta Bible';
