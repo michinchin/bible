@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -25,6 +24,7 @@ import '../../../models/app_settings.dart';
 import '../../common/common.dart';
 import '../../common/tec_overflow_box.dart';
 import '../../common/tec_scroll_listener.dart';
+import '../callouts_io.dart' if (dart.library.html) '../callouts_web.dart';
 import '../volume_view_data_bloc.dart';
 import 'chapter_build_helper.dart';
 import 'chapter_selection.dart';
@@ -227,24 +227,7 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
     final ref = widget.ref;
     _future = Future.wait([
       chapterHtmlWith(widget.volume, ref.book, ref.chapter),
-      _StudyCalloutsCache.shared.valueForKey(ref.toString(), (key) {
-        final totalVerses =
-            VolumesRepository.shared.bibleWithId(9).versesIn(book: ref.book, chapter: ref.chapter);
-
-        final verses = <int>[];
-        final offset = random(min: 1, max: 4);
-        const delta = 10;
-        final verse = (ref.verse + offset < totalVerses)
-            ? ref.verse + offset
-            : math.max(2, ref.verse - offset);
-        for (var v = verse % delta; v < totalVerses; v += delta) {
-          if (v >= 2) verses.add(v);
-        }
-        assert(verses.isNotEmpty);
-
-        return VolumesRepository.shared.resourceCallouts(
-            book: ref.book, chapter: ref.chapter, verses: verses, volumes: [1017]);
-      }),
+      chapterCallouts(ref),
     ]);
   }
 
@@ -280,13 +263,6 @@ class _BibleChapterViewState extends State<_BibleChapterView> {
       },
     );
   }
-}
-
-class _StudyCalloutsCache extends LruMemoryCache<ErrorOrValue<Map<int, Map<int, ResourceIntro>>>> {
-  static final _StudyCalloutsCache shared = _StudyCalloutsCache(maxItems: 6);
-
-  _StudyCalloutsCache({int maxItems, Duration defaultExpiresIn})
-      : super(maxItems: maxItems, defaultExpiresIn: defaultExpiresIn);
 }
 
 ///

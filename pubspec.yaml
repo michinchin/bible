@@ -41,6 +41,7 @@ dependencies:
   provider: ^5.0.0
   quill_delta: ^2.0.0
   share: ^2.0.4
+  sqflite: ^2.0.0
   string_validator: ^0.3.0
   tec_bloc:
     hosted:
@@ -152,6 +153,7 @@ flutter:
     - assets/footnote.svg
     - assets/marginNote.svg
     - assets/products.json
+    - assets/callouts.sqlite
     - assets/images/photo0.jpg
     - assets/images/photo1.jpg
     - assets/images/photo2.jpg

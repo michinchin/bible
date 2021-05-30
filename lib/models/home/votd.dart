@@ -12,7 +12,7 @@ class VotdEntry {
   VotdEntry({this.imageUrl, this.refs, this.year, this.ordinalDay});
 
   Reference get ref {
-    final hrefs = refs.split(';').map<Reference>((href) => Reference.fromHref(href)).toList();
+    final hrefs = refs.split(';').map<Reference>(Reference.fromHref).toList();
     var finalRef = hrefs[0];
     for (var i = 0; i < hrefs.length - 1; i++) {
       final h1 = hrefs[i];
