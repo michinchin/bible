@@ -154,8 +154,11 @@ class ChapterBuildHelper {
           maxHeight: height,
           child: Container(
             padding: EdgeInsets.only(right: textScaleFactor * 8.0),
-            child: Text(ref.chapter.toString(),
-                style: TextStyle(fontSize: fontSize, fontFamily: 'Palatino')),
+            child: Text(
+              ref.chapter.toString(),
+              textScaleFactor: 1.0,
+              style: TextStyle(fontSize: fontSize, fontFamily: 'Palatino'),
+            ),
           ),
         ),
       );
@@ -277,7 +280,8 @@ class _StudyCallout extends StatelessWidget {
           maxLines: 3,
           softWrap: true,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: Colors.orange, fontSize: 16 * textScaleFactor),
+          textScaleFactor: textScaleFactor,
+          style: const TextStyle(color: Colors.orange, fontSize: 16),
         );
 
     return _Callout(
