@@ -24,30 +24,30 @@ sed -i '' "s/DEBUG-VERSION/$VERSION-$BUILD_NUMBER/g" lib/version.dart
 
 # see README-Flutter-web.txt
 # echo "building website..."
-#flutter build web --release 
+flutter build web --release 
 
-#sed -i '' "s/main.dart./main.dart.${BUILD_NUMBER}./g" build/web/index.html
-#sed -i '' "s/flutter_service_worker./flutter_service_worker.${BUILD_NUMBER}./g" build/web/index.html
+sed -i '' "s/main.dart./main.dart.${BUILD_NUMBER}./g" build/web/index.html
+sed -i '' "s/flutter_service_worker./flutter_service_worker.${BUILD_NUMBER}./g" build/web/index.html
 
-#mv build/web/main.dart.js build/web/main.dart.$BUILD_NUMBER.js
-#mv build/web/flutter_service_worker.js build/web/flutter_service_worker.$BUILD_NUMBER.js
+mv build/web/main.dart.js build/web/main.dart.$BUILD_NUMBER.js
+mv build/web/flutter_service_worker.js build/web/flutter_service_worker.$BUILD_NUMBER.js
 
-#pushd build/web
+pushd build/web
 
-#for entry in *
-#do
-#   if [[ -d  $entry ]]; then
-#      echo "copying $entry"
-#      aws s3 cp --recursive --cache-control="max-age=2592000" --acl="public-read" "./$entry" "s3://tecarta-tb10-tecarta-com/$entry/"
-#   elif [[ "$entry" == "index.html" ]]; then
-#      aws s3 cp --cache-control="max-age=300" --acl="public-read" "./$entry" s3://tecarta-tb10-tecarta-com/
-#      aws s3 cp --cache-control="max-age=300" --acl="public-read" "./$entry" s3://tecarta-tb10-tecarta-com/index-${BUILD_NUMBER}.html
-#   else
-#      aws s3 cp --cache-control="max-age=2592000" --acl="public-read" "./$entry" s3://tecarta-tb10-tecarta-com/
-#   fi
-#done
+for entry in *
+do
+   if [[ -d  $entry ]]; then
+      echo "copying $entry"
+      aws s3 cp --recursive --cache-control="max-age=2592000" --acl="public-read" "./$entry" "s3://tecarta-tb10-tecarta-com/$entry/"
+   elif [[ "$entry" == "index.html" ]]; then
+      aws s3 cp --cache-control="max-age=300" --acl="public-read" "./$entry" s3://tecarta-tb10-tecarta-com/
+      aws s3 cp --cache-control="max-age=300" --acl="public-read" "./$entry" s3://tecarta-tb10-tecarta-com/index-${BUILD_NUMBER}.html
+   else
+      aws s3 cp --cache-control="max-age=2592000" --acl="public-read" "./$entry" s3://tecarta-tb10-tecarta-com/
+   fi
+done
 
-#popd
+popd
 
 # apk requires flutter 1.26
 # APK
