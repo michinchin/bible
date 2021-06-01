@@ -30,7 +30,7 @@ dependencies:
   flutter_svg: ^0.22.0
   freezed_annotation: ^0.14.1
   google_fonts: ^2.1.0
-  # i18n_extension: ^4.0.3
+  i18n_extension: ^4.0.3
   image_picker: ^0.7.5+3
   in_app_purchase: ^1.0.1
   json_annotation: ^4.0.1

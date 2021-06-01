@@ -1,4 +1,3 @@
-/*
 import 'package:i18n_extension/i18n_extension.dart';
 
 // cspell: disable
@@ -44,4 +43,3 @@ extension Localization on String {
 
   String get i18n => localize(this, _t);
 }
-*/
