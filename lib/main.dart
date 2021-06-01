@@ -51,7 +51,7 @@ Future<void> main() async {
 
   final stopwatch = Stopwatch()..start();
 
-  if (!kIsWeb) {
+  if (!kIsWeb && !TecPlatform.isMacOS) {
     await FlutterDownloader.initialize(debug: kDebugMode);
     await Notifications.init(
         channelInfo: ChannelInfo(id: 'tec-id', name: 'tec-name', description: 'tec-description'),
@@ -89,7 +89,9 @@ Future<void> main() async {
     tua.UserItemType.prefItem,
   ]);
 
-  InAppPurchases.init();
+  if (!TecPlatform.isMacOS) {
+    InAppPurchases.init();
+  }
 
   // items in prefs bloc can be saved in the db - userDB needs to have been initialized
   await PrefsBloc.shared.load();
