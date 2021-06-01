@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'package:bloc/bloc.dart';
+import 'package:collection/collection.dart';
+import 'package:equatable/equatable.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
@@ -14,21 +15,25 @@ import '../../models/shared_types.dart';
 
 export '../../models/shared_types.dart' show HighlightType;
 
-part 'highlights_bloc.freezed.dart';
+class ChapterHighlights extends Equatable {
+  final int volumeId;
+  final int book;
+  final int chapter;
+  final List<Highlight> highlights;
+  final bool loaded;
 
-@freezed
-abstract class ChapterHighlights with _$ChapterHighlights {
-  const factory ChapterHighlights(int volumeId, int book, int chapter, List<Highlight> highlights,
-      {bool loaded}) = _ChapterHighlights;
-}
+  const ChapterHighlights(this.volumeId, this.book, this.chapter, this.highlights,
+      {this.loaded = false});
 
-extension ChapterHighlightsExt on ChapterHighlights {
   Highlight highlightForVerse(int verse, {int andWord}) {
     for (final highlight in highlights.reversed) {
       if (highlight.ref.includesVerse(verse, andWord: andWord)) return highlight;
     }
     return null;
   }
+
+  @override
+  List<Object> get props => [volumeId, book, chapter, loaded, highlights];
 
   Iterable<Highlight> highlightsForVerse(
     int verse, {
@@ -62,13 +67,18 @@ extension ChapterHighlightsExt on ChapterHighlights {
   }
 }
 
-@freezed
-abstract class Highlight with _$Highlight {
-  const factory Highlight(
-    HighlightType highlightType,
-    int color,
-    Reference ref,
-  ) = _Highlight;
+class Highlight extends Equatable {
+  final HighlightType highlightType;
+  final int color;
+  final Reference ref;
+
+  const Highlight(this.highlightType, this.color, this.ref);
+
+  Highlight copyWith({HighlightType highlightType, int color, Reference ref}) => Highlight(
+        highlightType ?? this.highlightType,
+        color ?? this.color,
+        ref ?? this.ref,
+      );
 
   factory Highlight.from(UserItem ui) {
     final ref = Reference(
@@ -92,35 +102,19 @@ abstract class Highlight with _$Highlight {
       ref,
     );
   }
+
+  @override
+  List<Object> get props => [highlightType, ref, color];
 }
 
 enum HighlightMode { trial, save }
 
-@freezed
-abstract class HighlightEvent with _$HighlightEvent {
-  const factory HighlightEvent.updateFromDb({@required List<Highlight> hls}) = _UpdateFromDb;
-  const factory HighlightEvent.add(
-      {@required HighlightType type,
-      @required int color,
-      @required Reference ref,
-      @required HighlightMode mode}) = _Add;
-  const factory HighlightEvent.clear(Reference ref, HighlightMode mode) = _Clear;
-  const factory HighlightEvent.changeVolumeId(int volumeId) = _ChangeVolumeId;
-}
-
-class ChapterHighlightsBloc extends Bloc<HighlightEvent, ChapterHighlights> {
-  int volumeId;
-  final int book;
-  final int chapter;
-  final bool loaded;
-  StreamSubscription<UserDbChange> _userDbChangeSubscription;
-
+class ChapterHighlightsBloc extends Cubit<ChapterHighlights> {
   ChapterHighlightsBloc({
-    @required this.volumeId,
-    @required this.book,
-    @required this.chapter,
-    this.loaded = false,
-  }) : super(ChapterHighlights(volumeId, book, chapter, [], loaded: false)) {
+    @required int volumeId,
+    @required int book,
+    @required int chapter,
+  }) : super(ChapterHighlights(volumeId, book, chapter, const [], loaded: false)) {
     _initUserContent();
 
     // Start listening for changes to the db.
@@ -130,24 +124,28 @@ class ChapterHighlightsBloc extends Bloc<HighlightEvent, ChapterHighlights> {
 
   @override
   Future<void> close() {
+    _isClosed = true;
     _userDbChangeSubscription?.cancel();
     _userDbChangeSubscription = null;
     return super.close();
   }
+
+  StreamSubscription<UserDbChange> _userDbChangeSubscription;
+  bool _isClosed = false;
 
   void _userDbChangeListener(UserDbChange change) {
     var reload = false;
 
     if (change != null && change.includesItemType(UserItemType.highlight)) {
       if (change.type == UserDbChangeType.itemAdded &&
-          change.after?.volumeId == volumeId &&
-          change.after?.book == book &&
-          change.after?.chapter == chapter) {
+          change.after?.volumeId == state.volumeId &&
+          change.after?.book == state.book &&
+          change.after?.chapter == state.chapter) {
         reload = true;
       } else if (change.type == UserDbChangeType.itemDeleted &&
-          change.before?.volumeId == volumeId &&
-          change.before?.book == book &&
-          change.before?.chapter == chapter) {
+          change.before?.volumeId == state.volumeId &&
+          change.before?.book == state.book &&
+          change.before?.chapter == state.chapter) {
         reload = true;
       } else if (change.type == UserDbChangeType.multipleChanges) {
         reload = true;
@@ -156,118 +154,52 @@ class ChapterHighlightsBloc extends Bloc<HighlightEvent, ChapterHighlights> {
 
     if (reload) {
       // margin notes for this chapter changed, reload...
-      dmPrint('new hls for chapter $chapter');
+      dmPrint('new hls for chapter ${state.chapter}');
       _initUserContent();
     }
   }
 
   Future<void> _initUserContent() async {
-    final uc = await AppSettings.shared.userAccount.userDb
-        .getItemsWithVBC(volumeId, book, chapter, ofTypes: [UserItemType.highlight]);
+    final userItems = await AppSettings.shared.userAccount.userDb.getItemsWithVBC(
+        state.volumeId, state.book, state.chapter,
+        ofTypes: [UserItemType.highlight]);
 
-    if (uc.isNotEmpty) {
-      // We keep the highlights sorted by modified date with most recent at the bottom.
-      uc.sort((a, b) => a?.modified?.compareTo(b.modified) ?? 1);
-    }
+    // If this bloc was closed during the async await, just return.
+    if (_isClosed) return;
 
-    final hls = <Highlight>[];
+    // Sort the highlight user items by modified date, oldest to most recent.
+    userItems.sort((a, b) => a?.modified?.compareTo(b.modified) ?? 1);
 
-    for (final ui in uc) {
-      hls.add(Highlight.from(ui));
-    }
+    // Map the user item list to a Highlight list.
+    final hls = userItems.map((e) => Highlight.from(e)).toList();
 
     // _printHighlights(hls, withTitle: 'HIGHLIGHTS IMPORTED FROM DB:');
 
-    add(HighlightEvent.updateFromDb(hls: hls));
-  }
-
-  Future<void> _saveHighlightsToDb(List<int> verses, List<Highlight> hls) async {
-    final uc = await AppSettings.shared.userAccount.userDb
-        .getItemsWithVBC(volumeId, book, chapter, ofTypes: [UserItemType.highlight]);
-
-    // remove any existing hls in this reference range...
-    for (final ui in uc) {
-      if (verses.contains(ui.verse)) {
-        // dmPrint('Removing highlight from DB: ${Highlight.from(ui).ref}');
-        await AppSettings.shared.userAccount.userDb.deleteItem(ui);
-      }
-    }
-
-    // add any hls still in this reference range...
-    for (final hl in hls) {
-      for (final v in hl.ref.verses) {
-        if (verses.contains(v)) {
-          final wordBegin = hl.ref.startWordForVerse(v);
-
-          // create a new UserItem for this hl
-          final ui = UserItem(
-            type: UserItemType.highlight.index,
-            volumeId: volumeId,
-            book: book,
-            chapter: chapter,
-            color: (hl.color & 0xFFFFFF) +
-                ((hl.highlightType == HighlightType.underline) ? 0x1000000 : 0),
-            verse: v,
-            verseEnd: v,
-            // Since `wordBegin == 1` means the same thing as `wordBegin == 0`, and `wordBegin == 0`
-            // is handled more efficiently, always turn a 1 into a 0.
-            wordBegin: wordBegin == 1 ? 0 : wordBegin,
-            wordEnd: hl.ref.endWordForVerse(v),
-            created: dbIntFromDateTime(DateTime.now()),
-          );
-
-          await AppSettings.shared.userAccount.userDb.saveItem(ui);
-          // dmPrint('Added highlight to DB: ${hl.ref}');
-        }
-      }
-    }
-  }
-
-  @override
-  Stream<ChapterHighlights> mapEventToState(HighlightEvent event) async* {
-    final newState = event.when(
-        add: _add, clear: _clear, updateFromDb: _updateFromDb, changeVolumeId: _changeVolumeId);
-    yield newState;
-  }
-
-  ChapterHighlights _updateFromDb(List<Highlight> hls) {
     var newList = hls;
 
+    // This will make sure there are no overlapping highlights.
     if (hls.isNotEmpty) {
-      // Stopwatch stopwatch;
-      // if (kDebugMode) {
-      //   stopwatch = Stopwatch()..start();
-      // }
-
       newList = state.highlights;
       for (final hl in hls) {
         newList = newList.copySubtracting(hl.ref)..add(hl);
       }
-
-      // _printHighlights(newList, withTitle: 'Downloaded Highlights:');
-
-      // if (kDebugMode) {
-      //   dmPrint('Cleaning up the highlights took ${stopwatch.elapsed}');
-      // }
-
-      // _printHighlights(newList, withTitle: 'CLEANED UP HIGHLIGHTS:');
     }
 
-    return ChapterHighlights(volumeId, book, chapter, newList, loaded: true);
+    emit(ChapterHighlights(state.volumeId, state.book, state.chapter, newList, loaded: true));
   }
 
-  ChapterHighlights _add(HighlightType type, int color, Reference ref, HighlightMode mode) {
+  void add(HighlightType type, int color, Reference ref, HighlightMode mode) {
     assert(type != HighlightType.clear);
     final newList = state.highlights.copySubtracting(ref)..add(Highlight(type, color, ref));
     if (mode == HighlightMode.save) {
       // _printHighlights(state.highlights, withTitle: 'before:');
       // _printHighlights(newList, withTitle: 'after:');
-      _saveHighlightsToDb(ref.verses.toList(), newList);
+      _saveHighlightsToDb(ref.verses.toList(), newList, state.volumeId, state.book, state.chapter);
     }
-    return ChapterHighlights(volumeId, book, chapter, newList, loaded: true);
+    emit(ChapterHighlights(state.volumeId, state.book, state.chapter, newList, loaded: true));
   }
 
-  ChapterHighlights _clear(Reference ref, HighlightMode mode) {
+  void clear(Reference ref, HighlightMode mode) {
     final newList = state.highlights.copySubtracting(ref);
     if (mode == HighlightMode.trial) {
       // need to reset the hls...
@@ -275,15 +207,57 @@ class ChapterHighlightsBloc extends Bloc<HighlightEvent, ChapterHighlights> {
     } else {
       // _printHighlights(state.highlights, withTitle: 'before:');
       // _printHighlights(newList, withTitle: 'after:');
-      _saveHighlightsToDb(ref.verses.toList(), newList);
+      _saveHighlightsToDb(ref.verses.toList(), newList, state.volumeId, state.book, state.chapter);
     }
-    return ChapterHighlights(volumeId, book, chapter, newList, loaded: true);
+    emit(ChapterHighlights(state.volumeId, state.book, state.chapter, newList, loaded: true));
   }
 
-  ChapterHighlights _changeVolumeId(int volumeId) {
-    this.volumeId = volumeId;
+  void changeVolumeId(int volumeId) {
+    emit(ChapterHighlights(volumeId, state.book, state.chapter, const [], loaded: false));
     _initUserContent();
-    return ChapterHighlights(volumeId, book, chapter, [], loaded: false);
+  }
+}
+
+Future<void> _saveHighlightsToDb(
+    List<int> verses, List<Highlight> hls, int volumeId, int book, int chapter) async {
+  final userItems = await AppSettings.shared.userAccount.userDb
+      .getItemsWithVBC(volumeId, book, chapter, ofTypes: [UserItemType.highlight]);
+
+  // remove any existing hls in this reference range...
+  for (final ui in userItems) {
+    if (verses.contains(ui.verse)) {
+      // dmPrint('Removing highlight from DB: ${Highlight.from(ui).ref}');
+      await AppSettings.shared.userAccount.userDb.deleteItem(ui);
+    }
+  }
+
+  // add any hls still in this reference range...
+  for (final hl in hls) {
+    for (final v in hl.ref.verses) {
+      if (verses.contains(v)) {
+        final wordBegin = hl.ref.startWordForVerse(v);
+
+        // create a new UserItem for this hl
+        final ui = UserItem(
+          type: UserItemType.highlight.index,
+          volumeId: volumeId,
+          book: book,
+          chapter: chapter,
+          color: (hl.color & 0xFFFFFF) +
+              ((hl.highlightType == HighlightType.underline) ? 0x1000000 : 0),
+          verse: v,
+          verseEnd: v,
+          // Since `wordBegin == 1` means the same thing as `wordBegin == 0`, and `wordBegin == 0`
+          // is handled more efficiently, always turn a 1 into a 0.
+          wordBegin: wordBegin == 1 ? 0 : wordBegin,
+          wordEnd: hl.ref.endWordForVerse(v),
+          created: dbIntFromDateTime(DateTime.now()),
+        );
+
+        await AppSettings.shared.userAccount.userDb.saveItem(ui);
+        // dmPrint('Added highlight to DB: ${hl.ref}');
+      }
+    }
   }
 }
 

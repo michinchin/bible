@@ -383,7 +383,7 @@ class _ChapterViewState extends State<_ChapterView> {
                 if (highlights.loaded && highlights.volumeId != widget.volume.id) {
                   context
                       .tbloc<ChapterHighlightsBloc>()
-                      .add(HighlightEvent.changeVolumeId(widget.volume.id));
+                      .changeVolumeId(widget.volume.id);
                   userContentValid = false;
                 }
 
