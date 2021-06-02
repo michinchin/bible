@@ -58,10 +58,9 @@ Future<Reference> navigate(BuildContext context, Reference ref,
     builder: (context) => MultiBlocProvider(providers: [
       BlocProvider<NavBloc>(
           create: (_) => NavBloc(ref, initialTabIndex: initialIndex)
-            ..add(NavEvent.changeNavView(
-                state: searchView && hasSearchResults
-                    ? NavViewState.searchResults
-                    : NavViewState.bcvTabs))),
+            ..changeNavView(searchView && hasSearchResults
+                ? NavViewState.searchResults
+                : NavViewState.bcvTabs)),
     ], child: Nav(searchView: searchView)),
   );
 }
@@ -85,8 +84,7 @@ Future<Reference> showBibleSearch(BuildContext context, Reference ref,
       builder: (context) => MultiBlocProvider(
               providers: [
                 BlocProvider<NavBloc>(
-                    create: (_) => NavBloc(ref)
-                      ..add(const NavEvent.changeNavView(state: NavViewState.searchResults))),
+                    create: (_) => NavBloc(ref)..changeNavView(NavViewState.searchResults)),
               ],
               child: Nav(
                 searchView: true,
@@ -140,12 +138,12 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             setState(() {});
           });
 
-    // tab controller that updates position based on navbloc
+    // tab controller that updates position based on navBloc
     _tabController =
         TabController(length: tabLength, initialIndex: navBloc().state.tabIndex, vsync: this)
           ..addListener(() {
             if (_tabController.index != navBloc().state.tabIndex) {
-              navBloc().add(NavEvent.changeTabIndex(index: _tabController.index));
+              navBloc().changeTabIndex(_tabController.index);
             }
           });
     _searchListener = () {
@@ -153,7 +151,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
       _debounce = Timer(const Duration(milliseconds: 250), () {
         if (navBloc().state.search != _searchController.text) {
           // dmPrint('/nTESTING:${_searchController.text}/n');
-          navBloc().add(NavEvent.onSearchChange(search: _searchController.text));
+          navBloc().onSearchChange(_searchController.text);
         }
       });
     };
@@ -179,7 +177,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           TabController(length: tabLength, initialIndex: navBloc().state.tabIndex, vsync: this)
             ..addListener(() {
               if (_tabController.index != navBloc().state.tabIndex) {
-                navBloc().add(NavEvent.changeTabIndex(index: _tabController.index));
+                navBloc().changeTabIndex(_tabController.index);
               }
             });
     });
@@ -188,7 +186,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
   void onSubmit({String query}) {
     final s = query ?? _searchController.text;
 
-    navBloc().add(NavEvent.onSearchFinished(search: s));
+    navBloc().onSearchFinished(s);
     FocusScope.of(context).unfocus();
     if (s.isNotEmpty) {
       searchBloc()
@@ -245,8 +243,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                         : 'Show books in canonical order'),
                     onTap: () {
                       navBloc()
-                        ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
-                        ..add(const NavEvent.onSearchChange(search: ''));
+                        ..changeTabIndex(NavTabs.book.index)
+                        ..onSearchChange('');
                       PrefsBloc.toggle(PrefItemId.navBookOrder);
                     },
                   ),
@@ -255,8 +253,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                         navGridViewEnabled ? 'Show full name for books' : 'Show abbreviated books'),
                     onTap: () {
                       navBloc()
-                        ..add(NavEvent.changeTabIndex(index: NavTabs.book.index))
-                        ..add(const NavEvent.onSearchChange(search: ''));
+                        ..changeTabIndex(NavTabs.book.index)
+                        ..onSearchChange('');
                       PrefsBloc.toggle(PrefItemId.navLayout);
                     },
                   ),
@@ -374,9 +372,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                         badgeColor: Colors.orange, icon: Icons.youtube_searched_for)
                     : const Icon(Icons.youtube_searched_for),
                 onPressed: () {
-                  c
-                      .tbloc<NavBloc>()
-                      .add(const NavEvent.changeNavView(state: NavViewState.searchResults));
+                  c.tbloc<NavBloc>().changeNavView(NavViewState.searchResults);
                   // default to show history first
                   _searchResultsTabController.animateTo(1);
                 }),
@@ -404,9 +400,9 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
               icon: const Icon(Icons.cancel_outlined),
               onPressed: () {
                 _searchController.clear();
-                navBloc().add(const NavEvent.onSearchChange(search: ''));
+                navBloc().onSearchChange('');
                 if (s.tabIndex != NavTabs.book.index) {
-                  navBloc().add(NavEvent.changeTabIndex(index: NavTabs.book.index));
+                  navBloc().changeTabIndex(NavTabs.book.index);
                 }
               })
         ];

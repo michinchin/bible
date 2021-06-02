@@ -32,7 +32,7 @@ class SearchSuggestionsView extends StatelessWidget {
                 onTap: () {
                   final search = '${bible.nameOfBook(book)} ';
                   updateSearch(search);
-                  bloc.add(NavEvent.onSearchChange(search: search));
+                  bloc.onSearchChange(search);
                 }),
           for (final word in wordSuggestions)
             ListTile(
@@ -45,7 +45,7 @@ class SearchSuggestionsView extends StatelessWidget {
                     query.substring(query.length - 1, query.length) == ' ') {
                   query += '$a ';
                   updateSearch(query);
-                  bloc.add(NavEvent.onSearchChange(search: query));
+                  bloc.onSearchChange(query);
                 } else {
                   final words = query.split(' ')..last = a;
                   query = words.join(' ');

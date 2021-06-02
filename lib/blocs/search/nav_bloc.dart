@@ -1,101 +1,61 @@
-import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+
+import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/search/autocomplete.dart';
 
-part 'nav_bloc.freezed.dart';
-
 enum NavViewState { bcvTabs, searchSuggestions, searchResults }
 enum NavTabs { book, chapter, verse }
 
-@freezed
-abstract class NavEvent with _$NavEvent {
-  const factory NavEvent.changeTabIndex({int index}) = _ChangeIndex;
-  const factory NavEvent.setRef({Reference ref}) = _SetRef;
-  const factory NavEvent.onSearchChange({String search}) = _OnSearchChange;
-  const factory NavEvent.loadWordSuggestions({String search}) = _LoadWordSuggestions;
-  const factory NavEvent.changeNavView({NavViewState state}) = _ChangeNavView;
-  const factory NavEvent.onSearchFinished({String search}) = _OnSearchFinished;
-  const factory NavEvent.changeState(NavState state) = _ChangeNavState;
-}
+@immutable
+class NavState extends Equatable {
+  final NavViewState navViewState;
+  final int tabIndex;
+  final Reference ref;
+  final String search;
+  final List<int> bookSuggestions;
+  final List<String> wordSuggestions;
 
-@freezed
-abstract class NavState with _$NavState {
-  const factory NavState({
+  const NavState(this.navViewState, this.tabIndex, this.ref, this.search, this.bookSuggestions,
+      this.wordSuggestions);
+
+  @override
+  List<Object> get props => [navViewState, tabIndex, ref, search, bookSuggestions, wordSuggestions];
+
+  NavState copyWith({
     NavViewState navViewState,
     int tabIndex,
     Reference ref,
     String search,
     List<int> bookSuggestions,
     List<String> wordSuggestions,
-  }) = _NavState;
+  }) =>
+      NavState(
+        navViewState ?? this.navViewState,
+        tabIndex ?? this.tabIndex,
+        ref ?? this.ref,
+        search ?? this.search,
+        bookSuggestions ?? this.bookSuggestions,
+        wordSuggestions ?? this.wordSuggestions,
+      );
 }
 
-class NavBloc extends Bloc<NavEvent, NavState> {
+class NavBloc extends Cubit<NavState> {
   final Reference initialRef;
   final int initialTabIndex;
+
   NavBloc(this.initialRef, {this.initialTabIndex = 1})
-      : super(NavState(
-          ref: initialRef ?? Reference.fromHref('50/1/1', volume: 9),
-          tabIndex: initialTabIndex,
-          search: '',
-          bookSuggestions: [],
-          wordSuggestions: [],
-          navViewState: NavViewState.bcvTabs,
-        ));
+      : super(NavState(NavViewState.bcvTabs, initialTabIndex,
+            initialRef ?? Reference.fromHref('50/1/1', volume: 9), '', const [], const []));
 
-  // @override
-  // // ignore: type_annotate_public_apis
-  // Stream<Transition<NavEvent, NavState>> transformEvents(Stream<NavEvent> events, transitionFn) {
-  //   final nonDebounceStream = events.where((event) {
-  //     return (event is! _OnSearchChange);
-  //   });
+  void changeNavView(NavViewState vs) => emit(state.copyWith(navViewState: vs));
 
-  //   // debounce request streams
-  //   final debounceStream = events.where((event) {
-  //     return (event is _OnSearchChange);
-  //   }).debounceTime(const Duration(milliseconds: 250));
-
-  //   return super.transformEvents(nonDebounceStream.mergeWith([debounceStream]), transitionFn);
-  // }
-
-  // @override
-  // void onTransition(Transition<NavEvent, NavState> transition) {
-  //   // dmPrint(transition);
-  //   super.onTransition(transition);
-  // }
-
-  @override
-  Stream<NavState> mapEventToState(NavEvent event) async* {
-    if (event is _LoadWordSuggestions) {
-      final suggestions = await _loadWordSuggestions(event.search);
-      // TODO(abby): fix word suggest
-      yield state.copyWith(
-      wordSuggestions: suggestions, navViewState: NavViewState.searchSuggestions);
-
-    } else {
-      final newState = event.when(
-          changeNavView: _changeNavView,
-          onSearchChange: _onSearchChange,
-          onSearchFinished: _onSearchFinished,
-          loadWordSuggestions: (_) {},
-          changeTabIndex: _changeTabIndex,
-          changeState: _changeState,
-          setRef: _setReference);
-      // dmPrint('$newState');
-      dmPrint(NavViewState.values[newState.navViewState.index]);
-      yield newState;
-    }
-  }
-
-  NavState _changeNavView(NavViewState vs) => state.copyWith(navViewState: vs);
-
-  NavState _onSearchChange(String s) {
+  void onSearchChange(String s) {
     // dmPrint('SEARCH CHANGE: $s');
-    var currState = state.copyWith(search: s);
+    var newState = state.copyWith(search: s);
 
     if (s.isNotEmpty && s != null) {
       final bible = VolumesRepository.shared.bibleWithId(state.ref.volume);
@@ -130,33 +90,35 @@ class NavBloc extends Bloc<NavEvent, NavState> {
           if (m.group(2) != null) {
             final chapter = int.parse(m.group(2));
             if (chapter > 0 && chapter <= bible.chaptersIn(book: ref.book)) {
-              currState = currState.copyWith(tabIndex: NavTabs.verse.index);
+              newState = newState.copyWith(tabIndex: NavTabs.verse.index);
               ref = ref.copyWith(chapter: chapter);
               // chapter is ok...
               if (m.group(3) != null) {
                 // check verse
                 final verse = int.parse(m.group(3));
                 if (verse > 0 && verse <= bible.versesIn(book: ref.book, chapter: chapter)) {
-                  currState = currState.copyWith(tabIndex: NavTabs.verse.index);
+                  newState = newState.copyWith(tabIndex: NavTabs.verse.index);
                   ref = ref.copyWith(verse: verse, endVerse: verse);
                 }
               }
 
-              return currState.copyWith(ref: ref);
+              emit(newState.copyWith(ref: ref));
+              return;
             }
           }
         }
       }
-      if (currState.tabIndex == NavTabs.book.index) {
+      if (newState.tabIndex == NavTabs.book.index) {
         var book = bible.firstBook;
         while (book != 0) {
           final name = bible.nameOfBook(book).toLowerCase();
           if (name == check.trim()) {
-            return currState.copyWith(
+            emit(newState.copyWith(
                 navViewState: NavViewState.bcvTabs,
                 tabIndex: NavTabs.chapter.index,
                 ref: state.ref.copyWith(book: book),
-                search: '${bible.nameOfBook(book)} ');
+                search: '${bible.nameOfBook(book)} '));
+            return;
           } else if (name.startsWith(s.toLowerCase())) {
             matches[book] = bible.nameOfBook(book);
           }
@@ -166,21 +128,22 @@ class NavBloc extends Bloc<NavEvent, NavState> {
 
         if (matches.length == 1) {
           if (endsWithSpaceDigit) {
-            return currState.copyWith(
+            emit(newState.copyWith(
                 ref: state.ref.copyWith(book: matches.keys.first),
-                search: '${matches.values.first} ');
+                search: '${matches.values.first} '));
+            return;
           }
         }
-        add(NavEvent.loadWordSuggestions(search: s));
+        loadWordSuggestions(s);
 
-        currState = currState.copyWith(
+        newState = newState.copyWith(
           search: s,
           bookSuggestions: matches.keys.toList(),
           // navViewState: NavViewState.searchSuggestions
         );
-      } else if (currState.tabIndex == NavTabs.chapter.index) {
+      } else if (newState.tabIndex == NavTabs.chapter.index) {
         // chapter tab
-        currState = currState.copyWith(navViewState: NavViewState.bcvTabs);
+        newState = newState.copyWith(navViewState: NavViewState.bcvTabs);
         if (lastChar == ':') {
           int chapter;
           try {
@@ -193,49 +156,55 @@ class NavBloc extends Bloc<NavEvent, NavState> {
           }
 
           if (chapter > 0 && s.toLowerCase().trim() == '${selectedBook.toLowerCase()} $chapter:') {
-            return currState.copyWith(
-              ref: currState.ref.copyWith(chapter: chapter),
+            emit(newState.copyWith(
+              ref: newState.ref.copyWith(chapter: chapter),
               tabIndex: NavTabs.verse.index,
               search: s,
-            );
+            ));
+            return;
           }
         } else if (!s
             .toLowerCase()
             .startsWith(selectedBook.toLowerCase()) /*|| s.length == selectedBook.length */) {
-          add(NavEvent.loadWordSuggestions(search: s));
-          // currState = currState.copyWith(search: s, navViewState: NavViewState.searchSuggestions);
+          loadWordSuggestions(s);
+          // newState = newState.copyWith(search: s, navViewState: NavViewState.searchSuggestions);
         }
-      } else if (currState.tabIndex == NavTabs.verse.index) {
+      } else if (newState.tabIndex == NavTabs.verse.index) {
         //verse tab
         // did the colon get deleted...
         if (!s.toLowerCase().startsWith(selectedBook.toLowerCase()) ||
             s.length <= selectedBook.length) {
-          currState =
-              currState.copyWith(tabIndex: NavTabs.book.index, navViewState: NavViewState.bcvTabs);
+          newState =
+              newState.copyWith(tabIndex: NavTabs.book.index, navViewState: NavViewState.bcvTabs);
         } else if (!s.contains(':')) {
-          currState = currState.copyWith(
+          newState = newState.copyWith(
               tabIndex: NavTabs.chapter.index,
               navViewState: NavViewState.bcvTabs,
-              search: '${bible.nameOfBook(currState.ref.book)} ');
+              search: '${bible.nameOfBook(newState.ref.book)} ');
         }
       }
     } else {
-      currState = currState.copyWith(navViewState: NavViewState.bcvTabs, search: '');
+      newState = newState.copyWith(navViewState: NavViewState.bcvTabs, search: '');
     }
-    return currState;
+
+    emit(newState);
   }
 
-  NavState _onSearchFinished(String s) {
+  void onSearchFinished(String s) {
     dmPrint('Search Submitted: $s');
-    return state.copyWith(search: s, navViewState: NavViewState.searchResults);
+    emit(state.copyWith(search: s, navViewState: NavViewState.searchResults));
   }
 
-  NavState _changeState(NavState s) => s;
+  Future<void> loadWordSuggestions(String s) async {
+    final suggestions =
+        (await AutoComplete.fetch(phrase: s, translationIds: '${state.ref.volume}')).possibles;
 
-  Future<List<String>> _loadWordSuggestions(String s) async =>
-      (await AutoComplete.fetch(phrase: s, translationIds: '${state.ref.volume}')).possibles;
+    // TODO(abby): fix word suggest
+    emit(
+        state.copyWith(wordSuggestions: suggestions, navViewState: NavViewState.searchSuggestions));
+  }
 
-  NavState _changeTabIndex(int index) {
+  void changeTabIndex(int index) {
     var search = '';
     if (state.navViewState == NavViewState.bcvTabs && index > NavTabs.book.index) {
       final bible = VolumesRepository.shared.bibleWithId(initialRef.volume);
@@ -245,10 +214,10 @@ class NavBloc extends Bloc<NavEvent, NavState> {
         search += ' ${state.ref.chapter}:';
       }
     }
-    return state.copyWith(search: search, tabIndex: index);
+    emit(state.copyWith(search: search, tabIndex: index));
   }
 
-  NavState _setReference(Reference ref) => state.copyWith(ref: ref);
+  void setReference(Reference ref) => emit(state.copyWith(ref: ref));
 
   void selectBook(int bookId, String bookName) {
     // need to set ref before changing tab index or else will cause issues
@@ -257,14 +226,12 @@ class NavBloc extends Bloc<NavEvent, NavState> {
       // if changed book, init with first chapter
       ref = ref.copyWith(chapter: 1, verse: 1, endVerse: 1);
     }
-    add(NavEvent.changeState(
-        state.copyWith(ref: ref, tabIndex: NavTabs.chapter.index, search: bookName)));
+    emit(state.copyWith(ref: ref, tabIndex: NavTabs.chapter.index, search: bookName));
   }
 
   void selectChapter(int bookId, String bookName, int chapter) {
     final ref = state.ref.copyWith(book: bookId, chapter: chapter);
     final search = '$bookName $chapter:';
-    add(NavEvent.changeState(
-        state.copyWith(ref: ref, tabIndex: NavTabs.verse.index, search: search)));
+    emit(state.copyWith(ref: ref, tabIndex: NavTabs.verse.index, search: search));
   }
 }
