@@ -376,7 +376,7 @@ class _ChapterViewState extends State<_ChapterView> {
                 if (marginNotes.loaded && marginNotes.volumeId != widget.volume.id) {
                   context
                       .tbloc<ChapterMarginNotesBloc>()
-                      .add(MarginNotesEvent.changeVolumeId(widget.volume.id));
+                      .changeVolumeId(widget.volume.id);
                   userContentValid = false;
                 }
 

@@ -25,15 +25,15 @@ class ChapterHighlights extends Equatable {
   const ChapterHighlights(this.volumeId, this.book, this.chapter, this.highlights,
       {this.loaded = false});
 
+  @override
+  List<Object> get props => [volumeId, book, chapter, loaded, highlights];
+
   Highlight highlightForVerse(int verse, {int andWord}) {
     for (final highlight in highlights.reversed) {
       if (highlight.ref.includesVerse(verse, andWord: andWord)) return highlight;
     }
     return null;
   }
-
-  @override
-  List<Object> get props => [volumeId, book, chapter, loaded, highlights];
 
   Iterable<Highlight> highlightsForVerse(
     int verse, {
@@ -114,7 +114,7 @@ class ChapterHighlightsBloc extends Cubit<ChapterHighlights> {
     @required int volumeId,
     @required int book,
     @required int chapter,
-  }) : super(ChapterHighlights(volumeId, book, chapter, const [], loaded: false)) {
+  }) : super(ChapterHighlights(volumeId, book, chapter, const [])) {
     _initUserContent();
 
     // Start listening for changes to the db.
@@ -213,7 +213,7 @@ class ChapterHighlightsBloc extends Cubit<ChapterHighlights> {
   }
 
   void changeVolumeId(int volumeId) {
-    emit(ChapterHighlights(volumeId, state.book, state.chapter, const [], loaded: false));
+    emit(ChapterHighlights(volumeId, state.book, state.chapter, const []));
     _initUserContent();
   }
 }
