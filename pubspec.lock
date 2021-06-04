@@ -1176,6 +1176,13 @@ packages:
       url: "http://noah.tecarta.com:8100"
     source: hosted
     version: "2.2.4"
+  tec_store:
+    dependency: "direct main"
+    description:
+      name: tec_store
+      url: "http://noah.tecarta.com:8100"
+    source: hosted
+    version: "0.0.1"
   tec_user_account:
     dependency: "direct main"
     description:

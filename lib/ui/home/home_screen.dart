@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tec_store/tec_store.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_views/tec_views.dart';
 import 'package:tec_volumes/tec_volumes.dart';
@@ -92,7 +93,9 @@ class _HomeScreenState extends State<HomeScreen> {
               tab: TecTab.store,
               icon: Icons.store_outlined,
               label: 'Store',
-              widget: Container(color: Colors.yellow),
+              widget: TecStore(AppSettings.shared.userAccount, (productId) {
+                // TODO(abby): handle purchase
+              }),
             ),
             TabBottomBarItem(
               tab: TecTab.reader,
