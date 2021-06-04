@@ -86,7 +86,9 @@ class UserItemHelper {
     final searchItems = <SearchHistoryItem>[];
     for (final i in items) {
       final item = SearchHistoryItem.fromJson(parseJsonSync(i.info));
-      searchItems.add(item);
+      if (item != null) {
+        searchItems.add(item);
+      }
     }
     return searchItems;
   }
@@ -112,9 +114,10 @@ class UserItemHelper {
     }
 
     // if item is already in list, move to top
+    final lowerCaseSearch = searchHistoryItem.search.toLowerCase().trim();
     final index = items.indexWhere((i) =>
-        SearchHistoryItem.fromJson(parseJsonSync(i.info)).search.toLowerCase().trim() ==
-        searchHistoryItem.search.toLowerCase().trim());
+        lowerCaseSearch ==
+        SearchHistoryItem.fromJson(parseJsonSync(i.info))?.search?.toLowerCase()?.trim());
 
     UserItem item;
     if (index != -1) {
