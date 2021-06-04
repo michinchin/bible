@@ -68,7 +68,7 @@ class _SelectionSheetState extends State<SelectionSheet> with SingleTickerProvid
           underlineMode ? HighlightType.underline : HighlightType.highlight, colorChosen));
       PrefsBloc.setInt(colorIndex, colorChosen);
     } else {
-      context.tbloc<SelectionCmdBloc>()?.add(const SelectionCmd.cancelTrial());
+      context.tbloc<SelectionCmdBloc>()?.add(SelectionCmd.cancelTrial());
     }
   }
 

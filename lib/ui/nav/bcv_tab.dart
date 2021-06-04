@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tec_bloc/tec_bloc.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
@@ -179,9 +178,10 @@ class _BookView extends StatelessWidget {
       return s;
     }
 
-    final alphabeticalList = bookNames.keys.toList()
+    List<int> getAlphabeticalList() => bookNames.keys.toList()
       ..sort((k1, k2) =>
-          compareNatural(removeDigits(bible.nameOfBook(k1)), removeDigits(bible.nameOfBook(k2))));
+          removeDigits(bible.nameOfBook(k1)).compareTo(removeDigits(bible.nameOfBook(k2))));
+
     final ref = context.tbloc<NavBloc>().state.ref;
 
     void onTap(int book) {
@@ -252,7 +252,7 @@ class _BookView extends StatelessWidget {
     if (!navGridViewEnabled) {
       return ListView(children: [
         if (!navCanonical) ...[
-          list(alphabeticalList)
+          list(getAlphabeticalList())
         ] else ...[
           const ListLabel('OLD TESTAMENT'),
           list(ot),
@@ -264,7 +264,7 @@ class _BookView extends StatelessWidget {
       return ListView(
         children: [
           if (!navCanonical) ...[
-            gridView(alphabeticalList)
+            gridView(getAlphabeticalList())
           ] else ...[
             const ListLabel('OLD TESTAMENT'),
             gridView(ot),

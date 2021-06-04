@@ -137,23 +137,30 @@ class ChapterSelection {
     final bloc = context.tbloc<ChapterHighlightsBloc>(); // ignore: close_sinks
     if (bloc == null || isEmpty) return;
 
-    cmd.when(clearStyle: () {
-      bloc.clear(_getRef(), HighlightMode.save);
-      clearAllSelections(context);
-    }, setStyle: (type, color) {
-      bloc.add(type, color, _getRef(), HighlightMode.save);
-      clearAllSelections(context);
-    }, tryStyle: (type, color) {
-      _isInTrialMode = true;
-      bloc.add(type, color, _getRef(), HighlightMode.trial);
-    }, cancelTrial: () {
-      _isInTrialMode = false;
-      bloc.clear(_getRef(), HighlightMode.trial);
-    }, deselectAll: () {
-      clearAllSelections(context);
-    }, noOp: () {
-      // no-op
-    });
+    switch (cmd.cmdType) {
+      case SelectionCmdType.noOp:
+        // no-op
+        break;
+      case SelectionCmdType.clearStyle:
+        bloc.clear(_getRef(), HighlightMode.save);
+        clearAllSelections(context);
+        break;
+      case SelectionCmdType.setStyle:
+        bloc.add(cmd.highlightType, cmd.color, _getRef(), HighlightMode.save);
+        clearAllSelections(context);
+        break;
+      case SelectionCmdType.tryStyle:
+        _isInTrialMode = true;
+        bloc.add(cmd.highlightType, cmd.color, _getRef(), HighlightMode.trial);
+        break;
+      case SelectionCmdType.cancelTrial:
+        _isInTrialMode = false;
+        bloc.clear(_getRef(), HighlightMode.trial);
+        break;
+      case SelectionCmdType.deselectAll:
+        clearAllSelections(context);
+        break;
+    }
   }
 
   //-------------------------------------------------------------------------

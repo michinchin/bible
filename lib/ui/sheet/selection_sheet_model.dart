@@ -176,10 +176,10 @@ class SelectionSheetModel {
   }
 
   static void _noColor(BuildContext context) =>
-      context.tbloc<SelectionCmdBloc>()?.add(const SelectionCmd.clearStyle());
+      context.tbloc<SelectionCmdBloc>()?.add(SelectionCmd.clearStyle());
 
   static void deselect(BuildContext c) =>
-      c.tbloc<SelectionCmdBloc>()?.add(const SelectionCmd.deselectAll());
+      c.tbloc<SelectionCmdBloc>()?.add(SelectionCmd.deselectAll());
 
   static Future<void> copy(BuildContext c, {int uid}) async {
     TecShare.copy(c, await _shareText(c, uid: uid, maybeAddLink: false));
@@ -312,7 +312,7 @@ class SelectionSheetModel {
       final bloc = c.viewManager.dataBlocWithView(views.first) as VolumeViewDataBloc;
       final viewData = bloc.state.asVolumeViewData.copyWith(volumeId: bibleId);
       await bloc.update(c, viewData);
-      c.tbloc<SelectionCmdBloc>().add(const SelectionCmd.deselectAll());
+      c.tbloc<SelectionCmdBloc>().add(SelectionCmd.deselectAll());
       c.tbloc<SheetManagerBloc>().add(SheetEvent.main);
     }
   }

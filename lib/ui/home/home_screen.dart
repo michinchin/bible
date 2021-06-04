@@ -123,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             topRightWidget: ChangeChapterFab(state, ChapterButton.next),
                             resizeAnimationDuration: const Duration(milliseconds: 400),
                             onSelectionChangedInViews: (views) {
-                              context.read<SelectionBloc>()?.add(SelectionState(
+                              context.read<SelectionBloc>()?.updateWith(SelectionState(
                                   isTextSelected: views.isNotEmpty, viewsWithSelections: views));
                             },
                           );
