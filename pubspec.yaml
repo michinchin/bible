@@ -78,6 +78,12 @@ dependencies:
       name: tec_platform_util
       url: http://noah.tecarta.com:8100
     version: ^1.1.1
+  tec_store:
+    # path: ../shared/tec_store
+    hosted:
+      name: tec_store
+      url: http://noah.tecarta.com:8100
+    version: ^0.0.1
   tec_user_account:
     hosted:
       name: tec_user_account
@@ -160,7 +166,6 @@ flutter:
     - assets/images/photo3.jpg
     - assets/images/photo4.jpg
     - assets/images/photoBible.jpg
-
 #    - assets/images/viewOpLight.mp4
 #    - assets/images/viewOpDark.mp4
 #    - assets/images/moveViewLight.mp4
