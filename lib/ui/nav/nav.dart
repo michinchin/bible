@@ -66,14 +66,16 @@ Future<Reference> navigate(BuildContext context, Reference ref,
 }
 
 /// show search with requested search string, returns `Reference` in case of nav
-Future<Reference> showBibleSearch(BuildContext context, Reference ref,
-    {String search = '', bool showHistory = false}) {
+Future<Reference> showBibleSearch(
+  BuildContext context,
+  Reference ref, {
+  String search = '',
+  bool showHistory = false,
+}) {
   if (search.isNotEmpty) {
     final translations =
         PrefsBloc.getString(PrefItemId.translationsFilter).split('|').map(int.parse).toList();
-    context
-        .tbloc<SearchBloc>()
-        ?.add(SearchEvent.request(search: search, translations: translations));
+    context.tbloc<SearchBloc>()?.search(search, translations);
   }
   return showTecDialog<Reference>(
       context: context,
@@ -132,7 +134,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
           ..addListener(() {
             if (_searchResultsTabController.index == 1) {
               if (searchBloc().state.selectionMode) {
-                searchBloc().add(const SearchEvent.selectionModeToggle());
+                searchBloc().selectionModeToggle();
               }
             }
             setState(() {});
@@ -190,8 +192,8 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     FocusScope.of(context).unfocus();
     if (s.isNotEmpty) {
       searchBloc()
-        ..add(SearchEvent.request(search: s, translations: translations()))
-        ..add(const SearchEvent.setScrollIndex(0));
+        ..search(s, translations())
+        ..setScrollIndex(0);
     }
     _searchResultsTabController.animateTo(0);
   }
@@ -201,7 +203,7 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
     if (selectionModeOn) {
       TecToast.show(context, 'Entered Selection Mode');
     }
-    context.tbloc<SearchBloc>().add(const SearchEvent.selectionModeToggle());
+    context.tbloc<SearchBloc>().selectionModeToggle();
   }
 
   void _onSelectionCopied() {

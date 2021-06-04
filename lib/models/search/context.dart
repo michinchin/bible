@@ -2,25 +2,19 @@ import 'package:tec_cache/tec_cache.dart';
 import 'package:tec_util/tec_util.dart';
 
 class Context {
-  Map<int, String> verses;
-  int initialVerse = 0;
-  int finalVerse = 0;
-  String text = '';
+  final int initialVerse;
+  final int finalVerse;
+  final String text;
 
-  Context({this.verses, this.initialVerse, this.finalVerse});
+  const Context({this.initialVerse = 0, this.finalVerse = 0, this.text = ''});
 
-  factory Context.fromJson(Map<String, dynamic> json) {
-    final verses = <int, String>{};
-    as<Map<String, dynamic>>(json['verses']).forEach((k, dynamic v) {
-      final t = int.parse(k);
-      verses[t] = as<String>(v);
-    });
-
-    return Context(verses: verses);
-  }
-
-  static Future<Context> fetch(
-      {int translation, int book, int chapter, int verse, String content}) async {
+  static Future<Context> fetch({
+    int translation,
+    int book,
+    int chapter,
+    int verse,
+    String content,
+  }) async {
     final regex = RegExp(r'\[([0-9]+)\]');
     final arr = regex.allMatches(content).toList();
     var endVerse = verse;
@@ -36,69 +30,74 @@ class Context {
     final json = await TecCache.shared.jsonFromUrl(
       url: '$cloudFrontStreamUrl/$translation/chapters/${book}_$chapter.json',
     );
-    Context context;
-    if (json != null) {
-      context = Context.fromJson(json);
-    } else {
-      context = Context(verses: <int, String>{});
-    }
-    context.text = getString(context, verse, endVerse);
-    return context;
-  }
-}
 
-String getString(Context context, int verseId, int endVerseId) {
-  var vId = verseId;
-  var v = verseId - 1;
-  var before = '';
-  var after = '';
-  const charsToShow = 200;
-  final wholeChapter = context.verses;
+    final verses = json == null
+        ? <int, String>{}
+        : <int, String>{
+            for (final e in as<Map<String, dynamic>>(json['verses']).entries)
+              int.parse(e.key): as<String>(e.value)
+          };
 
-  while (v >= 1 && before.length < charsToShow) {
-    final verse = wholeChapter[v];
-    if (verse != null) {
-      if (before.isNotEmpty) {
-        before = ' $before';
-      }
-      before = verse + before;
-      before = ' [$v] $before';
-    }
-    v--;
-  }
-  context.initialVerse = ++v;
+    var initialVerse = 0;
+    var finalVerse = 0;
 
-  final verse = wholeChapter[v];
-  if (verse != null && verse.isNotEmpty) {
-    before += ' [$verseId] ${wholeChapter[verseId]}';
-  }
+    String _getString(int verseId, int endVerseId) {
+      var vId = verseId;
+      var v = verseId - 1;
+      var before = '';
+      var after = '';
+      const charsToShow = 200;
+      final wholeChapter = verses;
 
-  // adding range verses...
-  while (vId < endVerseId) {
-    vId++;
-    final verse = wholeChapter[vId];
-    if (verse != null && verse.isNotEmpty) {
-      before += ' [$vId] ${wholeChapter[vId]}';
-    }
-  }
-
-  if (verseId <= wholeChapter.keys.last) {
-    v = ++vId;
-    while (v <= verseId + 10 && after.length < charsToShow && v <= wholeChapter.keys.last) {
-      final verse = wholeChapter[v];
-      if (verse != null) {
-        if (after.isNotEmpty) {
-          after += ' ';
+      while (v >= 1 && before.length < charsToShow) {
+        final verse = wholeChapter[v];
+        if (verse != null) {
+          if (before.isNotEmpty) {
+            before = ' $before';
+          }
+          before = verse + before;
+          before = ' [$v] $before';
         }
-        after += ' [$v] ';
-        after += verse;
+        v--;
       }
-      v++;
-    }
-    context.finalVerse = --v;
-  } else {
-    context.finalVerse = ++v;
-  }
+      initialVerse = ++v;
 
-  return before.replaceFirst(' ', '') + after;
+      final verse = wholeChapter[v];
+      if (verse != null && verse.isNotEmpty) {
+        before += ' [$verseId] ${wholeChapter[verseId]}';
+      }
+
+      // adding range verses...
+      while (vId < endVerseId) {
+        vId++;
+        final verse = wholeChapter[vId];
+        if (verse != null && verse.isNotEmpty) {
+          before += ' [$vId] ${wholeChapter[vId]}';
+        }
+      }
+
+      if (verseId <= wholeChapter.keys.last) {
+        v = ++vId;
+        while (v <= verseId + 10 && after.length < charsToShow && v <= wholeChapter.keys.last) {
+          final verse = wholeChapter[v];
+          if (verse != null) {
+            if (after.isNotEmpty) {
+              after += ' ';
+            }
+            after += ' [$v] ';
+            after += verse;
+          }
+          v++;
+        }
+        finalVerse = --v;
+      } else {
+        finalVerse = ++v;
+      }
+
+      return before.replaceFirst(' ', '') + after;
+    }
+
+    final text = _getString(verse, endVerse);
+    return Context(initialVerse: initialVerse, finalVerse: finalVerse, text: text);
+  }
 }

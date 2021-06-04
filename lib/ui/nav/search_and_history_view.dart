@@ -366,7 +366,7 @@ class _SearchResultsViewState extends State<SearchResultsView> {
 
       // it does save the search results to db - but it doesn't update state
       // specifically scroll position
-      searchBloc.add(SearchEvent.setScrollIndex(scrollOffset));
+      searchBloc.setScrollIndex(scrollOffset);
     }
   }
 
@@ -464,11 +464,13 @@ class __SearchResultCardState extends State<_SearchResultCard> {
       );
       final map = Map<int, Context>.from(widget.res.contextMap);
       map[verseIndex] = newC;
-      context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
-          searchResult: widget.res.copyWith(contextMap: map, currentVerseIndex: verseIndex)));
+      context
+          .tbloc<SearchBloc>()
+          .modifySearchResult(widget.res.copyWith(contextMap: map, currentVerseIndex: verseIndex));
     } else {
-      context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
-          searchResult: widget.res.copyWith(currentVerseIndex: verseIndex)));
+      context
+          .tbloc<SearchBloc>()
+          .modifySearchResult(widget.res.copyWith(currentVerseIndex: verseIndex));
     }
   }
 
@@ -484,18 +486,19 @@ class __SearchResultCardState extends State<_SearchResultCard> {
       );
       final map = Map<int, Context>.from(widget.res.contextMap);
       map[widget.res.currentVerseIndex] = newC;
-      context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
-          searchResult:
-              widget.res.copyWith(contextMap: map, contextExpanded: !widget.res.contextExpanded)));
+      context.tbloc<SearchBloc>().modifySearchResult(
+          widget.res.copyWith(contextMap: map, contextExpanded: !widget.res.contextExpanded));
     } else {
-      context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
-          searchResult: widget.res.copyWith(contextExpanded: !widget.res.contextExpanded)));
+      context
+          .tbloc<SearchBloc>()
+          .modifySearchResult(widget.res.copyWith(contextExpanded: !widget.res.contextExpanded));
     }
   }
 
   void _onExpanded() {
-    context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
-        searchResult: widget.res.copyWith(expanded: !widget.res.expanded)));
+    context
+        .tbloc<SearchBloc>()
+        .modifySearchResult(widget.res.copyWith(expanded: !widget.res.expanded));
   }
 
   void _onShare() {
@@ -535,8 +538,9 @@ class __SearchResultCardState extends State<_SearchResultCard> {
   void _onListTileTap() {
     final selectionMode = context.tbloc<SearchBloc>().state.selectionMode;
     if (selectionMode) {
-      context.tbloc<SearchBloc>().add(SearchEvent.modifySearchResult(
-          searchResult: widget.res.copyWith(selected: !widget.res.selected)));
+      context
+          .tbloc<SearchBloc>()
+          .modifySearchResult(widget.res.copyWith(selected: !widget.res.selected));
     } else {
       _onExpanded();
     }
@@ -548,9 +552,8 @@ class __SearchResultCardState extends State<_SearchResultCard> {
     final selectionMode = searchBloc.state.selectionMode;
     if (!selectionMode) {
       searchBloc
-        ..add(const SearchEvent.selectionModeToggle())
-        ..add(SearchEvent.modifySearchResult(
-            searchResult: widget.res.copyWith(selected: !widget.res.selected)));
+        ..selectionModeToggle()
+        ..modifySearchResult(widget.res.copyWith(selected: !widget.res.selected));
     }
   }
 
@@ -724,7 +727,7 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
         minWidth: 50,
         child: Semantics(
           container: true,
-          label: curr == each.id ? '${each.a} selected' : 'Select ${each.a}',
+          label: curr == each.id ? '${each.abbreviation} selected' : 'Select ${each.abbreviation}',
           child: TextButton(
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -732,7 +735,7 @@ class __TranslationSelectorState extends State<_TranslationSelector> {
               backgroundColor: buttonColor,
             ),
             child: Text(
-              each.a,
+              each.abbreviation,
               textScaleFactor: contentTextScaleFactorWith(context),
               style: TextStyle(color: textColor),
             ),

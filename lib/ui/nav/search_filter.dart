@@ -17,24 +17,27 @@ import '../../models/pref_item.dart';
 import '../common/common.dart';
 import '../library/volumes_bloc.dart';
 
-Future<List<List<int>>> showFilter(BuildContext context,
-        {VolumesFilter filter,
-        Iterable<int> selectedVolumes,
-        Iterable<int> filteredBooks,
-        TextEditingController searchController}) =>
+Future<List<List<int>>> showFilter(
+  BuildContext context, {
+  VolumesFilter filter,
+  Iterable<int> selectedVolumes,
+  Iterable<int> filteredBooks,
+  TextEditingController searchController,
+}) =>
     showModalBottomSheet<List<List<int>>>(
-        shape: bottomSheetShape,
-        context: context,
-        useRootNavigator: true,
-        isScrollControlled: true,
-        builder: (c) => SizedBox(
-              height: MediaQuery.of(c).size.height / 2,
-              child: _SearchFilterView(
-                  filter: filter,
-                  selectedVolumes: selectedVolumes,
-                  selectedBooks: filteredBooks,
-                  searchController: searchController),
-            ));
+      shape: bottomSheetShape,
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      builder: (c) => SizedBox(
+        height: MediaQuery.of(c).size.height / 2,
+        child: _SearchFilterView(
+            filter: filter,
+            selectedVolumes: selectedVolumes,
+            selectedBooks: filteredBooks,
+            searchController: searchController),
+      ),
+    );
 
 class _SearchFilterView extends StatefulWidget {
   final VolumesFilter filter;
@@ -103,14 +106,12 @@ class __SearchFilterViewState extends State<_SearchFilterView> with SingleTicker
     if (volumes != null && !areEqualSets(_selectedVolumes, widget.selectedVolumes.toSet())) {
       PrefsBloc.setString(PrefItemId.translationsFilter, volumes.join('|'));
       if (widget.searchController.text.isNotEmpty) {
-        context
-            .tbloc<SearchBloc>()
-            .add(SearchEvent.request(search: widget.searchController.text, translations: volumes));
+        context.tbloc<SearchBloc>().search(widget.searchController.text, volumes);
       }
     }
     if (books != null && !areEqualSets(_filteredBooks, widget.selectedBooks.toSet())) {
       // excluded books
-      context.tbloc<SearchBloc>().add(SearchEvent.filterBooks(books));
+      context.tbloc<SearchBloc>().filterBooks(books);
     }
   }
 

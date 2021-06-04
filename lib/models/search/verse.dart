@@ -3,13 +3,13 @@ import 'package:tec_util/tec_util.dart';
 class Verse {
   final String title;
   final int id;
-  final String a;
+  final String abbreviation;
   final String verseContent;
 
   Verse({
     this.title,
     this.id,
-    this.a,
+    this.abbreviation,
     this.verseContent,
   });
 
@@ -17,7 +17,7 @@ class Verse {
     return Verse(
       title: ref,
       id: as<int>(json['id']),
-      a: as<String>(json['a']),
+      abbreviation: as<String>(json['a']),
       verseContent: as<String>(json['text']),
     );
   }

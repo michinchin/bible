@@ -1,25 +1,31 @@
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
+
+import 'package:equatable/equatable.dart';
 import 'package:tec_util/tec_util.dart';
 import 'package:tec_volumes/tec_volumes.dart';
 
 import '../const.dart';
 import 'verse.dart';
 
-class SearchResult {
+class SearchResult extends Equatable {
   final String ref;
   final int bookId;
   final int chapterId;
   final int verseId;
   final List<Verse> verses;
 
-  SearchResult({
-    this.ref,
-    this.bookId,
-    this.chapterId,
-    this.verseId,
-    this.verses,
+  const SearchResult({
+    @required this.ref,
+    @required this.bookId,
+    @required this.chapterId,
+    @required this.verseId,
+    @required this.verses,
   });
+
+  @override
+  List<Object> get props => [ref, bookId, chapterId, verseId, verses];
 
   SearchResult copyWith({
     String ref,
@@ -27,12 +33,6 @@ class SearchResult {
     int chapterId,
     int verseId,
     List<Verse> verses,
-    bool contextExpanded,
-    bool compareExpanded,
-    bool isExpanded,
-    bool isSelected,
-    int currentVerseIndex,
-    String fullText,
   }) =>
       SearchResult(
         ref: ref ?? this.ref,

@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:flutter/foundation.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+
+import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:tec_util/tec_util.dart';
 
 import '../../models/search/context.dart';
@@ -11,21 +11,44 @@ import '../../models/search/search_history_item.dart';
 import '../../models/search/search_result.dart';
 import '../../models/user_item_helper.dart';
 
-part 'search_bloc.freezed.dart';
+@immutable
+class SearchState extends Equatable {
+  final String search;
+  final List<SearchResultInfo> searchResults;
+  final List<SearchResultInfo> filteredResults;
+  final List<int> filteredTranslations;
+  final List<int> excludedBooks;
+  final int scrollIndex;
+  final bool loading;
+  final bool error;
+  final bool selectionMode;
 
-@freezed
-abstract class SearchEvent with _$SearchEvent {
-  const factory SearchEvent.request({String search, List<int> translations}) = _Requested;
-  const factory SearchEvent.selectionModeToggle() = _SelectionMode;
-  const factory SearchEvent.modifySearchResult({SearchResultInfo searchResult}) =
-      _ModifySearchResult;
-  const factory SearchEvent.filterBooks(List<int> excludedBooks) = _FilterBooks;
-  const factory SearchEvent.setScrollIndex(int scrollIndex) = _SetScrollIndex;
-}
+  const SearchState({
+    @required this.search,
+    @required this.searchResults,
+    @required this.filteredResults,
+    @required this.filteredTranslations,
+    @required this.excludedBooks,
+    @required this.scrollIndex,
+    this.loading = false,
+    this.error = false,
+    this.selectionMode = false,
+  });
 
-@freezed
-abstract class SearchState with _$SearchState {
-  const factory SearchState({
+  @override
+  List<Object> get props => [
+        search,
+        searchResults,
+        filteredResults,
+        filteredTranslations,
+        excludedBooks,
+        scrollIndex,
+        loading,
+        error,
+        selectionMode
+      ];
+
+  SearchState copyWith({
     String search,
     List<SearchResultInfo> searchResults,
     List<SearchResultInfo> filteredResults,
@@ -35,10 +58,21 @@ abstract class SearchState with _$SearchState {
     bool loading,
     bool error,
     bool selectionMode,
-  }) = _SearchState;
+  }) =>
+      SearchState(
+        search: search ?? this.search,
+        searchResults: searchResults ?? this.searchResults,
+        filteredResults: filteredResults ?? this.filteredResults,
+        filteredTranslations: filteredTranslations ?? this.filteredTranslations,
+        excludedBooks: excludedBooks ?? this.excludedBooks,
+        scrollIndex: scrollIndex ?? this.scrollIndex,
+        loading: loading ?? this.loading,
+        error: error ?? this.error,
+        selectionMode: selectionMode ?? this.selectionMode,
+      );
 }
 
-class SearchBloc extends Bloc<SearchEvent, SearchState> {
+class SearchBloc extends Cubit<SearchState> {
   SearchBloc()
       : super(const SearchState(
           search: '',
@@ -52,77 +86,52 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
           selectionMode: false,
         ));
 
-  @override
-  Stream<Transition<SearchEvent, SearchState>> transformEvents(Stream<SearchEvent> events,
-      Stream<Transition<SearchEvent, SearchState>> Function(SearchEvent) transitionFn) {
-    final nonDebounceStream = events.where((event) {
-      return (event is! _Requested);
-    });
-    // debounce request streams
-    final debounceStream = events.where((event) {
-      return (event is _Requested);
-    }).debounceTime(const Duration(milliseconds: 250));
+  Future<void> search(String search, List<int> translations) async {
+    emit(state.copyWith(loading: true));
+    dmPrint('Loading search: "$search"');
 
-    return super.transformEvents(nonDebounceStream.mergeWith([debounceStream]), transitionFn);
-  }
+    try {
+      final translationIds = translations?.join('|') ?? state.filteredTranslations?.join('|') ?? '';
+      final res = await SearchResults.fetch(words: search, translationIds: translationIds);
+      dmPrint('Completed search "$search" with ${res.length} result(s)');
 
-  @override
-  Stream<SearchState> mapEventToState(SearchEvent event) async* {
-    if (event is _Requested) {
-      yield state.copyWith(loading: true);
-      dmPrint('Loading search: ${event.search}');
-
-      try {
-        final translations =
-            event.translations?.join('|') ?? state.filteredTranslations?.join('|') ?? '';
-        final res = await SearchResults.fetch(words: event.search, translationIds: translations);
-        dmPrint('Completed search "${event.search}" with ${res.length} result(s)');
-
-        yield state.copyWith(
-            searchResults: res.map((r) => SearchResultInfo(r)).toList(),
-            filteredResults: res
-                .map((r) => SearchResultInfo(r))
-                .where((s) => !state.excludedBooks.contains(s.searchResult.bookId))
-                .toList(),
-            loading: false,
-            error: false,
-            search: event.search,
-            filteredTranslations: event.translations);
-      } catch (_) {
-        dmPrint('Error with search "${event.search}"');
-        yield state.copyWith(
-            error: true,
-            loading: false,
-            search: event.search,
-            filteredTranslations: event.translations);
-      }
-    } else if (event is _ModifySearchResult) {
-      yield _modifySearchResult(event.searchResult);
-    } else if (event is _SelectionMode) {
-      dmPrint('Selection Mode in search: ${!state.selectionMode ? 'ON' : 'OFF'}');
-      if (!state.selectionMode) {
-        yield state.copyWith(selectionMode: !state.selectionMode);
-      } else {
-        // clear selected
-        final results = state.filteredResults.map((r) => r.copyWith(selected: false)).toList();
-        yield state.copyWith(selectionMode: !state.selectionMode, filteredResults: results);
-      }
-    } else if (event is _FilterBooks) {
-      yield _filterBooks(event.excludedBooks);
-    } else if (event is _SetScrollIndex) {
-      yield _setScrollIndex(event.scrollIndex);
+      emit(state.copyWith(
+          searchResults: res.map((r) => SearchResultInfo(r)).toList(),
+          filteredResults: res
+              .map((r) => SearchResultInfo(r))
+              .where((s) => !state.excludedBooks.contains(s.searchResult.bookId))
+              .toList(),
+          loading: false,
+          error: false,
+          search: search,
+          filteredTranslations: translations));
+    } catch (_) {
+      dmPrint('Error with search "$search"');
+      emit(state.copyWith(
+          error: true, loading: false, search: search, filteredTranslations: translations));
     }
   }
 
-  SearchState _setScrollIndex(int index) => state.copyWith(scrollIndex: index);
-
-  SearchState _filterBooks(List<int> excludedBooks) {
-    final filteredResults =
-        state.searchResults.where((s) => !excludedBooks.contains(s.searchResult.bookId)).toList();
-    return state.copyWith(filteredResults: filteredResults, excludedBooks: excludedBooks);
+  void selectionModeToggle() {
+    dmPrint('Selection Mode in search: ${!state.selectionMode ? 'ON' : 'OFF'}');
+    if (!state.selectionMode) {
+      emit(state.copyWith(selectionMode: !state.selectionMode));
+    } else {
+      // clear selected
+      final results = state.filteredResults.map((r) => r.copyWith(selected: false)).toList();
+      emit(state.copyWith(selectionMode: !state.selectionMode, filteredResults: results));
+    }
   }
 
-  SearchState _modifySearchResult(SearchResultInfo info) {
+  void setScrollIndex(int index) => emit(state.copyWith(scrollIndex: index));
+
+  void filterBooks(List<int> excludedBooks) {
+    final filteredResults =
+        state.searchResults.where((s) => !excludedBooks.contains(s.searchResult.bookId)).toList();
+    emit(state.copyWith(filteredResults: filteredResults, excludedBooks: excludedBooks));
+  }
+
+  void modifySearchResult(SearchResultInfo info) {
     final res = List<SearchResultInfo>.from(state.filteredResults);
     final index = res.indexWhere((i) => i.searchResult.ref == info.searchResult.ref);
     var s = state;
@@ -132,9 +141,10 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     }
 
     if (s.selectionMode && s.filteredResults.where((r) => r.selected).isEmpty) {
-      add(const SearchEvent.selectionModeToggle());
+      selectionModeToggle();
     }
-    return s;
+
+    emit(s);
   }
 
   /// save search when navigating away or entering new search
@@ -150,27 +160,56 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   void refresh() {
-    add(const SearchEvent.selectionModeToggle());
-    add(const SearchEvent.selectionModeToggle());
+    selectionModeToggle();
+    selectionModeToggle();
   }
 }
 
-@freezed
-abstract class SearchResultInfo with _$SearchResultInfo {
-  const factory SearchResultInfo(SearchResult searchResult,
-      {@Default(false) bool contextExpanded,
-      @Default(0) int currentVerseIndex,
-      @Default(false) bool selected,
-      @Default(false) bool expanded,
-      @Default(<int, Context>{}) Map<int, Context> contextMap}) = _SearchResultInfo;
-  const SearchResultInfo._();
+@immutable
+class SearchResultInfo extends Equatable {
+  final SearchResult searchResult;
+  final bool contextExpanded;
+  final int currentVerseIndex;
+  final bool selected;
+  final bool expanded;
+  final Map<int, Context> contextMap;
+
+  const SearchResultInfo(
+    this.searchResult, {
+    this.contextExpanded = false,
+    this.currentVerseIndex = 0,
+    this.selected = false,
+    this.expanded = false,
+    this.contextMap = const <int, Context>{},
+  });
+
+  @override
+  List<Object> get props =>
+      [searchResult, contextExpanded, currentVerseIndex, selected, expanded, contextMap];
+
+  SearchResultInfo copyWith({
+    SearchResult searchResult,
+    bool contextExpanded,
+    int currentVerseIndex,
+    bool selected,
+    bool expanded,
+    Map<int, Context> contextMap,
+  }) =>
+      SearchResultInfo(
+        searchResult ?? this.searchResult,
+        contextExpanded: contextExpanded ?? this.contextExpanded,
+        currentVerseIndex: currentVerseIndex ?? this.currentVerseIndex,
+        selected: selected ?? this.selected,
+        expanded: expanded ?? this.expanded,
+        contextMap: contextMap ?? this.contextMap,
+      );
 
   String get shareText => '$label\n$currentText';
   String get label => contextExpanded && contextMap[currentVerseIndex] != null
       ? '${searchResult.ref.split(':')[0]}:'
           '${contextMap[currentVerseIndex].initialVerse}-${contextMap[currentVerseIndex].finalVerse}'
-          ' ${searchResult.verses[currentVerseIndex].a}'
-      : '${searchResult.ref} ${searchResult.verses[currentVerseIndex].a}';
+          ' ${searchResult.verses[currentVerseIndex].abbreviation}'
+      : '${searchResult.ref} ${searchResult.verses[currentVerseIndex].abbreviation}';
   String get currentText => contextExpanded && contextMap[currentVerseIndex] != null
       ? contextMap[currentVerseIndex].text
       : searchResult.verses[currentVerseIndex].verseContent;
