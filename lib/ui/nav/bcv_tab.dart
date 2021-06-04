@@ -132,7 +132,7 @@ class _VerseView extends StatelessWidget {
             _PillButton(
               onPressed: () {
                 final updatedRef = ref.copyWith(verse: i, endVerse: i);
-                context.tbloc<NavBloc>().add(NavEvent.setRef(ref: updatedRef));
+                context.tbloc<NavBloc>().setReference(updatedRef);
                 Navigator.of(context).maybePop(updatedRef);
               },
               textColor: /*ref.verse == i ? tabColors[NavTabs.verse.index] :*/ textColor,

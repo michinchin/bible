@@ -1,34 +1,28 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+
+import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:tec_user_account/tec_user_account.dart';
 import 'package:tec_util/tec_util.dart';
-import 'package:tec_volumes/tec_volumes.dart';
 
 import '../../models/app_settings.dart';
 import 'margin_note.dart';
 
-part 'margin_notes_bloc.freezed.dart';
+class ChapterMarginNotes extends Equatable {
+  final int volumeId;
+  final int book;
+  final int chapter;
+  final Map<int, MarginNote> marginNotes;
+  final bool loaded;
 
-@freezed
-abstract class MarginNotesEvent with _$MarginNotesEvent {
-  const factory MarginNotesEvent.updateFromDb({@required Map<int, MarginNote> marginNotes}) =
-      _UpdateFromDb;
-  const factory MarginNotesEvent.add({@required String text, @required Reference ref}) = _Add;
-  const factory MarginNotesEvent.delete(MarginNote marginNote) = _Delete;
-  const factory MarginNotesEvent.changeVolumeId(int volumeId) = _ChangeVolumeId;
-}
+  const ChapterMarginNotes(this.volumeId, this.book, this.chapter, this.marginNotes,
+      {this.loaded = false});
 
-@freezed
-abstract class ChapterMarginNotes with _$ChapterMarginNotes {
-  const factory ChapterMarginNotes(
-          int volumeId, int book, int chapter, Map<int, MarginNote> marginNotes, {bool loaded}) =
-      _ChapterMarginNotes;
-}
+  @override
+  List<Object> get props => [volumeId, book, chapter, loaded, marginNotes];
 
-extension ChapterMarginNotesExt on ChapterMarginNotes {
   bool hasMarginNoteForVerse(int verse) {
     return marginNotes.containsKey(verse);
   }
@@ -38,19 +32,12 @@ extension ChapterMarginNotesExt on ChapterMarginNotes {
   }
 }
 
-class ChapterMarginNotesBloc extends Bloc<MarginNotesEvent, ChapterMarginNotes> {
-  int volumeId;
-  final int book;
-  final int chapter;
-  final bool loaded;
-  StreamSubscription<UserDbChange> _userDbChangeSubscription;
-
+class ChapterMarginNotesBloc extends Cubit<ChapterMarginNotes> {
   ChapterMarginNotesBloc({
-    @required this.volumeId,
-    @required this.book,
-    @required this.chapter,
-    this.loaded = false,
-  }) : super(ChapterMarginNotes(volumeId, book, chapter, <int, MarginNote>{}, loaded: false)) {
+    @required int volumeId,
+    @required int book,
+    @required int chapter,
+  }) : super(ChapterMarginNotes(volumeId, book, chapter, const <int, MarginNote>{})) {
     _initUserContent();
 
     // Start listening for changes to the db.
@@ -60,24 +47,28 @@ class ChapterMarginNotesBloc extends Bloc<MarginNotesEvent, ChapterMarginNotes> 
 
   @override
   Future<void> close() {
+    _isClosed = true;
     _userDbChangeSubscription?.cancel();
     _userDbChangeSubscription = null;
     return super.close();
   }
+
+  StreamSubscription<UserDbChange> _userDbChangeSubscription;
+  bool _isClosed = false;
 
   void _userDbChangeListener(UserDbChange change) {
     var reload = false;
 
     if (change != null && change.includesItemType(UserItemType.marginNote)) {
       if (change.type == UserDbChangeType.itemAdded &&
-          change.after?.volumeId == volumeId &&
-          change.after?.book == book &&
-          change.after?.chapter == chapter) {
+          change.after?.volumeId == state.volumeId &&
+          change.after?.book == state.book &&
+          change.after?.chapter == state.chapter) {
         reload = true;
       } else if (change.type == UserDbChangeType.itemDeleted &&
-          change.before?.volumeId == volumeId &&
-          change.before?.book == book &&
-          change.before?.chapter == chapter) {
+          change.before?.volumeId == state.volumeId &&
+          change.before?.book == state.book &&
+          change.before?.chapter == state.chapter) {
         reload = true;
       } else if (change.type == UserDbChangeType.multipleChanges) {
         reload = true;
@@ -86,56 +77,47 @@ class ChapterMarginNotesBloc extends Bloc<MarginNotesEvent, ChapterMarginNotes> 
 
     if (reload) {
       // margin notes for this chapter changed, reload...
-      dmPrint('new margin notes for chapter $chapter');
+      dmPrint('new margin notes for chapter ${state.chapter}');
       _initUserContent();
     }
   }
 
-  @override
-  Stream<ChapterMarginNotes> mapEventToState(MarginNotesEvent event) async* {
-    final newState = event.when(
-        add: _add, delete: _delete, updateFromDb: _updateFromDb, changeVolumeId: _changeVolumeId);
-    yield newState;
-  }
-
-  ChapterMarginNotes _add(String text, Reference ref) {
-    final newMap = Map<int, MarginNote>.from(state.marginNotes);
-    final marginNote =
-        MarginNote(volume: volumeId, book: book, chapter: chapter, verse: ref.verse, text: text);
-    newMap[ref.verse] = marginNote;
-    return ChapterMarginNotes(volumeId, book, chapter, newMap, loaded: true);
-  }
-
-  Future<void> _deleteMarginNote(MarginNote marginNote) async {
-    await AppSettings.shared.userAccount.userDb.deleteItem(marginNote);
-  }
-
-  ChapterMarginNotes _delete(MarginNote marginNote) {
-    final deleteMarginNote = state.marginNotes.remove(marginNote);
-    _deleteMarginNote(deleteMarginNote);
-    return ChapterMarginNotes(volumeId, book, chapter, Map.from(state.marginNotes), loaded: true);
-  }
-
-  ChapterMarginNotes _changeVolumeId(int volumeId) {
-    this.volumeId = volumeId;
-    _initUserContent();
-    return ChapterMarginNotes(volumeId, book, chapter, {}, loaded: false);
-  }
-
-  ChapterMarginNotes _updateFromDb(Map<int, MarginNote> marginNotes) {
-    return ChapterMarginNotes(volumeId, book, chapter, marginNotes, loaded: true);
-  }
-
   Future<void> _initUserContent() async {
-    final uc = await AppSettings.shared.userAccount.userDb
-        .getItemsWithVBC(volumeId, book, chapter, ofTypes: [UserItemType.marginNote]);
+    final userItems = await AppSettings.shared.userAccount.userDb.getItemsWithVBC(
+        state.volumeId, state.book, state.chapter,
+        ofTypes: [UserItemType.marginNote]);
 
-    final marginNotes = <int, MarginNote>{};
+    // If this bloc was closed during the async await, just return.
+    if (_isClosed) return;
 
-    for (final ui in uc) {
-      marginNotes[ui.verse] = MarginNote.from(ui);
+    final marginNotes = <int, MarginNote>{
+      for (final ui in userItems) ui.verse: MarginNote.from(ui)
+    };
+    emit(ChapterMarginNotes(state.volumeId, state.book, state.chapter, marginNotes, loaded: true));
+  }
+
+  void add(String text, int verse) {
+    assert(text != null && text.isNotEmpty && verse != null);
+    final newMap = Map<int, MarginNote>.from(state.marginNotes);
+    final marginNote = MarginNote(
+        volume: state.volumeId, book: state.book, chapter: state.chapter, verse: verse, text: text);
+    newMap[verse] = marginNote;
+    emit(ChapterMarginNotes(state.volumeId, state.book, state.chapter, newMap, loaded: true));
+  }
+
+  void delete(MarginNote marginNote) {
+    final newMap = Map<int, MarginNote>.from(state.marginNotes);
+    final deletedMarginNote = newMap.remove(marginNote?.verse);
+    if (deletedMarginNote != null) {
+      AppSettings.shared.userAccount.userDb.deleteItem(marginNote);
+      emit(ChapterMarginNotes(
+          state.volumeId, state.book, state.chapter, Map.from(state.marginNotes),
+          loaded: true));
     }
+  }
 
-    add(MarginNotesEvent.updateFromDb(marginNotes: marginNotes));
+  void changeVolumeId(int volumeId) {
+    _initUserContent();
+    emit(ChapterMarginNotes(volumeId, state.book, state.chapter, const {}));
   }
 }

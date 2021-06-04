@@ -138,19 +138,17 @@ class ChapterSelection {
     if (bloc == null || isEmpty) return;
 
     cmd.when(clearStyle: () {
-      bloc.add(HighlightEvent.clear(_getRef(), HighlightMode.save));
+      bloc.clear(_getRef(), HighlightMode.save);
       clearAllSelections(context);
     }, setStyle: (type, color) {
-      bloc.add(
-          HighlightEvent.add(type: type, color: color, ref: _getRef(), mode: HighlightMode.save));
+      bloc.add(type, color, _getRef(), HighlightMode.save);
       clearAllSelections(context);
     }, tryStyle: (type, color) {
       _isInTrialMode = true;
-      bloc.add(
-          HighlightEvent.add(type: type, color: color, ref: _getRef(), mode: HighlightMode.trial));
+      bloc.add(type, color, _getRef(), HighlightMode.trial);
     }, cancelTrial: () {
       _isInTrialMode = false;
-      bloc.add(HighlightEvent.clear(_getRef(), HighlightMode.trial));
+      bloc.clear(_getRef(), HighlightMode.trial);
     }, deselectAll: () {
       clearAllSelections(context);
     }, noOp: () {
