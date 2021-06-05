@@ -93,8 +93,30 @@ class _HomeScreenState extends State<HomeScreen> {
               tab: TecTab.store,
               icon: Icons.store_outlined,
               label: 'Store',
-              widget: TecStore(AppSettings.shared.userAccount, (productId) {
-                // TODO(abby): handle purchase
+              widget: TecStore(AppSettings.shared.userAccount, (productId) async {
+                if (await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(productId)) {
+                  final open = await tecShowSimpleAlertDialog<bool>(
+                      context: context,
+                      title: 'Open',
+                      content: 'Would you like to read this volume?',
+                      actions: [
+                        TecDialogButton(
+                          child: const Text('No'),
+                          onPressed: () => Navigator.of(context).pop(false),
+                        ),
+                        TecDialogButton(
+                          child: const Text('Yes'),
+                          onPressed: () => Navigator.of(context).pop(true),
+                        )
+                      ]);
+                  if (open != null && open) {
+                    context.tabManager.add(TecTabEvent.reader);
+                    // change volume here
+                  }
+                } else {
+                  // TODO(abby): handle purchase
+                }
+                print('$productId');
               }),
             ),
             TabBottomBarItem(

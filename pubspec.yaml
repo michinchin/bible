@@ -81,7 +81,7 @@ dependencies:
     hosted:
       name: tec_store
       url: http://noah.tecarta.com:8100
-    version: ^0.0.1
+    version: ^0.0.2
   tec_user_account:
     hosted:
       name: tec_user_account
