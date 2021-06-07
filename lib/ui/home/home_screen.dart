@@ -1,3 +1,5 @@
+import 'package:bible/models/iap/iap_io.dart';
+import 'package:bible/ui/iap/iap_dialog.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +54,92 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+  Future<void> _onPurchase(int productId) async {
+    if (await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(productId)) {
+      final open = await tecShowSimpleAlertDialog<bool>(
+          context: context,
+          title: 'Open',
+          content: 'Would you like to read this volume?',
+          actions: [
+            TecDialogButton(
+              child: const Text('No'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TecDialogButton(
+              child: const Text('Yes'),
+              onPressed: () => Navigator.of(context).pop(true),
+            )
+          ]);
+      if (open != null && open) {
+        final bloc =
+            context.viewManager.dataBlocWithView(context.viewManager.viewAt(row: 0, column: 0).uid)
+                as VolumeViewDataBloc;
+        final viewData = bloc.state.asVolumeViewData.copyWith(volumeId: productId);
+        await bloc.update(context, viewData);
+
+        context.tabManager.changeTab(TecTab.reader);
+        // change volume here
+      }
+    } else {
+      final ua = AppSettings.shared.userAccount;
+      if (!ua.user.isSignedIn) {
+        await showSignInForPurchases(context, ua).then((_) {
+          ua.userDb.hasLicenseToFullVolume(productId).then((hasLicense) {
+            if (!hasLicense) {
+              _buyProduct(productId);
+            } else {
+              Navigator.of(context).pop();
+            }
+          });
+        });
+      } else {
+        _buyProduct(productId);
+      }
+    }
+  }
+
+  void _buyProduct(int productId) {
+    final volume = VolumesRepository.shared.volumeWithId(productId);
+    InAppPurchases.shared.purchase(
+      context,
+      (inAppId, isRestoration, error) =>
+          _handlePurchase(context, inAppId, isRestoration: isRestoration, error: error),
+      volume.appStoreId,
+      simulatePurchase: AppSettings.shared.deviceInfo.isSimulator,
+    );
+  }
+
+  Future<void> _handlePurchase(BuildContext context, String inAppId,
+      {bool isRestoration, IAPError error}) async {
+    if (error != null) {
+      dmPrint('IAP FAILED WITH ERROR: ${error?.message}');
+    } else if (isNotNullOrEmpty(inAppId)) {
+      final id = int.tryParse(inAppId.split('.').last);
+      if (id != null) {
+        if (!await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(id)) {
+          await AppSettings.shared.userAccount.userDb.addLicenseForFullVolume(id);
+        }
+        if (!isRestoration) {
+          // TO-DO(ron): ...
+          // await _newPurchase(id);
+
+          await tecShowSimpleAlertDialog<bool>(
+            context: context,
+            // title: 'In-app Purchase',
+            content: 'In-app purchase was successful! :)',
+            useRootNavigator: false,
+            actions: <Widget>[
+              TecDialogButton(
+                child: const Text('OK'),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+            ],
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // init the bar padding vars before we try to access them...
@@ -93,31 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
               tab: TecTab.store,
               icon: Icons.store_outlined,
               label: 'Store',
-              widget: TecStore(AppSettings.shared.userAccount, (productId) async {
-                if (await AppSettings.shared.userAccount.userDb.hasLicenseToFullVolume(productId)) {
-                  final open = await tecShowSimpleAlertDialog<bool>(
-                      context: context,
-                      title: 'Open',
-                      content: 'Would you like to read this volume?',
-                      actions: [
-                        TecDialogButton(
-                          child: const Text('No'),
-                          onPressed: () => Navigator.of(context).pop(false),
-                        ),
-                        TecDialogButton(
-                          child: const Text('Yes'),
-                          onPressed: () => Navigator.of(context).pop(true),
-                        )
-                      ]);
-                  if (open != null && open) {
-                    context.tabManager.add(TecTabEvent.reader);
-                    // change volume here
-                  }
-                } else {
-                  // TODO(abby): handle purchase
-                }
-                print('$productId');
-              }),
+              widget: TecStore(AppSettings.shared.userAccount, _onPurchase),
             ),
             TabBottomBarItem(
               tab: TecTab.reader,
